@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  2 passed (2)
+      Tests  60 passed (60)
+   Start at  07:19:25
+   Duration  16.66s (transform 16.60s, setup 0ms, import 22.03s, tests 4.52s, environment 943ms)

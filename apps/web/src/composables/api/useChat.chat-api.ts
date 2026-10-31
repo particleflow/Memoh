@@ -6,8 +6,8 @@ import {
   getBotsByBotIdSessions,
   getBotsByBotIdSessionsBySessionId,
   postBotsByBotIdAcpRuntimes,
-  postBotsByBotIdSessions,
-  postBotsByBotIdSessionsBySessionIdFork,
+  postBotsByBotIdSessionsContact,
+  getBotsByBotIdSessionsContact,
   postBotsByBotIdSessionsBySessionIdAcpRuntime,
   deleteBotsByBotIdSessionsBySessionId,
   patchBotsByBotIdAcpRuntimesByRuntimeIdModel,
@@ -229,54 +229,37 @@ export async function fetchSession(botId: string, sessionId: string): Promise<Se
   return data as SessionSummary
 }
 
-export async function createSession(botId: string, options?: string | CreateSessionOptions): Promise<SessionSummary> {
-  const id = botId.trim()
-  if (!id) throw new Error('bot id is required')
-  const body = typeof options === 'string'
-    ? { title: options, channel_type: 'local' }
-    : {
-        title: options?.title ?? '',
-        bot_agent_id: options?.botAgentId?.trim() || undefined,
-        channel_type: 'local',
-        type: options?.type,
-        session_mode: options?.sessionMode,
-        runtime_type: options?.runtimeType,
-        metadata: options?.metadata,
-        runtime_metadata: options?.runtimeMetadata,
-        acp_runtime_id: options?.acpRuntimeId?.trim() || undefined,
-        workdir_id: options?.workdirId?.trim() || undefined,
-        preferred_chat_model_id: options?.preferredChatModelId?.trim() || undefined,
-        preferred_reasoning_effort: options?.preferredReasoningEffort?.trim() || undefined,
-      }
-  const { data } = await postBotsByBotIdSessions({
-    path: { bot_id: id },
-    body,
-    throwOnError: true,
-  })
+export async function resolvePrivateChat(botId: string): Promise<SessionSummary> {
+  const { data } = await postBotsByBotIdSessionsContact({ path: { bot_id: botId }, cache: 'no-store', throwOnError: true })
+  if (!data?.id || data.bot_id !== botId) throw new Error('Private chat identity changed')
   return data as SessionSummary
+}
+
+export interface PrivateChatEntry {
+  session?: SessionSummary
+  candidates: SessionSummary[]
+  nextCursor: string | null
+}
+
+export async function inspectPrivateChat(botId: string, after?: string, selectedSessionId?: string): Promise<PrivateChatEntry> {
+  const { data } = await getBotsByBotIdSessionsContact({ path: { bot_id: botId }, query: { after, selected_session_id: selectedSessionId }, cache: 'no-store', throwOnError: true })
+  return { session: data.session as SessionSummary | undefined, candidates: (data.candidates ?? []) as SessionSummary[], nextCursor: data.next_cursor || null }
+}
+
+export async function bindPrivateChat(_botId: string, _sessionId: string): Promise<SessionSummary> {
+  throw new Error('Parallel Bot conversations are unavailable')
+}
+
+export async function createSession(_botId: string, _options?: string | CreateSessionOptions): Promise<SessionSummary> {
+  throw new Error('Parallel Bot conversations are unavailable')
 }
 
 export interface ForkSessionOptions {
   title?: string
 }
 
-export async function forkSessionFromTurn(botId: string, sessionId: string, turnId: string, options?: ForkSessionOptions): Promise<SessionSummary> {
-  const bid = botId.trim()
-  const sid = sessionId.trim()
-  const tid = turnId.trim()
-  const title = options?.title?.trim() ?? ''
-  if (!bid) throw new Error('bot id is required')
-  if (!sid) throw new Error('session id is required')
-  if (!tid) throw new Error('turn id is required')
-  const { data } = await postBotsByBotIdSessionsBySessionIdFork({
-    path: { bot_id: bid, session_id: sid },
-    body: {
-      turn_id: tid,
-      ...(title ? { title } : {}),
-    },
-    throwOnError: true,
-  })
-  return data as SessionSummary
+export async function forkSessionFromTurn(_botId: string, _sessionId: string, _turnId: string, _options?: ForkSessionOptions): Promise<SessionSummary> {
+  throw new Error('Parallel Bot conversations are unavailable')
 }
 
 export async function updateSessionTitle(botId: string, sessionId: string, title: string): Promise<SessionSummary> {

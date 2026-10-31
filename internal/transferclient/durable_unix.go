@@ -111,3 +111,5 @@ func queueFreeSpace(root *os.Root, bytes int64) error {
 	}
 	return nil
 }
+
+func queueDiskFull(err error) bool { return errors.Is(err, unix.ENOSPC) || errors.Is(err, unix.EDQUOT) }

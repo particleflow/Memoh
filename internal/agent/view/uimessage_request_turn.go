@@ -6,6 +6,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/turn"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 // UIAttachmentsFromTurnAttachments converts turn attachments into the
@@ -39,7 +40,7 @@ func UIAttachmentsFromTurnAttachments(botID string, attachments []turn.Attachmen
 //
 // Two invariants keep the live bubble seamless with the settled one:
 //
-//  1. The result is nil exactly when the turn will not persist a user
+//  1. The result is nil for a host result or when the turn will not persist a user
 //     message (mirrors prependTurnUserMessage in internal/agent/application):
 //     an attachment-only or discuss-shaped command produces no history turn,
 //     so projecting one would make a bubble vanish at the database handover.
@@ -52,6 +53,11 @@ func UIAttachmentsFromTurnAttachments(botID string, attachments []turn.Attachmen
 // Reply, forward, sender, and platform fields come straight from the command,
 // which is also the source buildInteractionMetadata persists from.
 func NewRequestUserTurn(cmd turn.StartTurnCommand, turnID string) *UITurn {
+	// The host reauthorizes this ledger reference before admission. Its input
+	// is machine context, including on old queue payloads with visible text.
+	if cmd.DelegationResultID != "" || cmd.TaskResultReceipt != "" {
+		return nil
+	}
 	if strings.TrimSpace(cmd.Query) == "" && strings.TrimSpace(cmd.UserMessageKind) != turn.UserMessageKindSkillActivation {
 		return nil
 	}
@@ -74,6 +80,8 @@ func NewRequestUserTurn(cmd turn.StartTurnCommand, turnID string) *UITurn {
 		Platform:          platform,
 		ExternalMessageID: strings.TrimSpace(cmd.ExternalMessageID),
 	}
+	source := (inputsource.Source{Kind: inputsource.User, BotID: cmd.BotID, SessionID: cmd.ThreadID, UserID: cmd.UserID, ChannelIdentityID: cmd.SourceChannelIdentityID, Channel: cmd.CurrentChannel}).Scoped(cmd.BotID, cmd.ThreadID)
+	request.InputSource = &source
 	if platform != "" {
 		request.SenderDisplayName = strings.TrimSpace(cmd.DisplayName)
 		request.SenderUserID = strings.TrimSpace(cmd.SourceChannelIdentityID)

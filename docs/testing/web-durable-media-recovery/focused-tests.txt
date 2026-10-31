@@ -1,0 +1,27 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/Memoh
+
+ ❯ |web| src/store/workspace-tabs.test.ts (100 tests | 1 failed) 778ms
+     × does not repoint a different live conversation to an old upload scope 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/workspace-tabs.test.ts > workspace layout store > does not repoint a different live conversation to an old upload scope
+TypeError: Cannot read properties of undefined (reading 'api')
+ ❯ src/store/workspace-tabs.test.ts:756:28
+    754|     const dock = createFakeDock()
+    755|     store.registerApi(dock as never)
+    756|     dock.getPanel('chat:1')!.api.updateParameters({ sessionId: 'differ…
+       |                            ^
+    757|     await vi.waitFor(() => expect(mediaRecovery.scopes).toHaveBeenCall…
+    758|     await nextTick()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 158 passed (159)
+   Start at  04:59:39
+   Duration  7.08s (transform 6.00s, setup 0ms, import 9.84s, tests 5.05s, environment 3.30s)
+

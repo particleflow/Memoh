@@ -72,8 +72,10 @@ func provideAuthHandler(log *slog.Logger, accountService *accounts.Service, rc *
 	return handlers.NewAuthHandler(log, accountService, rc.JwtSecret, rc.JwtExpiresIn)
 }
 
-func provideSessionQueueHandler(queries dbstore.Queries, agentService *application.Service, botService *bots.Service, accountService *accounts.Service) *handlers.SessionQueueHandler {
-	return handlers.NewSessionQueueHandler(queries, agentService, botService, accountService)
+func provideSessionQueueHandler(queries dbstore.Queries, agentService *application.Service, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, sessionService *sessionpkg.Service) *handlers.SessionQueueHandler {
+	h := handlers.NewSessionQueueHandler(queries, agentService, botService, accountService)
+	h.SetPrivateChatResolver(route.NewThreadCoordinator(nil, routeService, sessionService))
+	return h
 }
 
 func provideMessageHandler(log *slog.Logger, msgService *message.DBService, sessionService *sessionpkg.Service, mediaService *media.Service, botService *bots.Service, accountService *accounts.Service, hub *event.Hub, toolApproval *toolapproval.Service, userInput *userinput.Service, bgManager *background.Manager, acpPool *acpagent.SessionPool, pipeline *timeline.Pipeline, compactionService *compaction.Service, cfg config.Config) *handlers.MessageHandler {
@@ -91,15 +93,17 @@ func provideMessageHandler(log *slog.Logger, msgService *message.DBService, sess
 	return h
 }
 
-func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, workdirService *workdir.Service, botAgentsService *botagents.Service, agentService *application.Service, pipeline *timeline.Pipeline, runs ledger.Store) *handlers.SessionHandler {
+func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, workdirService *workdir.Service, botAgentsService *botagents.Service, agentService *application.Service, pipeline *timeline.Pipeline, runs ledger.Store, queries dbstore.Queries) *handlers.SessionHandler {
 	handler := handlers.NewSessionHandler(log, sessionService, acpPool, botService, accountService)
 	handler.SetThreadEnricher(routeService)
+	handler.SetPrivateChatResolver(route.NewThreadCoordinator(log, routeService, sessionService))
 	handler.SetWorkdirService(workdirService)
 	handler.SetBotAgents(botAgentsService)
 	handler.SetAgentRuntimeService(agentService)
 	handler.SetModelPreferenceService(agentService)
 	handler.SetProjectionCache(pipeline)
 	handler.SetInvocationLookup(runs)
+	handler.SetAbortObservationStore(queries)
 	return handler
 }
 
@@ -113,11 +117,12 @@ func provideBotAgentsHandler(log *slog.Logger, service *botagents.Service, botSe
 	return handlers.NewBotAgentsHandler(log, service, botService, accountService, runtimes)
 }
 
-func provideUsersHandler(log *slog.Logger, accountService *accounts.Service, botService *bots.Service, routeService *route.DBService, channelStore *channel.Store, channelRuntime channel.Runtime, registry *channel.Registry, workspaces *botworkspace.Service, manager *workspace.Manager, acpPool *acpagent.SessionPool, agentDrivers external.Drivers, credentialService *agentcredential.Service) *handlers.UsersHandler {
+func provideUsersHandler(log *slog.Logger, accountService *accounts.Service, botService *bots.Service, routeService *route.DBService, channelStore *channel.Store, channelRuntime channel.Runtime, registry *channel.Registry, workspaces *botworkspace.Service, manager *workspace.Manager, acpPool *acpagent.SessionPool, agentDrivers external.Drivers, credentialService *agentcredential.Service, mediaService *media.Service) *handlers.UsersHandler {
 	handler := handlers.NewUsersHandler(log, accountService, botService, routeService, channelStore, channelRuntime, registry, workspaces)
 	handler.SetWorkspaceStatus(manager)
 	handler.SetRuntimeResetService(botRuntimeResets{pool: acpPool, agents: agentDrivers})
 	handler.SetCredentialService(credentialService)
+	handler.SetMediaService(mediaService)
 	return handler
 }
 
@@ -151,10 +156,12 @@ func provideProviderOAuthHandler(providersService *providers.Service) *handlers.
 	return handlers.NewProviderOAuthHandler(providersService)
 }
 
-func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service) *handlers.LocalChannelHandler {
+func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service, queries dbstore.Queries, routeService *route.DBService) *handlers.LocalChannelHandler {
 	h := handlers.NewLocalChannelHandler(local.WebType, channelManager, channelStore, hub, botService, accountService, sessionService)
+	h.SetPrivateChatResolver(route.NewThreadCoordinator(nil, routeService, sessionService))
 	h.SetAgentService(resolver)
 	h.SetSessionRuntime(sessionRuntime)
+	h.SetAbortObservationStore(queries)
 	h.SetWorkdirService(workdirService)
 	h.SetCommandHandler(commandHandler)
 	h.SetRuntimeSkillResolver(containerdHandler)
@@ -242,4 +249,10 @@ func (r *webSpeechModelResolver) ResolveSpeechModelID(ctx context.Context, botID
 		return "", err
 	}
 	return s.TtsModelID, nil
+}
+
+func provideBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settingsService *settings.Service, tempStore *audiopkg.TempStore, botService *bots.Service, accountService *accounts.Service) *handlers.BotAudioHandler {
+	h := handlers.NewBotAudioHandler(log, audioService, settingsService, tempStore)
+	h.SetPlaybackAccess(botService, accountService)
+	return h
 }

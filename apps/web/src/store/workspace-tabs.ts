@@ -8,6 +8,7 @@ import { useChatStore } from '@/store/chat-list'
 import { routeConversationLabel } from '@/store/chat-list.utils'
 import { useChatSelectionStore } from '@/store/chat-selection'
 import { onAuthSessionCleared } from '@/lib/auth-session'
+import { restoreMediaUploadScopes } from '@/lib/media-transfer'
 import { hasBotPermission, type BotPermission } from '@/utils/bot-permissions'
 import { parseBrowserAddress } from '@/utils/browser-address'
 import {
@@ -94,6 +95,7 @@ function panelComponentOf(id: string): WorkspacePanelComponent | null {
 }
 
 export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
+  const mediaRecoveryPanels = new Set<string>()
   const selection = useChatSelectionStore()
   const { currentBotId } = storeToRefs(selection)
   const chatStore = useChatStore()
@@ -311,6 +313,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return i18n.global.t('chat.tabs.schedule').trim() || 'Schedule'
   }
 
+  function contactTitle(): string {
+    const bot = currentBot.value
+    return bot?.display_name?.trim() || bot?.name?.trim() || currentBotId.value?.trim() || ''
+  }
+
   // Per-session chat title fallback (syncChatTitles overlays the server title
   // once known). Draft tabs (no session) are system-titled, and so is a first
   // send's tab until the server confirms the send (see isSessionTentative).
@@ -324,7 +331,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     const params = panel.params ?? {}
     switch (panelComponentOf(panel.id)) {
       case 'chat':
-        return chatTitleFallbackFor(panelSessionId(panel))
+        return params.contactView === true ? contactTitle() : chatTitleFallbackFor(panelSessionId(panel))
       case 'file':
         return fileBaseName(panel.id.slice('file:'.length))
       case 'preview':
@@ -377,6 +384,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     // Draft chat and unsaved schedule tabs never carry user content, so their
     // titles are always re-derived — this is what migrates a draft persisted
     // under another locale.
+    if (component === 'chat' && panel.params?.contactView === true) return contactTitle()
     if (component === 'chat' && panelSessionId(panel) === null) return defaultChatTitle()
     if (component === 'schedule' && panel.id.startsWith('schedule:new:')) return scheduleTabTitle()
     if (!title) return panelTitleFallback(panel)
@@ -648,6 +656,14 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return !id || panelComponentOf(id) === 'chat'
   })
 
+  const activeContactTitle = computed(() => {
+    const id = activePanelId.value
+    const panel = id ? api.value?.getPanel(id) : null
+    return panel && panelComponentOf(panel.id) === 'chat' && panel.params?.contactView === true
+      ? contactTitle()
+      : ''
+  })
+
   function hasCurrentPermission(permission: BotPermission): boolean {
     return hasBotPermission(currentBot.value?.current_user_permissions, permission)
   }
@@ -759,17 +775,18 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return typeof sid === 'string' && sid.trim() ? sid : null
   }
 
-  function chatPanelForSession(sid: string) {
+  function chatPanelForSession(sid: string, contactView?: boolean) {
     const dock = api.value
     if (!dock) return undefined
     return dock.panels.find(
-      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid,
+      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid
+        && (contactView === undefined || (p.params?.contactView === true) === contactView),
     )
   }
 
   function resetDeletedChatPanelToDraft(panel: { id: string, api: { updateParameters(params: Record<string, unknown>): void, setTitle(title: string): void } }) {
     const explicitSelection = chatStore.hasExplicitSessionSelection === true
-    panel.api.updateParameters({ sessionId: null, explicitSelection })
+    panel.api.updateParameters({ sessionId: null, explicitSelection, contactView: false, taskAnchor: null })
     panel.api.setTitle(defaultChatTitle())
     markEphemeral(panel.id)
     if (api.value?.activePanel?.id === panel.id) {
@@ -816,12 +833,12 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     const activate = opts.activate !== false
     const existing = opts.groupLocal && opts.groupId
       ? dock.getGroup(opts.groupId)?.panels.find(
-          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid,
+          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid && panel.params?.contactView !== true,
         )
-      : chatPanelForSession(sid)
+      : chatPanelForSession(sid, false)
     if (existing) {
       existing.api.setTitle(title)
-      existing.api.updateParameters({ explicitSelection })
+      existing.api.updateParameters({ explicitSelection, taskAnchor: null })
       if (!activate) return
       if (dock.activePanel?.id === existing.id) {
         selectChatSession(sid, explicitSelection)
@@ -846,7 +863,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         )
       : undefined
     if (reusable) {
-      reusable.api.updateParameters({ sessionId: sid, explicitSelection })
+      reusable.api.updateParameters({ sessionId: sid, explicitSelection, contactView: false, taskAnchor: null })
       reusable.api.setTitle(title)
       if (!activate) return
       setNextChatActivationExplicit(reusable.id, explicitSelection)
@@ -896,7 +913,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
    * right-click means "give me a separate tab" — so it lands as a pinned chat
    * tab the preview slot can never evict. An already-open tab for the session is
    * promoted to pinned + focused. */
-  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string }) {
+  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean, contactView?: boolean, taskAnchor?: import('@/utils/task-history-link').TaskHistoryAnchor }) {
     const dock = api.value
     if (!dock) return
     const sid = opts.sessionId.trim()
@@ -906,12 +923,17 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     // Same guard as openSessionChat: a row mid-deletion can still be visible in
     // the sidebar, so refuse to (re)open a session being deleted for this bot.
     if (isDeletedSessionForCurrentBot(sid)) return
-    const title = opts.title?.trim() || chatTitleFallbackFor(sid)
-    const existing = chatPanelForSession(sid)
+    const title = opts.contactView === true ? contactTitle() : opts.title?.trim() || chatTitleFallbackFor(sid)
+    // Only the server-resolved contact entry requests this projection. History
+    // and task links retain a separate full transcript, even for this session.
+    const existing = chatPanelForSession(sid, opts.contactView === true)
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)
+      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false, taskAnchor: opts.taskAnchor ?? null })
+      setNextChatActivationExplicit(existing.id, opts.explicitSelection !== false)
       focusPanel(existing)
+      selectChatSession(sid, opts.explicitSelection !== false)
       return
     }
     const target = tabPosition(dock, opts.groupId)
@@ -919,7 +941,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       id: nextChatPanelId(bid),
       component: 'chat',
       title,
-      params: { sessionId: sid, explicitSelection: true },
+      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false, contactView: opts.contactView === true, taskAnchor: opts.taskAnchor ?? null },
       renderer: 'always',
       ...(target ? { position: target } : {}),
     })
@@ -942,7 +964,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     if (isDeletedSessionForCurrentBot(sid)) return
     const title = opts.title?.trim() || chatTitleFallbackFor(sid)
 
-    const existing = chatPanelForSession(sid)
+    const existing = chatPanelForSession(sid, false)
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)
@@ -969,37 +991,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     })
   }
 
-  /** Open or focus a draft chat tab (no session yet). An explicit group owns its
-   * own draft; callers without a group retain the legacy global-first behavior. */
-  function openDraftChat(opts?: { title?: string, groupId?: string, explicitSelection?: boolean }) {
-    const dock = api.value
-    if (!dock) return
-    const bid = (currentBotId.value ?? '').trim()
-    if (!bid) return
-    const draftCandidates = opts?.groupId
-      ? dock.getGroup(opts.groupId)?.panels ?? []
-      : dock.panels
-    const existingDraft = draftCandidates.find(
-      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === null,
-    )
-    if (existingDraft) {
-      const explicitSelection = opts?.explicitSelection === true
-      if (dock.activePanel?.id !== existingDraft.id) {
-        setNextChatActivationExplicit(existingDraft.id, explicitSelection)
-        focusPanel(existingDraft)
-      }
-      chatStore.selectDraft({ explicitSelection })
-      return
-    }
-    const id = nextChatPanelId(bid)
-    setNextChatActivationExplicit(id, opts?.explicitSelection === true)
-    openEphemeral({
-      id,
-      component: 'chat',
-      title: opts?.title?.trim() || defaultChatTitle(),
-      params: { sessionId: null, explicitSelection: opts?.explicitSelection === true },
-      groupId: opts?.groupId,
-    })
+  /** Compatibility for old controls: resolve the fixed Bot contact. */
+  function openDraftChat(_opts?: { title?: string, groupId?: string, explicitSelection?: boolean }) {
+    void chatStore.openContact()
   }
 
   // Activating a chat tab focuses its panel-scoped state and mirrors its session
@@ -1053,6 +1047,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   function alignSelectionWithDock() {
     const dock = api.value
     if (!dock) return
+    // Preserve the restored panels, but let an explicit Bot entrance open its
+    // contact before layout focus can write a task back into global selection.
+    if (chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
     const sid = (chatStore.sessionId ?? '').trim()
     const explicitSelection = chatStore.hasExplicitSessionSelection === true
     // A non-explicit pick may still be overridden by the default External
@@ -1123,6 +1120,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       if (panelComponentOf(panel.id) !== 'chat') continue
       const sid = panelSessionId(panel)
       if (!sid) continue
+      if (panel.params?.contactView === true) {
+        const title = contactTitle()
+        if (panel.api.title !== title) panel.api.setTitle(title)
+        continue
+      }
       const session = chatStore.knownSessionSummary(sid)
       // Unknown session (not yet in the loaded list): leave the tab alone —
       // deriving from nothing would overwrite a correct title with a fallback.
@@ -1162,12 +1164,12 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     }
   }
 
-  // Refill an EMPTY dock with the persistent "New Session" page. Guarded to the
+  // Refill an EMPTY dock by resolving the persistent Bot contact. Guarded to the
   // empty dock (not merely "no chat tab"): the respawn opens into the group's
   // ephemeral slot, so firing while a file/preview tab is open would evict it.
   function ensureDraftChatPanel() {
     const dock = api.value
-    if (!dock || suppressPersist || draftChatQueued) return
+    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
     if (dock.panels.length > 0) return
     if (!(currentBotId.value ?? '').trim()) return
 
@@ -1175,7 +1177,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     void nextTick(() => {
       draftChatQueued = false
       const latestDock = api.value
-      if (!latestDock || suppressPersist || latestDock.panels.length > 0) return
+      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
       if (!(currentBotId.value ?? '').trim()) return
       // Only an EXPLICIT selection may refill as that session. initialize()'s
       // auto-pick leaves a non-explicit sessionId even when we refused to open
@@ -1220,7 +1222,8 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         return
       }
     }
-    const anyChat = dock.panels.find(p => panelComponentOf(p.id) === 'chat')
+    const anyChat = dock.panels.find(p => mediaRecoveryPanels.has(p.id))
+      ?? dock.panels.find(p => panelComponentOf(p.id) === 'chat')
     if (anyChat) {
       focusPanel(anyChat)
       return
@@ -1390,6 +1393,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         name: args.name,
         botId: args.botId,
         contentHash: args.contentHash,
+        size: args.size,
         delegationUrl: args.delegationUrl,
         src: args.src,
       },
@@ -1954,6 +1958,34 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     }
   }, { immediate: true })
 
+  // Mobile cold start and ephemeral previews may not retain a chat tab. Restore
+  // its exact validated journal scope, without creating a session or sending.
+  watch([currentBotId, api], async ([bot, dock], _, onCleanup) => {
+    mediaRecoveryPanels.clear()
+    if (!bot || !dock) return
+    const controller = new AbortController()
+    onCleanup(() => controller.abort())
+    try {
+      const recovery = await restoreMediaUploadScopes(bot, controller.signal)
+      recovery.check()
+      if (api.value !== dock || currentBotId.value !== bot || loadedBotId !== bot) return
+      for (const scope of recovery.scopes) {
+        recovery.check()
+        if (scope.session && isDeletedSessionForCurrentBot(scope.session)) continue
+        const existing = dock.getPanel(scope.tab)
+        // Never repoint another live conversation to adopt an old upload.
+        if (existing && panelSessionId(existing) !== scope.session) continue
+        if (!existing) dock.addPanel({
+          id: scope.tab, component: 'chat', title: defaultChatTitle(),
+          params: { sessionId: scope.session, explicitSelection: false },
+          renderer: 'always', inactive: true,
+        })
+        pinPanel(scope.tab)
+        mediaRecoveryPanels.add(scope.tab)
+      }
+    } catch { /* Preserve unavailable journals; the composer exposes read errors. */ }
+  }, { immediate: true })
+
   // Crossing the breakpoint either way re-shapes the dock. Entering mobile
   // collapses any multi-group arrangement (only reachable by narrowing a
   // desktop window — a phone session is single-group from cold start); live
@@ -2105,6 +2137,8 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     () => syncChatTitles(),
   )
 
+  watch(contactTitle, () => syncChatTitles())
+
   watch(() => chatStore.deletedSession, (deleted) => {
     if (!deleted) return
     const deletedIds = deletedSessionIdsByBot.get(deleted.botId) ?? new Set<string>()
@@ -2115,8 +2149,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
 
   // initialize() settled the selection (kept, picked, or cleared it). Align it
   // with the dock once; later session-list refreshes never touch the dock.
+  watch(() => chatStore.contactChoice, choice => { if (!choice) ensureDraftChatPanel() })
+
   watch(() => chatStore.loadingChats, (loading) => {
     if (loading) return
+    ensureDraftChatPanel()
     alignSelectionWithDock()
     // An empty dock has not drawn its draft yet; ensureDraftChatPanel takes
     // the pick when it does.
@@ -2131,6 +2168,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     focusAdjacentTab,
     isMobile,
     activePanelIsChat,
+    activeContactTitle,
     mobileNavOpen,
     panelDragging,
     fileDirty,

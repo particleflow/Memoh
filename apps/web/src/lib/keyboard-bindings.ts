@@ -91,16 +91,6 @@ export const keyboardBindings: KeyboardBinding[] = [
     i18nKey: 'openSettings',
   },
   {
-    command: appKeyboardCommands.newChatSession,
-    key: 'n',
-    alt: true,
-    shift: true,
-    mac: { key: 'n', mod: true, alt: true },
-    browser: 'intercept',
-    scope: 'workspace',
-    i18nKey: 'newChatSession',
-  },
-  {
     command: appKeyboardCommands.focusChatInput,
     key: 'Enter',
     alt: true,

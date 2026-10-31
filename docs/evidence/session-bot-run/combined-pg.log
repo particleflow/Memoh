@@ -1,0 +1,7 @@
+Existing task-owned isolated loopback PG; each fixture creates and removes its own uniquely named database. No production DB or credentials.
+COMMAND: go test -p=1 -tags=integration -count=1 -v -timeout=180s -run ^TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths$ ./internal/db
+=== RUN   TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths
+    native_runtime_cutover_integration_test.go:285: MCP inactive + native primary: owner runtimes, bot mounts and account grants omit retired IDs while keeping native and unrelated active Agenvo IDs; zero old transport/OAuth; runtime, mount, workdir/session, unknown operation/transfer and synthetic credentials unchanged
+--- PASS: TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths (3.16s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.177s

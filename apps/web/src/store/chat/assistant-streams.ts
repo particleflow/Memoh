@@ -1,10 +1,13 @@
 import { reactive, toRaw } from 'vue'
+import type { WSAbortReason } from '@/composables/api/useChat.ws'
 import type { ChatAssistantTurn } from './types'
 
 export interface AssistantStream {
   readonly invocationId: string
   readonly runId: string
   readonly assistantTurn: ChatAssistantTurn
+  readonly projectionObserved: boolean
+  readonly disconnectedBeforeAcceptance: boolean
   // A retry or edit, which replaces a turn the history already has.
   readonly replacesTurn: boolean
   readonly botId: string
@@ -22,11 +25,14 @@ export interface AcceptedRun {
   readonly botId: string
   readonly sessionId: string
   readonly abortRequested: boolean
+  readonly abortReason?: WSAbortReason
 }
 
 interface PendingAssistantStream extends AssistantStream {
   sessionId: string
   runId: string
+  projectionObserved: boolean
+  disconnectedBeforeAcceptance: boolean
   appendMessages: boolean
   messageIds: Map<number, number>
   onModelPreferenceSettled?: () => void
@@ -72,6 +78,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   const runIdsByInvocation = new Map<string, string>()
   // Stops pressed before the server named the run, replayed by bindRunId.
   const abortRequestedInvocations = new Map<string, {
+    reason?: WSAbortReason
     botId: string
     sessionId: string
   }>()
@@ -106,6 +113,22 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
     return activeUnboundInvocationIds(botId, composerScope).length > 0
   }
 
+  function observeProjection(invocationId: string, botId: string, sessionId: string, runId: string) {
+    const stream = streams.get(invocationId)
+    if (!stream || stream.botId !== botId || stream.sessionId !== sessionId) return
+    if (stream.runId && stream.runId !== runId) return
+    stream.projectionObserved = true
+    stream.disconnectedBeforeAcceptance = false
+  }
+
+  function markDisconnected(botId: string) {
+    for (const stream of streams.values()) {
+      if (stream.botId === botId && !stream.runId && !stream.projectionObserved) {
+        stream.disconnectedBeforeAcceptance = true
+      }
+    }
+  }
+
   // Resolves an event to the local key for its turn. A run id is authoritative
   // once it exists; before that only the invocation names the turn.
   function invocationIdForEvent(event: StreamIdentity): string {
@@ -137,6 +160,8 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
       streams.set(id, {
         invocationId: id,
         runId: '',
+        projectionObserved: false,
+        disconnectedBeforeAcceptance: false,
         assistantTurn: input.assistantTurn,
         replacesTurn: input.replacesTurn ?? false,
         botId: input.botId,
@@ -167,6 +192,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
     const stream = streams.get(invocation)
     if (stream) {
       if (!stream.runId) stream.runId = run
+      stream.disconnectedBeforeAcceptance = false
       stream.assistantTurn.turnId = turn
       stream.assistantTurn.runtimeRunId = run
       invocationIdsByRunId.set(run, invocation)
@@ -180,6 +206,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
       botId: stream?.botId ?? deferredAbort?.botId ?? '',
       sessionId: stream?.sessionId ?? deferredAbort?.sessionId ?? '',
       abortRequested,
+      ...(deferredAbort?.reason ? { abortReason: deferredAbort.reason } : {}),
     }
   }
 
@@ -195,13 +222,14 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   // requestAbort resolves a stop to the run the server can address. Before
   // run_accepted no such name exists, so the intent is recorded and bindRunId
   // replays it. Silent turns without a visible stream are addressable too.
-  function requestAbort(invocationId: string): string {
+  function requestAbort(invocationId: string, reason?: WSAbortReason): string {
     const invocation = invocationId.trim()
     if (!invocation) return ''
     const runId = runIdsByInvocation.get(invocation) ?? ''
     if (runId) return runId
     const stream = streams.get(invocation)
     abortRequestedInvocations.set(invocation, {
+      reason,
       botId: stream?.botId ?? '',
       sessionId: stream?.sessionId ?? '',
     })
@@ -309,6 +337,8 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   }
 
   return {
+    observeProjection,
+    markDisconnected,
     activeUnboundInvocationIds,
     assistantStreamsForSession,
     isUnboundComposerStreaming,

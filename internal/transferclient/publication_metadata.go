@@ -9,13 +9,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"slices"
 	"strings"
 )
 
 // Versioned defaults in the existing publication locator, not a second config
-// root. Objects retain the queue's separately accounted, immutable byte budget.
+// root. Native objects are retained without a cumulative byte quota; actual
+// filesystem space is checked while downloading and before metadata writes.
 const (
 	publicationDirectory         = "publications-v1"
 	publicationReceipts          = 128 // Per bucket in locator v2; global only in legacy v1.
@@ -60,7 +62,7 @@ func publicationBucket(name string) (int, error) {
 // Every method is called while holding the original publication.lock.
 type publicationMetadata struct {
 	root        *os.Root
-	objectBytes int64
+	objectBytes int64 // Zero disables the legacy cumulative object quota; overflow checks remain.
 	hook        func(string)
 }
 
@@ -378,7 +380,7 @@ func (m *publicationMetadata) census(ctx context.Context, root *os.Root, index i
 		usage.Keys = append(usage.Keys, e.Name())
 		usage.Metadata += st.Size()
 		if r.State != "fenced" {
-			if r.Reference.SizeBytes > m.objectBytes-usage.Bytes {
+			if !m.fitsObjectBytes(usage.Bytes, r.Reference.SizeBytes) {
 				return usage, ErrCapacity
 			}
 			usage.Bytes += r.Reference.SizeBytes
@@ -465,7 +467,7 @@ func (m *publicationMetadata) loadUsage(root *os.Root, name string, index int) (
 		return nil
 	})
 	identity, identityErr := publicationRootIdentity(root)
-	if err != nil || identityErr != nil || count != 1 || u.Version != 1 || u.Identity != identity || u.Count < 0 || u.Count > publicationReceipts || u.Count != len(u.Keys) || u.Bytes < 0 || u.Bytes > m.objectBytes || u.Metadata < 0 || u.Metadata > publicationBucketBytes {
+	if err != nil || identityErr != nil || count != 1 || u.Version != 1 || u.Identity != identity || u.Count < 0 || u.Count > publicationReceipts || u.Count != len(u.Keys) || u.Bytes < 0 || !m.fitsObjectBytes(0, u.Bytes) || u.Metadata < 0 || u.Metadata > publicationBucketBytes {
 		return u, ErrStore
 	}
 	for i, key := range u.Keys {
@@ -533,7 +535,7 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 		if err != nil {
 			return err
 		}
-		if u.Bytes > m.objectBytes-total {
+		if !m.fitsObjectBytes(total, u.Bytes) {
 			return ErrCapacity
 		}
 		total += u.Bytes
@@ -541,7 +543,7 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 			return ErrCapacity
 		}
 	}
-	if state != "fenced" && ref.SizeBytes > m.objectBytes-total {
+	if state != "fenced" && !m.fitsObjectBytes(total, ref.SizeBytes) {
 		return ErrCapacity
 	}
 	root, closeRoot, err := m.bucket(index, false)
@@ -550,6 +552,9 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 	}
 	defer closeRoot()
 	if err := queueFreeSpace(root, publicationJournalBytes); err != nil {
+		if errors.Is(err, ErrCapacity) {
+			return errors.Join(errDiskSpace, err)
+		}
 		return err
 	}
 	return m.dirty(root, index, false)
@@ -613,10 +618,18 @@ func (m *publicationMetadata) validate(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		if u.Bytes > m.objectBytes-total {
+		if !m.fitsObjectBytes(total, u.Bytes) {
 			return ErrCapacity
 		}
 		total += u.Bytes
 	}
 	return nil
+}
+
+// Count retained bytes for integrity/rebuild, not as a total-task allowance.
+func (m *publicationMetadata) fitsObjectBytes(total, add int64) bool {
+	if total < 0 || add < 0 || add > math.MaxInt64-total {
+		return false
+	}
+	return m.objectBytes == 0 || total <= m.objectBytes && add <= m.objectBytes-total
 }

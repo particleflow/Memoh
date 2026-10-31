@@ -1,36 +1,42 @@
 <template>
-  <div class="flex h-full overflow-hidden">
-    <ChatWorkspace v-if="currentBotId" />
+  <div class="relative flex h-full overflow-hidden">
+    <!-- Preserve Dockview dimensions while a history link is being authorized. -->
+    <ChatWorkspace
+      v-if="currentBotId"
+      :class="{ invisible: !workspaceVisible }"
+    />
+    <ContactChoiceDialog />
+    <PanePlaceholder
+      v-if="!workspaceVisible"
+      class="absolute inset-0"
+      :title="historyError || t('common.loading')"
+    />
     <div
-      v-else
+      v-else-if="!currentBotId"
       class="flex-1 bg-card"
     >
       <PanePlaceholder
         v-if="missingBotName"
         :title="t('bots.notFound')"
-      >
-        {{ t('bots.notFoundDescription') }}
-      </PanePlaceholder>
+      />
       <PanePlaceholder
         v-else
         :title="t('chat.selectBot')"
-      >
-        {{ t('chat.selectBotHint') }}
-      </PanePlaceholder>
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { normalizeAgentID } from '@/utils/external-agent'
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onScopeDispose, provide, ref, watch } from 'vue'
 import { useTitle } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getBotsByBotIdAgents, getBotsById } from '@memohai/sdk'
 import { fetchBot } from '@/composables/api/useBot'
-import { PanePlaceholder } from '@felinic/ui'
+import { PanePlaceholder, toast } from '@felinic/ui'
 import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
 import { useChatStore } from '@/store/chat-list'
 import { routeConversationLabel } from '@/store/chat-list.utils'
@@ -38,13 +44,19 @@ import { useComposerPrefillStore } from '@/store/composer-prefill'
 import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { ACP_NO_PROJECT_MODE, createACPNoProjectPath } from '@/utils/acp'
 import { botAgentProvider } from '@/utils/bot-agent'
+import ContactChoiceDialog from './components/contact-choice-dialog.vue'
+import { fetchSession } from '@/composables/api/useChat'
+import { resolveApiErrorMessage } from '@/utils/api-error'
+import { hasTaskHistoryQuery, resolveTaskHistoryAnchor, type TaskHistoryAnchor } from '@/utils/task-history-link'
 import ChatWorkspace from './components/chat-workspace.vue'
 import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'
+import { chatWorkspaceVisibleKey } from './composables/chat-workspace-visibility'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const chatStore = useChatStore()
+chatStore.bindRouteContext(router)
 const workspaceTabs = useWorkspaceTabsStore()
 const { currentBotId, bots, activeSession } = storeToRefs(chatStore)
 const composerPrefill = useComposerPrefillStore()
@@ -91,6 +103,17 @@ let suppressUrlSync = false
 // The URL's bot identifier when the server has no such bot. While set, the
 // pane shows the not-found state and the URL is left as the user typed it.
 const missingBotName = ref('')
+const historyError = ref('')
+const historyLoading = ref(false)
+const workspaceVisible = computed(() => !historyError.value && !historyLoading.value && !chatStore.contactNavigationPending)
+provide(chatWorkspaceVisibleKey, workspaceVisible)
+let historyRequest = 0
+let historyValidation: AbortController | undefined
+function cancelHistoryValidation() {
+  historyValidation?.abort()
+  historyValidation = undefined
+}
+onScopeDispose(() => { historyRequest++; cancelHistoryValidation() })
 
 // home is now mounted persistently (via main-container, which App.vue keeps
 // alive across chat↔settings) rather than torn down when leaving chat. So these
@@ -106,6 +129,7 @@ const isChatRoute = () => CHAT_ROUTE_NAMES.has(route.name as string)
 // A first send's session is titled like the draft it came from until the
 // server confirms the send (see isSessionTentative).
 useTitle(() => {
+  if (isChatRoute() && currentBotId.value && workspaceTabs.activeContactTitle) return `Memoh · ${workspaceTabs.activeContactTitle}`
   const session = activeSession.value
   if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return 'Memoh'
   const title = (session.title ?? '').trim() || routeConversationLabel(session) || t('chat.untitledSession')
@@ -167,10 +191,34 @@ async function maybeStartExternalAgentSession() {
 
 async function syncStoreFromUrl(rawName: string) {
   const urlName = rawName.trim()
+  const request = ++historyRequest
+  cancelHistoryValidation()
+  const validation = new AbortController()
+  historyValidation = validation
+  const requestedRoute = route.fullPath
+  historyError.value = ''
+  historyLoading.value = !!route.query.session
+  if (hasTaskHistoryQuery(route.query) && !route.query.session) {
+    historyLoading.value = false
+    historyError.value = t('chat.contact.historyFailed')
+    return
+  }
+  if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {
+    historyLoading.value = false
+    historyError.value = t('chat.contact.historyFailed')
+    return
+  }
   if (!urlName) {
+    if (route.query.session) {
+      historyLoading.value = false
+      historyError.value = t('chat.contact.historyFailed')
+      return
+    }
     missingBotName.value = ''
     if (!currentBotId.value) {
       await chatStore.initializeWithRecovery()
+    } else {
+      await chatStore.selectBot(currentBotId.value)
     }
     await maybeStartExternalAgentSession()
     return
@@ -178,10 +226,23 @@ async function syncStoreFromUrl(rawName: string) {
   let resolvedId: string | null
   try {
     resolvedId = await resolveBotIdFromName(urlName)
-  } catch {
+  } catch (error) {
+    if (request === historyRequest) {
+      historyLoading.value = false
+      historyError.value = resolveApiErrorMessage(error, t('chat.contact.historyFailed'))
+    }
     return
   }
+  // A previous Bot lookup must never consume the next route's session query.
+  if (request !== historyRequest || route.fullPath !== requestedRoute) return
   if (!resolvedId) {
+    if (route.query.session) {
+      if (request === historyRequest) {
+        historyLoading.value = false
+        historyError.value = t('bots.notFoundDescription')
+      }
+      return
+    }
     // The URL may have moved on while the lookup was in flight; only the
     // current URL may clear the selection.
     if (((route.params.botName as string) ?? '').trim() !== urlName) return
@@ -197,7 +258,27 @@ async function syncStoreFromUrl(rawName: string) {
     return
   }
   missingBotName.value = ''
-  if (resolvedId !== (currentBotId.value ?? '').trim()) {
+  const historyId = typeof route.query.session === 'string' ? route.query.session.trim() : ''
+  if (historyId) {
+    try {
+      const taskAnchor = await resolveTaskHistoryAnchor(route.query, resolvedId, historyId, validation.signal)
+      if (request !== historyRequest || route.fullPath !== requestedRoute) return
+      const session = await fetchSession(resolvedId, historyId)
+      if (request !== historyRequest || route.query.session !== historyId || route.params.botName !== rawName) return
+      suppressUrlSync = true
+      try { await chatStore.selectBot(resolvedId, { sessionId: session.id }) }
+      finally { suppressUrlSync = false }
+      await nextTick()
+      if (request === historyRequest && route.fullPath === requestedRoute && route.query.session === historyId && currentBotId.value === resolvedId) {
+        chatStore.cancelContactChoice()
+        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title, taskAnchor })
+      }
+    } catch (error) {
+      if (request === historyRequest) historyError.value = resolveApiErrorMessage(error, t('chat.contact.historyFailed'))
+    } finally {
+      if (request === historyRequest) historyLoading.value = false
+    }
+  } else {
     suppressUrlSync = true
     try {
       await chatStore.selectBot(resolvedId)
@@ -205,20 +286,29 @@ async function syncStoreFromUrl(rawName: string) {
       suppressUrlSync = false
     }
   }
-  await maybeStartExternalAgentSession()
+  if (!historyId) await maybeStartExternalAgentSession()
   // Canonicalize the URL to the bot's name slug. This covers entry points that
   // navigate with a UUID (e.g. returning from settings), where currentBotId is
   // unchanged so the watcher below never fires.
   const canonicalName = await resolveBotNameFromId(resolvedId)
+  if (request !== historyRequest) return
   if (canonicalName && urlName !== canonicalName) {
-    void router.replace({ name: 'bot', params: { botName: canonicalName } })
+    void router.replace({ name: 'bot', params: { botName: canonicalName }, query: route.query })
   }
 }
 
 watch(
-  () => [route.name, route.params.botName] as const,
+  [
+    () => route.name, () => route.params.botName, () => route.query.session,
+    () => route.query.task_bot, () => route.query.task_type, () => route.query.task_id,
+    () => route.query.task_record, () => route.query.run,
+  ],
   ([routeName, paramBotName], prev) => {
-    if (!CHAT_ROUTE_NAMES.has(routeName as string)) return
+    if (!CHAT_ROUTE_NAMES.has(routeName as string)) {
+      historyRequest++
+      cancelHistoryValidation()
+      return
+    }
     // Returning to chat from a non-chat route (settings overlay): per-bot config
     // edited there — enabled agents, model, name — won't have reached the store,
     // which loads bots once and isn't wired to the settings query cache. Re-pull
@@ -231,7 +321,13 @@ watch(
     if (prevName !== undefined && !CHAT_ROUTE_NAMES.has(prevName)) {
       void chatStore.refreshBots()
     }
-    void syncStoreFromUrl((paramBotName as string) ?? '')
+    const requestedRoute = route.fullPath
+    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => {
+      if (route.fullPath !== requestedRoute) return
+      historyLoading.value = false
+      historyError.value = resolveApiErrorMessage(error, t('chat.contact.failed'))
+      toast.error(historyError.value)
+    })
   },
   { immediate: true },
 )
@@ -249,8 +345,9 @@ watch(currentBotId, async (newBotId) => {
     }
     return
   }
+  const requestedRoute = route.fullPath
   const botName = await resolveBotNameFromId(storeBot)
-  if (!botName) return
+  if (!botName || currentBotId.value !== storeBot || !isChatRoute() || route.fullPath !== requestedRoute) return
   if (((route.params.botName as string) ?? '').trim() === botName) return
   void router.replace({
     name: 'bot',
@@ -258,4 +355,50 @@ watch(currentBotId, async (newBotId) => {
   })
 })
 
+let openedContactRequest: unknown = null
+
+// Dock focus can change within the same Bot, without changing currentBotId.
+// Reflect that selection in the URL so a refresh/copy follows the visible chat.
+// Route-driven layout restoration is not a new navigation; its entrance still
+// owns identity validation. Task params become a link, never authorization.
+watch(() => workspaceTabs.activeId, async (panelId) => {
+  if (!panelId || !isChatRoute() || suppressUrlSync || historyLoading.value || historyError.value
+    || chatStore.loadingChats || chatStore.contactNavigationPending || chatStore.contactOpenRequested
+    || !workspaceTabs.activePanelIsChat) return
+  const panel = workspaceTabs.api?.activePanel
+  const botId = currentBotId.value
+  if (!panel || panel.id !== panelId || !botId) return
+  const sessionId = panel.params?.sessionId
+  if (typeof sessionId !== 'string' || !sessionId.trim()) return
+  const query = { ...route.query }
+  for (const key of ['session', 'task_bot', 'task_type', 'task_id', 'task_record', 'run']) delete query[key]
+  if (panel.params?.contactView !== true) {
+    query.session = sessionId
+    const anchor = panel.params?.taskAnchor as TaskHistoryAnchor | undefined
+    if (anchor) Object.assign(query, {
+      task_bot: anchor.directoryBotId, task_type: anchor.taskType,
+      task_id: anchor.taskId, task_record: anchor.recordId, run: anchor.runId,
+    })
+  }
+  const requestedRoute = route.fullPath
+  const request = historyRequest
+  const botName = await resolveBotNameFromId(botId)
+  if (!botName || historyRequest !== request || route.fullPath !== requestedRoute
+    || workspaceTabs.activeId !== panelId || currentBotId.value !== botId || !isChatRoute()) return
+  const target = { name: 'bot', params: { botName }, query }
+  if (router.resolve(target).fullPath !== route.fullPath) await router.replace(target)
+})
+
+watch(
+  () => [chatStore.contactOpenRequested, workspaceTabs.api, chatStore.loadingChats, route.query.session] as const,
+  async ([request, api, loading]) => {
+    if (!request || !api || loading || request === openedContactRequest || route.query.session || currentBotId.value !== request.botId) return
+    await nextTick()
+    if (chatStore.contactOpenRequested !== request || currentBotId.value !== request.botId || route.query.session) return
+    openedContactRequest = request
+    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false, contactView: true })
+    chatStore.completeContactOpen(request)
+  },
+  { immediate: true },
+)
 </script>

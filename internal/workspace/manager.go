@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/config"
 	ctr "github.com/felinics/memoh/internal/container"
 	"github.com/felinics/memoh/internal/db"
@@ -316,9 +317,6 @@ func (m *Manager) HookConfigClient(ctx context.Context, botID string) (*bridge.C
 	if err != nil {
 		return nil, err
 	}
-	if target.Info.Backend == bridge.WorkspaceBackendAgenvo {
-		return m.nativeMCPClient(ctx, botID)
-	}
 	return target.Client, nil
 }
 
@@ -572,6 +570,11 @@ func (m *Manager) ListWorkspaceTargets(ctx context.Context, botID string) ([]Wor
 	remoteTargets, err := m.remote.ListMounts(ctx, botID)
 	if err != nil {
 		return nil, err
+	}
+	// Omitting a retired primary must not advertise Server Workspace as an
+	// automatic replacement. Resolution still fails on the saved old primary.
+	if _, err := m.remote.getPrimaryRecord(ctx, botID); errors.Is(err, agenvo.ErrLegacyRetired) {
+		targets[0].Primary = false
 	}
 	for _, target := range remoteTargets {
 		if target.Primary {
@@ -972,9 +975,18 @@ func (m *Manager) Delete(ctx context.Context, botID string, preserveData bool) e
 		m.logger.WarnContext(ctx, "delete: delete task failed",
 			slog.String("container_id", containerID), slog.Any("error", err))
 	}
-	return m.service.DeleteContainer(ctx, containerID, &ctr.DeleteContainerOptions{
+	err := m.service.DeleteContainer(ctx, containerID, &ctr.DeleteContainerOptions{
 		CleanupSnapshot: true,
 	})
+	if err != nil && !ctr.IsNotFound(err) {
+		return err
+	}
+	// The runtime has released its bind mount. Remove only this Bot's empty
+	// runtime directory, including when a previous attempt removed the container.
+	if cleanupErr := m.cleanupBotRunDirectory(botID); cleanupErr != nil {
+		return cleanupErr
+	}
+	return err
 }
 
 func (m *Manager) dataRoot() string {

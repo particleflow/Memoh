@@ -300,11 +300,16 @@ jobs:
           : "${TEST_POSTGRES_DSN:?Delegation and task observation tests require PostgreSQL}"
           set -o pipefail
           go test -json -race -tags=integration -count=1 -timeout 90s \
-            -run '^Test(BotDelegationPostgresClaimIsolationAndDescendantAssets|SessionTasksPostgresOwnedTreeAndStableCursor|SessionTasksPostgresLatestChildRunAndMessage)$' ./internal/db | tee delegation-postgres-tests.jsonl
+            -run '^Test(BotDelegationPostgresClaimIsolationAndDescendantAssets|SessionTasksPostgresOwnedTreeAndStableCursor|SessionTasksPostgresLatestChildRunAndMessage|BotActivityPostgresUnopenedRunsScopeAndReadOnly|WorkspaceStoragePostgresHTTPPreservesRegistration|PostgresPrivateChatIsolationAndConcurrentReuse|PostgresPrivateChatLifecycle|PostgresPrivateChatNavigation)$' ./internal/db | tee delegation-postgres-tests.jsonl
           python3 - <<'PY'
           import json
           from pathlib import Path
           required = {
+              "TestPostgresPrivateChatIsolationAndConcurrentReuse",
+              "TestPostgresPrivateChatLifecycle",
+              "TestPostgresPrivateChatNavigation",
+              "TestBotActivityPostgresUnopenedRunsScopeAndReadOnly",
+              "TestWorkspaceStoragePostgresHTTPPreservesRegistration",
               "TestBotDelegationPostgresClaimIsolationAndDescendantAssets",
               "TestSessionTasksPostgresOwnedTreeAndStableCursor",
               "TestSessionTasksPostgresLatestChildRunAndMessage",
@@ -315,6 +320,51 @@ jobs:
           if missing:
               raise SystemExit("Required PostgreSQL tests did not PASS: " + ", ".join(sorted(missing)))
           print("Verified PostgreSQL PASS: " + ", ".join(sorted(required)))
+          PY
+      - name: Verify native profile cutover and historical identity on PostgreSQL
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: |
+          : "${TEST_POSTGRES_DSN:?Native profile cutover tests require PostgreSQL}"
+          set -o pipefail
+          go test -json -race -tags=integration -count=1 -timeout 120s \
+            -run '^Test(NativeAdmissionSnapshotCutoverAndLostResponse|NativeProfileCutoverPersistedHistoryScope|NativeProfilePauseRejectsConcurrentOrdinaryUpdates|PausedNativeProfileCutoverAtomic|NativeProfileCutoverMigrationRoundTrip|PausedNativeProfileOwnerService|PausedNativeProfileCutoverRacesResumeAndRevocation|PausedNativeProfileCutoverRejectsABA|SessionAbortOutcomeMigrationScopeAndIdempotency|Unified177To181PreservesAcceptedWorkAndHistory)$' ./internal/db | tee native-profile-postgres-tests.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          required = {
+              "TestNativeAdmissionSnapshotCutoverAndLostResponse",
+              "TestNativeProfileCutoverPersistedHistoryScope",
+              "TestNativeProfilePauseRejectsConcurrentOrdinaryUpdates",
+              "TestPausedNativeProfileCutoverAtomic",
+              "TestNativeProfileCutoverMigrationRoundTrip",
+              "TestPausedNativeProfileOwnerService",
+              "TestPausedNativeProfileCutoverRacesResumeAndRevocation",
+              "TestPausedNativeProfileCutoverRejectsABA",
+              "TestSessionAbortOutcomeMigrationScopeAndIdempotency",
+              "TestUnified177To181PreservesAcceptedWorkAndHistory",
+          }
+          events = [json.loads(line) for line in Path("native-profile-postgres-tests.jsonl").read_text().splitlines()]
+          passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+          missing = required - passed
+          if missing:
+              raise SystemExit("Required native profile PostgreSQL tests did not PASS: " + ", ".join(sorted(missing)))
+          print("Verified native profile PostgreSQL PASS: " + ", ".join(sorted(required)))
+          PY
+      - name: Require saved-result recovery CAS and retained execution history
+        env:
+          MEMOH_NATIVE_QUEUE_TEST_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: |
+          : "${MEMOH_NATIVE_QUEUE_TEST_DSN:?Saved-result recovery requires isolated PostgreSQL}"
+          set -o pipefail
+          go test -json -race -count=1 -run '^TestSavedResultRecoveryPostgres$' ./cmd/internal/core | tee saved-result-recovery.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          events = [json.loads(line) for line in Path('saved-result-recovery.jsonl').read_text().splitlines()]
+          assert any(e.get('Action') == 'pass' and e.get('Test') == 'TestSavedResultRecoveryPostgres' for e in events), 'required saved-result recovery did not PASS'
+          assert not any(e.get('Action') in ('skip', 'fail') for e in events), 'saved-result recovery skipped or failed a contract'
+          print('Verified saved-result recovery PostgreSQL CAS/history contracts without skips')
           PY
       # Additive gate: retain the other contract steps when merging stacked workflows.
       - name: Require computer operation CAS and RLS (no skips)

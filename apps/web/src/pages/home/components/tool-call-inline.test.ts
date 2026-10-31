@@ -156,7 +156,9 @@ it('shows Agenvo merged output and retained workspace without claiming separate 
   const { root } = mountTool('exec', { command: 'Write-Output ok' }, { state: 'completed', output: 'SYNTHETIC_WINDOWS_OK', exit_code: 0, cleanup_required: true, workspace_id: 'w-test' })
   await open(root)
   expect(root.textContent).toContain('SYNTHETIC_WINDOWS_OK')
-  expect(root.textContent).toContain('combines stdout and error text')
+  expect(root.textContent).toContain(en.computerExec.completed)
+  expect(root.textContent).not.toContain('combines stdout and error text')
+  expect([...root.querySelectorAll('pre')].filter(node => node.textContent?.includes('SYNTHETIC_WINDOWS_OK'))).toHaveLength(1)
   expect(root.textContent).toContain('w-test is retained')
   expect(root.textContent).not.toContain('No output')
 })
@@ -164,6 +166,91 @@ it('shows an uncertain Agenvo result without claiming cancellation succeeded', a
   const { root } = mountTool('exec', { command: 'Start-Sleep 30' }, { result: { state: 'unknown', cleanup_required: true, workspace_id: 'w-test' }, error: 'inspect before retrying' })
   await open(root)
   expect(root.textContent).toContain('outcome is unknown or rejected')
-  expect(root.textContent).toContain('does not stop Windows execution')
+  expect(root.textContent).toContain('w-test is retained')
+  expect(root.textContent).not.toContain('does not stop Windows execution')
+  expect(root.textContent).not.toContain(en.computerExec.completed)
   expect(root.textContent).not.toContain('No output')
+})
+
+// Fixed Images and native Media results carry a reference, not inline image bytes.
+describe('generated image reference detail', () => {
+  const hash = 'a'.repeat(64)
+  const completed = { state: 'completed', content_hash: hash, media_type: 'image/png', size_bytes: 123, delivered: 'current_conversation' }
+
+  it.each([completed, { structuredContent: completed }, { structured_content: completed }])('shows the returned attachment reference: %j', async (result) => {
+    const { root } = mountTool('generate_image', { prompt: 'synthetic circle', size: '1024x1024' }, result)
+    await open(root)
+    expect(root.textContent).toContain('Image attachment returned to this conversation.')
+    expect(root.textContent).toContain(hash)
+    expect(root.textContent).not.toContain('No image')
+    expect(root.textContent).not.toContain('1024x1024')
+    // A hash alone does not supply a media authorization scope or preview URL.
+    expect(root.querySelector('img')).toBeNull()
+    expect(root.querySelector('a')).toBeNull()
+  })
+
+  it.each([{ ...completed, delivered: undefined }, { content_hash: hash, media_type: 'image/png' }])('shows a stored reference without claiming delivery: %j', async (result) => {
+    const { root } = mountTool('generate_image', {}, result)
+    await open(root)
+    expect(root.textContent).toContain('Image saved.')
+    expect(root.textContent).toContain(hash)
+    expect(root.textContent).not.toContain('returned to this conversation')
+  })
+
+  it.each(failures)('preserves real tool errors: %j', async (result) => {
+    const { root } = mountTool('generate_image', {}, result)
+    await open(root)
+    expect(root.textContent).toContain('Delivery unavailable')
+    expect(root.textContent).not.toContain('Image saved')
+    expect(root.textContent).not.toContain('No image')
+  })
+
+  it('keeps an unknown result unknown even if it contains a reference', async () => {
+    const { root } = mountTool('generate_image', {}, { state: 'unknown', content_hash: hash, retryable: false })
+    await open(root)
+    expect(root.textContent).toContain('Image result is unconfirmed. Do not automatically generate again.')
+    expect(root.textContent).not.toContain(hash)
+    expect(root.textContent).not.toContain('Image saved')
+  })
+
+  it('distinguishes returned bytes from a confirmed stored attachment', async () => {
+    const { root } = mountTool('generate_image', {}, { state: 'generated', storage_state: 'unconfirmed', retryable: false })
+    await open(root)
+    expect(root.textContent).toContain('Image bytes were returned, but file storage is unconfirmed. Do not generate again to retry delivery.')
+    expect(root.textContent).not.toContain('Image saved')
+  })
+
+  it.each([
+    ['en', 'Image result is unconfirmed. Do not automatically generate again.'],
+    ['zh', '图像结果尚未确认，请勿自动重新生成。'],
+    ['ja', '画像の結果は未確認です。自動で再生成しないでください。'],
+  ])('keeps a finished call without a receipt unconfirmed (%s)', async (locale, text) => {
+    const { root } = mountTool('generate_image', {}, null, false, locale)
+    await open(root)
+    expect(root.textContent).toContain(text)
+    expect(root.textContent).not.toContain('Image saved')
+    expect(root.querySelector('img')).toBeNull()
+  })
+
+  it.each([{}, { state: 'completed' }, { content_hash: 'invalid' }, { content: [{ type: 'text', text: 'Generated a 1536x1024 image successfully.' }] }])('does not infer an attachment from missing data or model prose: %j', async (result) => {
+    const { root } = mountTool('generate_image', {}, result)
+    await open(root)
+    expect(root.textContent).toContain('No image preview or file reference was returned.')
+    expect(root.textContent).not.toContain('Image saved')
+    expect(root.textContent).not.toContain('1536x1024')
+  })
+
+  it.each([['zh', '图片附件已返回当前对话。'], ['ja', '画像添付がこの会話に返されました。']])('localizes the returned reference (%s)', async (locale, text) => {
+    const { root } = mountTool('generate_image', {}, completed, false, locale)
+    await open(root)
+    expect(root.textContent).toContain(text)
+    expect(root.textContent).toContain(hash)
+  })
+
+  it('preserves legacy inline image and path rendering', async () => {
+    const { root } = mountTool('generate_image', {}, { content: [{ type: 'image', data: 'c3ludGhldGlj', mimeType: 'image/png' }], structuredContent: { path: '/synthetic/image.png' } })
+    await open(root)
+    expect(root.querySelector('img')?.getAttribute('src')).toBe('data:image/png;base64,c3ludGhldGlj')
+    expect(root.textContent).toContain('/synthetic/image.png')
+  })
 })

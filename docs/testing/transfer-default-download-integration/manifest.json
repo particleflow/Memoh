@@ -1,0 +1,158 @@
+{
+  "base": "d21b15581656048cb58246530c2131f0983f053e",
+  "source": "648e4511f35fe2ce187509e9823d03c1d2e1d341",
+  "source_base": "a51ddcb1cab8e246ee32fe50762e633f221ef271",
+  "normalization": "Text: remove ANSI escapes, trim trailing whitespace/final blank lines; replace checkout path with <repo> and toolchain path with <toolchain>. Original logs remain locally; published copies are not byte-identical originals.",
+  "files": [
+    {
+      "name": "race.log",
+      "original_bytes": 13433,
+      "original_sha256": "00585ca43f3f94ce62fc7399ce5fe47cf1cafc684f6eb91542601648e19aeb6d",
+      "published_bytes": 13433,
+      "published_sha256": "00585ca43f3f94ce62fc7399ce5fe47cf1cafc684f6eb91542601648e19aeb6d"
+    },
+    {
+      "name": "pg.log",
+      "original_bytes": 9139,
+      "original_sha256": "e312d72c8d608b3c4b864dc44555c512acabf05e423a404e23e788dc9eb68ecc",
+      "published_bytes": 9139,
+      "published_sha256": "e312d72c8d608b3c4b864dc44555c512acabf05e423a404e23e788dc9eb68ecc"
+    },
+    {
+      "name": "aggregate.log",
+      "original_bytes": 1471,
+      "original_sha256": "a535463f3aa88fab8f9bc0f4e775813f8406592bd607ff491cd4e8eedef8dc42",
+      "published_bytes": 1315,
+      "published_sha256": "a5c388769e4bfdea80c7a85eca36fb69698f4bf2be8eaed4c1c8a1c73f78b671"
+    },
+    {
+      "name": "policy.log",
+      "original_bytes": 9663,
+      "original_sha256": "5edf9e7085914ca9f4db80f164ef9ce3e69f273e179860b150131076a6d94c47",
+      "published_bytes": 9299,
+      "published_sha256": "25291618303d2cc21dc41a4a09b992b864c9fb182efae4117ec14b8179c9b033"
+    }
+  ],
+  "source_files": [
+    {
+      "path": ".github/scripts/contribution-policy.test.mjs",
+      "sha256": "ac8fd3a74445e22720662bff6f1cc9c88db2844eceb7cbc915a1449a6441028d"
+    },
+    {
+      "path": ".github/workflows/delivery-native-large.yml",
+      "sha256": "4f6225c00e8a64b87dd025f22280c0cd83e3e41dfcbb41a41c87b04d0a5596d9"
+    },
+    {
+      "path": "cmd/transferqueue/budget_test.go",
+      "sha256": "69b9836f0c769ea5b40fbdcfe8679a91293975223ca9e9d1b4c494f6c389989b"
+    },
+    {
+      "path": "cmd/transferqueue/download_capacity_test.go",
+      "sha256": "26bc297b7dc34f227cc855074cb78abe5ded1421c393d542f4599057353c9832"
+    },
+    {
+      "path": "contrib/herdr/memoh-delivery/README.md",
+      "sha256": "f18c4f1334fb2362befd8b14289cc9ccf8976c16195c8cdfd99ea72b7628a1b9"
+    },
+    {
+      "path": "docs/testing/transfer-native-large-byte-recovery.md",
+      "sha256": "ab9c7cbef9978ea3f766d757acfe31ade530724844a13473200fdae449e27658"
+    },
+    {
+      "path": "internal/db/computer_delivery_native_large_windows_test.go",
+      "sha256": "81a554e3f67375ab664bceb32df1cd622d1585766a41dc5ba72a9e850a16b532"
+    },
+    {
+      "path": "internal/db/computer_roundtrip_integration_test.go",
+      "sha256": "53d6f69ecbe74a4d0e59cf2456170f50d2ed159f1ec989e3332b5928505111ab"
+    },
+    {
+      "path": "internal/transferclient/admission_compaction_test.go",
+      "sha256": "33561a7d8a4b868353771e821ad295d98447d064be698c4cc6fdb12bb8f83434"
+    },
+    {
+      "path": "internal/transferclient/association.go",
+      "sha256": "54e7c2d7e1d19a296f095aca391aa0587d6d7371a4e967a58f2d350005c49457"
+    },
+    {
+      "path": "internal/transferclient/download.go",
+      "sha256": "de56582402b5058c3f93a6ab4377f8e374d170631b73354937617641e3842e38"
+    },
+    {
+      "path": "internal/transferclient/download_space.go",
+      "sha256": "c0cc06520ad2a6be95f78fecd76252f7b4433c02daac643c618f10a261d58a35"
+    },
+    {
+      "path": "internal/transferclient/download_space_test.go",
+      "sha256": "7cc1c7660fedbe00048b34a81c620c392da1672ec6f1e96b711f8c7234e799f4"
+    },
+    {
+      "path": "internal/transferclient/durable.go",
+      "sha256": "73d26d347feec317c48ed244c27eaebdc4aa3cce4332d92da5349be80db8cddc"
+    },
+    {
+      "path": "internal/transferclient/durable_unix.go",
+      "sha256": "83beac4fb92ed9a84b710cfb8a85003e54301c10a2d507158d3003742ccd1fad"
+    },
+    {
+      "path": "internal/transferclient/durable_windows.go",
+      "sha256": "4620a30fb3522f0ac7cf2cf2ce822cd45ce1086f386e0e0b001d75bd8876df70"
+    },
+    {
+      "path": "internal/transferclient/host_budget.go",
+      "sha256": "a574ee3789eef7998eee9bfc46ca40f8536c5ccc826052a90f2803d8021f8445"
+    },
+    {
+      "path": "internal/transferclient/host_queue.go",
+      "sha256": "889b3be1ac9940b389991a00d71b913450485d3cccbca282fbb2dfa32ab4c9f9"
+    },
+    {
+      "path": "internal/transferclient/lifecycle.go",
+      "sha256": "691ea2e204072ba5b064139b3ed2f288762c57a3dbc967e57e016870fd309295"
+    },
+    {
+      "path": "internal/transferclient/publication_capacity_windows_test.go",
+      "sha256": "85bf06d7482cb200885c2a3a4187221f10aba51e1b3c31c684e45a0519d0cfc2"
+    },
+    {
+      "path": "internal/transferclient/publication_metadata.go",
+      "sha256": "af7a03ca8bdd16f6221e6c62cb29aeb24f65da1c0e05a891f2a0387c5e987931"
+    },
+    {
+      "path": "internal/transferclient/publication_metadata_migration.go",
+      "sha256": "7c28e4d3d97c08810969bc6fe3a044ff2b51daeb9e5d0bae0e5ea0c72f1589da"
+    },
+    {
+      "path": "internal/transferclient/publication_metadata_migration_test.go",
+      "sha256": "1d962076eefae8ad49cedd6a33583dd58ee6a1ca0a58152ad48f08f3d2072fef"
+    },
+    {
+      "path": "internal/transferclient/publication_windows.go",
+      "sha256": "fed4440d4cd3f42deb43a67d0c674a763cc760a2e323b87c5f8bac73ea760d6d"
+    },
+    {
+      "path": "internal/transferclient/queue.go",
+      "sha256": "b11c51abe60df697285295215ecfddc118bd39215df93cee8477bf51cd02983a"
+    },
+    {
+      "path": "internal/transferclient/retention.go",
+      "sha256": "75898fbba19cbb8edd71eb7a50e5a4bc63f724a91af5d1ac715ad34af2f9dc23"
+    },
+    {
+      "path": "scripts/test-native-delivery-postgres.ps1",
+      "sha256": "2c0187b4ca5daccaeca09b014f12d8de136b19078a20dbccac9eec39bf54c371"
+    }
+  ],
+  "protected_paths_changed": [],
+  "test_results": {
+    "race_exit": 0,
+    "race_named_pass_including_parents_and_subtests": 95,
+    "race_skips": 0,
+    "pg_exit": 0,
+    "pg_named_pass_including_parents_and_subtests": 28,
+    "pg_skips": 0,
+    "aggregate_exit": 0,
+    "policy_exit": 1,
+    "policy_reason": "15 passed; 4 failed because ruby executable is absent (ENOENT)"
+  }
+}

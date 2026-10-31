@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  4 passed (4)
+      Tests  31 passed (31)
+   Start at  13:46:25
+   Duration  13.31s (transform 9.71s, setup 0ms, import 13.16s, tests 766ms, environment 2.67s)
+

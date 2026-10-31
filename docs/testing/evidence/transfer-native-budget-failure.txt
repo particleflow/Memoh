@@ -1,0 +1,74 @@
+Previous native run 40162725339 / job121077472110 (8b83ca85): selected verbatim log lines
+2026-10-25T04:43:04.8032090Z ok  	github.com/felinics/memoh/internal/transferclient	98.204s
+2026-10-25T04:43:34.3806293Z --- PASS: TestWindowsNativeActiveJournal (17.17s)
+2026-10-25T04:43:34.3814384Z     --- PASS: TestWindowsNativeActiveJournal/progress (13.79s)
+2026-10-25T04:44:27.5675817Z --- PASS: TestWindowsNativePublicationBucketBudget (29.15s)
+2026-10-25T04:45:02.2725350Z ok  	github.com/felinics/memoh/internal/transferclient	116.047s
+2026-10-25T04:45:55.3721961Z --- PASS: TestWindowsNativeActiveJournal (17.18s)
+2026-10-25T04:45:55.3729142Z     --- PASS: TestWindowsNativeActiveJournal/progress (13.74s)
+2026-10-25T04:46:48.2760623Z --- PASS: TestWindowsNativePublicationBucketBudget (29.14s)
+
+Failed native run 40163966452 / job121081104769 (393e9087): selected verbatim log lines
+2026-10-25T05:05:57.2123886Z --- PASS: TestHostNetworkPolicyKeepsOriginalQueueBinding (0.10s)
+2026-10-25T05:05:57.6741133Z --- PASS: TestHostNetworkPolicyValidation (0.46s)
+2026-10-25T05:05:57.7452605Z --- PASS: TestHostNetworkPolicyRejectsProxyConflict (0.07s)
+2026-10-25T05:08:07.5914926Z ok  	github.com/felinics/memoh/internal/transferclient	297.006s
+2026-10-25T05:11:27.9657359Z --- PASS: TestWindowsNativeActiveJournal (180.95s)
+2026-10-25T05:11:27.9663053Z     --- PASS: TestWindowsNativeActiveJournal/progress (168.01s)
+2026-10-25T05:13:09.1862692Z panic: test timed out after 5m0s
+2026-10-25T05:13:09.1863409Z 	running tests:
+2026-10-25T05:13:09.1863832Z 		TestWindowsNativePublicationBucketBudget (14s)
+2026-10-25T05:13:09.1864363Z goroutine 1129 [running]:
+2026-10-25T05:13:09.1864762Z testing.(*M).startAlarm.func1()
+2026-10-25T05:13:09.1865680Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2682 +0x345
+2026-10-25T05:13:09.1866237Z created by time.goFunc
+2026-10-25T05:13:09.1866743Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/time/sleep.go:215 +0x2d
+2026-10-25T05:13:09.1867255Z goroutine 1 [chan receive]:
+2026-10-25T05:13:09.1868076Z testing.(*T).Run(0xc0000036c0, {0x7ff78a62f68e?, 0x7ff84d173410?}, 0x7ff78a6442d8)
+2026-10-25T05:13:09.1869234Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2005 +0x469
+2026-10-25T05:13:09.1870300Z testing.runTests.func1(0xc0000036c0)
+2026-10-25T05:13:09.1870885Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2477 +0x37
+2026-10-25T05:13:09.1871467Z testing.tRunner(0xc0000036c0, 0xc000159c70)
+2026-10-25T05:13:09.1872031Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1934 +0xc3
+2026-10-25T05:13:09.1872787Z testing.runTests(0xc0000081b0, {0x7ff78a9d7da0, 0x76, 0x76}, {0x7?, 0xc00005cb40?, 0x7ff78a9dc2e0?})
+2026-10-25T05:13:09.1873595Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2475 +0x4b4
+2026-10-25T05:13:09.1874097Z testing.(*M).Run(0xc0000608c0)
+2026-10-25T05:13:09.1874577Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2337 +0x63a
+2026-10-25T05:13:09.1875056Z main.main()
+2026-10-25T05:13:09.1875383Z 	_testmain.go:281 +0x9b
+2026-10-25T05:13:09.1875697Z goroutine 1128 [syscall]:
+2026-10-25T05:13:09.1876194Z syscall.Syscall(0xc000569080?, 0x7ff78a1d23ac?, 0x390?, 0xc000000006?, 0xc000569010?)
+2026-10-25T05:13:09.1876869Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/runtime/syscall_windows.go:457 +0x29
+2026-10-25T05:13:09.1877598Z syscall.FlushFileBuffers(0x390)
+2026-10-25T05:13:09.1877993Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/syscall/zsyscall_windows.go:633 +0x4f
+2026-10-25T05:13:09.1878358Z syscall.Fsync(...)
+2026-10-25T05:13:09.1878696Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/syscall/syscall_windows.go:738
+2026-10-25T05:13:09.1879092Z internal/poll.(*FD).Fsync(0x7ff78a6da520?)
+2026-10-25T05:13:09.1879763Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/internal/poll/fd_fsync_windows.go:15 +0xdb
+2026-10-25T05:13:09.1880175Z os.(*File).Sync(0xc00004c168)
+2026-10-25T05:13:09.1880540Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/os/file_posix.go:166 +0x3b
+2026-10-25T05:13:09.1881124Z github.com/felinics/memoh/internal/transferclient.readJournalFramesMode(0xc00004c168, 0x10000, 0x1, 0xc000569290)
+2026-10-25T05:13:09.1881676Z 	D:/a/Memoh/Memoh/internal/transferclient/durable.go:409 +0x399
+2026-10-25T05:13:09.1882374Z github.com/felinics/memoh/internal/transferclient.readPublicationJournal(0x0?, {0xc0000154a0, 0x48}, 0x1)
+2026-10-25T05:13:09.1882967Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:243 +0x133
+2026-10-25T05:13:09.1883745Z github.com/felinics/memoh/internal/transferclient.(*publicationMetadata).census(0xc000008ee8, {0x7ff78a6ddf38, 0xc000170c80}, 0xc0005bc808, 0x0)
+2026-10-25T05:13:09.1884663Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:365 +0x537
+2026-10-25T05:13:09.1885432Z github.com/felinics/memoh/internal/transferclient.(*publicationMetadata).rebuild(0xc000008ee8, {0x7ff78a6ddf38, 0xc000170c80}, 0xc0005bc808, 0x0)
+2026-10-25T05:13:09.1886100Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:399 +0x153
+2026-10-25T05:13:09.1886927Z github.com/felinics/memoh/internal/transferclient.(*publicationMetadata).save(0xc000008ee8, {0x7ff78a6ddf38, 0xc000170c80}, 0xc0005bc7d8, {0x1, {{0xc000380860, 0x10}, {0x7ff78a6192de, 0xb}, {0x7ff78a616dd7, ...}, ...}, ...})
+2026-10-25T05:13:09.1887727Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:589 +0x1c5
+2026-10-25T05:13:09.1888222Z github.com/felinics/memoh/internal/transferclient.(*NativePublication).save(...)
+2026-10-25T05:13:09.1888680Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_windows.go:158
+2026-10-25T05:13:09.1889468Z github.com/felinics/memoh/internal/transferclient.(*NativePublication).record(0xc0005054d0, {0x7ff78a6ddf38, 0xc000170c80}, {{0xc000380860, 0x10}, {0x7ff78a6192de, 0xb}, {0x7ff78a616dd7, 0x5}, {0xc000390000, ...}, ...}, ...)
+2026-10-25T05:13:09.1890286Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_windows.go:193 +0x66e
+2026-10-25T05:13:09.1891885Z github.com/felinics/memoh/internal/transferclient.(*NativePublication).Resolve(0xc0005054d0, {0x7ff78a6ddf38, 0xc000170c80}, {{0xc000380860, 0x10}, {0x7ff78a6192de, 0xb}, {0x7ff78a616dd7, 0x5}, {0xc000390000, ...}, ...}, ...)
+2026-10-25T05:13:09.1892752Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_windows.go:348 +0x36e
+2026-10-25T05:13:09.1893344Z github.com/felinics/memoh/internal/transferclient.TestWindowsNativePublicationBucketBudget(0xc000491c00)
+2026-10-25T05:13:09.1894009Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_capacity_windows_test.go:63 +0x3fd
+2026-10-25T05:13:09.1894617Z testing.tRunner(0xc000491c00, 0x7ff78a6442d8)
+2026-10-25T05:13:09.1895008Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1934 +0xc3
+2026-10-25T05:13:09.1895402Z created by testing.(*T).Run in goroutine 1
+2026-10-25T05:13:09.1895776Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1997 +0x44b
+2026-10-25T05:13:09.3563485Z FAIL	github.com/felinics/memoh/internal/transferclient	300.193s
+2026-10-25T05:13:09.3583262Z FAIL
+2026-10-25T05:13:09.5975192Z ##[error]Process completed with exit code 1.

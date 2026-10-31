@@ -160,7 +160,8 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 		"expired":       sign(owner, secret, -time.Minute), "revoked": sign(revoked, secret, time.Minute),
 	} {
 		t.Run(name, func(t *testing.T) {
-			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/agenvo/discover", account + "/private-device-id/agenvo-agent"} {
+			request(t, http.MethodPut, account+"/private-device-id/admission", token, 401, "no-store")
+			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/agenvo/discover", account + "/private-device-id/agenvo-agent", account + "/private-device-id/admission"} {
 				request(t, http.MethodGet, path, token, 401, "no-store")
 			}
 		})
@@ -182,8 +183,8 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 		t.Fatal("cache policy changed authentication-unavailable device status")
 	}
 	var runtimes []userruntime.Runtime
-	if err := json.Unmarshal(request(t, http.MethodGet, account, valid, 200, "no-store"), &runtimes); err != nil || len(runtimes) != 1 {
-		t.Fatalf("account runtime projection failed: %v", err)
+	if err := json.Unmarshal(request(t, http.MethodGet, account, valid, 200, "no-store"), &runtimes); err != nil || len(runtimes) != 0 {
+		t.Fatalf("retired account runtime was exposed: %v", err)
 	}
 	for _, path := range []string{base, account} {
 		request(t, http.MethodPatch, path, valid, 405, "no-store")

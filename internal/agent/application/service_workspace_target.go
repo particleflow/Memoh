@@ -44,6 +44,7 @@ func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) 
 	}
 	enforceSelection := requestedTargetID != ""
 	if hasWorkdir {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, bound.WorkDir)
 		// The workdir pins the target for the session's whole life. An
 		// explicit different target is rejected loudly — silently ignoring
 		// it would let the user believe the switch took effect.
@@ -100,6 +101,26 @@ func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) 
 		}
 	}
 	return ctx, req, nil
+}
+
+// prepareDecisionWorkspace re-enters the same host preparation used by a new
+// turn. Decision continuations run on the admission lifecycle context, which
+// predates the original turn's workspace binding. Identity comes from the
+// resolved decision, never from tool arguments or the answering model.
+func (s *Service) prepareDecisionWorkspace(ctx context.Context, req ChatRequest, cfg native.RunConfig) (context.Context, ChatRequest, native.RunConfig, error) {
+	req.UserID = firstNonEmpty(req.UserID, cfg.Identity.UserID, cfg.Identity.ChannelIdentityID)
+	var err error
+	ctx, req, err = s.prepareWorkspaceRequest(ctx, req)
+	if err != nil {
+		return ctx, req, cfg, err
+	}
+	cfg.Identity.UserID = req.UserID
+	if req.WorkspaceTarget != nil {
+		cfg.Identity.WorkspaceTargetID = req.WorkspaceTarget.TargetID
+		cfg.Identity.WorkspaceTargetKind = req.WorkspaceTarget.Kind
+		cfg.Identity.WorkspaceTargetName = req.WorkspaceTarget.Name
+	}
+	return ctx, req, cfg, nil
 }
 
 func (s *Service) resolveWorkspaceTargetSnapshot(ctx context.Context, botID, targetID string) (*WorkspaceTarget, error) {

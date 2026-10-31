@@ -26,6 +26,7 @@ type RecoverySummary struct {
 // Recovery is a read model. It has no transfer, submission or store-write port.
 // Native presence is separate from durable process/Pi/business result facts.
 type Recovery struct {
+	Reconciliation  *OperationReconciliation    `json:"reconciliation,omitempty"`
 	Continuity      *PiContinuity               `json:"continuity,omitempty"`
 	OperationID     string                      `json:"operation_id"`
 	TargetID        string                      `json:"target_id"`
@@ -90,7 +91,10 @@ func (s *Service) workspaces(ctx context.Context, b toolcontext.ComputerBinding,
 	return WorkspaceDiscovery{TargetID: id, WorkspaceObservations: observation}, nil
 }
 
-func (s *Service) recover(ctx context.Context, b toolcontext.ComputerBinding, id string) (Recovery, error) {
+// Recover performs the existing read-only native observation for a host-owned
+// binding. HTTP adapters must derive that binding from authenticated ownership,
+// never from client headers or native reference arguments.
+func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id string) (Recovery, error) {
 	r, d, err := s.load(ctx, b, id)
 	if err != nil {
 		return Recovery{}, err
@@ -102,7 +106,7 @@ func (s *Service) recover(ctx context.Context, b toolcontext.ComputerBinding, id
 	if state == "dispatching" {
 		state = "unknown"
 	}
-	out := Recovery{OperationID: r.ID, TargetID: r.TargetID, State: state, ProcessState: "unknown", PiResult: "unknown", BusinessOutcome: "unknown", ResultReason: "receipt_missing", CancelRequested: r.CancelRequested}
+	out := Recovery{OperationID: r.ID, TargetID: r.TargetID, State: state, ProcessState: "unknown", PiResult: "unknown", BusinessOutcome: "unknown", ResultReason: "receipt_missing", CancelRequested: r.CancelRequested, Reconciliation: operationReconciliation(r, d)}
 	refs := agenvo.OperationReferences{Workspace: d.Agent.WorkspaceID, Pane: d.Agent.PaneID, Terminal: d.Agent.TerminalID}
 	if batch := d.Batch; batch != nil {
 		out.Continuity = batchContinuity(batch)
@@ -143,8 +147,14 @@ func (s *Service) recover(ctx context.Context, b toolcontext.ComputerBinding, id
 	}
 	// Recheck owned session, current grant and registration before releasing
 	// either persisted text or native metadata. No receipt is changed or minted.
-	if _, _, err := s.load(pinned, b, r.ID); err != nil {
+	current, _, err := s.load(pinned, b, r.ID)
+	if err != nil {
 		return Recovery{}, err
+	}
+	if current.Revision != r.Revision {
+		// Do not combine a stale durable checkpoint with a later native read.
+		// Retrying this read does not submit or resume the operation.
+		return Recovery{}, agenvo.ErrUnknown
 	}
 	return out, nil
 }

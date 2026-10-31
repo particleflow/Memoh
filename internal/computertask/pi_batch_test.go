@@ -2,6 +2,7 @@ package computertask
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
@@ -62,7 +64,7 @@ func (a *batchAssets) Open(_ context.Context, _, hash string) (io.ReadCloser, me
 	return io.NopCloser(bytes.NewReader(b)), media.Asset{ContentHash: hash}, nil
 }
 
-// This fixture is a standard MCP -> service -> fixed Agenvo transport test.
+// This fixture is a standard MCP tool -> service -> direct native port test.
 // Pi/Herdr are synthetic: it is not a vendor binary or Windows acceptance.
 type batchTransport struct {
 	t                                                *testing.T
@@ -82,6 +84,7 @@ type batchTransport struct {
 	readSchema                                       *jsonschema.Resolved
 	columns, delay, remaining, maxLines, oversized   int
 	pending                                          string
+	framePrefix, frameSuffix                         string
 	rejectRead                                       bool
 	pageOffsets                                      []int
 	completion                                       []byte
@@ -135,25 +138,47 @@ func batchFile(name string, raw []byte) agenvo.BatchFile {
 	return agenvo.BatchFile{Name: name, Hash: hex.EncodeToString(h[:]), Size: int64(len(raw))}
 }
 
-func (f *batchTransport) call(_ context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
+func adaptNativePaneRead(target agenvo.Target, params map[string]any) (map[string]any, error) {
+	if target.NativeRuntimeID == "" {
+		return params, nil
+	}
+	if params["format"] != "ansi" {
+		return nil, errors.New("native pane.read requires format=ansi")
+	}
+	adapted := make(map[string]any, len(params)-1)
+	for key, value := range params {
+		if key != "format" {
+			adapted[key] = value
+		}
+	}
+	return adapted, nil
+}
+
+func TestNativeBatchSnapshotRequiresANSI(t *testing.T) {
+	target := agenvo.Target{NativeRuntimeID: "native"}
+	for _, params := range []map[string]any{{}, {"format": "plain"}} {
+		if _, err := adaptNativePaneRead(target, params); err == nil {
+			t.Fatal("accepted missing or non-ANSI format")
+		}
+	}
+	params := map[string]any{"format": "ansi", "source": "recent-unwrapped"}
+	adapted, err := adaptNativePaneRead(target, params)
+	if err != nil || adapted["source"] != "recent-unwrapped" || params["format"] != "ansi" {
+		t.Fatalf("invalid native adaptation: %v %v", adapted, err)
+	}
+	if _, ok := adapted["format"]; ok {
+		t.Fatal("legacy simulator received native-only format")
+	}
+}
+
+func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
-	if owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" || tool != "execute" {
-		f.t.Fatal("wrong relay identity")
+	mount := f.store.mounts[scope.TargetID]
+	if scope.BotID != mount.BotID || target.NativeRuntimeID != mount.RuntimeID || target.InstanceID != fixtureTarget(mount).InstanceID {
+		f.t.Fatal("wrong native Runtime mapping")
 	}
-	code, _ := args["code"].(string)
-	var parts []json.RawMessage
-	if json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts) != nil || len(parts) != 3 {
-		f.t.Fatal("arbitrary relay call")
-	}
-	var target map[string]string
-	var method string
-	var params map[string]any
-	_ = json.Unmarshal(parts[0], &target)
-	_ = json.Unmarshal(parts[1], &method)
-	_ = json.Unmarshal(parts[2], &params)
-	if target["deviceId"] != "device-a" || target["instanceId"] != "herdr-a" {
-		f.t.Fatalf("wrong device mapping: %v", target)
-	}
+
+	params = fixtureParams(params)
 	f.calls = append(f.calls, method)
 	f.projectCompletion()
 	body := map[string]any{}
@@ -164,19 +189,35 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		body = map[string]any{"root_pane": map[string]string{"pane_id": "job", "terminal_id": "job-terminal", "workspace_id": "w-test"}}
 	case "pane.run":
 		command, _ := params["command"].(string)
-		if command == `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }` {
-			if params["paneId"] != "control" {
-				f.t.Fatal("producer wake on Pi pane")
-			}
-			f.producerWakes++
-			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
-		}
 		match := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
+		packed := false
+		if len(match) != 2 {
+			match = regexp.MustCompile(`FromBase64String\('([A-Za-z0-9+/=]+)'\)`).FindStringSubmatch(command)
+			packed = true
+		}
 		if len(match) != 2 {
 			f.t.Fatal("missing fixed Bash launch")
 		}
 		raw, _ := base64.StdEncoding.DecodeString(match[1])
+		if packed {
+			reader, err := gzip.NewReader(bytes.NewReader(raw))
+			if err != nil {
+				f.t.Fatal(err)
+			}
+			raw, err = io.ReadAll(reader)
+			if err != nil {
+				f.t.Fatal(err)
+			}
+			_ = reader.Close()
+		}
 		script := string(raw)
+		if strings.HasPrefix(script, "HERDR_PLUGIN_CONFIG_DIR=") && strings.Contains(script, " -action collect-result </dev/null") {
+			if params["paneId"] != "control" || !strings.Contains(script, "HERDR_PLUGIN_STATE_DIR=") || strings.Contains(script, "plugin action invoke") {
+				f.t.Fatal("native producer wake lost its fixed control route")
+			}
+			f.producerWakes++
+			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
+		}
 		switch params["paneId"] {
 		case "job":
 			f.runs++
@@ -205,7 +246,7 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 				f.receipt.History = &agenvo.BatchHistoryReport{Before: before, After: after, Evidence: &agenvo.BatchHistoryEvidence{File: "synthetic.jsonl", Size: 1024, Hash: strings.Repeat("e", 64)}}
 			}
 			if f.lost {
-				return nil, errors.New("lost dispatch reply")
+				return agenvo.Receipt{}, agenvo.ErrUnknown
 			}
 		case "control":
 			f.reads++
@@ -252,7 +293,7 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 				data[0] ^= 1
 			}
 			f.control += "\r\nPS C:\\Synthetic> " + command + "\r\n"
-			f.pending = "\r\nMEMOH_FILE_" + m[1] + ":" + base64.StdEncoding.EncodeToString(data) + ":END_FILE_" + m[1] + "\r\nPS C:\\Synthetic>\r\n"
+			f.pending = "\r\n" + f.framePrefix + "MEMOH_FILE_" + m[1] + ":" + base64.StdEncoding.EncodeToString(data) + ":END_FILE_" + m[1] + f.frameSuffix + "\r\nPS C:\\Synthetic>\r\n"
 			f.remaining = f.delay
 			if f.onPage != nil {
 				f.onPage()
@@ -267,12 +308,18 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		}
 		body = map[string]any{"type": "pane_info", "pane": map[string]string{"pane_id": "control", "terminal_id": terminal, "workspace_id": f.progress.WorkspaceID}}
 	case "pane.read":
+		var err error
+		params, err = adaptNativePaneRead(target, params)
+		if err != nil {
+			f.t.Error(err)
+			return agenvo.Receipt{}, err
+		}
 		if err := f.readSchema.Validate(params); err != nil {
 			f.t.Errorf("Agenvo v0.2.0 pane.read schema rejected params: %v", err)
-			return nil, err
+			return agenvo.Receipt{}, err
 		}
 		if strings.HasPrefix(params["paneId"].(string), "-") {
-			return nil, errors.New("vendor pane ID refinement rejected leading dash")
+			return agenvo.Receipt{}, errors.New("vendor pane ID refinement rejected leading dash")
 		}
 		lines := int(params["lines"].(float64))
 		f.maxLines = max(f.maxLines, lines)
@@ -315,10 +362,11 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 	return envelope(map[string]any{"session": "synthetic", "result": body}), nil
 }
 
-func batchReadError(execution, code string) json.RawMessage {
-	body, _ := json.Marshal(map[string]any{"execution": execution, "error": map[string]string{"code": code, "message": "PRIVATE-read-diagnostic"}})
-	raw, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": string(body)}}})
-	return raw
+func batchReadError(execution, code string) agenvo.Receipt {
+	body, _ := json.Marshal(map[string]any{"execution": execution, "error": map[string]string{"code": code}})
+	var receipt agenvo.Receipt
+	_ = json.Unmarshal(body, &receipt)
+	return receipt
 }
 
 func renderedTail(text string, columns, limit int) string {
@@ -339,10 +387,10 @@ func setupBatch(t *testing.T) (*Source, *fixtureStore, *batchTransport, *batchAs
 	t.Helper()
 	source, store, _ := setup(t)
 	r := store.mounts["pc-a"]
-	var target agenvo.Target
-	_ = json.Unmarshal(r.RuntimeProviderConfig, &target)
+	target := fixtureTarget(r)
+	target.Producer = agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
 	target.Agent = agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}
-	r.RuntimeProviderConfig, _ = json.Marshal(target)
+	r.RuntimeProviderConfig = fixtureConfig(target)
 	store.mounts["pc-a"] = r
 	raw, err := os.ReadFile("testdata/agenvo-v0.2.0-pane-read.schema.json")
 	if err != nil {
@@ -385,6 +433,30 @@ func batchLogsUntilReady(t *testing.T, c *sdkmcp.ClientSession, id string) Resul
 	}
 	t.Fatal("bounded diagnostic collection did not finish")
 	return Result{}
+}
+
+func TestNativeBatchColoredFramesAndOtherControls(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	f.hiddenFrame = true
+	f.framePrefix, f.frameSuffix = "\x1b[32m", "\x1b[0m"
+	c := standardClient(t, source, "pc-a", false)
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	got := batchResultUntilReady(t, c, r.ID)
+	if got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
+		t.Fatalf("colored result: %+v", got)
+	}
+	f.framePrefix, f.frameSuffix = "\x1b[2J", ""
+	ctx, cancel := context.WithTimeout(t.Context(), 250*time.Millisecond)
+	defer cancel()
+	var d Details
+	if err := json.Unmarshal(store.records[r.ID].Details, &d); err != nil || d.Batch == nil || d.Batch.Receipt == nil {
+		t.Fatalf("saved batch: %+v %v", d.Batch, err)
+	}
+	beforeReads := f.reads
+	data, err := source.service.relay.ReadBatchPage(ctx, agenvo.Scope{BotID: "bot-a", UserID: "user-a", TargetID: "pc-a"}, d.Batch.Progress, *d.Batch.Receipt, d.Batch.Receipt.Stdout, 0)
+	if !errors.Is(err, agenvo.ErrUnknown) || len(data) != 0 || f.runs != 1 || f.reads != beforeReads+1 {
+		t.Fatalf("control-bearing frame accepted: bytes=%d err=%v runs=%d reads=%d before=%d", len(data), err, f.runs, f.reads, beforeReads)
+	}
 }
 
 func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
@@ -464,7 +536,7 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 	store.revoked = true
 	before := len(f.calls)
 	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_artifact", "computer_task_cancel", "computer_task_logs"} {
-		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, true)
+		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, tool != "computer_task_get")
 	}
 	if before != len(f.calls) {
 		t.Fatal("revoked observation reached relay")
@@ -551,7 +623,7 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 func TestStandardMCPPiBatchRejectsOversizeBeforeClaim(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32000)}, true)
+	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32001)}, true)
 	if len(store.records) != 0 || len(f.calls) != 0 {
 		t.Fatal("oversized launch reserved or dispatched")
 	}
@@ -797,7 +869,7 @@ func TestCompactResultIndependentOfLogStorageAndSurvivesRestart(t *testing.T) {
 	before := len(f.calls)
 	store.revoked = true
 	for _, tool := range []string{"computer_task_result", "computer_task_get", "computer_task_logs", "computer_task_artifact"} {
-		invoke(t, resumed, tool, map[string]any{"operation_id": r.ID}, true)
+		invoke(t, resumed, tool, map[string]any{"operation_id": r.ID}, tool != "computer_task_get")
 	}
 	if len(f.calls) != before {
 		t.Fatal("revoked diagnostic request reached PC")

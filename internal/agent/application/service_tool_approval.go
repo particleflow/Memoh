@@ -404,6 +404,13 @@ func (s *Service) executeApprovedTool(ctx context.Context, req toolapproval.Requ
 		return sdk.ToolResultPart{}, nil, err
 	}
 	resolved.RunConfig.RunID = runIDForChatRequest(runID)
+	ctx, _, resolved.RunConfig, err = s.prepareDecisionWorkspace(ctx, ChatRequest{
+		BotID: input.BotID, ThreadID: req.SessionID, RunID: resolved.RunConfig.RunID,
+		WorkspaceTargetID: req.WorkspaceTargetID,
+	}, resolved.RunConfig)
+	if err != nil {
+		return sdk.ToolResultPart{}, nil, err
+	}
 	if fence, ok := runtimefence.FromContext(ctx); ok {
 		var count int64
 		err := runtimefence.InTransaction(ctx, s.queries, fence.BotID, fence.SessionID, func(queries dbstore.Queries) error {

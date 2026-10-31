@@ -1,0 +1,9 @@
+{
+  "realServer": true,
+  "realPG": true,
+  "currentWeb": true,
+  "mutations": 0,
+  "upstreamOrTestRequests": 0,
+  "pageErrors": [],
+  "modelConfigReads": 1
+}

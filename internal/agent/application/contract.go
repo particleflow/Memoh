@@ -6,13 +6,17 @@ import (
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/turn"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 // ChatRequest is the application-layer input used while orchestrating a chat
 // turn. Transport callers should prefer turn.StartTurnCommand; the additional
 // channel and function fields below are strictly in-process runtime state.
 type ChatRequest struct {
-	DelegationResultID       string `json:"-"`
+	// InputSource is reconstructed only by trusted in-process ingress/ledgers.
+	InputSource              *inputsource.Source `json:"-"`
+	DelegationResultID       string              `json:"-"`
+	TaskResultReceipt        string              `json:"-"`
 	discussCurrentSources    []turn.ContextMessageSource
 	discussOmittedSources    []turn.ContextMessageSource
 	discussMessages          []turn.DiscussMessage
@@ -81,8 +85,8 @@ type ChatRequest struct {
 	SkipMemoryExtraction      bool                  `json:"-"`
 	SkipHistoryTurn           bool                  `json:"-"`
 	// TurnReplacement is set only for an admitted retry/edit run. Its step
-	// output stays hidden until the queue coordinator reaches the true final
-	// boundary and publishes this replacement in its own transaction.
+	// output stays hidden until the queue coordinator reaches a final or
+	// deferred-decision boundary and publishes it in its own transaction.
 	TurnReplacement     *messagepkg.TurnReplacement `json:"-"`
 	SkipTitleGeneration bool                        `json:"-"`
 	ForceFreshRuntime   bool                        `json:"-"`

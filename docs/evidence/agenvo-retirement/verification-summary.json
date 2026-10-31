@@ -1,0 +1,168 @@
+{
+  "verified_at_utc": "2026-10-25T15:10:21.778291+00:00",
+  "base_head": "03e4fb6220a4b9f13f2b642e8dd3acaca7545a48",
+  "source_sha256": "884e5e564d340e3cf22f1d58e4bb910b2b1ac2baf20d07612bc1a7336277fbc7",
+  "binary_sha256": "aa6c8785b975cedc1e98e72f74633a3753452d13e2826a6d42a903f42f8ac777",
+  "old_binary_sha256": "901dbcc14cb62770567adb40fa78a8a69253aa7d465d0077b71ea60f3573da03",
+  "environment": {
+    "web": "http://127.0.0.1:58083",
+    "api": "http://127.0.0.1:58080",
+    "postgres": "isolated memoh-herdr-ui-pg on loopback 58432",
+    "health_head_status": 200,
+    "startup": "Current Go source built and run with existing local Vite; mise unavailable in environment."
+  },
+  "red_case": "Old binary listed inactive legacy Agenvo runtime in all 3 HTTP lists and Computers UI.",
+  "green_states": [
+    "new binary inactive filtered",
+    "reactivated via existing UI",
+    "disabled via existing UI"
+  ],
+  "http_list_observations": 9,
+  "native_retained_in_every_list": true,
+  "database_checks_passed": 9,
+  "browser_page_errors": [],
+  "oauth_mutating_browser_requests": 0,
+  "oauth_status_reads": 2,
+  "outbound_synthetic_mcp_requests": 0,
+  "limitations": [
+    "Only synthetic local data; no real token, enrollment, OAuth authorization/refresh, Windows connection, business execution, or production deployment.",
+    "MCP detail UI performs read-only OAuth status requests; no OAuth discover/authorize/exchange/token mutation, external authorization navigation, or synthetic MCP network request occurred.",
+    "This verifies affected retirement selection surfaces, not complete native Runtime/Herdr delivery; earlier producer evidence is unchanged.",
+    "Agent-driven browser verification is not human QA."
+  ],
+  "database_assertions": [
+    {
+      "check": "user_runtimes preserved",
+      "pass": true,
+      "before_sha256": "db576fe151a3bafd0966123b138d4f4be518bd353d1d394e9a5e8d1e4c93452e",
+      "after_sha256": "db576fe151a3bafd0966123b138d4f4be518bd353d1d394e9a5e8d1e4c93452e",
+      "row_count": 2
+    },
+    {
+      "check": "bot_remote_runtime_bindings preserved",
+      "pass": true,
+      "before_sha256": "56b8d77fdafc923dbf3110221aaf75301e75e5a9a0ecda0a6e048f81650299c3",
+      "after_sha256": "56b8d77fdafc923dbf3110221aaf75301e75e5a9a0ecda0a6e048f81650299c3",
+      "row_count": 2
+    },
+    {
+      "check": "bot_workdirs preserved",
+      "pass": true,
+      "before_sha256": "de504c9a49e1b526812f9648979499168f45524ad7a02906a7479462a8cd1b0d",
+      "after_sha256": "de504c9a49e1b526812f9648979499168f45524ad7a02906a7479462a8cd1b0d",
+      "row_count": 1
+    },
+    {
+      "check": "bot_sessions preserved",
+      "pass": true,
+      "before_sha256": "cd8f8d2fdde8ec006904fee268cd2d82865196f1147575e30a1f04c647c2b8f4",
+      "after_sha256": "cd8f8d2fdde8ec006904fee268cd2d82865196f1147575e30a1f04c647c2b8f4",
+      "row_count": 1
+    },
+    {
+      "check": "computer_operations preserved",
+      "pass": true,
+      "before_sha256": "bd7267eab19bab04985c3772931dcdbeff168322cb8a91f0d4ace3a6607cb012",
+      "after_sha256": "bd7267eab19bab04985c3772931dcdbeff168322cb8a91f0d4ace3a6607cb012",
+      "row_count": 1
+    },
+    {
+      "check": "oauth_rows preserved",
+      "pass": true,
+      "before_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "after_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "row_count": 0
+    },
+    {
+      "check": "operation_count preserved",
+      "pass": true,
+      "before_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "after_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "row_count": 1
+    },
+    {
+      "check": "MCP inactive after UI toggle",
+      "pass": true
+    },
+    {
+      "check": "MCP OAuth auth type preserved",
+      "pass": true
+    }
+  ],
+  "http_list_results": [
+    {
+      "state": "new binary inactive filtered",
+      "lists": [
+        {
+          "path": "/users/me/runtimes",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        },
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/workspace-targets",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        },
+        {
+          "path": "/users/me/computer-access",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        }
+      ]
+    },
+    {
+      "state": "reactivated via existing UI",
+      "lists": [
+        {
+          "path": "/users/me/runtimes",
+          "status": 200,
+          "old_present": true,
+          "native_present": true
+        },
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/workspace-targets",
+          "status": 200,
+          "old_present": true,
+          "native_present": true
+        },
+        {
+          "path": "/users/me/computer-access",
+          "status": 200,
+          "old_present": true,
+          "native_present": true
+        }
+      ]
+    },
+    {
+      "state": "disabled via existing UI",
+      "lists": [
+        {
+          "path": "/users/me/runtimes",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        },
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/workspace-targets",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        },
+        {
+          "path": "/users/me/computer-access",
+          "status": 200,
+          "old_present": false,
+          "native_present": true
+        }
+      ]
+    }
+  ],
+  "mcp_ui_toggle_response_statuses": {
+    "enable": 200,
+    "disable": 200
+  },
+  "raw_local_evidence_directory": "/workspace/native-herdr-verification/retirement"
+}

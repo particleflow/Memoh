@@ -1,0 +1,23 @@
+{
+  "operation": {
+    "id": "a4bd903a-13e5-418f-b5d0-caf6770c7abd",
+    "team_id": "00000000-0000-0000-0000-000000000001",
+    "bot_id": "cd6a4258-406b-48ef-88bd-4f7a433bb005",
+    "session_id": "a9ec526a-f948-4226-ab99-dc3b1db3d4ce",
+    "user_id": "8f51d2d2-7f18-45d4-a8ba-afee2a639d7b",
+    "target_id": "95629761-e345-4fe3-bad0-4aec664af394",
+    "run_id": "navigation-proof",
+    "fingerprint": "proof",
+    "target_fingerprint": "proof",
+    "state": "unknown",
+    "details": {
+      "marker": "unchanged by navigation"
+    },
+    "cancel_requested": false,
+    "revision": 0,
+    "created_at": "2026-10-27T14:01:01.617578+00:00",
+    "updated_at": "2026-10-27T14:01:01.617578+00:00"
+  },
+  "other_session_route": null,
+  "canonical": "837242ed-a0ee-49b8-9a6c-33a9f32e81fe"
+}

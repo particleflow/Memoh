@@ -1,0 +1,10 @@
+
+> @memohai/web@0.22.0 build <checkout>/apps/web
+> vite build
+
+✓ patched dependencies verified against installed content
+vite v8.1.5 building client environment for production...
+transforming...Killed
+<checkout>/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 build: `vite build`
+Exit status 137

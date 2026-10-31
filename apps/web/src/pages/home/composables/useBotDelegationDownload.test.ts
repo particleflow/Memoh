@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BotdelegationView } from '@memohai/sdk'
 import { useBotDelegationDownload } from './useBotDelegationDownload'
 import type { TaskScope } from './useSessionTasks'
-const api = vi.hoisted(() => ({ head: vi.fn(), url: vi.fn(), click: vi.fn() }))
+const api = vi.hoisted(() => ({ head: vi.fn(), save: vi.fn(), click: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({ headBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHash: api.head }))
-vi.mock('@/lib/api-client', () => ({ sdkApiUrl: api.url, sdkAuthQuery: () => ({ token: 'synthetic' }) }))
+vi.mock('@/lib/media-transfer', () => ({ saveMediaDownload: api.save }))
 const hash = 'a'.repeat(64)
 const task: BotdelegationView = {
   delegation_id: 'handoff', source_session_id: 'session', target_bot_id: 'specialist', request_id: 'request', state: 'completed', delivery_state: 'accepted',
@@ -22,13 +22,13 @@ function setup() {
 }
 beforeEach(() => {
   api.head.mockReset().mockResolvedValue({})
-  api.url.mockReset().mockImplementation(({ url }) => url)
+  api.save.mockReset().mockResolvedValue(undefined)
   api.click.mockReset()
   vi.stubGlobal('document', { createElement: () => ({ click: api.click }) })
 })
 afterEach(() => { owners.splice(0).forEach(o => o.stop()); vi.unstubAllGlobals() })
 describe('scope-bound delegation downloads', () => {
-  it('checks the original route once, coalesces double click, streams via browser without Blob fallback', async () => {
+  it('checks original scope, coalesces double click, delegates byte verification to durable download', async () => {
     let finish!: () => void
     api.head.mockReturnValue(new Promise<void>(resolve => { finish = resolve }))
     const { action } = setup()
@@ -37,21 +37,20 @@ describe('scope-bound delegation downloads', () => {
     expect(api.head).toHaveBeenCalledTimes(1)
     expect(api.head.mock.calls[0]![0]).toMatchObject({ path: { bot_id: 'bot', session_id: 'session', delegation_id: 'handoff', content_hash: hash }, cache: 'no-store', throwOnError: true })
     finish(); await first
-    expect(api.click).toHaveBeenCalledTimes(1)
-    expect(api.url).toHaveBeenCalledWith({ url: task.attachments[0]!.url, query: { token: 'synthetic' } })
+    expect(api.save).toHaveBeenCalledWith('bot', hash, undefined, task.attachments[0]!.url, hash, expect.any(AbortSignal))
   })
   it.each(['https://example.invalid/file', '/bots/bot/media/'+hash, `/bots/other/sessions/session/delegations/handoff/attachments/${hash}`, `/bots/bot/sessions/session/delegations/foreign/attachments/${hash}`])('rejects a mismatching returned URL %s', async url => {
     const { action, reader } = setup()
     const a = { content_hash: hash, url }; reader.detail.value!.attachments = [a]
     expect(action.value.available(a)).toBe(false)
     await action.value.download(a)
-    expect(api.head).not.toHaveBeenCalled(); expect(api.click).not.toHaveBeenCalled()
+    expect(api.head).not.toHaveBeenCalled(); expect(api.save).not.toHaveBeenCalled()
   })
   it.each([401, 403, 404])('stops after %i and never falls back or auto retries', async status => {
     api.head.mockRejectedValue({ status, detail: 'PRIVATE' })
     const { action } = setup()
     await action.value.download(task.attachments[0]!); await action.value.download(task.attachments[0]!)
-    expect(api.head).toHaveBeenCalledTimes(1); expect(api.click).not.toHaveBeenCalled()
+    expect(api.head).toHaveBeenCalledTimes(1); expect(api.save).not.toHaveBeenCalled()
     expect(action.value.available(task.attachments[0]!)).toBe(false)
   })
   it.each(['scope', 'hidden', 'denial', 'removed'])('ignores a late HEAD after %s', async change => {
@@ -64,6 +63,6 @@ describe('scope-bound delegation downloads', () => {
     if (change === 'denial') reader.error.value = { status: 403 }
     if (change === 'removed') reader.detail.value!.attachments = []
     finish(); await first
-    expect(api.click).not.toHaveBeenCalled()
+    expect(api.save).not.toHaveBeenCalled()
   })
 })

@@ -43,6 +43,21 @@ afterEach(() => {
 })
 
 describe('specialist handoff content and states', () => {
+  it('keeps native run facts separate from unknown delegation and delivery', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, state: 'unknown', delivery_state: 'unknown', target_run_id: 'native-run-a', target_run_state: 'completed', target_run_updated_at: '2026-10-22T01:00:00Z' } })
+    expect(root.textContent).toContain('native-run-a')
+    expect(root.textContent).toContain('Run completed')
+    expect(root.textContent).toContain('Execution unknown')
+    expect(root.textContent).toContain('Delivery unknown')
+    expect(root.textContent).not.toContain(task.summary!.text)
+  })
+
+  it('does not infer an admitted run from a completed handoff or target session', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, target_session_id: 'specialist-session', target_run_state: 'completed' } })
+    expect(root.textContent).toContain(en.chat.delegations.runUnavailable)
+    expect(root.textContent).not.toContain('Run completed')
+  })
+
   it('offers delivery retry only to a capable host and respects its pending state', async () => {
     const retry = vi.fn()
     const action = ref<BotDelegationDeliveryAction>({ pending: false, disabled: false, retry })
@@ -82,7 +97,9 @@ describe('specialist handoff content and states', () => {
   it('never turns an accepted delivery response into confirmation that the supervisor processed it', () => {
     const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown' }, deliveryAction: { pending: false, disabled: true, response: task, retry: vi.fn() } })
     expect(root.textContent).toContain('Delivery request response · Accepted')
-    expect(root.textContent).toContain(en.chat.delegations.deliveryAccepted)
+    expect(root.textContent).toContain('Return delivery · Delivery unknown')
+    expect(root.textContent).not.toContain('Return delivery · Accepted')
+    expect(root.textContent).not.toContain(en.chat.delegations.deliveryAccepted)
     expect(root.querySelector('button')?.disabled).toBe(true)
   })
 
@@ -90,10 +107,10 @@ describe('specialist handoff content and states', () => {
     const root = mount({ selected: task.delegation_id, detail: task })
     expect(root.textContent).toContain('Execution completed')
     expect(root.textContent).toContain('Return delivery · Accepted')
-    expect(root.textContent).toContain('does not confirm that the supervisor has processed')
+    expect(root.textContent).not.toContain(en.chat.delegations.deliveryAccepted)
     expect(root.textContent).toContain(task.summary!.text)
     expect(root.textContent).toContain(en.chat.tasks.truncated)
-    expect(root.textContent).toContain('Downloads are not available')
+    expect(root.textContent).not.toContain('Downloads are not available')
     expect(root.querySelectorAll('a,img,iframe,video,script,audio')).toHaveLength(0)
     expect(root.textContent).not.toContain('synthetic-hash')
     expect(root.textContent).not.toContain('/bots/other')
@@ -106,18 +123,19 @@ describe('specialist handoff content and states', () => {
     expect(root.textContent).toContain('No final visible reply is available.')
     expect(root.textContent).not.toContain('Execution completed')
     expect(root.textContent).not.toContain('returned reference')
-    if (state === 'accepted' || state === 'running') expect(root.textContent).toContain('Live work and tool logs are not available')
+    expect(root.textContent).toContain(`Execution · ${en.chat.delegations.states[state]}`)
+    expect(root.textContent).toContain('Return delivery · Pending')
+    expect(root.textContent).not.toContain(en.chat.delegations.noLiveContent)
   })
 
   it('distinguishes a successful empty list from unsupported and inaccessible APIs', () => {
     expect(mount().textContent).toContain(en.chat.delegations.empty)
     const unsupported = mount({ error: { code: 'http.not_found', status: 404 } })
-    expect(unsupported.textContent).toContain(en.chat.delegations.unsupported)
+    expect(unsupported.textContent).toContain(en.errors.http.not_found)
     expect(unsupported.textContent).not.toContain(en.chat.delegations.empty)
     const hidden = mount({ error: { code: 'session.not_found', status: 404 } })
     expect(hidden.textContent).toContain(en.chat.delegations.inaccessible)
-    expect(hidden.textContent).not.toContain(en.chat.delegations.unsupported)
-  })
+      })
 
   it('keeps empty filtered pages pageable', () => {
     const root = mount({ nextCursor: 'opaque' })
@@ -145,8 +163,7 @@ describe('specialist handoff content and states', () => {
     expect(root.textContent).toContain(en.common.networkError)
     expect(root.textContent).not.toContain('PRIVATE_NETWORK')
     expect(root.textContent).not.toContain(en.chat.delegations.empty)
-    expect(root.textContent).not.toContain(en.chat.delegations.unsupported)
-  })
+      })
 })
 
 describe.each(['web', 'native'] as const)('shared body in a %s dialog host', (host) => {

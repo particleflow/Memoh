@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/media"
@@ -28,11 +29,12 @@ type BatchTransfer struct {
 	ReadyHash string           `json:"ready_hash,omitempty"`
 }
 type BatchDetails struct {
-	Feedback *deliverymeta.Feedback `json:"delivery_feedback,omitempty"`
-	Progress agenvo.BatchProgress   `json:"progress"`
-	Receipt  *agenvo.BatchReceipt   `json:"receipt,omitempty"`
-	Files    []BatchTransfer        `json:"files,omitempty"`
-	Result   *agenvo.PiJSONResult   `json:"result,omitempty"`
+	RecoveryReader *agenvo.BatchRecoveryReader `json:"recovery_reader,omitempty"`
+	Feedback       *deliverymeta.Feedback      `json:"delivery_feedback,omitempty"`
+	Progress       agenvo.BatchProgress        `json:"progress"`
+	Receipt        *agenvo.BatchReceipt        `json:"receipt,omitempty"`
+	Files          []BatchTransfer             `json:"files,omitempty"`
+	Result         *agenvo.PiJSONResult        `json:"result,omitempty"`
 }
 
 // storeBatchBytes verifies content-addressed readiness before recording a ref.
@@ -104,23 +106,69 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	readCtx, cancel := context.WithTimeout(pinned, 20*time.Second)
 	defer cancel()
+	trace := agenvo.BatchReadTraceFromContext(readCtx)
+	if trace != nil {
+		trace.OperationRunID = r.RunID
+		started := time.Now()
+		defer func() {
+			trace.ReadElapsedMS = time.Since(started).Milliseconds()
+			trace.DeadlineExceeded = errors.Is(readCtx.Err(), context.DeadlineExceeded)
+			trace.Canceled = errors.Is(readCtx.Err(), context.Canceled)
+		}()
+	}
 	save := func() error {
+		if trace != nil && trace.SaveKind != "" {
+			trace.ExpectedRevision = r.Revision
+		}
 		// Recheck grant and mapping after reading/ingesting, before returning
 		// private data. A concurrent receipt writer loses CAS; it cannot release
 		// another operation or advance this operation's offsets silently.
 		if _, _, err := s.load(ctx, b, r.ID); err != nil {
+			if trace != nil && trace.SaveKind != "" {
+				trace.Reason = "reader_authorization_recheck_failed"
+				trace.SaveErrorClass = "authorization_recheck"
+			}
 			return err
 		}
 		r.Details, _ = json.Marshal(d)
 		next, err := s.store.SaveComputerOperation(ctx, r)
 		if err != nil {
+			if trace != nil && trace.SaveKind != "" {
+				trace.Reason = "reader_save_failed"
+				trace.SaveErrorClass = "other"
+				switch {
+				case errors.Is(err, db.ErrNotFound):
+					trace.SaveErrorClass = "no_matching_row"
+				case errors.Is(err, context.DeadlineExceeded):
+					trace.SaveErrorClass = "deadline"
+				case errors.Is(err, context.Canceled):
+					trace.SaveErrorClass = "canceled"
+				}
+			}
 			return agenvo.ErrUnknown
 		}
 		r = next
 		return nil
 	}
+	collect := func(read func(*agenvo.BatchRecoveryReader) error) error {
+		return s.collectBatchRead(readCtx, scope(b, r.TargetID), batch, save, read)
+	}
+	readPage := func(file agenvo.BatchFile, offset int64) ([]byte, error) {
+		var raw []byte
+		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+			var err error
+			raw, err = s.relay.ReadBatchPageWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader, *batch.Receipt, file, offset)
+			return err
+		})
+		return raw, err
+	}
 	if batch.Receipt == nil {
-		receipt, err := s.relay.ObserveBatch(readCtx, scope(b, r.TargetID), batch.Progress)
+		var receipt *agenvo.BatchReceipt
+		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+			var err error
+			receipt, err = s.relay.ObserveBatchWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader)
+			return err
+		})
 		if err != nil {
 			if errors.Is(err, agenvo.ErrUnknown) {
 				return result(r, d), err
@@ -148,7 +196,12 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	// new correctly correlated local observation can clear that block; missing,
 	// partial or foreign receipts leave the last durable observation unchanged.
 	if delivery := producerResult(r, d); delivery != nil && delivery.hasPending() && !r.CancelRequested {
+		feedbackStarted := time.Now()
 		feedback, readErr := s.relay.ReadBatchProducerFeedback(readCtx, scope(b, r.TargetID), batch.Progress)
+		if trace != nil {
+			trace.FeedbackElapsedMS = time.Since(feedbackStarted).Milliseconds()
+			trace.FeedbackFailed = readErr != nil
+		}
 		current, currentDetails, err := s.load(ctx, b, r.ID)
 		if err != nil {
 			return Result{}, err
@@ -168,7 +221,12 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		// A finite idempotent wakeup, not a new execution attempt or a scheduler.
 		// Its transport outcome cannot change execution or delivery truth. A later
 		// query repeats this safe wakeup and reads the original ledger after restart.
-		_ = s.relay.AdvanceBatchDelivery(readCtx, scope(b, r.TargetID), batch.Progress)
+		wakeStarted := time.Now()
+		wakeErr := s.relay.AdvanceBatchDelivery(readCtx, scope(b, r.TargetID), batch.Progress)
+		if trace != nil {
+			trace.DeliveryWakeElapsedMS = time.Since(wakeStarted).Milliseconds()
+			trace.DeliveryWakeFailed = wakeErr != nil
+		}
 		current, currentDetails, err := s.load(ctx, b, r.ID)
 		if err != nil {
 			return Result{}, err
@@ -188,20 +246,37 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		} else {
 			meta := batch.Receipt.Completion
 			if meta == nil {
+				if trace != nil {
+					trace.Stage = "completion_metadata"
+					trace.Reason = "missing_descriptor"
+				}
 				return result(r, d), agenvo.ErrUnknown
 			}
 			// At most 8 KiB / four fixed pages. No log ingestion or model-driven
 			// continuation is needed; failed reads only retry this immutable file.
 			var raw []byte
 			for int64(len(raw)) < meta.Size {
-				page, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, *meta, int64(len(raw)))
+				if trace != nil {
+					trace.Stage = "completion_page"
+				}
+				page, err := readPage(*meta, int64(len(raw)))
 				if err != nil {
 					return result(r, d), err
 				}
 				raw = append(raw, page...)
+				if trace != nil {
+					trace.CompletedPages++
+				}
+			}
+			if trace != nil {
+				trace.Stage = "completion_parse"
+				trace.Reason = ""
 			}
 			parsed, err := agenvo.ParseBatchCompletion(raw, batch.Progress, *batch.Receipt)
 			if err != nil {
+				if trace != nil {
+					trace.Reason = "validation_failed"
+				}
 				return result(r, d), err
 			}
 			batch.Result = &parsed
@@ -240,7 +315,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			if readCtx.Err() != nil {
 				return result(r, d), nil
 			}
-			raw, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, f.Meta, f.Offset)
+			raw, err := readPage(f.Meta, f.Offset)
 			if err != nil {
 				if errors.Is(err, agenvo.ErrUnknown) {
 					return result(r, d), err

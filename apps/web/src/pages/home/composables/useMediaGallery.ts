@@ -1,5 +1,5 @@
 import { computed, ref, type Ref } from 'vue'
-import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { sdkFileApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { useChatStore } from '@/store/chat-list'
 import type { ChatMessage } from '@/store/chat-list'
 import type { UIAttachment } from '@/composables/api/useChat.types'
@@ -38,7 +38,7 @@ function resolveAssetApiUrl(att: UIAttachment): string {
   if (!contentHash) return ''
   const botId = resolveBotId(att)
   if (!botId) return ''
-  return sdkApiUrl({
+  return sdkFileApiUrl({
     url: '/bots/{bot_id}/media/{content_hash}',
     path: { bot_id: botId, content_hash: contentHash },
     query: sdkAuthQuery(),
@@ -54,7 +54,7 @@ function resolveUrl(att: UIAttachment): string {
     const pattern = new RegExp(`^/bots/(${uuid})/sessions/(${uuid})/delegations/(${uuid})/attachments/([0-9a-f]{64})$`)
     const match = typeof scoped === 'string' ? pattern.exec(scoped) : null
     if (!match || match[4] !== String(att.content_hash ?? '')) return ''
-    return sdkApiUrl({ url: scoped as string, query: sdkAuthQuery() })
+    return sdkFileApiUrl({ url: scoped as string, query: sdkAuthQuery() })
   }
   // Prefer asset API when content_hash is available (reliable, auth-aware).
   const assetUrl = resolveAssetApiUrl(att)

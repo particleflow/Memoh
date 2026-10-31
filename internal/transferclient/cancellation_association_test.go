@@ -77,10 +77,10 @@ func TestHTTP499AssociationReopenCancelAndAuthorization(t *testing.T) {
 			}
 			wantCalls := int64(1)
 			if resolveStatus == 499 {
-				wantCalls = 12 // First cancel intent starts one bounded reconciliation budget.
+				wantCalls = 14 // One due reconciliation per invocation; no total attempt budget.
 			}
-			if r.Associated || !r.AssociationBlocked || r.AssociationState != AssociationUnknown || resolves.Load() != wantCalls {
-				t.Fatal("unknown outcome or authorization retry bound lost", resolves.Load())
+			if r.Associated || r.AssociationBlocked != (resolveStatus != 499) || r.AssociationState != AssociationUnknown || resolves.Load() != wantCalls {
+				t.Fatal("unknown outcome or authorization stop lost", resolves.Load())
 			}
 		})
 	}

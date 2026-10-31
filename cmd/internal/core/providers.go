@@ -268,6 +268,12 @@ func provideUserRuntimeHub(lc fx.Lifecycle, log *slog.Logger) *userruntime.Hub {
 	return hub
 }
 
+func provideUserRuntimeService(store dbstore.UserRuntimeStore, hub *userruntime.Hub, cfg config.Config) *userruntime.Service {
+	svc := userruntime.NewService(store, hub)
+	svc.SetWorkspaceStorage(cfg.Workspace.Storage.Root, cfg.Workspace.Storage.ShareRoot)
+	return svc
+}
+
 func provideUserRuntimePipe() userruntime.Pipe {
 	return userruntime.NewDirectPipe()
 }
@@ -558,7 +564,7 @@ func agentLoopReselectModeFromConfig(log *slog.Logger, cfg config.AgentConfig) n
 	return native.LoopReselectMode(mode)
 }
 
-func injectToolProviders(a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider) {
+func injectToolProviders(lc fx.Lifecycle, a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider, delegations *botdelegation.Service, bgManager *background.Manager, log *slog.Logger) {
 	a.SetToolProviders(delegationScopedTools(providers))
 	for _, p := range providers {
 		if cp, ok := p.(*agenttools.ContainerProvider); ok {
@@ -575,13 +581,24 @@ func injectToolProviders(a *native.Agent, msgService *message.DBService, hookSer
 			// The parent model reads a spawned run's failure by the code the
 			// run itself failed with.
 			adapter.SetFailureTranslator(agentService.SubagentFailure)
-			sp.SetAgent(adapter)
-			sp.SetMessageService(msgService)
+			sp.SetAgent(sourceSpawnAgent{adapter})
+			sp.SetMessageService(sourceSpawnMessages{msgService})
 			sp.SetSystemPromptFunc(native.SpawnSystemPrompt)
 			sp.SetHookService(hookService)
 			// A spawned turn takes its thread's single run slot like any other,
 			// so without admission this provider starts nothing.
-			sp.SetSubagentAdmitter(agentService)
+			queue := &nativeTaskQueueHost{host: delegations.Host.(*delegationHost)}
+			sp.SetSubagentAdmitter(sourceSubagentAdmitter{agentService, queue})
+			sp.SetNativeTaskQueue(queue)
+			bgManager.SetBeforeAgentCancel(queue.Cancel)
+			lc.Append(fx.Hook{OnStart: func(ctx context.Context) error {
+				// Reconstruct only never-claimed work into the existing provider's
+				// serial queues. Unknown work is retained without executing it.
+				if err := sp.RecoverNativeTasks(ctx); err != nil {
+					log.Warn("restore queued native tasks", slog.Any("error", err))
+				}
+				return nil
+			}})
 		}
 	}
 }
@@ -691,7 +708,7 @@ func provideACPSessionPool(lc fx.Lifecycle, log *slog.Logger, runner *acpclient.
 
 func provideCodexDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *codexruntime.Driver {
 	driver := codexruntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: codexruntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,
@@ -715,7 +732,7 @@ func provideCodexDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *wor
 
 func provideClaudeCodeDriver(log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *claudecoderuntime.Driver {
 	driver := claudecoderuntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: claudecoderuntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,
@@ -729,7 +746,7 @@ func provideClaudeCodeDriver(log *slog.Logger, workspaceManager *workspace.Manag
 
 func provideGrokDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *grokruntime.Driver {
 	driver := grokruntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: grokruntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,
@@ -822,6 +839,9 @@ func provideExternalAgentLoginHandler(log *slog.Logger, drivers external.Drivers
 
 func provideAgentService(log *slog.Logger, a *native.Agent, modelsService *models.Service, queries dbstore.Queries, msgService *message.DBService, settingsService *settings.Service, accountService *accounts.Service, botService *bots.Service, mediaService *media.Service, containerdHandler *handlers.ContainerdHandler, workspaceManager *workspace.Manager, memoryRegistry *memprovider.Registry, channelStore *channel.Store, _ *route.DBService, sessionService *sessionpkg.Service, eventHub *event.Hub, compactionService *compaction.Service, pipeline *timeline.Pipeline, rc *boot.RuntimeConfig, bgManager *background.Manager, toolApproval *toolapproval.Service, userInput *userinput.Service, acpPool *acpagent.SessionPool, directAgents external.Drivers, hookService *hookspkg.Service, sessionRuntime *sessionruntime.Manager, workdirService *workdir.Service, cfg config.Config) *application.Service {
 	service := application.NewService(log, modelsService, queries, msgService, settingsService, accountService, a, rc.TimezoneLocation, 120*time.Second)
+	if cfg.Agent.ConversationPresence.IsEnabled() {
+		service.SetConversationPresence(application.ConversationPresenceOptions{Policy: cfg.Agent.ConversationPresence.Policy(), MaxConcurrentPerProvider: cfg.Agent.ConversationPresence.ConcurrentLimit()})
+	}
 	service.SetResumeSecret(rc.JwtSecret)
 	service.SetResumeReadiness(func(ctx context.Context, botID, targetID string) error {
 		client, err := workspaceManager.NativeMCPClient(ctx, botID)
@@ -1137,6 +1157,8 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	fedGateway.SetOAuthService(oauthService)
 	imageProvider := imagecapability.New(agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService), settingsService, modelsService, queries, mediaService,
 		imageCapabilityAuthorizer(&applicationBotPermissionChecker{bots: botService, accounts: accountService}, sessionService.Get))
+	imageProvider.SetLogger(log)
+	bindImageCapabilityReferences(imageProvider, mediaService, delegations)
 	return []agenttools.ToolProvider{
 		agenttools.NewBotDelegationProvider(delegations, botService),
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
@@ -1172,7 +1194,7 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewAskUserProvider(log),
 		agenttools.NewMessageProvider(log, channelMessaging, channelMessaging, channelMessaging, assetResolver),
 		agenttools.NewContactsProvider(log, channelcontactadapter.NewSource(routeService)),
-		agenttools.NewScheduleProvider(log, scheduleService),
+		&scheduleContactProvider{base: agenttools.NewScheduleProvider(log, scheduleService), host: delegations.Host.(*delegationHost)},
 		agenttools.NewWorkdirProvider(log, workdirService),
 		agenttools.NewACPAgentsProvider(log, &acpRuntimePoolAdapter{pool: acpPool}, queries),
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),
@@ -1261,6 +1283,9 @@ func provideMediaService(lc fx.Lifecycle, log *slog.Logger, provider storagepkg.
 	service := media.NewService(log, provider)
 	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
 	service.SetMaxUploadBytes(cfg.Files.MaxUploadBytes)
+	if err := service.SetTransferNetworkPolicy(cfg.Files.NetworkPolicy); err != nil {
+		return nil, err
+	}
 	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
 		if err := service.EnableUploads(root); err != nil {
 			return nil, err

@@ -16,7 +16,9 @@ UPDATE user_runtimes SET transfer_credential_id=$1,
  transfer_credential_digest=$2, transfer_target_digest=$3,
  transfer_expires_at=$4, updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$5
- AND user_id=$6 AND provider='agenvo' AND revoked_at IS NULL
+ AND user_id=$6
+ AND (provider='memoh' AND jsonb_typeof(provider_config->'herdr')='object')
+ AND revoked_at IS NULL AND activated_at IS NOT NULL
  AND transfer_credential_id=$7
  AND provider_config=$8
 `
@@ -51,7 +53,7 @@ func (q *Queries) ChangeTransferCredential(ctx context.Context, arg ChangeTransf
 }
 
 const readOwnedTransferCredential = `-- name: ReadOwnedTransferCredential :one
-SELECT runtime.id, runtime.user_id, runtime.provider_config,
+SELECT runtime.id, runtime.user_id, runtime.provider, runtime.provider_config,
  runtime.transfer_credential_id, runtime.transfer_credential_digest,
  runtime.transfer_target_digest, runtime.transfer_expires_at
 FROM user_runtimes runtime
@@ -59,7 +61,8 @@ JOIN team_members membership ON membership.team_id=runtime.team_id
  AND membership.user_id=runtime.user_id AND membership.is_active
 JOIN users owner ON owner.id=runtime.user_id AND owner.is_active
 WHERE runtime.team_id=public.memoh_current_team_id()
- AND runtime.provider='agenvo' AND runtime.revoked_at IS NULL
+ AND (runtime.provider='memoh'
+  AND jsonb_typeof(runtime.provider_config->'herdr')='object') AND runtime.revoked_at IS NULL
  AND runtime.activated_at IS NOT NULL
  AND runtime.id=$1 AND runtime.user_id=$2
 `
@@ -72,6 +75,7 @@ type ReadOwnedTransferCredentialParams struct {
 type ReadOwnedTransferCredentialRow struct {
 	ID                       pgtype.UUID        `json:"id"`
 	UserID                   pgtype.UUID        `json:"user_id"`
+	Provider                 string             `json:"provider"`
 	ProviderConfig           []byte             `json:"provider_config"`
 	TransferCredentialID     string             `json:"transfer_credential_id"`
 	TransferCredentialDigest string             `json:"transfer_credential_digest"`
@@ -85,6 +89,7 @@ func (q *Queries) ReadOwnedTransferCredential(ctx context.Context, arg ReadOwned
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.Provider,
 		&i.ProviderConfig,
 		&i.TransferCredentialID,
 		&i.TransferCredentialDigest,
@@ -95,20 +100,16 @@ func (q *Queries) ReadOwnedTransferCredential(ctx context.Context, arg ReadOwned
 }
 
 const readTransferCredential = `-- name: ReadTransferCredential :one
-SELECT runtime.id, runtime.user_id, runtime.provider_config,
+SELECT runtime.id, runtime.user_id, runtime.provider, runtime.provider_config,
  runtime.transfer_credential_id, runtime.transfer_credential_digest,
  runtime.transfer_target_digest, runtime.transfer_expires_at
 FROM user_runtimes runtime
 JOIN team_members membership ON membership.team_id=runtime.team_id
  AND membership.user_id=runtime.user_id AND membership.is_active
 JOIN users owner ON owner.id=runtime.user_id AND owner.is_active
-JOIN mcp_connections connection ON connection.team_id=runtime.team_id
- AND connection.id::text=runtime.provider_config->>'connection_id'
- AND connection.is_active AND connection.type='http'
-JOIN bots bot ON bot.team_id=runtime.team_id AND bot.id=connection.bot_id
- AND bot.owner_user_id=runtime.user_id
 WHERE runtime.team_id=public.memoh_current_team_id()
- AND runtime.provider='agenvo' AND runtime.revoked_at IS NULL
+ AND (runtime.provider='memoh'
+  AND jsonb_typeof(runtime.provider_config->'herdr')='object') AND runtime.revoked_at IS NULL
  AND runtime.activated_at IS NOT NULL
  AND runtime.transfer_credential_id=$1::text
  AND runtime.transfer_credential_digest <> ''
@@ -118,6 +119,7 @@ WHERE runtime.team_id=public.memoh_current_team_id()
 type ReadTransferCredentialRow struct {
 	ID                       pgtype.UUID        `json:"id"`
 	UserID                   pgtype.UUID        `json:"user_id"`
+	Provider                 string             `json:"provider"`
 	ProviderConfig           []byte             `json:"provider_config"`
 	TransferCredentialID     string             `json:"transfer_credential_id"`
 	TransferCredentialDigest string             `json:"transfer_credential_digest"`
@@ -131,6 +133,7 @@ func (q *Queries) ReadTransferCredential(ctx context.Context, credentialID strin
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.Provider,
 		&i.ProviderConfig,
 		&i.TransferCredentialID,
 		&i.TransferCredentialDigest,

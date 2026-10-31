@@ -21,13 +21,6 @@
           settings-mode
           @field-commit="commitForm"
         />
-
-        <p
-          v-else-if="agent.setup_mode === 'self'"
-          class="break-words text-sm text-muted-foreground"
-        >
-          {{ t('bots.settings.acpSelfModeHint') }}
-        </p>
       </div>
     </SettingsSection>
   </div>

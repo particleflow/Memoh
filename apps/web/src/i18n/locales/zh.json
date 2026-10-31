@@ -180,7 +180,7 @@
       "revoked": "这个 Agent 账号已断开，请重新连接或选择其他账号。",
       "runtime_busy": "请等待当前回复结束后再切换 Agent 账号。",
       "usage_auth_expired": "账户登录已过期，下次对话后会自动续期；如果仍无法查看额度，请重新连接账户。",
-      "usage_unavailable": "暂时无法获取额度，请稍后再试。"
+      "usage_unavailable": "暂时无法获取额度"
     },
     "agent_dependency_missing": "{dep_id} 尚未安装在此工作区。请在 Bot 的「依赖」中安装，或等待正在进行的安装完成，然后重新发送消息。",
     "app": {
@@ -242,6 +242,11 @@
     "codex_oauth_incomplete": "该 Bot 工作区尚未完成 Codex ChatGPT 登录。",
     "compaction": {
       "model_unavailable": "压缩模型不可用。请选择一个已启用、且声明了上下文窗口的对话模型。"
+    },
+    "computer": {
+      "admission_conflict": "电脑接纳状态版本已变化，请先读取当前状态。",
+      "admission_paused": "此电脑已暂停接收新任务，已有任务仍可回收结果。",
+      "admission_scope_unverified": "无法确认已注册原生实例的接纳覆盖范围。"
     },
     "connector": {
       "conflict": "该连接器与现有连接冲突。",
@@ -514,7 +519,7 @@
     },
     "workdir": {
       "git_branch_unavailable": "该本地分支已不可用，请刷新后选择已有分支。",
-      "git_busy": "有 Agent 正在使用此工作目录，请等待执行结束后再切换分支。",
+      "git_busy": "有 Agent 正在使用此工作目录",
       "git_switch_failed": "Git 无法切换分支，请检查未提交的修改，以及目标分支是否被其他 Worktree 使用。",
       "git_unavailable": "无法读取 Git 工作目录，请检查工作区后重试。",
       "not_found": "这个工作目录已不存在，请刷新列表后重新选择。",
@@ -528,6 +533,7 @@
       "image_not_found": "工作区镜像不存在、需要镜像仓库凭据，或名称无效，请检查镜像名称后重试。",
       "image_registry_unavailable": "暂时无法连接镜像仓库，请稍后重试。",
       "operation_unsupported": "此执行目标仅支持前台命令。文件或交互终端操作请选择其他电脑。",
+      "storage_unavailable": "NAS 工作区存储暂不可用。",
       "teardown_failed": "移除工作区失败。请重试删除 bot。",
       "template_bootstrap_failed": "工作区文件初始化失败，请尝试重建工作区。",
       "unreachable": "暂时无法连接工作区，请稍后重试。"
@@ -577,7 +583,6 @@
     "workspace_snapshot_rollback_request_invalid": "回滚请求无效。",
     "workspace_snapshot_version_invalid": "快照版本无效。",
     "workspace_snapshots_load_failed": "加载快照失败，请重试。",
-    "workspace_snapshots_unsupported": "当前工作区运行后端不支持快照。",
     "workspace_snapshotter_mismatch": "快照器与工作区运行后端不匹配。",
     "workspace_start_failed": "启动工作区失败，请重试。",
     "workspace_stop_failed": "停止工作区失败，请重试。",
@@ -672,7 +677,6 @@
     "copyCommand": "复制连接命令",
     "revoke": "断开连接",
     "revokeTitle": "断开这台电脑的连接？",
-    "revokeDescription": "{name} 将断开连接，原连接密钥也会失效。电脑上的文件不会被删除。",
     "revokeSuccess": "已断开电脑连接",
     "revokeFailed": "无法断开电脑连接",
     "status": {
@@ -1021,13 +1025,45 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "inputSources": {
+      "channelIdentity": "渠道身份",
+      "occurrence": "触发批次",
+      "originRun": "来源运行",
+      "native_task": "后台任务",
+      "unknown": "来源未知",
+      "user": "用户输入",
+      "schedule": "自动任务",
+      "bot_delegation": "Bot 委派",
+      "task_result": "任务回流",
+      "bot": "Bot",
+      "session": "会话",
+      "originBot": "来源 Bot",
+      "originSession": "来源会话",
+      "task": "任务",
+      "run": "任务运行"
+    },
+    "readAloud": {
+      "replay": "朗读",
+      "continue": "继续朗读",
+      "playing": "正在朗读此回复",
+      "failed": "朗读已停止"
+    },
     "delegations": {
+      "nativeRun": "专家会话运行",
+      "runId": "运行 ID",
+      "runCreated": "接纳时间",
+      "runUpdated": "最近记录时间",
+      "runRecorded": "原生运行的持久化状态，不代表实时连接。会话记录可能包含其他轮次。",
+      "runUnavailable": "此委派暂无可核实的原生运行记录。",
+      "openHistory": "打开专家会话记录",
+      "historyUnavailable": "无法打开专家会话",
+      "childTasks": "子 Agent 与电脑任务",
       "openTasks": "查看下游任务",
       "downstreamTitle": "专业 Bot 的任务",
       "downstreamDescription": "此专业 Bot 会话记录的执行任务。访问权限由服务端校验；此视图不提供实时日志或可调度队列。",
       "retryDelivery": "重试结果投递",
       "deliveryResponse": "投递请求响应",
-      "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果，请重新读取状态。",
+      "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果",
       "title": "专业 Bot 委派",
       "executionGroup": "执行任务",
       "description": "当前会话已授权的 Bot 委派记录。执行与结果投递分别记录状态。",
@@ -1040,7 +1076,6 @@
       "noLiveContent": "此视图暂不提供运行中的内容和工具日志。",
       "attachmentsUnavailable": "已报告 {count} 个返回引用，此视图暂不提供下载。",
       "empty": "当前会话没有专业 Bot 委派记录。",
-      "unsupported": "此服务器暂不支持 Bot 委派观察。升级服务器后可重新读取。",
       "inaccessible": "当前委派或会话已无法访问。",
       "loadFailed": "无法读取 Bot 委派，请重新读取。",
       "states": {
@@ -1057,10 +1092,23 @@
         "unavailable": "无法投递"
       },
       "downloadResult": "下载成果 {hash}",
-      "downloadFailed": "无法准备下载，请刷新视图并检查访问权限。"
+      "downloadFailed": "无法准备下载"
     },
     "tasks": {
-      "unsupported": "此服务器尚不支持任务观察。",
+      "records": "任务记录",
+      "resume": {
+        "action": "继续原生批次",
+        "ready": "使用原始指令继续原生批次。服务器将检查当前是否允许继续。",
+        "sending": "正在请求继续原始批次…",
+        "submitted": "原始指令已确认接收，任务是否成功仍未知。请查看此任务的当前状态和原生终端。",
+        "unchanged": "原始操作未发生变化。请查看此任务的当前状态和原生终端，任务是否成功仍未知。",
+        "unknown": "继续请求的结果未知。请查看此任务的当前状态和原生终端。",
+        "unavailable": "当前无法继续。需要完整的原始参数和符合条件的原生操作回执；Runtime 断开连接时须先重新连接。",
+        "blocked": "继续请求被阻止。请检查权限、目标和任务状态后再明确重试。",
+        "unauthorized": "请重新登录后再请求继续。",
+        "forbidden": "当前账户无权继续此任务。",
+        "storageUnavailable": "浏览器无法保留请求跟踪信息，当前无法继续。"
+      },
       "inaccessible": "无法再访问此会话或任务。",
       "title": "任务",
       "detail": "任务详情",
@@ -1071,16 +1119,16 @@
       "unavailable": "暂无可用的最终回复摘要。",
       "truncated": "摘要已截断。",
       "businessUnknown": "业务是否完成仍需核实。",
-      "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
-      "filteredPage": "本页没有可查看的任务，可继续下一页。",
-      "empty": "暂无任务记录。",
-      "newest": "返回最新",
+      "cancelIntent": "已请求取消",
+      "filteredPage": "本页没有可查看的任务",
+      "empty": "暂无子 Agent 或电脑任务记录。",
       "next": "下一页",
       "types": {
         "subagent": "子 Agent",
         "computer_operation": "电脑任务"
       },
       "statuses": {
+        "queued": "排队中",
         "unknown": "执行状态未知",
         "submitted": "已记录提交",
         "process_exited": "进程已退出",
@@ -1109,7 +1157,6 @@
       "files": {
         "title": "任务文件",
         "empty": "尚无文件交付记录。",
-        "unsupported": "当前服务尚不支持查看任务文件。",
         "loadFailed": "无法读取任务文件。",
         "upload": "已存入 NAS",
         "download": "电脑已接收",
@@ -1121,8 +1168,162 @@
           "failed": "交付失败",
           "unknown": "交付状态未知"
         }
+      },
+      "observation": {
+        "title": "当前电脑观察",
+        "paused": "自动检查已暂停。",
+        "loadFailed": "无法读取电脑观察。",
+        "agentState": "原生 Agent：{state}",
+        "receivedAt": "最近收到响应：{time}",
+        "availability": {
+          "online": "电脑连接可用",
+          "offline": "电脑明确报告离线",
+          "authentication_unavailable": "电脑连接认证不可用",
+          "runtime_unavailable": "Herdr 不可用",
+          "connection_unavailable": "电脑连接不可用",
+          "unknown": "电脑连接状态未知"
+        },
+        "states": {
+          "working": "工作中",
+          "idle": "空闲",
+          "blocked": "等待／受阻",
+          "done": "原生状态已结束（任务成果未核实）",
+          "unknown": "未知"
+        },
+        "match": {
+          "observed": "本次观察匹配到原任务引用。",
+          "mismatch": "原终端身份已变化，追踪尚未确认；未重新派发任务。",
+          "unknown": "尚无法确认原任务引用。"
+        },
+        "fields": {
+          "target_id": "电脑目标",
+          "workspace_id": "Herdr 工作区",
+          "pane_id": "执行窗格",
+          "pi_session_id": "已记录 Pi 会话"
+        },
+        "refresh": "刷新电脑观察",
+        "checkpoints": {
+          "connection": "当前连接",
+          "receipt": "持久回执与 Pi 结果",
+          "history": "历史连续性",
+          "collection": "收集检查点",
+          "receiptNotice": "持久执行证据与当前连接、业务结果分别记录。",
+          "historyNotice": "上次调用的证据不能确认历史当前可用或已经恢复。",
+          "collectionNotice": "已记录的检查点不代表当前文件可用，也不是可下载的成果交付。",
+          "bytes": "{offset} / {size} 字节",
+          "fields": {
+            "revision": "精确修订号",
+            "attempt": "原始尝试 ID",
+            "generation": "原始代次 ID",
+            "receipt_state": "回执校验",
+            "process_state": "进程状态",
+            "pi_result": "Pi 结果",
+            "result_reason": "结果证据",
+            "business_outcome": "业务结果",
+            "continuity": "连续性状态",
+            "continuity_reason": "连续性证据",
+            "before": "上次调用前",
+            "after": "上次调用后",
+            "confirmed_offset": "已确认字节 / 报告大小",
+            "current_availability": "当前文件可用性",
+            "recorded_content_hash": "已记录内容哈希"
+          },
+          "receiptStates": {
+            "not_applicable": "不适用",
+            "missing": "回执缺失",
+            "invalid": "回执无效",
+            "validated": "持久回执已校验"
+          },
+          "processStates": {
+            "exited": "进程已退出",
+            "not_started": "未启动"
+          },
+          "resultReasons": {
+            "receipt_missing": "回执缺失",
+            "legacy_result_protocol": "旧版结果协议",
+            "receipt_mismatch": "回执不匹配",
+            "verified_receipt": "已校验回执",
+            "verified_persisted_result": "已校验的持久 Pi 结果",
+            "completion_result_unavailable": "完成结果不可用",
+            "legacy_observation_only": "仅有旧版观察记录"
+          },
+          "continuityStates": {
+            "unconfirmed": "未确认"
+          },
+          "continuityReasons": {
+            "history_not_rechecked": "历史未重新检查",
+            "legacy_evidence_missing": "旧版历史证据缺失",
+            "prior_evidence_unconfirmed": "先前历史证据未确认"
+          },
+          "historyStates": {
+            "new": "该次调用使用新历史",
+            "verified": "该次调用时已校验",
+            "created": "该次调用时已创建",
+            "missing": "缺失",
+            "corrupt": "损坏",
+            "unreadable": "不可读取",
+            "changed": "已改变",
+            "unconfirmed": "未确认",
+            "not_checked": "未检查",
+            "not_started": "未启动"
+          },
+          "collectionStates": {
+            "not_collected": "未收集",
+            "empty": "空文件；无媒体对象",
+            "invalid": "检查点无效",
+            "recorded": "已记录检查点",
+            "collecting": "已部分收集"
+          },
+          "fileAvailability": {
+            "not_rechecked": "未检查当前可用性"
+          }
+        }
+      },
+      "native": {
+        "title": "原生 Agent 内容与续接",
+        "notice": "这是有界、未验证的终端样本，可能含工具输出；不是完整日志，也不证明本条指令成功。",
+        "open": "查看终端样本",
+        "failed": "未能取得内容或指令状态。再次发送前请先核对原请求。",
+        "truncated": "已截短",
+        "bounded": "仅近期样本",
+        "empty": "尚无终端文本。",
+        "sequence": "原生完成序号：{sequence}（不是逐指令结果）",
+        "unavailable": "原 Agent 当前不可用",
+        "refresh": "刷新内容与请求状态",
+        "pending": "指令结果尚未确认",
+        "mode": "会话选择",
+        "bound": "要求匹配已观测的逻辑会话",
+        "current": "使用当前关联的 Agent",
+        "modeNotice": "当前 Agent 模式不要求逻辑会话连续；两种模式均不保证原子身份绑定或恢复历史。",
+        "instruction": "新指令",
+        "invalid": "请输入不含 NUL、UTF-8 编码不超过 32,000 字节的指令。",
+        "send": "发送一条指令",
+        "results": {
+          "accepted": "输入已接受；工作完成及输出归属仍未验证。",
+          "rejected": "输入被拒绝；原任务结果保持不变。",
+          "blocked": "此前尚未确认的指令阻止了本次请求。",
+          "conflict": "此请求 ID 已用于其他指令。",
+          "unknown": "输入是否送达未知。请核对同一请求，不要换新 ID 重发。"
+        }
+      },
+      "relationship": {
+        "title": "会话归属关系",
+        "session_id": "归属会话",
+        "direct_parent_session_id": "该会话的直接父会话",
+        "parent_session_id": "本次查询的会话根",
+        "unavailable": "未提供引用"
       }
     },
+    "mediaRecovery": {
+      "pause": "暂停",
+      "unknown": "上传结果尚不确定。已保留原记录。",
+      "receiptMissing": "原上传记录不可用或已过期。已保留原 ID 和进度，未创建替代上传。",
+      "sourceMissing": "本地源文件不可用。请重新选择原文件以续传。",
+      "integrity": "文件大小或校验和验证失败，未接受附件。",
+      "storage": "本地恢复存储不可用。请保留此标签页后重试。",
+      "reselect": "请重新选择原文件以续传：{names}"
+    },
+    "attachmentUnavailable": "附件不可访问",
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",
     "workspaceLinkUnavailable": "此处无法打开工作区链接，请在有工作区访问权限的 Memoh 对话中打开。",
@@ -1260,7 +1461,6 @@
       "stop": "停止录音",
       "transcribing": "正在转写",
       "notConfigured": "请先选择语音转写模型。",
-      "unsupported": "当前浏览器不支持语音输入。",
       "permissionDenied": "麦克风权限已被拒绝。",
       "empty": "没有识别到语音内容。",
       "failed": "语音输入失败。",
@@ -1307,6 +1507,7 @@
     "pdfTooLargeForNative": "PDF 超过 12MB,将以路径形式存入工作区,模型无法直接查看其内容。",
     "pdfUnsupportedByModel": "当前模型不支持读取 PDF,文件将以路径形式存入工作区,模型无法直接查看其内容。",
     "send": "发送",
+    "stopGenerating": "停止生成回复",
     "sendFailed": "消息发送失败",
     "sendOutcomeUnknown": "服务端尚未确认这条消息，它可能已被受理。重发前请先在会话列表中查看。",
     "sendWorkdirUnsupported": "服务端无法在所选文件夹中开始这个对话。请升级服务端，或取消文件夹后再发送。",
@@ -1380,6 +1581,7 @@
       "unanswered": "未作答"
     },
     "tools": {
+      "userInputRecoveryState": "恢复：{state}",
       "elapsedRunning": "执行中 · {seconds} 秒",
       "read": "读取",
       "read_image": "查看图片",
@@ -1582,7 +1784,12 @@
         "noContent": "无内容",
         "contentTruncated": "预览已截断，完整写入大小：{bytes} 字节。",
         "noTasks": "暂无任务",
-        "noImage": "暂无图像",
+        "noImage": "未返回图片预览或文件引用。",
+        "imageReference": "文件引用",
+        "imageSaved": "图像已保存。",
+        "imageReturned": "图片附件已返回当前对话。",
+        "imageUnconfirmed": "图像结果尚未确认，请勿自动重新生成。",
+        "imageStorageUnconfirmed": "已返回图像数据，但文件保存尚未确认。请勿通过重新生成来重试交付。",
         "noResults": "暂无结果",
         "noPreview": "暂无预览",
         "noContacts": "暂无联系人",
@@ -1662,11 +1869,6 @@
     "modelEffort": "强度",
     "noModels": "暂无可用模型",
     "defaultExternalAgentLoading": "默认 Agent 仍在加载，请稍后重试。",
-    "defaultAgentNoWorkspaceExec": "已启用默认 Agent，但你没有执行工作区命令的权限。",
-    "defaultAgentMissing": "已启用默认 Agent，但尚未选择 Agent。",
-    "defaultAgentUnavailable": "已启用默认 Agent，但选中的 Agent 不可用。",
-    "defaultAgentDisabled": "已启用默认 Agent，但选中的 Agent 已停用。",
-    "defaultAgentNotConfigured": "已启用默认 Agent，但选中的 Agent 尚未配置完成。",
     "externalAgent": {
       "agentNotConfigured": "该 Bot 的外部 Agent 配置尚未完成。",
       "agentCommandStale": "Agent 已不再提供该命令。请重新打开命令面板后重试。",
@@ -1793,7 +1995,7 @@
       "description": "切换 Bot、对话、文件、日程和设置"
     },
     "activityBar": {
-      "sessions": "对话",
+      "sessions": "联系人",
       "files": "文件",
       "search": "搜索",
       "schedule": "日程"
@@ -1939,7 +2141,7 @@
       "changeFailed": "无法切换计划模式，请重试。"
     },
     "runtimeModeNextTurn": "在下次运行开始时生效。",
-    "runtimeModeModelUnavailable": "当前模型不支持此权限模式，请选择其他模式或模型。",
+    "runtimeModeModelUnavailable": "当前模型不支持此权限模式",
     "permissionMode": "权限模式",
     "goal": {
       "label": "目标",
@@ -1958,6 +2160,44 @@
         "usageLimited": "已达到用量上限",
         "budgetLimited": "已达到 Token 预算",
         "complete": "目标已完成"
+      }
+    },
+    "botRun": {
+      "title": "本会话最近一次 Bot 运行",
+      "unavailable": "运行状态尚未同步",
+      "empty": "当前快照没有已记录的 Bot 运行。",
+      "configuration": "最近活动是配置变更，不是任务运行。",
+      "aborting": "正在取消",
+      "runError": "本次运行记录了错误。",
+      "boundary": "运行状态与工具结果分别记录；运行结束不代表尚未返回的工具结果已确认。",
+      "content": "查看运行内容与工具",
+      "noContent": "已收到的记录中暂无可见内容。",
+      "tools": {
+        "failed": "工具返回错误",
+        "received": "已收到工具结果",
+        "running": "工具正在运行",
+        "unconfirmed": "工具结果未确认"
+      }
+    },
+    "contact": {
+      "contacts": "联系人",
+      "history": "历史与调试",
+      "chooseTitle": "选择持续对话",
+      "chooseDescription": "选择今后与这个 Bot 持续使用的对话。其他历史仍可查看。",
+      "startNew": "开始新的持续对话",
+      "more": "更多对话",
+      "failed": "暂时无法打开 Bot 对话，请重试。",
+      "historyFailed": "无法打开这段历史对话。",
+      "current": "当前对话"
+    },
+    "taskDirectory": {
+      "historyUnavailable": "无法在这段历史中定位原始执行。",
+      "empty": "这个 Bot 暂无任务记录。",
+      "types": {
+        "native_agent": "Agent 任务",
+        "computer_operation": "电脑任务",
+        "bot_delegation": "委派任务",
+        "schedule_fire": "计划任务"
       }
     }
   },
@@ -1993,6 +2233,8 @@
     }
   },
   "models": {
+    "unknownSelection": "模型不可用",
+    "unavailableSelection": "{name}（不可用）",
     "title": "模型",
     "searchPlaceholder": "搜索服务商…",
     "addModel": "添加模型",
@@ -2027,7 +2269,6 @@
     },
     "contextWindow": "上下文窗口",
     "contextWindowPlaceholder": "例如 128000",
-    "reasoningEfforts": "支持的推理强度",
     "reasoningEffortsPlaceholder": "选择推理强度",
     "contextWindowMin": "上下文窗口需大于 0",
     "maxOutputTokens": "最大输出 Token",
@@ -2052,6 +2293,26 @@
     "showingCount": "显示 {count} / {total}"
   },
   "provider": {
+    "mediaCatalog": {
+      "close": "关闭",
+      "errorTitle": "目录读取失败",
+      "title": "媒体模型目录",
+      "protocol": "Magpie 目录协议",
+      "read": "读取目录",
+      "readOnly": "读取已保存服务商的目录",
+      "hint": "使用此服务商已保存的连接，不导入、删除或测试模型。目录声明不代表模型执行或附件交付已通过。",
+      "failed": "无法读取目录，请检查已保存的连接及目录访问权限。",
+      "checkedAt": "读取时间",
+      "empty": "服务商返回了空目录。",
+      "unspecified": "未声明",
+      "modelFacts": "类别：{kind} · 输入：{input} · 输出：{output} · 来源：{source}",
+      "sources": {
+        "unspecified": "无能力元数据",
+        "catalog_kind": "目录类别字段",
+        "catalog_modalities": "目录模态字段",
+        "catalog_kind_and_modalities": "目录类别及模态字段"
+      }
+    },
     "add": "添加服务商",
     "addBtn": "添加",
     "searchPlaceholder": "搜索服务商…",
@@ -2080,7 +2341,7 @@
     "reachable": "可连接",
     "unreachable": "不可连接",
     "testFailed": "测试失败",
-    "testUnverifiedHint": "已连通，但无法通过模型列表确认可用——该服务商可能不支持此接口。可改为测试具体模型。",
+    "testUnverifiedHint": "已连通，但无法通过模型列表确认可用",
     "autoImport": "自动导入模型",
     "autoImportHint": "创建后自动从服务商获取并导入模型",
     "configurationTitle": "配置",
@@ -2089,6 +2350,11 @@
     "iconPlaceholder": "图标 URL 或标识（可选）",
     "enable": "启用",
     "enableHint": "只有启用的供应商的模型才会出现在可用模型列表中",
+    "imageReferences": {
+      "label": "允许参考图输入",
+      "protocolRequired": "请先选择 OpenAI Images 协议，再允许参考图输入。",
+      "legacyPolicy": "当前图片策略需要迁移后才能开启参考图输入，已有模型和编码设置保持不变。"
+    },
     "imagesProtocol": {
       "label": "图片生成协议",
       "description": "使用 Bot 已配置的图片模型，保留其他已保存的图片选项。",
@@ -2120,7 +2386,7 @@
         "authorizedCurrent": "当前账号已连接",
         "oauthing": "授权中...",
         "pendingDevice": "正在等待设备授权完成...",
-        "expired": "授权已过期，请重新授权。",
+        "expired": "授权已过期",
         "missing": "尚未授权。",
         "notConfigured": "当前提供商未正确配置 OAuth。"
       },
@@ -2221,7 +2487,7 @@
     "graphEdges": "关联",
     "semanticEmbeddingModel": "Embedding 模型",
     "semanticEmbeddingModelPlaceholder": "选择 Embedding 模型",
-    "graphEmpty": "还没有记忆——添加一些以查看图谱。"
+    "graphEmpty": "还没有记忆"
   },
   "network": {
     "title": "网络",
@@ -2245,12 +2511,12 @@
     "speakHint": "把回复读成语音。",
     "listenTitle": "聆听",
     "listenHint": "把语音转成文字。",
-    "empty": "暂无可用后端，添加具备语音能力的服务商即可。"
+    "empty": "暂无可用后端"
   },
   "video": {
     "title": "视频",
     "providersHint": "通过 OpenRouter、ModelArk 或 Volcengine 生成视频。",
-    "empty": "暂无视频后端，添加服务商后即可启用视频生成。",
+    "empty": "暂无视频后端",
     "models": "视频模型",
     "importModels": "导入模型",
     "importSuccess": "模型导入完成：新增 {created} 个，跳过 {skipped} 个",
@@ -2274,7 +2540,7 @@
     "addModel": "新建模型",
     "modelId": "模型 ID",
     "modelIdPlaceholder": "输入模型标识符（如 custom-voice）",
-    "noModels": "暂无模型，点击\"导入模型\"发现可用模型，或点击\"新建模型\"手动创建。",
+    "noModels": "暂无模型",
     "noCapabilities": "该模型暂无可用能力信息。",
     "saveSuccess": "语音配置已保存",
     "synthesis": {
@@ -2308,7 +2574,7 @@
     "emptyTitle": "暂无转写提供方",
     "emptyDescription": "添加转写提供方以为 Bot 启用语音转文字功能",
     "models": "语音识别模型",
-    "noModels": "暂无语音识别模型，可导入可用模型，或保留默认模板模型。",
+    "noModels": "暂无语音识别模型",
     "importModels": "导入模型",
     "importSuccess": "识别模型导入成功",
     "importFailed": "识别模型导入失败",
@@ -2719,7 +2985,6 @@
       "createMode": "新建 Bot",
       "importMode": "从备份导入",
       "dropzoneTitle": "点击选择或拖拽备份文件到此处",
-      "dropzoneHint": "支持 .memoh.zip 备份文件",
       "removeFile": "移除文件",
       "exportTitle": "导出 Bot",
       "exportDescription": "导出 Bot 配置、历史记录、附件和工作区文件，可用于恢复、换设备或分享。设置口令可对整个备份加密；不设置时密钥为明文保存，请妥善保管。",
@@ -3089,7 +3354,7 @@
         "browseUnreachable": "无法连接这台电脑，请确认已连接后重试",
         "path": "目录路径",
         "remotePathHelp": "在下方选择文件夹，或输入绝对路径。目录必须已经存在。",
-        "remoteOffline": "{name}未连接。连接后才能在这台电脑上选择文件夹。",
+        "remoteOffline": "{name}未连接",
         "remotePathPlaceholder": "/Users/you/code/project"
       }
     },
@@ -3231,9 +3496,7 @@
       "createGpuDevicesLabel": "CDI 设备",
       "createGpuDevicesDescription": "每行或用逗号填写一个 CDI 设备名。关闭 GPU 后将清空已保存的偏好。",
       "createGpuDevicesPlaceholder": "nvidia.com/gpu=0\namd.com/gpu=0",
-      "gpuDevicesRequired": "已启用 GPU 时，至少需要填写一个 CDI 设备名。",
       "cdiDevicesEmpty": "未附加 GPU",
-      "gpuRecreateHint": "GPU 配置变更需要重建工作区后生效，单纯启动或停止不会更新设备。",
       "deleteConfirm": "确定要彻底删除此工作区吗？未保留的数据将无法恢复。",
       "deletePreserveConfirm": "确定要先导出 `/data` 再删除此工作区吗？",
       "restoreConfirm": "确定要将已保留的数据恢复到 `/data` 吗？",
@@ -3290,7 +3553,6 @@
       "metricsTitle": "资源状态",
       "metricsSubtitle": "CPU、内存及存储使用情况和限制。",
       "metricsLoadFailed": "加载资源状态失败",
-      "metricsUnsupported": "当前后端不支持资源监控",
       "metricsUnavailable": "暂无可用指标。",
       "metricsStopped": "工作区未运行，仅显示存储使用情况。",
       "metricsPath": "统计范围",
@@ -3307,8 +3569,6 @@
         "cpuLabel": "CPU 核心数",
         "memoryLabel": "内存（GiB）",
         "storageLabel": "存储（GiB）",
-        "cpuHint": "支持的容器和 VM 运行后端会将其作为硬限制执行。",
-        "memoryHint": "支持的容器和 VM 运行后端会将其作为硬限制执行。",
         "storageHint": "为 VM 硬限制预留；容器运行后端当前仅将其记录为软限制。",
         "unlimited": "不限制",
         "unlimitedPlaceholder": "不限制",
@@ -3418,7 +3678,6 @@
         "multimedia": "多媒体"
       },
       "chatModel": "默认对话模型",
-      "chatModelDescription": "供 Memoh Agent 在 Telegram 等渠道的新对话中使用。在网页对话中选择模型不会修改此默认值。",
       "chatModelPlaceholder": "选择模型",
       "defaultAgent": "默认 Agent",
       "defaultAgentDescription": "仅用于新建本地聊天，已有会话继续使用原来的 Agent。",
@@ -3797,7 +4056,7 @@
         "description": "使用微信扫描二维码以连接微信账号。",
         "startScan": "获取二维码",
         "waitingScan": "打开微信扫描此二维码",
-        "scanned": "已扫码 — 请在手机上确认",
+        "scanned": "已扫码",
         "expired": "二维码已过期",
         "refresh": "刷新二维码",
         "success": "微信连接成功！",
@@ -3806,7 +4065,7 @@
         "verifyCodeWrong": "数字不匹配，请重新输入",
         "verifyCodePlaceholder": "手机上显示的数字",
         "verifyCodeSubmit": "确认",
-        "verifyCodeBlocked": "多次输入错误，请刷新二维码稍后再试",
+        "verifyCodeBlocked": "多次输入错误",
         "alreadyBound": "该微信已连接到此 Bot"
       },
       "types": {
@@ -3826,8 +4085,7 @@
         "cli": "本地 CLI",
         "local": "本地"
       },
-      "modelRequiredTitle": "设置默认对话模型",
-      "modelRequiredDescription": "渠道可以启用，但新对话还需要默认模型才能回复。点击前往设置。"
+      "modelRequiredTitle": "设置默认对话模型"
     },
     "memory": {
       "title": "记忆",
@@ -3840,7 +4098,6 @@
       "openFile": "打开附件",
       "fileUnavailable": "附件不可用，请检查原文件后重试。",
       "contentLabel": "内容",
-      "contentPlaceholder": "在此输入记忆内容（支持 Markdown）...",
       "totalCount": "记忆总数",
       "lastUpdated": "最近更新",
       "compact": "压缩",
@@ -3861,7 +4118,7 @@
       "searchResults": "搜索结果",
       "searchFailed": "搜索失败",
       "degradedTitle": "记忆索引降级",
-      "degradedDesc": "语义种子索引落后于知识库存储,图谱召回仍可用。重新同步文件以恢复。",
+      "degradedDesc": "语义种子索引落后于知识库存储,图谱召回仍可用。",
       "ingestAction": "同步文件",
       "ingestSuccess": "已从文件导入 {n} 条记忆",
       "ingestFailed": "从文件导入记忆失败",
@@ -4302,7 +4559,7 @@
         "selectPlaceholder": "选择模型",
         "hint": "选择 Bot 回复时使用的模型。建议现在选择，之后也可随时在设置中更改。",
         "loading": "正在加载模型...",
-        "loadFailed": "模型列表加载失败，请重试。",
+        "loadFailed": "模型列表加载失败",
         "retry": "重试"
       },
       "acp": {
@@ -4319,7 +4576,7 @@
       "action": "打开 Memoh",
       "saveFailed": "保存失败，请重试",
       "navigationFailed": "无法打开 Bot，请重试。",
-      "noModelWarning": "尚未为 Bot 选择模型，Bot 将无法回复消息。你可以稍后在 Bot 设置中配置。",
+      "noModelWarning": "尚未为 Bot 选择模型，Bot 将无法回复消息。",
       "examplesHint": "也可以从一个示例开始"
     }
   },
@@ -4612,30 +4869,21 @@
     "done": "已完成",
     "cancel": "取消"
   },
-  "agenvo": {
-    "bashPathHelp": "填写已验证 Git Bash 的 bash.exe 绝对 Windows 路径，不使用 WSL 启动器或 PATH 查找。",
-    "bashPath": "Git Bash 可执行文件",
-    "connect": "连接 Agenvo",
-    "description": "将已有 Agenvo 连接注册为 Windows Bash 命令目标。",
-    "limits": "仅支持前台 Bash 命令。不提供文件/HostFS API、交互终端或托管后台任务。取消只停止等待，工作区会保留供检查。 获授权的 Bot 共享该 Windows 账户的访问范围。",
-    "sourceBot": "已有连接所在的 Bot",
-    "connection": "Agenvo MCP 连接",
-    "connectionHelp": "只能共享由你拥有的、已启用的 HTTP 连接。",
-    "device": "Windows 设备 / Herdr 实例",
-    "choose": "请选择…",
-    "name": "电脑名称",
-    "session": "Herdr 会话",
-    "sessionHelp": "填写已有会话名称，连接时会验证该会话是否可访问。",
-    "workDir": "Windows 工作目录",
-    "discovering": "正在检查可用连接…",
-    "register": "连接并选择 Bot",
-    "noConnections": "此 Bot 没有已启用的 HTTP MCP 连接，请先在其 MCP 设置中配置 Agenvo。",
-    "noDevices": "此连接未发现 Herdr 实例。",
-    "capability": "Agenvo · 命令",
-    "agentCapability": "Agenvo · Pi 任务与命令",
-    "completed": "前台命令已完成，输出合并了标准输出和错误文本。",
-    "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
-    "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",
+  "computerExec": {
+    "completed": "前台命令已完成",
+    "uncertain": "命令结果未确定或被拒绝",
+    "retained": "工作区 {id} 已保留",
     "truncated": "输出已截断。"
+  },
+  "workspaceStorage": {
+    "title": "工作区存储",
+    "choose": "选择 NAS 目录",
+    "newDirectory": "新建目录",
+    "create": "创建",
+    "saved": "NAS 目录已保存",
+    "loadFailed": "暂时无法读取电脑",
+    "unavailable": "NAS 存储未配置或现有内网共享不可用",
+    "loading": "正在读取电脑",
+    "empty": "暂无已登记电脑"
   }
 }

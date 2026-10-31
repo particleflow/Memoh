@@ -7,6 +7,7 @@
 The main configuration file is `config.toml` (copied from `conf/app.example.toml` or environment-specific templates for development), containing:
 
 - `[bot_delegation]` — `execution_timeout` controls the host-owned specialist run deadline. Omitted/empty uses `30m`; a non-negative Go duration such as `2h` overrides it, and explicit `0s` disables only this outer deadline. Negative/invalid values fail configuration loading. Restart Server after edits. Agent/provider deadlines and server shutdown still apply. An expired or canceled execution remains `unknown`, does not deliver a final result, and is never automatically rerun. This setting does not change delivery retries or the PC Agent profile.
+- `[bot_delegation].result_summary_attempts` — positive automatic summary-attempt budget for the shared native saved-result delivery adapter (default `3`). New events persist the configured budget; existing snapshots remain unchanged. Legacy events without a snapshot use the current setting for future automatic attempts. Changing this setting never rearms `attention`. Explicit recovery uses the current saved event/attempt and terminal publication evidence, independently of this budget, and grants only one additional result-only summary.
 - `[log]` — Logging configuration (level, format)
 - `[server]` — HTTP listen address and optional `public_url` for the externally reachable Web origin (for example, `https://app.example.com`). Set `MEMOH_SERVER_PUBLIC_URL` to override it. Capability tools use this base URL for credential setup links and the MCP OAuth callback at `/api/oauth/mcp/callback`. Configure it for channel conversations; without it, setup links are relative and OAuth keeps the existing local callback default. Do not include credentials, query parameters, or a fragment.
 - `[admin]` — Admin account credentials
@@ -22,6 +23,7 @@ The main configuration file is `config.toml` (copied from `conf/app.example.toml
 - `[internal_rpc]` — Server↔Channel internal RPC targets and shared secret; empty secret selects the embedded all-in-one mode
 - `[web]` — Web frontend address
 - `[registry]` — Provider registry (`providers_dir` pointing to `conf/providers/`)
+- `[model_catalog_sync]` — Optional `provider_id` is the non-secret UUID of one existing Magpie provider, set by the system only after that identity has been verified. Empty or omitted disables automatic discovery. The server checks that the row exists, is enabled, and uses an OpenAI-compatible client before each sync; it never infers a provider from its name or URL. Disabling or deleting the provider takes effect on the next check. Changing or clearing the UUID requires a Server restart. This binding does not change the selected Bot model.
 - `[supermarket]` — Supermarket integration (base_url)
 
 Provider YAML templates in `conf/providers/` define preset configurations for various LLM providers (OpenAI, Anthropic, GitHub Copilot, etc.).

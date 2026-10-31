@@ -77,6 +77,8 @@ Top-level layout — see `docs/codebase-map.md` for the full annotated tree, con
 
 Before making changes to a directory, check whether that directory (or its nearest parent application/package directory) contains an `AGENTS.md`. If it does, read it first. Local files contain domain-specific conventions that override or extend this root guide.
 
+Before delivery, handoff or environment-recovery work, read the applicable entries in the [delivery compatibility incident register](docs/testing/compatibility-incident-register.md). Reuse the verified path and preserve unresolved boundaries; a text handoff, downloaded file, recovered executor and deployed product require separate evidence. The original owner updates the matching entry and handoff after a newly verified cause or recovery. Do not repeat an unchanged failed probe or bypass an access denial.
+
 Key local developer guides:
 - `apps/web/AGENTS.md` — web frontend architecture, routing, page conventions, and i18n rules.
 - `apps/desktop/AGENTS.md` — Electron shell, hosted-server bootstrap, tray/menu/preload rules.
@@ -132,6 +134,8 @@ Memoh is a commercial project split across two repositories: this OSS repo and a
 
 ### Pull Request QA Status
 
+For the NAS Assistant fork, human review of the rendered UI is **not a prerequisite for commit, amend, push, or the already-authorized delivery workflow**. This project policy overrides any such prerequisite in inherited UI skills, including `packages/ui/skills/web/SKILL.md`. Keep the required automated checks, actual application verification, and truthful acceptance disclosures. Do not request another submission waiver when the user has already authorized the work. This does not change tool approvals, credentials, repository protections, or production acceptance requirements.
+
 The `Human QA` section contains only one status checkbox, `- [ ] Human QA passed`, without an additional warning line:
 
 - **Not yet verified by a human**: leave the checkbox unchecked.
@@ -171,6 +175,16 @@ The `Human QA` section contains only one status checkbox, `- [ ] Human QA passed
 - Runtime internals (Twilight `Stream()`/`Generate()`, compaction, loop detection, tag extraction, full Browser/Computer Use details): `docs/agent-runtime.md`.
 
 ### Frontend Development
+
+For NAS Assistant, do not add explanatory small print, subtitles, helper paragraphs,
+empty-state instructions, reassurance/disclaimer copy, or additional recovery/playback
+controls without an explicit user request. Preserve original user/catalog body, control
+names, actual state/error, accessibility labels, and consequential action confirmations.
+Do not replace rejected copy with synonyms or hide it with CSS. Run
+`node scripts/check-ui-copy-policy.mjs`; only update its reviewed baseline after checking
+the exact user-authorized change. This user-specific rule takes precedence over generic
+UI guidance suggesting additional explanations or defensive controls.
+
 
 - Use Vue 3 Composition API with `<script setup>` style.
 - Shared components belong in `packages/ui/`; API calls use `@memohai/sdk`; state uses Pinia + Pinia Colada; i18n via vue-i18n.

@@ -1,0 +1,11 @@
+{
+  "realServer": true,
+  "realPG": true,
+  "syntheticHistory": true,
+  "modelOrDeviceExecution": false,
+  "pageErrors": [],
+  "unexpectedWrites": 0,
+  "deviceReads": 0,
+  "resumePOSTs": 0,
+  "abortControls": 1
+}

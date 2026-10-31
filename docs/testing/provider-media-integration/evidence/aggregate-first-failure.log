@@ -1,0 +1,36 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (c5af4f5d)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 5 files
+      ⋯ eslint --fix
+
+✖ eslint --fix
+
+✖ Failed to run tasks for staged files!
+↓ Skipped staging changes from tasks…
+⋯ Reverting to original state because of errors…
+✔ Done reverting to original state!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+
+✖ eslint --fix:
+
+/tmp/memoh-candidate-7bcb-review/docs/testing/provider-media-integration/scripts/browser.mjs
+  5:7  error  'fixture' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/memoh-candidate-7bcb-review/packages/sdk/src/@pinia/colada.gen.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+/tmp/memoh-candidate-7bcb-review/packages/sdk/src/index.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+/tmp/memoh-candidate-7bcb-review/packages/sdk/src/sdk.gen.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+/tmp/memoh-candidate-7bcb-review/packages/sdk/src/types.gen.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+✖ 5 problems (1 error, 4 warnings)
+[hooks] Web lint: 1.45s
+[hooks] Web lint failed (1)

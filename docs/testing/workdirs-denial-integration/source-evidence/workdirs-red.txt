@@ -1,0 +1,36 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/Memoh-files-next
+
+ ❯ |web| src/store/workdirs.test.ts (6 tests | 6 failed) 7ms
+     × handles one forbidden read shared by three background consumers and retries after a grant 4ms
+     × removes previously read paths on denial without deleting the saved workdir choice or another Bot 0ms
+     × preserves unexpected failures and leaves the read retryable: {} 0ms
+     × preserves unexpected failures and leaves the read retryable: {"code":"internal","status":500} 0ms
+     × preserves unexpected failures and leaves the read retryable: {"code":"http.unauthorized","status":401} 0ms
+     × preserves unexpected failures and leaves the read retryable: {"code":"internal","status":403} 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > handles one forbidden read shared by three background consumers and retries after a grant
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > removes previously read paths on denial without deleting the saved workdir choice or another Bot
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > preserves unexpected failures and leaves the read retryable: {}
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > preserves unexpected failures and leaves the read retryable: {"code":"internal","status":500}
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > preserves unexpected failures and leaves the read retryable: {"code":"http.unauthorized","status":401}
+ FAIL  |web| src/store/workdirs.test.ts > workdir reads without workspace permission > preserves unexpected failures and leaves the read retryable: {"code":"internal","status":403}
+ReferenceError: localStorage is not defined
+ ❯ src/store/workdirs.test.ts:10:5
+      8| describe('workdir reads without workspace permission', () => {
+      9|   beforeEach(() => {
+     10|     localStorage.clear()
+       |     ^
+     11|     setActivePinia(createPinia())
+     12|     api.fetch.mockReset()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed (6)
+   Start at  10:21:20
+   Duration  413ms (transform 179ms, setup 0ms, import 268ms, tests 7ms, environment 0ms)

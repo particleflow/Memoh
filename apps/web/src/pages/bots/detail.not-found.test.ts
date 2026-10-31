@@ -122,7 +122,8 @@ describe('bot detail page', () => {
     const el = await mountDetail('no-such-bot')
 
     expect(el.textContent).toContain('bots.notFound')
-    expect(el.textContent).toContain('bots.notFoundDescription')
+    expect(el.querySelector('[data-pane]')?.textContent).toBe('bots.notFound')
+    expect(el.textContent).not.toContain('bots.notFoundDescription')
     expect(el.textContent).not.toContain('overview-tab')
     expect(el.textContent).not.toContain('common.retry')
   })

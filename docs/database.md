@@ -55,6 +55,7 @@ The canonical source of truth for the full PostgreSQL schema is `db/postgres/mig
 - `bot_history_messages` — Unified message history under bot scope
 - `bot_history_message_assets` — Message → content_hash asset links (with name and metadata)
 - `bot_history_message_compacts` — Compacted message summaries
+- `session_run_abort_controls` — Best-effort observations of incoming cancellation controls for existing runs; hashed control IDs, safe client-reported reasons and forced team RLS. These are not execution records or proof of the cause of an old abort.
 
 **Computer execution and delivery**
 - `computer_operations` — Existing execution identity, authorization scope, cancellation fence and revision CAS; row-layout delivery marker since migration 0174

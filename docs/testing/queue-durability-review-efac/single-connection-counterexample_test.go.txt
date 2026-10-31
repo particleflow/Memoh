@@ -1,0 +1,75 @@
+package core
+
+import (
+	"context"
+	"errors"
+	"os"
+	"testing"
+	"time"
+
+	runtime "github.com/felinics/memoh/internal/agent/runtime/session"
+	"github.com/felinics/memoh/internal/agent/runtime/session/ledger"
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	"github.com/felinics/memoh/internal/followupqueue"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// Only session-local temporary relations are queried. No durable business row,
+// migration, model, credential or external HTTP request is made.
+func TestIndependentClaimRecoveryWithSingleConnection(t *testing.T) {
+	cfg, err := pgxpool.ParseConfig(os.Getenv("TEST_QUEUE_REVIEW_DSN"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.MaxConns = 1
+	cfg.MinConns = 0
+	ctx := context.Background()
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	if _, err = pool.Exec(ctx, "SELECT set_config('memoh.team_id', $1, false)", uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	_, err = pool.Exec(ctx, `CREATE TEMP TABLE session_follow_up_queues(bot_id uuid,session_id uuid,envelope bytea,updated_at timestamptz default now(),primary key(bot_id,session_id)); CREATE TEMP TABLE session_runs(LIKE public.session_runs INCLUDING DEFAULTS);`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var temp bool
+	err = pool.QueryRow(ctx, `SELECT bool_and(relnamespace=pg_my_temp_schema()) FROM pg_class WHERE oid IN (to_regclass('session_follow_up_queues'),to_regclass('session_runs'))`).Scan(&temp)
+	if err != nil || !temp {
+		t.Fatal("fixture is not entirely temporary", err)
+	}
+	store, err := followupqueue.New(pool, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := runtime.Key{BotID: uuid.NewString(), SessionID: uuid.NewString()}
+	err = store.Change(ctx, key, func(s *followupqueue.State) error {
+		s.Items = append(s.Items, runtime.FollowUpItem{ID: "retained-item", Status: runtime.QueueClaimed, Payload: []byte(`{"text":"fixture"}`)})
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	backend := followupqueue.NewBackend(runtime.NewMemoryBackend(), store)
+	runs := ledger.NewPostgres(sqlc.New(pool), pool)
+	if _, directErr := runs.GetByInvocation(ctx, key.SessionID, "follow-up:retained-item"); !errors.Is(directErr, ledger.ErrRunNotFound) {
+		t.Fatalf("single-connection ledger control failed: %v", directErr)
+	}
+	bounded, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+	defer cancel()
+	err = reconcileFollowUpClaims(bounded, backend, key, runs)
+	if err != nil {
+		t.Fatalf("recovery must not require a second pool connection while holding its queue transaction: %v", err)
+	}
+	state, err := store.Read(ctx, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(state.Items) != 1 || state.Items[0].Status != "unknown" {
+		t.Fatalf("original unresolved item not retained: %#v", state.Items)
+	}
+}

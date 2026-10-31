@@ -1,0 +1,22 @@
+{
+  "scope": "four older regenerable Go archive cache entries only; source, DB, logs and runtime binaries retained",
+  "removed": [
+    {
+      "cache": "5096c081fb9e5b259db6ed6f5f9d861d99ca424a4b352a809b1c6d3a159ed100-d",
+      "bytes": 167063038
+    },
+    {
+      "cache": "6fb7015cfe36547b52595b4160eaacd50acde2cfd0cabc70f3a3de87504e66cc-d",
+      "bytes": 167063038
+    },
+    {
+      "cache": "79c5fa3e479ff0a244b5be46102f170d9cffdd90bdaef6d10f2a76af5ff215ea-d",
+      "bytes": 167137058
+    },
+    {
+      "cache": "220e82b0fe0693ed3379cb105d47038d4c852b25d24db4d4dd2db35ff2a634e5-d",
+      "bytes": 167137126
+    }
+  ],
+  "total_bytes": 668400260
+}

@@ -21,6 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -28,22 +29,23 @@ import (
 // original admission input. It contains no JWTs, provider keys or tool outputs.
 // The admission fingerprint still names the original request, unchanged.
 type resumeContext struct {
-	Version           int               `json:"version"`
-	Query             string            `json:"query"`
-	ChatID            string            `json:"chat_id"`
-	UserID            string            `json:"user_id"`
-	ChannelIdentityID string            `json:"channel_identity_id,omitempty"`
-	CurrentChannel    string            `json:"current_channel,omitempty"`
-	ReplyTarget       string            `json:"reply_target,omitempty"`
-	ConversationType  string            `json:"conversation_type,omitempty"`
-	Model             string            `json:"model,omitempty"`
-	ReasoningEffort   string            `json:"reasoning_effort,omitempty"`
-	WorkspaceTargetID string            `json:"workspace_target_id,omitempty"`
-	SessionType       string            `json:"session_type,omitempty"`
-	ToolHTTPURL       string            `json:"tool_http_url,omitempty"`
-	TokenClaims       map[string]string `json:"token_claims,omitempty"`
-	ChatClaims        map[string]string `json:"chat_claims,omitempty"`
-	DeadlineAt        *time.Time        `json:"deadline_at,omitempty"`
+	InputSource       *inputsource.Source `json:"input_source,omitempty"`
+	Version           int                 `json:"version"`
+	Query             string              `json:"query"`
+	ChatID            string              `json:"chat_id"`
+	UserID            string              `json:"user_id"`
+	ChannelIdentityID string              `json:"channel_identity_id,omitempty"`
+	CurrentChannel    string              `json:"current_channel,omitempty"`
+	ReplyTarget       string              `json:"reply_target,omitempty"`
+	ConversationType  string              `json:"conversation_type,omitempty"`
+	Model             string              `json:"model,omitempty"`
+	ReasoningEffort   string              `json:"reasoning_effort,omitempty"`
+	WorkspaceTargetID string              `json:"workspace_target_id,omitempty"`
+	SessionType       string              `json:"session_type,omitempty"`
+	ToolHTTPURL       string              `json:"tool_http_url,omitempty"`
+	TokenClaims       map[string]string   `json:"token_claims,omitempty"`
+	ChatClaims        map[string]string   `json:"chat_claims,omitempty"`
+	DeadlineAt        *time.Time          `json:"deadline_at,omitempty"`
 	// Normalized input references are host-authored: WebSocket admission stores
 	// only an attachment digest, while a tool may run before the first step
 	// commits its user-message asset links. Never use model metadata for this.
@@ -52,6 +54,10 @@ type resumeContext struct {
 	// resume admits it again behind its instructions.
 	DiscussMessages       []turn.DiscussMessage       `json:"discuss_messages,omitempty"`
 	DiscussOmittedSources []turn.ContextMessageSource `json:"discuss_omitted_sources,omitempty"`
+	// Version 3 preserves host origin. Older consumers reject this version
+	// instead of resuming a result as ordinary user input without authority.
+	DelegationResultID string `json:"delegation_result_id,omitempty"`
+	RouteID            string `json:"route_id,omitempty"`
 }
 
 // errResumeUnrecoverable marks an interrupted intent that no later scan can
@@ -67,6 +73,10 @@ func (s *Service) SetResumeReadiness(check func(context.Context, string, string)
 }
 
 func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) error {
+	// A result summary restarts from its durable outbox, never an execution checkpoint.
+	if req.TaskResultReceipt != "" {
+		return nil
+	}
 	if s.resumeSecret == "" || s.queries == nil || req.RunID == "" || req.ShutdownResume {
 		return nil
 	}
@@ -80,6 +90,12 @@ func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) e
 		CurrentChannel: req.CurrentChannel, ReplyTarget: req.ReplyTarget,
 		ConversationType: req.ConversationType, Model: req.Model, ReasoningEffort: req.ReasoningEffort,
 		WorkspaceTargetID: req.WorkspaceTargetID, SessionType: req.SessionType, ToolHTTPURL: req.ToolHTTPURL,
+	}
+	source := requestInputSource(req)
+	data.InputSource = &source
+	if req.InputSource != nil {
+		// Older consumers must not resume an automated input as its owner.
+		data.Version = 4
 	}
 	for _, a := range req.Attachments {
 		if hash := strings.TrimSpace(a.ContentHash); hash != "" {
@@ -99,6 +115,10 @@ func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) e
 	if req.discussMessages != nil {
 		data.Version, data.Query = 2, ""
 		data.DiscussMessages, data.DiscussOmittedSources = req.discussMessages, req.discussOmittedSources
+	}
+	if req.DelegationResultID != "" {
+		data.Version, data.Query = 3, req.Query
+		data.DelegationResultID, data.RouteID = req.DelegationResultID, req.RouteID
 	}
 	raw, err := json.Marshal(data)
 	if err != nil {
@@ -364,6 +384,18 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 	if data.DeadlineAt != nil && !time.Now().Before(*data.DeadlineAt) {
 		return nil, fmt.Errorf("%w: execution budget expired", errResumeUnrecoverable)
 	}
+	if data.DelegationResultID != "" {
+		if s.delegationScope == nil {
+			return nil, fmt.Errorf("%w: task result authorization unavailable", errResumeUnrecoverable)
+		}
+		// Recheck before admission as well as inside the actual stream. A
+		// restarted task result must never lose either Bot's live authority.
+		var err error
+		ctx, _, err = s.delegationScope(ctx, ChatRequest{BotID: row.BotID.String(), ThreadID: row.SessionID.String(), UserID: data.UserID, ChatID: data.ChatID, RouteID: data.RouteID, CurrentChannel: data.CurrentChannel, ReplyTarget: data.ReplyTarget, ConversationType: data.ConversationType, DelegationResultID: data.DelegationResultID})
+		if err != nil {
+			return nil, err
+		}
+	}
 	decisionContext, err := s.interruptedDecisionContext(ctx, row, input.DecisionContinuations)
 	if err != nil {
 		return nil, err
@@ -410,13 +442,15 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 		return nil, err
 	}
 	req := ChatRequest{
-		BotID: row.BotID.String(), ThreadID: row.SessionID.String(), ChatID: data.ChatID,
+		InputSource: data.InputSource,
+		BotID:       row.BotID.String(), ThreadID: row.SessionID.String(), ChatID: data.ChatID,
 		RunID: admission.RunID, RunHandle: admission.Handle, TurnID: admission.TurnID, TurnPosition: &admission.TurnPosition,
 		Query: resumeInstruction + data.Query, UserID: data.UserID, SourceChannelIdentityID: data.ChannelIdentityID,
 		Token: token, ChatToken: chatToken, CurrentChannel: data.CurrentChannel, ReplyTarget: data.ReplyTarget,
 		ConversationType: data.ConversationType, Model: data.Model, ReasoningEffort: data.ReasoningEffort,
 		WorkspaceTargetID: data.WorkspaceTargetID, SessionType: data.SessionType, ToolHTTPURL: data.ToolHTTPURL,
 		UserMessagePersisted: true, SkipMemoryExtraction: true, SkipTitleGeneration: true, ShutdownResume: true,
+		DelegationResultID: data.DelegationResultID, RouteID: data.RouteID,
 	}
 	if decisionContext != "" {
 		req.discussPromptSuffix = "\n\n" + decisionContext
@@ -426,6 +460,9 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 		req.discussMessages, req.discussOmittedSources, req.discussRecoveryExhausted = data.DiscussMessages, data.DiscussOmittedSources, true
 		req.discussPromptPrefix = resumeInstruction
 		req.Query = resumeInstruction + discussAgentFullContextPrompt(data.DiscussMessages) + req.discussPromptSuffix
+	}
+	if data.Version == 3 {
+		req.Query = data.Query
 	}
 	chunks, errs := s.streamTurnChat(runCtx, req)
 	h := &runHandle{
@@ -448,6 +485,10 @@ func (data resumeContext) resumable() bool {
 		return data.SessionType != string(turn.ModeDiscuss) || strings.TrimSpace(data.Query) != ""
 	case 2:
 		return len(data.DiscussMessages) > 0
+	case 3:
+		return data.DelegationResultID != "" && data.SessionType != string(turn.ModeDiscuss) && strings.TrimSpace(data.Query) != ""
+	case 4:
+		return data.InputSource != nil && data.InputSource.Kind != inputsource.Unknown && strings.TrimSpace(data.Query) != ""
 	default:
 		return false
 	}
@@ -459,8 +500,14 @@ func (s *Service) RecordSubagentResume(ctx context.Context, session tools.Sessio
 	if !ok {
 		return nil
 	}
+	source, known := inputsource.FromContext(ctx, session.BotID, sessionID)
+	var origin *inputsource.Source
+	if known {
+		origin = &source
+	}
 	return s.recordRunResumeContext(ctx, ChatRequest{
-		BotID: session.BotID, ThreadID: sessionID, RunID: handle.RunID,
+		InputSource: origin,
+		BotID:       session.BotID, ThreadID: sessionID, RunID: handle.RunID,
 		ChatID: session.ChatID, UserID: session.UserID, SourceChannelIdentityID: session.ChannelIdentityID,
 		ChatToken: session.SessionToken, CurrentChannel: session.CurrentPlatform, ReplyTarget: session.ReplyTarget,
 		ConversationType: session.ConversationType, WorkspaceTargetID: session.WorkspaceTargetID, Query: query, Model: model, SessionType: "subagent",

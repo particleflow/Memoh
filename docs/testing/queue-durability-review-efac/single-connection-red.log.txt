@@ -1,0 +1,8 @@
+=== RUN   TestIndependentClaimRecoveryWithSingleConnection
+    durable_followup_independent_review_test.go:66: recovery must not require a second pool connection while holding its queue transaction: ledger(postgres): get run by invocation: context deadline exceeded
+--- FAIL: TestIndependentClaimRecoveryWithSingleConnection (0.53s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.554s
+FAIL
+
+exit=1

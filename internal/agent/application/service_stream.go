@@ -335,6 +335,10 @@ func (s *Service) StreamChat(ctx context.Context, req ChatRequest) (<-chan Strea
 			return
 		}
 		if dispatch.kind == dispatchExternal {
+			if streamReq.TaskResultReceipt != "" {
+				fail(errors.New("result summaries require the native result-only runtime"))
+				return
+			}
 			if err := rejectExternalAgentWorkspaceTarget(streamReq); err != nil {
 				fail(err)
 				return
@@ -378,7 +382,7 @@ func (s *Service) StreamChat(ctx context.Context, req ChatRequest) (<-chan Strea
 		if stepCommitter != nil {
 			stepCommitter.bindContinuation(&cfg)
 		}
-		cfg = s.prepareRunConfig(streamCtx, cfg)
+		cfg = s.prepareRunConfig(streamCtx, cfg, streamReq)
 		terminal := s.contextLifecycleTerminal(streamCtx, cfg)
 		outcome := newOutcomeRecorder(streamCtx)
 		defer outcome.finishLifecycle(terminal)
@@ -720,7 +724,7 @@ func (s *Service) streamChatWSResultWithHooks(
 	if stepCommitter != nil {
 		stepCommitter.bindContinuation(&cfg)
 	}
-	cfg = s.prepareRunConfig(streamCtx, cfg)
+	cfg = s.prepareRunConfig(streamCtx, cfg, req)
 	terminal := s.contextLifecycleTerminal(streamCtx, cfg)
 	outcome := newOutcomeRecorder(streamCtx)
 	lifecycle = outcome
@@ -737,6 +741,7 @@ func (s *Service) streamChatWSResultWithHooks(
 	cfg = pauseIdleDuringBudgetRecovery(cfg, idleCancel)
 
 	agentEventCh := s.agent.Stream(idleCtx, cfg)
+	agentEventCh = s.withConversationPresence(idleCtx, req, rc, agentEventCh)
 	modelID := rc.model.ID
 	stored := false
 	clientGone := false
@@ -752,7 +757,9 @@ func (s *Service) streamChatWSResultWithHooks(
 	failureRecorded := false
 	for event := range agentEventCh {
 		event = publicRuntimeNotice(event)
-		idleCancel.Observe(event)
+		if !isConversationPresenceEvent(event) {
+			idleCancel.Observe(event)
+		}
 
 		// Track tool calls for adaptive idle timeout
 		if event.Type == native.EventToolCallStart {

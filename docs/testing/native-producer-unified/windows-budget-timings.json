@@ -1,0 +1,176 @@
+[
+  {
+    "run": 40193260634,
+    "jobs": [
+      {
+        "id": 121168605787,
+        "conclusion": "success",
+        "total_seconds": 1161,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "seconds": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success",
+            "seconds": 15
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "conclusion": "success",
+            "seconds": 22
+          },
+          {
+            "name": "Execute transfer contracts except Windows and journal progress",
+            "conclusion": "success",
+            "seconds": 213
+          },
+          {
+            "name": "Execute active journal progress contract",
+            "conclusion": "success",
+            "seconds": 58
+          },
+          {
+            "name": "Execute Windows active journal contracts",
+            "conclusion": "success",
+            "seconds": 118
+          },
+          {
+            "name": "Execute remaining Windows-prefixed transfer contracts",
+            "conclusion": "success",
+            "seconds": 239
+          },
+          {
+            "name": "Execute complete CLI contracts",
+            "conclusion": "success",
+            "seconds": 16
+          },
+          {
+            "name": "Execute native publication with PostgreSQL",
+            "conclusion": "success",
+            "seconds": 127
+          },
+          {
+            "name": "Build reviewed binary bundle",
+            "conclusion": "success",
+            "seconds": 24
+          },
+          {
+            "name": "Verify packaged executable",
+            "conclusion": "success",
+            "seconds": 308
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "conclusion": "success",
+            "seconds": 3
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "conclusion": "success",
+            "seconds": 10
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success",
+            "seconds": 2
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "seconds": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": 40199092938,
+    "jobs": [
+      {
+        "id": 121186213224,
+        "conclusion": "success",
+        "total_seconds": 512,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "seconds": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success",
+            "seconds": 10
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "conclusion": "success",
+            "seconds": 52
+          },
+          {
+            "name": "Execute transfer contracts except Windows and journal progress",
+            "conclusion": "success",
+            "seconds": 95
+          },
+          {
+            "name": "Execute active journal progress contract",
+            "conclusion": "success",
+            "seconds": 16
+          },
+          {
+            "name": "Execute Windows active journal contracts",
+            "conclusion": "success",
+            "seconds": 21
+          },
+          {
+            "name": "Execute remaining Windows-prefixed transfer contracts",
+            "conclusion": "success",
+            "seconds": 119
+          },
+          {
+            "name": "Execute complete CLI contracts",
+            "conclusion": "success",
+            "seconds": 6
+          },
+          {
+            "name": "Execute native publication with PostgreSQL",
+            "conclusion": "success",
+            "seconds": 24
+          },
+          {
+            "name": "Build reviewed binary bundle",
+            "conclusion": "success",
+            "seconds": 5
+          },
+          {
+            "name": "Verify packaged executable",
+            "conclusion": "success",
+            "seconds": 154
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "conclusion": "success",
+            "seconds": 3
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "conclusion": "success",
+            "seconds": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success",
+            "seconds": 2
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "seconds": 0
+          }
+        ]
+      }
+    ]
+  }
+]

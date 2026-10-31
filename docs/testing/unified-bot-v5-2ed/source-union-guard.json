@@ -1,0 +1,44 @@
+{
+  "parent": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "reviewed_increment_tree_before_format": "cd83526211164c4091872e43efcb837bfc4bc1f6",
+  "tree_before_guard_file": "94c65dd6000fb8bdb9191c7f9cbd432a60322174",
+  "source_delta_beyond_reviewed_patches": [
+    "cmd/internal/core/task_result_delivery.go",
+    "cmd/internal/core/task_result_delivery_test.go",
+    "internal/agent/application/delegation.go",
+    "internal/agent/application/task_result.go",
+    "internal/agent/application/task_result_test.go",
+    "internal/taskresult/delivery.go"
+  ],
+  "extra_documents": [
+    "docs/testing/unified-bot-v5-2ed/README.md",
+    "docs/testing/unified-bot-v5-2ed/source-union-guard.json",
+    "docs/testing/unified-bot-v5-2ed/gofmt-actual-toolchain.json"
+  ],
+  "all_other_reviewed_and_base_paths_preserved": true,
+  "protected_paths_unchanged": [
+    "internal/agenvo/pi_batch_producer.go",
+    "internal/deliverymeta",
+    "internal/transferclient",
+    "internal/agent/runtime",
+    "db/postgres/migrations",
+    "db/postgres/schema",
+    "packages/sdk",
+    "conf"
+  ],
+  "original_branch_unchanged": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "source_commits": [
+    "b2d6e1c2058e3bddef1c8b3e9ef4c48468282422",
+    "87b76482e8173907305f6b9303c061a00d9b0d09",
+    "453a1178c25213772dbead9f428f1dca83e2a027"
+  ],
+  "validation": {
+    "gofumpt_six_files": "passed",
+    "diff_check": "passed",
+    "actual_gofmt": "passed: existing /workspace/.memoh-cloud/go/bin/gofmt (Go 1.25.7), six files, exit 0, no output, source hashes unchanged",
+    "gci": "write exited 0, go env diagnostic retained; not a full lint pass",
+    "functional_tests": "unchanged author evidence reused",
+    "ci_build_publish_deploy": "not performed",
+    "full_lint_build_ci": "not run; initial gci go-env diagnostic retained"
+  }
+}

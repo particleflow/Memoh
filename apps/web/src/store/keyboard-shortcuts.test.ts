@@ -26,13 +26,13 @@ describe('useKeyboardShortcutsStore', () => {
   })
 
   it.each([
-    ['MacIntel', { mod: true, alt: true, shift: false, key: 'n' }],
-    ['Win32', { mod: false, alt: true, shift: true, key: 'n' }],
-    ['Linux x86_64', { mod: false, alt: true, shift: true, key: 'n' }],
+    ['MacIntel', { mod: true, alt: true, shift: false, key: 'x' }],
+    ['Win32', { mod: false, alt: true, shift: true, key: 'x' }],
+    ['Linux x86_64', { mod: false, alt: true, shift: true, key: 'x' }],
   ])('resolves the default chord for %s', (platform, combo) => {
     onPlatform(platform)
     const store = useKeyboardShortcutsStore()
-    expect(store.getEffectiveCombo(appKeyboardCommands.newChatSession)).toEqual(combo)
+    expect(store.getEffectiveCombo(appKeyboardCommands.newTerminal)).toEqual(combo)
   })
 
   it('overrides a binding key and reports it as overridden', () => {
@@ -123,7 +123,7 @@ describe('useKeyboardShortcutsStore', () => {
     const store = useKeyboardShortcutsStore()
     expect(store.setBinding(appKeyboardCommands.newTerminal, 'Mod+k').kind).toBe('same-scope')
     expect(store.isOverridden(appKeyboardCommands.newTerminal)).toBe(false)
-    expect(store.setBinding(appKeyboardCommands.newChatSession, 'n').kind).toBe('no-modifier')
+    expect(store.setBinding(appKeyboardCommands.newTerminal, 'n').kind).toBe('no-modifier')
   })
 
   it('rejects bare-key global bindings so typing the key in a form does not fire the command', () => {
@@ -221,13 +221,20 @@ describe('useKeyboardShortcutsStore', () => {
   })
 
   it.each([
-    'new-chat-session', 'focus-chat-input', 'show-sessions', 'show-files',
+    'focus-chat-input', 'show-sessions', 'show-files',
     'show-schedule', 'show-supermarket', 'next-workspace-tab', 'previous-workspace-tab',
     'split-workspace-right', 'split-workspace-below', 'new-terminal', 'new-browser',
   ])('keeps applying an override saved under the shipped command id %s', (command) => {
     localStorage.setItem('keyboard-shortcuts-overrides', JSON.stringify({ [command]: 'Mod+Alt+Shift+F9' }))
     const store = useKeyboardShortcutsStore()
     expect(store.effectiveBindings.find(binding => binding.command === command)).toMatchObject({ key: 'F9', mod: true, alt: true, shift: true })
+  })
+
+  it('does not expose the removed new-chat command through a saved override', () => {
+    localStorage.setItem('keyboard-shortcuts-overrides', JSON.stringify({ 'new-chat-session': 'Mod+Alt+Shift+F9' }))
+    const store = useKeyboardShortcutsStore()
+    expect(store.allBindings.some(binding => binding.command === appKeyboardCommands.newChatSession)).toBe(false)
+    expect(store.effectiveBindings.some(binding => binding.command === appKeyboardCommands.newChatSession)).toBe(false)
   })
 
   it('garbage stored overrides do not poison the effective bindings', () => {

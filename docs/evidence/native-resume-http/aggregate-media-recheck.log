@@ -1,0 +1,12 @@
+=== RUN   TestMediaHTTPUploadConfiguredAbove200MiB
+--- PASS: TestMediaHTTPUploadConfiguredAbove200MiB (1.34s)
+=== RUN   TestMediaHTTPStreamingLimitAndAdmission
+=== RUN   TestMediaHTTPStreamingLimitAndAdmission/exact
+=== RUN   TestMediaHTTPStreamingLimitAndAdmission/over_configured
+=== RUN   TestMediaHTTPStreamingLimitAndAdmission/over_default_200MiB
+--- PASS: TestMediaHTTPStreamingLimitAndAdmission (0.54s)
+    --- PASS: TestMediaHTTPStreamingLimitAndAdmission/exact (0.00s)
+    --- PASS: TestMediaHTTPStreamingLimitAndAdmission/over_configured (0.00s)
+    --- PASS: TestMediaHTTPStreamingLimitAndAdmission/over_default_200MiB (0.54s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.919s

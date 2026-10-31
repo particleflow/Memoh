@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	alibabaspeech "github.com/felinics/twilight/provider/alibabacloud/speech"
 	deepgramspeech "github.com/felinics/twilight/provider/deepgram/speech"
 	deepgramtranscription "github.com/felinics/twilight/provider/deepgram/transcription"
 	edgespeech "github.com/felinics/twilight/provider/edge/speech"
@@ -22,7 +21,9 @@ import (
 	volcenginespeech "github.com/felinics/twilight/provider/volcengine/speech"
 	sdk "github.com/felinics/twilight/sdk"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/audio/adapter/alibabacloud"
+	"github.com/felinics/memoh/internal/audio/adapter/cosyvoiceinput"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -138,6 +139,25 @@ func (r *Registry) Get(clientType models.ClientType) (ProviderDefinition, error)
 	def, ok := r.providers[clientType]
 	if !ok {
 		return ProviderDefinition{}, fmt.Errorf("speech provider not found: %s", clientType)
+	}
+	return def, nil
+}
+
+// GetTranscription resolves only the transcription protocol. A separately
+// configured transcription model selects this path; a chat model or provider
+// catalog alone is not evidence that an upstream supports audio recognition.
+// Reuse the native OpenAI adapter without registering aliases that would seed
+// preset model IDs or expose synthesis for existing chat providers.
+func (r *Registry) GetTranscription(clientType models.ClientType) (ProviderDefinition, error) {
+	if clientType == models.ClientTypeOpenAICompletions || clientType == models.ClientTypeOpenAIResponses {
+		clientType = models.ClientTypeOpenAITranscription
+	}
+	def, err := r.Get(clientType)
+	if err != nil {
+		return ProviderDefinition{}, apperror.FieldInvalid("client_type", err)
+	}
+	if def.TranscriptionFactory == nil {
+		return ProviderDefinition{}, apperror.FieldInvalid("client_type", fmt.Errorf("provider does not support transcription: %s", clientType))
 	}
 	return def, nil
 }
@@ -804,14 +824,7 @@ func defaultProviderDefinitions() []ProviderDefinition {
 				},
 			}},
 			Factory: func(config map[string]any) (sdk.SpeechProvider, error) {
-				opts := []alibabaspeech.Option{}
-				if v := configString(config, "api_key"); v != "" {
-					opts = append(opts, alibabaspeech.WithAPIKey(v))
-				}
-				if v := configString(config, "base_url"); v != "" {
-					opts = append(opts, alibabaspeech.WithBaseURL(v))
-				}
-				return alibabaspeech.New(opts...), nil
+				return cosyvoiceinput.New(configString(config, "api_key"), configString(config, "base_url")), nil
 			},
 			Order: 80,
 		},

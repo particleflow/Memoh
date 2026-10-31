@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  2 passed (2)
+      Tests  40 passed (40)
+   Start at  16:25:48
+   Duration  7.21s (transform 5.31s, setup 0ms, import 7.02s, tests 238ms, environment 901ms)
+

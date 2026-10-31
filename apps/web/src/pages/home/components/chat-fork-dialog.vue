@@ -6,7 +6,6 @@
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>{{ $t('chat.forkDialog.title') }}</DialogTitle>
-        <DialogDescription>{{ $t('chat.forkDialog.description') }}</DialogDescription>
       </DialogHeader>
       <form
         class="space-y-4"
@@ -39,7 +38,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Spinner } from '@felinic/ui'
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Spinner } from '@felinic/ui'
 import { useI18n } from 'vue-i18n'
 import { useChatStore } from '@/store/chat-list'
 import { useChatViewTarget } from '../composables/useChatViewContext'

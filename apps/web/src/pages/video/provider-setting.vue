@@ -54,7 +54,6 @@
               :key="field.key"
               stack="sm"
               :label="field.title || field.key"
-              :description="field.description"
             >
               <PasswordInput
                 v-if="field.type === 'secret'"

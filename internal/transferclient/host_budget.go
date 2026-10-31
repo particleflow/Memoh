@@ -10,6 +10,9 @@ import (
 
 // DefaultHostQueueLimits is the historical installed-command profile. The
 // library accepts limits explicitly; only the CLI resolves user configuration.
+// Bytes remains in the immutable legacy locator; it does not limit registered
+// upload sources, download sizes/backlog, or retained native download objects.
+// Downloads use actual filesystem space and the existing worker locks.
 func DefaultHostQueueLimits() QueueLimits {
 	return QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 8 << 20, Workers: 1}
 }

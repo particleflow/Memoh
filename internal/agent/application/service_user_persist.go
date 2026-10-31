@@ -65,6 +65,12 @@ func (s *Service) persistUserTurn(ctx context.Context, req ChatRequest) (message
 	}
 	senderChannelIdentityID, senderUserID := s.resolvePersistSenderIDs(ctx, req)
 	sessionMode, runtimeType := s.persistSessionRuntimeSnapshot(ctx, req)
+	metadata := mergeMetadata(mergeMetadata(buildRouteMetadata(req), buildInteractionMetadata(req)), workspaceTargetMetadata(req.WorkspaceTarget))
+	metadata = mergeMetadata(metadata, map[string]any{"input_source": requestInputSource(req)})
+	if req.DelegationResultID != "" || req.TaskResultReceipt != "" {
+		displayText = ""
+		metadata = mergeMetadata(metadata, botTaskResultMetadata(req))
+	}
 	return s.messageService.Persist(ctx, messagepkg.PersistInput{
 		BotID:                   req.BotID,
 		SessionID:               req.ThreadID,
@@ -74,7 +80,7 @@ func (s *Service) persistUserTurn(ctx context.Context, req ChatRequest) (message
 		SourceReplyToMessageID:  req.SourceReplyToMessageID,
 		Role:                    "user",
 		Content:                 content,
-		Metadata:                mergeMetadata(mergeMetadata(buildRouteMetadata(req), buildInteractionMetadata(req)), workspaceTargetMetadata(req.WorkspaceTarget)),
+		Metadata:                metadata,
 		Assets:                  chatAttachmentsToAssetRefs(req.Attachments),
 		EventID:                 req.EventID,
 		DisplayText:             displayText,

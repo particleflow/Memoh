@@ -26,19 +26,24 @@ parents remain. [Migration evidence](migration-preservation.json) compares every
 
 ## Executed checks
 
+The raw log filenames below identify files from the original owner environment;
+they are not tracked repository attachments and are not downloadable evidence
+here. The linked structured summaries and screenshots are the published record.
+No result is rerun or inferred from an unavailable raw log by this cleanup.
+
 - `go test -p 3 -run '^$' ./...`: all 218 package output lines completed, exit 0.
   This is a compile check, not execution of every repository test.
-  [Raw output](go-compile-raw.log).
+  Original raw output: `go-compile-raw.log` (not published).
 - Actual PG, integration build tag and nonempty isolated DSN: **20 passed, zero
   skipped**. Pattern: `Test(BotDelegationPostgres|ComputerDeliveryPostgres|ComputerTransfer|SessionTasksPostgres)`.
   The full formal chain, canonical init-only snapshot and 170→171→172→173 path
   execute. New assertions retain exact existing runtime credentials and operation
   JSON across 172→173, plus the legacy-writer guard and delegation forced RLS.
-  [Original Go output](pg-go-raw.log).
+  Original Go output: `pg-go-raw.log` (not published).
 - New task-transfer HTTP test: exact Range bytes/Content-Range, 416/no-store,
   size conflict, mismatched hash, revocation and anonymous rejection. Existing
   CrossBot JWT/scoped-original tests pass alongside it.
-  [Raw output](range-combined-raw.log), [race output](range-race-raw.log).
+  Original raw outputs: `range-combined-raw.log`, `range-race-raw.log` (not published).
 - Twelve related Go packages passed, with 3,130 pass events and 65 explicit skips
   (counts include subtests). Most skipped cases require separate application PG
   environment variables; the opt-in media volume benchmark is also skipped.
@@ -49,20 +54,21 @@ parents remain. [Migration evidence](migration-preservation.json) compares every
   fixtures. The seven tests passed after removing proxy variables for that test
   process; their real TCP connection is explicitly redirected to `httptest` by
   the existing fixture. No paid image provider was called.
-- SDK `tsc` passed. [Output](sdk-typecheck-raw.log).
+- SDK `tsc` passed in the recorded run; `sdk-typecheck-raw.log` is not published.
 - Full Web typecheck **failed** with the same 153 diagnostic headers as the saved
   exact a68 baseline: zero added/removed. [Comparison](web-typecheck-comparison.json).
 - Normal handler/DB lint passed, as did integration-tag incremental lint
   against 834. [Command results](check-results.json).
 - Integration-tag full DB lint **failed** with 18 diagnostics in seven files,
-  all byte-identical to 834. [Raw lint](pg-lint-raw.log),
+  all byte-identical to 834. Original raw lint: `pg-lint-raw.log` (not published);
   [unchanged-file comparison](pg-lint-existing-files.json). The incremental check
   against 834 passed. This does not claim the full integration lint is green.
 
 The first new HTTP fixture attempt reused an upload delivery ID for download
 and received the expected immutable-identity conflict. The fixture now gives
-independent downloads their own identity. [First attempt](range-fixture-first-attempt.log)
-is retained; no product authorization was weakened to make it pass.
+independent downloads their own identity. The original owner log is named
+`range-fixture-first-attempt.log` and is not published here; the failure remains
+disclosed. No product authorization was weakened to make it pass.
 
 ## Real application and UI
 
@@ -83,7 +89,7 @@ One fresh synthetic business execution verifies the combined application's new
 input → specialist send → final supervisor attachment chain, original owners,
 exact attachment counts, reopen identity, terminal/empty-queue observations,
 Range/If-Range/HEAD/416 and anonymous rejection. Attachments contain only 31 and
-40 bytes. [Raw output](native-combination-raw.log),
+40 bytes. Original raw output: `native-combination-raw.log` (not published);
 [structured result](native-combination-results.json). A separate actual API
 revocation/restoration check denies both scoped originals with 404/no-store and
 restores exact bytes under the same explicit grant permissions.

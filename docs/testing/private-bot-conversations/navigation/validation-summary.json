@@ -1,0 +1,29 @@
+{
+  "source_base": "e6574f4d73269b64f2fd57528a16648306a55693",
+  "web_tests_pass": 266,
+  "web_tests_failed": 0,
+  "web_typecheck_exit": 0,
+  "sdk_typecheck_exit": 0,
+  "web_lint_exit": 0,
+  "web_build_exit": 0,
+  "ui_contract_exit": 0,
+  "ui_contract_existing_warnings": 3,
+  "integration_delta_lint_exit": 0,
+  "full_integration_lint_baseline_diagnostics_retained": 22,
+  "agent_core_boundary_exit": 0,
+  "navigation": {
+    "pass": 9,
+    "fail": 0,
+    "skip": 0
+  },
+  "lifecycle_regression": {
+    "pass": 14,
+    "fail": 0,
+    "skip": 0
+  },
+  "http": {
+    "pass": 26,
+    "fail": 0,
+    "skip": 0
+  }
+}

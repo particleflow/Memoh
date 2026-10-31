@@ -1,0 +1,12 @@
+=== RUN   TestNativeHerdrAccountBoundaryProbe
+=== RUN   TestNativeHerdrAccountBoundaryProbe/account
+    native_account_probe_test.go:62: status=200 account_validations=1 configuration_writes=1
+=== RUN   TestNativeHerdrAccountBoundaryProbe/chat_route
+    native_account_probe_test.go:62: status=200 account_validations=0 configuration_writes=1
+    native_account_probe_test.go:65: chat-route credential reached owner configuration
+--- FAIL: TestNativeHerdrAccountBoundaryProbe (0.00s)
+    --- PASS: TestNativeHerdrAccountBoundaryProbe/account (0.00s)
+    --- FAIL: TestNativeHerdrAccountBoundaryProbe/chat_route (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.017s
+FAIL

@@ -1,0 +1,14 @@
+{
+  "reviewedBaselineSHA256": "abf615c6f10126821e510bac76e8ee87610c095810b5c81dba622d1653da22c5",
+  "additionChecks": [
+    {
+      "insertion": "<p>未授权描述回归</p>",
+      "rejected": true
+    },
+    {
+      "insertion": "<Button @click=\"stopNewAction\">停止朗读</Button>",
+      "rejected": true
+    }
+  ],
+  "restoredSourcePasses": true
+}

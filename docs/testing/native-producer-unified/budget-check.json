@@ -1,0 +1,18 @@
+{
+  "base": "3a3cd00e66112e73062cb59d6d88b115ef8bcfb2",
+  "changed_files": [
+    ".github/workflows/delivery-native.yml",
+    "contrib/herdr/memoh-delivery/verify-fixtures.ps1"
+  ],
+  "source_aggregate_timeout": "5m -> 10m",
+  "packaged_aggregate_timeout": "5m -> 10m",
+  "whole_job_timeout_minutes": "25 -> 35",
+  "all_other_commands_and_selectors": "byte-identical after replacing only changed budget literals and ignoring YAML comments",
+  "tests_and_production_changed": false,
+  "excerpt_source": "https://github.com/particleflow/Memoh/actions/runs/40199820161/attempts/1",
+  "job": 121188411058,
+  "extraction": "From the failed go-test step group header through its error result, before Post job cleanup. CRLF normalized to LF and line-end whitespace removed for repository formatting; no other line changes.",
+  "saved_normalized_log_sha256": "a4c20bc5f49a0411dbb1f81659dcc154e7ddf13382553c96f16944ad865759fe",
+  "excerpt_sha256": "0919b860f3b6af37e8bff441c7e0e2cf5fb894d5aada32bfa98e31f0940fbbc8",
+  "validation_exit": 0
+}

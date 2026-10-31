@@ -1,5 +1,6 @@
-// Package agenvo adapts Agenvo's existing MCP tools. It does not run a relay,
-// mint credentials, or implement a second agent scheduler.
+// Package agenvo holds the shared Windows computer task ledger and Herdr/Pi
+// adapters used by native Memoh Runtime. The package name and legacy wire
+// decoders remain for historical compatibility; production has no MCP caller.
 package agenvo
 
 import (
@@ -11,31 +12,35 @@ import (
 )
 
 var (
-	ErrInvalidTarget = errors.New("invalid Agenvo target")
-	ErrUnavailable   = errors.New("agenvo target unavailable")
-	ErrUnsupported   = errors.New("operation not supported by Agenvo target")
-	ErrRejected      = errors.New("agenvo operation rejected")
-	ErrUnknown       = errors.New("agenvo operation outcome is unknown; do not repeat the operation")
-	ErrTargetChanged = errors.New("agenvo target authorization changed")
+	ErrInvalidTarget = errors.New("invalid computer target")
+	ErrUnavailable   = errors.New("computer target unavailable")
+	ErrUnsupported   = errors.New("operation not supported by computer target")
+	ErrRejected      = errors.New("computer operation rejected")
+	ErrUnknown       = errors.New("computer operation outcome is unknown; do not repeat the operation")
+	ErrTargetChanged = errors.New("computer target authorization changed")
 )
 
-// Target refers to an existing authorized MCP connection. Credentials belong
-// to the MCP/OAuth service and must never be copied into an execution target.
+// Target pins the selected Runtime and private native execution profile.
+// Historical JSON fields retain their original names and fingerprint identity.
 type Target struct {
-	ConnectionID string       `json:"connection_id"`
-	DeviceID     string       `json:"device_id"`
-	InstanceID   string       `json:"instance_id"`
-	Session      string       `json:"session"`
-	WorkDir      string       `json:"work_dir"`
-	BashPath     string       `json:"bash_path"`
-	Agent        AgentProfile `json:"agent,omitempty,omitzero"`
+	ConnectionID    string          `json:"connection_id"`
+	DeviceID        string          `json:"device_id"`
+	InstanceID      string          `json:"instance_id"`
+	Session         string          `json:"session"`
+	WorkDir         string          `json:"work_dir"`
+	BashPath        string          `json:"bash_path"`
+	Agent           AgentProfile    `json:"agent,omitempty,omitzero"`
+	NativeRuntimeID string          `json:"native_runtime_id,omitempty"`
+	HerdrCLI        string          `json:"herdr_cli,omitempty"`
+	HerdrConfigRoot string          `json:"herdr_config_root,omitempty"`
+	Producer        ProducerLocator `json:"producer,omitempty,omitzero"`
 }
 
 // AgentProfile is private deployment configuration, never model-supplied.
 // No provider default is inferred and no credential is stored here.
 type AgentProfile struct {
-	// Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
-	// finite official CLI invocations; no automatic protocol fallback occurs.
+	// Empty is decoded only for historical profiles. Native configuration
+	// requires pi-json-v1; no protocol fallback occurs.
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	Provider      string `json:"provider"`
 	Model         string `json:"model"`
@@ -69,17 +74,17 @@ type Scope struct{ BotID, TargetID, UserID string }
 // It is called before every native operation, including reads and cleanup.
 type Resolve func(context.Context, Scope) (Target, error)
 
-// CallTool reuses Memoh's MCP transport and OAuth refresh. The return value is
-// the standard MCP CallToolResult, without a JSON-RPC transport envelope.
-type CallTool func(context.Context, string, string, map[string]any) (json.RawMessage, error)
+// NativeCaller uses the selected, grant-checked Runtime's Exec transport. It
+// returns a native receipt, never business completion or a retry instruction.
+type NativeCaller func(context.Context, Scope, Target, string, map[string]any) (Receipt, error)
 
 type Client struct {
-	resolve  Resolve
-	callTool CallTool
+	resolve    Resolve
+	callNative NativeCaller
 }
 
-func NewClient(resolve Resolve, call CallTool) *Client {
-	return &Client{resolve: resolve, callTool: call}
+func NewClient(resolve Resolve, call NativeCaller) *Client {
+	return &Client{resolve: resolve, callNative: call}
 }
 
 type Receipt struct {
@@ -93,7 +98,7 @@ type Receipt struct {
 }
 
 func (c *Client) resolveTarget(ctx context.Context, scope Scope) (Target, error) {
-	if c == nil || c.resolve == nil || c.callTool == nil || scope.BotID == "" || scope.TargetID == "" {
+	if c == nil || c.resolve == nil || scope.BotID == "" || scope.TargetID == "" {
 		return Target{}, ErrInvalidTarget
 	}
 	t, err := c.resolve(ctx, scope)
@@ -133,43 +138,13 @@ func (c *Client) relay(ctx context.Context, scope Scope, expected Target, method
 	if current != expected {
 		return Receipt{}, ErrTargetChanged
 	}
-	target, _ := json.Marshal(map[string]string{"deviceId": current.DeviceID, "instanceId": current.InstanceID})
-	name, _ := json.Marshal(method)
-	args, err := json.Marshal(params)
-	if err != nil {
-		return Receipt{}, ErrUnsupported
+	if current.NativeRuntimeID == "" {
+		return Receipt{}, ErrLegacyRetired
 	}
-	// JSON encoding is JavaScript data encoding here, never shell quoting. The
-	// user's command remains data in params and cannot inject relay JavaScript.
-	code := "return await call(" + string(target) + "," + string(name) + "," + string(args) + ");"
-	raw, err := c.callTool(ctx, current.ConnectionID, "execute", map[string]any{"code": code})
-	if err != nil {
-		if errors.Is(err, ErrAuthenticationUnavailable) {
-			return Receipt{}, errors.Join(ErrUnknown, ErrAuthenticationUnavailable)
-		}
-		return Receipt{}, ErrUnknown
+	if c.callNative == nil {
+		return Receipt{}, ErrUnavailable
 	}
-	value, err := decodeToolResult(raw)
-	if err != nil {
-		return Receipt{}, err
-	}
-	var receipt Receipt
-	if json.Unmarshal(value, &receipt) != nil {
-		return Receipt{}, ErrUnknown
-	}
-	if receipt.Error != nil {
-		if availability := nativeAvailability(receipt); availability != nil {
-			return receipt, errors.Join(ErrRejected, availability)
-		}
-		if receipt.Execution == "rejected" || receipt.Execution == "not_started" {
-			return receipt, ErrRejected
-		}
-		return receipt, ErrUnknown
-	}
-	if receipt.Execution != "accepted" && (method != "agent.start" || receipt.Execution != "starting") {
-		return receipt, ErrUnknown
-	}
-	return receipt, nil
+	return c.callNative(ctx, scope, current, method, params)
 }
 
 // Probe verifies the approved instance and the selected native service without
@@ -192,34 +167,9 @@ func (c *Client) Probe(ctx context.Context, scope Scope) error {
 	return nil
 }
 
-func decodeToolResult(raw json.RawMessage) (json.RawMessage, error) {
-	var result struct {
-		IsError bool `json:"isError"`
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
-	}
-	if len(raw) > 128*1024 || json.Unmarshal(raw, &result) != nil || result.IsError {
-		return nil, ErrUnknown
-	}
-	var text strings.Builder
-	for _, block := range result.Content {
-		if block.Type != "text" {
-			return nil, ErrUnknown
-		}
-		text.WriteString(block.Text)
-	}
-	value := json.RawMessage(text.String())
-	if !json.Valid(value) {
-		return nil, ErrUnknown
-	}
-	return value, nil
-}
-
 func resultBody(receipt Receipt, out any) error {
-	// Herdr CLI results have their own {result: ...} envelope inside Agenvo's
-	// native outcome. Do not search recursively for a convenient success field.
+	// Herdr CLI results have their own {result: ...} envelope inside the native
+	// outcome. Do not search recursively for a convenient success field.
 	var native struct {
 		Result json.RawMessage `json:"result"`
 	}

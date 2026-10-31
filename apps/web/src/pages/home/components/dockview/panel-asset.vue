@@ -38,6 +38,7 @@
         <Button
           variant="outline"
           size="sm"
+          :loading="downloading"
           @click="handleDownload"
         >
           <Download class="mr-1.5 size-3" />
@@ -49,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { File, Download } from 'lucide-vue-next'
 import { Button, PanePlaceholder, toast } from '@felinic/ui'
@@ -59,6 +60,7 @@ import DockPanelFrame from './panel-frame.vue'
 import { isTextFile, isImageFile } from '@/components/file-manager/utils'
 import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { resolveApiErrorMessage } from '@/utils/api-error'
+import { MediaRecoveryError, saveMediaDownload } from '@/lib/media-transfer'
 import { resolveUrl } from '../../composables/useMediaGallery'
 import { usePanelVisible } from './use-panel-visible'
 
@@ -69,7 +71,7 @@ import { usePanelVisible } from './use-panel-visible'
 // the direct source URL it was opened with.
 const props = defineProps<{
   params: {
-    params: { name?: string, botId?: string, contentHash?: string, delegationUrl?: string, src?: string }
+    params: { name?: string, botId?: string, contentHash?: string, size?: number, delegationUrl?: string, src?: string }
     api: DockviewPanelApi
     containerApi: DockviewApi
   }
@@ -120,13 +122,35 @@ async function loadText() {
   }
 }
 
-function handleDownload() {
+const downloading = ref(false)
+let downloadController: AbortController | undefined
+function pauseDownload() { downloadController?.abort() }
+onScopeDispose(pauseDownload)
+watch([visible, renderUrl], pauseDownload)
+async function handleDownload() {
   const url = renderUrl.value
-  if (!url) return
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name.value || 'file'
-  a.click()
+  if (!url || downloading.value) return
+  const { botId, contentHash, size, delegationUrl } = props.params.params
+  if (!contentHash || !botId) {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name.value || 'file'
+    a.click()
+    return
+  }
+  const controller = new AbortController()
+  downloadController = controller
+  downloading.value = true
+  try {
+    await saveMediaDownload(botId, contentHash, size, delegationUrl, name.value, controller.signal)
+  } catch (error) {
+    if (!controller.signal.aborted) toast.error(error instanceof MediaRecoveryError
+      ? t(`chat.mediaRecovery.${error.reason}`)
+      : resolveApiErrorMessage(error, t('bots.files.readFailed')))
+  } finally {
+    if (downloadController === controller) downloadController = undefined
+    downloading.value = false
+  }
 }
 
 // Text is fetched lazily the first time the tab is shown (an image renders

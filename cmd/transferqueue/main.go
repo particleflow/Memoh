@@ -29,7 +29,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, enqueue-results, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, enqueue-results, collect-result, advance-results, advance-snapshots, advance-snapshot, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -39,7 +39,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "advance-snapshots", "advance-snapshot", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -57,6 +57,21 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 	// Reserve a bounded tail of the same invocation for advisory persistence.
 	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
 	defer stopWork()
+	if *kind == "advance-snapshots" || *kind == "advance-snapshot" {
+		if *kind == "advance-snapshots" && *id != "" || *kind == "advance-snapshot" && *id == "" {
+			return 2
+		}
+		var status transferclient.QueueStatus
+		var err error
+		if *kind == "advance-snapshots" {
+			status, err = transferclient.AdvanceSnapshotProducer(workCtx, getenv, "native-profile-v1", limits, transport, now())
+		} else {
+			status, err = transferclient.InvokeConfiguredHerdr(workCtx, getenv, "native-profile-v1", limits, transferclient.ConfiguredAction{Kind: "advance-snapshot", DeliveryID: *id}, transport, now())
+		}
+		// No producer feedback projection/source-root access in this capability.
+		// Its scope cannot be mistaken for the general queue lifecycle summary.
+		return writeSnapshotStatus(output, status, err)
+	}
 	if *kind == "enqueue-results" {
 		if *id != "" {
 			return 2
@@ -83,6 +98,12 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return writeFixed(output, `{"budget_migration":"complete"}`)
 	}
 	publish := func(status transferclient.QueueStatus) string {
+		// Only a validated durable download is outside the outbound producer
+		// projection. Missing/foreign upload context remains a feedback failure.
+		// This says nothing about transfer/association success or retryability.
+		if status.Direction == "download" {
+			return "not_applicable"
+		}
 		if status.Job.Task.Attempt == "" {
 			return ""
 		}
@@ -257,6 +278,27 @@ func readAdmission(ctx context.Context, input io.Reader) (admissionInput, error)
 	case r := <-done:
 		return r.value, r.err
 	}
+}
+
+func writeSnapshotStatus(output io.Writer, status transferclient.QueueStatus, err error) int {
+	if errors.Is(err, transferclient.ErrNoWork) {
+		return writeFixed(output, `{"state":"idle","advance_scope":"retained_upload_snapshots"}`)
+	}
+	var buffer bytes.Buffer
+	code := writeStatus(&buffer, status, "", "", nil)
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(buffer.Bytes(), &fields) != nil {
+		return 1
+	}
+	fields["advance_scope"] = json.RawMessage(`"retained_upload_snapshots"`)
+	if err != nil {
+		fields["error_class"], _ = json.Marshal(transferclient.LifecycleFailure(err).ErrorClass)
+		code = 1
+	}
+	if json.NewEncoder(output).Encode(fields) != nil {
+		return 1
+	}
+	return code
 }
 
 func writeStatus(output io.Writer, s transferclient.QueueStatus, source, feedback string, summary *transferclient.Lifecycle) int {

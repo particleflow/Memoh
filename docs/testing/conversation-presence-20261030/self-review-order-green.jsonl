@@ -1,0 +1,8 @@
+{"Time":"2026-10-30T13:34:16.338678298Z","Action":"start","Package":"github.com/felinics/memoh/internal/agent/application"}
+{"Time":"2026-10-30T13:34:16.394758818Z","Action":"run","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude"}
+{"Time":"2026-10-30T13:34:16.394792388Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Output":"=== RUN   TestConversationPresencePrioritizesFormalBehindReadyPrelude\n"}
+{"Time":"2026-10-30T13:34:16.395072042Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Output":"--- PASS: TestConversationPresencePrioritizesFormalBehindReadyPrelude (0.00s)\n"}
+{"Time":"2026-10-30T13:34:16.395088427Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Elapsed":0}
+{"Time":"2026-10-30T13:34:16.396312443Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Output":"PASS\n"}
+{"Time":"2026-10-30T13:34:17.401971141Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Output":"ok  \tgithub.com/felinics/memoh/internal/agent/application\t1.063s\n"}
+{"Time":"2026-10-30T13:34:17.402270875Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agent/application","Elapsed":1.064}

@@ -42,6 +42,12 @@ type Client struct {
 	http      http.Client
 	auth      Authorization
 	selection string
+	// Configured uploads use their existing limits/receipt GET. Downloads read
+	// the same task-scoped limits once before their existing file stream.
+	policyBot       string
+	policyLoaded    bool
+	bootstrapPolicy bool
+	transport       *http.Transport
 }
 
 // New accepts HTTPS only. The supplied transport must validate the server's
@@ -76,7 +82,7 @@ func New(base string, client *http.Client, auth Authorization) (*Client, error) 
 	t.TLSClientConfig.ServerName = u.Hostname()
 	t.DisableCompression = true
 	h.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	return &Client{base: strings.TrimRight(base, "/"), http: h, auth: auth}, nil
+	return &Client{base: strings.TrimRight(base, "/"), http: h, auth: auth, transport: t}, nil
 }
 
 // NewTask uses the explicit task-authenticated adapter namespace. The original
@@ -111,25 +117,28 @@ func (s Spec) valid() bool {
 }
 
 type Limits struct {
-	MaxUploadBytes   int64 `json:"max_upload_bytes"`
-	ResumableEnabled bool  `json:"resumable_enabled"`
-	ChunkMaxBytes    int64 `json:"chunk_max_bytes"`
+	NetworkPolicy    *hostNetworkPolicy `json:"network_policy,omitempty"`
+	MaxUploadBytes   int64              `json:"max_upload_bytes"`
+	ResumableEnabled bool               `json:"resumable_enabled"`
+	ChunkMaxBytes    int64              `json:"chunk_max_bytes"`
 }
 
 // Receipt mirrors PR #8's wire shape, without importing the server or runtime.
 type Receipt struct {
-	ID          string    `json:"id"`
-	State       string    `json:"state"`
-	Offset      int64     `json:"offset"`
-	SizeBytes   int64     `json:"size_bytes"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	ContentHash string    `json:"content_hash,omitempty"`
-	Mime        string    `json:"mime"`
+	NetworkPolicy *hostNetworkPolicy `json:"network_policy,omitempty"`
+	ID            string             `json:"id"`
+	State         string             `json:"state"`
+	Offset        int64              `json:"offset"`
+	SizeBytes     int64              `json:"size_bytes"`
+	ExpiresAt     time.Time          `json:"expires_at"`
+	ContentHash   string             `json:"content_hash,omitempty"`
+	Mime          string             `json:"mime"`
 }
 
 type HTTPError struct {
 	Status     int
 	RetryAfter time.Duration
+	RetryAt    time.Time // Exact server deadline, including dates beyond a Duration.
 }
 
 // Memoh's error catalog and HTTP boundary use 499 for caller cancellation.
@@ -168,6 +177,11 @@ func mediaPath(bot string) (string, error) {
 }
 
 func (c *Client) request(ctx context.Context, method, path string, body []byte, headers http.Header) (*http.Response, error) {
+	if c.bootstrapPolicy && !c.policyLoaded && path != "/bots/"+c.policyBot+"/media/limits" {
+		if _, err := c.Limits(ctx, c.policyBot); err != nil {
+			return nil, err
+		}
+	}
 	auth, err := c.auth(ctx)
 	if err != nil || auth == "" || strings.ContainsAny(auth, "\r\n") {
 		return nil, ErrAuthorization
@@ -196,19 +210,39 @@ func (c *Client) request(ctx context.Context, method, path string, body []byte, 
 }
 
 func statusError(resp *http.Response) error {
-	retry := time.Duration(0)
-	if seconds, err := strconv.Atoi(resp.Header.Get("Retry-After")); err == nil && seconds > 0 {
-		retry = time.Duration(min(seconds, 300)) * time.Second
-	} else if date, err := http.ParseTime(resp.Header.Get("Retry-After")); err == nil {
-		retry = time.Until(date)
+	return statusErrorAt(resp, time.Now())
+}
+
+func statusErrorAt(resp *http.Response, now time.Time) error {
+	h := &HTTPError{Status: resp.StatusCode}
+	// Permission refusals take precedence even over an invalid retry header.
+	if h.Status == http.StatusUnauthorized || h.Status == http.StatusForbidden {
+		return h
 	}
-	if retry < 0 {
-		retry = 0
+	raw := strings.TrimSpace(resp.Header.Get("Retry-After"))
+	numeric := raw != ""
+	for _, c := range raw {
+		if c < '0' || c > '9' {
+			numeric = false
+			break
+		}
 	}
-	if retry > 5*time.Minute {
-		retry = 5 * time.Minute
+	if numeric {
+		seconds, err := strconv.ParseInt(raw, 10, 64)
+		// Queue timestamps use JSON time.Time (years 1..9999). An unrepresentable
+		// server deadline is a protocol refusal, never permission to retry earlier.
+		last := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC).Unix()
+		if err != nil || now.Unix() > last || seconds > last-now.Unix() {
+			return ErrProtocol
+		}
+		h.RetryAt = time.Unix(now.Unix()+seconds, int64(now.Nanosecond())).UTC()
+	} else if date, err := http.ParseTime(raw); err == nil {
+		h.RetryAt = date.UTC()
 	}
-	return &HTTPError{Status: resp.StatusCode, RetryAfter: retry}
+	if h.RetryAt.After(now) {
+		h.RetryAfter = h.RetryAt.Sub(now)
+	}
+	return h
 }
 
 func (c *Client) json(ctx context.Context, method, path string, body []byte, headers http.Header, want int, out any) error {
@@ -239,6 +273,9 @@ func (c *Client) Limits(ctx context.Context, bot string) (Limits, error) {
 	if err == nil && (result.MaxUploadBytes <= 0 || result.ResumableEnabled && (result.ChunkMaxBytes <= 0 || result.ChunkMaxBytes > MaxChunkBytes)) {
 		err = ErrProtocol
 	}
+	if err == nil && c.policyBot == bot && !c.policyLoaded {
+		err = c.adoptNetworkPolicy(result.NetworkPolicy)
+	}
 	return result, err
 }
 
@@ -260,6 +297,9 @@ func (c *Client) receipt(ctx context.Context, method, bot, id, suffix string, bo
 		return result, ErrInvalid
 	}
 	err = c.json(ctx, method, path+"/uploads/"+id+suffix, body, headers, 200, &result)
+	if err == nil && method == http.MethodGet && c.policyBot == bot && !c.policyLoaded {
+		err = c.adoptNetworkPolicy(result.NetworkPolicy)
+	}
 	return result, err
 }
 

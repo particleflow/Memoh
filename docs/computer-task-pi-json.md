@@ -1,5 +1,7 @@
 # Pi JSON invocation receipts (candidate, not deployed)
 
+> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+
 This independent change builds on the computer task MCP service. It does not
 modify Pi, Memoh's Agent runtime or context composition, install a hook, or add
 a persistent RPC process. The production PR #6 TUI observation contract remains
@@ -8,7 +10,7 @@ historical evidence; its terminal snapshots cannot prove a task completed.
 ## Configuration and transport
 
 An owner can opt an existing registered computer into `pi-json-v1` through the
-existing `PUT /users/me/runtimes/{id}/agenvo-agent` endpoint:
+`PUT /users/me/runtimes/{id}/native-herdr` endpoint. The following is the `agent` subobject within the existing complete native Herdr profile:
 
 ```json
 {
@@ -23,9 +25,7 @@ existing `PUT /users/me/runtimes/{id}/agenvo-agent` endpoint:
 These are deployment references, not credentials. The existing Pi configuration
 owns the Magpie endpoint and credential command. The registered Git Bash path
 remains private deployment configuration. This change creates no credential,
-grant or default provider. Empty `execution_mode` preserves the explicitly
-registered legacy TUI mode; unsupported modes are rejected, never retried through
-another protocol. `computer_targets.agent_protocol` reports the distinction.
+grant or default provider. Native registrations require `execution_mode: "pi-json-v1"`; unsupported modes are rejected, never retried through another protocol. `computer_targets.agent_protocol` reports the distinction.
 
 The unchanged standard MCP tools remain the public boundary. A trusted host
 binds the authenticated turn to its conversation scope. The model supplies only

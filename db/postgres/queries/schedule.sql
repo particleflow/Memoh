@@ -1,7 +1,7 @@
 -- name: CreateSchedule :one
 INSERT INTO schedule (
   name, description, pattern, max_calls, enabled, command, bot_id,
-  run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, max_run_seconds
+  run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, max_run_seconds, result_origin
 )
 VALUES (
   $1, $2, $3, $4, $5, $6, $7,
@@ -14,25 +14,26 @@ VALUES (
   sqlc.narg(acp_model_id)::text,
   sqlc.narg(reasoning_effort)::text,
   sqlc.narg(workdir_id)::uuid,
- COALESCE(NULLIF(sqlc.arg(max_run_seconds)::integer, 0), 3600)
+ COALESCE(NULLIF(sqlc.arg(max_run_seconds)::integer, 0), 3600),
+ COALESCE(sqlc.narg(result_origin)::jsonb, '{}'::jsonb)
 )
 RETURNING *;
 
 -- name: GetScheduleByID :one
 SELECT *
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND id = $1;
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL;
 
 -- name: ListSchedulesByBot :many
 SELECT *
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND bot_id = $1
+WHERE team_id = public.memoh_current_team_id() AND bot_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: ListEnabledSchedules :many
 SELECT *
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND enabled = true
+WHERE team_id = public.memoh_current_team_id() AND enabled = true AND deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: UpdateSchedule :one
@@ -41,6 +42,10 @@ SET name = $2,
     description = $3,
     pattern = $4,
     max_calls = $5,
+    registration_generation = CASE WHEN sqlc.arg(enabled_explicit)::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN registration_generation + 1 ELSE registration_generation END,
+    limit_disabled = CASE WHEN sqlc.arg(enabled_explicit)::boolean OR $6::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN false ELSE limit_disabled END,
     enabled = $6,
     command = $7,
     run_target = $8,
@@ -54,18 +59,22 @@ SET name = $2,
     workdir_id = sqlc.narg(workdir_id)::uuid,
     max_run_seconds = COALESCE(NULLIF(sqlc.arg(max_run_seconds)::integer, 0), 3600),
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 RETURNING *;
 
 -- name: DeleteSchedule :exec
-DELETE FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND id = $1;
+-- Keep the original plan as the trusted parent of its execution logs.
+UPDATE schedule
+SET deleted_at = now(), enabled = false, limit_disabled = false, updated_at = now()
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL;
 
 -- name: DisableSchedule :one
 UPDATE schedule
 SET enabled = false,
+    registration_generation = registration_generation + 1,
+    limit_disabled = false,
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 RETURNING *;
 
 -- name: IncrementScheduleCalls :one
@@ -76,5 +85,5 @@ SET current_calls = current_calls + 1,
       ELSE enabled
     END,
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 RETURNING *;

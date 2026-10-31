@@ -1,0 +1,8 @@
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-completions
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-responses
+--- PASS: TestSharedTranscriptionRejectsDisabledProvider (0.00s)
+    --- PASS: TestSharedTranscriptionRejectsDisabledProvider/openai-completions (0.00s)
+    --- PASS: TestSharedTranscriptionRejectsDisabledProvider/openai-responses (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio	0.006s

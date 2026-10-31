@@ -22,9 +22,6 @@ const { t } = useI18n()
 const login = computed(() => DEVICE_LOGINS[props.auth])
 const label = computed(() => t(AGENT_AUTH_MODE_COPY[props.auth].label))
 const devicePending = computed(() => !!props.deviceLogin)
-const description = computed(() => props.authorized
-  ? login.value.connectedDescription
-  : props.existing ? login.value.agentDescription : AGENT_AUTH_MODE_COPY[props.auth].description)
 // KeepAlive does not take a teleported dialog away with its deactivated host,
 // and a sign-in that outlives the deactivation would leave it over the next page.
 const active = ref(true)
@@ -35,7 +32,7 @@ onDeactivated(() => { active.value = false })
 <template>
   <SettingsRow
     :label="label"
-    :description="t(description)"
+    :description="authorized ? t(login.connectedDescription) : undefined"
   >
     <div class="flex gap-2">
       <Button
@@ -82,10 +79,11 @@ onDeactivated(() => { active.value = false })
       <DialogBody>
         <DeviceCodePanel
           v-if="deviceLogin"
+          hint=""
           :code="deviceLogin.user_code"
           :verification-uri="deviceLogin.verification_url"
           :expires-at="expiresAt"
-          :hint="t(login.hint)"
+
           :retry-loading="authorizing"
           :copy-and-open-label="t('deviceCode.copyAndOpen')"
           :retry-label="t('deviceCode.retry')"

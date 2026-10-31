@@ -19,6 +19,7 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))
 vi.mock('@felinic/ui', async () => {
   const { h } = await import('vue')
   return {
+    toast: { error: vi.fn() },
     PanePlaceholder: (props: { title?: string }, { slots }: { slots: Slots }) =>
       h('div', [props.title, slots.default?.()]),
   }
@@ -33,7 +34,7 @@ vi.mock('@/store/chat-list', () => ({
       currentBotId.value = id
     }
     return {
-      currentBotId, bots, activeSession, selectBot,
+      currentBotId, bots, activeSession, selectBot, bindRouteContext: vi.fn(),
       refreshBots: chat.refreshBots,
       initializeWithRecovery: chat.initializeWithRecovery,
     }
@@ -44,6 +45,7 @@ vi.mock('./components/chat-workspace.vue', async () => {
   const { h } = await import('vue')
   return { default: () => h('div', 'chat-workspace') }
 })
+vi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))
 
 const existingBot = { id: 'bot-1', name: 'errs-bot' }
 const previousBot = { id: 'bot-0', name: 'previous-bot' }

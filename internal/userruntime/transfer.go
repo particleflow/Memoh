@@ -107,11 +107,8 @@ func (s *TransferCredentials) Enroll(ctx context.Context, owner, runtime string,
 	if old.CredentialID != req.ExpectedID {
 		return TransferCredentialEnrollment{}, ErrTransferConflict
 	}
-	target, err := agenvo.DecodeTarget(old.Config)
+	target, err := transferRuntimeTarget(old)
 	if err != nil {
-		return TransferCredentialEnrollment{}, ErrTransferCredential
-	}
-	if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
 		return TransferCredentialEnrollment{}, ErrTransferCredential
 	}
 	next := old
@@ -122,7 +119,7 @@ func (s *TransferCredentials) Enroll(ctx context.Context, owner, runtime string,
 		}
 		next.ExpiresAt = req.ExpiresAt.UTC()
 	}
-	next.TargetDigest, err = transferTargetDigest(old.Config)
+	next.TargetDigest, err = transferIdentityDigest(target)
 	if err != nil {
 		return TransferCredentialEnrollment{}, ErrTransferCredential
 	}
@@ -177,11 +174,11 @@ func (s *TransferCredentials) device(ctx context.Context, id string) (TransferDe
 	if r.CredentialID != id || r.Digest == "" || (!r.ExpiresAt.IsZero() && !r.ExpiresAt.After(time.Now())) {
 		return TransferDevice{}, r, ErrTransferCredential
 	}
-	target, err := agenvo.DecodeTarget(r.Config)
+	target, err := transferRuntimeTarget(r)
 	if err != nil {
 		return TransferDevice{}, r, ErrTransferCredential
 	}
-	digest, err := transferTargetDigest(r.Config)
+	digest, err := transferIdentityDigest(target)
 	if err != nil || digest != r.TargetDigest {
 		return TransferDevice{}, r, ErrTransferCredential
 	}
@@ -232,11 +229,14 @@ func transferDigest(value string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func transferTargetDigest(config []byte) (string, error) {
-	t, err := agenvo.DecodeTarget(config)
-	if err != nil {
-		return "", err
+func transferRuntimeTarget(r dbstore.RuntimeTransferRecord) (agenvo.Target, error) {
+	if r.Provider == "memoh" {
+		return agenvo.DecodeNativeTarget(r.RuntimeID, r.Config)
 	}
+	return agenvo.Target{}, ErrTransferCredential
+}
+
+func transferIdentityDigest(t agenvo.Target) (string, error) {
 	raw, err := json.Marshal([3]string{t.ConnectionID, t.DeviceID, t.InstanceID})
 	if err != nil {
 		return "", err

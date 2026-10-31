@@ -12,6 +12,7 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/channel"
+	"github.com/felinics/memoh/internal/channel/route"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 )
@@ -55,6 +56,7 @@ func TestWSSkillActivationOnBusySessionAnswersSessionBusy(t *testing.T) {
 		agentService:   &application.Service{},
 		logger:         slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}
+	handler.SetPrivateChatResolver(&fixedContactStub{entry: route.PrivateChatEntry{Session: &sessionpkg.Thread{ID: sessionID, BotID: botID}}})
 	// Another skill turn of the same session holds the reservation.
 	release, reserved := handler.reserveWSRequestedSkillTurn(botID, sessionID, "invocation-running")
 	if !reserved {

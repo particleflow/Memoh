@@ -1,0 +1,100 @@
+[
+  {
+    "path": "tests-final.txt",
+    "rawSHA256": "2d1f18375ccfd6bba46454b22d8683aac204764b088fccdcabc43f87c83c6bbf",
+    "rawBytes": 347,
+    "publishedSHA256": "95b1c4f79c7f1f877faa4bc1a8e680dbf83e2dfcd1a86cfb8e1dea81e45a0c39",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "activity-verified-final.txt",
+    "rawSHA256": "939457f51bd42d2fefad7228872ba99e264c612d6a03a024521693812bffa8da",
+    "rawBytes": 320,
+    "publishedSHA256": "46ed2c230b72935fe9317a51cf1d6bce634029b9422ea9244a1895bff899153b",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "types-verified-final.txt",
+    "rawSHA256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "rawBytes": 116,
+    "publishedSHA256": "89d678fee3bc7b19e45ec4a669d7cba386fc1ea42f1f65e9a8aa45335cda8ba9",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "types-exact-final.txt",
+    "rawSHA256": "cbcc9e3f67116d401e7867406b6649b6072c62fc670a08fce93e892fdc33d5b1",
+    "rawBytes": 566,
+    "publishedSHA256": "1336dcf6dda6810a4228ca80cf2a80828e9047b9d74ce993b507c144cbdcf207",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "lint-final.txt",
+    "rawSHA256": "0049dedeb9eb04f24d5c5705c57df22205aae2d31aac15e18e088ea0e6d79b39",
+    "rawBytes": 317,
+    "publishedSHA256": "c7d0a6a40bc4d78fe90150f4cfda297b01fc029447dceaef74370f8205f14676",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "lint-states.txt",
+    "rawSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rawBytes": 0,
+    "publishedSHA256": "f4fdf100aaa274c118b634588331478a44a60903554f14bc5c8dc95f8136b651",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "build-verified.txt",
+    "rawSHA256": "1d5b553db665db266b3f8b60069b9f4a8df5b81626b2dde9271287cdbb1361fe",
+    "rawBytes": 76364,
+    "publishedSHA256": "480965befbb7164b716fbc9d584e2f689a229a5110e4a540a29fa5c426a6e921",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "ui-contract-verified.txt",
+    "rawSHA256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "rawBytes": 1169,
+    "publishedSHA256": "c785d0b446712b7d7837076743cf5e209dd1f0d4f0f01b6406114f0790558ab9",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "browser-final.txt",
+    "rawSHA256": "df00a59343c2d258549a12e4e32844db9175d4137532040a6eb072d86c7209e6",
+    "rawBytes": 223,
+    "publishedSHA256": "df00a59343c2d258549a12e4e32844db9175d4137532040a6eb072d86c7209e6",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "staged-hook.txt",
+    "rawSHA256": "981c77af427d6d5be34a1a02091ba8d2b7fd12f0bb48fe92645a84021ad2a492",
+    "rawBytes": 532,
+    "publishedSHA256": "981c77af427d6d5be34a1a02091ba8d2b7fd12f0bb48fe92645a84021ad2a492",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "types-final.txt",
+    "rawSHA256": "48a81eea0e6c8c0cc8a43a667e0b5c1945af64e6d60eaf898cd258e9338435c9",
+    "rawBytes": 1341,
+    "publishedSHA256": "6a5f681711d6f4efe99d873928f4ce8fc67466836409cb5936d18eee5793f244",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "existing-tests-first.txt",
+    "rawSHA256": "ed65ead8e95d7ab15e23d890f1946d9e856217a1d8f9f679d60099cad7e4039c",
+    "rawBytes": 25133,
+    "publishedSHA256": "1392f041813c03018738d326bd8575d03462d03cbfa975d8a67eed01c69c5d1d",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "ui-contract-current.txt",
+    "rawSHA256": "c1ea19d5ac84fb8121a32d45e537ad2a290a33f9b681344217852a51564e0b56",
+    "rawBytes": 1500,
+    "publishedSHA256": "0254abcb20d14a93b061646422649d37f98124209966a97f68852a9ed38835ce",
+    "rule": "strip trailing horizontal whitespace and outer blank lines; empty diagnostics explicitly labelled"
+  },
+  {
+    "path": "staged-hook-final.txt",
+    "rawSHA256": "6092963dec13eb5bcb80e971eb386388ba25e3eb8646bf9f9820e3f88d8d8083",
+    "rawBytes": 532,
+    "publishedSHA256": "6092963dec13eb5bcb80e971eb386388ba25e3eb8646bf9f9820e3f88d8d8083",
+    "rule": "strip trailing whitespace and outer blank lines"
+  }
+]

@@ -1,0 +1,194 @@
+{
+  "events": [],
+  "plays": [
+    {
+      "ms": 747.4000000022352,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:39061/d176747a-b5ab-439a-9ed6-d071acab389d",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    }
+  ],
+  "samples": [
+    {
+      "ms": 257.19999999925494,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 275.6000000014901,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 279.6000000014901,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 320.69999999925494,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 324,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 337.69999999925494,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 354.9000000022352,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 370.9000000022352,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 388.80000000074506,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 404.5,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 421.1000000014901,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 437.9000000022352,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 454.5,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 471,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 488.1000000014901,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 504.19999999925494,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 521.3000000007451,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 537.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 554.6999999992549,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 571,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 587.6000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 604.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 621,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 637.6000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 654.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 671.1000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 688.1999999992549,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 704.1999999992549,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 720.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 741.3000000007451,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 754.1999999992549,
+      "rms": 0,
+      "state": "blocked"
+    },
+    {
+      "ms": 771.1999999992549,
+      "rms": 0,
+      "state": "blocked"
+    },
+    {
+      "ms": 787.5,
+      "rms": 0,
+      "state": "blocked"
+    }
+  ],
+  "trigger": 288,
+  "state": {
+    "key": "turn",
+    "status": "blocked"
+  },
+  "inputs": [],
+  "players": [
+    {
+      "src": "blob:http://127.0.0.1:39061/d176747a-b5ab-439a-9ed6-d071acab389d",
+      "time": 0,
+      "paused": true,
+      "ended": false
+    }
+  ]
+}

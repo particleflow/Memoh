@@ -1,19 +1,20 @@
 // @vitest-environment jsdom
 import { createApp, defineComponent, h, KeepAlive, nextTick, onUnmounted, ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { getBotsByBotIdMediaLimits, postBotsByBotIdMedia } from '@memohai/sdk'
+import { uploadMedia } from '@/lib/media-transfer'
 import { useComposerUpload } from './useComposerUpload'
 
-vi.mock('@memohai/sdk', () => ({
-  getBotsByBotIdMediaLimits: vi.fn(),
-  postBotsByBotIdMedia: vi.fn(),
+vi.mock('@/lib/media-transfer', () => ({
+  mediaIdentity: async (bot: string, signal: AbortSignal) => ({ bot, check: () => signal.throwIfAborted() }),
+  uploadPolicy: async () => ({ limit: 1024, chunk: 1024 }),
+  uploadMedia: vi.fn(),
+  acknowledgeMedia: vi.fn(),
 }))
 
 describe('cached chat tab upload lifecycle', () => {
   it('aborts when switching to an already-open tab and never sends a late upload result', async () => {
-    vi.mocked(getBotsByBotIdMediaLimits).mockResolvedValue({ data: { max_upload_bytes: 1024 } } as never)
     let complete!: (value: never) => void
-    const upload = vi.mocked(postBotsByBotIdMedia)
+    const upload = vi.mocked(uploadMedia)
     upload.mockImplementation(() => new Promise<never>(resolve => { complete = resolve }))
     const sendMessage = vi.fn()
     const unmounted = vi.fn()
@@ -51,7 +52,7 @@ describe('cached chat tab upload lifecycle', () => {
       await nextTick()
       host.querySelector<HTMLButtonElement>('[data-send="a"]')!.click()
       await vi.waitFor(() => expect(upload).toHaveBeenCalledOnce())
-      const signal = upload.mock.calls[0]![0].signal!
+      const signal = upload.mock.calls[0]![4]
       expect(signal.aborted).toBe(false)
       shown.value = 'b'
       await nextTick()
@@ -59,7 +60,7 @@ describe('cached chat tab upload lifecycle', () => {
       expect(unmounted).not.toHaveBeenCalled()
       expect(mounted).toEqual(['b', 'a'])
       expect(signal.aborted).toBe(true)
-      complete({ data: { content_hash: 'a'.repeat(64), size_bytes: 1, mime: 'text/plain' } } as never)
+      complete({ key: 'fixture', hash: 'a'.repeat(64), size: 1, mime: 'text/plain' } as never)
       await expect(sending).rejects.toMatchObject({ name: 'AbortError' })
       expect(sendMessage).not.toHaveBeenCalled()
       shown.value = 'a'

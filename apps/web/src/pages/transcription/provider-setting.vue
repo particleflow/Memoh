@@ -63,7 +63,6 @@
               :key="field.key"
               stack="sm"
               :label="field.title || field.key"
-              :description="field.description"
             >
               <div
                 v-if="field.type === 'secret'"
@@ -349,7 +348,13 @@ const { data: metaList } = useQuery({
   },
 })
 
-const currentMeta = computed(() => (metaList.value ?? []).find(m => m.provider === curProvider.value?.client_type) ?? null)
+const currentMeta = computed(() => {
+  const clientType = curProvider.value?.client_type
+  const protocol = clientType === 'openai-completions' || clientType === 'openai-responses'
+    ? 'openai-transcription'
+    : clientType
+  return (metaList.value ?? []).find(m => m.provider === protocol) ?? null
+})
 const orderedProviderFields = computed(() => [...(currentMeta.value?.config_schema?.fields ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
 
 const { data: providerModelData } = useQuery({

@@ -2,7 +2,6 @@
   <FormDialogShell
     v-model:open="open"
     :title="t('bots.folders.createTitle')"
-    :description="t('bots.folders.createDescription')"
     :cancel-text="t('common.cancel')"
     :submit-text="t('bots.folders.create')"
     :submit-disabled="!canSubmit"
@@ -53,7 +52,6 @@
         <FieldStack
           v-if="targetIsNative"
           :label="t('bots.folders.form.parent')"
-          :help="nativePathHelp"
         >
           <DirectoryPicker
             :bot-id="botId"
@@ -66,7 +64,7 @@
           v-else
           :label="t('bots.folders.form.path')"
           for="folder-path"
-          :help="remotePathHelp"
+          :help="selectedTargetOnline ? undefined : t('bots.folders.form.remoteOffline', { name: selectedTargetName })"
         >
           <div class="flex flex-col gap-2">
             <Input
@@ -163,12 +161,6 @@ const targetIsNative = computed(() => selectedTarget.value?.kind !== 'remote')
 // so the tree gives way to a line saying so and Create waits for it.
 const selectedTargetOnline = computed(() => selectedTarget.value?.online !== false)
 
-const remotePathHelp = computed(() => (
-  selectedTargetOnline.value
-    ? t('bots.folders.form.remotePathHelp')
-    : t('bots.folders.form.remoteOffline', { name: selectedTargetName.value })
-))
-
 // On the native workspace the name doubles as the directory segment, so it has
 // to be one: a name carrying a separator (or a dot segment) would silently land
 // somewhere other than where the help line promises.
@@ -180,16 +172,6 @@ const nameIsDirectorySegment = computed(() => {
 
 const nativeTargetPath = computed(() => (
   `${browsePath.value.replace(/\/$/, '')}/${name.value.trim()}`
-))
-
-// The help line always states the resolved absolute path — the tree shows
-// structure, this shows the exact directory the sessions get. It also says the
-// directory is created when missing, so nothing appears out of nowhere and the
-// line stays true whether or not it already exists.
-const nativePathHelp = computed(() => (
-  nameIsDirectorySegment.value
-    ? t('bots.folders.form.directoryTarget', { path: nativeTargetPath.value })
-    : t('bots.folders.form.parentHelp', { path: browsePath.value })
 ))
 
 // The root row is the surface itself — the Cloud Computer rather than a

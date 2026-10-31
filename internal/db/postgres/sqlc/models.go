@@ -550,6 +550,18 @@ type ChannelLinkCode struct {
 	TeamID                    pgtype.UUID        `json:"team_id"`
 }
 
+type ComputerAdmissionGate struct {
+	TeamID       pgtype.UUID        `json:"team_id"`
+	OwnerID      pgtype.UUID        `json:"owner_id"`
+	ConnectionID pgtype.UUID        `json:"connection_id"`
+	DeviceID     string             `json:"device_id"`
+	InstanceID   string             `json:"instance_id"`
+	RequestID    pgtype.UUID        `json:"request_id"`
+	Paused       bool               `json:"paused"`
+	Revision     int64              `json:"revision"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
 type ComputerDeliveryEntry struct {
 	TeamID      pgtype.UUID `json:"team_id"`
 	OperationID pgtype.UUID `json:"operation_id"`
@@ -624,6 +636,26 @@ type ContextLifecycle struct {
 	Snapshot           []byte             `json:"snapshot"`
 	SelectionDecisions []byte             `json:"selection_decisions"`
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+}
+
+type ConversationPresence struct {
+	TeamID         pgtype.UUID        `json:"team_id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	RunID          pgtype.UUID        `json:"run_id"`
+	InvocationID   string             `json:"invocation_id"`
+	ActorID        string             `json:"actor_id"`
+	EpisodeID      pgtype.UUID        `json:"episode_id"`
+	Generation     string             `json:"generation"`
+	LiveGeneration string             `json:"live_generation"`
+	FencingToken   int64              `json:"fencing_token"`
+	Temperature    string             `json:"temperature"`
+	State          string             `json:"state"`
+	ClaimedAt      pgtype.Timestamptz `json:"claimed_at"`
+	Piece          []byte             `json:"piece"`
+	CloseReason    pgtype.Text        `json:"close_reason"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type FetchProvider struct {
@@ -773,6 +805,19 @@ type ModelVariant struct {
 	TeamID    pgtype.UUID        `json:"team_id"`
 }
 
+type NativeProfileCutoverIntent struct {
+	BackendPid    int32         `json:"backend_pid"`
+	TransactionID pgtype.Uint64 `json:"transaction_id"`
+	TeamID        pgtype.UUID   `json:"team_id"`
+	OwnerID       pgtype.UUID   `json:"owner_id"`
+	RuntimeID     pgtype.UUID   `json:"runtime_id"`
+	TargetID      pgtype.UUID   `json:"target_id"`
+	InstanceID    string        `json:"instance_id"`
+	RequestID     pgtype.UUID   `json:"request_id"`
+	Revision      int64         `json:"revision"`
+	NewDir        string        `json:"new_dir"`
+}
+
 type Provider struct {
 	ID                 pgtype.UUID        `json:"id"`
 	ProviderTemplateID pgtype.UUID        `json:"provider_template_id"`
@@ -804,44 +849,53 @@ type ProviderOauthToken struct {
 }
 
 type Schedule struct {
-	MaxRunSeconds   int32              `json:"max_run_seconds"`
-	ID              pgtype.UUID        `json:"id"`
-	Name            string             `json:"name"`
-	Description     string             `json:"description"`
-	Pattern         string             `json:"pattern"`
-	MaxCalls        pgtype.Int4        `json:"max_calls"`
-	CurrentCalls    int32              `json:"current_calls"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	Enabled         bool               `json:"enabled"`
-	Command         string             `json:"command"`
-	BotID           pgtype.UUID        `json:"bot_id"`
-	RunTarget       string             `json:"run_target"`
-	TargetSessionID pgtype.UUID        `json:"target_session_id"`
-	RuntimeType     pgtype.Text        `json:"runtime_type"`
-	BotAgentID      pgtype.UUID        `json:"bot_agent_id"`
-	AcpAgentID      pgtype.Text        `json:"acp_agent_id"`
-	ModelID         pgtype.UUID        `json:"model_id"`
-	AcpModelID      pgtype.Text        `json:"acp_model_id"`
-	ReasoningEffort pgtype.Text        `json:"reasoning_effort"`
-	WorkdirID       pgtype.UUID        `json:"workdir_id"`
-	TeamID          pgtype.UUID        `json:"team_id"`
+	LimitDisabled          bool               `json:"limit_disabled"`
+	RegistrationGeneration int64              `json:"registration_generation"`
+	ResultOrigin           []byte             `json:"result_origin"`
+	MaxRunSeconds          int32              `json:"max_run_seconds"`
+	ID                     pgtype.UUID        `json:"id"`
+	Name                   string             `json:"name"`
+	Description            string             `json:"description"`
+	Pattern                string             `json:"pattern"`
+	MaxCalls               pgtype.Int4        `json:"max_calls"`
+	CurrentCalls           int32              `json:"current_calls"`
+	CreatedAt              pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt              pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt              pgtype.Timestamptz `json:"deleted_at"`
+	Enabled                bool               `json:"enabled"`
+	Command                string             `json:"command"`
+	BotID                  pgtype.UUID        `json:"bot_id"`
+	RunTarget              string             `json:"run_target"`
+	TargetSessionID        pgtype.UUID        `json:"target_session_id"`
+	RuntimeType            pgtype.Text        `json:"runtime_type"`
+	BotAgentID             pgtype.UUID        `json:"bot_agent_id"`
+	AcpAgentID             pgtype.Text        `json:"acp_agent_id"`
+	ModelID                pgtype.UUID        `json:"model_id"`
+	AcpModelID             pgtype.Text        `json:"acp_model_id"`
+	ReasoningEffort        pgtype.Text        `json:"reasoning_effort"`
+	WorkdirID              pgtype.UUID        `json:"workdir_id"`
+	TeamID                 pgtype.UUID        `json:"team_id"`
 }
 
 type ScheduleLog struct {
-	ID           pgtype.UUID        `json:"id"`
-	ScheduleID   pgtype.UUID        `json:"schedule_id"`
-	BotID        pgtype.UUID        `json:"bot_id"`
-	SessionID    pgtype.UUID        `json:"session_id"`
-	Status       string             `json:"status"`
-	ResultText   string             `json:"result_text"`
-	ErrorMessage string             `json:"error_message"`
-	ErrorCode    string             `json:"error_code"`
-	Usage        []byte             `json:"usage"`
-	ModelID      pgtype.UUID        `json:"model_id"`
-	StartedAt    pgtype.Timestamptz `json:"started_at"`
-	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
-	TeamID       pgtype.UUID        `json:"team_id"`
+	ScheduledFor   pgtype.Timestamptz `json:"scheduled_for"`
+	ClaimDeadline  pgtype.Timestamptz `json:"claim_deadline"`
+	ClaimState     string             `json:"claim_state"`
+	ResultOrigin   []byte             `json:"result_origin"`
+	ResultDelivery []byte             `json:"result_delivery"`
+	ID             pgtype.UUID        `json:"id"`
+	ScheduleID     pgtype.UUID        `json:"schedule_id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	Status         string             `json:"status"`
+	ResultText     string             `json:"result_text"`
+	ErrorMessage   string             `json:"error_message"`
+	ErrorCode      string             `json:"error_code"`
+	Usage          []byte             `json:"usage"`
+	ModelID        pgtype.UUID        `json:"model_id"`
+	StartedAt      pgtype.Timestamptz `json:"started_at"`
+	CompletedAt    pgtype.Timestamptz `json:"completed_at"`
+	TeamID         pgtype.UUID        `json:"team_id"`
 }
 
 type SearchProvider struct {
@@ -853,6 +907,13 @@ type SearchProvider struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	TeamID    pgtype.UUID        `json:"team_id"`
+}
+
+type SessionFollowUpQueue struct {
+	BotID     pgtype.UUID        `json:"bot_id"`
+	SessionID pgtype.UUID        `json:"session_id"`
+	Envelope  []byte             `json:"envelope"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type SessionRun struct {
@@ -879,6 +940,20 @@ type SessionRun struct {
 	ErrorMessage          pgtype.Text        `json:"error_message"`
 	CreatedAt             pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+}
+
+type SessionRunAbortControl struct {
+	TeamID       pgtype.UUID        `json:"team_id"`
+	RunID        pgtype.UUID        `json:"run_id"`
+	SessionID    pgtype.UUID        `json:"session_id"`
+	RequestHash  string             `json:"request_hash"`
+	ReceivedAt   pgtype.Timestamptz `json:"received_at"`
+	Source       string             `json:"source"`
+	ClientReason string             `json:"client_reason"`
+	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
+	Applied      pgtype.Bool        `json:"applied"`
+	ErrorClass   pgtype.Text        `json:"error_class"`
+	ServerSource pgtype.Text        `json:"server_source"`
 }
 
 type Snapshot struct {

@@ -5,7 +5,6 @@ import {
   Button,
   Empty,
   EmptyContent,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -27,6 +26,9 @@ const { t } = useI18n()
 
 const { data: providerData, isLoading: providersLoading } = useQuery({
   key: () => ['providers'],
+  // Disk display snapshots omit secrets; refresh even a recent snapshot before
+  // the form treats an absent masked Key as a missing server credential.
+  refetchOnMount: 'always',
   query: async () => {
     const { data } = await getProviders({ throwOnError: true })
     return data
@@ -298,7 +300,6 @@ function openAddProvider(templateId?: string) {
           </EmptyMedia>
         </EmptyHeader>
         <EmptyTitle>{{ t('provider.emptyTitle') }}</EmptyTitle>
-        <EmptyDescription>{{ t('provider.emptyDescription') }}</EmptyDescription>
         <EmptyContent>
           <Button
             variant="outline"

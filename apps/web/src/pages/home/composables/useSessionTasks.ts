@@ -4,6 +4,8 @@ import {
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId,
   type SessiontaskTask,
 } from '@memohai/sdk'
+import { useNativeTask } from './useNativeTask'
+import { useComputerTaskObservation } from './useComputerTaskObservation'
 import { useComputerTaskDeliveries } from './useComputerTaskDeliveries'
 import { apiErrorStatus } from '@/utils/api-error'
 
@@ -116,8 +118,11 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
     if (![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh()
   }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  const deliveries = useComputerTaskDeliveries(scope, selected, computed(() => visible.value && !paused.value
+  const computerVisible = computed(() => visible.value && !paused.value
     && !error.value && !!detail.value && detail.value.task_type === 'computer_operation'
-    && detail.value.task_id === selected.value?.task_id))
-  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries }
+    && detail.value.task_id === selected.value?.task_id)
+  const deliveries = useComputerTaskDeliveries(scope, selected, computerVisible)
+  const observation = useComputerTaskObservation(scope, selected, computerVisible)
+  const nativeTask = useNativeTask(scope, selected, visible, computed(() => !computerVisible.value))
+  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries, observation, nativeTask }
 }

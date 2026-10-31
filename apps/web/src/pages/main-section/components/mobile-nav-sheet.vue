@@ -47,6 +47,7 @@
         <div class="relative min-h-0 flex-1 overflow-hidden">
           <PanelSessions
             v-show="sidebarView === 'sessions'"
+            :activity-visible="mobileNavOpen && sidebarView === 'sessions'"
             class="h-full"
           />
           <PanelFiles

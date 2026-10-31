@@ -1,0 +1,49 @@
+{
+  "baseline": "e6149a454c0677a80ad765b03615c63befaaea98",
+  "humanQA": false,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "commands": [
+    {
+      "command": "pnpm exec vitest run apps/web/src/components/sidebar/session-activity.test.ts apps/web/src/pages/home/components/session-tasks.test.ts",
+      "exit": 0,
+      "passed": 60,
+      "log": "tests-final.txt"
+    },
+    {
+      "command": "pnpm exec vitest run apps/web/src/components/sidebar/session-activity.test.ts",
+      "exit": 0,
+      "passed": 20,
+      "log": "activity-verified-final.txt"
+    },
+    {
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit": 0,
+      "log": "types-verified-final.txt"
+    },
+    {
+      "command": "pnpm --filter @memohai/web build",
+      "exit": 0,
+      "log": "build-verified.txt"
+    },
+    {
+      "command": "pnpm exec eslint changed Vue and TS files",
+      "exit": 0,
+      "warnings": 2,
+      "log": "lint-final.txt"
+    },
+    {
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit": 0,
+      "warnings": 3,
+      "log": "ui-contract-verified.txt"
+    },
+    {
+      "command": "node .husky/checks.mjs",
+      "exit": 0,
+      "log": "staged-hook-final.txt"
+    }
+  ],
+  "snapshot": "pre-commit verification; user subsequently authorized this exact submission, Human QA remains false"
+}

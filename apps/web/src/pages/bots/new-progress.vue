@@ -36,7 +36,7 @@
           variant="outline"
           @click="handleBack"
         >
-          {{ $t('bots.create.back') }}
+          {{ $t(canRetry ? 'bots.create.continueLater' : 'bots.create.back') }}
         </Button>
         <Button
           v-if="canOpenExisting"
@@ -86,13 +86,15 @@ const router = useRouter()
 const { t } = useI18n()
 const queryCache = useQueryCache()
 const store = useBotCreateProgressStore()
+store.syncScope()
 const { status, lines, display, bot, setupError, errorCode, createdAgent, authorizationId, modelConfigured, canRetry } = storeToRefs(store)
 if (store.status === 'idle') {
   // A refresh lands here with an empty store. The created Bot is persisted from
   // the first `bot_created` event, so resume on it instead of creating again.
-  const saved = readCreatedBotSession(props.onboarding)
+  const saved = readCreatedBotSession(props.onboarding, store.createScope())
   const previous = props.onboarding ? readOnboardingBotResult() : null
-  if (saved) void store.restore(saved, props.onboarding)
+  if (store.restorePending(props.onboarding)) { /* Replay with the original request key. */ }
+  else if (saved) void store.restore(saved, props.onboarding)
   else if (previous?.agent && isDirectBotAgentRuntime(previous.agent.agentId)) {
     void store.restore({ botId: previous.botId, botName: '', displayName: '', agentId: previous.agent.botAgentId,
       runtime: previous.agent.agentId, authorizationId: previous.agent.authorizationId, setupError: null }, true)
@@ -136,6 +138,7 @@ async function goToBot() {
     })
     void queryCache.invalidateQueries({ key: getBotsQueryKey() })
     onboardingSteps.nextStep()
+    store.finishResolved()
     store.reset()
     return
   }
@@ -164,6 +167,7 @@ async function goToBot() {
   // Reset only after navigation has committed, so the still-mounted terminal
   // never flashes empty before the view swaps.
   writeCreatedBotSession(null)
+  store.finishResolved()
   store.reset()
 }
 
@@ -234,8 +238,11 @@ async function handleOpenExisting() {
 }
 
 function handleBack() {
+  const unresolved = canRetry.value
   store.reset()
-  if (props.onboarding) onboardingSteps.prevStep()
-  else router.replace({ name: 'bot-new' })
+  if (props.onboarding) {
+    if (unresolved) onboardingSteps.goToStep(2)
+    else onboardingSteps.prevStep()
+  } else router.replace({ name: unresolved ? 'bots' : 'bot-new' })
 }
 </script>

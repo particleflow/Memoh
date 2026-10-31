@@ -1,0 +1,32 @@
+
+> @memohai/monorepo@0.22.0 test /tmp/memoh-candidate-7bcb-review
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/pages/home/components/session-task-results.test.ts (8 tests | 1 failed) 402ms
+     × uses the reader Bot and native preview/download, hides pending refs and clears on denial 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > uses the reader Bot and native preview/download, hides pending refs and clears on denial
+AssertionError: expected "click" to be called once, but got 0 times
+ ❯ src/pages/home/components/session-task-results.test.ts:97:29
+     95|       expect(opened).toHaveBeenCalledOnce()
+     96|       expect(download).not.toHaveBeenCalled()
+     97|     } else expect(download).toHaveBeenCalledOnce()
+       |                             ^
+     98|     deliveries.value = { ...deliveries.value, error: { status: 403 } }
+     99|     await nextTick()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  05:42:05
+   Duration  7.66s (transform 5.20s, setup 0ms, import 6.68s, tests 402ms, environment 447ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

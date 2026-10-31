@@ -1,6 +1,6 @@
 import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
 import { headBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHash, type BotdelegationView } from '@memohai/sdk'
-import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { saveMediaDownload } from '@/lib/media-transfer'
 import { apiErrorStatus } from '@/utils/api-error'
 import type { TaskScope } from './useSessionTasks'
 import type { useBotDelegations } from './useBotDelegations'
@@ -52,23 +52,17 @@ export function useBotDelegationDownload(scope: Ref<TaskScope | null>, visible: 
     controller = requestController
     pending.value = true
     error.value = undefined
-    const timeout = setTimeout(() => requestController.abort(), 15000)
     try {
-      // Metadata-only authorization check gives the view a localized failure.
-      // The browser's subsequent GET rechecks authorization and streams bytes;
-      // no whole-file Blob, cached token or success claim in this component.
+      // Recheck the original delegation; persistent Range recovery retains
+      // this exact authorization path and verifies the final original bytes.
       await headBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHash({
         path: target.path, signal: requestController.signal, cache: 'no-store', throwOnError: true,
       })
       if (epoch !== generation || !pathFor(a)) return
-      const link = document.createElement('a')
-      link.href = sdkApiUrl({ url: target.url, query: sdkAuthQuery() })
-      link.download = a.content_hash!
-      link.click()
+      await saveMediaDownload(target.path.bot_id, a.content_hash!, a.size_bytes, target.url, a.content_hash!, requestController.signal)
     } catch (cause) {
       if (epoch === generation) error.value = cause
     } finally {
-      clearTimeout(timeout)
       if (controller === requestController) controller = undefined
       if (epoch === generation) pending.value = false
     }

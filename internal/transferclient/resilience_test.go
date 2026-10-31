@@ -104,7 +104,7 @@ func TestCreateQuotaRejectionCanRetryButUnknownCannot(t *testing.T) {
 	store := storeJob(t, newJob(src))
 	before := time.Now()
 	j := advance(t, c, store, src)
-	if j.Phase != "queued" || j.NextAttempt.Before(before.Add(299*time.Second)) || j.NextAttempt.After(time.Now().Add(301*time.Second)) {
+	if j.Phase != "queued" || j.NextAttempt.Before(before.Add(2999*time.Second)) || j.NextAttempt.After(time.Now().Add(3001*time.Second)) {
 		t.Fatalf("create quota mishandled: %+v", j)
 	}
 	advance(t, c, store, src)

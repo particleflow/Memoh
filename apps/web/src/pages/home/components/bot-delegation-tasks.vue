@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import BotDelegationRun from './bot-delegation-run.vue'
+import type { BotDelegationHistoryAction } from '../composables/useBotDelegationHistory'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, CalloutBanner, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { BotdelegationView } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
-import { delegationAPIUnsupported } from '../composables/useBotDelegations'
 import type { BotDelegationDownloadAction } from '../composables/useBotDelegationDownload'
 import type { BotDelegationDeliveryAction } from '../composables/useBotDelegationDelivery'
 
@@ -17,6 +18,7 @@ const props = defineProps<{
   loading: boolean
   error?: unknown
   deliveryAction?: BotDelegationDeliveryAction
+  historyAction?: BotDelegationHistoryAction
   tasksAction?: () => void
   downloadAction?: BotDelegationDownloadAction
 }>()
@@ -27,7 +29,6 @@ const emit = defineEmits<{
 }>()
 const { t } = useI18n()
 const errorMessage = computed(() => {
-  if (delegationAPIUnsupported(props.error)) return t('chat.delegations.unsupported')
   if (isApiErrorCode(props.error, 'session.not_found')) return t('chat.delegations.inaccessible')
   return resolveApiErrorMessage(props.error, t('chat.delegations.loadFailed'))
 })
@@ -72,13 +73,12 @@ function taskLabel(task: BotdelegationView) {
       <p class="text-body">
         {{ t('chat.delegations.returnDelivery') }} · {{ deliveryLabel(detail.delivery_state) }}
       </p>
-      <p
-        v-if="detail.delivery_state === 'accepted' || deliveryAction?.response?.delivery_state === 'accepted'"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.delegations.deliveryAccepted') }}
-      </p>
     </div>
+    <BotDelegationRun
+      :task="detail"
+      :loading="loading"
+      :history-action="historyAction"
+    />
     <Button
       v-if="tasksAction && detail.target_session_id"
       variant="outline"
@@ -139,12 +139,6 @@ function taskLabel(task: BotdelegationView) {
       >
         {{ t('chat.tasks.truncated') }}
       </p>
-      <p
-        v-if="detail.state === 'accepted' || detail.state === 'running'"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.delegations.noLiveContent') }}
-      </p>
       <template v-if="detail.state === 'completed' && detail.attachments.length">
         <div
           v-if="downloadAction"
@@ -166,12 +160,6 @@ function taskLabel(task: BotdelegationView) {
             :description="resolveApiErrorMessage(downloadAction.error, t('chat.delegations.downloadFailed'))"
           />
         </div>
-        <p
-          v-else
-          class="text-body text-muted-foreground"
-        >
-          {{ t('chat.delegations.attachmentsUnavailable', { count: detail.attachments.length }) }}
-        </p>
       </template>
     </div>
   </section>
@@ -194,17 +182,9 @@ function taskLabel(task: BotdelegationView) {
       </ItemContent>
     </Item>
     <div
-      v-if="cursor || nextCursor"
+      v-if="nextCursor"
       class="flex flex-wrap gap-2"
     >
-      <Button
-        v-if="cursor"
-        variant="ghost"
-        :disabled="loading"
-        @click="emit('page')"
-      >
-        {{ t('chat.tasks.newest') }}
-      </Button>
       <Button
         v-if="nextCursor"
         variant="outline"

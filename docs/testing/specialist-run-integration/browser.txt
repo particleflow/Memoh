@@ -1,0 +1,5 @@
+PASS real JWT/Server/PG projection: exact existing native run and times; delegation/delivery unchanged; anonymous 401 no-store
+PASS supervisor handoff exposes admitted root run, separately from execution/delivery state
+PASS parent read failure clears unconfirmed run observation
+PASS explicit reload recovers the same handoff and native run without dispatch
+PASS fresh source relation and target-session permission check -> ordinary native history; zero task/chat/delivery mutations

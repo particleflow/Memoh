@@ -878,7 +878,7 @@ WHERE s.team_id = public.memoh_current_team_id()
     OR s.type <> 'schedule'
     OR EXISTS (
       SELECT 1 FROM schedule sc
-      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id
+      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id AND sc.deleted_at IS NULL
     )
   )
   AND (
@@ -1020,7 +1020,7 @@ WHERE s.team_id = public.memoh_current_team_id()
     OR s.type <> 'schedule'
     OR EXISTS (
       SELECT 1 FROM schedule sc
-      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id
+      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id AND sc.deleted_at IS NULL
     )
   )
   AND (
@@ -1309,6 +1309,59 @@ func (q *Queries) LockSessionForCommitReconciliation(ctx context.Context, arg Lo
 	var id pgtype.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const lockSessionForContact = `-- name: LockSessionForContact :one
+SELECT id, bot_id, route_id, channel_type, type, session_mode, runtime_type, runtime_metadata, preferred_chat_model_id, preferred_reasoning_effort, preferred_external_model_id, model_preference_revision, visibility, title, metadata, next_turn_position, compaction_epoch, runtime_fencing_token, runtime_reset_token, runtime_reset_expires_at, runtime_config_epoch, parent_session_id, created_by_user_id, created_at, updated_at, deleted_at, team_id, workdir_id, bot_agent_id
+FROM bot_sessions
+WHERE team_id = public.memoh_current_team_id()
+  AND id = $1
+  AND bot_id = $2
+FOR UPDATE
+`
+
+type LockSessionForContactParams struct {
+	SessionID pgtype.UUID `json:"session_id"`
+	BotID     pgtype.UUID `json:"bot_id"`
+}
+
+// Preserve the full binding, including a tombstone, before taking a route lock.
+// A missing or foreign row is not evidence that a contact may be recreated.
+func (q *Queries) LockSessionForContact(ctx context.Context, arg LockSessionForContactParams) (BotSession, error) {
+	row := q.db.QueryRow(ctx, lockSessionForContact, arg.SessionID, arg.BotID)
+	var i BotSession
+	err := row.Scan(
+		&i.ID,
+		&i.BotID,
+		&i.RouteID,
+		&i.ChannelType,
+		&i.Type,
+		&i.SessionMode,
+		&i.RuntimeType,
+		&i.RuntimeMetadata,
+		&i.PreferredChatModelID,
+		&i.PreferredReasoningEffort,
+		&i.PreferredExternalModelID,
+		&i.ModelPreferenceRevision,
+		&i.Visibility,
+		&i.Title,
+		&i.Metadata,
+		&i.NextTurnPosition,
+		&i.CompactionEpoch,
+		&i.RuntimeFencingToken,
+		&i.RuntimeResetToken,
+		&i.RuntimeResetExpiresAt,
+		&i.RuntimeConfigEpoch,
+		&i.ParentSessionID,
+		&i.CreatedByUserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.TeamID,
+		&i.WorkdirID,
+		&i.BotAgentID,
+	)
+	return i, err
 }
 
 const lockSessionRuntimeFence = `-- name: LockSessionRuntimeFence :one

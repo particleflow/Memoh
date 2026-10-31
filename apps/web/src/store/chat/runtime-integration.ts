@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import type { UIStreamEvent } from '@/composables/api/useChat'
+import type { UIStreamEvent, WSAbortReason } from '@/composables/api/useChat'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { createInvocationId, stringRecord } from '../chat-list.normalize'
 import { provisionalSessionTitle } from '../chat-list.utils'
@@ -105,6 +105,7 @@ const FIRST_SEND_CONFIRM_TIMEOUT_MS = 30_000
 
 export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
   const deferredAbortByInvocation = new Map<string, {
+    reason?: WSAbortReason
     runId: string
     botId: string
   }>()
@@ -122,7 +123,10 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
   // whether the first attempt's run was taken. Only a confirmation or the
   // timeout settles that; until then the send keeps its session.
   function refusalOf(invocationId: string, refusal: StreamFailureError): StreamFailureError {
-    return deps.firstSend.isResent(invocationId) ? sendOutcomeUnknownError() : refusal
+    return deps.firstSend.isResent(invocationId)
+      || deps.assistantStreams.getAssistantStream(invocationId)?.disconnectedBeforeAcceptance
+      ? sendOutcomeUnknownError()
+      : refusal
   }
 
   function handleSessionCreated(
@@ -161,7 +165,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     const requestedWorkdirId = deps.firstSend.requestedWorkdirFor(event.invocation_id)
     if (requestedWorkdirId && (event.workdir_id ?? '').trim() !== requestedWorkdirId) {
       deps.realtime.forgetWebSocketRequest(botId, event.invocation_id)
-      abortRun(event.invocation_id)
+      abortRun(event.invocation_id, 'workdir_mismatch')
       deps.assistantStreams.rejectAssistantStream(
         event.invocation_id,
         new StreamFailureError(deps.workdirMismatchMessage(), 'startup', event),
@@ -189,7 +193,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     const deferredAbort = deferredAbortByInvocation.get(invocationId)
     if (!deferredAbort) return
     deferredAbortByInvocation.delete(invocationId)
-    sendAbortControl(deferredAbort.runId, deferredAbort.botId, sessionId)
+    sendAbortControl(deferredAbort.runId, deferredAbort.botId, sessionId, deferredAbort.reason)
   }
 
   // The server took a held first send once it has both named the session
@@ -318,11 +322,12 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
       }
       if (accepted?.abortRequested) {
         const botId = accepted.botId || sourceBotId
-        if (sessionId) sendAbortControl(accepted.runId, botId, sessionId)
+        if (sessionId) sendAbortControl(accepted.runId, botId, sessionId, accepted.abortReason)
         else {
           deferredAbortByInvocation.set(accepted.invocationId, {
             runId: accepted.runId,
             botId,
+            reason: accepted.abortReason,
           })
         }
       }
@@ -444,6 +449,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     const currentPending = currentInvocationId
       ? deps.assistantStreams.getAssistantStream(currentInvocationId)
       : undefined
+    if (currentPending && currentRun) deps.assistantStreams.observeProjection(currentInvocationId, botId, sessionId, currentRun.run_id)
     const needsHistoryResync = Boolean(
       view && !view.transcript.applyRuntimeTranscript(change.current.transcript),
     )
@@ -550,28 +556,26 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     }
   }
 
-  function abortRun(invocationId: string) {
-    const runId = deps.assistantStreams.requestAbort(invocationId)
+  function abortRun(invocationId: string, reason: WSAbortReason = 'user_stop') {
+    const runId = deps.assistantStreams.requestAbort(invocationId, reason)
     if (!runId) return
     const stream = deps.assistantStreams.getAssistantStream(invocationId)
     if (!stream?.sessionId.trim()) {
       deferredAbortByInvocation.set(invocationId, {
         runId,
         botId: stream?.botId ?? '',
+        reason,
       })
       return
     }
-    sendAbortControl(
-      runId,
-      stream?.botId,
-      stream?.sessionId,
-    )
+    sendAbortControl(runId, stream?.botId, stream?.sessionId, reason)
   }
 
   function sendAbortControl(
     runId: string,
     botId?: string,
     sessionId?: string,
+    reason?: WSAbortReason,
   ): boolean {
     const controlId = createInvocationId()
     const sid = sessionId?.trim() ?? ''
@@ -580,12 +584,13 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
       botId,
       sid,
       controlId,
+      reason ?? 'unspecified',
     )
     if (sent) deps.decisions.trackAbort(controlId, sid, runId)
     return sent
   }
 
-  function abort(target?: ChatViewTarget) {
+  function abort(target?: ChatViewTarget, reason: WSAbortReason = 'user_stop') {
     const resolved = deps.normalizeTarget(target)
     const abortError = new Error('aborted')
     abortError.name = 'AbortError'
@@ -608,11 +613,12 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
           runtime.run_id,
           resolved.botId,
           resolved.sessionId,
+          reason,
         )
       }
     }
     for (const invocationId of invocationIds) {
-      if (!runtimeAborted) abortRun(invocationId)
+      if (!runtimeAborted) abortRun(invocationId, reason)
       deps.assistantStreams.rejectAssistantStream(invocationId, abortError)
     }
     deps.chatViews.prune()
@@ -628,6 +634,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
   // the queued resend is dropped.
   function handleWebSocketClosed(botId: string) {
     const bid = botId.trim()
+    deps.assistantStreams.markDisconnected(bid)
     for (const invocationId of deps.firstSend.awaitingConfirmationIds()) {
       const pending = deps.assistantStreams.getAssistantStream(invocationId)
       if (!pending || pending.botId.trim() !== bid) continue
@@ -643,17 +650,15 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     }
   }
 
-  // Ends a held first send the server has not confirmed in time, with its
-  // outcome unknown. The stop is recorded too, so a run_accepted that still
-  // arrives aborts the run instead of leaving it going unwatched. Returns the
-  // cancel for the send to call once it settles.
+  // Ends any local send the server has not confirmed in time, with its
+  // outcome unknown. Missing confirmation does not authorize stopping a run
+  // the server may already be executing. Returns the cancel for the send to
+  // call once it settles.
   function watchFirstSendConfirmation(invocationId: string): () => void {
     const timer = setTimeout(() => {
-      if (!deps.firstSend.isAwaitingConfirmation(invocationId)) return
       const pending = deps.assistantStreams.getAssistantStream(invocationId)
-      if (!pending) return
+      if (!pending || pending.runId || pending.projectionObserved) return
       deps.realtime.forgetWebSocketRequest(pending.botId, invocationId)
-      abortRun(invocationId)
       deps.assistantStreams.rejectAssistantStream(
         invocationId,
         sendOutcomeUnknownError(),
@@ -662,10 +667,10 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     return () => clearTimeout(timer)
   }
 
-  function abortAllAssistantStreams() {
+  function abortAllAssistantStreams(reason: WSAbortReason = 'client_cleanup') {
     const abortError = new Error('aborted')
     abortError.name = 'AbortError'
-    deps.assistantStreams.rejectAllStreams(abortError, abortRun)
+    deps.assistantStreams.rejectAllStreams(abortError, invocationId => abortRun(invocationId, reason))
     deferredAbortByInvocation.clear()
   }
 

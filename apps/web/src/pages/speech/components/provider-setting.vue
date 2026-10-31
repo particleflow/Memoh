@@ -56,7 +56,6 @@
               :key="field.key"
               stack="sm"
               :label="field.title || field.key"
-              :description="field.description"
             >
               <div
                 v-if="field.type === 'secret'"

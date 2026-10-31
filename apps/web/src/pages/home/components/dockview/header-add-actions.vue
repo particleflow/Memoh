@@ -16,13 +16,6 @@
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem
-          v-if="currentBotId"
-          @select="store.openDraftChat({ title: t('chat.newSession'), groupId: props.params.group.id, explicitSelection: false })"
-        >
-          <MessageCircle />
-          {{ t('sidebar.chat') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
           v-if="canWorkspaceExec"
           @select="store.openTerminal(props.params.group.id)"
         >
@@ -46,7 +39,7 @@
         <!-- Splitting is a desktop-only affordance: the mobile shell is a
              single stack, so the split items are hidden there. -->
         <template v-if="canSplit && !isMobile">
-          <DropdownMenuSeparator v-if="currentBotId || canWorkspaceExec || canSplitExtras" />
+          <DropdownMenuSeparator v-if="canWorkspaceExec || canSplitExtras" />
           <DropdownMenuItem @select="store.splitGroup(props.params.group.id, 'right')">
             <SplitRightIcon />
             {{ t('chat.tabBarToolkit.splitRight') }}
@@ -65,7 +58,6 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { MessageCircle } from 'lucide-vue-next'
 import { AddIcon, TerminalIcon, BrowserIcon, ComputerIcon, SplitRightIcon, SplitDownIcon } from '@memohai/icon/ui'
 import {
   Button,
@@ -118,6 +110,7 @@ const canSplit = computed(() => {
 })
 
 const hasAnyAction = computed(() =>
-  !!currentBotId.value || canWorkspaceExec.value || canSplitExtras.value || (canSplit.value && !isMobile.value),
+  activePanelId.value !== null && props.params.group.activePanel?.api.component !== 'chat'
+  && (canWorkspaceExec.value || canSplitExtras.value || (canSplit.value && !isMobile.value)),
 )
 </script>

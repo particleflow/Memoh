@@ -1,0 +1,6 @@
+=== RUN   TestWorkspaceStoragePostgresHTTPPreservesRegistration
+    workspace_storage_integration_test.go:154: PASS actual shared settings page with fresh PostgreSQL/HTTP: browse, successful mkdir once, explicit save once, refresh preserved selection, cancel no write, narrow Chinese dark; actual HTTP503 from unavailable simulated share disables NAS writes; no model calls. Windows share is simulated.
+        
+--- PASS: TestWorkspaceStoragePostgresHTTPPreservesRegistration (10.41s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	10.426s

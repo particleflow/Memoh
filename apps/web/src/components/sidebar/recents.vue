@@ -17,15 +17,7 @@
         :label-class="sectionLabelClass"
         compact
         @toggle="toggleSectionCollapsed"
-      >
-        <TextButton
-          :class="rowActionRevealClass"
-          :aria-label="t('chat.newSession')"
-          @click.stop="startUnfiledSession"
-        >
-          <Plus />
-        </TextButton>
-      </GroupHeader>
+      />
     </div>
 
     <!-- Cursor-paginated rows render as a plain list; load-more still uses a
@@ -45,8 +37,6 @@
           :streaming="chatStore.isSessionStreaming(currentBotId, session.id)"
           @select="handleSelect"
           @open-new-tab="handleOpenNewTab"
-          @rename="sessionDialogs?.openRename($event)"
-          @delete="sessionDialogs?.openDelete($event)"
         />
       </div>
 
@@ -92,14 +82,11 @@
         </div>
       </template>
     </div>
-
-    <SessionDialogs ref="sessionDialogs" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, toRef, watch, type ComponentPublicInstance } from 'vue'
-import { Plus } from 'lucide-vue-next'
+import { computed, nextTick, toRef, watch, type ComponentPublicInstance } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
@@ -109,9 +96,8 @@ import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { normalizedSessionMode, sortByRecency } from '@/store/chat-list.utils'
 import type { SessionSummary } from '@/composables/api/useChat'
 import { useSidebarInfiniteScroll } from './use-sidebar-infinite-scroll'
-import { TextButton, Skeleton } from '@felinic/ui'
+import { Skeleton } from '@felinic/ui'
 import SessionItem from './session-item.vue'
-import SessionDialogs from './session-dialogs.vue'
 import GroupHeader from './group-header.vue'
 
 // The sessions panel owns the scrollport shared with Folders; Recents pages
@@ -134,7 +120,6 @@ const {
   sessionsCursor,
 } = storeToRefs(chatStore)
 
-const sessionDialogs = ref<InstanceType<typeof SessionDialogs> | null>(null)
 
 const SIDEBAR_SESSION_MODES = new Set(['chat', 'discuss', 'schedule'])
 
@@ -158,10 +143,6 @@ const loadMoreSkeletonRows = SESSION_SKELETON_WIDTHS.slice(0, 3)
 // 区头 label 沿用改造前 TextButton 的渲染:静态 muted、hover 行变 foreground
 // (旧区头是 ghost TextButton,text-muted-foreground hover:text-foreground)
 const sectionLabelClass = 'text-xs font-[550] tracking-[-0.02em] text-muted-foreground transition-colors group-hover/group-header:text-foreground' /* ui-allow-style */
-
-// 组头 trailing 动作的显现类,与 folders-section 的组头按钮同一套
-// (见 group-header.vue 头注释)。
-const rowActionRevealClass = 'can-hover:opacity-0 can-hover:pointer-events-none group-hover/group-header:pointer-events-auto group-hover/group-header:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100'
 
 const sectionCollapsedByBot = useLocalStorage<Record<string, boolean>>(
   'workspace-sidebar-recents-collapsed',
@@ -218,17 +199,6 @@ watch(currentBotId, () => {
     resetScrollTop()
   })
 })
-
-// The Recents group-header plus: start a session bound to no folder, so it
-// lands in this unfiled timeline (mirrors folders-section.startFolderSession
-// with the working-workdir binding cleared).
-function startUnfiledSession() {
-  const botId = (currentBotId.value ?? '').trim()
-  if (!botId) return
-  workdirsStore.setWorkingWorkdir(botId, null)
-  workspaceTabs.openDraftChat({ title: t('chat.newSession'), explicitSelection: false })
-  workspaceTabs.closeMobileNav()
-}
 
 function handleSelect(session: SessionSummary) {
   // Pass the raw title (possibly empty): openSessionChat's fallback derives

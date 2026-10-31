@@ -1,0 +1,1 @@
+PASS actual Server/JWT/PG: direct aborted image run returns 200/empty tasks (not an error); mixed list returns 3 authorized items; malformed PC envelope excluded; malformed child text omitted; good child and unknown PC preserved; specialist separate list 200; anonymous401/no-store; pre-existing ledger unchanged

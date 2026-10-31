@@ -60,3 +60,37 @@ func TestComputerBindingCannotBeReboundOrOutliveRun(t *testing.T) {
 		}
 	}
 }
+
+func TestRestoreComputerRunKeepsAuthenticatedBinding(t *testing.T) {
+	b := ComputerBinding{BotID: "bot", UserID: "user", SessionID: "session", TargetID: "pc"}
+	ctx, err := WithComputerBinding(t.Context(), b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restored, err := RestoreComputerRun(ctx, "original-run")
+	want := b
+	want.RunID = "original-run"
+	got, ok := HostComputerBinding(restored)
+	if err != nil || !ok || got != want || ComputerScope(restored) != "pc" {
+		t.Fatal("restoring ledger run changed identity/scope", err)
+	}
+	if original, _ := HostComputerBinding(ctx); original != b {
+		t.Fatal("request binding was mutated")
+	}
+	if _, err := RestoreComputerRun(restored, "original-run"); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		ctx context.Context
+		run string
+	}{{t.Context(), "original-run"}, {ctx, ""}, {restored, "another-run"}, {context.WithValue(ctx, untrustedComputerKey{}, true), "original-run"}} {
+		if _, err := RestoreComputerRun(test.ctx, test.run); !errors.Is(err, ErrComputerBinding) {
+			t.Fatal("untrusted or changed run accepted", err)
+		}
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if _, err := RestoreComputerRun(canceled, "original-run"); !errors.Is(err, ErrComputerBinding) {
+		t.Fatal("canceled binding restored", err)
+	}
+}

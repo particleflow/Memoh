@@ -34,6 +34,10 @@ type delegationHTTPFixture struct {
 	creates, runs, deliveries atomic.Int32
 }
 
+func (*delegationHTTPFixture) TargetRun(context.Context, botdelegation.Record) (*botdelegation.RunObservation, error) {
+	return nil, nil
+}
+
 func (*delegationHTTPFixture) ValidateSession(context.Context, string) error { return nil }
 func (*delegationHTTPFixture) BotTeam(_ context.Context, bot string) (string, error) {
 	if bot == taskBot || bot == taskTarget {

@@ -1,0 +1,19 @@
+PASS real JWT/Server/PG projection: exact existing native run and times; delegation/delivery unchanged; anonymous 401 no-store
+PASS supervisor handoff exposes admitted root run, separately from execution/delivery state
+PASS parent read failure clears unconfirmed run observation
+PASS explicit reload recovers the same handoff and native run without dispatch
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: native session message/history endpoint must be read
+    at file:///tmp/delegation-run-integration/browser.mjs:64:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v25.9.0

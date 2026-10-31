@@ -13,7 +13,6 @@ import {
   SettingsSection,
   Spinner,
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@felinic/ui'
@@ -51,7 +50,6 @@ import { ONBOARDING_KEYS } from '../constants'
 import { mergeOnboardingModels } from './provider-setup'
 import StepFrame from '../components/step-frame.vue'
 import StepExitShell from '../components/step-exit-shell.vue'
-import HintBox from '../components/hint-box.vue'
 import FooterNav from '../components/footer-nav.vue'
 
 const { t } = useI18n()
@@ -64,6 +62,10 @@ const store = useBotCreateProgressStore()
 const userStore = useUserStore()
 
 onMounted(() => {
+  if (store.restorePending(true) || store.status === 'creating') {
+    nextStep()
+    return
+  }
   if (readOnboardingBotResult()) {
     nextStep()
     return
@@ -79,7 +81,7 @@ async function adoptExistingBot() {
   // A dev replay explicitly wants to exercise creation again; a creation that
   // is in flight or resumable in this tab is still owned by the progress step.
   if (import.meta.env.DEV && safeLocalGet(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1') return
-  if (store.status !== 'idle' || readCreatedBotSession(true)) return
+  if (store.status !== 'idle' || readCreatedBotSession(true, store.createScope())) return
   submitting.value = true
   try {
     const { data } = await getBots({ throwOnError: true })
@@ -384,9 +386,6 @@ async function handleSubmit() {
                         <CircleHelp class="size-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent class="max-w-80 text-left leading-relaxed">
-                      {{ $t('onboarding.bot.model.hint') }}
-                    </TooltipContent>
                   </Tooltip>
                 </div>
                 <InlineLoadingRow
@@ -424,13 +423,6 @@ async function handleSubmit() {
                 />
               </template>
             </div>
-
-            <HintBox
-              class="mt-6 transition-all duration-[350ms] ease-out delay-[200ms]"
-              :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
-            >
-              {{ $t('bots.createBotWaitHint') }}
-            </HintBox>
           </form>
         </div>
 

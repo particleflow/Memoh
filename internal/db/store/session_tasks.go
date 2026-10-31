@@ -9,6 +9,7 @@ import (
 type SessionTaskCandidate struct {
 	Type, ID, SessionID string
 	CreatedAt           time.Time
+	Name                string `json:"-"`
 }
 
 type SessionTaskFilter struct {

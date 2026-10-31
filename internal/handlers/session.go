@@ -30,20 +30,22 @@ import (
 
 // SessionHandler handles bot session CRUD endpoints.
 type SessionHandler struct {
-	sessionService  *session.Service
-	threadEnricher  threadEnricher
-	acpRuntimes     acpSessionRuntimeService
-	runtimeResets   sessionResetService
-	workdirs        sessionWorkdirService
-	agentRuntimes   sessionAgentRuntimeService
-	runtimeControls turn.RuntimeControlService
-	botAgents       *botagents.Service
-	botService      *bots.Service
-	accountService  *accounts.Service
-	modelPrefs      modelPreferenceService
-	projectionCache sessionProjectionCache
-	invocations     sessionInvocationLookup
-	logger          *slog.Logger
+	privateChats      privateChatResolver
+	sessionService    *session.Service
+	threadEnricher    threadEnricher
+	acpRuntimes       acpSessionRuntimeService
+	runtimeResets     sessionResetService
+	workdirs          sessionWorkdirService
+	agentRuntimes     sessionAgentRuntimeService
+	runtimeControls   turn.RuntimeControlService
+	botAgents         *botagents.Service
+	botService        *bots.Service
+	accountService    *accounts.Service
+	modelPrefs        modelPreferenceService
+	projectionCache   sessionProjectionCache
+	invocations       sessionInvocationLookup
+	abortObservations sessionAbortObservationStore
+	logger            *slog.Logger
 }
 
 type sessionProjectionCache interface {
@@ -145,19 +147,23 @@ func (h *SessionHandler) SetProjectionCache(cache sessionProjectionCache) {
 // Register registers session routes.
 func (h *SessionHandler) Register(e *echo.Echo) {
 	g := e.Group("/bots/:bot_id/sessions")
-	g.POST("", h.CreateSession)
+	g.POST("", rejectParallelChat)
+	g.POST("/contact", h.ResolvePrivateChat)
+	g.GET("/contact", h.InspectPrivateChat)
+	g.POST("/contact/bind", rejectParallelChat)
 	g.GET("", h.ListSessions)
 	g.GET("/model-preference-seed", h.ModelPreferenceSeed)
 	g.GET("/:session_id", h.GetSession)
 	g.GET("/:session_id/invocations/:invocation_id", h.GetSessionInvocation)
+	g.POST("/:session_id/decisions/:decision_id/recover", h.RecoverAcceptedUserInput)
 	g.GET("/:session_id/runtime-controls", h.GetRuntimeControls)
 	g.PATCH("/:session_id/runtime-controls/mode", h.SetRuntimeMode)
 	g.GET("/:session_id/runtime-controls/goal", h.GetRuntimeGoal)
 	g.POST("/:session_id/runtime-controls/goal", h.ControlRuntimeGoal)
 	g.POST("/:session_id/runtime-controls/commands", h.ExecuteRuntimeCommand)
-	g.POST("/:session_id/fork", h.ForkSession)
-	g.PATCH("/:session_id", h.UpdateSession)
-	g.DELETE("/:session_id", h.DeleteSession)
+	g.POST("/:session_id/fork", rejectParallelChat)
+	g.PATCH("/:session_id", h.UpdateSession, h.fixedContactPreferences)
+	g.DELETE("/:session_id", rejectParallelChat)
 }
 
 type createSessionRequest struct {

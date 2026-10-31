@@ -248,7 +248,6 @@
          the dialog itself carries no subtitle — its section label already does. -->
     <ActionCard
       :title="$t('mcp.advancedSettings')"
-      :description="advancedHint"
       @click="showAdvanced = true"
     >
       <template #icon>
@@ -648,12 +647,6 @@ function handleTransportChange(v: string) {
   connectionType.value = next
 }
 
-// The advanced card's description names its whole content: per-transport extras
-// only (env vars / headers) — authorization has its own entry above.
-const advancedHint = computed(() =>
-  connectionType.value === 'stdio' ? t('mcp.advancedHintStdio') : t('mcp.advancedHintRemote'),
-)
-
 // ---- Name inline edit (header) ----
 // Commits to the DRAFT (form.name), never to the server — Save owns persistence.
 const nameEditing = ref(false)
@@ -688,8 +681,7 @@ const oauthRowDescription = computed(() => {
   const s = oauthStatus.value
   if (s?.has_token && s.expired) return t('mcp.oauth.expired')
   if (probeAuthRequired.value && !s?.has_token) return t('mcp.oauth.signInRequired')
-  if (oauthNeedsClientId.value) return t('mcp.oauth.clientIdHint')
-  return t('mcp.oauth.optionalHint')
+  return undefined
 })
 
 function configValue(config: Record<string, unknown>, key: string): string {

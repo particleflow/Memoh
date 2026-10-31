@@ -6,10 +6,20 @@ import (
 
 	tools "github.com/felinics/memoh/internal/agent/tool"
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/imagecapability"
+	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
+
+// Reuse the same live-authorized loader as native conversation attachments.
+// The durable delegation selects the original owner; no media alias is written.
+func bindImageCapabilityReferences(provider *imagecapability.Provider, assets *media.Service, delegations *botdelegation.Service) {
+	loader := &delegationAssetLoader{base: &gatewayAssetLoaderAdapter{media: assets}, host: delegations.Host.(*delegationHost)}
+	provider.SetReferenceOpener(loader.OpenForGateway)
+}
 
 // Reuse live Bot chat permission and the persisted session-to-Bot binding.
 // Session identities come from host admission, never image tool arguments.

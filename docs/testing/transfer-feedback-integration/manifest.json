@@ -1,0 +1,72 @@
+{
+  "base": "9601ac062a3b65477db8db76bcaa521265ba7ee2",
+  "source": "0894a6eb8ff69c8796e2da5450fa172d4cd5ef81",
+  "source_delta_base": "648e4511f35fe2ce187509e9823d03c1d2e1d341",
+  "product_head": "e4e97009dc4321770ce3730ab7bc8250cda3d44f",
+  "logs": [
+    {
+      "file": "cli-race.log",
+      "sha256": "a266001bf46f88a15d73d000bb7a7b3258816ffb338a735a7d88d4c03dea6126",
+      "bytes": 2778,
+      "transformation": "none"
+    },
+    {
+      "file": "feedback-race.log",
+      "sha256": "b3857a1ebaa3fbc8f600ffdf1c0d3fc9a0b8ba364a24fdec2453a2abaee65b7c",
+      "bytes": 2484,
+      "transformation": "none"
+    },
+    {
+      "file": "lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "transformation": "none"
+    },
+    {
+      "file": "build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "transformation": "none"
+    },
+    {
+      "file": "core.log",
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+      "bytes": 95,
+      "transformation": "none"
+    },
+    {
+      "file": "commit-hook.log",
+      "sha256": "c210c65e382a056d8475380d3c55e388fed97efc3e380fe945da14ceff88d6ee",
+      "bytes": 276,
+      "transformation": "none"
+    },
+    {
+      "file": "source-files.json",
+      "sha256": "d12d9f7afa38e7b0c8c17b9ba1d9fe0a87fc4af8e8491bc4c3257eb499bac704",
+      "bytes": 1066,
+      "transformation": "none"
+    }
+  ],
+  "checks": {
+    "cli_race": {
+      "exit": 0,
+      "named_pass_entries": 22,
+      "skips": 0
+    },
+    "feedback_race": {
+      "exit": 0,
+      "named_pass_entries": 18,
+      "skips": 0
+    },
+    "lint": {
+      "exit": 0,
+      "version": "2.10.1"
+    },
+    "build": {
+      "exit": 0
+    },
+    "core_boundary": {
+      "exit": 0
+    }
+  }
+}

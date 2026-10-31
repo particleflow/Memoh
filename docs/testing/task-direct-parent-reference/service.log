@@ -1,0 +1,128 @@
+=== RUN   TestDirectParentProjectionAcrossPagesAndQueryRoots
+--- PASS: TestDirectParentProjectionAcrossPagesAndQueryRoots (0.00s)
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors/missing
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors/other_owner
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors/other_bot
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors/orphan
+=== RUN   TestDirectParentProjectionDoesNotExposeUnavailableAncestors/cycle
+--- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors (0.00s)
+    --- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors/missing (0.00s)
+    --- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors/other_owner (0.00s)
+    --- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors/other_bot (0.00s)
+    --- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors/orphan (0.00s)
+    --- PASS: TestDirectParentProjectionDoesNotExposeUnavailableAncestors/cycle (0.00s)
+=== RUN   TestPersistedCompletionProjection
+=== RUN   TestPersistedCompletionProjection/success
+=== RUN   TestPersistedCompletionProjection/failed
+=== RUN   TestPersistedCompletionProjection/aborted
+=== RUN   TestPersistedCompletionProjection/incomplete
+=== RUN   TestPersistedCompletionProjection/invalid_protocol
+=== RUN   TestPersistedCompletionProjection/output_limit
+=== RUN   TestPersistedCompletionProjection/not_started
+=== RUN   TestPersistedCompletionProjection/empty_final
+=== RUN   TestPersistedCompletionProjection/truncated
+=== RUN   TestPersistedCompletionProjection/legacy
+=== RUN   TestPersistedCompletionProjection/future_version
+=== RUN   TestPersistedCompletionProjection/missing_receipt
+=== RUN   TestPersistedCompletionProjection/wrong_attempt
+=== RUN   TestPersistedCompletionProjection/wrong_session
+=== RUN   TestPersistedCompletionProjection/no_exit
+=== RUN   TestPersistedCompletionProjection/pending_result
+=== RUN   TestPersistedCompletionProjection/missing_completion
+=== RUN   TestPersistedCompletionProjection/bad_success
+=== RUN   TestPersistedCompletionProjection/oversized
+=== RUN   TestPersistedCompletionProjection/forged_outcome
+=== RUN   TestPersistedCompletionProjection/too_few_records
+=== RUN   TestPersistedCompletionProjection/invalid_with_text
+--- PASS: TestPersistedCompletionProjection (0.03s)
+    --- PASS: TestPersistedCompletionProjection/success (0.00s)
+    --- PASS: TestPersistedCompletionProjection/failed (0.00s)
+    --- PASS: TestPersistedCompletionProjection/aborted (0.00s)
+    --- PASS: TestPersistedCompletionProjection/incomplete (0.00s)
+    --- PASS: TestPersistedCompletionProjection/invalid_protocol (0.00s)
+    --- PASS: TestPersistedCompletionProjection/output_limit (0.00s)
+    --- PASS: TestPersistedCompletionProjection/not_started (0.00s)
+    --- PASS: TestPersistedCompletionProjection/empty_final (0.00s)
+    --- PASS: TestPersistedCompletionProjection/truncated (0.00s)
+    --- PASS: TestPersistedCompletionProjection/legacy (0.00s)
+    --- PASS: TestPersistedCompletionProjection/future_version (0.00s)
+    --- PASS: TestPersistedCompletionProjection/missing_receipt (0.00s)
+    --- PASS: TestPersistedCompletionProjection/wrong_attempt (0.00s)
+    --- PASS: TestPersistedCompletionProjection/wrong_session (0.00s)
+    --- PASS: TestPersistedCompletionProjection/no_exit (0.00s)
+    --- PASS: TestPersistedCompletionProjection/pending_result (0.00s)
+    --- PASS: TestPersistedCompletionProjection/missing_completion (0.00s)
+    --- PASS: TestPersistedCompletionProjection/bad_success (0.00s)
+    --- PASS: TestPersistedCompletionProjection/oversized (0.00s)
+    --- PASS: TestPersistedCompletionProjection/forged_outcome (0.00s)
+    --- PASS: TestPersistedCompletionProjection/too_few_records (0.00s)
+    --- PASS: TestPersistedCompletionProjection/invalid_with_text (0.00s)
+=== RUN   TestResultProjectionWhitelistAndNoWrite
+--- PASS: TestResultProjectionWhitelistAndNoWrite (0.00s)
+=== RUN   TestLateCompletionIsLiveWithoutChangingPaginationKeys
+--- PASS: TestLateCompletionIsLiveWithoutChangingPaginationKeys (0.00s)
+=== RUN   TestParentAggregatesOwnedDescendantsWithoutChangingOwnership
+--- PASS: TestParentAggregatesOwnedDescendantsWithoutChangingOwnership (0.00s)
+=== RUN   TestScopeAndRevocation
+=== RUN   TestScopeAndRevocation/user
+=== RUN   TestScopeAndRevocation/bot
+=== RUN   TestScopeAndRevocation/parent
+=== RUN   TestScopeAndRevocation/child_user
+=== RUN   TestScopeAndRevocation/child_bot
+=== RUN   TestScopeAndRevocation/child_deleted
+=== RUN   TestScopeAndRevocation/foreign_session
+=== RUN   TestScopeAndRevocation/pc_mismatch
+=== RUN   TestScopeAndRevocation/pc_grant_revoked
+=== RUN   TestScopeAndRevocation/root_grant_revoked
+=== RUN   TestScopeAndRevocation/registration_changed
+=== RUN   TestScopeAndRevocation/child_broadens
+=== RUN   TestScopeAndRevocation/cycle
+=== RUN   TestScopeAndRevocation/receipt_user
+=== RUN   TestScopeAndRevocation/receipt_bot
+--- PASS: TestScopeAndRevocation (0.00s)
+    --- PASS: TestScopeAndRevocation/user (0.00s)
+    --- PASS: TestScopeAndRevocation/bot (0.00s)
+    --- PASS: TestScopeAndRevocation/parent (0.00s)
+    --- PASS: TestScopeAndRevocation/child_user (0.00s)
+    --- PASS: TestScopeAndRevocation/child_bot (0.00s)
+    --- PASS: TestScopeAndRevocation/child_deleted (0.00s)
+    --- PASS: TestScopeAndRevocation/foreign_session (0.00s)
+    --- PASS: TestScopeAndRevocation/pc_mismatch (0.00s)
+    --- PASS: TestScopeAndRevocation/pc_grant_revoked (0.00s)
+    --- PASS: TestScopeAndRevocation/root_grant_revoked (0.00s)
+    --- PASS: TestScopeAndRevocation/registration_changed (0.00s)
+    --- PASS: TestScopeAndRevocation/child_broadens (0.00s)
+    --- PASS: TestScopeAndRevocation/cycle (0.00s)
+    --- PASS: TestScopeAndRevocation/receipt_user (0.00s)
+    --- PASS: TestScopeAndRevocation/receipt_bot (0.00s)
+=== RUN   TestSelectedPCInheritedThroughChildren
+--- PASS: TestSelectedPCInheritedThroughChildren (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/id
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/snapshot
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/primary
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/malformed
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/conflicting
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/workdir_precedence
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/id (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/snapshot (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/primary (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/malformed (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/conflicting (0.00s)
+    --- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/workdir_precedence (0.00s)
+=== RUN   TestProjectionNeverLeaksAndStatesStayHonest
+--- PASS: TestProjectionNeverLeaksAndStatesStayHonest (0.00s)
+=== RUN   TestPiBatchReceiptsRemainOutsideFrozenSummaryContract
+--- PASS: TestPiBatchReceiptsRemainOutsideFrozenSummaryContract (0.00s)
+=== RUN   TestCursorStableAcrossLateStateChangesAndRevocation
+--- PASS: TestCursorStableAcrossLateStateChangesAndRevocation (0.00s)
+=== RUN   TestBoundedFilteredPagesStillAdvance
+--- PASS: TestBoundedFilteredPagesStillAdvance (0.00s)
+=== RUN   TestSubagentUsesOwnRunAndVisibleText
+--- PASS: TestSubagentUsesOwnRunAndVisibleText (0.00s)
+=== RUN   TestSubagentTextProjectionIsBoundedAndNotRawLogs
+--- PASS: TestSubagentTextProjectionIsBoundedAndNotRawLogs (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	1.095s

@@ -52,7 +52,7 @@
           v-if="isNative"
           class="px-4 py-3 text-xs text-muted-foreground"
         >
-          {{ $t('webSearch.nativeManaged') }}
+          {{ $t('common.active') }}
         </div>
 
         <form

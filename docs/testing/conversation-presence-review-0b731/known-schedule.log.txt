@@ -1,0 +1,2 @@
+exit=1
+ERROR: trusted non-user history suppresses first direct input: previous_inputs=1, last_direct_input=<NULL> (expected 0,NULL) (SQLSTATE P0001)

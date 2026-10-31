@@ -1,8 +1,6 @@
 <template>
   <div class="h-full w-full bg-background">
-    <PanePlaceholder :title="t('chat.workspaceEmpty')">
-      {{ t('chat.workspaceEmptyHint') }}
-    </PanePlaceholder>
+    <PanePlaceholder :title="t('chat.workspaceEmpty')" />
   </div>
 </template>
 

@@ -3,7 +3,6 @@
     <SettingsSection :title="$t('bots.agent.runtimeSetup')">
       <SettingsRow
         :label="$t('bots.agent.authMode')"
-        :description="authDescription"
       >
         <Select
           :model-value="config.auth"
@@ -28,7 +27,6 @@
       <SettingsRow
         v-if="config.auth === 'api_key' || config.auth === 'oauth_token'"
         :label="config.auth === 'api_key' ? $t('bots.agent.apiKey') : $t('bots.agent.oauthToken')"
-        :description="config.auth === 'api_key' ? $t('bots.agent.apiKeyDescription') : $t('bots.agent.oauthTokenDescription')"
         stack="sm"
       >
         <AgentCredentialInput
@@ -63,7 +61,6 @@
 
       <SettingsRow
         :label="$t('bots.agent.defaultModel')"
-        :description="$t('bots.agent.defaultModelDescription')"
         stack="sm"
       >
         <Input
@@ -77,7 +74,6 @@
       <SettingsRow
         v-if="defaultModes?.supported"
         :label="$t('bots.agent.defaultPermissionMode')"
-        :description="$t('bots.agent.defaultPermissionModeDescription')"
         stack="sm"
       >
         <Select
@@ -172,7 +168,6 @@ import {
   DIRECT_BOT_AGENT_API_KEY_AUTH_KIND,
   DIRECT_BOT_AGENT_AUTH_MODES,
   DIRECT_BOT_AGENT_DEPENDENCY_ID,
-  isAgentAuthMode,
   isDeviceLoginAuthMode,
   isDirectBotAgentRuntime,
   normalizeBotAgentRuntime,
@@ -247,8 +242,6 @@ function readConfig() {
 }
 
 watch([() => props.agent.metadata, runtime], readConfig, { immediate: true })
-
-const authDescription = computed(() => t(AGENT_AUTH_MODE_COPY[isAgentAuthMode(config.auth) ? config.auth : 'api_key'].description))
 
 // Empty for a runtime that takes no base URL override; the row is then hidden.
 const baseUrlPlaceholder = computed(() => isCodex.value

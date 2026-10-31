@@ -1,0 +1,62 @@
+{
+  "base": "4d23244c683aca4c436efec4db375921fdf60472",
+  "product_files": [
+    "cmd/internal/core/computer_tasks.go",
+    "internal/agenvo/batch_read_trace.go",
+    "internal/agenvo/pi_batch_service.go",
+    "internal/computertask/pi_batch.go",
+    "internal/computertask/pi_batch_reader.go",
+    "internal/computertask/source.go"
+  ],
+  "regression": {
+    "command": "go test -json ./internal/computertask ./internal/agenvo -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity|BatchReader(UnknownCreation|OnlyCASWinner|ReadOnlyGet|DoesNotTreat|ChangedIdentity|ReceiptAndHash|PageReread)|StandardMCPPiBatch(DelayedFrames|ReadRejection|CompleteReceipt)|CompactResultIndependent)' -count=1",
+    "exit_code": 0,
+    "passed_test_and_subtest_events": 41,
+    "failed": 0,
+    "skipped": 0
+  },
+  "new_read_scenarios": 9,
+  "each_scenario_compares_logging_off_on": true,
+  "race": {
+    "command": "go test -race ./internal/computertask ./internal/agenvo -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity)$' -count=1",
+    "exit_code": 0
+  },
+  "vet": {
+    "command": "go vet ./internal/agenvo ./internal/computertask ./cmd/internal/core",
+    "exit_code": 0
+  },
+  "core_di_compile": {
+    "command": "go test ./cmd/internal/core -run '^$'",
+    "exit_code": 0,
+    "unrelated_core_tests_executed": false
+  },
+  "incremental_lint": {
+    "command": "golangci-lint run --new-from-merge-base=4d23244c683aca4c436efec4db375921fdf60472 ./internal/agenvo/... ./internal/computertask/... ./cmd/internal/core/...",
+    "exit_code": 0
+  },
+  "aggregate": {
+    "command": "node .husky/checks.mjs",
+    "exit_code": 1,
+    "failure": "unchanged baseline computer_tasks_preflight_test.go:91 unusedwrite DeviceID",
+    "tests_phase_ran": false,
+    "baseline_independently_reproduced": "previous isolated 4d baseline lint proof retained at qa-delegated-image-input-4d/baseline-lint.log",
+    "rules_changed": false
+  },
+  "official_core_boundary": {
+    "command": "bash scripts/check-agent-core-boundary.sh",
+    "exit_code": 0,
+    "official_baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046"
+  },
+  "prior_failures_preserved": [
+    "fixture privacy check initially rejected safe enum words; changed to explicit private-field/marker checks",
+    "lint initially flagged deliberate direct-error identity test; narrow documented test-only suppression preserves the stricter identity assertion"
+  ],
+  "field_calls": 0,
+  "paid_model_calls": 0,
+  "schema_or_public_tool_changes": 0,
+  "cas_or_retry_changes": 0,
+  "deployment": false,
+  "production_root_cause": "not confirmed; instrumentation only",
+  "ui_acceptance": "not performed; source/isolated verification only",
+  "ci": "not run on this branch"
+}

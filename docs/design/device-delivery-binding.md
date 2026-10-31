@@ -3,8 +3,8 @@
 This increment supersedes the bootstrap proposals in `task-transfer-principal.md`
 that required a separate grant or native plugin attestation for each file. A
 trusted, paired private PC can reuse one configured Memoh device credential.
-Existing Agenvo `pane.run` can invoke the finite helper; it is not proof of
-completion. No Agenvo/Herdr connector or Agent core modification is required.
+The native Runtime invokes the configured finite helper; invocation acceptance
+is not proof of completion. No Agent core modification is required.
 
 `DeviceTransferVerifier` authenticates the configured credential to a stable
 connection/device/instance tuple and rechecks revocation. It does not accept an

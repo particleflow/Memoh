@@ -94,7 +94,6 @@ defineExpose({ handoff, resume })
   <SettingsRow
     v-if="deviceLoginAuth && signsInAfterCreate"
     :label="$t(AGENT_AUTH_MODE_COPY[deviceLoginAuth].label)"
-    :description="$t('bots.agent.signInAfterCreate')"
   />
   <DeviceLoginPanel
     v-else-if="deviceLoginAuth"
@@ -110,7 +109,7 @@ defineExpose({ handoff, resume })
   <SettingsRow
     v-else-if="mode === 'claude_account'"
     :label="$t('bots.agent.claudeAccount')"
-    :description="ready ? $t('bots.settings.agentCredentialSaved') : $t('bots.agent.claudeAccountDescription')"
+    :description="ready ? $t('bots.settings.agentCredentialSaved') : undefined"
   >
     <Button
       type="button"
@@ -127,7 +126,7 @@ defineExpose({ handoff, resume })
   <SettingsRow
     v-else
     :label="mode === 'oauth_token' ? $t('bots.agent.oauthToken') : $t('bots.agent.apiKey')"
-    :description="error || (ready ? $t('bots.settings.agentCredentialSaved') : mode === 'oauth_token' ? $t('bots.agent.oauthTokenDescription') : $t('bots.agent.apiKeyDescription'))"
+    :description="error || (ready ? $t('bots.settings.agentCredentialSaved') : undefined)"
     stack="always"
   >
     <AgentCredentialInput
@@ -151,9 +150,6 @@ defineExpose({ handoff, resume })
         <DialogTitle>{{ $t('bots.agent.claudeAccount') }}</DialogTitle>
       </DialogHeader>
       <DialogBody class="space-y-4">
-        <p class="text-sm text-muted-foreground">
-          {{ $t('bots.agent.claudeAuthorizationHint') }}
-        </p>
         <Button
           type="button"
           variant="outline"

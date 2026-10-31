@@ -1,0 +1,238 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/speech-sentence-boundary.test.ts (12 tests | 9 failed) 52ms
+     × does not commit an ambiguous partial prefix Dr. as its own synthesis request 32ms
+     × does not commit an ambiguous partial prefix Mr. as its own synthesis request 3ms
+     × does not commit an ambiguous partial prefix Prof. as its own synthesis request 2ms
+     × does not commit an ambiguous partial prefix U.S. as its own synthesis request 1ms
+     × does not commit an ambiguous partial prefix Ph.D. as its own synthesis request 1ms
+     × does not commit an ambiguous partial prefix 第3. as its own synthesis request 3ms
+     × keeps a title and following name together instead of resetting context after Dr. 1ms
+     × does not break mixed-language clauses at an abbreviation or comma, but can commit a clear CJK sentence 1ms
+     × retains a trailing English period for textual lookahead; finalization flushes a genuine single sentence 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix Dr. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: 'Dr.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "Dr.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix Mr. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: 'Mr.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "Mr.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix Prof. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: 'Prof.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "Prof.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix U.S. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: 'U.S.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "U.S.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix Ph.D. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: 'Ph.D.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "Ph.D.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not commit an ambiguous partial prefix 第3. as its own synthesis request
+AssertionError: expected [ { key: 'turn', text: '第3.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "第3.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:9:57
+      7|   it.each(['Dr.', 'Mr.', 'Prof.', 'U.S.', 'Ph.D.', '3.', '1.', '第3.'])…
+      8|     const live = new LiveSpeechReplies()
+      9|     expect(live.update([message(prefix)], true, false)).toEqual([])
+       |                                                         ^
+     10|   })
+     11|   it('keeps a title and following name together instead of resetting c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > keeps a title and following name together instead of resetting context after Dr.
+AssertionError: expected [ { key: 'turn', text: 'Dr.' } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "Dr.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:13:56
+     11|   it('keeps a title and following name together instead of resetting c…
+     12|     const live = new LiveSpeechReplies()
+     13|     expect(live.update([message('Dr.')], true, false)).toEqual([])
+       |                                                        ^
+     14|     expect(live.update([message('Dr. Smith has 3.14 dollars. Next')], …
+     15|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > does not break mixed-language clauses at an abbreviation or comma, but can commit a clear CJK sentence
+AssertionError: expected [ { key: 'turn', …(1) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "请看第3.14项，Dr. ",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:23:74
+     21|   it('does not break mixed-language clauses at an abbreviation or comm…
+     22|     const live = new LiveSpeechReplies()
+     23|     expect(live.update([message('请看第3.14项，Dr. Smith 说明')], true, false…
+       |                                                                          ^
+     24|     expect(live.update([message('请看第3.14项，Dr. Smith 说明。下一句')], true, f…
+     25|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-sentence-boundary.test.ts > prosody boundaries across incremental tokens > retains a trailing English period for textual lookahead; finalization flushes a genuine single sentence
+AssertionError: expected [ { key: 'turn', …(1) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "A complete sentence.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-sentence-boundary.test.ts:28:73
+     26|   it('retains a trailing English period for textual lookahead; finaliz…
+     27|     const live = new LiveSpeechReplies()
+     28|     expect(live.update([message('A complete sentence.')], true, false)…
+       |                                                                         ^
+     29|     expect(live.update([message('A complete sentence.', false)], true,…
+     30|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 3 passed (12)
+   Start at  12:16:23
+   Duration  453ms (transform 94ms, setup 0ms, import 220ms, tests 52ms, environment 0ms)

@@ -1,0 +1,58 @@
+Run https://github.com/particleflow/Memoh/actions/runs/40453237386
+Head cd9133f37077ac37b7f34428804d0633ce1edacf
+Job122020556849 step6, attempt1. Extract; complete original job log remains on GitHub.
+2026-10-27T05:06:57.8233416Z === RUN   TestProducerFeedbackScopeAndUnchangedBlock
+2026-10-27T05:06:57.9551588Z     producer_feedback_test.go:134: delivery store unavailable or corrupt
+2026-10-27T05:06:57.9551990Z         delivery private storage permission denied
+2026-10-27T05:06:57.9571037Z --- FAIL: TestProducerFeedbackScopeAndUnchangedBlock (0.13s)
+2026-10-27T05:06:57.9571589Z === RUN   TestProducerMultiplePartialRestartAndDeniedFile
+2026-10-27T05:06:58.8361781Z     producer_multifile_test.go:22: delivery store unavailable or corrupt
+2026-10-27T05:06:58.8362366Z         delivery private storage permission denied
+2026-10-27T05:06:58.8387901Z --- FAIL: TestProducerMultiplePartialRestartAndDeniedFile (0.88s)
+2026-10-27T05:06:58.8388313Z === RUN   TestProducerFeedbackDeniedFirstAndMiddle
+2026-10-27T05:06:58.8388666Z === RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0
+2026-10-27T05:06:59.6979545Z     producer_multifile_test.go:29: delivery store unavailable or corrupt
+2026-10-27T05:06:59.6980140Z         delivery private storage permission denied
+2026-10-27T05:06:59.7002405Z === RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1
+2026-10-27T05:07:00.5812783Z     producer_multifile_test.go:29: delivery store unavailable or corrupt
+2026-10-27T05:07:00.5813816Z         delivery private storage permission denied
+2026-10-27T05:07:00.5843518Z === RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0
+2026-10-27T05:07:01.4986784Z     producer_multifile_test.go:29: delivery store unavailable or corrupt
+2026-10-27T05:07:01.4987208Z         delivery private storage permission denied
+2026-10-27T05:07:01.5013523Z === RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1
+2026-10-27T05:07:02.3637307Z     producer_multifile_test.go:29: delivery store unavailable or corrupt
+2026-10-27T05:07:02.3638007Z         delivery private storage permission denied
+2026-10-27T05:07:02.3664353Z --- FAIL: TestProducerFeedbackDeniedFirstAndMiddle (3.53s)
+2026-10-27T05:07:02.3664786Z     --- FAIL: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0 (0.86s)
+2026-10-27T05:07:02.3665742Z     --- FAIL: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1 (0.88s)
+2026-10-27T05:07:02.3666166Z     --- FAIL: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0 (0.92s)
+2026-10-27T05:07:02.3666617Z     --- FAIL: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1 (0.86s)
+2026-10-27T05:07:02.3667030Z === RUN   TestProducerClosedManifestRestartAndLostAssociation
+2026-10-27T05:07:02.7359762Z --- PASS: TestProducerClosedManifestRestartAndLostAssociation (0.37s)
+2026-10-27T05:07:03.0801998Z === RUN   TestProducerBadManifestDoesNotStarveValidDelivery/oversize
+2026-10-27T05:07:03.4304877Z     producer_test.go:77: delivery store unavailable or corrupt
+2026-10-27T05:07:03.4305244Z         delivery private storage permission denied
+2026-10-27T05:07:03.4327183Z === RUN   TestProducerBadManifestDoesNotStarveValidDelivery/malformed
+2026-10-27T05:07:03.8350492Z     producer_test.go:77: delivery store unavailable or corrupt
+2026-10-27T05:07:03.8351102Z         delivery private storage permission denied
+2026-10-27T05:07:03.8375014Z === RUN   TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch
+2026-10-27T05:07:04.2562943Z     producer_test.go:77: delivery store unavailable or corrupt
+2026-10-27T05:07:04.2563435Z         delivery private storage permission denied
+2026-10-27T05:07:04.2585862Z === RUN   TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch
+2026-10-27T05:07:04.6127897Z     producer_test.go:77: delivery store unavailable or corrupt
+2026-10-27T05:07:04.6128273Z         delivery private storage permission denied
+2026-10-27T05:07:04.6150087Z === RUN   TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan
+2026-10-27T05:07:04.9963701Z     producer_test.go:77: delivery store unavailable or corrupt
+2026-10-27T05:07:04.9964067Z         delivery private storage permission denied
+2026-10-27T05:07:04.9985568Z --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery (1.92s)
+2026-10-27T05:07:04.9987348Z     --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery/oversize (0.35s)
+2026-10-27T05:07:04.9987833Z     --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery/malformed (0.40s)
+2026-10-27T05:07:04.9988215Z     --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch (0.42s)
+2026-10-27T05:07:04.9988638Z     --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch (0.36s)
+2026-10-27T05:07:04.9989169Z     --- FAIL: TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan (0.38s)
+2026-10-27T05:07:04.9989617Z === RUN   TestProducerInputAndRootFailClosed
+2026-10-27T05:07:05.0338880Z --- PASS: TestProducerInputAndRootFailClosed (0.04s)
+2026-10-27T05:07:56.6824924Z === RUN   TestTaskSourceProcessRecovery
+2026-10-27T05:07:57.2445473Z     source_test.go:216: actual_bytes=131109 sha256=6453f7b7d701816b71381a6484be03cd5f17046e99c1907ab7adf967ada9d172 create=1 patch=3 complete=1 commit=1 original_identity=true new_processes=true source_preserved=true config_bytes_unchanged=true snapshot_copies=0
+2026-10-27T05:07:57.2468515Z --- PASS: TestTaskSourceProcessRecovery (0.57s)
+2026-10-27T05:07:57.2468954Z === RUN   TestTaskSourceManifestAndFeedbackScope

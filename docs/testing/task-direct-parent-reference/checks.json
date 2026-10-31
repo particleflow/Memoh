@@ -1,0 +1,25 @@
+{
+  "base": "b7f478bc1b79209207b0061bdf5af874406d6399",
+  "local_checks": {
+    "service_race": 0,
+    "postgres_real_integration_race": 0,
+    "http_sessiontask_race": 0,
+    "ui_83": 0,
+    "ui_final_relation_fixture_2": 0,
+    "web_types": 0,
+    "sdk_types": 0,
+    "server_build": 0,
+    "web_build": 0,
+    "swagger_generate": 0,
+    "sdk_generate": 0,
+    "actual_server_pg_http": 0,
+    "actual_browser": 0,
+    "ui_contract": 0,
+    "staged_aggregate": 0,
+    "evidence_runner_eslint": 0
+  },
+  "ui_contract_warnings": 3,
+  "web_build_chunk_warning": true,
+  "remote_ci": "not yet checked for this head; parent reads via existing connector",
+  "no_deployment": true
+}

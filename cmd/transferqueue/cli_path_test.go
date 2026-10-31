@@ -199,7 +199,17 @@ func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
 		if json.Unmarshal(waiting["next_due_at"], &deadline) != nil || !deadline.After(now) {
 			t.Fatal("missing persisted deadline")
 		}
-		now = deadline.Add(time.Millisecond)
+		// The producer's finite loop also samples the real clock between steps.
+		// Advance physical time to the persisted deadline rather than injecting
+		// a future time that the next internal sample would move backwards from.
+		timer := time.NewTimer(time.Until(deadline))
+		select {
+		case <-timer.C:
+		case <-t.Context().Done():
+			timer.Stop()
+			t.Fatal(t.Context().Err())
+		}
+		now = time.Now().UTC()
 	}
 	done := invoke("advance-results", "", nil)
 	if string(done["associated"]) != "true" || string(done["state"]) != `"idle"` {

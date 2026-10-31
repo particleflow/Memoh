@@ -50,7 +50,6 @@
 
   <SettingsRow
     :label="t('bots.schedule.execution.model')"
-    :description="modelHelp"
     stack="sm"
   >
     <div class="w-full sm:w-56">
@@ -375,13 +374,6 @@ const newSessionPlaceholder = computed(() =>
     ? t('bots.schedule.execution.pickModel')
     : t('bots.schedule.execution.botDefault'),
 )
-
-const modelHelp = computed(() => {
-  if (!modelRequired.value) return ''
-  return chatModels.value.length === 0
-    ? t('bots.schedule.execution.noModelAvailable')
-    : t('bots.schedule.execution.noBotDefaultModel')
-})
 
 // Seed the picker once the lists land, so the field is answered rather than
 // blocking on a question the user did not ask to be asked. It stays a normal

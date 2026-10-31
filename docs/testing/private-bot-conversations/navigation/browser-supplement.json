@@ -1,0 +1,563 @@
+{
+  "steps": [
+    "one verified ordinary legacy chat continues automatically, same original ID; no dialog and no new session",
+    "second member account sees completed denied result, not a stuck loading state or another account conversation",
+    "390px Chinese dark dialog remains unselected; Cancel leaves both old chats and main binding unchanged"
+  ],
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/useChat.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkdirs.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.types.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.chat-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.message-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.ws.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useApps.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useBot.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChatExamples.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useScheduleRuns.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkspaceDependencies.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useAppStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/sse-error.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useStarterPrompts.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useDisplayPrepareStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/unique-contact-fea4eb57",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/container",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/contact/bind",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/848c197a-c625-4261-ad04-d572647ac66a/queue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/848c197a-c625-4261-ad04-d572647ac66a",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/agents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/skills/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/sessions/848c197a-c625-4261-ad04-d572647ac66a/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/fea4eb57-f622-4f53-92ae-685e860f9491/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useContainerStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useBotCreateStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/botCreateTerminal.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkspaceDependencyStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkdirs.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.message-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.chat-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.types.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.ws.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useBot.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useApps.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChatExamples.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useScheduleRuns.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkspaceDependencies.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useAppStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useStarterPrompts.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useDisplayPrepareStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/sse-error.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/navigation-review-258ba8d8",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/useBotCreateStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useContainerStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/botCreateTerminal.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkspaceDependencyStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkdirs.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.types.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.ws.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.message-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChat.chat-api.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useApps.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useBot.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useChatExamples.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useScheduleRuns.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useWorkspaceDependencies.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useAppStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/sse-error.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useDisplayPrepareStream.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/useStarterPrompts.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/choice-dark-e7bc9563",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/container",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/sessions/model-preference-seed",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/starter-prompts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/agents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/skills/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/e7bc9563-8b06-4544-ba36-df535a1c81ea/media/limits",
+      "status": 200
+    }
+  ],
+  "page_errors": [],
+  "unique_bot": "fea4eb57-f622-4f53-92ae-685e860f9491",
+  "unique_original_session": "848c197a-c625-4261-ad04-d572647ac66a",
+  "model_messages_sent": 0
+}

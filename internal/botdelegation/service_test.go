@@ -14,11 +14,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/felinics/memoh/internal/chat/thread"
 )
 
 type memoryLedger struct {
-	mu      sync.Mutex
-	records map[string]Record
+	mu       sync.Mutex
+	records  map[string]Record
+	run      *RunObservation
+	runErr   error
+	runReads int
+}
+
+func (m *memoryLedger) TargetRun(_ context.Context, _ Record) (*RunObservation, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.runReads++
+	return m.run, m.runErr
 }
 
 func (m *memoryLedger) Claim(_ context.Context, r Record) (Record, bool, error) {
@@ -241,7 +253,7 @@ func TestUnknownAndDeliveryFailureDoNotRerunBusiness(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if h.runs.Load() != 1 || (state == "unknown" && (got.Summary != nil || h.deliveries.Load() != 0)) || (state == "completed" && got.DeliveryState != "unknown") {
+			if h.runs.Load() != 1 || h.deliveries.Load() != 1 || got.DeliveryState != "unknown" || (state == "unknown" && got.Summary != nil) {
 				t.Fatalf("dishonest state or rerun: %+v runs=%d", got, h.runs.Load())
 			}
 		})
@@ -282,13 +294,21 @@ func TestTextAndSingleOriginalReturnThenRevocation(t *testing.T) {
 }
 
 func TestRetryDeliveryNeverRunsSpecialistAgain(t *testing.T) {
-	s, _, h, in := serviceFixture(t)
+	s, f, h, in := serviceFixture(t)
+	// This legacy contract stops after accepted delivery. The opted-in native
+	// result path instead rechecks its durable publication receipt on each retry.
+	source := f.sessions["child"]
+	source.RuntimeType = thread.RuntimeACPAgent
+	f.sessions[source.ID] = source
 	h.deliverErr = errors.New("SECRET delivery response lost")
 	v, err := s.Submit(t.Context(), "manager", "user", "child", in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	s.wg.Wait()
+	if s.Ledger.(*memoryLedger).records[v.ID].Payload.ResultDeliveryVersion != 0 {
+		t.Fatal("legacy delivery fixture unexpectedly opted in")
+	}
 	h.deliverErr = nil
 	for range 3 {
 		v, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID)
@@ -306,6 +326,33 @@ func TestRetryDeliveryNeverRunsSpecialistAgain(t *testing.T) {
 	if _, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID); !errors.Is(err, ErrConflict) {
 		t.Fatal("unknown execution retried")
 	}
+}
+
+func TestRetryOptedInDeliveryReconcilesOriginalRecord(t *testing.T) {
+	s, _, h, in := serviceFixture(t)
+	h.deliverErr = errors.New("synthetic delivery acknowledgement lost")
+	v, err := s.Submit(t.Context(), "manager", "user", "child", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.wg.Wait()
+	before := s.Ledger.(*memoryLedger).records[v.ID]
+	if before.Payload.ResultDeliveryVersion != 1 || before.DeliveryState != "unknown" {
+		t.Fatalf("not an opted-in uncertain delivery: %+v", before)
+	}
+	h.deliverErr = nil
+	for range 3 {
+		got, err := s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID)
+		if err != nil || got.ID != v.ID || got.DeliveryState != "accepted" {
+			t.Fatalf("reconcile=%+v %v", got, err)
+		}
+	}
+	after := s.Ledger.(*memoryLedger).records[v.ID]
+	if h.runs.Load() != 1 || h.creates.Load() != 1 || h.deliveries.Load() != 4 || after.RunID != before.RunID || after.Identity != before.Identity {
+		t.Fatal("reconciliation changed execution identity or skipped the host receipt check")
+	}
+	// Host calls count reconciliation entries, not user messages. Exactly-once
+	// publication is covered separately by the real PostgreSQL receipt test.
 }
 
 func TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget(t *testing.T) {
@@ -372,5 +419,41 @@ func TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget(t *testing.T) {
 			}
 		}
 		c = p.NextCursor
+	}
+}
+
+func TestRunObservationSurvivesReaderRestartWithoutRedispatch(t *testing.T) {
+	a, _, identity, _ := fixture()
+	now := time.Now().UTC()
+	r := Record{Identity: identity, ID: uuid.NewString(), RunID: uuid.NewString(), State: "running", DeliveryState: "pending"}
+	ledger := &memoryLedger{records: map[string]Record{r.ID: r}, run: &RunObservation{ID: r.RunID, State: "completed", CreatedAt: now, UpdatedAt: now}}
+	for range 2 {
+		s := NewService(a, ledger, nil, nil, time.Minute)
+		got, err := s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID)
+		s.Close()
+		if err != nil || got.TargetRunID != r.RunID || got.TargetRunState != "completed" || got.State != "unknown" || got.TargetRunUpdatedAt == nil || !got.TargetRunUpdatedAt.Equal(now) {
+			t.Fatalf("durable observation must not promote unknown delegation or require live host: %+v %v", got, err)
+		}
+	}
+}
+
+func TestRunProjectionOmitsPlaceholderAndChecksAuthorityFirst(t *testing.T) {
+	a, f, identity, _ := fixture()
+	r := Record{Identity: identity, ID: uuid.NewString(), RunID: uuid.NewString(), State: "failed"}
+	ledger := &memoryLedger{records: map[string]Record{r.ID: r}}
+	s := NewService(a, ledger, nil, nil, time.Minute)
+	defer s.Close()
+	got, err := s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID)
+	if err != nil || got.TargetRunID != "" || got.TargetRunState != "" || got.TargetRunCreatedAt != nil {
+		t.Fatalf("placeholder leaked: %+v %v", got, err)
+	}
+	ledger.runErr = errors.New("synthetic read unavailable")
+	if _, err = s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID); err == nil {
+		t.Fatal("read failure must not look like no run")
+	}
+	reads := ledger.runReads
+	f.active = false
+	if _, err = s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID); err == nil || ledger.runReads != reads {
+		t.Fatal("revoked session read native run")
 	}
 }

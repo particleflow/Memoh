@@ -1,0 +1,90 @@
+{
+  "normalization": "Text only: ANSI escapes removed; exact known checkout prefix replaced with <checkout>; terminal blank lines collapsed to one final newline for nonempty text. No other edits. PNG byte-identical.",
+  "files": [
+    {
+      "name": "affected-go.log",
+      "original_sha256": "1d8605f6337e5971c0c3dafb38a452aee6406a51a2d3892ba12734d16f4990e8",
+      "published_sha256": "1d8605f6337e5971c0c3dafb38a452aee6406a51a2d3892ba12734d16f4990e8",
+      "published_bytes": 219
+    },
+    {
+      "name": "postgres.log",
+      "original_sha256": "e7e313f83ecbecbfde3118ec16cd472eac5b0143ed175ec23cb0403be653ac82",
+      "published_sha256": "e7e313f83ecbecbfde3118ec16cd472eac5b0143ed175ec23cb0403be653ac82",
+      "published_bytes": 4422
+    },
+    {
+      "name": "account-guard.log",
+      "original_sha256": "d9091be8fe2c7725df47e4b5aad97fc8cad8d877d5f59b591bcbfec5fe82d1ae",
+      "published_sha256": "d9091be8fe2c7725df47e4b5aad97fc8cad8d877d5f59b591bcbfec5fe82d1ae",
+      "published_bytes": 1749
+    },
+    {
+      "name": "sdk-types.log",
+      "original_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+      "published_sha256": "6861d1d9833ca683573b4f83428aafdb8601b7b67077bf12e7faf051561c3cdf",
+      "published_bytes": 89
+    },
+    {
+      "name": "web-types.log",
+      "original_sha256": "180a2e96d48e24d781156f8164baef8c17aa50e8b94edbe8c70919ce388dff3c",
+      "published_sha256": "180a2e96d48e24d781156f8164baef8c17aa50e8b94edbe8c70919ce388dff3c",
+      "published_bytes": 56
+    },
+    {
+      "name": "web-types-corrected.log",
+      "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "published_sha256": "ffbc712df86538528c6934f8dc01b285ed71b2d47ebd2f694d11314ba4f6eac1",
+      "published_bytes": 93
+    },
+    {
+      "name": "server-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_bytes": 0
+    },
+    {
+      "name": "server-start.log",
+      "original_sha256": "4b2a1adaed3fa6995bc12d982a9f9a3c34ec5d713199ca47f6a012f4e6de23c9",
+      "published_sha256": "4b2a1adaed3fa6995bc12d982a9f9a3c34ec5d713199ca47f6a012f4e6de23c9",
+      "published_bytes": 155
+    },
+    {
+      "name": "browser.log",
+      "original_sha256": "39c8dc2be23e6202663bf7686adb0c3335fe3705e690a821645e593009ca57d3",
+      "published_sha256": "39c8dc2be23e6202663bf7686adb0c3335fe3705e690a821645e593009ca57d3",
+      "published_bytes": 235
+    },
+    {
+      "name": "browser-proof.json",
+      "original_sha256": "1794bedf0670bea433b8831856e75b961db8257c37172f76a2a4117f588ded86",
+      "published_sha256": "1794bedf0670bea433b8831856e75b961db8257c37172f76a2a4117f588ded86",
+      "published_bytes": 256
+    },
+    {
+      "name": "fixture-cleanup.log",
+      "original_sha256": "59534ec0a315d2bb561c3892a6ab98a89707539b5c12ce1dc4d84b0294c6c0a5",
+      "published_sha256": "59534ec0a315d2bb561c3892a6ab98a89707539b5c12ce1dc4d84b0294c6c0a5",
+      "published_bytes": 356
+    },
+    {
+      "name": "contract-proof.json",
+      "original_sha256": "10f27d9b20497a53e0a1921fd80aeb6f678923b4a122a7d7cac8209602e89aa9",
+      "published_sha256": "10f27d9b20497a53e0a1921fd80aeb6f678923b4a122a7d7cac8209602e89aa9",
+      "published_bytes": 651
+    },
+    {
+      "name": "native-registry-offline.png",
+      "original_sha256": "f533d0c4560419f9377642f7313216f447b9277353ecb0449a477685559b64b0",
+      "published_sha256": "f533d0c4560419f9377642f7313216f447b9277353ecb0449a477685559b64b0",
+      "published_bytes": 54746
+    }
+  ],
+  "postgres": {
+    "top_level_pass": 16,
+    "subtest_pass": 8,
+    "skip": 0,
+    "package_result": "ok  \tgithub.com/felinics/memoh/internal/db\t50.899s",
+    "exit_code": 0
+  }
+}

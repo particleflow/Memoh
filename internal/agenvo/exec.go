@@ -112,7 +112,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 		result.State = "unknown"
 		return result, ErrUnknown
 	}
-	// Agenvo does not offer an atomic expected-generation close. Retain the
+	// Herdr does not offer an atomic expected-generation close. Retain the
 	// workspace for inspection; never close a potentially reused native ID.
 	result.CleanupRequired = true
 	defer func() {
@@ -144,7 +144,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 			Output string `json:"output"`
 		}
 		// Unlike workspace CLI replies, pane.read is plain terminal output
-		// directly under the Agenvo native result, without another result key.
+		// directly under the native result, without another result key.
 		if err := json.Unmarshal(read.Result, &snapshot); err != nil {
 			result.State = "unknown"
 			return result, ErrUnknown

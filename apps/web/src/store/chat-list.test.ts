@@ -1,3 +1,5 @@
+import { createApp } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import enMessages from '@/i18n/locales/en.json'
 import { createPinia, disposePinia, setActivePinia, type Pinia } from 'pinia'
@@ -13,6 +15,7 @@ import type {
   UIStreamEventHandler,
   UITurn,
   UIUserTurn,
+  WSAbortReason,
 } from '@/composables/api/useChat'
 import { REASONING_EFFORT_DISABLE } from '@/pages/bots/components/reasoning-effort'
 import { AUTH_SESSION_CLEARED_EVENT } from '@/lib/auth-session'
@@ -27,6 +30,9 @@ const api = vi.hoisted(() => ({
   forkSessionFromTurn: vi.fn(),
   fetchSession: vi.fn(),
   fetchSessions: vi.fn(),
+  resolvePrivateChat: vi.fn(),
+  inspectPrivateChat: vi.fn(),
+  bindPrivateChat: vi.fn(),
   fetchBots: vi.fn(),
   fetchMessagesUI: vi.fn(),
   executeQuickAction: vi.fn(),
@@ -108,17 +114,18 @@ function deferred<T>() {
   return { promise, resolve, reject }
 }
 
-function applyLatestDraftRequest(store: ReturnType<typeof useChatStore>) {
-  const request = store.draftViewRequested
-  if (!request) throw new Error('Expected a Draft view request')
-  store.applyDraftViewRequest(request, true)
+async function declareHistoryEntry(sessionId: string) {
+  const router = createRouter({ history: createMemoryHistory(), routes: [
+    { path: '/', name: 'home', component: { render: () => null } },
+  ] })
+  await router.push({ path: '/', query: { session: sessionId } })
+  // A persisted tab is not an explicit history entry. Install the actual
+  // route context so this fixture exercises the same deep-link boundary.
+  const app = createApp({})
+  app.use(pinia)
+  app.use(router)
 }
 
-async function applyLatestForkRequest(store: ReturnType<typeof useChatStore>) {
-  const request = store.forkedSessionRequested
-  if (!request) throw new Error('Expected a Forked Session request')
-  await store.selectSession(request.sessionId)
-}
 
 const h = {
   streamHandler: null as UIStreamEventHandler | null,
@@ -131,6 +138,12 @@ const h = {
   runtimeUnsubscribes: [] as string[],
   wsRunIds: [] as string[],
   abortedWSRuns: [] as string[],
+  abortedWSControls: [] as Array<{
+    runId: string
+    sessionId: string
+    controlId: string
+    reason?: WSAbortReason
+  }>,
   lastRunId: '',
   lastSessionId: '',
   // Mirrors the server: a message without session_id creates a session and
@@ -270,6 +283,11 @@ function wsRunId(index = 0): string {
   return (index < 0 ? h.wsRunIds.at(index) : h.wsRunIds[index]) ?? ''
 }
 
+function recordAbort(runId: string, sessionId: string, controlId: string, reason?: WSAbortReason) {
+  h.abortedWSRuns.push(runId)
+  h.abortedWSControls.push({ runId, sessionId, controlId, reason })
+}
+
 beforeEach(() => {
     pinia = createPinia()
     setActivePinia(pinia)
@@ -291,20 +309,39 @@ beforeEach(() => {
     h.runtimeUnsubscribes = []
     h.wsRunIds = []
     h.abortedWSRuns = []
+    h.abortedWSControls = []
     h.sendUpdates = [runtime.started, runtime.failed('runtime_run_failed')]
     h.acceptRuns = true
-    vi.clearAllMocks()
+    vi.resetAllMocks()
 
     api.fetchBots.mockResolvedValue([
       { id: 'bot-1', status: 'active', name: 'Bot' },
     ])
     api.fetchSessions.mockResolvedValue({ items: [], nextCursor: null })
-    api.fetchSession.mockResolvedValue({
-      id: 'session-unknown',
-      bot_id: 'bot-1',
-      title: 'Unknown session',
-      type: 'chat',
+    // Explicit fake server state: the declared owned chat is already bound.
+    // Freeze that identity on first resolution, independently of later list
+    // refreshes, pagination, UI selection, and user-entered target IDs.
+    const contacts = new Map<string, Record<string, unknown>>()
+    api.resolvePrivateChat.mockImplementation(async (botId: string) => {
+      if (contacts.has(botId)) return contacts.get(botId)
+      const firstList = api.fetchSessions.mock.results.find((_result, index) =>
+        api.fetchSessions.mock.calls[index]?.[0] === botId)
+      const page = firstList?.type === 'return' ? await firstList.value : undefined
+      const declared = page?.items?.find((session: { bot_id: string, type?: string }) =>
+        session.bot_id === botId && session.type !== 'schedule' && session.type !== 'subagent')
+      const contact = declared ?? {
+        id: 'session-1', bot_id: botId, title: 'Fixed contact', type: 'chat',
+        channel_type: 'local',
+      }
+      contacts.set(botId, contact)
+      return contact
     })
+    api.inspectPrivateChat.mockImplementation(async (botId: string) => ({
+      session: await api.resolvePrivateChat(botId), candidates: [], nextCursor: null,
+    }))
+    api.fetchSession.mockImplementation(async (botId: string, sessionId: string) => ({
+      id: sessionId, bot_id: botId, title: 'Session', type: 'chat',
+    }))
     api.createSession.mockResolvedValue({
       id: 'session-1',
       bot_id: 'bot-1',
@@ -594,9 +631,7 @@ beforeEach(() => {
             publishRuntimeUpdate(onStreamEvent, h.lastSessionId, h.lastRunId, update)
           }
         }),
-        abort: vi.fn((runId: string) => {
-          h.abortedWSRuns.push(runId)
-        }),
+        abort: vi.fn(recordAbort),
         close: vi.fn(),
         forget: vi.fn(),
         bindSession: vi.fn(),
@@ -607,6 +642,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  // A timed-out async case may never reach its own finally block.
+  vi.useRealTimers()
   disposePinia(pinia)
   vi.unstubAllGlobals()
 })
@@ -696,6 +733,7 @@ describe('chat-list store', () => {
     const selection = useChatSelectionStore()
     selection.setBot('bot-1')
     selection.setSession('session-restored', { explicitSelection: true })
+      await declareHistoryEntry('session-restored')
     const store = useChatStore()
 
     const initializing = store.initialize()
@@ -758,12 +796,12 @@ describe('chat-list store', () => {
       expect(store.messages[1]).toMatchObject({
         role: 'assistant',
         streaming: false,
-        messages: [{ type: 'error', code: 'runtime_run_failed', content: '' }],
+        messages: [{ type: 'error', code: 'runtime_run_failed', content: enMessages.errors.runtime_run_failed }],
       })
       expect(store.startupSendFailure).toBeNull()
       expect(onBeforeTurnAppend).toHaveBeenCalledWith(expect.objectContaining({
         botId: 'bot-1',
-        sessionId: null,
+        sessionId: 'session-1',
       }))
       expect(onBeforeMessageSend).toHaveBeenCalledOnce()
       expect(onTurnAppendAborted).not.toHaveBeenCalled()
@@ -1070,8 +1108,7 @@ describe('chat-list store', () => {
     })
 
   it('uses structured API feedback for startup send failures', async () => {
-      // A draft's first message creates its session in-band; here the server
-      // refuses to create it, so no session_created ever arrives.
+      // The contact exists, but this invocation is rejected before admission.
       h.manualSessionCreation = true
       h.sendUpdates = []
       h.acceptRuns = false
@@ -1080,12 +1117,13 @@ describe('chat-list store', () => {
       await store.selectBot('bot-1')
       const sending = store.sendMessage('hello')
       await flushPromises()
-      // Nothing of the send is shown before the server confirms it.
-      expect(store.messages).toEqual([])
-      expect(store.firstSendFor({ botId: 'bot-1', viewId: 'chat' })).toMatchObject({ revealed: false })
+      // Existing-contact input is optimistic; it must not allocate a new chat.
+      expect(store.messages.map(turn => turn.role)).toEqual(['user', 'assistant'])
+      expect(store.firstSendFor({ botId: 'bot-1', viewId: 'chat' })).toBeUndefined()
       h.streamHandler?.({
         type: 'error',
         invocation_id: wsInvocationId(0),
+        session_id: 'session-1',
         code: 'acp_agent_not_configured',
         message: 'raw backend message',
       })
@@ -1103,32 +1141,25 @@ describe('chat-list store', () => {
       expect(store.firstSendFor({ botId: 'bot-1', viewId: 'chat' })).toBeUndefined()
       expect(api.deleteSession).not.toHaveBeenCalled()
       expect(store.startupSendFailure).toMatchObject({
-        sessionId: '',
+        sessionId: 'session-1',
         error: 'External agent setup is incomplete for this bot.',
         restoreInput: 'hello',
       })
     })
 
   it.each(['/new codex', '/new chat codex'])(
-    'handles %s as a fresh direct-runtime chat composer',
+    'refuses %s without replacing the fixed contact',
     async (command) => {
       const store = useChatStore()
-
       await store.selectBot('bot-1')
       const result = await store.sendMessage(command)
-      applyLatestDraftRequest(store)
-
-      expect(result.ok).toBe(true)
+      expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: command })
+      expect(store.draftViewRequested).toBeNull()
       expect(api.createSession).not.toHaveBeenCalled()
       expect(h.sentWSMessages).toHaveLength(0)
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
       expect(store.activeChatTarget).toMatchObject({
-        kind: 'draft-external-agent',
-        // codex is a direct runtime, not an ACP profile; the draft must
-        // carry the runtime or session creation degrades to acp_agent.
-        runtimeType: 'codex',
-        isExternalAgent: true,
-        isPendingExternalAgent: true,
+        kind: 'session', runtimeType: 'model', isExternalAgent: false, isPendingExternalAgent: false,
       })
     },
   )
@@ -1173,7 +1204,7 @@ describe('chat-list store', () => {
       expect(store.pendingExternalAgentMatchesInput({ ...input, sessionMode: 'discuss' })).toBe(false)
     })
 
-  it('keeps an explicit draft as Memoh even when the bot default runtime is ACP', async () => {
+  it('legacy draft navigation requests the fixed contact despite an ACP default', async () => {
       sdk.getBotsByBotIdSettings.mockResolvedValue({
         data: {
           chat_runtime: 'codex',
@@ -1188,33 +1219,39 @@ describe('chat-list store', () => {
       store.selectDraft({ explicitSelection: true })
       await flushPromises()
 
+      expect(store.contactOpenRequested).toMatchObject({ botId: 'bot-1', sessionId: 'session-1' })
+      expect(store.draftViewRequested).toBeNull()
       expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
       expect(store.pendingExternalAgentSessionMetadata).toBeNull()
-      expect(store.hasExplicitSessionSelection).toBe(true)
+      expect(store.hasExplicitSessionSelection).toBe(false)
       expect(store.activeChatTarget).toMatchObject({
-        kind: 'draft-native',
-        explicitSelection: true,
+        kind: 'session',
+        explicitSelection: false,
         runtimeType: 'model',
         isExternalAgent: false,
       })
     })
 
-  it('treats bare /new as an explicit empty composer override', async () => {
+  it('refuses bare /new without changing the main contact or staging another draft', async () => {
       const store = useChatStore()
 
       await store.selectBot('bot-1')
       store.stageDefaultExternalAgentSession({ runtime: 'acp', agentId: 'codex', projectPath: '/data', projectMode: 'project' })
+      const before = {
+        id: store.sessionId, metadata: store.pendingExternalAgentSessionMetadata,
+        explicit: store.hasExplicitSessionSelection,
+      }
       const onBeforeMessageSend = vi.fn()
       const result = await store.sendMessage('/new', undefined, { onBeforeMessageSend })
       expect(onBeforeMessageSend).not.toHaveBeenCalled()
       expect(welcomeSendConsumedDraft({}, result)).toBe(false)
-      applyLatestDraftRequest(store)
+      expect(store.draftViewRequested).toBeNull()
 
-      expect(result.ok).toBe(true)
-      expect(store.sessionId).toBeNull()
-      expect(store.pendingExternalAgentSessionMetadata).toBeNull()
-      expect(store.hasExplicitSessionSelection).toBe(true)
+      expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: '/new' })
+      expect(store.sessionId).toBe(before.id)
+      expect(store.pendingExternalAgentSessionMetadata).toEqual(before.metadata)
+      expect(store.hasExplicitSessionSelection).toBe(before.explicit)
     })
 
   it('merges ACP approval tool messages into the existing tool block by call id', async () => {
@@ -1306,7 +1343,7 @@ describe('chat-list store', () => {
       }))
     })
 
-  it('does not restore an auto-picked historical session when default chat runtime is ACP', async () => {
+  it('opens the ordinary contact despite an external runtime default', async () => {
       api.fetchSessions.mockResolvedValue({
         items: [{
           id: 'history-session-1',
@@ -1321,6 +1358,7 @@ describe('chat-list store', () => {
           chat_runtime: 'codex',
         },
       })
+      api.resolvePrivateChat.mockResolvedValue({ id: 'ordinary-contact', bot_id: 'bot-1', type: 'chat' })
       const selection = useChatSelectionStore()
       selection.setBot('bot-1')
       selection.setSession('history-session-1')
@@ -1329,11 +1367,11 @@ describe('chat-list store', () => {
       await store.initialize()
       await flushPromises()
 
-      expect(sdk.getBotsByBotIdSettings).toHaveBeenCalled()
-      expect(store.sessionId).toBeNull()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
+      expect(store.sessionId).toBe('ordinary-contact')
       expect(store.hasExplicitSessionSelection).toBe(false)
       expect(store.messages).toEqual([])
-      expect(api.fetchMessagesUI).not.toHaveBeenCalled()
+      expect(store.pendingExternalAgentSessionMetadata).toBeNull()
     })
 
   it('restores an explicitly selected historical session when default chat runtime is ACP', async () => {
@@ -1354,17 +1392,18 @@ describe('chat-list store', () => {
       const selection = useChatSelectionStore()
       selection.setBot('bot-1')
       selection.setSession('history-session-1', { explicitSelection: true })
+      await declareHistoryEntry('history-session-1')
       const store = useChatStore()
 
       await store.initialize()
 
-      expect(sdk.getBotsByBotIdSettings).toHaveBeenCalled()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
       expect(store.sessionId).toBe('history-session-1')
       expect(store.hasExplicitSessionSelection).toBe(true)
       expect(store.pendingExternalAgentSessionMetadata).toBeNull()
     })
 
-  it('keeps an explicit empty Memoh composer across session list initialization refreshes', async () => {
+  it('reopens the same contact after a legacy empty-composer request and list refresh', async () => {
       const store = useChatStore()
 
       await store.selectBot('bot-1')
@@ -1383,9 +1422,9 @@ describe('chat-list store', () => {
 
       await store.initialize()
 
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
       expect(store.pendingExternalAgentSessionMetadata).toBeNull()
-      expect(store.hasExplicitSessionSelection).toBe(true)
+      expect(store.hasExplicitSessionSelection).toBe(false)
       expect(api.createACPRuntime).not.toHaveBeenCalled()
     })
 
@@ -1436,13 +1475,13 @@ describe('chat-list store', () => {
 
       await store.initialize()
 
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
       expect(store.pendingExternalAgentSessionMetadata).toEqual({
         acp_agent_id: 'claude-code',
         project_path: '/data/other',
         acp_project_mode: 'project',
       })
-      expect(store.hasExplicitSessionSelection).toBe(true)
+      expect(store.hasExplicitSessionSelection).toBe(false)
       expect(api.createACPRuntime).not.toHaveBeenCalled()
     })
 
@@ -1489,17 +1528,13 @@ describe('chat-list store', () => {
       })
 
       expect(result.ok).toBe(true)
-      expect(api.createSession).toHaveBeenCalledTimes(1)
-      expect(api.createSession).toHaveBeenLastCalledWith('bot-1', expect.objectContaining({
-        type: 'chat',
-        sessionMode: 'chat',
-        runtimeType: 'acp_agent',
-        acpRuntimeId: 'rt_warm',
-      }))
+      expect(api.createSession).not.toHaveBeenCalled()
+      expect(store.sessionId).toBe('session-1')
+      expect(store.activeChatTarget).toMatchObject({ kind: 'session', sessionId: 'session-1' })
       expect(api.setACPRuntimeModel).not.toHaveBeenCalled()
       expect(api.closeACPRuntime).not.toHaveBeenCalled()
       expect(h.sentWSMessages[0]).toMatchObject({
-        session_id: 'acp-session-1',
+        session_id: 'session-1',
         reasoning_effort: 'high',
         text: 'hello agent',
         model_id: 'gpt-5.1-codex-high',
@@ -2130,9 +2165,11 @@ describe('chat-list store', () => {
           messages: [{ id: 1, type: 'text', content: 'Time to take a shower.' }],
           timestamp: '2026-09-16T10:01:00.000Z',
         }])
+      await declareHistoryEntry('session-schedule')
       const store = useChatStore()
 
       await store.selectBot('bot-1')
+      await store.selectSession('session-schedule')
       expect(store.sessionId).toBe('session-schedule')
       expect(store.messages).toEqual([])
 
@@ -2306,10 +2343,13 @@ describe('chat-list store', () => {
         role: 'assistant',
         messages: [
           { type: 'text', content: 'partial response' },
-          { type: 'error', code: 'runtime_run_failed', content: '' },
+          { type: 'error', code: 'runtime_run_failed', content: enMessages.errors.runtime_run_failed },
         ],
         streaming: false,
       })
+      const failedReply = store.messages[1]
+      if (failedReply?.role !== 'assistant') throw new Error('Expected the failed assistant reply')
+      expect(result).toMatchObject({ errorCode: 'runtime_run_failed', errorTurnId: failedReply.turnId, errorRunId: failedReply.runtimeRunId })
       expect(store.startupSendFailure).toBeNull()
     })
 
@@ -3202,7 +3242,7 @@ describe('chat-list store', () => {
         if (sessionId === 'fork-session') return Promise.resolve(forkTurns)
         return Promise.resolve([])
       })
-      api.forkSessionFromTurn.mockResolvedValueOnce({
+      api.fetchSession.mockResolvedValueOnce({
         id: 'fork-session',
         bot_id: 'bot-1',
         title: 'Source fork',
@@ -3238,11 +3278,12 @@ describe('chat-list store', () => {
       await store.selectBot('bot-1')
       await flushPromises()
       const ok = await store.forkTurn('turn-fx-9-1', { title: 'Custom fork name' })
-      await applyLatestForkRequest(store)
+      expect(store.forkedSessionRequested).toBeNull()
+      await store.selectSession('fork-session')
       await flushPromises()
 
-      expect(ok).toBe(true)
-      expect(api.forkSessionFromTurn).toHaveBeenCalledWith('bot-1', 'source-session', 'turn-fx-9-1', { title: 'Custom fork name' })
+      expect(ok).toBe(false)
+      expect(api.forkSessionFromTurn).not.toHaveBeenCalled()
       expect(store.sessionId).toBe('fork-session')
       expect(store.messages.map(message => message.id)).toEqual(['fork-user', 'fork-assistant'])
       expect(store.activeChatTarget.metadata.forked_from).toMatchObject({
@@ -3298,7 +3339,7 @@ describe('chat-list store', () => {
         if (sessionId === 'fork-session') return Promise.resolve(forkTurns)
         return Promise.resolve([])
       })
-      api.forkSessionFromTurn.mockResolvedValueOnce({
+      api.fetchSession.mockResolvedValueOnce({
         id: 'fork-session',
         bot_id: 'bot-1',
         title: 'Source fork',
@@ -3321,10 +3362,11 @@ describe('chat-list store', () => {
       await store.selectBot('bot-1')
       await flushPromises()
       const ok = await store.forkTurn('turn-fx-10-1')
-      await applyLatestForkRequest(store)
+      expect(store.forkedSessionRequested).toBeNull()
+      await store.selectSession('fork-session')
       await flushPromises()
 
-      expect(ok).toBe(true)
+      expect(ok).toBe(false)
       expect(store.sessionId).toBe('fork-session')
       expect(store.activeChatTarget.metadata.forked_from).toMatchObject({
         session_id: 'source-session',
@@ -3405,18 +3447,13 @@ describe('chat-list store', () => {
       const ok = await fork
       await flushPromises()
 
-      expect(ok).toBe(true)
+      expect(ok).toBe(false)
       expect(store.sessionId).toBe('other-session')
       expect(store.messages.map(message => message.id)).toEqual(['other-user'])
-      expect(store.knownSessionSummary('fork-session')).toMatchObject({ id: 'fork-session' })
-      expect(api.fetchMessagesUI).toHaveBeenCalledWith('bot-1', 'fork-session', expect.anything())
-      expect(store.forkedSessionRequested).toMatchObject({
-        botId: 'bot-1',
-        viewId: targetA.viewId,
-        expectedSessionId: 'source-session',
-        sessionId: 'fork-session',
-        activate: true,
-      })
+      expect(store.knownSessionSummary('fork-session')).toBeNull()
+      expect(api.fetchMessagesUI).not.toHaveBeenCalledWith('bot-1', 'fork-session', expect.anything())
+      expect(store.forkedSessionRequested).toBeNull()
+      expect(api.forkSessionFromTurn).not.toHaveBeenCalled()
     })
 
   it('drops a late Fork result after the authenticated scope resets', async () => {
@@ -3451,7 +3488,7 @@ describe('chat-list store', () => {
       }))
       response.resolve({ id: 'old-fork', bot_id: 'bot-1', title: 'Old fork', type: 'chat' })
 
-      await expect(fork).resolves.toBe(true)
+      await expect(fork).resolves.toBe(false)
       expect(store.forkedSessionRequested).toBeNull()
       expect(store.knownSessionSummary('old-fork')).toBeNull()
       expect(api.fetchMessagesUI).not.toHaveBeenCalledWith('bot-1', 'old-fork', expect.anything())
@@ -3528,13 +3565,13 @@ describe('chat-list store', () => {
       })
       await sendPromise
 
-      const draftCommandEvent = store.commandEventForScope({ botId: 'bot-1', composerScope: 'bot-1:draft-a' })
+      const draftCommandEvent = store.commandEventForScope({ botId: 'bot-1', sessionId: 'session-1', composerScope: 'bot-1:draft-a' })
       expect(draftCommandEvent).toMatchObject({
         type: 'command_result',
         bot_id: 'bot-1',
         composer_scope: 'bot-1:draft-a',
       })
-      expect(draftCommandEvent?.session_id).toBeUndefined()
+      expect(draftCommandEvent?.session_id).toBe('session-1')
       expect(store.commandEvent).toBeNull()
     })
 
@@ -3550,6 +3587,7 @@ describe('chat-list store', () => {
         title: 'Session A',
         type: 'chat',
       })
+      api.resolvePrivateChat.mockResolvedValue({ id: 'session-a', bot_id: 'bot-1', type: 'chat', title: 'Contact A' })
       const store = useChatStore()
       const onBeforeTurnAppend = vi.fn()
       const onBeforeMessageSend = vi.fn()
@@ -3607,7 +3645,7 @@ describe('chat-list store', () => {
         restoreInput: '/help',
         error: 'Slash command failed.',
       })
-      const commandEvent = store.commandEventForScope({ botId: 'bot-1', composerScope: 'bot-1:panel-a' })
+      const commandEvent = store.commandEventForScope({ botId: 'bot-1', sessionId: 'session-1', composerScope: 'bot-1:panel-a' })
       expect(commandEvent).toMatchObject({
         type: 'command_error',
         composer_scope: 'bot-1:panel-a',
@@ -3657,10 +3695,11 @@ describe('chat-list store', () => {
           text: 'Available Web quick actions: /help.',
         },
       })
+      api.resolvePrivateChat.mockResolvedValue({ id: 'session-acp', bot_id: 'bot-1', title: 'ACP contact', type: 'chat', runtime_type: 'acp_agent', runtime_metadata: { acp_agent_id: 'codex' } })
       const store = useChatStore()
 
       await store.selectBot('bot-1')
-      store.stageExternalAgentSession({ runtime: 'acp', agentId: 'codex' })
+      expect(store.sessionId).toBe('session-acp')
       const result = await store.sendMessage('/help', undefined, {
         composerScope: 'bot-1:draft-a',
       })
@@ -3671,7 +3710,7 @@ describe('chat-list store', () => {
         skillActivationAllowed: false,
       }))
       expect(h.sentWSMessages).toHaveLength(0)
-      const commandEvent = store.commandEventForScope({ botId: 'bot-1', composerScope: 'bot-1:draft-a' })
+      const commandEvent = store.commandEventForScope({ botId: 'bot-1', sessionId: 'session-acp', composerScope: 'bot-1:draft-a' })
       expect(commandEvent).toMatchObject({
         type: 'command_result',
         result: {
@@ -3694,6 +3733,7 @@ describe('chat-list store', () => {
         title: 'Session A',
         type: 'chat',
       })
+      api.resolvePrivateChat.mockResolvedValue({ id: 'session-a', bot_id: 'bot-1', type: 'chat', title: 'Contact A' })
       const store = useChatStore()
 
       await store.selectBot('bot-1')
@@ -3725,6 +3765,7 @@ describe('chat-list store', () => {
         title: 'Session A',
         type: 'chat',
       })
+      api.resolvePrivateChat.mockResolvedValue({ id: 'session-a', bot_id: 'bot-1', type: 'chat', title: 'Contact A' })
       const store = useChatStore()
 
       await store.selectBot('bot-1')
@@ -3799,21 +3840,23 @@ describe('chat-list store', () => {
       await flushPromises()
       const runId = wsRunId(0)
 
-      expect(store.streaming).toBe(true)
-      const secondResult = await store.sendMessage('second activation', undefined, {
+      expect(runId).toBe('run-1')
+      const secondSend = store.sendMessage('second activation', undefined, {
         requestedSkills: [{ name: 'beta' }],
         composerScope: 'bot-1:draft-a',
       })
-      expect(secondResult).toMatchObject({ ok: false, stage: 'startup' })
+      await flushPromises()
       expect(h.sentWSMessages).toHaveLength(1)
+      const secondResult = await secondSend
+      expect(secondResult).toMatchObject({ ok: false, stage: 'startup' })
 
       const invocationId = wsInvocationId(0)
       h.streamHandler?.({
         type: 'session_created',
         invocation_id: invocationId,
-        session_id: 'session-created',
+        session_id: 'session-1',
       })
-      emitRuntime(runtime.completed, 'session-created', runId)
+      emitRuntime(runtime.completed, 'session-1', runId)
       await expect(firstSend).resolves.toMatchObject({ ok: true })
       expect(store.streaming).toBe(false)
     })
@@ -3834,13 +3877,16 @@ describe('chat-list store', () => {
       store.abort()
 
       await expect(sending).resolves.toMatchObject({ ok: false })
-      expect(h.abortedWSRuns).toEqual([])
+      expect(h.abortedWSRuns).toEqual([runId])
       h.streamHandler?.({
         type: 'session_created',
         invocation_id: wsInvocationId(0),
-        session_id: 'session-created',
+        session_id: 'session-1',
       })
       expect(h.abortedWSRuns).toContain(runId)
+      expect(h.abortedWSControls).toEqual([{
+        runId, sessionId: 'session-1', controlId: expect.any(String), reason: 'user_stop',
+      }])
       expect(store.streaming).toBe(false)
     })
 
@@ -3862,6 +3908,9 @@ describe('chat-list store', () => {
       store.abort()
       await expect(sending).resolves.toMatchObject({ ok: false })
       expect(h.abortedWSRuns).toEqual([wsRunId(0)])
+      expect(h.abortedWSControls).toEqual([{
+        runId: wsRunId(0), sessionId: 'session-1', controlId: expect.any(String), reason: 'user_stop',
+      }])
     })
 
   it('replays a stop pressed before the run was accepted', async () => {
@@ -3874,15 +3923,14 @@ describe('chat-list store', () => {
             return true
           },
           send: vi.fn((message: Record<string, unknown>) => {
-            if (
-              message.type === 'runtime_subscribe'
-              || message.type === 'runtime_unsubscribe'
-            ) return
+            if (message.type === 'runtime_subscribe') {
+              emitRuntimeSnapshot(onStreamEvent, String(message.session_id))
+              return
+            }
+            if (message.type === 'runtime_unsubscribe') return
             h.sentWSMessages.push(message)
           }),
-          abort: vi.fn((runId: string) => {
-            h.abortedWSRuns.push(runId)
-          }),
+          abort: vi.fn(recordAbort),
           close: vi.fn(),
           onOpen: null,
           onClose: null,
@@ -3912,7 +3960,39 @@ describe('chat-list store', () => {
 
       await expect(sending).resolves.toMatchObject({ ok: false })
       expect(h.abortedWSRuns).toEqual(['run-late'])
+      expect(h.abortedWSControls).toEqual([{
+        runId: 'run-late', sessionId: 'session-1', controlId: expect.any(String), reason: 'user_stop',
+      }])
     })
+
+  it.each(['bot_switch', 'auth_reset'] as const)('labels an active run abort with %s', async (reason) => {
+    const windowTarget = new EventTarget()
+    vi.stubGlobal('window', windowTarget)
+    api.fetchBots.mockResolvedValue([
+      { id: 'bot-1', status: 'active', name: 'Bot 1' },
+      { id: 'bot-2', status: 'active', name: 'Bot 2' },
+    ])
+    h.sendUpdates = []
+    const store = useChatStore()
+    await store.selectBot('bot-1')
+    const sending = store.sendMessage('hello')
+    await flushPromises()
+    const runId = wsRunId(0)
+
+    if (reason === 'bot_switch') {
+      await store.selectBot('bot-2')
+    }
+    else {
+      windowTarget.dispatchEvent(new CustomEvent(AUTH_SESSION_CLEARED_EVENT, {
+        detail: { reason: 'logout' },
+      }))
+    }
+
+    await expect(sending).resolves.toMatchObject({ ok: false })
+    expect(h.abortedWSControls).toEqual([{
+      runId, sessionId: 'session-1', controlId: expect.any(String), reason,
+    }])
+  })
 
   it('fails a rejected submission with the code the server refused it by', async () => {
       h.sendUpdates = []
@@ -3958,14 +4038,14 @@ describe('chat-list store', () => {
       const invocationId = wsInvocationId(0)
       const runId = wsRunId(0)
 
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-first' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-conflict' })
 
-      expect(store.sessionId).toBe('session-first')
-      expect(store.knownSessionSummary('session-first')).not.toBeNull()
+      expect(store.sessionId).toBe('session-1')
+      expect(store.knownSessionSummary('session-1')).not.toBeNull()
       expect(store.knownSessionSummary('session-conflict')).toBeNull()
 
-      emitRuntime(runtime.completed, 'session-first', runId)
+      emitRuntime(runtime.completed, 'session-1', runId)
       await expect(sending).resolves.toMatchObject({ ok: true })
     })
 
@@ -3990,15 +4070,15 @@ describe('chat-list store', () => {
       const runId = wsRunId(0)
 
       await store.selectSession('session-b')
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       await flushPromises()
 
       expect(store.sessionId).toBe('session-b')
       // The hidden Draft view still owns this stream, so its new Session is
       // remembered without stealing global focus from session-b.
-      expect(store.knownSessionSummary('created-session')).not.toBeNull()
+      expect(store.knownSessionSummary('session-1')).not.toBeNull()
 
-      emitRuntime(runtime.completed, 'created-session', runId)
+      emitRuntime(runtime.completed, 'session-1', runId)
       await sendPromise
 
       expect(store.sessionId).toBe('session-b')
@@ -4026,16 +4106,16 @@ describe('chat-list store', () => {
       await flushPromises()
       const invocationId = wsInvocationId(0)
 
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       await flushPromises()
       // The run is not accepted yet, so the pane is still the draft.
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
       expect(store.messages).toHaveLength(0)
 
       h.streamHandler?.({
         type: 'command_error',
         invocation_id: invocationId,
-        session_id: 'created-session',
+        session_id: 'session-1',
         composer_scope: 'bot-1:draft-a',
         terminal: true,
         code: 'slash.skill_activation_unsupported',
@@ -4050,34 +4130,24 @@ describe('chat-list store', () => {
         restoreAttachments: [attachment],
         restoreRequestedSkills: [requestedSkill],
       })
-      expect(api.deleteSession).toHaveBeenCalledWith('bot-1', 'created-session')
-      expect(store.deletedSession).toEqual({
-        id: 'created-session',
-        botId: 'bot-1',
-        seq: 1,
-        composerScope: 'bot-1:draft-a',
-      })
-      expect(store.sessionId).toBeNull()
-      expect(store.knownSessionSummary('created-session')).toBeNull()
+      expect(api.deleteSession).not.toHaveBeenCalled()
+      expect(store.deletedSession).toBeNull()
+      expect(store.sessionId).toBe('session-1')
+      expect(store.knownSessionSummary('session-1')).not.toBeNull()
       expect(store.messages).toHaveLength(0)
-      const draftCommandEvent = store.commandEventForScope({ botId: 'bot-1', composerScope: 'bot-1:draft-a' })
+      const draftCommandEvent = store.commandEventForScope({ botId: 'bot-1', sessionId: 'session-1', composerScope: 'bot-1:draft-a' })
       expect(draftCommandEvent).toMatchObject({
         type: 'command_error',
         bot_id: 'bot-1',
         composer_scope: 'bot-1:draft-a',
       })
-      expect(draftCommandEvent?.session_id).toBeUndefined()
+      expect(draftCommandEvent?.session_id).toBe('session-1')
       expect(store.startupSendFailureFor({
         botId: 'bot-1',
-        sessionId: null,
-        viewId: 'draft-a',
-      }, 'bot-1:draft-a')).toMatchObject({
-        botId: 'bot-1',
-        composerScope: 'bot-1:draft-a',
-        restoreInput: 'hello with skill',
-        restoreAttachments: [attachment],
-        restoreRequestedSkills: [requestedSkill],
-      })
+        sessionId: 'session-1',
+        viewId: 'chat',
+      }, 'bot-1:draft-a')).toBeNull()
+      expect(result.errorCode).toBe('slash.skill_activation_unsupported')
     })
 
   it('keeps a held first send across a dropped socket once the server named its session', async () => {
@@ -4091,31 +4161,31 @@ describe('chat-list store', () => {
       const sending = store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' })
       await flushPromises()
       const invocationId = wsInvocationId(0)
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       await flushPromises()
       // The resend a reconnect makes goes to the session the server named, so
       // the server answers with the run this invocation already has.
-      expect(socket.bindSession).toHaveBeenCalledWith(invocationId, 'created-session')
+      expect(socket.bindSession).toHaveBeenCalledWith(invocationId, 'session-1')
 
       // The run_accepted frame is lost with the socket. The server may have
       // taken the run, so the send waits and its session stays.
       socket.onClose?.()
       await flushPromises()
       expect(api.deleteSession).not.toHaveBeenCalled()
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
 
       // The reconnect resends the request, now addressed to that session, and
       // the server answers with the invocation's run.
       // As on a real reconnect, the pending request goes out before onOpen.
-      h.lastSessionId = 'created-session'
+      h.lastSessionId = 'session-1'
       h.acceptRuns = true
-      socket.send({ ...h.sentWSMessages[0], session_id: 'created-session' })
+      socket.send({ ...h.sentWSMessages[0], session_id: 'session-1' })
       socket.onOpen?.()
       await flushPromises()
       emitRuntime(runtime.completed)
 
       await expect(sending).resolves.toMatchObject({ ok: true })
-      expect(store.sessionId).toBe('created-session')
+      expect(store.sessionId).toBe('session-1')
       expect(api.deleteSession).not.toHaveBeenCalled()
     })
 
@@ -4138,12 +4208,12 @@ describe('chat-list store', () => {
       const sending = store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' })
       await flushPromises()
       const invocationId = wsInvocationId(0)
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       await flushPromises()
       socket.onClose?.()
       await flushPromises()
 
-      h.streamHandler?.({ ...refusal, invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ ...refusal, invocation_id: invocationId, session_id: 'session-1' })
       const result = await sending
 
       expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: 'hello' })
@@ -4151,10 +4221,39 @@ describe('chat-list store', () => {
       expect(api.deleteSession).not.toHaveBeenCalled()
     })
 
-  it('keeps the session of a held first send whose confirmation timed out', async () => {
+  it('bounds an unacknowledged contact invocation without cancelling or resending it', async () => {
+    h.sendUpdates = []
+    h.acceptRuns = false
+    const store = useChatStore()
+    await store.selectBot('bot-1')
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    let result: Awaited<ReturnType<typeof store.sendMessage>> | undefined
+    try {
+      void store.sendMessage('hello').then(value => { result = value })
+      await vi.advanceTimersByTimeAsync(0)
+      const sent = h.sentWSMessages.filter(message => message.type === 'message')
+      expect(sent).toHaveLength(1)
+      expect(sent[0]).toMatchObject({ session_id: 'session-1', invocation_id: expect.any(String) })
+      const socket = api.connectWebSocket.mock.results.at(-1)!.value
+      socket.onClose?.()
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(h.abortedWSRuns).toEqual([])
+      expect(api.deleteSession).not.toHaveBeenCalled()
+      expect(h.sentWSMessages.filter(message => message.type === 'message')).toEqual(sent)
+      expect(store.sessionId).toBe('session-1')
+      expect(result).toMatchObject({ ok: false, error: enMessages.chat.sendOutcomeUnknown })
+    } finally {
+      store.abort()
+      vi.useRealTimers()
+    }
+  })
+
+  it.each([true, false])('keeps a timed-out first send and does not abort its late acceptance (session named before timeout: %s)', async (namedBeforeTimeout) => {
       h.manualSessionCreation = true
       h.sendUpdates = []
       h.acceptRuns = false
+      const network = vi.fn(() => Promise.reject(new Error('Unexpected network request')))
+      vi.stubGlobal('fetch', network)
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       // flushPromises waits on a timer, which is fake here.
       const flush = () => vi.advanceTimersByTimeAsync(0)
@@ -4162,40 +4261,52 @@ describe('chat-list store', () => {
         const store = useChatStore()
 
         await store.selectBot('bot-1')
-        const sending = store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' })
+        let settled: Awaited<ReturnType<typeof store.sendMessage>> | undefined
+        void store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' }).then(value => { settled = value })
         await flush()
         const invocationId = wsInvocationId(0)
-        h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
-        await flush()
+        const created = { type: 'session_created' as const, invocation_id: invocationId, session_id: 'session-1' }
+        if (namedBeforeTimeout) {
+          h.streamHandler?.(created)
+          await flush()
+        }
 
         await vi.advanceTimersByTimeAsync(30_000)
-        const result = await sending
+        expect(settled).toBeDefined()
+        const result = settled!
 
         // Unconfirmed is not refused: the session may hold the run, so it is
         // kept, and the copy does not ask for a blind resend.
         expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: 'hello' })
         expect(result.error).toBe(enMessages.chat.sendOutcomeUnknown)
         expect(api.deleteSession).not.toHaveBeenCalled()
+        expect(h.abortedWSRuns).toEqual([])
 
-        // A confirmation that still arrives stops the run the user was told
-        // did not go through.
+        // The timeout is an unknown outcome, not a user stop. Its late
+        // confirmation must not cancel work the server already accepted.
+        if (!namedBeforeTimeout) h.streamHandler?.(created)
         h.streamHandler?.({
           type: 'run_accepted',
           run_id: 'run-late',
           invocation_id: invocationId,
-          session_id: 'created-session',
+          session_id: 'session-1',
           turn_id: 'turn-run-late',
-          epoch: 'epoch-created-session',
+          epoch: 'epoch-session-1',
           seq: 1,
         })
         await flush()
-        expect(h.abortedWSRuns).toEqual(['run-late'])
+        expect(h.abortedWSRuns).toEqual([])
+        expect(api.deleteSession).not.toHaveBeenCalled()
+        expect(h.sentWSMessages.filter(message =>
+          message.type === 'message' || message.type === 'retry_message' || message.type === 'edit_message',
+        )).toEqual([expect.objectContaining({ type: 'message', invocation_id: invocationId })])
+        expect(network).not.toHaveBeenCalled()
       } finally {
         vi.useRealTimers()
       }
     })
 
-  it('reports an unknown outcome when the socket drops before the server named a session', async () => {
+  it('reports an unknown outcome when the contact socket drops before invocation acceptance', async () => {
       h.manualSessionCreation = true
       h.sendUpdates = []
       h.acceptRuns = false
@@ -4203,11 +4314,15 @@ describe('chat-list store', () => {
 
       await store.selectBot('bot-1')
       const socket = api.connectWebSocket.mock.results.at(-1)!.value
-      const sending = store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' })
-      await flushPromises()
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      let settled: Awaited<ReturnType<typeof store.sendMessage>> | undefined
+      void store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' }).then(value => { settled = value })
+      await vi.advanceTimersByTimeAsync(0)
 
       socket.onClose?.()
-      const result = await sending
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(settled).toBeDefined()
+      const result = settled!
 
       expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: 'hello' })
       expect(result.error).toBe(enMessages.chat.sendOutcomeUnknown)
@@ -4237,11 +4352,11 @@ describe('chat-list store', () => {
       const invocationId = wsInvocationId(0)
 
       await store.selectSession('session-b')
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       h.streamHandler?.({
         type: 'command_error',
         invocation_id: invocationId,
-        session_id: 'created-session',
+        session_id: 'session-1',
         composer_scope: 'bot-1:draft-a',
         terminal: true,
         code: 'slash.skill_activation_unsupported',
@@ -4250,15 +4365,10 @@ describe('chat-list store', () => {
       const result = await sendPromise
 
       expect(result).toMatchObject({ ok: false, stage: 'startup' })
-      expect(api.deleteSession).toHaveBeenCalledWith('bot-1', 'created-session')
-      expect(store.deletedSession).toEqual({
-        id: 'created-session',
-        botId: 'bot-1',
-        seq: 1,
-        composerScope: 'bot-1:draft-a',
-      })
+      expect(api.deleteSession).not.toHaveBeenCalled()
+      expect(store.deletedSession).toBeNull()
       expect(store.sessionId).toBe('session-b')
-      expect(store.knownSessionSummary('created-session')).toBeNull()
+      expect(store.knownSessionSummary('session-1')).not.toBeNull()
     })
 
   it('keeps deferred draft websocket errors scoped away from the switched session', async () => {
@@ -4282,23 +4392,18 @@ describe('chat-list store', () => {
       const invocationId = wsInvocationId(0)
 
       await store.selectSession('session-b')
-      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
+      h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'session-1' })
       h.streamHandler?.({
         type: 'error',
         invocation_id: invocationId,
-        session_id: 'created-session',
+        session_id: 'session-1',
         message: 'model failed',
       })
       const result = await sendPromise
 
       expect(result).toMatchObject({ ok: false, stage: 'startup', composerScope: 'bot-1:draft-a' })
-      expect(api.deleteSession).toHaveBeenCalledWith('bot-1', 'created-session')
-      expect(store.deletedSession).toEqual({
-        id: 'created-session',
-        botId: 'bot-1',
-        seq: 1,
-        composerScope: 'bot-1:draft-a',
-      })
+      expect(api.deleteSession).not.toHaveBeenCalled()
+      expect(store.deletedSession).toBeNull()
       expect(store.sessionId).toBe('session-b')
       expect(store.startupSendFailure).toBeNull()
     })
@@ -4553,6 +4658,7 @@ describe('chat-list store', () => {
       })
       api.fetchMessagesUI.mockResolvedValue([])
 
+      await declareHistoryEntry('session-subagent')
       const store = useChatStore()
       await store.selectBot('bot-1')
       await store.selectSession('session-subagent')
@@ -4605,6 +4711,7 @@ describe('chat-list store', () => {
       selection.setBot('bot-1')
       selection.setSession('acp-session-hidden', { explicitSelection: true })
 
+      await declareHistoryEntry('acp-session-hidden')
       const store = useChatStore()
       await store.selectSession('acp-session-hidden')
 
@@ -5055,8 +5162,10 @@ describe('chat-list store', () => {
         ],
         nextCursor: null,
       })
+      await declareHistoryEntry('schedule-1')
       const store = useChatStore()
       await store.selectBot('bot-1')
+      await store.selectSession('schedule-1')
       await flushPromises()
 
       expect(store.sessionId).toBe('schedule-1')
@@ -5219,8 +5328,8 @@ describe('chat-list store', () => {
       })
       await store.initialize()
 
-      expect(store.sessions).toEqual([])
-      expect(store.sessionId).toBeNull()
+      expect(store.sessions.map(session => session.id)).toEqual(['session-1'])
+      expect(store.sessionId).toBe('session-1')
       expect(store.knownSessionSummary('session-2')).toBeNull()
     })
 
@@ -5309,11 +5418,11 @@ describe('chat-list store', () => {
       })
       // Hydration proof: the summary's subagent type reached the target; the
       // session itself stays writable so the user can chat with the agent.
-      expect(store.chatReadOnlyFor(targetB)).toBe(false)
+      expect(store.chatReadOnlyFor(targetB)).toBe(true)
       expect(api.fetchSession).toHaveBeenCalledWith('bot-1', 'session-b')
     })
 
-  it('keeps an unknown real Session read-only until its summary confirms it is writable', async () => {
+  it('keeps a historical Session read-only even after its summary is confirmed', async () => {
       api.fetchSessions.mockResolvedValueOnce({
         items: [{ id: 'session-a', bot_id: 'bot-1', title: 'A', type: 'chat' }],
         nextCursor: null,
@@ -5340,7 +5449,7 @@ describe('chat-list store', () => {
 
       summary.resolve({ id: 'session-b', bot_id: 'bot-1', title: 'B', type: 'chat' })
       await flushPromises()
-      expect(store.chatReadOnlyFor(targetB)).toBe(false)
+      expect(store.chatReadOnlyFor(targetB)).toBe(true)
     })
 
   it('does not remember a visible Session summary that resolves after deletion', async () => {
@@ -5463,7 +5572,7 @@ describe('chat-list store', () => {
       expect(store.isChatViewCreatingSession(target)).toBe(false)
     })
 
-  it('restores a failed ACP creation to its owning Draft after focus moves', async () => {
+  it('refuses a legacy draft send without losing either pane after focus moves', async () => {
       const creation = deferred<{
         id: string
         bot_id: string
@@ -5485,16 +5594,18 @@ describe('chat-list store', () => {
       store.focusChatView(targetB.viewId)
       store.selectDraft({ explicitSelection: true })
       store.stageExternalAgentSession({ runtime: 'acp', agentId: 'claude' }, {}, targetB)
-      creation.reject(new Error('create failed'))
+      creation.resolve({ id: 'unaccepted-session', bot_id: 'bot-1', title: 'Ignored', type: 'chat' })
       await expect(sending).resolves.toMatchObject({ ok: false, stage: 'startup' })
 
+      expect(api.createSession).not.toHaveBeenCalled()
+      expect(store.knownSessionSummary('unaccepted-session')).toBeNull()
       expect(store.pendingExternalAgentStateFor(targetA)).toMatchObject({ metadata: { acp_agent_id: 'custom-agent' } })
       expect(store.pendingExternalAgentStateFor(targetB)).toMatchObject({ metadata: { acp_agent_id: 'claude' } })
       expect(store.pendingExternalAgentSessionMetadata).toMatchObject({ acp_agent_id: 'claude' })
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-1')
     })
 
-  it('creates an explicit non-focused ACP Draft with its saved Agent and warm runtime', async () => {
+  it('refuses a non-contact draft send while retaining its saved Agent and warm runtime', async () => {
       h.sendUpdates = [runtime.started]
       const store = useChatStore()
       await store.selectBot('bot-1')
@@ -5512,17 +5623,15 @@ describe('chat-list store', () => {
       await flushPromises()
       await flushPromises()
 
-      expect(api.createSession).toHaveBeenLastCalledWith('bot-1', expect.objectContaining({
-        runtimeType: 'acp_agent',
-        acpRuntimeId: 'rt_warm',
-        runtimeMetadata: expect.objectContaining({ acp_agent_id: 'custom-agent' }),
-      }))
-      expect(store.sessionId).toBeNull()
-      expect(store.pendingExternalAgentStateFor(targetA)).toBeNull()
+      expect(api.createSession).not.toHaveBeenCalled()
+      expect(store.sessionId).toBe('session-1')
+      expect(store.pendingExternalAgentStateFor(targetA)).toMatchObject({
+        metadata: { acp_agent_id: 'custom-agent' }, runtimeId: 'rt_warm',
+      })
       expect(api.closeACPRuntime).not.toHaveBeenCalledWith('bot-1', 'rt_warm')
 
       store.abort({ ...targetA, sessionId: 'session-1' })
-      await expect(sending).resolves.toMatchObject({ ok: false, stage: 'stream' })
+      await expect(sending).resolves.toMatchObject({ ok: false, stage: 'startup' })
     })
 
   it('does not let a late session_created event steal focus from another Draft', async () => {
@@ -5551,12 +5660,15 @@ describe('chat-list store', () => {
         session_id: 'session-a',
       })
 
-      expect(store.sessionId).toBeNull()
-      expect(store.chatView({ ...targetA, sessionId: 'session-a' }).sessionId).toBe('session-a')
+      expect(store.sessionId).toBe('session-1')
+      expect(store.chatView(targetA).sessionId).toBeNull()
+      expect(store.knownSessionSummary('session-a')).toBeNull()
+      expect(api.createSession).not.toHaveBeenCalled()
+      expect(h.sentWSMessages).toEqual([])
       expect(store.chatView(targetB).kind).toBe('draft')
 
       emitRuntime(runtime.completed, 'session-a', runId)
-      await expect(sending).resolves.toMatchObject({ ok: true })
+      await expect(sending).resolves.toMatchObject({ ok: false, stage: 'startup' })
     })
 
   it('does not clear Draft B staging when Session A Agent update resolves late', async () => {
@@ -5597,7 +5709,7 @@ describe('chat-list store', () => {
       })
       await updating
 
-      expect(store.sessionId).toBeNull()
+      expect(store.sessionId).toBe('session-a')
       expect(store.pendingExternalAgentStateFor(targetB)).toMatchObject({
         metadata: { acp_agent_id: 'claude' },
         runtimeId: 'rt_warm',
@@ -5633,16 +5745,11 @@ describe('chat-list store', () => {
         chat_acp_project_mode: 'project',
       } })
 
-      await expect(command).resolves.toMatchObject({ ok: true })
-      expect(store.sessionId).toBeNull()
+      await expect(command).resolves.toMatchObject({ ok: false, stage: 'startup' })
+      expect(store.sessionId).toBe('session-1')
       expect(store.pendingExternalAgentStateFor(targetB)).toMatchObject({ metadata: { acp_agent_id: 'claude' } })
-      expect(store.draftViewRequested).toMatchObject({
-        botId: 'bot-1',
-        viewId: targetA.viewId,
-        expectedSessionId: null,
-        input: { agentId: 'codex', projectPath: '/data/a', projectMode: 'project' },
-        activate: true,
-      })
+      expect(store.draftViewRequested).toBeNull()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
     })
 
   it('keeps the newest /new Agent choice when an older settings request resolves last', async () => {
@@ -5679,10 +5786,8 @@ describe('chat-list store', () => {
       } })
       await newer
       const latestRequest = store.draftViewRequested
-      expect(latestRequest).toMatchObject({
-        viewId: target.viewId,
-        input: { agentId: 'claude-code', projectPath: '/data/claude' },
-      })
+      expect(latestRequest).toBeNull()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
 
       codexSettings.resolve({ data: {
         chat_runtime: 'codex',
@@ -5693,7 +5798,7 @@ describe('chat-list store', () => {
       await older
 
       expect(store.draftViewRequested).toBe(latestRequest)
-      expect(store.draftViewRequested?.input?.agentId).toBe('claude-code')
+      expect(store.draftViewRequested?.input).toBeUndefined()
     })
 
   it('drops a late /new Agent result after the authenticated scope resets', async () => {
@@ -5724,7 +5829,7 @@ describe('chat-list store', () => {
         chat_acp_project_mode: 'project',
       } })
 
-      await expect(command).resolves.toMatchObject({ ok: true })
+      await expect(command).resolves.toMatchObject({ ok: false, stage: 'startup' })
       expect(store.draftViewRequested).toBeNull()
       expect(store.currentBotId).toBeNull()
     })
@@ -5754,7 +5859,7 @@ describe('chat-list store', () => {
         chat_acp_project_path: '/data/codex',
         chat_acp_project_mode: 'project',
       } })
-      await expect(command).resolves.toMatchObject({ ok: true })
+      await expect(command).resolves.toMatchObject({ ok: false, stage: 'startup' })
 
       expect(store.draftViewRequested).toBeNull()
       expect(store.pendingExternalAgentStateFor(target)).toMatchObject({

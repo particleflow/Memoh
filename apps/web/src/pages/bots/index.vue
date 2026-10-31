@@ -20,12 +20,6 @@
         <h1 class="text-lg font-semibold">
           {{ $t('sidebar.bots') }}
         </h1>
-        <p
-          v-if="status === 'success' && allBots.length === 0"
-          class="mt-1.5 text-[13px] text-muted-foreground"
-        >
-          {{ $t('bots.emptyDescription') }}
-        </p>
       </div>
 
       <CalloutBanner

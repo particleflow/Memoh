@@ -901,6 +901,9 @@ CREATE INDEX IF NOT EXISTS idx_lifecycle_events_container_id ON lifecycle_events
 CREATE INDEX IF NOT EXISTS idx_lifecycle_events_event_type ON lifecycle_events(event_type);
 
 CREATE TABLE IF NOT EXISTS schedule (
+  limit_disabled BOOLEAN NOT NULL DEFAULT false,
+  registration_generation BIGINT NOT NULL DEFAULT 0,
+  result_origin JSONB NOT NULL DEFAULT '{}',
   max_run_seconds integer NOT NULL DEFAULT 3600 CHECK (max_run_seconds BETWEEN 300 AND 86400),
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -910,6 +913,7 @@ CREATE TABLE IF NOT EXISTS schedule (
   current_calls INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMPTZ,
   enabled BOOLEAN NOT NULL DEFAULT true,
   command TEXT NOT NULL,
   bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
@@ -1027,6 +1031,11 @@ ALTER TABLE bot_history_messages ADD CONSTRAINT fk_compact_id FOREIGN KEY (compa
 
 -- schedule_logs: structured execution records for scheduled tasks.
 CREATE TABLE IF NOT EXISTS schedule_logs (
+  scheduled_for TIMESTAMPTZ,
+  claim_deadline TIMESTAMPTZ,
+  claim_state TEXT NOT NULL DEFAULT '',
+  result_origin JSONB NOT NULL DEFAULT '{}',
+  result_delivery JSONB NOT NULL DEFAULT '{}',
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   schedule_id UUID NOT NULL REFERENCES schedule(id) ON DELETE CASCADE,
   bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
@@ -3284,3 +3293,402 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+
+-- 0175_computer_admission
+-- Admission only: no task, receipt, result, credential or native process changes.
+CREATE TABLE IF NOT EXISTS public.computer_admission_gates (
+    team_id UUID NOT NULL DEFAULT public.memoh_current_team_id() REFERENCES public.teams(id),
+    owner_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    connection_id UUID NOT NULL,
+    device_id TEXT NOT NULL CHECK (length(device_id) BETWEEN 1 AND 128),
+    instance_id TEXT NOT NULL CHECK (length(instance_id) BETWEEN 1 AND 128),
+    request_id UUID NOT NULL,
+    paused BOOLEAN NOT NULL,
+    revision BIGINT NOT NULL CHECK (revision > 0),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (team_id, owner_id, connection_id, device_id, instance_id)
+);
+ALTER TABLE public.computer_admission_gates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.computer_admission_gates FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS computer_admission_team ON public.computer_admission_gates;
+CREATE POLICY computer_admission_team ON public.computer_admission_gates
+    USING (team_id = public.memoh_current_team_id())
+    WITH CHECK (team_id = public.memoh_current_team_id());
+
+-- A short owner-scoped transaction lock also covers aliases registered under
+-- other mount IDs. No lock is held while contacting Agenvo or executing work.
+CREATE OR REPLACE FUNCTION public.memoh_computer_admission_lock(p_owner UUID)
+RETURNS VOID LANGUAGE SQL VOLATILE AS $$
+    SELECT pg_advisory_xact_lock(hashtextextended(
+        'computer-admission:' || public.memoh_current_team_id()::text || ':' || p_owner::text, 0));
+$$;
+
+CREATE OR REPLACE FUNCTION public.memoh_computer_admission_identity(p_provider TEXT, p_runtime UUID, p_config JSONB)
+RETURNS JSONB LANGUAGE SQL IMMUTABLE AS $$
+    SELECT CASE
+        WHEN p_provider='agenvo' THEN p_config
+        WHEN p_provider='memoh' AND jsonb_typeof(p_config->'herdr')='object' THEN
+            jsonb_build_object('connection_id',p_runtime::text,'device_id',p_runtime::text,
+                'instance_id',p_config->'herdr'->>'instance_id')
+        ELSE NULL
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.memoh_change_computer_admission(
+    p_owner UUID, p_runtime UUID, p_config JSONB,
+    p_request UUID, p_revision BIGINT, p_paused BOOLEAN)
+RETURNS JSONB LANGUAGE plpgsql VOLATILE AS $$
+DECLARE
+    registered JSONB;
+    conn UUID;
+    device TEXT;
+    instance TEXT;
+    gate public.computer_admission_gates%ROWTYPE;
+BEGIN
+    PERFORM public.memoh_computer_admission_lock(p_owner);
+    SELECT public.memoh_computer_admission_identity(provider,id,provider_config) INTO registered FROM public.user_runtimes
+    WHERE team_id=public.memoh_current_team_id() AND id=p_runtime AND user_id=p_owner
+      AND provider IN ('agenvo','memoh') AND revoked_at IS NULL AND activated_at IS NOT NULL
+      AND provider_config=p_config;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    conn := (registered->>'connection_id')::uuid;
+    device := registered->>'device_id';
+    instance := registered->>'instance_id';
+    IF conn IS NULL OR coalesce(length(device),0) NOT BETWEEN 1 AND 128
+       OR coalesce(length(instance),0) NOT BETWEEN 1 AND 128 THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    -- Each native runtime is its own trust domain. Preserve fail-closed alias
+    -- coverage for Agenvo without guessing equivalence from names or URLs.
+    IF EXISTS (SELECT 1 FROM public.user_runtimes r
+        WHERE r.team_id=public.memoh_current_team_id() AND r.user_id=p_owner
+          AND r.provider IN ('agenvo','memoh') AND r.revoked_at IS NULL
+          AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'device_id'=device
+          AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'instance_id'=instance
+          AND lower(public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'connection_id') IS DISTINCT FROM conn::text) THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    SELECT * INTO gate FROM public.computer_admission_gates
+    WHERE team_id=public.memoh_current_team_id() AND owner_id=p_owner
+      AND connection_id=conn AND device_id=device AND instance_id=instance;
+    IF FOUND THEN
+        IF gate.request_id=p_request AND gate.paused=p_paused THEN
+            RETURN to_jsonb(gate); -- Lost acknowledgement: same transition only.
+        END IF;
+        IF gate.revision<>p_revision OR
+           (p_paused AND (gate.paused OR gate.request_id=p_request)) OR
+           (NOT p_paused AND (NOT gate.paused OR gate.request_id<>p_request)) THEN
+            RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+        END IF;
+        UPDATE public.computer_admission_gates SET paused=p_paused, request_id=p_request,
+            revision=revision+1, updated_at=now()
+        WHERE team_id=gate.team_id AND owner_id=gate.owner_id AND connection_id=gate.connection_id
+          AND device_id=gate.device_id AND instance_id=gate.instance_id
+        RETURNING * INTO gate;
+    ELSE
+        IF NOT p_paused OR p_revision<>0 THEN
+            RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+        END IF;
+        INSERT INTO public.computer_admission_gates
+            (owner_id, connection_id, device_id, instance_id, request_id, paused, revision)
+        VALUES (p_owner, conn, device, instance, p_request, true, 1)
+        RETURNING * INTO gate;
+    END IF;
+    RETURN to_jsonb(gate);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.memoh_assert_computer_admission(p_bot UUID, p_target UUID)
+RETURNS VOID LANGUAGE plpgsql VOLATILE AS $$
+DECLARE
+    owner UUID;
+    registered JSONB;
+BEGIN
+    SELECT owner_user_id INTO owner FROM public.bots
+    WHERE team_id=public.memoh_current_team_id() AND id=p_bot;
+    IF owner IS NULL THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    PERFORM public.memoh_computer_admission_lock(owner);
+    -- Re-read mapping after acquiring the same lock as the pause transition.
+    SELECT public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config) INTO registered
+    FROM public.bot_remote_runtime_bindings b JOIN public.user_runtimes r
+      ON r.team_id=b.team_id AND r.id=b.runtime_id
+    WHERE b.team_id=public.memoh_current_team_id() AND b.bot_id=p_bot AND b.id=p_target
+      AND r.user_id=owner AND r.provider IN ('agenvo','memoh');
+    IF registered IS NULL OR nullif(registered->>'connection_id','') IS NULL
+       OR nullif(registered->>'device_id','') IS NULL OR nullif(registered->>'instance_id','') IS NULL THEN
+        -- Preserve legacy no-gate store behaviour. When the owner has a pause,
+        -- an unresolvable mapping cannot establish exemption from that pause.
+        IF EXISTS (SELECT 1 FROM public.computer_admission_gates
+            WHERE team_id=public.memoh_current_team_id() AND owner_id=owner AND paused) THEN
+            RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+        END IF;
+        RETURN;
+    END IF;
+    IF EXISTS (SELECT 1 FROM public.computer_admission_gates
+        WHERE team_id=public.memoh_current_team_id() AND owner_id=owner AND paused
+          AND device_id=registered->>'device_id' AND instance_id=registered->>'instance_id') THEN
+        -- Include ambiguous cross-connection aliases: they must not bypass a
+        -- previously closed gate. This does not attest that they are equivalent.
+        RAISE EXCEPTION USING ERRCODE='MC001', MESSAGE='computer admission paused';
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.memoh_guard_computer_admission()
+RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    IF TG_OP='INSERT' THEN
+        IF EXISTS (SELECT 1 FROM public.computer_operations
+            WHERE team_id=NEW.team_id AND bot_id=NEW.bot_id AND session_id=NEW.session_id
+              AND user_id=NEW.user_id AND run_id=NEW.run_id AND fingerprint=NEW.fingerprint) THEN
+            RETURN NEW; -- ON CONFLICT returns an existing receipt, never dispatches.
+        END IF;
+        PERFORM public.memoh_assert_computer_admission(NEW.bot_id, NEW.target_id);
+    ELSIF EXISTS (SELECT 1 FROM jsonb_array_elements(coalesce(nullif(NEW.details->'followups','null'::jsonb),'[]'::jsonb)) n
+        WHERE NOT EXISTS (SELECT 1 FROM jsonb_array_elements(coalesce(nullif(OLD.details->'followups','null'::jsonb),'[]'::jsonb)) o
+            WHERE o->>'request_id'=n->>'request_id')) THEN
+        PERFORM public.memoh_assert_computer_admission(NEW.bot_id, NEW.target_id);
+    END IF;
+    RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS computer_admission_claim ON public.computer_operations;
+CREATE TRIGGER computer_admission_claim BEFORE INSERT ON public.computer_operations
+    FOR EACH ROW EXECUTE FUNCTION public.memoh_guard_computer_admission();
+DROP TRIGGER IF EXISTS computer_admission_followup ON public.computer_operations;
+CREATE TRIGGER computer_admission_followup BEFORE UPDATE OF details ON public.computer_operations
+    FOR EACH ROW EXECUTE FUNCTION public.memoh_guard_computer_admission();
+
+CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
+RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    IF OLD.provider IN ('agenvo','memoh') AND
+       (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
+        PERFORM public.memoh_computer_admission_lock(OLD.user_id);
+        IF EXISTS (SELECT 1 FROM public.computer_admission_gates
+            WHERE team_id=OLD.team_id AND owner_id=OLD.user_id AND paused
+              AND device_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'device_id'
+              AND instance_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'instance_id') THEN
+            RAISE EXCEPTION USING ERRCODE='MC001', MESSAGE='computer admission paused';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS computer_admission_registration ON public.user_runtimes;
+CREATE TRIGGER computer_admission_registration BEFORE UPDATE OF provider, provider_config ON public.user_runtimes
+    FOR EACH ROW EXECUTE FUNCTION public.memoh_guard_paused_registration();
+
+-- Received cancel controls are observations, not execution records or causes.
+CREATE TABLE IF NOT EXISTS public.session_run_abort_controls (
+    team_id UUID NOT NULL DEFAULT public.memoh_current_team_id(),
+    run_id UUID NOT NULL,
+    session_id UUID NOT NULL,
+    request_hash TEXT NOT NULL CHECK (length(request_hash) = 64),
+    received_at TIMESTAMPTZ NOT NULL,
+    source TEXT NOT NULL CHECK (source = 'websocket'),
+    client_reason TEXT NOT NULL CHECK (client_reason IN
+        ('unspecified', 'user_stop', 'bot_switch', 'auth_reset', 'workdir_mismatch', 'client_cleanup')),
+    PRIMARY KEY (team_id, run_id, request_hash),
+    FOREIGN KEY (team_id, session_id, run_id)
+        REFERENCES public.session_runs(team_id, session_id, run_id) ON DELETE CASCADE
+);
+ALTER TABLE public.session_run_abort_controls ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.session_run_abort_controls FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS session_run_abort_controls_team ON public.session_run_abort_controls;
+CREATE POLICY session_run_abort_controls_team ON public.session_run_abort_controls
+    USING (team_id = public.memoh_current_team_id())
+    WITH CHECK (team_id = public.memoh_current_team_id());
+
+-- Native profile cutover final schema.
+-- A transaction-scoped exact intent: never an authorization credential and
+-- never returned to clients. An exception rolls both intent and update back.
+CREATE TABLE IF NOT EXISTS public.native_profile_cutover_intents (
+    backend_pid integer NOT NULL,
+    transaction_id xid8 NOT NULL,
+    team_id uuid NOT NULL,
+    owner_id uuid NOT NULL,
+    runtime_id uuid NOT NULL,
+    target_id uuid NOT NULL,
+    instance_id text NOT NULL,
+    request_id uuid NOT NULL,
+    revision bigint NOT NULL,
+    new_dir text NOT NULL,
+    PRIMARY KEY (backend_pid, transaction_id, team_id, runtime_id)
+);
+ALTER TABLE public.native_profile_cutover_intents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.native_profile_cutover_intents FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS native_profile_cutover_intents_team ON public.native_profile_cutover_intents;
+CREATE POLICY native_profile_cutover_intents_team ON public.native_profile_cutover_intents
+    USING (team_id = public.memoh_current_team_id())
+    WITH CHECK (team_id = public.memoh_current_team_id());
+
+CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
+RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
+DECLARE permit public.native_profile_cutover_intents%ROWTYPE;
+BEGIN
+    IF OLD.provider IN ('agenvo','memoh') AND
+       (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
+        PERFORM public.memoh_computer_admission_lock(OLD.user_id);
+        IF EXISTS (SELECT 1 FROM public.computer_admission_gates
+            WHERE team_id=OLD.team_id AND owner_id=OLD.user_id AND paused
+              AND device_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'device_id'
+              AND instance_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'instance_id') THEN
+            DELETE FROM public.native_profile_cutover_intents
+              WHERE backend_pid=pg_backend_pid() AND transaction_id=pg_current_xact_id()
+                AND team_id=OLD.team_id AND owner_id=OLD.user_id AND runtime_id=OLD.id
+                AND new_dir=NEW.provider_config #>> '{herdr,agent,config_dir}'
+              RETURNING * INTO permit;
+            IF NOT FOUND OR OLD.provider <> 'memoh' OR NEW.provider <> OLD.provider
+               OR (to_jsonb(NEW)-'provider_config'-'updated_at') IS DISTINCT FROM (to_jsonb(OLD)-'provider_config'-'updated_at')
+               OR jsonb_typeof(NEW.provider_config #> '{herdr,agent,config_dir}') IS DISTINCT FROM 'string'
+               OR jsonb_set(OLD.provider_config, '{herdr,agent,config_dir}', NEW.provider_config #> '{herdr,agent,config_dir}', false) IS DISTINCT FROM NEW.provider_config
+               OR NOT EXISTS (SELECT 1 FROM public.computer_admission_gates g
+                   WHERE g.team_id=OLD.team_id AND g.owner_id=OLD.user_id AND g.connection_id=OLD.id
+                     AND g.device_id=OLD.id::text AND g.instance_id=permit.instance_id
+                     AND g.request_id=permit.request_id AND g.revision=permit.revision AND g.paused)
+               OR NOT EXISTS (SELECT 1 FROM public.bot_remote_runtime_bindings b JOIN public.bots bot
+                   ON bot.team_id=b.team_id AND bot.id=b.bot_id
+                   WHERE b.team_id=OLD.team_id AND b.id=permit.target_id AND b.runtime_id=OLD.id AND bot.owner_user_id=OLD.user_id)
+               OR OLD.provider_config #>> '{herdr,instance_id}' IS DISTINCT FROM permit.instance_id THEN
+                RAISE EXCEPTION USING ERRCODE='MC001', MESSAGE='computer admission paused';
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+-- Caller must validate profile/path and the expected target fingerprint before
+-- entry. Exact old JSON is compared again while holding the admission lock.
+CREATE OR REPLACE FUNCTION public.memoh_cutover_paused_native_profile(
+    p_owner uuid, p_runtime uuid, p_target uuid, p_old jsonb, p_new jsonb,
+    p_instance text, p_request uuid, p_revision bigint)
+RETURNS jsonb LANGUAGE plpgsql VOLATILE AS $$
+DECLARE updated public.user_runtimes%ROWTYPE; gate public.computer_admission_gates%ROWTYPE;
+BEGIN
+    PERFORM public.memoh_computer_admission_lock(p_owner);
+    PERFORM 1 FROM public.users u JOIN public.team_members m ON m.user_id=u.id
+        WHERE u.id=p_owner AND u.is_active AND m.is_active AND m.team_id=public.memoh_current_team_id()
+        FOR SHARE OF u, m;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    IF p_revision < 1 OR p_instance IS NULL OR p_request IS NULL
+       OR jsonb_typeof(p_new #> '{herdr,agent,config_dir}') IS DISTINCT FROM 'string'
+       OR jsonb_set(p_old, '{herdr,agent,config_dir}', p_new #> '{herdr,agent,config_dir}', false) IS DISTINCT FROM p_new
+       OR p_old #>> '{herdr,instance_id}' IS DISTINCT FROM p_instance THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM public.computer_admission_gates g
+        WHERE g.team_id=public.memoh_current_team_id() AND g.owner_id=p_owner AND g.connection_id=p_runtime
+          AND g.device_id=p_runtime::text AND g.instance_id=p_instance AND g.request_id=p_request
+          AND g.revision=p_revision AND g.paused) THEN
+        RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+    END IF;
+    PERFORM 1 FROM public.bot_remote_runtime_bindings b JOIN public.bots bot
+        ON bot.team_id=b.team_id AND bot.id=b.bot_id
+        WHERE b.team_id=public.memoh_current_team_id() AND b.id=p_target AND b.runtime_id=p_runtime AND bot.owner_user_id=p_owner
+        FOR SHARE OF b, bot;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
+    END IF;
+    INSERT INTO public.native_profile_cutover_intents
+        VALUES (pg_backend_pid(), pg_current_xact_id(), public.memoh_current_team_id(), p_owner, p_runtime,
+                p_target, p_instance, p_request, p_revision, p_new #>> '{herdr,agent,config_dir}');
+    UPDATE public.user_runtimes SET provider_config=p_new, updated_at=now()
+        WHERE team_id=public.memoh_current_team_id() AND id=p_runtime AND user_id=p_owner
+          AND provider='memoh' AND activated_at IS NOT NULL AND revoked_at IS NULL AND provider_config=p_old
+        RETURNING * INTO updated;
+    IF NOT FOUND OR EXISTS (SELECT 1 FROM public.native_profile_cutover_intents
+        WHERE backend_pid=pg_backend_pid() AND transaction_id=pg_current_xact_id()
+          AND team_id=public.memoh_current_team_id() AND runtime_id=p_runtime) THEN
+        RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+    END IF;
+    -- Advance the existing CAS fence even though admission stays paused.
+    -- Comparing only the config permits A -> B -> A to revive an old request.
+    UPDATE public.computer_admission_gates SET revision=revision+1, updated_at=now()
+        WHERE team_id=public.memoh_current_team_id() AND owner_id=p_owner
+          AND connection_id=p_runtime AND device_id=p_runtime::text
+          AND instance_id=p_instance AND request_id=p_request AND revision=p_revision AND paused
+        RETURNING * INTO gate;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+    END IF;
+    RETURN to_jsonb(gate);
+END;
+$$;
+
+-- Session abort outcome final schema.
+-- Incoming controls and their observed server return are separate facts.
+-- Existing records remain unknown; never backfill a result from terminal state.
+ALTER TABLE public.session_run_abort_controls
+    ADD COLUMN IF NOT EXISTS completed_at timestamptz,
+    ADD COLUMN IF NOT EXISTS applied boolean,
+    ADD COLUMN IF NOT EXISTS error_class text,
+    ADD COLUMN IF NOT EXISTS server_source text;
+ALTER TABLE public.session_run_abort_controls DROP CONSTRAINT IF EXISTS session_abort_outcome_shape;
+ALTER TABLE public.session_run_abort_controls ADD CONSTRAINT session_abort_outcome_shape CHECK (
+    (completed_at IS NULL AND applied IS NULL AND error_class IS NULL AND server_source IS NULL)
+    OR (completed_at IS NOT NULL AND applied IS NOT NULL AND error_class IS NOT NULL AND server_source IS NOT NULL
+        AND error_class IN ('none','canceled','deadline_exceeded','control_error')
+        AND server_source IN ('agent_service','runtime_controller'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_logs_occurrence
+ ON schedule_logs(team_id,schedule_id,scheduled_for) WHERE scheduled_for IS NOT NULL;
+
+-- 0182_conversation_presence
+-- Keep optional conversation acknowledgement claims outside model/history input.
+CREATE TABLE IF NOT EXISTS public.conversation_presence (
+  team_id UUID NOT NULL DEFAULT public.memoh_current_team_id() REFERENCES public.teams(id),
+  bot_id UUID NOT NULL,
+  session_id UUID NOT NULL,
+  run_id UUID NOT NULL,
+  invocation_id TEXT NOT NULL,
+  actor_id TEXT NOT NULL,
+  episode_id UUID NOT NULL,
+  generation TEXT NOT NULL,
+  live_generation TEXT NOT NULL,
+  fencing_token BIGINT NOT NULL CHECK (fencing_token > 0),
+  temperature TEXT NOT NULL CHECK (temperature IN ('cold','hot','uncertain','ineligible')),
+  state TEXT NOT NULL DEFAULT 'eligible' CHECK (state IN ('eligible','claimed','published','closed')),
+  claimed_at TIMESTAMPTZ,
+  piece JSONB,
+  close_reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (team_id, session_id, invocation_id),
+  FOREIGN KEY (team_id, bot_id) REFERENCES public.bots(team_id, id) ON DELETE CASCADE,
+  FOREIGN KEY (team_id, session_id, run_id) REFERENCES public.session_runs(team_id, session_id, run_id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS conversation_presence_episode_claim
+  ON public.conversation_presence(team_id, session_id, episode_id) WHERE claimed_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS conversation_presence_session_recent
+  ON public.conversation_presence(team_id, session_id, actor_id, created_at DESC);
+ALTER TABLE public.conversation_presence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversation_presence FORCE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'conversation_presence' AND policyname = 'conversation_presence_team') THEN
+    CREATE POLICY conversation_presence_team ON public.conversation_presence
+      USING (team_id = public.memoh_current_team_id()) WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+END $$;
+
+-- Durable follow-up queue receipts (0183).
+-- 0183_session_follow_up_queue: retain durable input and receipt identities.
+-- Additive durable follow-up storage. Integration must confirm this migration number.
+-- No cascading deletion or TTL removes accepted/failed/unknown queue history.
+CREATE TABLE IF NOT EXISTS session_follow_up_queues (
+ bot_id UUID NOT NULL,
+ session_id UUID NOT NULL,
+ envelope BYTEA NOT NULL,
+ updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+ PRIMARY KEY (bot_id,session_id)
+);
+-- Rollback must retain this table and the original encryption key. An old binary
+-- cannot recover these queues: do not roll it back while durable inputs remain.

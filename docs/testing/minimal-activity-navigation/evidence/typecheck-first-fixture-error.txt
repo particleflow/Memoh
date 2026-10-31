@@ -1,0 +1,8 @@
+
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/components/sidebar/session-activity.test.ts(115,202): error TS2739: Type '{ text: string; }' is missing the following properties from type 'UIUserTurn': turn_id, role, timestamp
+/tmp/memoh-candidate-7bcb-review/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

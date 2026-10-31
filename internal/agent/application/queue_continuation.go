@@ -27,12 +27,18 @@ import (
 type queuePayload struct {
 	Text    string                 `json:"text"`
 	Command *turn.StartTurnCommand `json:"command,omitempty"`
+	// Old consumers cannot execute this host-only envelope: Command is absent.
+	// They see no display text and reject it as an unsupported continuation.
+	InternalCommand *turn.StartTurnCommand `json:"internal_command,omitempty"`
 }
 
 func encodeQueueCommand(cmd turn.StartTurnCommand) ([]byte, error) {
 	text := strings.TrimSpace(cmd.UserVisibleText)
 	if text == "" {
 		text = strings.TrimSpace(cmd.Query)
+	}
+	if cmd.DelegationResultID != "" || cmd.TaskResultReceipt != "" {
+		return json.Marshal(queuePayload{InternalCommand: &cmd})
 	}
 	return json.Marshal(queuePayload{Text: text, Command: &cmd})
 }
@@ -41,6 +47,12 @@ func decodeQueuePayload(payload []byte) queuePayload {
 	var body queuePayload
 	if err := json.Unmarshal(payload, &body); err != nil {
 		return queuePayload{}
+	}
+	if body.InternalCommand != nil {
+		if body.Command != nil || (body.InternalCommand.DelegationResultID == "" && body.InternalCommand.TaskResultReceipt == "") {
+			return queuePayload{}
+		}
+		body.Command = body.InternalCommand
 	}
 	body.Text = strings.TrimSpace(body.Text)
 	return body
@@ -64,7 +76,7 @@ func rewriteQueuePayloadText(payload []byte, editorUserID, text string) ([]byte,
 	}
 	body := decodeQueuePayload(payload)
 	editor := strings.TrimSpace(editorUserID)
-	if body.Command == nil || editor == "" || strings.TrimSpace(body.Command.UserID) != editor {
+	if body.Command == nil || (body.Command.DelegationResultID != "" || body.Command.TaskResultReceipt != "") || editor == "" || strings.TrimSpace(body.Command.UserID) != editor {
 		return nil, ErrQueueItemNotEditable
 	}
 	body.Text = text
@@ -78,6 +90,9 @@ func rewriteQueuePayloadText(payload []byte, editorUserID, text string) ([]byte,
 // fall back to the raw envelope, which can contain a deferred command credential.
 func QueuePayloadText(payload []byte) string {
 	body := decodeQueuePayload(payload)
+	if body.Command != nil && (body.Command.DelegationResultID != "" || body.Command.TaskResultReceipt != "") {
+		return ""
+	}
 	if text := strings.TrimSpace(body.Text); text != "" {
 		return text
 	}

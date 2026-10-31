@@ -30,30 +30,48 @@ type ConnectionCommitGuard func() error
 // in-memory reverse-RPC connections. Bot/session routing belongs outside this
 // package.
 type Service struct {
-	agenvo         *agenvo.Service
-	store          dbstore.UserRuntimeStore
-	hub            *Hub
-	lifecycleLocks *runtimeLifecycleLocks
+	agenvo           *agenvo.Service
+	store            dbstore.UserRuntimeStore
+	hub              *Hub
+	lifecycleLocks   *runtimeLifecycleLocks
+	workspaceStorage *workspaceStorage
 }
 
 func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
-func (s *Service) ConfigureAgenvoAgent(ctx context.Context, owner, id string, profile agenvo.AgentProfile) (Runtime, error) {
+func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, profile agenvo.NativeHerdrProfile) (Runtime, error) {
 	if s.agenvo == nil {
 		return Runtime{}, agenvo.ErrUnavailable
 	}
-	row, err := s.agenvo.ConfigureAgent(ctx, owner, id, profile)
+	row, err := s.agenvo.ConfigureNativeHerdr(ctx, owner, id, profile)
 	if err != nil {
 		return Runtime{}, err
 	}
-	return runtimeFromRecord(row, nil), nil
+	runtime := runtimeFromRecord(row, s.connection(row.ID))
+	// Configuring a program reference must not reissue the Runtime credential.
+	runtime.Key = ""
+	return runtime, nil
 }
 
-func (s *Service) DiscoverAgenvo(ctx context.Context, ownerID, connectionID string) ([]agenvo.DiscoveredInstance, error) {
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in agenvo.NativeProfileCutoverRequest) (agenvo.Admission, error) {
 	if s.agenvo == nil {
-		return nil, agenvo.ErrUnavailable
+		return agenvo.Admission{}, agenvo.ErrUnavailable
 	}
-	return s.agenvo.Discover(ctx, ownerID, connectionID)
+	return s.agenvo.CutoverPausedNativeProfile(ctx, owner, id, in)
+}
+
+func (s *Service) ReadComputerAdmission(ctx context.Context, owner, runtime string) (agenvo.Admission, error) {
+	if s.agenvo == nil {
+		return agenvo.Admission{}, agenvo.ErrUnavailable
+	}
+	return s.agenvo.ReadAdmission(ctx, owner, runtime)
+}
+
+func (s *Service) SetComputerAdmission(ctx context.Context, owner, runtime string, in agenvo.ChangeAdmission) (agenvo.Admission, error) {
+	if s.agenvo == nil {
+		return agenvo.Admission{}, agenvo.ErrUnavailable
+	}
+	return s.agenvo.SetAdmission(ctx, owner, runtime, in)
 }
 
 func NewService(store dbstore.UserRuntimeStore, hub *Hub) *Service {
@@ -88,23 +106,10 @@ func (s *Service) CreateRuntime(ctx context.Context, userID string, req CreateRu
 	if len(name) > maxRuntimeNameBytes || strings.ContainsRune(name, '\x00') || !utf8.ValidString(name) {
 		return Runtime{}, fmt.Errorf("%w: name must be valid UTF-8 of at most %d bytes", ErrInvalidName, maxRuntimeNameBytes)
 	}
-	if req.Provider == agenvo.Provider {
-		if req.Agenvo == nil || name == "" {
-			return Runtime{}, agenvo.ErrInvalidTarget
-		}
-		if s.agenvo == nil {
-			return Runtime{}, agenvo.ErrUnavailable
-		}
-		row, err := s.agenvo.Register(ctx, userID, name, *req.Agenvo)
-		if err != nil {
-			return Runtime{}, err
-		}
-		runtime := runtimeFromRecord(row, nil)
-		runtime.Online = true // Register completed a real, read-only native probe.
-		runtime.Availability = "online"
-		return runtime, nil
+	if req.Provider == agenvo.Provider || req.Agenvo != nil {
+		return Runtime{}, agenvo.ErrLegacyRetired
 	}
-	if req.Provider != "" && req.Provider != "memoh" || req.Agenvo != nil {
+	if req.Provider != "" && req.Provider != "memoh" {
 		return Runtime{}, agenvo.ErrInvalidTarget
 	}
 	if err := s.store.ExpirePendingUserRuntimes(ctx, userID); err != nil {
@@ -144,9 +149,8 @@ func (s *Service) ListRuntimes(ctx context.Context, userID string) ([]Runtime, e
 	items := make([]Runtime, 0, len(rows))
 	for _, row := range rows {
 		runtime := runtimeFromRecord(row, s.connection(row.ID))
-		if row.Provider == agenvo.Provider && s.agenvo != nil {
-			runtime.Availability = agenvo.Availability(s.agenvo.Probe(ctx, row.UserID, row.ProviderConfig))
-			runtime.Online = runtime.Availability == "online"
+		if row.Provider == agenvo.Provider {
+			continue // Historical rows remain stored, but are never selectable or probed.
 		}
 		// A credential becomes a manageable computer only after a ready
 		// connection consumes its short-lived pending state. Persisting that
@@ -340,6 +344,16 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 		}
 		return runtime
 	}
+	target, targetErr := agenvo.DecodeRuntimeTarget(row.Provider, row.ID, row.ProviderConfig)
+	if targetErr == nil && target.NativeRuntimeID != "" {
+		digest, _ := agenvo.NativeProfileConfigDigest(row.ProviderConfig)
+		runtime.NativeHerdr = &NativeHerdrIdentity{
+			ConnectionID: target.ConnectionID, DeviceID: target.DeviceID,
+			InstanceID: target.InstanceID, Session: target.Session,
+			TargetFingerprint: agenvo.TargetFingerprint(target),
+			ConfigSHA256:      digest,
+		}
+	}
 	if connection == nil {
 		return runtime
 	}
@@ -350,5 +364,11 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 	runtime.Arch = connection.Info.Arch
 	runtime.ClientVersion = connection.Info.ClientVersion
 	runtime.Capabilities = append([]string(nil), connection.Info.Capabilities...)
+	if runtime.NativeHerdr != nil {
+		runtime.Capabilities = append(runtime.Capabilities, agenvo.CapabilityForegroundExec)
+		if target.Agent != (agenvo.AgentProfile{}) {
+			runtime.Capabilities = append(runtime.Capabilities, "herdr_pi_task")
+		}
+	}
 	return runtime
 }

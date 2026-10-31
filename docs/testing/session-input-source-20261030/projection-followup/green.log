@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /workspace/Memoh
+
+
+ Test Files  6 passed (6)
+      Tests  99 passed (99)
+   Start at  10:22:55
+   Duration  2.77s (transform 4.07s, setup 0ms, import 6.06s, tests 187ms, environment 3ms)

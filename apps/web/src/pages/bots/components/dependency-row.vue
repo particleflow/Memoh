@@ -64,10 +64,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { dependencyName, dependencyDescription, dependencyIconUrl } = useWorkspaceDependencyText()
+const { dependencyName, dependencyIconUrl } = useWorkspaceDependencyText()
 
 const name = computed(() => dependencyName(props.item))
-const description = computed(() => dependencyDescription(props.item))
 const version = computed(() => formatDependencyVersion(props.item.installed_version))
 const iconUrl = computed(() => dependencyIconUrl(props.item))
 const badge = computed(() => dependencyStatusBadge(props.item))
@@ -177,12 +176,6 @@ const dimClass = computed(() => (unsupported.value ? 'opacity-40' : ''))
           </Badge>
         </div>
 
-        <p
-          v-if="description"
-          class="mt-0.5 text-body text-muted-foreground"
-        >
-          {{ description }}
-        </p>
 
         <!-- The recorded failure is a disclosure, not always-on text: a stack
              trace would otherwise set the row height for the whole list. -->

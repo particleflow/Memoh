@@ -38,7 +38,7 @@ func (h *RuntimeTransferCredentialHandler) Register(e *echo.Echo) {
 // @Summary Read owned computer file credential status (no secret)
 // @Tags user-runtimes
 // @Produce json
-// @Param id path string true "Existing Agenvo runtime ID"
+// @Param id path string true "Existing native Runtime ID"
 // @Success 200 {object} userruntime.TransferCredentialStatus
 // @Failure 403 {object} server.Problem
 // @Failure 503 {object} server.Problem
@@ -61,7 +61,7 @@ func (h *RuntimeTransferCredentialHandler) status(c echo.Context) error {
 // @Tags user-runtimes
 // @Accept json
 // @Produce json
-// @Param id path string true "Existing Agenvo runtime ID"
+// @Param id path string true "Existing native Runtime ID"
 // @Param request body userruntime.ChangeTransferCredentialRequest true "Expected current credential ID and optional device expiry"
 // @Success 201 {object} userruntime.TransferCredentialEnrollment
 // @Failure 400 {object} server.Problem
@@ -88,7 +88,7 @@ func (h *RuntimeTransferCredentialHandler) enroll(c echo.Context) error {
 // revoke godoc
 // @Summary Revoke an owned computer file credential with current-ID CAS
 // @Tags user-runtimes
-// @Param id path string true "Existing Agenvo runtime ID"
+// @Param id path string true "Existing native Runtime ID"
 // @Param expected_id query string true "Current non-secret credential ID"
 // @Success 204 "Revoked"
 // @Failure 403 {object} server.Problem

@@ -119,11 +119,6 @@
         </EmptyMedia>
       </EmptyHeader>
       <EmptyTitle>{{ $t('models.emptyTitle') }}</EmptyTitle>
-      <EmptyDescription>
-        {{ $t(managed
-          ? 'models.managedEmptyDescription'
-          : providerId ? 'models.emptyDescription' : 'models.draftEmptyDescription') }}
-      </EmptyDescription>
     </Empty>
   </SettingsSection>
 </template>
@@ -132,7 +127,6 @@
 import { ref, computed, watch } from 'vue'
 import {
   Empty,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,

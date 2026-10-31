@@ -1,0 +1,18 @@
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/absent_selection_preserves_local
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/selected_root_preserves_dot_artifact_semantics
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/selected_child
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/local_root_not_broadened
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/different_registered_Runtime
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/different_Bot
+=== RUN   TestComputerTaskWorkspaceDefaultBindingAndRoots/different_owner
+--- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/absent_selection_preserves_local (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/selected_root_preserves_dot_artifact_semantics (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/selected_child (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/local_root_not_broadened (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/different_registered_Runtime (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/different_Bot (0.00s)
+    --- PASS: TestComputerTaskWorkspaceDefaultBindingAndRoots/different_owner (0.00s)
+PASS
+ok  	command-line-arguments	0.009s

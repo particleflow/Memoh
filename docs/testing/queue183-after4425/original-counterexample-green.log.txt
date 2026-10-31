@@ -1,0 +1,6 @@
+=== RUN   TestIndependentClaimRecoveryWithSingleConnection
+--- PASS: TestIndependentClaimRecoveryWithSingleConnection (0.05s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.071s
+
+exit=0

@@ -1,0 +1,71 @@
+[hooks] Hook regression tests: /workspace/.memoh-cloud/tooling/node_modules/node/bin/node --test scripts/hook-checks.test.mjs
+✔ frontend (2.018482ms)
+✔ hook test script (0.246561ms)
+✔ docs (0.105129ms)
+✔ Go package (0.170297ms)
+✔ deduplicate (0.137016ms)
+✔ embedded prompt (0.093872ms)
+✔ template (0.163987ms)
+✔ mixed (0.106691ms)
+✔ workspace Dockerfile (0.919806ms)
+✔ OpenAPI contract (0.239861ms)
+✔ display assets (0.206571ms)
+✔ runtime configuration (0.074703ms)
+✔ dependency (0.104408ms)
+✔ SQL inputs (0.102845ms)
+✔ deleted package (0.03957ms)
+✔ rename old and new paths (0.035143ms)
+✔ UI submodule (0.029975ms)
+✔ toolchain (0.027691ms)
+✔ frontend configuration (0.029665ms)
+✔ root Go package (0.028974ms)
+✔ explicit full checks (0.070156ms)
+✔ only staged files select checks; spaces are preserved (57.023921ms)
+✔ file size uses the index, not a smaller working copy (50.424787ms)
+✔ large generated Swagger artifacts retain their package checks (170.906326ms)
+✔ ordinary oversized file remains rejected: spec/notes.json (50.929889ms)
+✔ ordinary oversized file remains rejected: spec/nested/swagger.json (50.182712ms)
+✔ ordinary oversized file remains rejected: docs/swagger.json (50.261832ms)
+✔ ordinary oversized file remains rejected: packages/sdk/src/other.gen.ts (54.457344ms)
+✔ ordinary oversized file remains rejected: uploads/large.bin (55.508818ms)
+✔ ordinary file at the unchanged 1 MiB boundary is accepted (53.236053ms)
+✔ frontend calls lint-staged without Go (79.098747ms)
+✔ Go package checks run sequentially and failures stop the chain (229.146101ms)
+✔ timeout fails rather than silently skipping checks (1175.773854ms)
+✔ full mode runs all three checks even without staged changes (129.165357ms)
+✔ deleted resource still selects its package through the index (56.28227ms)
+✔ build-excluded packages do not invoke lint or test (76.512145ms)
+✔ packages that remain after build selection still run checks (138.024107ms)
+✔ ordinary package failures are not hidden by selection (138.744813ms)
+✔ real Go build constraints skip tag-only packages and honor GOFLAGS (602.046783ms)
+✔ manual checks from a subdirectory select and run packages at the root (105.985691ms)
+✔ dependency-only commits explicitly require CI without invoking Go (41.446493ms)
+✔ lint rejects import paths even when Go accepts them (93.220232ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3527.466731
+[hooks] Hook regression tests: 3.56s
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (938d19ec)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 9 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 3.91s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/botdelegation ./internal/db ./internal/handlers ./spec
+go: could not create module cache: mkdir /workspace/.memoh-cloud/cache/go-mod: file exists
+[hooks] Go package selection: 0.02s
+[hooks] Go package selection failed (1)

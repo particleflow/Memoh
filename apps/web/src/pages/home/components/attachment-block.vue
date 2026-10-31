@@ -4,12 +4,21 @@
       v-for="(att, i) in block.attachments"
       :key="i"
     >
+      <div
+        v-if="unavailableSources.has(getUrl(att))"
+        role="status"
+        class="text-body text-muted-foreground"
+      >
+        <span>{{ getDisplayName(att) }}</span>
+        <p>{{ t('chat.attachmentUnavailable') }}</p>
+      </div>
+
       <!-- Content image/video (assistant body): an image the bot posts into the
            reply is content, not an attachment chip, so it keeps its natural
            aspect ratio (a screenshot stays a rectangle) — bounded by the column
            width and a max height, never cropped square. -->
       <button
-        v-if="variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)"
+        v-else-if="variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)"
         type="button"
         class="block w-fit max-w-[min(28rem,100%)] cursor-pointer overflow-hidden rounded-lg border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
         @click="handleMediaClick(att)"
@@ -29,6 +38,7 @@
           class="block h-auto max-h-80 w-auto max-w-full object-contain"
           loading="eager"
           decoding="async"
+          @error="handleMediaError"
         >
       </button>
 
@@ -45,6 +55,7 @@
           :video="isVideo(att)"
           :name="String(att.name ?? '')"
           interactive
+          @media-error="src => unavailableSources.add(src)"
         />
       </button>
 
@@ -108,7 +119,12 @@
 </template>
 
 <script setup lang="ts">
-import { inject, reactive, watch } from 'vue'
+import { inject, onScopeDispose, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { toast } from '@felinic/ui'
+import { MediaRecoveryError, saveMediaDownload } from '@/lib/media-transfer'
+import { fileApiFetch } from '@/lib/api-client'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import type { AttachmentBlock, AttachmentItem } from '@/store/chat-list'
 import { useChatStore } from '@/store/chat-list'
 import { isTextFile } from '@/components/file-manager/utils'
@@ -136,6 +152,10 @@ const props = withDefaults(defineProps<{
 const chatStore = useChatStore()
 const openInFileManager = inject(openInFileManagerKey, undefined)
 const openAssetPreview = inject(openAssetPreviewKey, undefined)
+const { t } = useI18n()
+const unavailableSources = reactive(new Set<string>())
+let downloadController: AbortController | undefined
+onScopeDispose(() => downloadController?.abort())
 
 // A sent text file should read exactly like its composer preview did — same line
 // count, same "load then appear" shimmer. The composer had the File object to
@@ -176,7 +196,7 @@ async function ensureLineCount(att: AttachmentItem) {
   }
   lineCounts[key] = 'counting'
   try {
-    const res = await fetch(url)
+    const res = await fileApiFetch(url)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const count = (await res.text()).split('\n').length
     lineCountCache.set(key, count)
@@ -202,6 +222,11 @@ function isCounting(att: AttachmentItem): boolean {
 
 function getUrl(att: AttachmentItem): string {
   return resolveUrl(att)
+}
+
+function handleMediaError(event: Event) {
+  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')
+  if (src) unavailableSources.add(src)
 }
 
 function isImage(att: AttachmentItem): boolean {
@@ -280,7 +305,7 @@ function stableKey(input: string): string {
   return hash.toString(36)
 }
 
-function handleOpenFile(att: AttachmentItem) {
+async function handleOpenFile(att: AttachmentItem) {
   const url = getUrl(att)
   if (!url) return
   const name = getDisplayName(att)
@@ -293,9 +318,23 @@ function handleOpenFile(att: AttachmentItem) {
       name,
       botId: contentHash ? resolveAttBotId(att) : undefined,
       contentHash: contentHash || undefined,
+      size: attachmentSize(att),
       delegationUrl,
       src: contentHash ? undefined : url,
     })
+    return
+  }
+  if (contentHash) {
+    if (downloadController) return
+    const controller = new AbortController()
+    downloadController = controller
+    try {
+      await saveMediaDownload(resolveAttBotId(att), contentHash, attachmentSize(att), delegationUrl, name, controller.signal)
+    } catch (error) {
+      if (!controller.signal.aborted) toast.error(error instanceof MediaRecoveryError
+        ? t(`chat.mediaRecovery.${error.reason}`)
+        : resolveApiErrorMessage(error, t('bots.files.readFailed')))
+    } finally { if (downloadController === controller) downloadController = undefined }
     return
   }
   // Rendered outside a dock (no preview host): download rather than hand a

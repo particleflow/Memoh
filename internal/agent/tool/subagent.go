@@ -285,6 +285,7 @@ type SpawnProvider struct {
 	bgManager      *background.Manager
 	hookService    *hooks.Service
 	admitter       SubagentAdmitter
+	taskQueue      NativeTaskQueue
 	modelResolver  subagentModelResolver
 	coord          *agentCoordinator
 	logger         *slog.Logger
@@ -386,7 +387,11 @@ func (p *SpawnProvider) Tools(ctx context.Context, session SessionContext) ([]to
 			Description: spawnDescription,
 			Parameters:  toolexec.SchemaFor[spawnAgentArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, args spawnAgentArgs) (sdk.ToolOutput, error) {
-				return toolexec.OutputPair(p.execSpawnAgent(ctx.Context, sess, args))
+				callCtx := withNativeTaskCall(ctx.Context, ctx.ToolCallID, ctx.ToolName, args)
+				if result, found, err := p.replayNativeTask(callCtx, sess); found || err != nil {
+					return toolexec.OutputPair(result, err)
+				}
+				return toolexec.OutputPair(p.execSpawnAgent(callCtx, sess, args))
 			}),
 		},
 		{
@@ -394,7 +399,11 @@ func (p *SpawnProvider) Tools(ctx context.Context, session SessionContext) ([]to
 			Description: "Send a follow-up message to an existing managed subagent. Messages to a busy agent are queued and run serially.",
 			Parameters:  toolexec.SchemaFor[sendMessageArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, args sendMessageArgs) (sdk.ToolOutput, error) {
-				return toolexec.OutputPair(p.execSendMessage(ctx.Context, sess, args))
+				callCtx := withNativeTaskCall(ctx.Context, ctx.ToolCallID, ctx.ToolName, args)
+				if result, found, err := p.replayNativeTask(callCtx, sess); found || err != nil {
+					return toolexec.OutputPair(result, err)
+				}
+				return toolexec.OutputPair(p.execSendMessage(callCtx, sess, args))
 			}),
 		},
 		{
@@ -446,6 +455,7 @@ type agentRunResult struct {
 }
 
 type agentRequest struct {
+	receipt          *dbstore.NativeTaskReceipt
 	taskID           string
 	agentID          string
 	agentSessionID   string
@@ -689,6 +699,10 @@ func (p *SpawnProvider) execListAgents(ctx context.Context, session SessionConte
 }
 
 func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionContext, rec agentRecord, config sessionpkg.SubagentConfig, message string, runInBackground bool) (any, error) {
+	return p.submitAgentTaskWithReceipt(ctx, session, rec, config, message, runInBackground, nil)
+}
+
+func (p *SpawnProvider) submitAgentTaskWithReceipt(ctx context.Context, session SessionContext, rec agentRecord, config sessionpkg.SubagentConfig, message string, runInBackground bool, receipt *dbstore.NativeTaskReceipt) (any, error) {
 	if p.bgManager == nil {
 		return nil, errors.New("background task manager not available")
 	}
@@ -697,8 +711,23 @@ func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionCont
 	if p.admitter == nil {
 		return nil, errors.New("session runtime is not available")
 	}
+	description := truncateTitle(fmt.Sprintf("%s: %s", rec.AgentID, message), 120)
+	if p.taskQueue != nil && receipt == nil {
+		call, _ := ctx.Value(nativeTaskCallKey{}).(nativeTaskCall)
+		r, created, err := p.taskQueue.Enqueue(ctx, session, call.ID, rec.AgentID, rec.SessionID, config, message, description)
+		if err != nil {
+			return nil, err
+		}
+		if !created {
+			return nativeTaskResponse(r), nil
+		}
+		receipt = &r
+	}
 	runtime, err := p.modelResolver(context.WithoutCancel(ctx), session, config.ModelUUID, config.ModelID, config.ProviderName)
 	if err != nil {
+		if receipt != nil {
+			err = errors.Join(err, p.taskQueue.Reject(context.WithoutCancel(ctx), *receipt))
+		}
 		return nil, fmt.Errorf("resolve model: %w", err)
 	}
 	systemPrompt := ""
@@ -707,6 +736,7 @@ func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionCont
 	}
 
 	req := &agentRequest{
+		receipt:        receipt,
 		agentID:        rec.AgentID,
 		agentSessionID: rec.SessionID,
 		message:        message,
@@ -715,13 +745,16 @@ func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionCont
 		runtime:        runtime,
 		systemPrompt:   systemPrompt,
 	}
-	description := truncateTitle(fmt.Sprintf("%s: %s", rec.AgentID, message), 120)
 
 	key := agentStateKey(session.BotID, session.SessionID, rec.AgentID)
 	p.coord.mu.Lock()
+	if receipt != nil && p.bgManager.Get(receipt.TaskID) != nil {
+		p.coord.mu.Unlock()
+		return nativeTaskResponse(*receipt), nil
+	}
 	st := p.coord.ensure(session.BotID, session.SessionID, rec.AgentID, rec.SessionID)
 	if st.runningTaskID != "" {
-		taskID, _, err := p.bgManager.StartAgentTask(ctx, session.BotID, session.SessionID, rec.AgentID, rec.SessionID, message, description, true)
+		taskID, _, err := p.startRecordedAgentTask(ctx, req, description, true)
 		if err != nil {
 			p.coord.mu.Unlock()
 			return nil, err
@@ -744,7 +777,7 @@ func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionCont
 		}, nil
 	}
 
-	taskID, taskCtx, err := p.bgManager.StartAgentTask(ctx, session.BotID, session.SessionID, rec.AgentID, rec.SessionID, message, description, false)
+	taskID, taskCtx, err := p.startRecordedAgentTask(ctx, req, description, false)
 	if err != nil {
 		p.coord.mu.Unlock()
 		return nil, err
@@ -776,6 +809,11 @@ func (p *SpawnProvider) submitAgentTask(ctx context.Context, session SessionCont
 }
 
 func (p *SpawnProvider) runAgentRequest(ctx context.Context, key string, req *agentRequest) agentRunResult {
+	if err := p.claimRecordedAgentTask(ctx, req); err != nil {
+		result := rejectedAgentRun(req, err)
+		result.Status = string(background.TaskUnknown)
+		return p.completeAgentRequest(ctx, key, req, result)
+	}
 	runCtx, finishRun, admitErr := p.admitAgentRun(ctx, req)
 	if admitErr != nil {
 		// Nothing was started and nothing was persisted, but the task record has
@@ -832,8 +870,11 @@ func (p *SpawnProvider) agentTaskStopRequested(taskID string) bool {
 // to whatever is next. Both the executed and the refused path end here, so a
 // task can never be left running in the manager's view.
 func (p *SpawnProvider) completeAgentRequest(ctx context.Context, key string, req *agentRequest, result agentRunResult) agentRunResult {
+	p.finishRecordedAgentTask(ctx, req, &result)
 	status := background.TaskCompleted
 	switch {
+	case result.Status == string(background.TaskUnknown):
+		status = background.TaskUnknown
 	case result.Status == string(background.TaskKilled):
 		status = background.TaskKilled
 	case result.Error != "":

@@ -36,10 +36,25 @@
       <!-- Sender name (channel threads only): names every participant so the
            group conversation is legible without relying on bubble side. -->
       <p
-        v-if="showSenderName && avatarName"
+        v-if="sourceLabel || (showSenderName && avatarName)"
         class="text-xs font-medium text-muted-foreground mb-1 px-0.5"
       >
-        {{ avatarName }}
+        <TooltipProvider v-if="sourceLabel">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                data-input-source
+                tabindex="0"
+              >{{ sourceLabel }}</span>
+            </TooltipTrigger>
+            <TooltipContent class="whitespace-pre-wrap break-all">
+              {{ sourceDetails }}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <template v-else>
+          {{ avatarName }}
+        </template>
       </p>
 
       <!-- Background task status -->
@@ -203,7 +218,15 @@
 
       <!-- Assistant blocks and the live process preview share one vertical rhythm. -->
       <div v-else>
-        <div class="[--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]">
+        <div
+          class="chat-speech-bubble [--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]"
+          :data-speech-state="speechStatus ?? 'idle'"
+        >
+          <span
+            v-if="speechStatus === 'playing'"
+            class="sr-only"
+            role="status"
+          >{{ t('chat.readAloud.playing') }}</span>
           <template
             v-for="node in renderNodes"
             :key="node.key"
@@ -235,6 +258,10 @@
                  edge trims are the only exceptions. -->
               <div
                 v-if="node.block.type === 'text' && node.block.content"
+                :ref="element => setSpeechBody(node.block.id, speechSource(node.block), !isAssistantBlockStreaming(node.index), element)"
+                data-speech-body
+                :data-speech-final="speechFinalSources.get(node.block.id) === node.block.content && !isAssistantBlockStreaming(node.index) ? 'true' : 'false'"
+                :data-speech-block-id="node.block.id"
                 :lang="contentLang(node.block.content)"
                 class="prose prose-sm dark:prose-invert max-w-none [&_li]:my-0.5! [&>*:first-child]:mt-0! [&>*:last-child]:mb-0!"
               >
@@ -243,7 +270,9 @@
                      default docs profile — it is tuned for message streams,
                      not long documents. -->
                 <MarkdownRender
+                  :ref="renderer => setSpeechRenderer(node.block.id, speechSource(node.block), !isAssistantBlockStreaming(node.index), renderer)"
                   :content="node.block.content"
+                  :final="!isAssistantBlockStreaming(node.index)"
                   :custom-markdown-it="withLiteralSingleDollars"
                   :is-dark="isDark"
                   mode="chat"
@@ -285,8 +314,19 @@
                 v-else-if="node.block.type === 'error' && (node.block.code || node.block.content)"
                 tone="destructive"
                 size="sm"
-                :description="errorBlockContent(node.block)"
-              />
+                :description="recoveryErrorContent(node.block)"
+                :clickable="recoverableError(node.block) && !recovery.blocked.value"
+                :disabled="recoverableError(node.block) && recovery.busy.value"
+                :aria-busy="recoverableError(node.block) && recovery.busy.value"
+                @click="recoverableError(node.block) && recovery.recover()"
+              >
+                <template
+                  v-if="recoverableError(node.block) && recovery.busy.value"
+                  #icon
+                >
+                  <Spinner class="size-3.5" />
+                </template>
+              </CalloutBanner>
 
               <!-- Runtime notice block: a degradation the runtime wants the
                    user to see (tools unavailable, an interaction declined).
@@ -347,6 +387,7 @@
           class="mt-2"
           role="assistant"
           :copy-text="assistantPlainText"
+          :on-replay="canReplaySpeech ? () => emit('replaySpeech') : undefined"
           :inline-actions="inlineActions"
           :time-label="calendarTimestamp"
           :full-time="fullTimestamp"
@@ -408,8 +449,12 @@ if (typeof document !== 'undefined') {
 import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'
 import { Sparkles, Target } from 'lucide-vue-next'
 import { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'
-import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Textarea } from '@felinic/ui'
-import MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'
+import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea, Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@felinic/ui'
+import MarkdownRender, { enableKatex, enableMermaid, type MarkstreamRendererHandle } from 'markstream-vue'
+import { useLocalStorage } from '@vueuse/core'
+import { bindSpeechRenderer } from '../composables/speech-render-completion'
+import { useAcceptedUserInputRecovery } from '../composables/useAcceptedUserInputRecovery'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSettingsStore } from '@/store/settings'
 import ToolCallGroup from './tool-call-group.vue'
 import ChatAnswersCard from './chat-answers-card.vue'
@@ -434,7 +479,9 @@ import type {
 } from '@/store/chat-list'
 import { structuredToolResult } from '@/store/chat-list.normalize'
 import { runtimeGoalObjective } from '@/utils/runtime-slash-commands'
+import { provideNativeTaskResumeScope } from '../composables/native-task-resume-scope'
 import { withLiteralSingleDollars } from '@/utils/markdown-dollar'
+import { speechText, type SpeechStatus } from '../composables/chat-read-aloud'
 
 import { resolveUrl } from '../composables/useMediaGallery'
 import { useElementVisibility } from '@vueuse/core'
@@ -456,12 +503,17 @@ const emit = defineEmits<{
   active: [isActive: boolean, { id: string, top: number,  }]
   editMessage: [messageId: string, text: string, done: (started: boolean) => void]
   forkMessage: [turnId: string]
+  replaySpeech: []
 }>()
 
 const props = defineProps<{
   message: ChatMessage
+  hideProcessActivity?: boolean
   botId?: string
   sessionId?: string
+  recoveryOriginalRunId?: string
+  recoveryEnabled?: boolean
+  recoveryVisible?: boolean
   // Group layout for third-party synced threads: every turn left-aligned with
   // an avatar + sender name + channel badge (including the bot's own replies).
   channelThread?: boolean
@@ -478,7 +530,43 @@ const props = defineProps<{
   goalRuntime?: string
   isScrolling: boolean
   isLastMessage?: boolean
+  speechEnabled?: boolean
+  speechCanReplay?: boolean
+  speechStatus?: SpeechStatus
 }>()
+
+// Source-versioned native renderer acknowledgement; no guessed quiet timer.
+const speechFinalSources = ref(new Map<number, string>())
+function speechSource(block: ContentBlock) { return block.type === 'text' ? block.content : '' }
+const speechBodies = new Map<number, Element>()
+const speechRenderers = new Map<number, MarkstreamRendererHandle>()
+function bindSpeechSource(id: number, source: string, final: boolean) {
+  const body = speechBodies.get(id), renderer = speechRenderers.get(id)
+  if (!body || !renderer) return
+  bindSpeechRenderer(body, renderer, source, final, () => { speechFinalSources.value = new Map(speechFinalSources.value).set(id, source) })
+}
+function setSpeechBody(id: number, source: string, final: boolean, element: unknown) {
+  if (element instanceof Element) speechBodies.set(id, element); else speechBodies.delete(id)
+  bindSpeechSource(id, source, final)
+}
+function setSpeechRenderer(id: number, source: string, final: boolean, renderer: unknown) {
+  if (renderer && typeof (renderer as MarkstreamRendererHandle).getVirtualMetrics === 'function') speechRenderers.set(id, renderer as MarkstreamRendererHandle); else speechRenderers.delete(id)
+  bindSpeechSource(id, source, final)
+}
+
+const canReplaySpeech = computed(() => props.speechEnabled && props.speechCanReplay && !props.message.streaming && !!speechText(props.message))
+provideNativeTaskResumeScope(props)
+const recoveryToken = useLocalStorage('token', '')
+const recovery = useAcceptedUserInputRecovery(computed(() => ({ bot: props.botId || '', session: props.sessionId || '', run: props.recoveryOriginalRunId,
+  enabled: props.recoveryEnabled === true && !!props.botId && !!props.sessionId, visible: props.recoveryVisible !== false })), toRef(props, 'message'), recoveryToken)
+const recoveryStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing', 'completed', 'failed', 'aborted', 'lost', 'unknown'])
+function recoverableError(block: ErrorBlock) { return block.code === 'runtime_run_failed' && !!recovery.candidate.value }
+function recoveryErrorContent(block: ErrorBlock) {
+  if (!recoverableError(block)) return errorBlockContent(block)
+  if (recovery.blocked.value && recovery.error.value) return resolveApiErrorMessage(recovery.error.value, errorBlockContent(block))
+  if (recovery.state.value) return t('chat.tools.userInputRecoveryState', { state: t(`chat.tasks.statuses.${recoveryStates.has(recovery.state.value) ? recovery.state.value : 'unknown'}`) })
+  return errorBlockContent(block)
+}
 
 // Compare the whole reply, including tools separated by assistant text.
 const showExecutionLocation = computed(() => {
@@ -753,6 +841,40 @@ const avatarName = computed(() => {
   return ''
 })
 
+const sourceLabel = computed(() => {
+  if (props.message.role === 'system') return ''
+  const source = props.message.inputSource
+  if (!source) return ''
+  const known = new Set(['user', 'schedule', 'bot_delegation', 'task_result', 'native_task'])
+  const kind = known.has(source.kind) ? source.kind : 'unknown'
+  const ownIdentity = source.user_id && source.user_id === userStore.userInfo.id
+  const actor = kind === 'user'
+    ? (props.message.role === 'user' ? props.message.senderDisplayName : '')
+      || (ownIdentity ? userStore.userInfo.displayName || userStore.userInfo.username : '')
+      || source.user_id || source.channel_identity_id
+    : source.task_id
+  const bot = props.botId === source.bot_id ? props.botName || source.bot_id : source.bot_id
+  return [bot, t(`chat.inputSources.${kind}`), source.channel, actor].filter(Boolean).join(' · ')
+})
+
+const sourceDetails = computed(() => {
+  if (props.message.role === 'system') return ''
+  const source = props.message.inputSource
+  if (!source) return ''
+  return [
+    [t('chat.inputSources.bot'), source.bot_id],
+    [t('chat.inputSources.session'), source.session_id],
+    [t('chat.inputSources.user'), source.user_id],
+    [t('chat.inputSources.channelIdentity'), source.channel_identity_id],
+    [t('chat.inputSources.originBot'), source.origin_bot_id],
+    [t('chat.inputSources.originSession'), source.origin_session_id],
+    [t('chat.inputSources.task'), source.task_id],
+    [t('chat.inputSources.run'), source.task_run_id],
+    [t('chat.inputSources.occurrence'), source.occurrence_id],
+    [t('chat.inputSources.originRun'), source.origin_run_id],
+  ].filter(([, value]) => value).map(([label, value]) => `${label}: ${value}`).join('\n')
+})
+
 const avatarFallback = computed(() => (avatarName.value || '?').slice(0, 2).toUpperCase())
 
 // The bot's own turns carry no platform tag; fall back to the thread's channel
@@ -832,16 +954,27 @@ const runtimeStatusText = computed(() => {
   if (props.message.role !== 'assistant' || !props.message.streaming) return ''
   const status = props.message.messages.find(block => block.type === 'status')
   if (status?.type !== 'status' || !status.name) return ''
+  if (status.name === 'conversation_ack') {
+    if (props.message.messages.some(block => block.type === 'text' && block.content.trim())) return ''
+    return status.args?.text ?? ''
+  }
   const key = `chat.runtimeStatus.${status.name}`
   return te(key) ? t(key, status.args ?? {}) : ''
 })
 
-const shouldRenderMessage = computed(() =>
-  props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming,
-)
+const shouldRenderMessage = computed(() => {
+  if (props.hideProcessActivity && props.message.role === 'system' && props.message.kind === 'background_task') return false
+  return props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming
+})
 
 function isVisibleAssistantBlock(block: ContentBlock): boolean {
   if (block.type === 'status') return false
+  // Contact presentation may omit raw tools, but provider-returned reasoning
+  // and runtime status remain visible while a reply is being generated. This
+  // is render-only: approvals and task/debug panes read the intact transcript.
+  if (props.hideProcessActivity) {
+    if (block.type === 'tool') return isCompletedAskUser(block)
+  }
   if (block.type === 'tool') return true
   if (block.type === 'text') return Boolean(block.content)
   if (block.type === 'command') return Boolean(block.content)

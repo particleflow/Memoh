@@ -2,12 +2,6 @@
   <PageShell :title="t('runtimes.title')">
     <template #actions>
       <Button
-        variant="outline"
-        @click="agenvoDialogOpen = true"
-      >
-        {{ t('agenvo.connect') }}
-      </Button>
-      <Button
         :loading="creatingRuntime"
         @click="startConnect"
       >
@@ -30,7 +24,6 @@
         <SettingsRow
           v-else-if="desktopRuntimeLoadFailed"
           :label="t('runtimes.thisComputer.loadFailed')"
-          :description="t('runtimes.thisComputer.loadFailedDescription')"
         >
           <Button
             variant="outline"
@@ -136,7 +129,6 @@
         <SettingsRow
           v-else-if="runtimesError && runtimes === undefined"
           :label="t('runtimes.loadFailed')"
-          :description="t('runtimes.loadFailedDescription')"
         >
           <Button
             variant="outline"
@@ -154,9 +146,6 @@
           <p class="text-sm font-medium text-foreground">
             {{ desktopRuntimeBridge ? t('runtimes.emptyOtherTitle') : t('runtimes.emptyTitle') }}
           </p>
-          <p class="mx-auto mt-1 max-w-md text-xs leading-relaxed text-muted-foreground">
-            {{ desktopRuntimeBridge ? t('runtimes.emptyOtherDescription') : t('runtimes.emptyDescription') }}
-          </p>
         </div>
 
         <SettingsRow
@@ -169,13 +158,6 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
               <p class="flex min-w-0 items-center gap-2 text-sm">
                 <span class="truncate font-medium text-foreground">{{ runtime.name }}</span>
-                <Badge
-                  v-if="runtime.provider === 'agenvo'"
-                  variant="secondary"
-                  size="sm"
-                >
-                  {{ agenvoCapabilityLabel(runtime, t) }}
-                </Badge>
                 <Badge
                   v-if="accessCount(runtime) > 0"
                   variant="secondary"
@@ -255,9 +237,6 @@
       >
         <DialogHeader>
           <DialogTitle>{{ t('runtimes.thisComputer.dialogTitle') }}</DialogTitle>
-          <DialogDescription>
-            {{ t('runtimes.thisComputer.dialogDescription') }}
-          </DialogDescription>
         </DialogHeader>
 
         <FormStack>
@@ -303,9 +282,6 @@
           <DialogTitle class="break-words">
             {{ desktopRuntimeName }}
           </DialogTitle>
-          <DialogDescription>
-            {{ t('computerAccess.subtitleRuntime') }}
-          </DialogDescription>
         </DialogHeader>
 
         <DialogBody>
@@ -321,11 +297,6 @@
     </DialogPanel>
   </Dialog>
 
-  <ConnectAgenvoDialog
-    v-model:open="agenvoDialogOpen"
-    @registered="onAgenvoRegistered"
-  />
-
   <ConnectComputerDialog
     v-model:open="connectDialogOpen"
     :credential="connectCredential"
@@ -339,7 +310,7 @@
 </template>
 
 <script setup lang="ts">
-import { runtimeAvailability, agenvoCapabilityLabel } from '@/utils/workspace-target'
+import { runtimeAvailability } from '@/utils/workspace-target'
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -358,7 +329,6 @@ import {
   Button,
   Dialog,
   DialogBody,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPanel,
@@ -374,7 +344,6 @@ import { SettingsIcon as Settings } from '@memohai/icon/ui'
 import { ConfirmPopover, FieldStack, FormStack, InlineLoadingRow, PageShell, SettingsRow, SettingsSection } from '@felinic/ui'
 import BotComputerAccessDialog from '@/components/computer/bot-computer-access-dialog.vue'
 import ComputerAccessList from '@/components/computer/computer-access-list.vue'
-import ConnectAgenvoDialog from '@/components/computer/connect-agenvo-dialog.vue'
 import ConnectComputerDialog from '@/components/computer/connect-computer-dialog.vue'
 import { useAccountRuntimes, useComputerAccessActions, useComputerAccessGrants } from '@/components/computer/use-computer-access'
 import {
@@ -402,12 +371,6 @@ function accessCount(runtime: UserruntimeRuntime): number {
   return grants.value.filter(grant => grant.runtime_id === runtime.id).length
 }
 
-const agenvoDialogOpen = ref(false)
-async function onAgenvoRegistered(runtime: UserruntimeRuntime): Promise<void> {
-  await refetchRuntimes()
-  openAccessDialog(runtime)
-}
-
 const accessDialogOpen = ref(false)
 // The dialog's subject is just an id: the display name resolves live from the
 // runtimes list, so a handshake backfill (default name → device hostname)
@@ -427,9 +390,8 @@ function openAccessDialog(runtime: UserruntimeRuntime): void {
 }
 
 function revokeMessage(runtime: UserruntimeRuntime): string {
-  const base = t('runtimes.revokeDescription', { name: runtime.name })
   const count = accessCount(runtime)
-  return count > 0 ? `${base} ${t('runtimes.revokeAccessWarning', { count })}` : base
+  return count > 0 ? t('runtimes.revokeAccessWarning', { count }) : ''
 }
 
 const desktopRuntimeState = ref<DesktopRuntimeState>()
@@ -530,14 +492,7 @@ const desktopRuntimeLabel = computed(() => (
     : t('runtimes.thisComputer.allow')
 ))
 
-const desktopRuntimeDescription = computed(() => (
-  desktopRuntimeState.value?.error
-  || (!desktopRuntimeState.value?.enabled
-    ? t('runtimes.thisComputer.description')
-    : desktopRuntimeActive.value
-      ? t('runtimes.thisComputer.enabledDescription')
-      : t('runtimes.thisComputer.pausedDescription'))
-))
+const desktopRuntimeDescription = computed(() => desktopRuntimeState.value?.error || '')
 
 const desktopRuntimeStatusLabel = computed(() => {
   switch (desktopRuntimeState.value?.status) {
@@ -656,7 +611,7 @@ async function removeDesktopRuntime(): Promise<void> {
 const desktopRuntimeRemoveMessage = computed(() => {
   const registered = desktopRuntimeRegistered.value
   if (registered) return revokeMessage(registered)
-  return t('runtimes.revokeDescription', { name: desktopRuntimeName.value })
+  return ''
 })
 
 const submitDesktopRuntimeName = connectForm.handleSubmit(values => enableDesktopRuntime(values.name.trim()))

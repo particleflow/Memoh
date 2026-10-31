@@ -1,0 +1,7 @@
+# github.com/felinics/memoh/internal/imagecapability [github.com/felinics/memoh/internal/imagecapability.test]
+internal/imagecapability/boundaries_test.go:49:6: uuid already declared through import of package uuid ("github.com/google/uuid")
+	internal/imagecapability/observation.go:10:2: other declaration of uuid
+internal/imagecapability/boundaries_test.go:49:6: uuid already declared through import of package uuid ("github.com/google/uuid")
+	internal/imagecapability/observation_test.go:17:2: other declaration of uuid
+FAIL	github.com/felinics/memoh/internal/imagecapability [build failed]
+FAIL

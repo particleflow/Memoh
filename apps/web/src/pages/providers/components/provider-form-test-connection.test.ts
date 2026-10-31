@@ -27,6 +27,8 @@ async function flushPromises() {
   await nextTick()
 }
 
+vi.mock('./provider-media-catalog.vue', () => ({ default: { template: '<span />' } }))
+
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: translate, te: hasTranslation }),
 }))
@@ -83,6 +85,7 @@ vi.mock('@felinic/ui', async () => {
     SelectTrigger: Passthrough,
     SelectValue: Passthrough,
     Spinner: Passthrough,
+    Switch: Passthrough,
     toast: { success: vi.fn(), error: vi.fn() },
   }
 })

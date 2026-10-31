@@ -108,6 +108,7 @@ type compactionRunner interface {
 
 // Service orchestrates chat with the internal agent.
 type Service struct {
+	conversationPresence    *conversationPresenceRuntime
 	activeTurns             activeTurnTracker
 	resumeSecret            string
 	resumeScopes            SessionResumeScopeProvider
@@ -134,6 +135,7 @@ type Service struct {
 	botPermissions          botPermissionChecker
 	workspaceTargets        workspaceTargetResolver
 	delegationScope         func(context.Context, ChatRequest) (context.Context, ChatRequest, error)
+	taskResultWake          func(context.Context)
 	workdirs                sessionWorkdirResolver
 	pipeline                *timeline.Pipeline
 	streamHTTPClient        *http.Client
@@ -409,6 +411,7 @@ func (s *Service) InlineImageAttachments(ctx context.Context, botID string, refs
 }
 
 type resolvedContext struct {
+	presence                    *presenceResolvedModel
 	runConfig                   native.RunConfig
 	model                       models.GetResponse
 	provider                    sqlc.Provider
@@ -498,7 +501,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	}
 	req = s.applySubagentThreadDefaults(ctx, req, sessionPrefModelID != "")
 
+	var presenceModel *presenceResolvedModel
+	modelHook := s.presenceModelHook(req, &presenceModel)
 	runCfg, chatModel, provider, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
+		ModelConfigHook:    modelHook,
 		BotID:              req.BotID,
 		ChatID:             req.ChatID,
 		SessionID:          req.ThreadID,
@@ -523,6 +529,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 			slog.Any("error", err),
 		)
 		return resolvedContext{}, req, err
+	}
+
+	if req.TaskResultReceipt != "" {
+		runCfg.SupportsToolCall = false
 	}
 
 	// Persist explicit selections before generation and advance the revision
@@ -693,6 +703,9 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	runCfg.ContextTrimmableMessages = min(trimmableMessages, len(messages))
 
 	displayName := s.resolveDisplayName(ctx, req)
+	if source := requestInputSource(req); source.Kind != "user" {
+		displayName = source.Kind
+	}
 	mergedAttachments := s.routeAndMergeAttachments(ctx, chatModel, req)
 
 	tz := runCfg.Identity.TimezoneLocation
@@ -779,6 +792,7 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	}
 
 	return resolvedContext{
+		presence:                    presenceModel,
 		runConfig:                   runCfg,
 		model:                       chatModel,
 		provider:                    provider,
@@ -843,7 +857,7 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 		cfg.OnStepCommitted = stepCommitter.commit
 		stepCommitter.bindContinuation(&cfg)
 	}
-	cfg = s.prepareRunConfig(ctx, cfg)
+	cfg = s.prepareRunConfig(ctx, cfg, req)
 	terminal := s.contextLifecycleTerminal(ctx, cfg)
 	var lifecycleCause error
 	defer func() { terminal(lifecycleCause) }()
@@ -896,6 +910,7 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 // baseRunConfigParams holds parameters for buildBaseRunConfig that differ
 // between chat and discuss callers.
 type baseRunConfigParams struct {
+	ModelConfigHook   func(models.GetResponse, sqlc.Provider, models.SDKModelConfig) models.SDKModelConfig
 	BotID             string
 	ChatID            string
 	SessionID         string
@@ -963,7 +978,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 	if modelHTTPClient == nil {
 		modelHTTPClient = s.streamHTTPClient
 	}
-	sdkModel := models.NewSDKChatModel(models.SDKModelConfig{
+	sdkConfig := models.SDKModelConfig{
 		ModelID:               chatModel.ModelID,
 		ClientType:            provider.ClientType,
 		APIKey:                creds.APIKey,
@@ -979,7 +994,11 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		ThinkingBudgetMax:     chatModel.Config.ThinkingBudgetMax,
 		ContextWindow:         contextBudgetFromChatModel(chatModel),
 		MaxOutputTokens:       chatModel.Config.MaxOutputTokensLimit(),
-	})
+	}
+	if p.ModelConfigHook != nil {
+		sdkConfig = p.ModelConfigHook(chatModel, provider, sdkConfig)
+	}
+	sdkModel := models.NewSDKChatModel(sdkConfig)
 
 	var agentSkills []native.SkillEntry
 	if s.skillLoader != nil {
@@ -1048,6 +1067,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 	if bound, hasWorkdir, workdirErr := s.resolveSessionWorkdirBinding(ctx, p.BotID, p.SessionID); workdirErr != nil {
 		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, workdirErr
 	} else if hasWorkdir {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, bound.WorkDir)
 		cfg.Identity.WorkdirPath = bound.WorkDir
 		// Pin the workdir's target so the resolution below runs against it —
 		// including its error path when the target is unreachable.
@@ -1440,7 +1460,7 @@ func (s *Service) ResolveRunConfig(ctx context.Context, botID, sessionID, channe
 }
 
 // prepareRunConfig generates the system prompt and appends the user message.
-func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig) native.RunConfig {
+func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig, requests ...ChatRequest) native.RunConfig {
 	cfg.ContextHookText = ""
 	beforePromptResult := s.runPromptHook(ctx, agentRunConfigView{
 		BotID:        cfg.Identity.BotID,
@@ -1568,6 +1588,19 @@ func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig) na
 		native.GenerateSystemSections(systemParams),
 		hookBuild.Frags,
 	)
+	// Keep host provenance separate from user/task bodies. It participates in
+	// provider budget admission as required context and survives mode changes.
+	source := requestInputSource(ChatRequest{BotID: cfg.Identity.BotID, ThreadID: cfg.Identity.SessionID})
+	if len(requests) > 0 {
+		source = requestInputSource(requests[0])
+	}
+	section := sourceSystemSection(source)
+	cfg.System += "\n\n" + section.Text
+	sourceFrags := native.SystemSectionFrags([]native.SystemSection{section}, cfg.ContextScope)
+	for i := range sourceFrags {
+		sourceFrags[i].CacheClass = contextfrag.CacheNever
+	}
+	cfg.ContextSourceFrags = append(cfg.ContextSourceFrags, sourceFrags...)
 	cfg.ContextSourceWarnings = hookBuild.Warnings
 	return cfg.RefreshContextFrag()
 }

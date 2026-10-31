@@ -1,0 +1,79 @@
+{
+  "source": "6e3cec9df7dd81dfe5c15ee44e7f1823fd272c35",
+  "runs": [
+    {
+      "id": 41082332497,
+      "name": "Native large-byte recovery",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41082332698,
+      "name": "Docker PR",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41082332393,
+      "name": "Contribution policy CI",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41082332653,
+      "name": "ESLint",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41082332450,
+      "name": "Go CI",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 41082332441,
+      "name": "Native delivery fixtures",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "failures": [
+    {
+      "job": 124154405793,
+      "errors": [
+        "2026-10-30T15:44:47.7848122Z ##[error]internal/agent/application/conversation_presence_native_postgres_test.go:61:14: Error return value of `fmt.Fprint` is not checked (errcheck)",
+        "2026-10-30T15:44:47.7860506Z ##[error]internal/agent/application/conversation_presence_native_postgres_test.go:64:14: Error return value of `fmt.Fprint` is not checked (errcheck)",
+        "2026-10-30T15:44:47.7866626Z ##[error]internal/agent/application/conversation_presence_runtime_test.go:57:16: Error return value of `fmt.Fprint` is not checked (errcheck)",
+        "2026-10-30T15:44:47.7869070Z ##[error]internal/agent/application/conversation_presence_runtime_test.go:67:15: Error return value of `fmt.Fprint` is not checked (errcheck)",
+        "2026-10-30T15:44:47.7872832Z ##[error]internal/agent/application/conversation_presence_sdk_test.go:40:15: Error return value of `fmt.Fprint` is not checked (errcheck)",
+        "2026-10-30T15:44:47.7876769Z ##[error]internal/agent/application/conversation_presence_independent_review_test.go:3:1: File is not properly formatted (gci)",
+        "2026-10-30T15:44:47.7878729Z ##[error]internal/agent/application/conversation_presence_postgres_test.go:10:1: File is not properly formatted (gci)",
+        "2026-10-30T15:44:47.7880148Z ##[error]internal/agent/application/conversation_presence_sdk_test.go:11:1: File is not properly formatted (gci)",
+        "2026-10-30T15:44:47.7882354Z ##[error]internal/handlers/session_invocation_independent_review_test.go:4:1: File is not properly formatted (gci)",
+        "2026-10-30T15:44:47.7884918Z ##[error]internal/agent/application/conversation_presence_independent_review_test.go:9:1: File is not properly formatted (gofumpt)",
+        "2026-10-30T15:44:47.7887498Z ##[error]internal/agent/application/conversation_presence_sdk_test.go:14:1: File is not properly formatted (goimports)",
+        "2026-10-30T15:44:47.7889693Z ##[error]internal/agent/application/conversation_presence_runtime_test.go:83:40: G704: SSRF via taint analysis (gosec)",
+        "2026-10-30T15:44:47.7893170Z ##[error]internal/agent/application/conversation_presence_native_postgres_test.go:31:15: error-format: fmt.Errorf can be replaced with errors.New (perfsprint)",
+        "2026-10-30T15:44:47.7896899Z ##[error]internal/agent/application/conversation_presence_postgres_test.go:127:18: unused-parameter: parameter 'c' seems to be unused, consider removing or renaming it as _ (revive)",
+        "2026-10-30T15:44:47.7901543Z ##[error]internal/agent/application/conversation_presence_postgres_test.go:128:17: unused-parameter: parameter 'c' seems to be unused, consider removing or renaming it as _ (revive)",
+        "2026-10-30T15:44:47.7906167Z ##[error]internal/agent/application/conversation_presence_postgres_test.go:134:45: unused-parameter: parameter 't' seems to be unused, consider removing or renaming it as _ (revive)",
+        "2026-10-30T15:44:47.7911004Z ##[error]internal/agent/application/conversation_presence_postgres_test.go:135:50: unused-parameter: parameter 't' seems to be unused, consider removing or renaming it as _ (revive)",
+        "2026-10-30T15:44:47.7928053Z ##[error]issues found"
+      ]
+    },
+    {
+      "job": 124154405782,
+      "cause": "full chain upgraded clean to182; retained upgrade fixture asserted literal181",
+      "step": "Verify native profile cutover and historical identity on PostgreSQL"
+    }
+  ],
+  "fixes": {
+    "scope": "tests only; no lint rules, permissions, product speech or migrations changed",
+    "localEvidence": [
+      "current-chain-retention-final.log.txt",
+      "presence-lint-fixture-sdk-check.log.txt"
+    ],
+    "fixtureNetwork": "exact-host/http/no-userinfo guard with single-hop RoundTripper retains main WroteRequest; three forbidden targets rejected before base transport"
+  }
+}

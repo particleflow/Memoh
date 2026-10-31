@@ -149,12 +149,6 @@ const visibleSections = computed(() => props.sections.filter(s => iconMap[s.key]
               >{{ t('bots.backup.conflict') }}</span>
             </div>
             <div
-              v-if="item.sensitive"
-              class="text-[10px] text-warning-foreground"
-            >
-              {{ t('bots.backup.sensitiveHint') }}
-            </div>
-            <div
               v-if="mode === 'strategy'"
               class="text-[10px] text-muted-foreground"
             >

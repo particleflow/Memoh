@@ -1,0 +1,4 @@
+=== RUN   TestSessionTaskObservationHTTPHostBindingAndLateRevocation
+--- PASS: TestSessionTaskObservationHTTPHostBindingAndLateRevocation (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.020s

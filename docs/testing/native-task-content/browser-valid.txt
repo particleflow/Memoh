@@ -1,0 +1,4 @@
+PASS real Web + JWT + PG + synthetic native get/read/prompt: bounded escaped sample; accepted is input delivery only; exactly one prompt
+PASS offline clears stale sample; visible polling restores content without prompt replay
+PASS lost prompt confirmation persists unknown in PG and UUID in browser; page reload reconciles same request and never resends
+PASS narrow shared Web content layout; not a Harmony package or real Windows Agent test

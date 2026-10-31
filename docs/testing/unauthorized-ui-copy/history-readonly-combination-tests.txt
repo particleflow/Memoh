@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/Memoh-ui-p2-review
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:57:36
+   Duration  8.19s (transform 5.85s, setup 0ms, import 7.34s, tests 316ms, environment 408ms)

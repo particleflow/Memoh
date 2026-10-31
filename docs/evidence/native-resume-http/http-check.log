@@ -1,0 +1,27 @@
+[
+  {
+    "case": "anonymous",
+    "status": 401,
+    "cache_control": "no-store",
+    "code": "http.unauthorized"
+  },
+  {
+    "case": "identity_in_body",
+    "status": 400,
+    "cache_control": "no-store",
+    "code": "request.field_invalid"
+  },
+  {
+    "case": "wrong_kind",
+    "status": 400,
+    "cache_control": "no-store",
+    "code": "request.field_invalid"
+  },
+  {
+    "case": "old_agenvo_operation_cannot_resume",
+    "status": 400,
+    "cache_control": "no-store",
+    "code": "http.bad_request"
+  }
+]
+PASS whole-row snapshots unchanged: operations/sessions/runs/messages; original fixtures only, no native Runtime fixture in this DB

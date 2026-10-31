@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -339,4 +340,37 @@ func invocationTestStatus(err error) int {
 	}
 	def, _ := apperror.Lookup(apperror.CodeOf(err))
 	return def.HTTPStatus
+}
+
+// Exercise Echo's real router: it uses RawPath when present, otherwise Path.
+func TestGetSessionInvocationEscapedPathIdentity(t *testing.T) {
+	for _, tc := range []struct{ name, encoded, identity string }{
+		{"encoded colon", "follow-up%3Aitem", "follow-up:item"},
+		{"literal colon", "follow-up:item", "follow-up:item"},
+		{"literal percent escape", "literal%253Aitem", "literal%3Aitem"},
+		{"mixed escapes", "literal%253A%3Aitem", "literal%3A:item"},
+		{"plus", "literal%2Bitem", "literal+item"},
+		{"slash", "literal%2Fitem", "literal/item"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			store := sessionledger.New()
+			run := admitInvocationTestRun(t, store, "run-encoded", invocationTestSessionA, tc.identity)
+			lookup := &recordingInvocationLookup{store: store}
+			h := newInvocationTestHandler(newInvocationTestQueries(invocationTestSession(invocationTestSessionA, invocationTestOwnerID)), lookup)
+			e := echo.New()
+			e.GET("/bots/:bot_id/sessions/:session_id/invocations/:invocation_id", func(c echo.Context) error {
+				c.Set("user", &jwt.Token{Valid: true, Claims: jwt.MapClaims{"sub": invocationTestOwnerID, "user_id": invocationTestOwnerID}})
+				return h.GetSessionInvocation(c)
+			})
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/sessions/"+invocationTestSessionA+"/invocations/"+tc.encoded, nil))
+			body := decodeInvocationBody(t, rec)
+			if rec.Code != http.StatusOK || body["found"] != true || body["invocation_id"] != tc.identity || body["run_id"] != run.RunID {
+				t.Fatalf("encoded lookup: status %d body %#v", rec.Code, body)
+			}
+			if len(lookup.calls) != 1 || lookup.calls[0] != invocationTestSessionA+"/"+tc.identity {
+				t.Fatalf("lookup identity: %#v", lookup.calls)
+			}
+		})
+	}
 }

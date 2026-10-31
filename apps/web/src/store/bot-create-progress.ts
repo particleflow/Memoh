@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import { getAgentAuthorizationsById, getBotsById, getBotsByIdChecks, getBotsByBotIdAgents, getBotsByBotIdAgentsById, patchBotsByBotIdAgentsById, postBotsByBotIdAgents, postBotsByBotIdAgentsByIdCredentialClaim, postBotsByBotIdUserAccess, putBotsByBotIdSettings } from '@memohai/sdk'
 import type { BotagentsBotAgent, BotsBot, BotsCreateBotRequest } from '@memohai/sdk'
 import {
@@ -23,6 +23,10 @@ import { agentAuthForCredentialKind, botAgentRuntimeForProvider, directBotAgentM
 import { externalAgentDisplayName } from '@/utils/external-agent'
 import { writeCreatedBotSession, type CreatedBotSession } from '@/pages/bots/created-bot-session'
 import { randomUUID } from '@/utils/uuid'
+import { useUserStore } from '@/store/user'
+import { sdkApiBaseUrl } from '@/lib/api-client'
+import { clearPendingBotSession, readPendingBotSession, writePendingBotSession } from '@/pages/bots/pending-bot-session'
+import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
 import { installCreatedAgent } from './install-created-agent'
 
 // The Bot row exists from the first `bot_created` event on, so every failure
@@ -118,8 +122,10 @@ async function applyGrants(
   botId: string,
   grants: BotCreateGrant[] | undefined,
   onError?: (message: string) => void,
+  current: () => boolean = () => true,
 ): Promise<void> {
   for (const grant of grants ?? []) {
+    if (!current()) return
     if (grant.subject_type === 'user' && !grant.user_id) continue
     if (grant.permissions.length === 0) continue
     try {
@@ -133,7 +139,7 @@ async function applyGrants(
         throwOnError: true,
       })
     } catch (error) {
-      onError?.(resolveApiErrorMessage(error, localFailureMessage()))
+      if (current()) onError?.(resolveApiErrorMessage(error, localFailureMessage()))
     }
   }
 }
@@ -145,9 +151,10 @@ function localFailureMessage(): string {
 // Polls the Bot until the server has settled its workspace one way or the
 // other. Returns the last observation even when the budget runs out while the
 // Bot is still creating; the caller decides what that means.
-async function awaitBotSettled(botId: string): Promise<BotsBot> {
+async function awaitBotSettled(botId: string, current: () => boolean = () => true): Promise<BotsBot> {
   const deadline = Date.now() + BOT_STATUS_POLL_BUDGET_MS
   for (;;) {
+    if (!current()) throw new Error('Session changed')
     const { data } = await getBotsById({ path: { id: botId }, throwOnError: true })
     if (data.status !== BOT_STATUS_CREATING || Date.now() >= deadline) return data
     await sleep(BOT_STATUS_POLL_INTERVAL_MS)
@@ -184,6 +191,8 @@ async function workspaceFailure(
 // from the create form to the dedicated progress route. Views read this store
 // and own navigation/onboarding side effects.
 export const useBotCreateProgressStore = defineStore('bot-create-progress', () => {
+  const userStore = useUserStore()
+  const scope = () => userStore.userInfo.id ? JSON.stringify([sdkApiBaseUrl(), userStore.userInfo.id]) : ''
   const status = ref<BotCreateStatus>('idle')
   const display = ref<BotCreateDisplay | null>(null)
   const progress = ref<BotCreateProgress | null>(null)
@@ -202,6 +211,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   // with the Bot already made; each start() from the form mints a new key.
   let lastRequestKey = ''
   let grantsApplied = false
+  let activeScope = ''
 
   const percent = computed(() => botCreateProgressPercent(progress.value))
   const isActive = computed(() => status.value === 'creating')
@@ -221,9 +231,16 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     lastPayload = null
     hasPayload.value = false
     grantsApplied = false
+    activeScope = ''
     writeCreatedBotSession(null, lastOptions.onboarding)
     lastOptions = {}
     modelConfigured.value = false
+  }
+  const stopAuthListener = onAuthSessionCleared(reset)
+  onScopeDispose(stopAuthListener)
+
+  function syncScope() {
+    if (activeScope && activeScope !== scope()) reset()
   }
 
   function ensureErrorLine(message: string) {
@@ -235,6 +252,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     if (!bot.value?.id) return
     const runtime = directRuntimeOf(lastOptions.agent)
     writeCreatedBotSession({
+      scope: scope(),
       botId: bot.value.id, botName: bot.value.name ?? '', displayName: display.value?.display_name ?? '',
       avatarUrl: display.value?.avatar_url, settings: lastOptions.settings, setupError: setupError.value,
       ...(runtime && { runtime, agentId: createdAgent.value?.id ?? '', authorizationId: authorizationId.value || undefined }),
@@ -261,6 +279,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     const message = resolveApiErrorMessage(error, localFailureMessage())
     setupError.value = message
     errorCode.value = parseMemohError(error)?.code ?? (apiErrorStatus(error) === 409 ? 'bot.name_taken' : null)
+    if (parseMemohError(error)?.code === 'bot.name_taken' && scope()) clearPendingBotSession(scope(), lastOptions.onboarding)
     progress.value = { phase: 'error', error: message }
     ensureErrorLine(message)
     status.value = 'error'
@@ -269,6 +288,10 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   async function applySetup(recovering = false): Promise<BotCreateStartResult> {
     const options = lastOptions
     const botId = bot.value?.id
+    const operationScope = scope()
+    const generation = authSessionGeneration()
+    const current = () => scope() === operationScope && authSessionGeneration() === generation
+    const check = () => { if (!current()) throw new Error('Session changed') }
     let settingsApplied = !hasSettings(options.settings)
     let agentApplied = !options.agent
     const directAgent = !!options.agent && botAgentRuntimeForProvider(options.agent.provider) !== 'acp'
@@ -285,13 +308,16 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
         if (recovering) {
           if (createdAgent.value?.id) {
             const { data } = await getBotsByBotIdAgentsById({ path: { bot_id: botId, id: createdAgent.value.id }, throwOnError: true })
+            check()
             createdAgent.value = data
           } else {
             const { data } = await getBotsByBotIdAgents({ path: { bot_id: botId }, throwOnError: true })
+            check()
             createdAgent.value = data.items?.find(agent => agent.runtime === runtime) ?? null
           }
           if (authorizationId.value && !createdAgent.value?.agent_credential_id) {
             const { data } = await getAgentAuthorizationsById({ path: { id: authorizationId.value }, throwOnError: true })
+            check()
             metadata = { ...metadata, auth: agentAuthForCredentialKind(data.auth_kind) }
           }
         }
@@ -301,6 +327,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
             body: { name: options.agent.name.trim(), runtime, ...(directAgent && { enabled: false }), metadata },
             throwOnError: true,
           })
+          check()
           createdAgent.value = { ...data, runtime: data.runtime ?? runtime }
           saveSession()
         }
@@ -309,10 +336,12 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
         if (authorizationId.value && !createdAgent.value.agent_credential_id) {
           if (recovering && createdAgent.value.metadata?.auth !== metadata.auth) {
             await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { metadata }, throwOnError: true })
+            check()
           }
           const { data } = await postBotsByBotIdAgentsByIdCredentialClaim({
             path: { bot_id: botId, id: agentId }, body: { authorization_id: authorizationId.value }, throwOnError: true,
           })
+          check()
           createdAgent.value.agent_credential_id = data.id
         }
       }
@@ -322,6 +351,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
           body: { ...settingsBody(options.settings ?? {}), ...(!directAgent && createdAgent.value?.id ? { default_bot_agent_id: createdAgent.value.id } : {}) },
           throwOnError: true,
         })
+        check()
         settingsApplied = true
         if (!directAgent) agentApplied = true
       }
@@ -334,17 +364,21 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
           kind: 'installing-agent', status: 'running', message: externalAgentDisplayName(agent.runtime ?? '', agent.name ?? ''),
         })
         await installCreatedAgent(botId, agent)
+        check()
         if (!agent.enabled) {
           await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { enabled: true }, throwOnError: true })
+          check()
           agent.enabled = true
         }
         await putBotsByBotIdSettings({ path: { bot_id: botId }, body: { default_bot_agent_id: agentId }, throwOnError: true })
+        check()
         agentApplied = true
         lines.value = finalizeBotCreateTerminalLines(lines.value)
       }
       if (!setupError.value) lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'ready', status: 'done' })
       status.value = 'ready'
     } catch (error) {
+      if (!current()) return NOTHING_APPLIED
       setupError.value = resolveApiErrorMessage(error, localFailureMessage())
       errorCode.value = parseMemohError(error)?.code ?? null
       lines.value = finalizeBotCreateTerminalLines(lines.value, 'error')
@@ -359,10 +393,14 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   // once per Bot; a workspace retry or a resumed flow does not re-share.
   async function finishSetup(recovering = false): Promise<BotCreateStartResult> {
     const botId = bot.value?.id
+    const operationScope = scope()
+    const generation = authSessionGeneration()
+    const current = () => scope() === operationScope && authSessionGeneration() === generation
     if (botId && !grantsApplied) {
       grantsApplied = true
-      await applyGrants(botId, lastOptions.grants, message => { setupError.value = message })
+      await applyGrants(botId, lastOptions.grants, message => { setupError.value = message }, current)
     }
+    if (!current()) return NOTHING_APPLIED
     const result = await applySetup(recovering)
     // The setup that onboarding asked for lives only in this tab. Once it has
     // all been applied, a user who leaves before the final step must not be
@@ -378,14 +416,19 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   // Relays a workspace provisioning stream (create or container retry) into
   // the terminal. Returns the settled state; a stream that broke without a
   // server error event leaves `errorCode` empty.
-  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>) {
+  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>, terminalEvent: 'ready' | 'complete' = 'ready', stillCurrent?: () => boolean) {
+    const streamScope = scope()
+    const generation = authSessionGeneration()
     return await collectBotCreateProgressStream(stream, {
+      terminalEvent,
       initialState: bot.value ? { bot: bot.value } : undefined,
       onState: (state) => {
+        if (scope() !== streamScope || authSessionGeneration() !== generation || (stillCurrent && !stillCurrent())) return
         progress.value = state.progress ?? progress.value
         if (state.bot) { bot.value = state.bot; saveSession() }
       },
       onEvent: (event) => {
+        if (scope() !== streamScope || authSessionGeneration() !== generation || (stillCurrent && !stillCurrent())) return
         // Installation and Agent activation must finish before the ready line.
         if (event.type !== 'ready') lines.value = appendBotCreateTerminalLine(lines.value, event)
       },
@@ -398,19 +441,24 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   async function resume(): Promise<BotCreateStartResult> {
     const botId = bot.value?.id
     if (!botId) return NOTHING_APPLIED
+    const operationScope = scope()
+    const generation = authSessionGeneration()
+    const currentScope = () => scope() === operationScope && authSessionGeneration() === generation
     beginStep()
     if (lines.value.at(-1)?.kind !== 'creating') {
       lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'creating', status: 'running' })
     }
     progress.value = { phase: 'creating' }
     try {
-      const current = await awaitBotSettled(botId)
+      const current = await awaitBotSettled(botId, currentScope)
+      if (!currentScope()) return NOTHING_APPLIED
       bot.value = { ...bot.value, ...current }
       if (!display.value?.display_name && current.display_name) {
         display.value = { display_name: current.display_name, avatar_url: current.avatar_url }
       }
       if (current.status === BOT_STATUS_FAILED) {
         const failure = await workspaceFailure(botId)
+        if (!currentScope()) return NOTHING_APPLIED
         failWorkspace(failure.detail, failure.code ?? 'workspace_setup_failed')
         return NOTHING_APPLIED
       }
@@ -421,6 +469,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
       lines.value = finalizeBotCreateTerminalLines(lines.value)
       return await finishSetup(true)
     } catch (error) {
+      if (!currentScope()) return NOTHING_APPLIED
       if (apiErrorStatus(error) === 404) {
         // The Bot was deleted meanwhile; there is nothing left to resume on.
         bot.value = null
@@ -438,11 +487,16 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   async function retryWorkspace(): Promise<BotCreateStartResult> {
     const botId = bot.value?.id
     if (!botId) return NOTHING_APPLIED
+    const operationScope = scope()
+    const generation = authSessionGeneration()
+    const current = () => scope() === operationScope && authSessionGeneration() === generation
     beginStep()
     progress.value = { phase: 'pulling' }
     try {
       const { stream } = await postBotsByBotIdContainerStream({ path: { bot_id: botId }, body: {}, throwOnError: true })
-      const result = await followWorkspaceStream(stream)
+      if (!current()) return NOTHING_APPLIED
+      const result = await followWorkspaceStream(stream, 'complete')
+      if (!current()) return NOTHING_APPLIED
       if (result.setupError) {
         if (!result.errorCode) return await resume()
         failWorkspace(result.setupError, result.errorCode)
@@ -451,6 +505,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
       lines.value = finalizeBotCreateTerminalLines(lines.value)
       return await finishSetup()
     } catch (error) {
+      if (!current()) return NOTHING_APPLIED
       failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)
       return NOTHING_APPLIED
     }
@@ -461,7 +516,22 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     options: StartBotCreateOptions = {},
     requestKey: string = randomUUID(),
   ): Promise<BotCreateStartResult> {
+    syncScope()
     if (status.value === 'creating') return NOTHING_APPLIED
+    const requestScope = scope()
+    const generation = authSessionGeneration()
+    const pending = readPendingBotSession(requestScope, options.onboarding)
+    const recovering = !!pending
+    if (pending) {
+      payload = pending.payload
+      options = pending.options
+      requestKey = pending.requestKey
+    }
+    if (!writePendingBotSession(requestScope, requestKey, payload, options)) {
+      failWithoutBot(new Error('Unable to safely save the Bot creation request'))
+      return NOTHING_APPLIED
+    }
+    activeScope = requestScope
     lastPayload = payload
     hasPayload.value = true
     lastOptions = options
@@ -478,7 +548,8 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     lines.value = pushBotCreateTerminalLine([], { kind: 'command', status: 'info', message: display.value.display_name })
     try {
       const { stream } = await postBotsStream({ body: payload, headers: { 'Idempotency-Key': requestKey }, throwOnError: true })
-      const result = await followWorkspaceStream(stream)
+      const result = await followWorkspaceStream(stream, 'ready', () => scope() === requestScope && authSessionGeneration() === generation)
+      if (scope() !== requestScope || authSessionGeneration() !== generation) return NOTHING_APPLIED
       bot.value = result.bot ?? null
       if (!bot.value) {
         setupError.value = result.setupError ?? null
@@ -494,14 +565,32 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
         failWorkspace(result.setupError, result.errorCode)
         return NOTHING_APPLIED
       }
-      return await finishSetup()
+      const setup = await finishSetup(recovering)
+      if (scope() === requestScope && authSessionGeneration() === generation && status.value === 'ready') clearPendingBotSession(requestScope, options.onboarding)
+      return setup
     } catch (error) {
+      if (scope() !== requestScope || authSessionGeneration() !== generation) return NOTHING_APPLIED
       if (bot.value) {
         failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)
         return NOTHING_APPLIED
       }
       failWithoutBot(error)
       return NOTHING_APPLIED
+    }
+  }
+
+  function restorePending(onboarding = false) {
+    syncScope()
+    if (status.value !== 'idle') return false
+    const pending = readPendingBotSession(scope(), onboarding)
+    if (!pending) return false
+    void start(pending.payload, pending.options, pending.requestKey)
+    return true
+  }
+
+  function finishResolved() {
+    if (bot.value?.id && readPendingBotSession(scope(), lastOptions.onboarding)) {
+      clearPendingBotSession(scope(), lastOptions.onboarding)
     }
   }
 
@@ -516,7 +605,9 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   }
 
   function restore(saved: CreatedBotSession, onboarding = false) {
+    syncScope()
     if (status.value !== 'idle') return
+    activeScope = scope()
     bot.value = { id: saved.botId, name: saved.botName }
     display.value = { display_name: saved.displayName, avatar_url: saved.avatarUrl }
     createdAgent.value = saved.runtime && saved.agentId ? { id: saved.agentId, runtime: saved.runtime } : null
@@ -547,6 +638,10 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     errorCode,
     modelConfigured,
     restore,
+    restorePending,
+    finishResolved,
+    createScope: scope,
+    syncScope,
     percent,
     isActive,
     canRetry,

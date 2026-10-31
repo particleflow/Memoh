@@ -1,0 +1,19 @@
+{
+  "zip_sha256": "054da75975de11c72ad9d73a59b56214e6f1179b7e7a3cd6bf891ee1b33d35ef",
+  "nas": {
+    "head": "e34e99e6356c0e79ecc634a4ea833a9c0a81fb29",
+    "base": "391adba82a2347123f02f29fdbd289cde84d26cb",
+    "tree": "43aeb687500632161ad13e2229f89ebea4c8c77d",
+    "patch_sha256": "c6be20db0badb3acfb1a7e13c952c1e7d221e240eb1a2151b165d9cdad741698",
+    "files_verified": 22
+  },
+  "phone_not_applied": {
+    "head": "f1f92713149fd0445cedfab2dc1b2a0496e53512",
+    "base": "c530567d2c8f35547e2f1cc550859f3da016b77f",
+    "tree": "95f351df88bb22bc111f4e339ad565cc7887fa21",
+    "patch_sha256": "a41daa3234fbfc3cb22871d9f04b1d8c0ea7ea95492f903b8dfafd6c0f49e22d",
+    "files_verified": 8
+  },
+  "reconstructed_trees_match": true,
+  "library": "libfile_22d97c85568c81918644268351151d49"
+}

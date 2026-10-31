@@ -199,12 +199,6 @@ const skipAnimation = () => {
         >
           {{ t('onboarding.intro.title') }}
         </h2>
-        <p
-          class="mt-4 text-muted-foreground text-sm md:text-base max-w-[480px] leading-relaxed font-light whitespace-pre-line transition-all duration-500 ease-out delay-[120ms]"
-          :class="showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
-        >
-          {{ t('onboarding.intro.description') }}
-        </p>
         <div
           class="mt-6 transition-all duration-500 ease-out delay-[180ms]"
           :class="showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"

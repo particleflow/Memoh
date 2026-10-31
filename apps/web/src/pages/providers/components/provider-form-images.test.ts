@@ -5,6 +5,8 @@ import type { App, Slots } from 'vue'
 import type { ProvidersGetResponse } from '@memohai/sdk'
 
 const feedback = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+vi.mock('./provider-media-catalog.vue', () => ({ default: { template: '<span />' } }))
+
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key, te: () => false }) }))
 vi.mock('@memohai/sdk', () => ({
   deleteProvidersByIdOauthToken: vi.fn(),
@@ -39,6 +41,14 @@ vi.mock('@felinic/ui', async () => {
       onChange: (event: Event) => emit('update:modelValue', (event.target as HTMLSelectElement).value),
     }, slots.default?.()),
   })
+  const Switch = defineComponent({
+    props: { modelValue: Boolean, disabled: Boolean },
+    emits: ['update:modelValue'],
+    setup: (props, { attrs, emit }) => () => h('input', {
+      ...attrs, type: 'checkbox', checked: props.modelValue, disabled: props.disabled,
+      onChange: (event: Event) => emit('update:modelValue', (event.target as HTMLInputElement).checked),
+    }),
+  })
   const SelectItem = defineComponent({
     props: { value: String },
     setup: (props, { slots }) => () => h('option', { value: props.value }, slots.default?.()),
@@ -49,7 +59,7 @@ vi.mock('@felinic/ui', async () => {
     FormItem: Pass, FormMessage: Pass, HoverCard: Pass, HoverCardContent: Pass,
     HoverCardTrigger: Pass, Input, LabelSwap: Pass, Select,
     SelectContent: (_props: unknown, { slots }: { slots: Slots }) => slots.default?.(),
-    SelectItem, SelectTrigger: () => null, SelectValue: () => null, Spinner: Pass,
+    Switch, SelectItem, SelectTrigger: () => null, SelectValue: () => null, Spinner: Pass,
     toast: feedback,
   }
 })
@@ -105,7 +115,14 @@ async function mountForm(config: Record<string, unknown> = {}, clientType = 'ope
     await flush()
     return save.mock.calls[0]![0] as { config: Record<string, unknown>, client_type: string }
   }
-  return { root, provider, saving, save, control, choose, rename, submit }
+  const references = () => root.querySelector<HTMLInputElement>('[data-field="images_edits"] input')
+  const setReferences = async (enabled: boolean) => {
+    const input = references()!
+    input.checked = enabled
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+    await flush()
+  }
+  return { root, provider, saving, save, control, choose, rename, submit, references, setReferences }
 }
 
 describe('provider Images protocol configuration', () => {
@@ -189,5 +206,91 @@ describe('provider Images protocol configuration', () => {
     form.saving.value = true
     await flush()
     expect(form.control()?.disabled).toBe(true)
+  })
+})
+
+
+describe('provider reference-image capability configuration', () => {
+  it.each(['openai-completions', 'openai-responses'])('defaults off and requires explicit Images selection (%s)', async (clientType) => {
+    const form = await mountForm({}, clientType)
+    expect(form.references()?.checked).toBe(false)
+    expect(form.references()?.disabled).toBe(true)
+    await form.choose('openai-images')
+    expect(form.references()?.disabled).toBe(false)
+    expect(form.references()?.checked).toBe(false)
+    expect((await form.submit()).config.images_api).toEqual({ protocol: 'openai-images' })
+  })
+
+  it('persists only the existing boolean and retains image policies and blank password', async () => {
+    const images = { protocol: 'openai-images', model_mode: 'configured', edit_encoding: 'json-images' }
+    const form = await mountForm({ images_api: images })
+    await form.setReferences(true)
+    const payload = await form.submit()
+    expect(payload.config.images_api).toEqual({ ...images, edits: true })
+    expect(payload.config.base_url).toBe('https://provider.example.invalid/v1')
+    expect(payload.config).not.toHaveProperty('api_key')
+    expect(payload.client_type).toBe('openai-completions')
+    expect(form.provider.value.config?.images_api).toEqual(images)
+    const reopened = await mountForm({ images_api: payload.config.images_api })
+    expect(reopened.references()?.checked).toBe(true)
+    expect(reopened.root.querySelector<HTMLInputElement>('[type="password"]')?.value).toBe('')
+  })
+
+  it('can explicitly disable references without deleting the protocol or legacy fields', async () => {
+    const images = { protocol: 'openai-images', edits: true, model_mode: 'configured', edit_encoding: 'json-images' }
+    const form = await mountForm({ images_api: images })
+    await form.setReferences(false)
+    expect((await form.submit()).config.images_api).toEqual({ ...images, edits: false })
+  })
+
+  it.each(['anthropic-messages', 'google-generative-ai'])('hides the Images capability for unsupported client type %s', async (clientType) => {
+    const form = await mountForm({}, clientType)
+    expect(form.references()).toBeNull()
+  })
+
+  it('observes a refetch without overwriting a dirty reference selection', async () => {
+    const form = await mountForm({ images_api: { protocol: 'openai-images' } })
+    await form.setReferences(true)
+    form.provider.value = { ...form.provider.value, name: 'Refetched name' }
+    await flush()
+    expect(form.references()?.checked).toBe(true)
+    form.provider.value = { ...form.provider.value, id: 'second-synthetic-provider' }
+    await flush()
+    expect(form.references()?.checked).toBe(false)
+    form.provider.value = { ...form.provider.value, config: { ...form.provider.value.config, images_api: { protocol: 'openai-images', edits: true } } }
+    await flush()
+    expect(form.references()?.checked).toBe(true)
+  })
+
+  it('preserves the pending switch on a rejected save without retrying', async () => {
+    const form = await mountForm({ images_api: { protocol: 'openai-images' } })
+    form.save.mockRejectedValue({ status: 401 })
+    await form.setReferences(true)
+    await form.submit()
+    await vi.waitFor(() => expect(feedback.error).toHaveBeenCalledOnce())
+    expect(feedback.success).not.toHaveBeenCalled()
+    expect(form.references()?.checked).toBe(true)
+    expect(form.provider.value.config?.images_api).toEqual({ protocol: 'openai-images' })
+  })
+
+  it('disables references while saving', async () => {
+    const form = await mountForm({ images_api: { protocol: 'openai-images' } })
+    form.saving.value = true
+    await flush()
+    expect(form.references()?.disabled).toBe(true)
+  })
+
+  it.each([
+    { model_mode: 'omit' },
+    { model_mode: 'configured' },
+    { edit_encoding: 'multipart' },
+  ])('does not silently migrate incompatible legacy image policy %j', async (legacy) => {
+    const images = { protocol: 'openai-images', ...legacy }
+    const form = await mountForm({ images_api: images })
+    await form.setReferences(true)
+    form.root.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await vi.waitFor(() => expect(form.references()?.getAttribute('aria-invalid')).toBe('true'))
+    expect(form.save).not.toHaveBeenCalled()
+    expect(form.provider.value.config?.images_api).toEqual(images)
   })
 })

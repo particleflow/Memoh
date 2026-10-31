@@ -1,0 +1,3 @@
+PASS actual persisted summary and delivery HTTP200 reads for 15s: zero native observation/content requests
+PASS explicit observation only; HTTP200 authentication_unavailable visible and no further native reads across two polling intervals
+PASS explicit auth recovery and transient disconnection resume GET for the same task, no input replay; reopen summary requires fresh observation opt-in

@@ -35,12 +35,12 @@ func exerciseSessionDeliveryHTTP(ctx context.Context, t *testing.T, store *postg
 	botService := bots.NewService(log, queries)
 	accountService := accounts.NewService(log, store)
 	calls := 0
-	targets := agenvo.NewService(store, sessionDeliveryPermissions{botService, accountService}, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	targets := agenvo.NewService(store, sessionDeliveryPermissions{botService, accountService}, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		calls++
-		return nil, errors.New("unexpected device call")
+		return agenvo.Receipt{}, errors.New("unexpected device call")
 	})
 	tasks := sessiontask.NewService(store, thread.NewService(log, queries, nil), workdir.NewService(store, nil), targets, "synthetic-account-secret")
-	handler := handlers.NewSessionTaskHandler(tasks, botService, accountService)
+	handler := handlers.NewSessionTaskHandler(tasks, botService, accountService, nil)
 	app := server.NewServer(log, ":0", "synthetic-account-secret", handler) //nolint:contextcheck // Real server middleware handles request context.
 	token, _, err := auth.GenerateToken(id.Binding.UserID, "synthetic-account-secret", time.Minute)
 	if err != nil {

@@ -1,0 +1,9 @@
+ok  	github.com/felinics/memoh/internal/agenvo	37.940s
+ok  	github.com/felinics/memoh/internal/userruntime	0.084s
+ok  	github.com/felinics/memoh/internal/workspace	0.110s
+ok  	github.com/felinics/memoh/internal/computertask	17.415s
+ok  	github.com/felinics/memoh/internal/handlers	6.435s
+ok  	github.com/felinics/memoh/cmd/internal/core	0.300s
+ok  	github.com/felinics/memoh/internal/agent/tool	9.628s
+ok  	github.com/felinics/memoh/internal/nativeherdr	(cached)
+ok  	github.com/felinics/memoh/internal/sessiontask	(cached)

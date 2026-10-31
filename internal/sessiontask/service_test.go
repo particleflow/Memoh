@@ -15,6 +15,7 @@ import (
 	thread "github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
 )
 
@@ -28,9 +29,13 @@ type fixture struct {
 	root, child, grandchild, op string
 	primary                     string
 	runs                        map[string]dbstore.SubagentRun
+	historyDenied               bool
+	primaryReads                int
+	liveReads                   int
 }
 
 func (f *fixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
+	f.primaryReads++
 	if f.primary == "" {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
 	}
@@ -55,12 +60,26 @@ func (d dirs) Get(_ context.Context, bot, id string) (workdir.Workdir, error) {
 	return v, nil
 }
 
-func (f *fixture) ResolveTarget(_ context.Context, s agenvo.Scope) (agenvo.Target, error) {
-	v, ok := f.targets[s.TargetID]
-	if !ok || s.BotID != "bot" || s.UserID != "user" {
-		return v, ErrUnavailable
+func (f *fixture) AuthorizeOperationHistory(ctx context.Context, s agenvo.Scope) error {
+	if f.historyDenied || s.BotID != "bot" || s.UserID != "user" || s.TargetID == "" {
+		return ErrUnavailable
 	}
-	return v, nil
+	if err := toolcontext.CheckDelegationTarget(ctx, s.BotID, s.TargetID, "workspace_exec"); err != nil {
+		return err
+	}
+	return toolcontext.CheckComputerTarget(ctx, s.TargetID)
+}
+
+func (f *fixture) ResolveTarget(ctx context.Context, s agenvo.Scope) (agenvo.Target, error) {
+	f.liveReads++
+	if err := f.AuthorizeOperationHistory(ctx, s); err != nil {
+		return agenvo.Target{}, err
+	}
+	target, ok := f.targets[s.TargetID]
+	if !ok {
+		return agenvo.Target{}, ErrUnavailable
+	}
+	return target, nil
 }
 
 func (f *fixture) ReadComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
@@ -144,7 +163,7 @@ func TestParentAggregatesOwnedDescendantsWithoutChangingOwnership(t *testing.T) 
 }
 
 func TestScopeAndRevocation(t *testing.T) {
-	for _, scenario := range []string{"user", "bot", "parent", "child_user", "child_bot", "child_deleted", "foreign_session", "pc_mismatch", "pc_grant_revoked", "root_grant_revoked", "registration_changed", "child_broadens", "cycle", "receipt_user", "receipt_bot"} {
+	for _, scenario := range []string{"user", "bot", "parent", "child_user", "child_bot", "child_deleted", "foreign_session", "pc_mismatch", "permission_revoked", "root_permission_revoked", "snapshot_mismatch", "child_broadens", "cycle", "receipt_user", "receipt_bot"} {
 		t.Run(scenario, func(t *testing.T) {
 			f := newFixture()
 			bot, user, parent := "bot", "user", f.root
@@ -169,14 +188,14 @@ func TestScopeAndRevocation(t *testing.T) {
 			case "pc_mismatch":
 				root.WorkdirID = "w"
 				f.workdirs["w"] = workdir.Workdir{ID: "w", BotID: "bot", WorkspaceTargetID: "pc-b"}
-			case "pc_grant_revoked":
-				delete(f.targets, "pc-a")
-			case "root_grant_revoked":
+			case "permission_revoked":
+				f.historyDenied = true
+			case "root_permission_revoked":
 				root.WorkdirID = "w"
 				f.workdirs["w"] = workdir.Workdir{ID: "w", BotID: "bot", WorkspaceTargetID: "pc-b"}
-				delete(f.targets, "pc-b")
-			case "registration_changed":
-				f.targets["pc-a"] = agenvo.Target{DeviceID: "changed"}
+				f.historyDenied = true
+			case "snapshot_mismatch":
+				r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": agenvo.Target{DeviceID: "changed"}})
 			case "child_broadens":
 				root.WorkdirID = "w"
 				child.WorkdirID = "native"
@@ -223,8 +242,8 @@ func TestSelectedPCInheritedThroughChildren(t *testing.T) {
 	}
 }
 
-func TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS(t *testing.T) {
-	for _, mode := range []string{"id", "snapshot", "primary", "malformed", "conflicting", "workdir_precedence"} {
+func TestPersistedSelectionNeverBroadensHistoricalScope(t *testing.T) {
+	for _, mode := range []string{"id", "snapshot", "malformed", "conflicting", "workdir_precedence"} {
 		t.Run(mode, func(t *testing.T) {
 			f := newFixture()
 			root := f.sessions[f.root]
@@ -233,8 +252,6 @@ func TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS(t *testing.T) {
 				root.Metadata["workspace_target_id"] = "pc-b"
 			case "snapshot":
 				root.Metadata["workspace_target"] = map[string]any{"target_id": "pc-b"}
-			case "primary":
-				f.primary = "pc-b"
 			case "malformed":
 				root.Metadata["workspace_target_id"] = 42
 			case "conflicting":
@@ -257,7 +274,7 @@ func TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS(t *testing.T) {
 	root.Metadata["workspace_target_id"] = "native"
 	f.sessions[f.root] = root
 	if _, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op); err != nil {
-		t.Fatal("explicit NAS selection should use current Bot grants", err)
+		t.Fatal("explicit NAS selection should retain original owned history permission", err)
 	}
 }
 
@@ -383,7 +400,7 @@ func TestCursorStableAcrossLateStateChangesAndRevocation(t *testing.T) {
 	if _, err = f.service.List(t.Context(), "bot", "user", f.child, 1, first.NextCursor); !errors.Is(err, ErrCursor) {
 		t.Fatal("cross-session cursor accepted")
 	}
-	delete(f.targets, "pc-a")
+	f.historyDenied = true
 	p, err := f.service.List(t.Context(), "bot", "user", f.root, 100, first.NextCursor)
 	if err != nil {
 		t.Fatal(err)
@@ -401,7 +418,7 @@ func TestBoundedFilteredPagesStillAdvance(t *testing.T) {
 	for i := 0; i < scanBudget+2; i++ {
 		f.addOperation(f.root, "pc-a", time.Now().Add(-time.Hour-time.Duration(i)*time.Second))
 	}
-	delete(f.targets, "pc-a")
+	f.historyDenied = true
 	p, err := f.service.List(t.Context(), "bot", "user", f.root, 20, "")
 	if err != nil || len(p.Items) != 0 || p.NextCursor == "" {
 		t.Fatal(p, err)

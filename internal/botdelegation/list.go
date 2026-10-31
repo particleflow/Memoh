@@ -12,9 +12,31 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var ErrCursor = errors.New("invalid delegation cursor")
+
+// DirectoryMetadata reuses both Bot grants and owned ancestry without reading
+// result content or requiring an old execution binding to be today's binding.
+// The caller discovers both incoming and outgoing IDs; this method never trusts
+// the directory Bot as a substitute for the record's original source identity.
+func (s *Service) DirectoryMetadata(ctx context.Context, bot, user, session, id string) (View, error) {
+	r, err := s.Ledger.Get(ctx, bot, user, session, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return View{}, ErrDenied
+	}
+	if err != nil {
+		return View{}, err
+	}
+	if r.ID != id || r.Identity.UserID != user || r.Identity.SourceBotID != bot || r.Identity.SourceSessionID != session {
+		return View{}, ErrDenied
+	}
+	if _, err = s.Authority.authorizeHistory(ctx, r.Identity); err != nil {
+		return View{}, err
+	}
+	return s.projectMetadata(ctx, r)
+}
 
 type Page struct {
 	Items      []View `json:"items" validate:"required"`
@@ -103,7 +125,7 @@ func (s *Service) List(ctx context.Context, bot, user, session string, limit int
 		r := rows[0]
 		c.BeforeTime, c.BeforeID = r.CreatedAt, r.ID
 		scanned++
-		v, err := s.project(ctx, r)
+		v, err := s.projectHistory(ctx, r)
 		if err != nil && !errors.Is(err, ErrDenied) {
 			return p, err
 		}

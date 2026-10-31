@@ -45,7 +45,6 @@
       >
         <EmptyHeader>
           <EmptyTitle>{{ $t('bots.schedule.empty') }}</EmptyTitle>
-          <EmptyDescription>{{ $t('bots.schedule.emptyDescription') }}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button
@@ -150,7 +149,7 @@ import {
   ConfirmDeleteDialog,
   Dialog, DialogScrollContent, DialogHeader, DialogTitle,
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuSeparator,
-  Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle,
+  Empty, EmptyContent, EmptyHeader, EmptyTitle,
   InlineLoadingRow, PageShell, SettingsRow, SettingsSection, Switch, toast,
 } from '@felinic/ui'
 import {

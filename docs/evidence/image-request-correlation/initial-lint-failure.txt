@@ -1,0 +1,9 @@
+internal/imagecapability/http.go:37:24: Non-inherited new context, use function like `context.WithXXX` or `r.Context` instead (contextcheck)
+	t.observation.returned(request.Context(), response, err)
+	                      ^
+internal/imagecapability/observation_test.go:84:5: ifElseChain: rewrite if-else to switch statement (gocritic)
+				if mode == "completed" {
+				^
+internal/imagecapability/observation_test.go:83:14: ST1023: should omit type io.ReadCloser from declaration; it will be inferred from the right-hand side (staticcheck)
+				var body io.ReadCloser = io.NopCloser(strings.NewReader("PRIVATE_RESPONSE"))
+				         ^

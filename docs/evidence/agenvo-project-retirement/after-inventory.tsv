@@ -1,0 +1,313 @@
+path	matched_lines	class	reason
+.github/workflows/delivery-native.yml	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+apps/web/src/pages/home/components/tool-call-inline.test.ts	2	C	historical evidence, migrations or regression fixture
+apps/web/src/utils/workspace-target.test.ts	5	C	historical evidence, migrations or regression fixture
+apps/web/src/utils/workspace-target.ts	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/agent/session_tasks.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/agenvo.go	12	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/bot_delegation.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/computer_original_driver_test.go	1	C	historical evidence, migrations or regression fixture
+cmd/internal/core/computer_tasks.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/computer_tasks_preflight_test.go	8	C	historical evidence, migrations or regression fixture
+cmd/internal/core/container_runtime_bridge.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/container_runtime_bridge_test.go	3	C	historical evidence, migrations or regression fixture
+cmd/internal/core/image_capability.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+cmd/internal/core/module.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+contrib/bot-skills/README.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+contrib/bot-skills/windows-computer/SKILL.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+db/postgres/migrations/0001_init.up.sql	8	C	historical evidence, migrations or regression fixture
+db/postgres/migrations/0169_agenvo_execution_targets.down.sql	4	C	historical evidence, migrations or regression fixture
+db/postgres/migrations/0169_agenvo_execution_targets.up.sql	3	C	historical evidence, migrations or regression fixture
+db/postgres/migrations/0175_computer_admission.up.sql	5	C	historical evidence, migrations or regression fixture
+db/postgres/migrations/0176_native_herdr_admission.down.sql	4	C	historical evidence, migrations or regression fixture
+db/postgres/migrations/0176_native_herdr_admission.up.sql	6	C	historical evidence, migrations or regression fixture
+db/postgres/queries/computer_operations.sql	5	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+db/postgres/queries/user_runtimes.sql	5	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+docs/agent-integration-boundary.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/computer-task-compact-result.md	6	B/C	current native/shared adapter reference or marked historical protocol document
+docs/computer-task-mcp.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/computer-task-pi-json.md	3	B/C	current native/shared adapter reference or marked historical protocol document
+docs/data-path-resolution.md	6	B/C	current native/shared adapter reference or marked historical protocol document
+docs/delivery-producer-feedback.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/delivery-producer-handoff.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/agenvo-execution-target.md	14	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/computer-delivery-association.md	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/device-delivery-binding.md	3	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/task-transfer-principal.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/windows-file-delivery.md	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/design/windows-native-binding.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/device-transfer-setup.md	3	B/C	current native/shared adapter reference or marked historical protocol document
+docs/evidence/agenvo-retirement/README.md	1	C	historical evidence, migrations or regression fixture
+docs/evidence/agenvo-retirement/verification-summary.json	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/README.md	4	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/affected-tests.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/baseline-red.txt	4	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/baseline-regression.patch	3	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/checks.json	3	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/README.md	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/local-windows-selector.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/pc-combination-tests.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/ps51-bom-failure-excerpt.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/ps51-bom-local-final.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/ps51-compat-local.txt	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/integration/ps51-original-failure-excerpt.txt	3	C	historical evidence, migrations or regression fixture
+docs/evidence/native-complex-submit/product-files.sha256	4	C	historical evidence, migrations or regression fixture
+docs/evidence/native-herdr/README.md	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-herdr/producer-cli-verification.json	2	C	historical evidence, migrations or regression fixture
+docs/evidence/native-herdr/source-after-final.json	23	C	historical evidence, migrations or regression fixture
+docs/evidence/native-resume-http/README.md	2	C	historical evidence, migrations or regression fixture
+docs/evidence/native-resume-http/http-check.log	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-resume-http/http-proof.json	1	C	historical evidence, migrations or regression fixture
+docs/evidence/native-resume-integration/README.md	1	C	historical evidence, migrations or regression fixture
+docs/evidence/session-bot-run/README.md	1	C	historical evidence, migrations or regression fixture
+docs/evidence/session-bot-run/combined-pg.log	1	C	historical evidence, migrations or regression fixture
+docs/native-agent-followup-boundary.md	5	B/C	current native/shared adapter reference or marked historical protocol document
+docs/native-agent-observation-history.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/native-runtime-cutover.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/native-runtime-herdr.md	7	B/C	current native/shared adapter reference or marked historical protocol document
+docs/native-runtime-scope-review.md	7	B/C	current native/shared adapter reference or marked historical protocol document
+docs/native-workspace-observation.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/pi-batch-history-continuity.md	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/batch-control-restart/README.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/batch-recovery-reader/README.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/batch-recovery-reader/packages.txt	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/batch-recovery-reader/postgres.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/ci-import-policy.mjs	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/README.md	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/endpoint-evidence/aggregate.txt	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/endpoint-evidence/lint.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/endpoint-evidence/unit-final.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/endpoint-location.md	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/evidence/aggregate.log	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/evidence/lint-corrections.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/evidence/packages-before-locale-fix.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-admission/evidence/unit.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-operation-reconciliation/README.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/computer-operation-reconciliation/schema-proof.json	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/call-site-disposition/full-lint.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/full-lint-2.11.0-bounded-memory.log	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/full-lint-2.11.0.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/full-lint-2.11.4-analysis.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/full-lint-2.11.4-bounded-memory.log	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/full-lint-analysis.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/g704-source-tracking/remaining-19/classification.json	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-crossbot-web/logs/go-service.jsonl	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-history-delivery/evidence-manifest.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-history-delivery/evidence/integration-history-swagger.log	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/README.md	3	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence-manifest.json	13	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo-account-pg.log	8	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo-account-pg.output.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo-account-pg.result.json	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo.log	795	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo.output.txt	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/agenvo.result.json	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/computertask.log	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/evidence/computertask.output.txt	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-native-followup-history/results.json	6	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-publication-followup-history/evidence-manifest.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/integration-publication-followup-history/evidence/boundary.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-producer-unified/README.md	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-producer-unified/affected-go.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-task-content/README.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-unified-integration/README.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-unified-integration/assembly-schedule.log	8	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/native-unified-integration/combined-go.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/provider-media-integration/scripts/runtime-check.py	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/resume-abort-combination/swagger.log	17	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/task-observation-activation/README.md	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/task-observation-activation/observation-backend-initial-space-failure.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/task-observation-activation/observation-backend.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/transfer-network-central/integration/generate-swagger.txt	17	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-ci-history.log	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-ledger174/affected-race.txt	10	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-ledger174/http-postgres.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-recovery-images/evidence.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-recovery-images/postgres.txt	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-route-sdk-registration/images-combined.jsonl	16	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence-manifest.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/bounded-cache-cleanup.json	24	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/computer-routing.log	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/computer-routing.output.txt	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/images-core.log	16	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/images-core.output.txt	8	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/inheritance.json	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/legacy-tools.log	4	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/legacy-tools.output.txt	2	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/legacy-tools.result.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/evidence/link-space-cleanup.json	197	B/C	current native/shared adapter reference or marked historical protocol document
+docs/testing/unified-server-web-candidate/results.json	1	B/C	current native/shared adapter reference or marked historical protocol document
+docs/validation/agenvo/README.md	20	C	historical evidence, migrations or regression fixture
+docs/validation/agenvo/bash-acceptance.md	1	C	historical evidence, migrations or regression fixture
+docs/validation/agenvo/bash-vectors.json	2	C	historical evidence, migrations or regression fixture
+docs/validation/agenvo/windows-acceptance.md	2	C	historical evidence, migrations or regression fixture
+docs/validation/agenvo/windows-stderr-vector.json	1	C	historical evidence, migrations or regression fixture
+docs/validation/agenvo/windows-vectors.json	1	C	historical evidence, migrations or regression fixture
+docs/validation/bot-delegation-attachments/composition/go-test-summary.json	1	C	historical evidence, migrations or regression fixture
+docs/validation/compact-result-faults.txt	1	C	historical evidence, migrations or regression fixture
+docs/validation/computer-task-mcp/README.md	5	C	historical evidence, migrations or regression fixture
+docs/validation/computer-task-pi-json/README.md	4	C	historical evidence, migrations or regression fixture
+docs/validation/computer-workflow/README.md	5	C	historical evidence, migrations or regression fixture
+docs/validation/computer-workflow/withdrawn/56a4d08f-SKILL.md	5	C	historical evidence, migrations or regression fixture
+docs/validation/computer-workflow/withdrawn/computer_workflow_provider_test.go.txt	1	C	historical evidence, migrations or regression fixture
+docs/validation/device-cache-web-integration/README.md	1	C	historical evidence, migrations or regression fixture
+docs/validation/native-workspace-observation/README.md	2	C	historical evidence, migrations or regression fixture
+docs/validation/resumable-uploads/integration-checks.txt	2	C	historical evidence, migrations or regression fixture
+docs/validation/resumable-uploads/integration-contract.txt	1	C	historical evidence, migrations or regression fixture
+docs/validation/resumable-uploads/integration-go-tests.txt	1	C	historical evidence, migrations or regression fixture
+docs/validation/resumable-uploads/integration-race.txt	1	C	historical evidence, migrations or regression fixture
+docs/validation/resumable-uploads/pr7-integration.md	5	C	historical evidence, migrations or regression fixture
+docs/validation/session-task-results/README.md	4	C	historical evidence, migrations or regression fixture
+docs/validation/session-tasks/README.md	2	C	historical evidence, migrations or regression fixture
+docs/validation/windows-file-delivery/queue-integration.md	1	C	historical evidence, migrations or regression fixture
+docs/validation/workspaces-image-integration/README.md	2	C	historical evidence, migrations or regression fixture
+eslint.config.mjs	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agent/tool/container.go	8	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agent/tool/container_agenvo_test.go	6	C	historical evidence, migrations or regression fixture
+internal/agent/tool/container_test.go	7	C	historical evidence, migrations or regression fixture
+internal/agenvo/admission.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/admission_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/agent.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/agent_followup.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/agent_identity_boundary_test.go	2	C	historical evidence, migrations or regression fixture
+internal/agenvo/agent_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/bash.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/bash_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/client.go	4	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/endpoint.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/endpoint_test.go	3	C	historical evidence, migrations or regression fixture
+internal/agenvo/exec.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/exec_test.go	2	C	historical evidence, migrations or regression fixture
+internal/agenvo/native_batch_launcher_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/native_complex_preflight_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/native_producer_completion_test.go	2	C	historical evidence, migrations or regression fixture
+internal/agenvo/native_profile.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/native_profile_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/observation.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/observation_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_batch.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_history.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_history_format_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_batch_history_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_batch_paths.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_producer.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_producer_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_batch_reader.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_resume.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_resume_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_batch_service.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_batch_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_completion.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_completion_fault_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_completion_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/pi_json.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/pi_json_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/postgres_test.go	5	C	historical evidence, migrations or regression fixture
+internal/agenvo/profile.go	5	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/profile_test.go	3	C	historical evidence, migrations or regression fixture
+internal/agenvo/retirement_test.go	1	C	historical evidence, migrations or regression fixture
+internal/agenvo/service.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/service_test.go	2	C	historical evidence, migrations or regression fixture
+internal/agenvo/workdir.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/agenvo/workdir_test.go	1	C	historical evidence, migrations or regression fixture
+internal/botdelegation/authority.go	9	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/botdelegation/authority_test.go	7	C	historical evidence, migrations or regression fixture
+internal/botdelegation/scope.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/delivery.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/delivery_postgres.go	7	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/delivery_test.go	7	C	historical evidence, migrations or regression fixture
+internal/computertask/followup.go	19	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/followup_concurrency_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/followup_test.go	10	C	historical evidence, migrations or regression fixture
+internal/computertask/legacy_exec_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/native_agent_boundary_test.go	8	C	historical evidence, migrations or regression fixture
+internal/computertask/native_complex_submit_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/native_evidence.go	29	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/native_evidence_test.go	6	C	historical evidence, migrations or regression fixture
+internal/computertask/native_runtime_test.go	16	C	historical evidence, migrations or regression fixture
+internal/computertask/native_view.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/native_view_test.go	3	C	historical evidence, migrations or regression fixture
+internal/computertask/observation.go	14	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/observation_test.go	5	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch.go	34	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/pi_batch_control_restart_test.go	2	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch_history.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/pi_batch_history_test.go	2	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch_reader.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/pi_batch_reader_postgres_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch_reader_test.go	5	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch_resume.go	20	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/pi_batch_resume_test.go	18	C	historical evidence, migrations or regression fixture
+internal/computertask/pi_batch_test.go	21	C	historical evidence, migrations or regression fixture
+internal/computertask/producer_feedback_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/producer_test.go	5	C	historical evidence, migrations or regression fixture
+internal/computertask/reconciliation.go	4	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/reconciliation_test.go	3	C	historical evidence, migrations or regression fixture
+internal/computertask/resume_view.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/resume_view_test.go	4	C	historical evidence, migrations or regression fixture
+internal/computertask/service.go	43	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/computertask/source_test.go	11	C	historical evidence, migrations or regression fixture
+internal/computertask/testdata/agenvo-v0.2.0-pane-read.schema.json	1	C	historical evidence, migrations or regression fixture
+internal/db/computer_admission_integration_test.go	2	C	historical evidence, migrations or regression fixture
+internal/db/computer_delivery_integration_test.go	5	C	historical evidence, migrations or regression fixture
+internal/db/computer_delivery_native_windows_test.go	5	C	historical evidence, migrations or regression fixture
+internal/db/computer_delivery_upgrade_integration_test.go	2	C	historical evidence, migrations or regression fixture
+internal/db/computer_endpoint_integration_test.go	11	C	historical evidence, migrations or regression fixture
+internal/db/computer_operations_postgres_integration_test.go	1	C	historical evidence, migrations or regression fixture
+internal/db/computer_receipt_turnover_postgres_integration_test.go	4	C	historical evidence, migrations or regression fixture
+internal/db/computer_transfer_principal_integration_test.go	2	C	historical evidence, migrations or regression fixture
+internal/db/computer_transfer_registry_integration_test.go	1	C	historical evidence, migrations or regression fixture
+internal/db/native_herdr_delivery_integration_test.go	6	C	historical evidence, migrations or regression fixture
+internal/db/native_producer_cli_integration_test.go	6	C	historical evidence, migrations or regression fixture
+internal/db/native_runtime_cutover_integration_test.go	19	C	historical evidence, migrations or regression fixture
+internal/db/postgres/sqlc/computer_operations.sql.go	11	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/db/postgres/sqlc/user_runtimes.sql.go	11	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/db/postgres/store/computer_operations.go	4	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/db/postgres/store/user_runtimes.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/db/session_task_deliveries_integration_test.go	2	C	historical evidence, migrations or regression fixture
+internal/db/store/contracts.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/computer_admission.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/computer_admission_test.go	6	C	historical evidence, migrations or regression fixture
+internal/handlers/computer_deliveries_test.go	6	C	historical evidence, migrations or regression fixture
+internal/handlers/computer_transfers_device.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/computer_transfers_device_test.go	2	C	historical evidence, migrations or regression fixture
+internal/handlers/computer_transfers_revalidation_test.go	2	C	historical evidence, migrations or regression fixture
+internal/handlers/computer_transfers_test.go	3	C	historical evidence, migrations or regression fixture
+internal/handlers/private_device_transport_test.go	5	C	historical evidence, migrations or regression fixture
+internal/handlers/runtime_transfer_credentials.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/session_task_native.go	4	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/session_task_native_test.go	6	C	historical evidence, migrations or regression fixture
+internal/handlers/session_task_observation_test.go	5	C	historical evidence, migrations or regression fixture
+internal/handlers/session_task_resume.go	4	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/session_task_resume_test.go	5	C	historical evidence, migrations or regression fixture
+internal/handlers/session_tasks.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/session_tasks_test.go	10	C	historical evidence, migrations or regression fixture
+internal/handlers/user_runtime.go	8	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/handlers/user_runtime_endpoint_test.go	7	C	historical evidence, migrations or regression fixture
+internal/handlers/user_runtime_native_account_test.go	4	C	historical evidence, migrations or regression fixture
+internal/nativeherdr/commands.go	39	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/nativeherdr/commands_test.go	12	C	historical evidence, migrations or regression fixture
+internal/nativeherdr/exec.go	25	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/nativeherdr/exec_test.go	18	C	historical evidence, migrations or regression fixture
+internal/nativeherdr/powershell_test.go	2	C	historical evidence, migrations or regression fixture
+internal/sessiontask/result.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/sessiontask/result_test.go	3	C	historical evidence, migrations or regression fixture
+internal/sessiontask/service.go	5	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/sessiontask/service_test.go	6	C	historical evidence, migrations or regression fixture
+internal/userruntime/agenvo_retirement_test.go	8	C	historical evidence, migrations or regression fixture
+internal/userruntime/native_identity_test.go	3	C	historical evidence, migrations or regression fixture
+internal/userruntime/service.go	27	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/userruntime/transfer.go	6	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/userruntime/types.go	2	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/workspace/agenvo_retirement_test.go	4	C	historical evidence, migrations or regression fixture
+internal/workspace/bridge/workspace_info.go	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/workspace/manager.go	3	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+internal/workspace/native_herdr_test.go	2	C	historical evidence, migrations or regression fixture
+internal/workspace/remote.go	12	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+packages/sdk/src/@pinia/colada.gen.ts	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+packages/sdk/src/index.ts	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+packages/sdk/src/sdk.gen.ts	1	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+packages/sdk/src/types.gen.ts	30	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+spec/docs.go	31	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+spec/swagger.json	31	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query
+spec/swagger.yaml	31	B/C	native/shared adapter, explicit retirement guard, or private compatibility decoder/query

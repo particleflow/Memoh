@@ -1,0 +1,196 @@
+{
+  "base": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "product": "0d9ecd2db9acf06cf85833c9cd7f960a378ca668",
+  "commands": [
+    {
+      "command": "pnpm exec vitest run apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts (fallback pnpm)",
+      "exit": 1,
+      "log": "startup-failure.txt"
+    },
+    {
+      "command": "NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts (before fix)",
+      "exit": 1,
+      "log": "red-configured.txt"
+    },
+    {
+      "command": "NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts apps/web/src/pages/home/composables/useNativeTask.test.ts apps/web/src/pages/home/composables/useSessionTasks.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/components/native-task-content.test.ts",
+      "exit": 0,
+      "log": "tests.txt"
+    },
+    {
+      "command": "NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts",
+      "exit": 0,
+      "log": "new-tests-final.txt"
+    },
+    {
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit": 2,
+      "log": "typecheck-initial.txt"
+    },
+    {
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit": 0,
+      "log": "typecheck-final.txt"
+    },
+    {
+      "command": "pnpm exec eslint apps/web/src/pages/home/composables/useNativeTask.ts apps/web/src/pages/home/composables/useSessionTasks.ts apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts",
+      "exit": 0,
+      "log": "lint.txt"
+    },
+    {
+      "command": "pnpm --filter @memohai/web build",
+      "exit": 0,
+      "log": "build.txt"
+    },
+    {
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit": 0,
+      "log": "ui-contract.txt"
+    },
+    {
+      "command": "bash scripts/check-agent-core-boundary.sh",
+      "exit": 0,
+      "log": "core.txt"
+    },
+    {
+      "command": "node browser.mjs (existing isolated fixture)",
+      "exit": 0,
+      "log": "browser.txt"
+    },
+    {
+      "command": "python3 readonly-peer.py (existing isolated fixture; stopped by its stop-peer marker)",
+      "exit": 0,
+      "log": "peer.txt"
+    }
+  ],
+  "files": [
+    {
+      "file": "startup-failure.txt",
+      "bytes": 3325,
+      "sha256": "5533352154339e9d5f85b70727f4cb26f87fba54044d384100b4d67ffe54df34",
+      "transformation": "none"
+    },
+    {
+      "file": "red-configured.txt",
+      "bytes": 2501,
+      "sha256": "98c754e9a7450a2b061048b2c7e67da9811a405362df41c755d2bd547b88fbfb",
+      "transformation": "none"
+    },
+    {
+      "file": "tests.txt",
+      "bytes": 345,
+      "sha256": "9e3f2361ad4958c6051c880967150d8555b073a7cac12cbb624804c4776f360e",
+      "transformation": "none"
+    },
+    {
+      "file": "new-tests-final.txt",
+      "bytes": 333,
+      "sha256": "14254355a9080fe61f9dbdb39972f363b6c1179fbd553ea3169148621c2b7abd",
+      "transformation": "none"
+    },
+    {
+      "file": "typecheck-initial.txt",
+      "bytes": 671,
+      "sha256": "36220812038d9c0924b850a2c4577cb4c69f2a17aba15923e40c153fa9da541f",
+      "transformation": "none"
+    },
+    {
+      "file": "typecheck-final.txt",
+      "bytes": 116,
+      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "transformation": "none"
+    },
+    {
+      "file": "lint.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transformation": "none"
+    },
+    {
+      "file": "build.txt",
+      "bytes": 76364,
+      "sha256": "99036fa300abf487ae120a9dab741e59b68941996dfe2f7079b8f4550ee6271b",
+      "transformation": "none"
+    },
+    {
+      "file": "ui-contract.txt",
+      "bytes": 1169,
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "transformation": "none"
+    },
+    {
+      "file": "core.txt",
+      "bytes": 95,
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+      "transformation": "none"
+    },
+    {
+      "file": "browser.txt",
+      "bytes": 421,
+      "sha256": "50c1664e6cd56a83e8c9a06d4cadba99754a760e2b43fff95fcd9c00eae7a3c3",
+      "transformation": "none"
+    },
+    {
+      "file": "browser-proof.json",
+      "bytes": 234,
+      "sha256": "cc02cccac436064e464386f601bcd6f7f38778db4c15d7e7531fae61405d57f5",
+      "transformation": "none"
+    },
+    {
+      "file": "peer.txt",
+      "bytes": 197,
+      "sha256": "2aa2099bf79496886eab320f947cf871f2dda53e88371985c82a76134c0659a1",
+      "transformation": "none"
+    },
+    {
+      "file": "pg-proof.json",
+      "bytes": 422,
+      "sha256": "3ec0365d281b02ff877dee867100311f0e61aa550a05f6e25f1f8d5305e3fdab",
+      "transformation": "none"
+    },
+    {
+      "file": "relationship-proof.json",
+      "bytes": 226,
+      "sha256": "55af96df0367c44d8faa513fdc881986b8e6dc8b028e12915a99f62d0aba0ee7",
+      "transformation": "none"
+    },
+    {
+      "file": "cache-cleanup.json",
+      "bytes": 613,
+      "sha256": "937ccd6f8e3c62ea34fbbf7437a3b08d4b16bab35f9d6570bbd98b8ea0ea62e2",
+      "transformation": "none"
+    },
+    {
+      "file": "browser.mjs",
+      "bytes": 4197,
+      "sha256": "7ad9396394ada1707a45e026c87d8a3a145a3a32050d2671ee37164806feacb5",
+      "transformation": "none"
+    },
+    {
+      "file": "readonly-peer.py",
+      "bytes": 5822,
+      "sha256": "00c5ef5e6af81b8679549914b9d7e3b7a664e08e5803983182c2a8171389e134",
+      "transformation": "none"
+    },
+    {
+      "file": "parent-unavailable.png",
+      "bytes": 51835,
+      "sha256": "97d2ccb2d0a9bbb3f6684f972f555b523c92b2388477128582d2abe53a183b5b",
+      "transformation": "none"
+    },
+    {
+      "file": "same-task-recovered.png",
+      "bytes": 113016,
+      "sha256": "b4f71fcc04e82b349be45560f24f08425615772a23f9c26d64819be07adc4fe6",
+      "transformation": "none"
+    },
+    {
+      "file": "same-task-narrow-dark.png",
+      "bytes": 49105,
+      "sha256": "bef5166fe15c75b98ec4337bc7160e48241ffdf0dc04bbf51379ea4ff799d798",
+      "transformation": "none"
+    }
+  ],
+  "remote_ci": "not checked by this environment",
+  "production_actions": 0
+}

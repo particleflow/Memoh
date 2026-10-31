@@ -110,6 +110,7 @@
       ref="uploadInputRef"
       type="file"
       class="hidden"
+      multiple
       :disabled="operationLoading || !canWrite"
       @change="handleUpload"
     >
@@ -368,7 +369,7 @@ import {
 } from '@memohai/sdk'
 import type { HandlersFsFileInfo } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
-import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { fileApiFetch, sdkApiUrl, sdkFileApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { joinPath, parentPath } from '@/components/file-manager/utils'
 import FileTree from '@/components/file-manager/file-tree.vue'
 import SidebarPanelHeader from './panel-header.vue'
@@ -494,17 +495,20 @@ function downloadBlob(blob: Blob, filename: string) {
 // errors). Used by the tree per folder; failures surface as a toast and an empty
 // folder rather than breaking the whole tree.
 async function listDirectory(path: string): Promise<HandlersFsFileInfo[]> {
-  if (!props.botId) return []
+  const botId = props.botId
+  if (!botId || !props.active) return []
   let lastError: unknown
   for (let attempt = 0; attempt < 3; attempt++) {
+    if (!props.active || props.botId !== botId) return []
     try {
       const { data } = await getBotsByBotIdContainerFsList({
-        path: { bot_id: props.botId },
+        path: { bot_id: botId },
         query: { path },
         throwOnError: true,
       })
-      return data.entries ?? []
+      return props.active && props.botId === botId ? data.entries ?? [] : []
     } catch (error) {
+      if (!props.active || props.botId !== botId) return []
       lastError = error
       if (attempt < 2 && isTransientWorkspaceError(error)) {
         await wait(500 * (attempt + 1))
@@ -701,7 +705,7 @@ async function handleDirectoryInputUpload(event: Event) {
   }
 }
 
-// Shared upload engine for every multi-entry upload (folder picker, drag-drop).
+// Shared upload engine for every multi-entry upload (file/folder picker, drop).
 // Owns the busy gate and the progress line; the RESULT toast is the caller's,
 // because only the caller knows whether the user dropped files, a folder, or
 // both. Directories are created first and sequentially: a nested file upload
@@ -710,6 +714,7 @@ async function runUploadBatch(
   directories: string[],
   files: { path: string, file: File }[],
 ): Promise<{ failed: number, total: number }> {
+  const botId = props.botId
   const total = directories.length + files.length
   let completed = 0
   let failed = 0
@@ -723,7 +728,7 @@ async function runUploadBatch(
     for (const dir of directories) {
       try {
         await postBotsByBotIdContainerFsMkdir({
-          path: { bot_id: props.botId },
+          path: { bot_id: botId },
           body: { path: dir },
           throwOnError: true,
         })
@@ -746,7 +751,7 @@ async function runUploadBatch(
         if (!item) return
         try {
           await postBotsByBotIdContainerFsUpload({
-            path: { bot_id: props.botId },
+            path: { bot_id: botId },
             body: { path: item.path, file: item.file } as never,
             throwOnError: true,
           })
@@ -801,20 +806,21 @@ async function uploadDirectoryPayload(payload: DirectoryUploadPayload) {
 }
 
 async function handleUpload(event: Event) {
-  if (!props.canWrite) return
+  if (!props.canWrite || uploadBusy.value) return
   const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
+  const files = Array.from(input.files ?? [])
+  if (files.length === 0) return
 
-  const destPath = joinPath(uploadTarget.value, file.name)
+  const target = uploadTarget.value
+  const botId = props.botId
   try {
-    await postBotsByBotIdContainerFsUpload({
-      path: { bot_id: props.botId },
-      body: { path: destPath, file } as never,
-      throwOnError: true,
-    })
-    toast.success(t('bots.files.uploadSuccess'))
-    if (uploadTarget.value !== rootPath) navigateTo(uploadTarget.value)
+    const { failed, total } = await runUploadBatch([], files.map(file => ({ path: joinPath(target, file.name), file })))
+    if (failed > 0) {
+      toast.error(t('bots.files.uploadPartialFailed', { failed, total }))
+    } else {
+      toast.success(t('bots.files.uploadSuccess'))
+    }
+    if (props.botId === botId && target !== rootPath) navigateTo(target)
     reloadAndBroadcast()
   } catch (error) {
     toast.error(resolveApiErrorMessage(error, t('bots.files.uploadFailed')))
@@ -1061,7 +1067,7 @@ async function handleBatchDownload() {
   if (paths.length === 0 || batchArchiveLoading.value) return
   batchArchiveLoading.value = true
   try {
-    const response = await fetch(sdkApiUrl({
+    const response = await fileApiFetch(sdkApiUrl({
       url: '/bots/{bot_id}/container/fs/archive',
       path: { bot_id: props.botId },
     }), {
@@ -1125,7 +1131,7 @@ async function handleExtract(entry: HandlersFsFileInfo) {
   if (!entry.path || extractLoading.value) return
   extractLoading.value = true
   try {
-    const response = await fetch(sdkApiUrl({
+    const response = await fileApiFetch(sdkApiUrl({
       url: '/bots/{bot_id}/container/fs/extract',
       path: { bot_id: props.botId },
     }), {
@@ -1149,7 +1155,7 @@ async function handleExtract(entry: HandlersFsFileInfo) {
 }
 
 function handleDownload(entry: HandlersFsFileInfo) {
-  const url = sdkApiUrl({
+  const url = sdkFileApiUrl({
     url: '/bots/{bot_id}/container/fs/download',
     path: { bot_id: props.botId },
     query: { path: entry.path ?? '', ...sdkAuthQuery() },

@@ -242,9 +242,6 @@
           <div class="flex items-center justify-between gap-4 border-t pt-4">
             <div class="space-y-0.5">
               <Label>{{ t('people.activeOnCreate') }}</Label>
-              <p class="text-[11px] text-muted-foreground">
-                {{ t('people.activeOnCreateHint') }}
-              </p>
             </div>
             <Switch
               v-model="createForm.isActive"

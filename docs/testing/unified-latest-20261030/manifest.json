@@ -1,0 +1,745 @@
+{
+  "date": "2026-10-30",
+  "canonical_checklist": {
+    "url": "https://chatgpt.com/space/page_881a70a14c5081919d8fd93132fc6968",
+    "read_sequence": 217,
+    "reconciled_sequence": 219,
+    "items": 46,
+    "gates": 7,
+    "checkboxes_changed": false
+  },
+  "candidate": {
+    "line": "particleflow/Memoh refs/heads/integrate/unified-7b-transfer-observation (Draft PR79)",
+    "current_remote_product": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+    "local_product_checkpoint": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+    "local_product_tree": "d559098d1b8bdf9d4ea22119d1b2725bf8e34be2",
+    "frozen": false,
+    "publishable": false,
+    "final_validated_sha": null,
+    "new_CI_or_image_dispatch": 0,
+    "includes_schema": 182
+  },
+  "runtime_baseline": {
+    "provenance": "Parent-relayed sole-writer completed baseline receipt, prior receipts only; no new field read by this task",
+    "Server": {
+      "source": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+      "image": "ghcr.io/particleflow/server@sha256:89856adda806ca22747c58fb75003f0df66e8aeef3da4a6854123452ad6b8e10"
+    },
+    "Web": {
+      "source": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+      "image": "ghcr.io/particleflow/web@sha256:9cb53e5297d7ee5d2e5d36e3bf852f5e7759a41d49b7a1119bea35cc53a1ba6d",
+      "health": "healthy per writer",
+      "acceptance": "failed: original history 11 skeletons /0 messages;0954 same cause unproved"
+    },
+    "schema": {
+      "version": 181,
+      "dirty": false,
+      "provenance": "prior valid receipt"
+    },
+    "Workspace": {
+      "containers": 3,
+      "image_observations": [
+        "two image IDs prefix sha256:0150a749…",
+        "one workspace:main"
+      ],
+      "full_immutable_digests": "not supplied",
+      "legacy_046_label_invalid": true
+    },
+    "Harmony": {
+      "version": "1.0.36",
+      "version_code": 1000036,
+      "source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+      "shared": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+      "signed_HAP_bytes": 37833168,
+      "signed_HAP_sha256": "07a890f6e3202cc757aca24749dae302214ee7699a75738b9ac16fabf7f53a70",
+      "signed_and_distributed": "parent/owner reported",
+      "phone_installed_or_accepted": false,
+      "source_handoff": "45853ec772dc76810733454af13b07dd6a2f38b8",
+      "evidence": "1a53db02c15061d344dcc379a1b8abef7da805c0"
+    },
+    "Windows": {
+      "running": "original57",
+      "selected_manifest_prefix": "c1d983bc…",
+      "running_source_full_SHA": "not obtained in baseline receipt",
+      "field_staging": {
+        "consumer": "c879d1622eeadcf02ec4b16590ade2cee6e1ac85",
+        "producer": "212ae2445fe7a5fbe95479a4f2024069bf83332b"
+      },
+      "cloud_candidate": {
+        "consumer": "c868026ab43cc7ab5e9b5dcb27ea5c90741049c7",
+        "producer": "bbdb0e2748bb5611827803daffa1302e67a2c624",
+        "CI": 41019252974,
+        "Windows_tests": 750,
+        "Ubuntu_tests": 742,
+        "skips": 0,
+        "artifact": 12961545620,
+        "qualification": "not-for-production-release; Explicit real upload/auth/positive TLS gate is an unaccepted throw, not observed TLS handshake failure",
+        "field_activated": false
+      }
+    },
+    "real_HTTP_token_transfer_enabled": false,
+    "diagnostics": "off; sole writer released and window unconsumed"
+  },
+  "modules": [
+    {
+      "name": "opaque queued invocation identity",
+      "owner": "01a183dd-7846-7315-82d8-27b0a7fc0013",
+      "source": "c878a31e268119939330d9eed52050539636b306",
+      "evidence": "29685958ec896489371a894b6854ee8b2e9df9c5",
+      "state": "已纳入",
+      "consumer_commit": "68ea0304155a4998cb8a2bf49bf140b660efbd1c",
+      "new_checks": "two independent percent/slash/session guards pass; reuse author7 endpoint+6 router",
+      "scope": "lookup only; no schema/queue persistence/auth/SDK/UI change"
+    },
+    {
+      "name": "history rendering",
+      "owner": "original navigation owner",
+      "source_checkpoint": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
+      "deployed": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+      "state": "已纳入源码／仍未现场验收",
+      "reason": "late Router context defect proved and corrected; actual field eleven-skeleton root cause remains open",
+      "evidence": "a7e69c4d63d528bf578939b45b4c8198878ccbaa",
+      "consumer_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+      "new_checks": "two route-context checks pass; eight speech guards red then green after stream/Response fixture correction only; no product speech change"
+    },
+    {
+      "name": "speech continuity/replay",
+      "owner": "01a18352-ad88-7142-9394-4452acc370f0",
+      "sources": [
+        "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+        "ba44c06261fb3be30557160840bc25e339cab650"
+      ],
+      "evidence": "d90f0536e52ad782f0436abccb26994ad4d1bb3a",
+      "state": "待修复",
+      "blocker": "P1 repeated late final tail when reconciled runtimeRunId omitted; completed cache becomes changed",
+      "review": "docs/testing/speech-continuity-review-ba44/README.md",
+      "same_session_incremental_text": "original owner still developing; not silently replaced by independent sentence calls"
+    },
+    {
+      "name": "cold/hot same-model presence",
+      "owner": "01a18ca3-5f3e-716e-93a1-ad4d6fff3002",
+      "source": "45c27c6e5f8aeb214a15cc1c9b4eeae1412ce294",
+      "state": "已纳入源码／仍未现场验收",
+      "blockers": [],
+      "review": "docs/testing/conversation-presence-review-0b731/README.md",
+      "schema": 182,
+      "audio_ack_contract": "absent; never scan status into audio",
+      "evidence": "13fa1aef22de53626e8165c8203692f837011761",
+      "consumer_commit": "a08fb2cd7e0eae63bf079b8c10f6042f6d0cc51a",
+      "new_checks": "original pinned/AutoModel two-case guard plus four scoped history/classifier cases pass; actual temporary facts SQL passed/ROLLBACK",
+      "remaining": "opaque provider/effort/long-history performance/latency/cost/audio and browser WS integration remain unverified"
+    },
+    {
+      "name": "pending HTTP queue durability",
+      "owner": "01a183dd-7846-7315-82d8-27b0a7fc0013",
+      "state": "待修复",
+      "source": "not delivered; original owner active",
+      "requirement": "same pending item/invocation across process loss before claim; c878 lookup fix and PostgreSQL admitted run do not prove this",
+      "schema_reservation": "not supplied;182 reserved by presence, conflict must be reviewed"
+    },
+    {
+      "name": "complete download/publisher difference",
+      "owner": "original download owner; parent coordinating",
+      "state": "待修复",
+      "source": "final exact source not delivered; original owner active",
+      "requirement": "preserve original distribution/identity/bytes/hash/resume; HTTP and HTTPS speed remain unresolved",
+      "scope403": "only named earlier HTTPS review artifact remains denied for parent; do not reopen or bypass"
+    },
+    {
+      "name": "Harmony matched source",
+      "owner": "01a167f1-9f75-7455-807f-25826443b0ca",
+      "source": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
+      "state": "已纳入映射／仍未现场验收",
+      "mapping": "includes81c/1fa plus500d three production seams, source fetched and mapping reviewed; presence message-item delta and tests-only stream fixture correction remain to consume",
+      "build": "not started; build/sign/distribute once after final shared/SDK frozen",
+      "remaining_phone_items": 25,
+      "additional_consumer_files": [
+        "apps/web/src/pages/home/components/message-item.vue",
+        "apps/web/src/pages/home/index.read-aloud-admission.test.ts"
+      ]
+    },
+    {
+      "name": "Windows paired qualification",
+      "owner": "01a164cf-7585-769d-a224-c598d66260c8",
+      "source": "c868026ab43cc7ab5e9b5dcb27ea5c90741049c7",
+      "producer": "bbdb0e2748bb5611827803daffa1302e67a2c624",
+      "state": "仍未现场验收",
+      "owner_active": "latest auditv4 and real upload/auth/EXE TLS admission",
+      "audit_member": {
+        "library": "libfile_34f4bd2b7acc8191b0bb1fa7d506eb4f",
+        "version": 4,
+        "archive_bytes": 269215,
+        "archive_sha256": "a58d0e441a02fe8b0ef0ef3732d9587ba3819ebacf9be5db491edf9f5b773a42",
+        "path": "composition-admission.json",
+        "bytes": 3577,
+        "sha256": "4895063e2b37953d03010cd5e0c0ff11ba46f65f8dd0150647e23a757df9c4b9",
+        "verified_from_retained_archive": true,
+        "new_transfer_attempts": 0,
+        "full_text_delivered_in_current_task": true
+      }
+    },
+    {
+      "name": "paired exact result filename/recovery",
+      "owner": "original file+Windows owners",
+      "sources": [
+        "1b7200d768c1231179725cfa2f85c8c3452882fb",
+        "3ca78ae033229e71430459dd047cf750b65acd5b",
+        "d25a7fcc4ad05ae43a5c42d3c7e79cfb99535d91"
+      ],
+      "state": "配对待确认／仍未现场验收",
+      "current_server": "legacy flat logical source_ref; new filename increment not present",
+      "qualification": "do not restore name announcements while PC57 is consumer; producerbbdb descends212/d25, which is not Server consumption proof",
+      "original_unknown_operation": "do not replay, rename, register or regenerate"
+    },
+    {
+      "name": "certificate renewal",
+      "owner": "original Certimate owner",
+      "state": "仍未实际续签验收；不阻当前其他交付",
+      "evidence": "2026-10-29 scheduled succeeded, rule85days/30days correctly skipped",
+      "expires": "2027-01-23",
+      "forced_resign": false
+    }
+  ],
+  "acceptance_mapping": [
+    {
+      "id": "P01",
+      "requirement": "P01 只使用统一 Magpie provider",
+      "canonical_page_checked": true,
+      "states": [
+        "已纳入（原已验结论保留）"
+      ],
+      "owner": "Provider原owner",
+      "remaining": "保留原清单已验结论；不扩读完整Provider响应。"
+    },
+    {
+      "id": "P02",
+      "requirement": "P02 模型名称对应实际执行模型",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Provider原owner",
+      "remaining": "实际served模型／档位及手机身份仍需现场；声明能力不替代真实出站。"
+    },
+    {
+      "id": "B01",
+      "requirement": "B01 普通图片生成与参考输入",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "保留既有原图／参考编辑成功；当前候选与手机仍未验，不重生雪景。"
+    },
+    {
+      "id": "B02",
+      "requirement": "B02 专业 Bot 委派和父子任务关系",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "固定主聊与后台任务原实现保留；c878一次解码已纳本地，待领HTTP队列崩溃保全仍由原owner修。"
+    },
+    {
+      "id": "B03",
+      "requirement": "B03 生成成果回到原会话附件",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "保留committed成果自动回原会话附件；PC→NAS→原会话及手机仍验，旧unknown不重派。"
+    },
+    {
+      "id": "B04",
+      "requirement": "B04 显式 memory 与会话恢复",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "保留显式memory和持久恢复；手机及跨任务读取完整矩阵未验。"
+    },
+    {
+      "id": "B05",
+      "requirement": "B05 ASR 原生接线与真实转录",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "ASR暂缓不关闭；已重新要求的自动／手动流式朗读继续。ba44迟到尾句重复及缓存P1待修；500ms必须实际可听，不能以软件采样替代。"
+    },
+    {
+      "id": "B06",
+      "requirement": "B06 视频能力与语音能力分开判定",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Bot／媒体及各原专责",
+      "remaining": "视频暂缓不复活；朗读目标继续但不等同ASR/视频验收或自然韵律已解决。"
+    },
+    {
+      "id": "U01",
+      "requirement": "U01 登录持久化与安全恢复",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "共享导航／认证／Harmony原owner",
+      "remaining": "原正常Web登录子项保留；重开、升级、持久登录和手机矩阵未全验。"
+    },
+    {
+      "id": "U02",
+      "requirement": "U02 任务名字状态与正确跳转",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "共享导航／认证／Harmony原owner",
+      "remaining": "现网Web1fa健康但11骨架／0消息仍失败；500d晚初始化路由归属修补已纳入192309，不能据此认定现场骨架根因闭合；保名字／状态／原执行上下文。"
+    },
+    {
+      "id": "U03",
+      "requirement": "U03 Agent名字状态与正确跳转",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "共享导航／认证／Harmony原owner",
+      "remaining": "仅名字／真实状态／正确跳转；当前手机及完整Agent目录未验。"
+    },
+    {
+      "id": "U04",
+      "requirement": "U04 Bot名字状态与正确跳转",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "共享导航／认证／Harmony原owner",
+      "remaining": "固定Bot联系人、相关Bot目录；不恢复全局管理／新建主聊，手机未验。"
+    },
+    {
+      "id": "U05",
+      "requirement": "U05 普通图像调用在任务视图可见",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "共享导航／认证／Harmony原owner",
+      "remaining": "普通图像调用保留真实任务投影，不冒充委派Agent；当前端到端未全验。"
+    },
+    {
+      "id": "W01",
+      "requirement": "W01 官方 Runtime Herdr Pi 一体部署",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "运行原57保留；c868/bbdb云端候选非正式，Herdr/Pi/布局/真实TLS准入待核。"
+    },
+    {
+      "id": "W02",
+      "requirement": "W02 真正控制 Windows 与合法前台管理员身份",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "真实Windows控制与合法前台身份独立未验；不得以shell成功、上传或CI代替。"
+    },
+    {
+      "id": "W03",
+      "requirement": "W03 断开 NAS 后已有任务继续本地运行",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "断NAS已有任务本地续跑必须独立现场结果；旧隔离Pi1.2不代当前原PC/Pi。"
+    },
+    {
+      "id": "W04",
+      "requirement": "W04 重连同一任务且不重复执行",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "原task/run/receipt重连不重复执行必须现场核；不能据短断连或客户端重连推断。"
+    },
+    {
+      "id": "W05",
+      "requirement": "W05 现有路径与 producer 配置对齐",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "不可变根、sourceRoot/producer配置对与现有共享路径需按原owner最新profile核；不新增副本/同步/凭据/共享。"
+    },
+    {
+      "id": "W06",
+      "requirement": "W06 进程存活与历史任务交接安全",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Windows原owner01a164cf",
+      "remaining": "原57/旧PID代际证据保留；新候选正常停旧Host、未知任务与queue移交边界未闭合。"
+    },
+    {
+      "id": "F01",
+      "requirement": "F01 用户自订存储根与 NAS 集中配置",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "已有NAS集中配置与认证分发不是缺API；有效NAS根→工作区存储→电脑／UNC映射和权限仍需实证。"
+    },
+    {
+      "id": "F02",
+      "requirement": "F02 LAN 优先与 IPv6 回退",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "集中策略／fetch／RCP桥源码保留；真实HTTP token未启，LAN优先／IPv6与严格TLS现场未验。"
+    },
+    {
+      "id": "F03",
+      "requirement": "F03 真字节大文件传输",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "HTTP/HTTPS慢仍未解决；下载完整差分由原owner修，未取得最终SHA，不能靠重复旧包或新探针替代。"
+    },
+    {
+      "id": "F04",
+      "requirement": "F04 多文件传输与分页分开验收",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "Web565普通input一次三文件与hash子项保留；分页、手机和Windows原生分别验。"
+    },
+    {
+      "id": "F05",
+      "requirement": "F05 续传与哈希校验",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "保原receipt/hash、Web刷新续传子项与新冷却；手机/Windows原进程恢复仍未全验。"
+    },
+    {
+      "id": "F06",
+      "requirement": "F06 断连和进程重启恢复",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "原队列／collector进程恢复隔离证据保留；实际断连、重启、前进reader兼容仍现场核。"
+    },
+    {
+      "id": "F07",
+      "requirement": "F07 成果 producer 真登记与任务引用",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "NAS→PC→Pi原输入、实体产物、producer登记、自动关联原会话完整闭环未验；原f33/unknown不补造或重执行。1b/3ca/d25配对功能不可静默遗忘或在PC57上提前启用。"
+    },
+    {
+      "id": "F08",
+      "requirement": "F08 所有端遵循同一传输契约",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "文件原owner01a177a6及下载原owner",
+      "remaining": "原共同协议、身份、分片和journals保留；NAS/shared/Harmony/Windows不同资格层级不冒同版已装。"
+    },
+    {
+      "id": "T01",
+      "requirement": "T01 域名与证书身份一致",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "唯一现场writer及各客户端原owner",
+      "remaining": "服务端既有严格TLS子项保留；各实际客户端的Host/SNI/证书身份另验。"
+    },
+    {
+      "id": "T02",
+      "requirement": "T02 完整证书链与系统信任",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "唯一现场writer及各客户端原owner",
+      "remaining": "完整链与Windows/ArkWeb系统信任未验；不得关闭校验。"
+    },
+    {
+      "id": "T03",
+      "requirement": "T03 HTTPS WSS 与入口协议",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "唯一现场writer及各客户端原owner",
+      "remaining": "保HTTPS/WSS和逻辑origin；动态媒体、PC producer和实际手机仍验。"
+    },
+    {
+      "id": "T04",
+      "requirement": "T04 各端实际无不安全提示",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "唯一现场writer及各客户端原owner",
+      "remaining": "全端真实无不安全提示未通过；CI或远端curl不能代客户端。"
+    },
+    {
+      "id": "C01",
+      "requirement": "C01 原生申请与自动部署现有证书",
+      "canonical_page_checked": true,
+      "states": [
+        "已纳入（原已验结论保留）"
+      ],
+      "owner": "Certimate原owner",
+      "remaining": "保留原生申请与既有部署已验子项，不重复签发。"
+    },
+    {
+      "id": "C02",
+      "requirement": "C02 到期续签自动触发并实际部署",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "Certimate原owner",
+      "remaining": "2026-10-29 scheduled succeeded，85天/30天规则正确跳过，到期2027-01-23；等真实续签事件，不强制重签、不挡其他交付。"
+    },
+    {
+      "id": "V01",
+      "requirement": "V01 source CI image package running 精确对应",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（既有基线）",
+        "待修复／配置或配对",
+        "仍未完整现场验收"
+      ],
+      "owner": "原统一集成线／唯一writer",
+      "remaining": "仅一条原集成线；本地192309已合c878/13fa/500d，尚非最终冻结/发布SHA。"
+    },
+    {
+      "id": "V02",
+      "requirement": "V02 schema 175 到 176 与真实健康",
+      "canonical_page_checked": true,
+      "states": [
+        "已纳入（原已验结论保留）"
+      ],
+      "owner": "原统一集成线／唯一writer",
+      "remaining": "保留175→176历史已验；当前181清洁回执不等于未来182现场迁移。"
+    },
+    {
+      "id": "V03",
+      "requirement": "V03 可恢复发布与历史完整性",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "原统一集成线／唯一writer",
+      "remaining": "保最新业务/receipt/queue/checkpoint；182若纳入只兼容前进，禁止down、删字段或旧dump覆盖。"
+    },
+    {
+      "id": "A01",
+      "requirement": "A01 现行入口和调度彻底移除",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "原生Runtime退役原owner",
+      "remaining": "旧执行禁用与历史只读保留；正式撤销旧绑定独立门未自动执行。"
+    },
+    {
+      "id": "A02",
+      "requirement": "A02 退役不级联删除历史",
+      "canonical_page_checked": false,
+      "states": [
+        "已纳入（已有子项）",
+        "仍未完整现场验收"
+      ],
+      "owner": "原生Runtime退役原owner",
+      "remaining": "历史不级联删除子项保留；全部旧页面/工具读取权限不外推。"
+    },
+    {
+      "id": "N01",
+      "requirement": "N01 不新增多余服务协议账号系统任务",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "各原owner与统一变更审查",
+      "remaining": "只原服务/协议/账户/计划，候选不另建服务；全项目现场差分仍需结论。"
+    },
+    {
+      "id": "N02",
+      "requirement": "N02 不改官方 Agent 内核或扩大端口权限",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "各原owner与统一变更审查",
+      "remaining": "不改官方Agent核心，不扩大端口/权限；官方二进制与部署差分分别核。"
+    },
+    {
+      "id": "N03",
+      "requirement": "N03 不误删外部文件与保留旧队列",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "各原owner与统一变更审查",
+      "remaining": "只既定根与可验证自有临时物；不删未知卷/旧queue/外部文件。"
+    },
+    {
+      "id": "N04",
+      "requirement": "N04 秘密和基础设施私址不进入公开仓库",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "各原owner与统一变更审查",
+      "remaining": "最终差分与包保空配置，秘密/私址不公开；当前范围检查不冒全历史认证。"
+    },
+    {
+      "id": "N05",
+      "requirement": "N05 变更恢复清单与可恢复冗余清理",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "各原owner与统一变更审查",
+      "remaining": "保持恢复清单与必要回滚证据；0冗余不等于删除有效历史或未知资源。"
+    },
+    {
+      "id": "S01",
+      "requirement": "S01 aborted 与工具卡等待状态一致",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "原雪景记录／媒体及导航原owner",
+      "remaining": "原雪景aborted、工具卡与unknown独立保留；缺消息不能补造、不能重生图换绿。"
+    },
+    {
+      "id": "S02",
+      "requirement": "S02 暂时无法读取任务的独立闭环",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "原雪景记录／媒体及导航原owner",
+      "remaining": "API正向200不替错误恢复或当前历史正文；现1fa失败保留，原失败HTTP码不猜。"
+    },
+    {
+      "id": "S03",
+      "requirement": "S03 原请求结果和历史不被重试污染",
+      "canonical_page_checked": false,
+      "states": [
+        "仍未完整现场验收"
+      ],
+      "owner": "原雪景记录／媒体及导航原owner",
+      "remaining": "原请求/取消/未落盘结果来源未知保留；不得新生成、旧DB回灌或重复POST污染。"
+    }
+  ],
+  "release_gates": [
+    {
+      "id": "G1",
+      "requirement": "每个实际变更已对应本清单编号，没有漏掉用户要求或额外扩展方案。",
+      "canonical_page_checked": false,
+      "state": "46项及7门映射已建立；最终差分仍需复核"
+    },
+    {
+      "id": "G2",
+      "requirement": "所有受影响项已更新当前状态、证据时间、精确版本和下一步；隔离、CI、现场证据没有混写。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    },
+    {
+      "id": "G3",
+      "requirement": "现场运行版本与交付记录一致；Web、Windows、鸿蒙分别核对，不以一端代替全部。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    },
+    {
+      "id": "G4",
+      "requirement": "Windows 控制、断 NAS 本地续跑、重连不重复和全端无安全警告均有独立结果。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    },
+    {
+      "id": "G5",
+      "requirement": "新失败已单独登记，原请求、历史会话、run 和附件未被重试、迁移或清理覆盖。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    },
+    {
+      "id": "G6",
+      "requirement": "变更与恢复清单齐全；项目无污染各项完成核对，必要恢复材料可用。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    },
+    {
+      "id": "G7",
+      "requirement": "只将真正通过的项目勾选；剩余阻塞明确责任模块和所需条件，不宣布整体交付完成。",
+      "canonical_page_checked": false,
+      "state": "最终统一交付前保持未关闭"
+    }
+  ],
+  "release_handoff": {
+    "state": "not publishable yet",
+    "route": "same repository/original integrate branch and docker.yml; no new integration line",
+    "CI": "one final changed head after admitted sources combined; reuse existing module evidence, no unchanged reruns",
+    "images": "scope only actual changed images; retain actual Workspace containers/digests; no rebuild for label consistency",
+    "Harmony": "one matched new build after final shared/SDK identity; do not rebuild36",
+    "Windows": "no forced PC57 replacement; original owner/sole writer completes positive gates with paired artifact",
+    "writer": "01a157e3-ab3a-7534-81d6-68d7202e000c",
+    "restore": "keep latest history,unknown,receipts,queues,cooldowns,HostBinding and compatible readers; no migration down or old dump overwrite",
+    "schema": "182 present locally from reviewed presence; production181 untouched. Retain receipt/claim tables and latest data; only182-compatible forward recovery.",
+    "expected_image_scope": "server-web, already supported; final qualified source only, no dispatch now"
+  }
+}

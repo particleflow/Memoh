@@ -1,0 +1,13 @@
+{
+  "acceptance_items": 46,
+  "release_gates": 7,
+  "checkboxes_changed": false,
+  "admitted_sources": [
+    "c878a31e268119939330d9eed52050539636b306",
+    "13fa1aef22de53626e8165c8203692f837011761",
+    "500d86f52ae97ba92ac8245bbafbe66ba21543db"
+  ],
+  "new_model_or_TTS_calls": 0,
+  "new_CI_image_dispatch_HAP_build_field_deployments": 0,
+  "full_candidate_frozen": false
+}

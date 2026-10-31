@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -10,29 +11,39 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/accounts"
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/sessiontask"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
-type SessionTaskHandler struct {
-	service  *sessiontask.Service
-	bots     *bots.Service
-	accounts *accounts.Service
+type ComputerTaskObserver interface {
+	Recover(context.Context, toolcontext.ComputerBinding, string) (computertask.Recovery, error)
 }
 
-func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, accounts *accounts.Service) *SessionTaskHandler {
-	return &SessionTaskHandler{service: service, bots: bots, accounts: accounts}
+type SessionTaskHandler struct {
+	computers ComputerTaskObserver
+	service   *sessiontask.Service
+	bots      *bots.Service
+	accounts  *accounts.Service
+}
+
+func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, accounts *accounts.Service, computers ComputerTaskObserver) *SessionTaskHandler {
+	return &SessionTaskHandler{service: service, bots: bots, accounts: accounts, computers: computers}
 }
 
 func (h *SessionTaskHandler) Register(e *echo.Echo) {
+	e.GET("/bots/:bot_id/activity", h.Activity)
+	e.GET("/bots/:bot_id/tasks", h.Directory)
+	e.GET("/bots/:bot_id/tasks/:task_type/:record_id", h.DirectoryTask)
 	// Global JWT middleware can reject before a route handler runs. Apply the
 	// task response policy before routing/auth, including namespace 404/405s.
 	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			parts := strings.SplitN(echo.GetPath(c.Request()), "/", 7)
-			if len(parts) >= 6 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && parts[3] == "sessions" && parts[4] != "" && parts[5] == "tasks" {
+			if len(parts) >= 4 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && (parts[3] == "activity" || parts[3] == "tasks" || (len(parts) >= 6 && parts[3] == "sessions" && parts[4] != "" && parts[5] == "tasks")) {
 				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 			}
 			return next(c)
@@ -42,6 +53,10 @@ func (h *SessionTaskHandler) Register(e *echo.Echo) {
 	g.GET("", h.List)
 	g.GET("/:task_type/:task_id", h.Get)
 	g.GET("/:task_type/:task_id/deliveries", h.Deliveries)
+	g.GET("/:task_type/:task_id/observation", h.Observe)
+	g.GET("/:task_type/:task_id/content", h.Content)
+	g.POST("/:task_type/:task_id/followup", h.Followup)
+	g.POST("/:task_type/:task_id/resume", h.Resume)
 }
 
 func (h *SessionTaskHandler) authorize(c echo.Context) (string, error) {
@@ -72,7 +87,7 @@ func taskHTTPError(err error) error {
 
 // List godoc
 // @Summary List safe task summaries under an owned conversation
-// @Description Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
+// @Description Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. session_id is the owning session; parent_session_id remains the requested aggregation root. Optional direct_parent_session_id is the owning session's persisted direct parent, authorized through the ancestor path; omission supplies no parent reference. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"
@@ -107,7 +122,7 @@ func (h *SessionTaskHandler) List(c echo.Context) error {
 
 // Get godoc
 // @Summary Read a safe task summary within an owned conversation
-// @Description Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
+// @Description Same projection as a list item, with fresh authorization. session_id and optional direct_parent_session_id describe the owning session and its direct parent; parent_session_id remains the requested aggregation root. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"
@@ -173,4 +188,57 @@ func (h *SessionTaskHandler) Deliveries(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, page)
+}
+
+// Observe godoc
+// @Summary Observe a computer task's original native references
+// @Description Read-only, bounded Herdr metadata and an operation-revision-bound persisted reconciliation snapshot. Rechecks parent/descendant ownership and current device grants before and after observation. A concurrent operation revision change fails closed. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history. Reconciliation neither pauses target admission nor authorizes host stop/upgrade; recorded file references are not live media checks.
+// @Tags sessions
+// @Produce json
+// @Param bot_id path string true "Bot ID"
+// @Param session_id path string true "Owned parent session ID"
+// @Param task_type path string true "Task discriminator" Enums(computer_operation)
+// @Param task_id path string true "Computer operation ID"
+// @Success 200 {object} computertask.Recovery
+// @Failure 400 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 404 {object} server.Problem
+// @Failure 500 {object} server.Problem
+// @Router /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation [get].
+func (h *SessionTaskHandler) Observe(c echo.Context) error {
+	user, err := h.authorize(c)
+	if err != nil {
+		return err
+	}
+	if _, err := uuid.Parse(c.Param("task_id")); err != nil || h.computers == nil {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	ctx := c.Request().Context()
+	bot, parent, kind, id := c.Param("bot_id"), c.Param("session_id"), c.Param("task_type"), c.Param("task_id")
+	binding, err := h.service.ComputerBinding(ctx, bot, user, parent, kind, id)
+	if err != nil {
+		return taskHTTPError(err)
+	}
+	ctx, err = toolcontext.WithComputerBinding(ctx, binding)
+	if err != nil {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	observation, err := h.computers.Recover(ctx, binding, id)
+	if errors.Is(err, computertask.ErrDenied) || errors.Is(err, agenvo.ErrTargetChanged) {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	if err != nil {
+		return err
+	}
+	// Native reads can outlive a parent/child relation or grant. Recheck the
+	// requested root too, not just the operation's own session inside Recover.
+	if _, err := h.authorize(c); err != nil {
+		return err
+	}
+	current, err := h.service.ComputerBinding(ctx, bot, user, parent, kind, id)
+	if err != nil || current != binding {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	return c.JSON(http.StatusOK, observation)
 }

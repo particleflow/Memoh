@@ -3,7 +3,6 @@ package transferclient
 import (
 	"context"
 	"errors"
-	"math/rand/v2"
 	"net/http"
 	"time"
 )
@@ -66,7 +65,7 @@ type Snapshot interface {
 }
 
 func (j Job) valid() bool {
-	if j.Version != 1 || !validID(j.DeliveryID) || !validID(j.BotID) || !validID(j.OperationID) || !validID(j.SnapshotID) || !validID(j.LocatorRevision) || !j.Spec.valid() || j.Offset < 0 || j.Offset > j.Spec.SizeBytes || j.Attempts < 0 || j.Attempts > 12 {
+	if j.Version != 1 || !validID(j.DeliveryID) || !validID(j.BotID) || !validID(j.OperationID) || !validID(j.SnapshotID) || !validID(j.LocatorRevision) || !j.Spec.valid() || j.Offset < 0 || j.Offset > j.Spec.SizeBytes || j.Attempts < 0 {
 		return false
 	}
 	if j.ReceiptID != "" && !validID(j.ReceiptID) {
@@ -136,17 +135,8 @@ func fail(j *Job, err error, now time.Time, save Save) error {
 		return stop(j, "blocked", code, save)
 	}
 	next := *j
-	next.Attempts++
-	if next.Attempts >= 12 {
-		return stop(j, "blocked", "retry_budget", save)
-	}
-	ceiling := min(time.Second*time.Duration(1<<min(next.Attempts, 9)), 5*time.Minute)
-	// Bounded jitter, persisted by the host; Advance never sleeps or schedules.
-	delay := ceiling/2 + time.Duration(rand.Int64N(int64(ceiling/2))) //nolint:gosec // Retry jitter has no security/identity role.
-	if h != nil && h.RetryAfter > delay {
-		delay = min(h.RetryAfter, 5*time.Minute)
-	}
-	next.NextAttempt, next.ErrorCode = now.Add(delay), code
+	next.Attempts = incrementAttempts(next.Attempts)
+	next.NextAttempt, next.ErrorCode = retryDue(now, next.Attempts, err), code
 	return persist(j, next, save)
 }
 
@@ -186,6 +176,9 @@ func accept(j *Job, r Receipt, save Save) error {
 func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapshot, now time.Time) error {
 	if !job.valid() || save == nil {
 		return ErrInvalid
+	}
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	j := &job
 	if j.Phase == "ready" || j.Phase == "canceled" || j.Phase == "create_unknown" || j.Phase == "blocked" {

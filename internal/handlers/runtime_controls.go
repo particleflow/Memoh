@@ -115,6 +115,9 @@ func (h *SessionHandler) ExecuteRuntimeCommand(c echo.Context) error {
 	if err := c.Bind(&body); err != nil || strings.TrimSpace(body.Command) == "" {
 		return apperror.New(apperror.CodeRuntimeControlRequestInvalid, nil)
 	}
+	if resetsConversation(body.Command) {
+		return rejectParallelChat(c)
+	}
 	request.Command = body.Command
 	result, err := h.runtimeControls.ExecuteRuntimeCommand(c.Request().Context(), request)
 	if err != nil {

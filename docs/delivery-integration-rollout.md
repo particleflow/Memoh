@@ -1,5 +1,10 @@
 # Generic delivery integration candidate
 
+For handoff/tool failures, first consult the maintained
+[compatibility incident register](testing/compatibility-incident-register.md).
+The candidate and schema sequence below are historical; use the current
+version-specific handoff for deployment, not these older schema numbers.
+
 This candidate combines the reviewed delivery ancestry through
 `ddb09be456002ea81466fb1560d1f6b6850b99dd` with cleaned main
 `851e8da4284c1f01e7e95f9547b16e7250bf553b` using an ordinary merge.
@@ -64,8 +69,9 @@ immutable queue snapshots, finite actions and delivery IDs remain unchanged.
    response requires a status read and explicit current-ID rotation, not blind
    re-enrollment. Do not place the owner account JWT on the PC.
 5. Install the fixed bundle through existing Herdr facilities. Its supplied
-   config/state locations and the existing approved private `source_root` must
-   match the registered execution root. Keep the credential in the separate
+   config/state locations remain private local NTFS. The existing approved
+   `source_root` must match the registered execution root; an authorized native
+   SMB UNC task root is separate from queue storage. Keep the credential in the separate
    private `device.credential` file, never argv/logs/model context. Use normal
    HTTPS hostname/certificate validation and the already approved channel; the
    code does not repair ACLs, alter trust, open ports or create a daemon.

@@ -1,0 +1,5 @@
+=== RUN   TestPostgresAbortObservationPreservesRunAndScope
+    session_abort_observation_postgres_test.go:156: generated queries: original run unchanged; old source absent; new control distinct; duplicate/cross-bot/cross-session/cross-team writes=0; RLS read denied
+--- PASS: TestPostgresAbortObservationPreservesRunAndScope (0.11s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.145s

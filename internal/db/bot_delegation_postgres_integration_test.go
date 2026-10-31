@@ -92,6 +92,57 @@ func TestBotDelegationPostgresClaimIsolationAndDescendantAssets(t *testing.T) {
 	if got, err = ledger.ForTarget(ctx, target, destination); err != nil || got.ID != r.ID {
 		t.Fatalf("durable target association: %v", err)
 	}
+
+	// The pre-admission delegation UUID is not a native run, even on an old
+	// completed fixture. Only the exact admitted identity can be projected.
+	if run, err := ledger.TargetRun(ctx, r); err != nil || run != nil {
+		t.Fatalf("placeholder observation: %+v %v", run, err)
+	}
+	exec("INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint,fencing_token) VALUES($1,$2,$3,$4,$5,1,'completed','{}','synthetic',5)", r.RunID, target, destination, "bot-delegation:"+r.ID, uuid.NewString())
+	restored, err = ledger.Get(ctx, source, user, root, r.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run, err := botdelegation.NewPostgresLedger(q).TargetRun(ctx, restored)
+	if err != nil || run == nil || run.ID != r.RunID || run.State != "completed" || run.CreatedAt.IsZero() {
+		t.Fatalf("persisted native observation: %+v %v", run, err)
+	}
+	for _, change := range []struct {
+		name   string
+		mutate func(*botdelegation.Record)
+	}{
+		{"bot", func(v *botdelegation.Record) { v.Identity.TargetBotID = source }},
+		{"session", func(v *botdelegation.Record) { v.Identity.TargetSessionID = sibling }},
+		{"user", func(v *botdelegation.Record) { v.Identity.UserID = other }},
+		{"team", func(v *botdelegation.Record) { v.Identity.TeamID = uuid.NewString() }},
+		{"invocation", func(v *botdelegation.Record) { v.ID = uuid.NewString() }},
+		{"placeholder", func(v *botdelegation.Record) { v.RunID = uuid.NewString() }},
+	} {
+		wrong := r
+		change.mutate(&wrong)
+		if got, err := ledger.TargetRun(ctx, wrong); err != nil || got != nil {
+			t.Fatalf("%s observation escaped: %+v %v", change.name, got, err)
+		}
+	}
+	exec("INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,'unrelated-later-turn',$4,2,'completed','{}','synthetic')", uuid.NewString(), target, destination, uuid.NewString())
+	if got, err := ledger.TargetRun(ctx, r); err != nil || got == nil || got.ID != r.RunID {
+		t.Fatalf("latest turn substituted: %+v %v", got, err)
+	}
+	for _, mutation := range []string{
+		"UPDATE bot_sessions SET runtime_fencing_token=6 WHERE id=$1",
+		"UPDATE bot_sessions SET deleted_at=now() WHERE id=$1",
+	} {
+		exec(mutation, destination)
+		if got, err := ledger.TargetRun(ctx, r); err != nil || got != nil {
+			t.Fatalf("retired run exposed: %+v %v", got, err)
+		}
+		exec("UPDATE bot_sessions SET runtime_fencing_token=0,deleted_at=NULL WHERE id=$1", destination)
+	}
+	exec("UPDATE session_runs SET error_code='history_reset' WHERE run_id=$1", r.RunID)
+	if got, err := ledger.TargetRun(ctx, r); err != nil || got != nil {
+		t.Fatalf("reset run exposed: %+v %v", got, err)
+	}
+	exec("UPDATE session_runs SET error_code=NULL WHERE run_id=$1", r.RunID)
 	for i, entry := range []struct {
 		session, role string
 		visible       bool
@@ -111,6 +162,9 @@ func TestBotDelegationPostgresClaimIsolationAndDescendantAssets(t *testing.T) {
 	}
 	foreignTeam := uuid.NewString()
 	exec("SELECT set_config('memoh.team_id',$1,false)", foreignTeam)
+	if got, err := ledger.TargetRun(ctx, r); err != nil || got != nil {
+		t.Fatalf("cross-team native run: %+v %v", got, err)
+	}
 	if _, err = ledger.Get(ctx, source, user, root, r.ID); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("cross-team read: %v", err)
 	}

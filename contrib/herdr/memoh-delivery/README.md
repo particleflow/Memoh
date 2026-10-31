@@ -20,9 +20,9 @@ complete endpoint installer or require the user to assemble separate services.
 
 | Concern | Present in this component | Remaining endpoint integration |
 | --- | --- | --- |
-| Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Herdr/Agenvo pairing, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
+| Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Memoh Runtime/Herdr configuration, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
 | Configuration and data | Herdr supplies config/state locations. One `HostConfig` reads `transfer.json`; the separate private credential is read on requests. Queue/publications use the supplied state root; source files keep their existing owner. | No endpoint-wide setup currently provisions these locations and the registered task `WorkDir` together. `source_root` is a separately supplied value checked against the task root hash, not an automatically shared registration setting. |
-| Relative paths | Plugin executable paths are package-relative; source references are logical filenames. Config/state/source roots must be clean absolute private paths, never CWD-relative or silently inferred. | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
+| Relative paths | Plugin executable paths are package-relative; source references are logical filenames. All roots must be clean absolute paths. Config/state remain private local NTFS; the task source can use an already authorized native SMB UNC root. See [task source boundaries](../../../docs/delivery-task-source.md). | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
 | Startup checks | `verify-storage` checks/opens native queue storage. Task launch checks Pi, Node and required Bash utilities; the producer hook checks Herdr when collecting. | There is no combined startup health check for all dependencies, plugin installation, device authorization and real HTTPS trust. `probe` explicitly reports `device_configuration: required`; it does not prove connectivity. |
 | Compatibility | The package records its exact source SHA and hashes. Config, locator and queue versions fail closed; Server requires the complete 171/172 schema and device verifier. | The static plugin version is not a negotiated Server/host compatibility matrix. There is no coordinated version selection or automatic upgrade migration. |
 | Update/rollback/uninstall | Queue evidence, retained receipts and NAS associations survive process restart. Only durably committed queue payloads are automatically released. | No updater, atomic package switch, rollback coordinator or uninstall ownership manifest is supplied. Replacement must preserve config/state and unresolved evidence; uninstall must never imply deleting producer files or NAS originals. |
@@ -67,7 +67,7 @@ job actions select `-delivery <logical-id>`. The manifest's `advance-delivery`
 runs `advance-results`: at most 64 existing queue steps on one due job within
 two minutes, then exits. It does not poll, schedule,
 reset retry budgets, create a business attempt, or run a background service.
-Herdr/Agenvo can invoke the installed command through its existing command path;
+The configured native Memoh Runtime/Herdr path can invoke the installed command through its existing command path;
 no connector or Agent core change is needed. Input acceptance alone is not a
 completion receipt.
 
@@ -83,7 +83,7 @@ completion receipt.
    `/users/me/runtimes/:id/transfer-credential`; only its digest is stored on
    Server. Choose expiry/revoke/rotation policy and privately provision the
    one-time returned purpose-specific device credential. Do not use a PC account JWT, broad Bot
-   token or the Agenvo control/OAuth credential. No per-file token or pairing is
+   token or any legacy control/OAuth credential. No per-file token or pairing is
    required. Missing verifier means unavailable, never account-auth fallback.
 3. After installation approval, install this bundle through the existing Herdr
    plugin mechanism, without a service. Herdr supplies `HERDR_PLUGIN_CONFIG_DIR`
@@ -97,8 +97,9 @@ completion receipt.
    bundle, argv, model context or terminal output. Rotation replaces that same
    private credential through the approved administrative process. Requests read
    it afresh; server revocation is checked on every request and after scans.
-5. For uploads only, configure `source_root` to the producer's approved private
-   NTFS export directory. It must not overlap config or queue state. Producers
+5. For uploads only, configure `source_root` to the producer's approved task
+   directory: local NTFS or the existing authorized native SMB UNC location.
+   It must not overlap config or queue state. Producers
    close output writers and supply one logical filename (`source_ref`, letters,
    digits, underscore or hyphen), declared hash/size/MIME and existing task
    selectors. Downloads publish under the existing queue's retained native
@@ -143,11 +144,11 @@ old finite writers, not run both versions. Rollback must retain the state and
 use a reader supporting v5; it cannot reinterpret indexed sources as snapshots.
 
 The historical 8-job/256 MiB reservation profile and optional
-`queue-budget.json` are retained only for legacy snapshot/download/publication
-compatibility. They no longer limit new upload registration or source size.
-This increment does **not** remove the separate download/publication constraints,
-Server `[files].max_upload_bytes` default of 200 MiB, or task manifest/ledger
-limits. Consequently metadata registration is not a claim that 10,000 GiB files
+`queue-budget.json` are retained for legacy snapshot policy and unchanged
+locator compatibility. They do not limit new upload registration/source size,
+download size/backlog, or the cumulative bytes of retained download objects.
+Server `[files].max_upload_bytes` defaults to 200 MiB independently; metadata
+capacity and task-specific contracts remain separate. Consequently metadata registration is not a claim that 10,000 GiB files
 have been transferred or that every three-end product constraint is solved.
 
 The Server still requires the complete hash before Create. Closed producer
@@ -191,7 +192,7 @@ fence remains; never guess a new receipt after uncertain creation.
 The optional task declaration `artifact: {source_ref, mime}`, or `artifacts` with
 1–16 distinct entries in the existing declaration (never both), is available for
 `herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
-match the existing private `source_root`; a mismatch fails explicitly. Write and
+match the existing authorized `source_root`; a mismatch fails explicitly. Write and
 close the declared files before Pi exits. The envelope supplies non-secret
 `MEMOH_DELIVERY_CONTEXT_FILE`, closes a metadata manifest, and invokes the fixed
 `collect-result` action. This does not change Agent code or its prompt.
@@ -245,6 +246,15 @@ ownership, HTTPS trust and the real PC/NAS route still require acceptance.
 Windows producer tests use a protocol fixture; Linux upload Server/PG and
 Windows download publication/PG tests are separate combinations.
 
+Starting with component 0.10.1, a durable inbound download returns
+`feedback_status: not_applicable`: it has no outbound producer projection.
+`recorded` and `unavailable` retain their outgoing feedback meanings, including
+strict original attempt/declaration checks and actual write failures. The unified
+endpoint must explicitly accept the new value without treating it as transfer
+success or weakening exit/lifecycle/association checks. Do not reinterpret an old
+component's `unavailable` as success. No queue/config migration is required; see
+[the exact consumer contract](../../../docs/delivery-producer-feedback.md#cli-feedback-applicability).
+
 Do not install/link or configure this package against production as part of
 fixture acceptance. The API fault model and limitations are documented in
 `docs/design/windows-native-binding.md` and `docs/design/device-delivery-binding.md`.
@@ -293,8 +303,9 @@ receipt and seal), supports original-ID inspect/admission without producer
 bytes, and never deletes unknown evidence. It has 256 deterministic buckets,
 each capped at 1 MiB framed metadata and 1024 files (filesystem overhead extra).
 Bucket exhaustion fails with capacity and preserves the source journal. There
-is no automatic history deletion. Native publication keeps its separate retained-byte budget; plugin 0.7 adds
-explicit publication metadata migration described below. Downloads remain bounded.
+is no automatic history deletion. Plugin 0.7 added explicit publication metadata
+migration described below. Current downloads retain the same metadata layout,
+with actual filesystem space governing payload writes.
 
 ## Publication metadata maintenance (0.7.0)
 
@@ -313,8 +324,28 @@ successful download from the maintenance result.
 
 Locator v2's explicit defaults are 64 buckets of at most 128 records, each journal
 at most 64 KiB (512 MiB maximum journal metadata plus filesystem/cache overhead).
-A full bucket returns capacity and never evicts a proof. Objects retain the
-separate existing byte limit, default CLI 256 MiB; Queue Retire does not free them.
-See `docs/delivery-publication-metadata.md` for accounting, crash and rollback
-boundaries. Larger sustainable object storage and ownership-based cleanup remain
-unimplemented. This component does not perform endpoint installation or upgrades.
+A full bucket returns capacity and never evicts a proof. Queue Retire does not
+delete retained objects. Current writers count their bytes for integrity but do
+not impose the old cumulative 256 MiB payload quota. See
+`docs/delivery-publication-metadata.md` for historical layout/crash boundaries
+and `docs/testing/transfer-native-large-byte-recovery.md` for the default-download
+correction. Ownership-based cleanup remains unimplemented. This component does
+not perform endpoint installation or upgrades.
+
+## Default download space handling
+
+Download enqueue writes metadata and an empty private part; it neither reserves
+the whole file nor allocates a second full copy. Existing workers stream with
+64 KiB buffers, checking actual free space in the existing checkpoint window.
+Insufficient payload space retains the synced offset and reports the existing
+summary fields `state: waiting`, `error_class: capacity`, and `next_due_at`. The
+finite host action can retry when due without exhausting network attempts. It
+does not delete source, unfinished data, unknown evidence, or published objects.
+Actual metadata exhaustion still fails explicitly; physical disk is not unlimited.
+
+No budget change or migration is required for this correction. Default locator
+bytes, origin/HostBinding, task identity and publication layout stay unchanged.
+Update all component writers before downloading beyond an old byte allowance;
+older binaries still reject such records/retained objects. Do not mix old/new
+writers or delete state to force a downgrade. Component replacement belongs to
+the unified endpoint, not an extra per-file user action.

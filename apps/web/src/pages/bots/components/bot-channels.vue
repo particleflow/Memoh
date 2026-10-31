@@ -23,7 +23,7 @@
             tone="warning"
             clickable
             :title="t('bots.channels.modelRequiredTitle')"
-            :description="t('bots.channels.modelRequiredDescription')"
+
             @click="openModelSettings"
           />
 
@@ -76,7 +76,6 @@
           <SettingsSection v-else>
             <Empty class="py-16">
               <EmptyTitle>{{ t('bots.channels.emptyTitle') }}</EmptyTitle>
-              <EmptyDescription>{{ t('bots.channels.emptyDescription') }}</EmptyDescription>
               <EmptyContent>
                 <Button
                   variant="outline"
@@ -153,7 +152,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   Button, Skeleton,
   Dialog, DialogContent, DialogHeader, DialogTitle,
-  Empty, EmptyTitle, EmptyDescription, EmptyContent,
+  Empty, EmptyTitle, EmptyContent,
 } from '@felinic/ui'
 import { useQuery } from '@pinia/colada'
 import { getChannels, getBotsByIdChannelByPlatform, getBotsByBotIdSettings } from '@memohai/sdk'

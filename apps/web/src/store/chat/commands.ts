@@ -5,7 +5,6 @@ import type {
 } from '@/composables/api/useChat'
 import { executeQuickAction } from '@/composables/api/useChat'
 import { resolveApiErrorMessage } from '@/utils/api-error'
-import { DIRECT_BOT_AGENT_RUNTIMES, isDirectBotAgentRuntime } from '@/utils/bot-agent'
 import { createInvocationId } from '../chat-list.normalize'
 import { commandActionErrorMessage } from './messages'
 import type { ExternalAgentSessionInput, ActiveChatTarget, ChatViewTarget } from './types'
@@ -50,9 +49,9 @@ function parseWebNewCommand(
   text: string,
 ): { mode: 'chat' | 'discuss' | ''; agentId: string } | null {
   const input = text.trim()
-  if (!input.startsWith('/new')) return null
+  if (!/^\/(?:new|reset|clear)(?:\s|$)/i.test(input)) return null
   const parts = input.split(/\s+/)
-  if (parts[0] !== '/new') return null
+  if (!['/new', '/reset', '/clear'].includes(parts[0]!.toLowerCase())) return null
   const positional = parts.slice(1).filter(part => part && !part.startsWith('-'))
   const first = positional[0]?.toLowerCase() ?? ''
   const second = positional[1]?.toLowerCase() ?? ''
@@ -79,61 +78,12 @@ export function createChatCommands(deps: ChatCommandDeps) {
 
   async function handleWebNewCommand(
     text: string,
-    attachments: ChatAttachment[] | undefined,
-    target: ChatViewTarget,
+    _attachments: ChatAttachment[] | undefined,
+    _target: ChatViewTarget,
   ): Promise<WebCommandResult> {
     const parsed = parseWebNewCommand(text)
     if (!parsed) return { kind: 'none' }
-    const generation = deps.userScopeGeneration()
-    const activate = deps.isFocusedTarget(target)
-    if (attachments?.length) {
-      return { kind: 'error', message: 'Attachments are not supported with /new' }
-    }
-    const agentId = parsed.agentId.trim()
-    if (!agentId) {
-      if (parsed.mode === 'discuss') {
-        return {
-          kind: 'error',
-          message: 'Discuss External Agent sessions require an agent, for example /new discuss codex',
-        }
-      }
-      const command = deps.beginDraftCommand(target)
-      if (command.isCurrent()) deps.requestDraftView(target, null, activate)
-      command.finish()
-      return { kind: 'handled' }
-    }
-    if (!isDirectBotAgentRuntime(agentId)) {
-      const usage = DIRECT_BOT_AGENT_RUNTIMES.map(runtime => `/new ${runtime}`).join(', ')
-      return { kind: 'error', message: `Unknown agent "${agentId}" — use one of ${usage}, or pick an agent from the composer` }
-    }
-
-    const command = deps.beginDraftCommand(target)
-    try {
-      const targetBotId = target.botId === '__unbound__' ? '' : target.botId
-      // ensureBot now rethrows fetch failures (so bootstrap recovery can retry
-      // them); this interactive path keeps its original "not ready" reply.
-      const botId = targetBotId || await deps.ensureBot().catch(() => null)
-      if (!botId) return { kind: 'error', message: 'Bot not ready' }
-      const defaults = await deps.defaultExternalAgentSettingsForAgent(botId, agentId)
-      if (
-        generation !== deps.userScopeGeneration()
-        || (deps.currentBotId.value ?? '').trim() !== botId
-        || !command.isCurrent()
-      ) {
-        return { kind: 'handled' }
-      }
-      deps.requestDraftView(target, {
-        agentId,
-        sessionMode: parsed.mode === 'discuss' ? 'discuss' : 'chat',
-        ...defaults,
-        // Direct runtimes are not ACP profiles; without the explicit runtime
-        // the draft would create an acp_agent session the server refuses.
-        runtime: agentId,
-      }, activate)
-      return { kind: 'handled' }
-    } finally {
-      command.finish()
-    }
+    return { kind: 'error', message: deps.commandErrorMessage('slash.unsupported_in_web') }
   }
 
   async function handleWebSlashCommand(

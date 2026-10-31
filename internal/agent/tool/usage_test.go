@@ -58,7 +58,7 @@ func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
 				t.Fatalf("skill guidance does not match registered tools: %s", usage)
 			}
 			if tt.wantDiscovery {
-				for _, boundary := range []string{"Authorization is not availability", "exec_foreground", "Never substitute another location", "not ordinary `exec`, a full workspace", "computer_task_submit(kind=foreground_bash)"} {
+				for _, boundary := range []string{"Authorization is not availability", "exec_foreground", "Never substitute another location", "not ordinary `exec`", "This capability alone does not promise filesystem or desktop support", "computer_task_submit(kind=foreground_bash)"} {
 					if !strings.Contains(usage, boundary) {
 						t.Errorf("missing boundary %q", boundary)
 					}

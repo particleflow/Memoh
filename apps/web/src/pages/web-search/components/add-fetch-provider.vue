@@ -52,7 +52,6 @@
         <FieldStack
           v-for="field in configFields"
           :key="field.key"
-          :help="field.description"
         >
           <template #label>
             <Label>

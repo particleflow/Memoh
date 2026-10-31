@@ -5,6 +5,7 @@ import { RouterView, useRoute } from 'vue-router'
 import { Toaster } from '@felinic/ui'
 import { useSettingsStore } from '@/store/settings'
 import MainSection from '@/pages/main-section/index.vue'
+import { useCatalogRefresh } from '@/composables/useCatalogRefresh'
 
 useSettingsStore()
 
@@ -25,6 +26,7 @@ const route = useRoute()
 const isChatRoute = computed(() => route.name === 'home' || route.name === 'bot')
 const isSettingsRoute = computed(() => route.path.startsWith('/settings'))
 const isAppArea = computed(() => isChatRoute.value || isSettingsRoute.value)
+useCatalogRefresh(isAppArea)
 
 // Localized headings for auto-shaped long-blob toasts (raw backend errors etc.).
 // @felinic/ui is i18n-agnostic, so the app supplies these; they react to locale.

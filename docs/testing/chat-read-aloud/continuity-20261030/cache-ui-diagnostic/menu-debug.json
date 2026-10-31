@@ -1,0 +1,24 @@
+{
+  "targets": [
+    {
+      "tag": "DIV",
+      "id": "runtime:result-turn-2:assistant",
+      "html": "<div data-state=\"open\" data-slot=\"context-menu-trigger\" data-message-id=\"runtime:result-turn-2:assistant\" class=\"transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2\" data-anchor=\"runtime:result-turn-2:assistant\" style=\"pointer-events: auto;\"><div class=\"flex gap-3 items-start\"><!-- Sender avatar. Local chat shows it only for remote users; a synced\n         channel thread shows it for every participant (self / bot included). --><!--v-if--><!-- Content --><div class=\"min-w-0 group/msg flex-1 max-w-full\" data-chat-content=\"\"><!-- Sender name (channel threads only): names every participant so the\n           group conversation is legible without relying on bubble side. --><!--v-if--"
+    }
+  ],
+  "menu": [
+    {
+      "text": "暂不可重播：无可用缓存音频",
+      "disabled": ""
+    }
+  ],
+  "vue": [
+    {
+      "enabled": true,
+      "message": {},
+      "available": true,
+      "replay": false,
+      "label": "chat.readAloud.unavailable"
+    }
+  ]
+}

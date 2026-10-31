@@ -1,0 +1,38 @@
+{
+  "checked_at_utc": "2026-10-30T12:28:39.035209+00:00",
+  "base_research_commit": "1e0950077a4e2ec025cbda68a5388bae15a75d6f",
+  "status": "offline_structure_checks_passed_only",
+  "changed_files_within_declared_ownership": true,
+  "shared_runtime_handler_projection_speech_files_changed": false,
+  "prepared_go_test_functions": [
+    "TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites",
+    "TestPresenceSDKRejectsWrongSelectionAndInvalidOutput",
+    "TestAcknowledgementIsNaturalAndTypedNotAFixedFallback",
+    "TestFormalFirstAndCancelRejectProviderThatIgnoresCancellation",
+    "TestStartDoesNotWaitForAuxiliaryStoreOrGeneration",
+    "TestHotConversationAndForeignActorDoNotGenerate",
+    "TestFormalBeforeClaimAndEpisodeReplayDoNotGenerate",
+    "TestFailureCapacityAndWrongPhaseNeverPublishOrRetry",
+    "TestContinuityUsesStateInsteadOfAClockAlone",
+    "TestOnlyTrustedDirectSourceIsEligible",
+    "TestThinkingPrefersOffThenLowWithoutModelNames"
+  ],
+  "go_tests_executed": false,
+  "gofmt_executed": false,
+  "go_type_or_syntax_check_executed": false,
+  "go_blocker": "Previously identified PATH go is a board-game executable; no compiler installed or new Go test attempted in this preparation turn.",
+  "durable_claims_and_main_pipeline_wired": false,
+  "ui_and_live_latency_verified": false,
+  "real_model_or_tts_requests": 0,
+  "deployments": 0,
+  "remote_push_or_external_submissions": 0,
+  "request_count_fields_are_scope_declarations_not_measured_by_this_script": true,
+  "source_sha256": {
+    "internal/agent/application/conversation_presence_sdk.go": "961bb64a8387166df617e2faaa90c0f6f6ff678b4490fa2458c9c23b65c76f5b",
+    "internal/agent/application/conversation_presence_sdk_test.go": "3c56428c4e1ff8808380c79926c3d83167c112f29befded3f4968f2a858c1da7",
+    "internal/conversationpresence/coordinator.go": "b03b5012b51ff87d3af9c459c31a6d81fe6d7e19da7fe5b0dbc2be87ef4839e7",
+    "internal/conversationpresence/coordinator_test.go": "6480ee21ac19a7e6682cb651198087e77d317becc8e954b0d8b0e84ad636374d",
+    "internal/conversationpresence/policy.go": "9b4212684fc27c40676db61a4271b09bc67a1ba13ac1a1d2e227672aca9b4c81",
+    "internal/conversationpresence/policy_test.go": "402a3de6c2b3e7806ee8b949406f93eba34dc5e9470f7e6bd9c3467a16aa986f"
+  }
+}

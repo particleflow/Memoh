@@ -1,0 +1,3 @@
+GOOS=windows GOARCH=amd64 go test -p=1 -ldflags="-s -w" -c ./internal/transferclient
+exit_code=0
+Cross-compilation only, not native Windows or UNC execution.

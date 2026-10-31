@@ -46,3 +46,32 @@ func TestLoadBotDelegationExecutionTimeout(t *testing.T) {
 		t.Fatalf("omitted section: %v %v", got, err)
 	}
 }
+
+func TestLoadResultSummaryAttempts(t *testing.T) {
+	for _, tc := range []struct {
+		body    string
+		want    int
+		invalid bool
+	}{{"", DefaultResultSummaryAttempts, false}, {"result_summary_attempts=1", 1, false}, {"result_summary_attempts=7", 7, false}, {"result_summary_attempts=0", 0, true}, {"result_summary_attempts=-2", 0, true}} {
+		t.Run(tc.body, func(t *testing.T) {
+			file := filepath.Join(t.TempDir(), "config.toml")
+			if err := os.WriteFile(file, []byte("[bot_delegation]\n"+tc.body+"\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			cfg, err := Load(file)
+			if tc.invalid {
+				if err == nil {
+					t.Fatal("invalid summary policy accepted")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := cfg.BotDelegation.SummaryAttemptLimit()
+			if err != nil || got != tc.want {
+				t.Fatalf("policy %d %v", got, err)
+			}
+		})
+	}
+}

@@ -1,0 +1,717 @@
+{
+  "phase": "after-recovery-gap-mounted",
+  "failed_bot_reads": [
+    2540.43,
+    2747.41,
+    3549.37,
+    5561.93,
+    9568.39
+  ],
+  "http": [
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 502,
+      "at_ms": 2540.43
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 502,
+      "at_ms": 2542.5
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workdirs",
+      "query": {},
+      "status": 502,
+      "at_ms": 2739.47
+    },
+    {
+      "path": "/api/bots/bootstrap-review-a-ad40d397",
+      "query": {},
+      "status": 502,
+      "at_ms": 2742.0
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "query": {},
+      "status": 502,
+      "at_ms": 2744.89
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "query": {},
+      "status": 502,
+      "at_ms": 2745.14
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/container",
+      "query": {},
+      "status": 502,
+      "at_ms": 2745.32
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 502,
+      "at_ms": 2747.23
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 502,
+      "at_ms": 2747.41
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 502,
+      "at_ms": 3549.37
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "query": {},
+      "status": 502,
+      "at_ms": 3562.32
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 502,
+      "at_ms": 5561.93
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "query": {},
+      "status": 502,
+      "at_ms": 5564.23
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 502,
+      "at_ms": 9568.39
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "query": {},
+      "status": 502,
+      "at_ms": 9571.55
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 200,
+      "at_ms": 10009.45
+    },
+    {
+      "path": "/api/bots/bootstrap-review-a-ad40d397",
+      "query": {},
+      "status": 200,
+      "at_ms": 10029.44
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "query": {},
+      "status": 200,
+      "at_ms": 10038.44
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "query": {},
+      "status": 200,
+      "at_ms": 10057.7
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "query": {
+        "session_id": [
+          "54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+        ],
+        "limit": [
+          "30"
+        ]
+      },
+      "status": 200,
+      "at_ms": 10149.49,
+      "items": 2
+    },
+    {
+      "path": "/api/ping",
+      "query": {},
+      "status": 200,
+      "at_ms": 10150.07
+    },
+    {
+      "path": "/api/acp/profiles",
+      "query": {},
+      "status": 200,
+      "at_ms": 10150.24
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 200,
+      "at_ms": 10150.48
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workdirs",
+      "query": {},
+      "status": 200,
+      "at_ms": 10259.53
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/agents",
+      "query": {},
+      "status": 200,
+      "at_ms": 10259.9
+    },
+    {
+      "path": "/api/providers",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.06
+    },
+    {
+      "path": "/api/models",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.16
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.46
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.7
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/skills/catalog",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.8
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "query": {},
+      "status": 200,
+      "at_ms": 10260.9
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "query": {},
+      "status": 200,
+      "at_ms": 10265.45
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff/status",
+      "query": {},
+      "status": 200,
+      "at_ms": 10265.59
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/media/limits",
+      "query": {},
+      "status": 200,
+      "at_ms": 10277.22
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 200,
+      "at_ms": 17583.85
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions",
+      "query": {
+        "types": [
+          "chat,discuss,acp_agent,schedule"
+        ],
+        "hide_schedule_runs": [
+          "true"
+        ],
+        "limit": [
+          "50"
+        ]
+      },
+      "status": 200,
+      "at_ms": 17641.77
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workspace-targets",
+      "query": {},
+      "status": 200,
+      "at_ms": 17658.7
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/events",
+      "query": {},
+      "status": 200,
+      "at_ms": 17660.07
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "query": {},
+      "status": 200,
+      "at_ms": 17664.07
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "query": {
+        "session_id": [
+          "c7b62199-0c98-4fd4-9b66-22dc17aa4f72"
+        ],
+        "limit": [
+          "30"
+        ]
+      },
+      "status": 200,
+      "at_ms": 17679.86,
+      "items": 0
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "query": {},
+      "status": 200,
+      "at_ms": 18240.41
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "query": {
+        "session_id": [
+          "6f25432a-e437-4a17-93aa-8ed808624def"
+        ],
+        "limit": [
+          "30"
+        ]
+      },
+      "status": 200,
+      "at_ms": 18306.14,
+      "items": 2
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 200,
+      "at_ms": 18313.95
+    },
+    {
+      "path": "/api/acp/profiles",
+      "query": {},
+      "status": 200,
+      "at_ms": 18348.75
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "query": {},
+      "status": 200,
+      "at_ms": 18351.09
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "query": {},
+      "status": 200,
+      "at_ms": 18351.31
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/agents",
+      "query": {},
+      "status": 200,
+      "at_ms": 18351.5
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workspace-targets",
+      "query": {},
+      "status": 200,
+      "at_ms": 18352.5
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/skills/catalog",
+      "query": {},
+      "status": 200,
+      "at_ms": 18352.68
+    },
+    {
+      "path": "/api/models",
+      "query": {},
+      "status": 200,
+      "at_ms": 18354.38
+    },
+    {
+      "path": "/api/providers",
+      "query": {},
+      "status": 200,
+      "at_ms": 18354.49
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def/status",
+      "query": {},
+      "status": 200,
+      "at_ms": 18354.94
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/media/limits",
+      "query": {},
+      "status": 200,
+      "at_ms": 18361.21
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "query": {},
+      "status": 200,
+      "at_ms": 18422.2
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 200,
+      "at_ms": 18491.76
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/workdirs",
+      "query": {},
+      "status": 200,
+      "at_ms": 18501.84
+    },
+    {
+      "path": "/api/bots",
+      "query": {},
+      "status": 200,
+      "at_ms": 18502.82
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "query": {},
+      "status": 200,
+      "at_ms": 18506.33
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/container",
+      "query": {},
+      "status": 404,
+      "at_ms": 18510.16
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/settings",
+      "query": {},
+      "status": 200,
+      "at_ms": 18512.18
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact",
+      "query": {},
+      "status": 200,
+      "at_ms": 18515.06
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/media/limits",
+      "query": {},
+      "status": 200,
+      "at_ms": 18521.26
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "query": {},
+      "status": 200,
+      "at_ms": 18521.58
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions",
+      "query": {
+        "types": [
+          "chat,discuss,acp_agent,schedule"
+        ],
+        "hide_schedule_runs": [
+          "true"
+        ],
+        "limit": [
+          "50"
+        ]
+      },
+      "status": 200,
+      "at_ms": 18524.12
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/events",
+      "query": {},
+      "status": 200,
+      "at_ms": 18538.36
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact",
+      "query": {},
+      "status": 200,
+      "at_ms": 18542.33
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/messages",
+      "query": {
+        "session_id": [
+          "8f55e489-12f5-418f-8726-c97bd550d0b4"
+        ],
+        "limit": [
+          "30"
+        ]
+      },
+      "status": 200,
+      "at_ms": 18594.84,
+      "items": 0
+    },
+    {
+      "path": "/api/users/me",
+      "query": {},
+      "status": 200,
+      "at_ms": 18599.5
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/messages",
+      "query": {
+        "session_id": [
+          "579f6727-2ed1-4e1b-a278-333e986bbd24"
+        ],
+        "limit": [
+          "30"
+        ]
+      },
+      "status": 200,
+      "at_ms": 18605.18,
+      "items": 2
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "query": {},
+      "status": 200,
+      "at_ms": 18605.7
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/agents",
+      "query": {},
+      "status": 200,
+      "at_ms": 18621.73
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/workspace-targets",
+      "query": {},
+      "status": 200,
+      "at_ms": 18652.37
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/skills/catalog",
+      "query": {},
+      "status": 200,
+      "at_ms": 18652.57
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/media/limits",
+      "query": {},
+      "status": 200,
+      "at_ms": 18653.87
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/settings",
+      "query": {},
+      "status": 200,
+      "at_ms": 18654.06
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24/status",
+      "query": {},
+      "status": 200,
+      "at_ms": 18654.3
+    }
+  ],
+  "sockets": [
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/web/ws",
+      "opened_ms": 10044.68,
+      "closed_ms": 17575.47
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/web/ws",
+      "opened_ms": 17673.4,
+      "closed_ms": 18480.48
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/web/ws",
+      "opened_ms": 18583.82,
+      "closed_ms": null
+    }
+  ],
+  "frames": [
+    {
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "bot_id": null,
+      "at_ms": 10052.47
+    },
+    {
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "bot_id": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "at_ms": 10143.73
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_unsubscribe",
+      "session_id": "54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "bot_id": null,
+      "at_ms": 17575.27
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "c7b62199-0c98-4fd4-9b66-22dc17aa4f72",
+      "bot_id": null,
+      "at_ms": 17673.48
+    },
+    {
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "c7b62199-0c98-4fd4-9b66-22dc17aa4f72",
+      "bot_id": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "at_ms": 17677.01
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_unsubscribe",
+      "session_id": "c7b62199-0c98-4fd4-9b66-22dc17aa4f72",
+      "bot_id": null,
+      "at_ms": 18291.3
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "bot_id": null,
+      "at_ms": 18291.39
+    },
+    {
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "bot_id": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "at_ms": 18299.71
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_unsubscribe",
+      "session_id": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "bot_id": null,
+      "at_ms": 18478.58
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "bot_id": null,
+      "at_ms": 18596.76
+    },
+    {
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "bot_id": "88f8057e-7caf-489b-885e-d0c76865ed54",
+      "at_ms": 18649.16
+    }
+  ],
+  "errors": [
+    "Object",
+    "Object",
+    "Object",
+    "Object",
+    "Object",
+    "Object"
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact"
+    }
+  ],
+  "before_restore": {
+    "visible": [
+      false,
+      false
+    ],
+    "rows": 0,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def"
+  },
+  "server_ready_ms": 9991.96,
+  "probe": {
+    "visible": [
+      true,
+      true
+    ],
+    "rows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+  },
+  "probe_ms": 11763.81,
+  "eventual": {
+    "visible": [
+      true,
+      true
+    ],
+    "rows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+  },
+  "same_bot_warm": {
+    "socket_count_before": 2,
+    "socket_count_after": 2,
+    "view": {
+      "visible": [
+        true,
+        true
+      ],
+      "rows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def"
+    }
+  },
+  "other_bot": {
+    "socket_count": 3,
+    "view": {
+      "visible": [
+        true,
+        true
+      ],
+      "rows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-b-88f8057e?session=579f6727-2ed1-4e1b-a278-333e986bbd24"
+    }
+  },
+  "inference_frames": []
+}

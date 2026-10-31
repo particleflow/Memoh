@@ -1,0 +1,9 @@
+internal/handlers/user_runtime_native_account_test.go:29:1: File is not properly formatted (gofumpt)
+}
+^
+internal/handlers/user_runtime_native_account_test.go:27:7: unused-receiver: method receiver 's' is not referenced in method's body, consider removing or renaming it as _ (revive)
+func (s *nativeAccountProbeStore) OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error) {
+      ^
+internal/handlers/user_runtime_native_account_test.go:30:102: unused-parameter: parameter 'before' seems to be unused, consider removing or renaming it as _ (revive)
+func (s *nativeAccountProbeStore) ConfigureNativeHerdrRuntime(ctx context.Context, owner, id string, before, after dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
+                                                                                                     ^

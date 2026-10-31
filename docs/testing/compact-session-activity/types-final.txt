@@ -1,0 +1,11 @@
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/components/sidebar/session-activity.test.ts(72,49): error TS2741: Property 'messages' is missing in type '{ run_id: string; turn_id: string; generation: string; status: "running"; started_at: string; updated_at: string; }' but required in type 'RuntimeCurrentRunView'.
+src/components/sidebar/session-activity.test.ts(103,49): error TS2741: Property 'messages' is missing in type '{ run_id: string; turn_id: string; generation: string; status: "running"; started_at: string; updated_at: string; }' but required in type 'RuntimeCurrentRunView'.
+src/components/sidebar/session-activity.test.ts(141,49): error TS2741: Property 'messages' is missing in type '{ run_id: string; turn_id: string; generation: string; status: "running"; started_at: string; updated_at: string; }' but required in type 'RuntimeCurrentRunView'.
+src/components/sidebar/session-activity.test.ts(143,5): error TS18048: 'observations.parent' is possibly 'undefined'.
+src/components/sidebar/session-activity.test.ts(144,5): error TS18048: 'observations.parent' is possibly 'undefined'.
+/tmp/memoh-candidate-7bcb-review/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

@@ -384,11 +384,41 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AgenvoAdmission = {
+    agent_config_dir?: string;
+    config_sha256?: string;
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    paused?: boolean;
+    request_id?: string;
+    revision?: string;
+    scope?: string;
+    target_fingerprint?: string;
+};
+
+export type AgenvoAgentObservation = {
+    completion_changed?: boolean;
+    completion_seq?: string;
+    interactive_ready?: boolean;
+    output?: string;
+    output_fidelity?: string;
+    session_relation?: string;
+    starting?: boolean;
+    status?: string;
+    /**
+     * No Herdr status, completion sequence or terminal text independently
+     * proves that the requested work succeeded. No lifecycle hook is assumed.
+     */
+    task_success_verified?: boolean;
+    truncated?: boolean;
+};
+
 export type AgenvoAgentProfile = {
     config_dir?: string;
     /**
-     * Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
-     * finite official CLI invocations; no automatic protocol fallback occurs.
+     * Empty is decoded only for historical profiles. Native configuration
+     * requires pi-json-v1; no protocol fallback occurs.
      */
     execution_mode?: string;
     model?: string;
@@ -396,25 +426,97 @@ export type AgenvoAgentProfile = {
     provider?: string;
 };
 
-export type AgenvoDiscoveredInstance = {
-    device_id?: string;
-    device_name?: string;
-    instance_id?: string;
+export type AgenvoBatchFile = {
     name?: string;
-    online?: boolean;
+    sha256?: string;
+    size?: number;
 };
 
-export type AgenvoTarget = {
+export type AgenvoBatchHistoryEvidence = {
+    file?: string;
+    sha256?: string;
+    size?: number;
+};
+
+export type AgenvoBatchHistoryReport = {
+    after?: string;
+    before?: string;
+    evidence?: AgenvoBatchHistoryEvidence;
+};
+
+export type AgenvoBatchReceipt = {
+    attempt?: string;
+    completion?: AgenvoBatchFile;
+    exit_code?: number;
+    exited?: boolean;
+    generation?: string;
+    history?: AgenvoBatchHistoryReport;
+    pane_id?: string;
+    pi_session_id?: string;
+    request_hash?: string;
+    started?: boolean;
+    stderr?: AgenvoBatchFile;
+    stdout?: AgenvoBatchFile;
+    terminal_id?: string;
+    version?: number;
+    workspace_id?: string;
+};
+
+export type AgenvoChangeAdmission = {
+    expected_revision?: string;
+    paused?: boolean;
+    request_id?: string;
+};
+
+export type AgenvoNativeHerdrProfile = {
     agent?: AgenvoAgentProfile;
-    bash_path?: string;
-    connection_id?: string;
-    device_id?: string;
+    bash_path: string;
+    herdr_cli: string;
+    herdr_config_root: string;
+    instance_id: string;
+    producer?: AgenvoProducerLocator;
+    session: string;
+    work_dir: string;
+};
+
+export type AgenvoNativeProfileCutoverRequest = {
+    agent_config_dir?: string;
+    expected_config_sha256?: string;
+    expected_pause_revision?: string;
+    expected_target_fingerprint?: string;
     instance_id?: string;
-    session?: string;
-    work_dir?: string;
+    pause_request_id?: string;
+    runtime_id?: string;
+    target_id?: string;
+};
+
+export type AgenvoProducerLocator = {
+    config_dir: string;
+    program_path: string;
+    state_dir: string;
+};
+
+export type AgenvoReferenceObservation = {
+    agent_status?: string;
+    availability?: string;
+    control_pane?: string;
+    pane?: string;
+    reason?: string;
+    reference_match?: string;
+    workspace?: string;
 };
 
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
+
+export type ApplicationUserInputRecoveryResult = {
+    decision_id?: string;
+    invocation_id?: string;
+    original_run_id?: string;
+    recovery_run_id?: string;
+    replayed?: boolean;
+    started?: boolean;
+    state?: string;
+};
 
 export type AudioConfigSchema = {
     fields?: Array<AudioFieldSchema>;
@@ -726,6 +828,16 @@ export type BotdelegationPage = {
     next_cursor?: string;
 };
 
+export type BotdelegationRecoveryInput = {
+    event_id: string;
+    expected_attempt: number;
+};
+
+export type BotdelegationRecoveryView = {
+    event?: TaskresultEvent;
+    event_id?: string;
+};
+
 export type BotdelegationSummary = {
     source?: string;
     text?: string;
@@ -742,6 +854,10 @@ export type BotdelegationView = {
     state: 'accepted' | 'running' | 'unknown' | 'completed' | 'failed';
     summary?: BotdelegationSummary;
     target_bot_id: string;
+    target_run_created_at?: string;
+    target_run_id?: string;
+    target_run_state?: 'accepted' | 'running' | 'waiting_decision' | 'finishing' | 'completed' | 'aborted' | 'failed' | 'lost';
+    target_run_updated_at?: string;
     target_session_id?: string;
     updated_at: string;
 };
@@ -1181,6 +1297,83 @@ export type ComputertaskDeliveryRequest = {
     version?: number;
 };
 
+export type ComputertaskFollowupResult = {
+    atomic_identity_guaranteed?: boolean;
+    business_outcome?: string;
+    continuity_verified?: boolean;
+    input_may_have_been_sent?: boolean;
+    mode?: string;
+    prompt_accepted?: boolean;
+    reason?: string;
+    request_id?: string;
+    session_observed?: boolean;
+    session_relation?: string;
+    state?: string;
+    strict_resume_available?: boolean;
+};
+
+export type ComputertaskNativeContent = {
+    availability?: string;
+    followup_available?: boolean;
+    followups?: Array<ComputertaskFollowupResult>;
+    observation?: AgenvoAgentObservation;
+    operation_id?: string;
+    session_binding?: string;
+    supported?: boolean;
+};
+
+export type ComputertaskOperationReconciliation = {
+    control_pane_id?: string;
+    control_terminal_id?: string;
+    files?: Array<ComputertaskRecoveryFile>;
+    generation?: string;
+    receipt?: AgenvoBatchReceipt;
+    receipt_state?: string;
+    request_hash?: string;
+    revision?: string;
+    target_fingerprint?: string;
+    terminal_id?: string;
+};
+
+export type ComputertaskPiContinuity = {
+    last_invocation?: AgenvoBatchHistoryReport;
+    reason?: string;
+    status?: string;
+};
+
+export type ComputertaskRecovery = {
+    attempt?: string;
+    business_outcome?: string;
+    cancel_requested?: boolean;
+    continuity?: ComputertaskPiContinuity;
+    native?: AgenvoReferenceObservation;
+    operation_id?: string;
+    pane_id?: string;
+    pi_result?: string;
+    pi_session_id?: string;
+    process_state?: string;
+    reconciliation?: ComputertaskOperationReconciliation;
+    result_reason?: string;
+    result_summary?: ComputertaskRecoverySummary;
+    state?: string;
+    target_id?: string;
+    workspace_id?: string;
+};
+
+export type ComputertaskRecoveryFile = {
+    confirmed_offset?: number;
+    current_availability?: string;
+    meta?: AgenvoBatchFile;
+    recorded_content_hash?: string;
+    state?: string;
+};
+
+export type ComputertaskRecoverySummary = {
+    source?: string;
+    text?: string;
+    truncated?: boolean;
+};
+
 export type ConnectitAuthMethod = {
     credential_fields?: Array<ConnectitCredentialField>;
     key?: string;
@@ -1581,6 +1774,7 @@ export type ConversationUiTurn = {
     external_message_id?: string;
     forward?: ConversationUiForwardRef;
     id?: string;
+    input_source?: InputsourceSource;
     kind?: string;
     messages?: Array<ConversationUiMessage>;
     platform?: string;
@@ -1614,6 +1808,11 @@ export type ConversationUiUserInput = {
     short_id?: number;
     status?: string;
     user_input_id?: string;
+};
+
+export type DeliverymetaArtifact = {
+    mime?: string;
+    source_ref?: string;
 };
 
 export type DisplaySessionInfo = {
@@ -1779,6 +1978,10 @@ export type GithubComFelinicsMemohInternalMcpConnection = {
     tools_cache?: Array<McpToolDescriptor>;
     type?: string;
     updated_at?: string;
+};
+
+export type HandlersAcceptedUserInputRecoveryInput = {
+    original_run_id: string;
 };
 
 export type HandlersAgentAuthorizationClaimRequest = {
@@ -1952,6 +2155,10 @@ export type HandlersAppUpdateRequest = {
 
 export type HandlersBatchDeleteRequest = {
     ids?: Array<string>;
+};
+
+export type HandlersBindPrivateChatRequest = {
+    session_id?: string;
 };
 
 export type HandlersBotUserCandidate = {
@@ -2199,16 +2406,35 @@ export type HandlersCreateSnapshotResponse = {
     version?: number;
 };
 
+export type HandlersCurrentUserResponse = {
+    avatar_url?: string;
+    created_at?: string;
+    display_name?: string;
+    email?: string;
+    id?: string;
+    is_active?: boolean;
+    joined_at?: string;
+    last_login_at?: string;
+    membership_is_active?: boolean;
+    membership_updated_at?: string;
+    metadata?: {
+        [key: string]: unknown;
+    };
+    network_policy?: MediaTransferNetworkPolicy;
+    principal_is_active?: boolean;
+    role?: string;
+    timezone?: string;
+    title_model_id?: string;
+    updated_at?: string;
+    username?: string;
+};
+
 export type HandlersDailyTokenUsage = {
     cache_read_tokens?: number;
     day?: string;
     input_tokens?: number;
     output_tokens?: number;
     reasoning_tokens?: number;
-};
-
-export type HandlersDiscoverAgenvoRequest = {
-    connection_id: string;
 };
 
 export type HandlersFsArchiveRequest = {
@@ -2401,6 +2627,7 @@ export type HandlersMcpStdioResponse = {
 export type HandlersMediaUploadLimitsResponse = {
     chunk_max_bytes?: number;
     max_upload_bytes: number;
+    network_policy?: MediaTransferNetworkPolicy;
     resumable_enabled?: boolean;
 };
 
@@ -2410,6 +2637,17 @@ export type HandlersMediaUploadResponse = {
     size_bytes: number;
 };
 
+export type HandlersMediaUploadStatusResponse = {
+    content_hash?: string;
+    expires_at: string;
+    id: string;
+    mime: string;
+    network_policy?: MediaTransferNetworkPolicy;
+    offset: number;
+    size_bytes: number;
+    state: 'uploading' | 'ready' | 'canceled';
+};
+
 export type HandlersModelTokenUsage = {
     input_tokens?: number;
     model_id?: string;
@@ -2417,6 +2655,39 @@ export type HandlersModelTokenUsage = {
     model_slug?: string;
     output_tokens?: number;
     provider_name?: string;
+};
+
+export type HandlersNativeTaskFollowupInput = {
+    mode: 'current_agent' | 'bound_session';
+    request_id: string;
+    task: string;
+};
+
+export type HandlersNativeTaskFollowupResponse = {
+    blocked_by_request?: string;
+    followup?: ComputertaskFollowupResult;
+    operation_id?: string;
+    request_conflict?: boolean;
+    state?: string;
+};
+
+export type HandlersNativeTaskResumeInput = {
+    artifact?: DeliverymetaArtifact;
+    artifacts?: Array<DeliverymetaArtifact>;
+    inputs?: Array<string>;
+    kind: 'herdr_pi_task';
+    target_id?: string;
+    task: string;
+    work_dir?: string;
+};
+
+export type HandlersNativeTaskResumeResponse = {
+    automatic_retry?: boolean;
+    business_outcome?: 'unknown';
+    operation_id?: string;
+    outcome?: 'submitted' | 'unchanged' | 'unknown' | 'unavailable' | 'blocked';
+    phase?: string;
+    state?: string;
 };
 
 export type HandlersPingResponse = {
@@ -3335,7 +3606,56 @@ export type HandlersOauthExchangeRequest = {
     state?: string;
 };
 
+export type HandlersPlaybackConfigResponse = {
+    identity?: string;
+    input_content_type?: string;
+};
+
+export type HandlersPlaybackInputRequest = {
+    final?: boolean;
+    id?: string;
+    offset?: number;
+    sequence?: number;
+    text?: string;
+};
+
+export type HandlersSessionAbortControlResponse = {
+    /**
+     * Applied is the observed control return, not proof of a unique abort cause.
+     */
+    applied?: boolean;
+    /**
+     * ClientReason is a client-reported enum, not proof of a human action.
+     */
+    client_reason?: string;
+    /**
+     * CompletedAt is a stored server return observation, not the run finish time.
+     */
+    completed_at?: string;
+    error_class?: string;
+    received_at?: string;
+    /**
+     * ServerSource names the server branch; it is not an authenticated actor.
+     */
+    server_source?: string;
+    /**
+     * Source is assigned by the receiving server, not inferred from a user agent.
+     */
+    source?: string;
+};
+
 export type HandlersSessionInvocationResponse = {
+    /**
+     * AbortControl is the earliest observed incoming request, not necessarily
+     * the request that caused runtime intent. Delivery to storage is best effort.
+     * Its client_reason is client-reported, never an authenticated actor.
+     */
+    abort_control?: HandlersSessionAbortControlResponse;
+    /**
+     * AbortRequestedAt is durable runtime intent. Missing means unknown, not
+     * proof that no cancellation occurred. Old records are never backfilled.
+     */
+    abort_requested_at?: string;
     /**
      * Found is false when the session has no run for this invocation, which
      * is an ordinary answer (never admitted, or not yet) rather than an error.
@@ -3483,6 +3803,22 @@ export type HooksToolPayload = {
     result?: unknown;
 };
 
+export type InputsourceSource = {
+    bot_id?: string;
+    channel?: string;
+    channel_identity_id?: string;
+    kind?: string;
+    occurrence_id?: string;
+    origin_bot_id?: string;
+    origin_run_id?: string;
+    origin_session_id?: string;
+    session_id?: string;
+    task_id?: string;
+    task_kind?: string;
+    task_run_id?: string;
+    user_id?: string;
+};
+
 export type McpAuthorizeResult = {
     authorization_id?: string;
     authorization_url?: string;
@@ -3569,6 +3905,17 @@ export type McpUpsertRequest = {
     url?: string;
 };
 
+export type MediaTransferEndpoint = {
+    logical_origin?: string;
+    physical_origin?: string;
+};
+
+export type MediaTransferNetworkPolicy = {
+    endpoint?: MediaTransferEndpoint;
+    lan_addresses?: Array<string>;
+    version?: number;
+};
+
 export type MediaUpload = {
     content_hash?: string;
     expires_at: string;
@@ -3577,6 +3924,27 @@ export type MediaUpload = {
     offset: number;
     size_bytes: number;
     state: 'uploading' | 'ready' | 'canceled';
+};
+
+export type MediaUploadFailure = {
+    at: number;
+    code: string;
+    expires_at: string;
+    handle?: string;
+    operation: string;
+    phase: string;
+    received_at: string;
+    sdk_code?: number;
+    version: number;
+};
+
+export type MediaUploadFailureInput = {
+    at: number;
+    code: string;
+    handle?: string;
+    phase: string;
+    sdk_code?: number;
+    version: number;
 };
 
 export type MediaUploadInput = {
@@ -3748,6 +4116,25 @@ export type ProvidersImportModelsResponse = {
     updated?: number;
 };
 
+export type ProvidersMediaCatalogModel = {
+    capability_source?: string;
+    id?: string;
+    input?: Array<string>;
+    kind?: string;
+    output?: Array<string>;
+};
+
+export type ProvidersMediaCatalogResponse = {
+    checked_at?: string;
+    models?: Array<ProvidersMediaCatalogModel>;
+    protocol?: string;
+    provider_id?: string;
+    /**
+     * Audio input metadata does not prove a model implements the transcription API.
+     */
+    transcription_status?: string;
+};
+
 export type ProvidersOAuthAccount = {
     avatar_url?: string;
     email?: string;
@@ -3872,6 +4259,12 @@ export type ReasoningOptions = {
      * are then empty and no control should be rendered at all.
      */
     supported?: boolean;
+};
+
+export type RoutePrivateChatEntry = {
+    candidates?: Array<SessionSession>;
+    next_cursor?: string;
+    session?: SessionSession;
 };
 
 export type ScheduleCreateRequest = {
@@ -4224,6 +4617,35 @@ export type SessionruntimeSteerPendingRef = {
     item_id?: string;
 };
 
+export type SessiontaskActivity = {
+    bot_id: string;
+    id: string;
+    kind: 'bot' | 'agent' | 'task';
+    name: string;
+    session_id: string;
+    state: 'accepted' | 'submitted' | 'running' | 'waiting_decision' | 'finishing';
+};
+
+export type SessiontaskActivityPage = {
+    items: Array<SessiontaskActivity>;
+    next_cursor?: string;
+};
+
+export type SessiontaskDirectoryPage = {
+    items: Array<SessiontaskDirectoryTask>;
+    next_cursor?: string;
+};
+
+export type SessiontaskDirectoryTask = {
+    created_at: string;
+    destination?: SessiontaskTaskDestination;
+    name: string;
+    record_id: string;
+    state: string;
+    task_id: string;
+    task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+};
+
 export type SessiontaskPage = {
     items: Array<SessiontaskTask>;
     next_cursor?: string;
@@ -4241,6 +4663,12 @@ export type SessiontaskTask = {
     cancel_requested?: boolean;
     content_available: boolean;
     created_at: string;
+    /**
+     * DirectParentSessionID is the owning session's persisted direct parent,
+     * exposed only after the complete ancestor path is authorized. Omitted when
+     * that session has no parent; older servers also omit this optional field.
+     */
+    direct_parent_session_id?: string;
     operation_kind?: 'foreground_bash' | 'herdr_pi_task' | 'unknown';
     /**
      * ParentSessionID is the requested aggregation root, not a rewritten owner.
@@ -4258,6 +4686,13 @@ export type SessiontaskTask = {
     task_id: string;
     task_type: 'subagent' | 'computer_operation';
     updated_at: string;
+};
+
+export type SessiontaskTaskDestination = {
+    bot_id: string;
+    run_id?: string;
+    session_id: string;
+    turn_id?: string;
 };
 
 export type SettingsSettings = {
@@ -4383,6 +4818,27 @@ export type SkillsSafeCatalogItem = {
     state?: string;
 };
 
+export type TaskresultEvent = {
+    attempt?: number;
+    automatic_attempts?: number;
+    message_id?: string;
+    recoveries?: Array<TaskresultRecovery>;
+    report_state?: string;
+    run_id?: string;
+    state?: string;
+    summary_run_id?: string;
+    text?: string;
+};
+
+export type TaskresultRecovery = {
+    attempt?: number;
+    from_attempt?: number;
+    previous_run_id?: string;
+    previous_run_state?: string;
+    requested_at?: string;
+    requested_by?: string;
+};
+
 export type TurnRuntimeCommand = {
     completed_text?: string;
     description?: string;
@@ -4476,9 +4932,17 @@ export type UserruntimeChangeTransferCredentialRequest = {
 };
 
 export type UserruntimeCreateRuntimeRequest = {
-    agenvo?: AgenvoTarget;
     name?: string;
-    provider?: string;
+    provider?: 'memoh';
+};
+
+export type UserruntimeNativeHerdrIdentity = {
+    config_sha256?: string;
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    session?: string;
+    target_fingerprint?: string;
 };
 
 export type UserruntimeRuntime = {
@@ -4491,6 +4955,7 @@ export type UserruntimeRuntime = {
     id?: string;
     key?: string;
     name?: string;
+    native_herdr?: UserruntimeNativeHerdrIdentity;
     online?: boolean;
     os?: string;
     provider?: string;
@@ -4507,6 +4972,22 @@ export type UserruntimeTransferCredentialEnrollment = {
 export type UserruntimeTransferCredentialStatus = {
     credential_id?: string;
     expires_at?: string;
+};
+
+export type UserruntimeWorkspaceDirectory = {
+    name?: string;
+    path?: string;
+};
+
+export type UserruntimeWorkspaceStorage = {
+    directories?: Array<UserruntimeWorkspaceDirectory>;
+    path?: string;
+    selected_path?: string;
+    windows_path?: string;
+};
+
+export type UserruntimeWorkspaceStorageRequest = {
+    path?: string;
 };
 
 export type VideoConfigSchema = {
@@ -5923,6 +6404,61 @@ export type PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses = {
 };
 
 export type PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponse = PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses[keyof PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses];
+
+export type GetBotsByBotIdActivityData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Page size (1-100)
+         */
+        limit?: number;
+        /**
+         * Opaque continuation scoped to caller and Bot
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/activity';
+};
+
+export type GetBotsByBotIdActivityErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdActivityError = GetBotsByBotIdActivityErrors[keyof GetBotsByBotIdActivityErrors];
+
+export type GetBotsByBotIdActivityResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskActivityPage;
+};
+
+export type GetBotsByBotIdActivityResponse = GetBotsByBotIdActivityResponses[keyof GetBotsByBotIdActivityResponses];
 
 export type GetBotsByBotIdAgentsData = {
     body?: never;
@@ -10340,6 +10876,183 @@ export type GetBotsByBotIdMediaLimitsResponses = {
 
 export type GetBotsByBotIdMediaLimitsResponse = GetBotsByBotIdMediaLimitsResponses[keyof GetBotsByBotIdMediaLimitsResponses];
 
+export type GetBotsByBotIdMediaUploadFailuresData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures';
+};
+
+export type GetBotsByBotIdMediaUploadFailuresErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresError = GetBotsByBotIdMediaUploadFailuresErrors[keyof GetBotsByBotIdMediaUploadFailuresErrors];
+
+export type GetBotsByBotIdMediaUploadFailuresResponses = {
+    /**
+     * OK
+     */
+    200: Array<MediaUploadFailure>;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresResponse = GetBotsByBotIdMediaUploadFailuresResponses[keyof GetBotsByBotIdMediaUploadFailuresResponses];
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Existing client operation ID
+         */
+        operation: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures/{operation}';
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationError = GetBotsByBotIdMediaUploadFailuresByOperationErrors[keyof GetBotsByBotIdMediaUploadFailuresByOperationErrors];
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationResponses = {
+    /**
+     * OK
+     */
+    200: Array<MediaUploadFailure>;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationResponse = GetBotsByBotIdMediaUploadFailuresByOperationResponses[keyof GetBotsByBotIdMediaUploadFailuresByOperationResponses];
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationData = {
+    /**
+     * Whitelisted failure metadata
+     */
+    body: MediaUploadFailureInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Existing client operation ID
+         */
+        operation: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures/{operation}';
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Request Entity Too Large
+     */
+    413: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationError = PutBotsByBotIdMediaUploadFailuresByOperationErrors[keyof PutBotsByBotIdMediaUploadFailuresByOperationErrors];
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationResponses = {
+    /**
+     * OK
+     */
+    200: MediaUploadFailure;
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationResponse = PutBotsByBotIdMediaUploadFailuresByOperationResponses[keyof PutBotsByBotIdMediaUploadFailuresByOperationResponses];
+
 export type PostBotsByBotIdMediaUploadsData = {
     /**
      * Expected size, SHA-256 and MIME
@@ -10508,7 +11221,7 @@ export type GetBotsByBotIdMediaUploadsByUploadIdResponses = {
     /**
      * OK
      */
-    200: MediaUpload;
+    200: HandlersMediaUploadStatusResponse;
 };
 
 export type GetBotsByBotIdMediaUploadsByUploadIdResponse = GetBotsByBotIdMediaUploadsByUploadIdResponses[keyof GetBotsByBotIdMediaUploadsByUploadIdResponses];
@@ -11988,6 +12701,176 @@ export type PostBotsByBotIdSessionsResponses = {
 
 export type PostBotsByBotIdSessionsResponse = PostBotsByBotIdSessionsResponses[keyof PostBotsByBotIdSessionsResponses];
 
+export type GetBotsByBotIdSessionsContactData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Candidate ID cursor
+         */
+        after?: string;
+        /**
+         * Explicitly opened conversation; eligibility is verified before offering
+         */
+        selected_session_id?: string;
+    };
+    url: '/bots/{bot_id}/sessions/contact';
+};
+
+export type GetBotsByBotIdSessionsContactErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsContactError = GetBotsByBotIdSessionsContactErrors[keyof GetBotsByBotIdSessionsContactErrors];
+
+export type GetBotsByBotIdSessionsContactResponses = {
+    /**
+     * OK
+     */
+    200: RoutePrivateChatEntry;
+};
+
+export type GetBotsByBotIdSessionsContactResponse = GetBotsByBotIdSessionsContactResponses[keyof GetBotsByBotIdSessionsContactResponses];
+
+export type PostBotsByBotIdSessionsContactData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/contact';
+};
+
+export type PostBotsByBotIdSessionsContactErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsContactError = PostBotsByBotIdSessionsContactErrors[keyof PostBotsByBotIdSessionsContactErrors];
+
+export type PostBotsByBotIdSessionsContactResponses = {
+    /**
+     * OK
+     */
+    200: SessionSession;
+};
+
+export type PostBotsByBotIdSessionsContactResponse = PostBotsByBotIdSessionsContactResponses[keyof PostBotsByBotIdSessionsContactResponses];
+
+export type PostBotsByBotIdSessionsContactBindData = {
+    /**
+     * Explicitly selected conversation
+     */
+    body: HandlersBindPrivateChatRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/contact/bind';
+};
+
+export type PostBotsByBotIdSessionsContactBindErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsContactBindError = PostBotsByBotIdSessionsContactBindErrors[keyof PostBotsByBotIdSessionsContactBindErrors];
+
+export type PostBotsByBotIdSessionsContactBindResponses = {
+    /**
+     * OK
+     */
+    200: SessionSession;
+};
+
+export type PostBotsByBotIdSessionsContactBindResponse = PostBotsByBotIdSessionsContactBindResponses[keyof PostBotsByBotIdSessionsContactBindResponses];
+
 export type GetBotsByBotIdSessionsEventsData = {
     body?: never;
     path: {
@@ -12555,6 +13438,67 @@ export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses = {
 
 export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponse = GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses[keyof GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses];
 
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverData = {
+    /**
+     * Original failed run identity
+     */
+    body: HandlersAcceptedUserInputRecoveryInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned chat session ID
+         */
+        session_id: string;
+        /**
+         * Original submitted ask_user decision ID
+         */
+        decision_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverError = PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors[keyof PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses = {
+    /**
+     * Accepted
+     */
+    202: ApplicationUserInputRecoveryResult;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponse = PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses[keyof PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses];
+
 export type GetBotsByBotIdSessionsBySessionIdDelegationsData = {
     body?: never;
     path: {
@@ -12930,6 +13874,67 @@ export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryR
 };
 
 export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponse = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverData = {
+    /**
+     * Exact saved event and expected attempt
+     */
+    body: BotdelegationRecoveryInput;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverError = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses = {
+    /**
+     * Accepted
+     */
+    202: BotdelegationRecoveryView;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponse = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses];
 
 export type GetBotsByBotIdSessionsBySessionIdFollowUpQueueData = {
     body?: never;
@@ -13933,6 +14938,60 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses = 
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses];
 
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskNativeContent;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses];
+
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesData = {
     body?: never;
     path: {
@@ -13995,6 +15054,190 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesRe
 };
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData = {
+    /**
+     * Original input and retained request ID
+     */
+    body: HandlersNativeTaskFollowupInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupError = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses = {
+    /**
+     * OK
+     */
+    200: HandlersNativeTaskFollowupResponse;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponse = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskRecovery;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeData = {
+    /**
+     * Complete original tool arguments
+     */
+    body: HandlersNativeTaskResumeInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Original computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeError = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses = {
+    /**
+     * OK
+     */
+    200: HandlersNativeTaskResumeResponse;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponse = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;
@@ -14274,6 +15517,115 @@ export type PostBotsByBotIdStarterPromptsRefreshResponses = {
 
 export type PostBotsByBotIdStarterPromptsRefreshResponse = PostBotsByBotIdStarterPromptsRefreshResponses[keyof PostBotsByBotIdStarterPromptsRefreshResponses];
 
+export type GetBotsByBotIdTasksData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Page size 1-100
+         */
+        limit?: number;
+        /**
+         * Opaque Bot and account scoped continuation
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/tasks';
+};
+
+export type GetBotsByBotIdTasksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdTasksError = GetBotsByBotIdTasksErrors[keyof GetBotsByBotIdTasksErrors];
+
+export type GetBotsByBotIdTasksResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskDirectoryPage;
+};
+
+export type GetBotsByBotIdTasksResponse = GetBotsByBotIdTasksResponses[keyof GetBotsByBotIdTasksResponses];
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdData = {
+    body?: never;
+    path: {
+        /**
+         * Directory Bot ID
+         */
+        bot_id: string;
+        /**
+         * Original task type
+         */
+        task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+        /**
+         * Durable occurrence ID
+         */
+        record_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tasks/{task_type}/{record_id}';
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdError = GetBotsByBotIdTasksByTaskTypeByRecordIdErrors[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdErrors];
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskDirectoryTask;
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdResponse = GetBotsByBotIdTasksByTaskTypeByRecordIdResponses[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdResponses];
+
 export type GetBotsByBotIdTokenUsageData = {
     body?: never;
     path: {
@@ -14546,6 +15898,181 @@ export type PostBotsByBotIdToolsResponses = {
 };
 
 export type PostBotsByBotIdToolsResponse = PostBotsByBotIdToolsResponses[keyof PostBotsByBotIdToolsResponses];
+
+export type PostBotsByBotIdTtsPlaybackData = {
+    /**
+     * Text to read aloud
+     */
+    body: HandlersSynthesizeRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback';
+};
+
+export type PostBotsByBotIdTtsPlaybackErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdTtsPlaybackError = PostBotsByBotIdTtsPlaybackErrors[keyof PostBotsByBotIdTtsPlaybackErrors];
+
+export type PostBotsByBotIdTtsPlaybackResponses = {
+    /**
+     * Audio bytes; Content-Type is the configured model's audio format
+     */
+    200: unknown;
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/config';
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigError = GetBotsByBotIdTtsPlaybackConfigErrors[keyof GetBotsByBotIdTtsPlaybackConfigErrors];
+
+export type GetBotsByBotIdTtsPlaybackConfigResponses = {
+    /**
+     * OK
+     */
+    200: HandlersPlaybackConfigResponse;
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigResponse = GetBotsByBotIdTtsPlaybackConfigResponses[keyof GetBotsByBotIdTtsPlaybackConfigResponses];
+
+export type PostBotsByBotIdTtsPlaybackInputData = {
+    /**
+     * Initial exact spoken-text frame, sequence and Unicode offset zero
+     */
+    body: HandlersPlaybackInputRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/input';
+};
+
+export type PostBotsByBotIdTtsPlaybackInputErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PostBotsByBotIdTtsPlaybackInputError = PostBotsByBotIdTtsPlaybackInputErrors[keyof PostBotsByBotIdTtsPlaybackInputErrors];
+
+export type PostBotsByBotIdTtsPlaybackInputResponses = {
+    /**
+     * Configured audio bytes
+     */
+    200: unknown;
+};
+
+export type PutBotsByBotIdTtsPlaybackInputData = {
+    /**
+     * Next frame; final closes text input, not audio output
+     */
+    body: HandlersPlaybackInputRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/input';
+};
+
+export type PutBotsByBotIdTtsPlaybackInputErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PutBotsByBotIdTtsPlaybackInputError = PutBotsByBotIdTtsPlaybackInputErrors[keyof PutBotsByBotIdTtsPlaybackInputErrors];
+
+export type PutBotsByBotIdTtsPlaybackInputResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
 
 export type PostBotsByBotIdTtsSynthesizeData = {
     /**
@@ -16852,6 +18379,14 @@ export type GetProvidersData = {
 
 export type GetProvidersErrors = {
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Internal Server Error
      */
     500: ServerProblem;
@@ -16884,6 +18419,14 @@ export type PostProvidersErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Internal Server Error
      */
     500: ServerProblem;
@@ -16908,6 +18451,14 @@ export type GetProvidersCountData = {
 };
 
 export type GetProvidersCountErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Internal Server Error
      */
@@ -16940,6 +18491,14 @@ export type PostProvidersFromTemplateErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -16982,6 +18541,14 @@ export type GetProvidersNameByNameErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17055,6 +18622,14 @@ export type DeleteProvidersByIdErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17090,6 +18665,14 @@ export type GetProvidersByIdErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17132,6 +18715,14 @@ export type PutProvidersByIdErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17173,6 +18764,14 @@ export type PostProvidersByIdImportModelsErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17192,6 +18791,61 @@ export type PostProvidersByIdImportModelsResponses = {
 };
 
 export type PostProvidersByIdImportModelsResponse = PostProvidersByIdImportModelsResponses[keyof PostProvidersByIdImportModelsResponses];
+
+export type GetProvidersByIdMediaCatalogData = {
+    body?: never;
+    path: {
+        /**
+         * Provider ID
+         */
+        id: string;
+    };
+    query: {
+        /**
+         * Catalog protocol
+         */
+        protocol: 'magpie';
+    };
+    url: '/providers/{id}/media-catalog';
+};
+
+export type GetProvidersByIdMediaCatalogErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Bad Gateway
+     */
+    502: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetProvidersByIdMediaCatalogError = GetProvidersByIdMediaCatalogErrors[keyof GetProvidersByIdMediaCatalogErrors];
+
+export type GetProvidersByIdMediaCatalogResponses = {
+    /**
+     * OK
+     */
+    200: ProvidersMediaCatalogResponse;
+};
+
+export type GetProvidersByIdMediaCatalogResponse = GetProvidersByIdMediaCatalogResponses[keyof GetProvidersByIdMediaCatalogResponses];
 
 export type GetProvidersByIdModelsData = {
     body?: never;
@@ -17215,6 +18869,14 @@ export type GetProvidersByIdModelsErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17254,6 +18916,14 @@ export type GetProvidersByIdOauthAuthorizeErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17287,6 +18957,14 @@ export type PostProvidersByIdOauthPollErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17322,6 +19000,14 @@ export type GetProvidersByIdOauthStatusErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17356,6 +19042,14 @@ export type DeleteProvidersByIdOauthTokenErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17387,6 +19081,14 @@ export type PostProvidersByIdTestErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -18743,7 +20445,7 @@ export type GetUsersMeResponses = {
     /**
      * OK
      */
-    200: AccountsAccount;
+    200: HandlersCurrentUserResponse;
 };
 
 export type GetUsersMeResponse = GetUsersMeResponses[keyof GetUsersMeResponses];
@@ -19064,42 +20766,6 @@ export type PostUsersMeRuntimesResponses = {
 
 export type PostUsersMeRuntimesResponse = PostUsersMeRuntimesResponses[keyof PostUsersMeRuntimesResponses];
 
-export type PostUsersMeRuntimesAgenvoDiscoverData = {
-    /**
-     * Existing MCP connection
-     */
-    body: HandlersDiscoverAgenvoRequest;
-    path?: never;
-    query?: never;
-    url: '/users/me/runtimes/agenvo/discover';
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerProblem;
-    /**
-     * Forbidden
-     */
-    403: ServerProblem;
-    /**
-     * Service Unavailable
-     */
-    503: ServerProblem;
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverError = PostUsersMeRuntimesAgenvoDiscoverErrors[keyof PostUsersMeRuntimesAgenvoDiscoverErrors];
-
-export type PostUsersMeRuntimesAgenvoDiscoverResponses = {
-    /**
-     * OK
-     */
-    200: Array<AgenvoDiscoveredInstance>;
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverResponse = PostUsersMeRuntimesAgenvoDiscoverResponses[keyof PostUsersMeRuntimesAgenvoDiscoverResponses];
-
 export type DeleteUsersMeRuntimesByIdData = {
     body?: never;
     path: {
@@ -19136,22 +20802,56 @@ export type DeleteUsersMeRuntimesByIdResponses = {
     204: unknown;
 };
 
-export type PutUsersMeRuntimesByIdAgenvoAgentData = {
-    /**
-     * Private deployment profile
-     */
-    body: AgenvoAgentProfile;
+export type GetUsersMeRuntimesByIdAdmissionData = {
+    body?: never;
     path: {
         /**
-         * Existing runtime ID
+         * Existing owner runtime ID
          */
         id: string;
     };
     query?: never;
-    url: '/users/me/runtimes/{id}/agenvo-agent';
+    url: '/users/me/runtimes/{id}/admission';
 };
 
-export type PutUsersMeRuntimesByIdAgenvoAgentErrors = {
+export type GetUsersMeRuntimesByIdAdmissionErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdAdmissionError = GetUsersMeRuntimesByIdAdmissionErrors[keyof GetUsersMeRuntimesByIdAdmissionErrors];
+
+export type GetUsersMeRuntimesByIdAdmissionResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type GetUsersMeRuntimesByIdAdmissionResponse = GetUsersMeRuntimesByIdAdmissionResponses[keyof GetUsersMeRuntimesByIdAdmissionResponses];
+
+export type PutUsersMeRuntimesByIdAdmissionData = {
+    /**
+     * Compare-and-swap admission request
+     */
+    body: AgenvoChangeAdmission;
+    path: {
+        /**
+         * Existing owner runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/admission';
+};
+
+export type PutUsersMeRuntimesByIdAdmissionErrors = {
     /**
      * Bad Request
      */
@@ -19160,24 +20860,122 @@ export type PutUsersMeRuntimesByIdAgenvoAgentErrors = {
      * Forbidden
      */
     403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
 };
 
-export type PutUsersMeRuntimesByIdAgenvoAgentError = PutUsersMeRuntimesByIdAgenvoAgentErrors[keyof PutUsersMeRuntimesByIdAgenvoAgentErrors];
+export type PutUsersMeRuntimesByIdAdmissionError = PutUsersMeRuntimesByIdAdmissionErrors[keyof PutUsersMeRuntimesByIdAdmissionErrors];
 
-export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
+export type PutUsersMeRuntimesByIdAdmissionResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type PutUsersMeRuntimesByIdAdmissionResponse = PutUsersMeRuntimesByIdAdmissionResponses[keyof PutUsersMeRuntimesByIdAdmissionResponses];
+
+export type PutUsersMeRuntimesByIdNativeHerdrData = {
+    /**
+     * Private deployment profile
+     */
+    body: AgenvoNativeHerdrProfile;
+    path: {
+        /**
+         * Existing native Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/native-herdr';
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrError = PutUsersMeRuntimesByIdNativeHerdrErrors[keyof PutUsersMeRuntimesByIdNativeHerdrErrors];
+
+export type PutUsersMeRuntimesByIdNativeHerdrResponses = {
     /**
      * OK
      */
     200: UserruntimeRuntime;
 };
 
-export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
+export type PutUsersMeRuntimesByIdNativeHerdrResponse = PutUsersMeRuntimesByIdNativeHerdrResponses[keyof PutUsersMeRuntimesByIdNativeHerdrResponses];
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverData = {
+    /**
+     * Cutover CAS facts
+     */
+    body: AgenvoNativeProfileCutoverRequest;
+    path: {
+        /**
+         * Existing native Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/native-herdr/profile-cutover';
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverError = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors];
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponse = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses];
 
 export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };
@@ -19218,7 +21016,7 @@ export type GetUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };
@@ -19255,7 +21053,7 @@ export type PostUsersMeRuntimesByIdTransferCredentialData = {
     body: UserruntimeChangeTransferCredentialRequest;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };
@@ -19292,6 +21090,147 @@ export type PostUsersMeRuntimesByIdTransferCredentialResponses = {
 };
 
 export type PostUsersMeRuntimesByIdTransferCredentialResponse = PostUsersMeRuntimesByIdTransferCredentialResponses[keyof PostUsersMeRuntimesByIdTransferCredentialResponses];
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageData = {
+    body?: never;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: {
+        /**
+         * Relative directory within this computer's NAS storage
+         */
+        path?: string;
+    };
+    url: '/users/me/runtimes/{id}/workspace-storage';
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageError = GetUsersMeRuntimesByIdWorkspaceStorageErrors[keyof GetUsersMeRuntimesByIdWorkspaceStorageErrors];
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeWorkspaceStorage;
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageResponse = GetUsersMeRuntimesByIdWorkspaceStorageResponses[keyof GetUsersMeRuntimesByIdWorkspaceStorageResponses];
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageData = {
+    /**
+     * Relative selected directory
+     */
+    body: UserruntimeWorkspaceStorageRequest;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/workspace-storage';
+};
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageError = PutUsersMeRuntimesByIdWorkspaceStorageErrors[keyof PutUsersMeRuntimesByIdWorkspaceStorageErrors];
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesData = {
+    /**
+     * Relative path
+     */
+    body: UserruntimeWorkspaceStorageRequest;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/workspace-storage/directories';
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesError = PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors[keyof PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors];
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
 
 export type DeleteUsersByIdData = {
     body?: never;

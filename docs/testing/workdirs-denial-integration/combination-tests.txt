@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  10:38:02
+   Duration  9.25s (transform 6.92s, setup 0ms, import 9.18s, tests 179ms, environment 802ms)

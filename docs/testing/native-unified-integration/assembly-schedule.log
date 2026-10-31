@@ -1,0 +1,68 @@
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn/persisted-child
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn/unrelated-thread
+--- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn (0.00s)
+    --- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn/persisted-child (0.00s)
+    --- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn/unrelated-thread (0.00s)
+=== RUN   TestTriggerSchedulePreparesStoredWorkspace
+=== RUN   TestTriggerSchedulePreparesStoredWorkspace/remote_PC
+=== RUN   TestTriggerSchedulePreparesStoredWorkspace/native_NAS_workspace
+--- PASS: TestTriggerSchedulePreparesStoredWorkspace (0.00s)
+    --- PASS: TestTriggerSchedulePreparesStoredWorkspace/remote_PC (0.00s)
+    --- PASS: TestTriggerSchedulePreparesStoredWorkspace/native_NAS_workspace (0.00s)
+=== RUN   TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools
+=== RUN   TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/workspace_permission_revoked
+=== RUN   TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/workdir_resolution_fails
+=== RUN   TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/target_offline
+--- PASS: TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools (0.00s)
+    --- PASS: TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/workspace_permission_revoked (0.00s)
+    --- PASS: TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/workdir_resolution_fails (0.00s)
+    --- PASS: TestTriggerScheduleRejectsUnavailableWorkspaceBeforeTools/target_offline (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.021s
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope (0.00s)
+    --- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code (0.00s)
+    --- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied (0.00s)
+    --- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied (0.00s)
+=== RUN   TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall
+--- PASS: TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall (0.00s)
+=== RUN   TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary
+--- PASS: TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary (0.00s)
+=== RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
+--- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess (0.00s)
+    --- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex (0.00s)
+    --- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code (0.00s)
+    --- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build (0.00s)
+=== RUN   TestHostPreservesUpstreamWorkspaceBehavior
+--- PASS: TestHostPreservesUpstreamWorkspaceBehavior (0.00s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.016s

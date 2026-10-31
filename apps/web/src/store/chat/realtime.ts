@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { useRetryingStream } from '@/composables/useRetryingStream'
 import {
   connectWebSocket,
@@ -7,6 +8,7 @@ import {
   type UIRuntimeEvent,
   type UIStreamEvent,
   type WSClientMessage,
+  type WSAbortReason,
 } from '@/composables/api/useChat'
 import {
   createRuntimeClient,
@@ -19,6 +21,8 @@ interface RetryingStream {
 }
 
 interface SessionRuntimeConnection {
+  historyFailed: boolean
+  retryHistory: (() => void) | null
   prepared: boolean
   pending: RuntimeProjectionChange[]
   initialSnapshotReady: Promise<void>
@@ -75,21 +79,25 @@ export function createChatRealtimeController(
   let botSessionsActivityGeneration = 0
   let activityStreamBotId = ''
   const sessionRuntimeConnections = new Map<string, SessionRuntimeConnection>()
+  const observationVersion = ref(0)
   const botSessionsActivityStream = transport.createRetryingStream()
   const runtimeClient = createRuntimeClient({
     send: message => activeWebSocket?.send(message),
     onProjection: (sessionId, change) => {
+      observationVersion.value++
       const botId = activeWebSocketBotId
       const connection = botId
         ? sessionRuntimeConnections.get(sessionRuntimeKey(botId, sessionId))
         : undefined
       if (!botId || !connection) return
+      // A failed history read may settle before the first snapshot. Record
+      // readiness independently so reopening can commit the retried history.
+      if (change.event.type === 'runtime_snapshot') {
+        connection.resolveInitialSnapshot?.()
+        connection.resolveInitialSnapshot = null
+      }
       if (!connection.prepared) {
         connection.pending.push(change)
-        if (change.event.type === 'runtime_snapshot') {
-          connection.resolveInitialSnapshot?.()
-          connection.resolveInitialSnapshot = null
-        }
         return
       }
       callbacks.onRuntimeProjection(botId, sessionId, change)
@@ -102,6 +110,7 @@ export function createChatRealtimeController(
     activeWebSocket = null
     activeWebSocketBotId = ''
     runtimeClient.onDisconnected()
+    observationVersion.value++
     socket?.close()
   }
 
@@ -117,6 +126,7 @@ export function createChatRealtimeController(
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         if (isRuntimeEvent(event)) {
           runtimeClient.handleEvent(event)
+          observationVersion.value++
           return
         }
         callbacks.onWebSocketEvent(bid, event)
@@ -124,10 +134,12 @@ export function createChatRealtimeController(
       socket.onOpen = () => {
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         runtimeClient.onConnected()
+        observationVersion.value++
       }
       socket.onClose = () => {
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         runtimeClient.onDisconnected()
+        observationVersion.value++
         callbacks.onWebSocketClosed?.(bid)
       }
       activeWebSocket = socket
@@ -171,6 +183,7 @@ export function createChatRealtimeController(
     botId?: string,
     sessionId?: string,
     controlId?: string,
+    reason?: WSAbortReason,
   ): boolean {
     const id = runId.trim()
     const bid = botId?.trim()
@@ -178,7 +191,7 @@ export function createChatRealtimeController(
     const cid = controlId?.trim() ?? ''
     if (!id || !sid || !cid || !activeWebSocket?.connected) return false
     if (bid && bid !== activeWebSocketBotId) return false
-    activeWebSocket.abort(id, sid, cid)
+    activeWebSocket.abort(id, sid, cid, reason)
     return true
   }
 
@@ -194,6 +207,7 @@ export function createChatRealtimeController(
         runtimeClient.unsubscribe(sid)
       }
       sessionRuntimeConnections.clear()
+      observationVersion.value += 1
       return
     }
 
@@ -206,6 +220,7 @@ export function createChatRealtimeController(
     sessionRuntimeConnections.delete(key)
     connection.resolveInitialSnapshot?.()
     runtimeClient.unsubscribe(sid)
+    observationVersion.value += 1
   }
 
   function startSessionRuntime(botId: string, sessionId: string) {
@@ -213,12 +228,20 @@ export function createChatRealtimeController(
     const sid = sessionId.trim()
     if (!bid || !sid) return
     const key = sessionRuntimeKey(bid, sid)
-    if (sessionRuntimeConnections.has(key)) return
+    const existing = sessionRuntimeConnections.get(key)
+    if (existing) {
+      // A failed REST read is not a prepared history. Explicitly reopening the
+      // same session retries that read without replacing its live subscription.
+      if (existing.historyFailed) existing.retryHistory?.()
+      return
+    }
     let resolveInitialSnapshot!: () => void
     const initialSnapshotReady = new Promise<void>((resolve) => {
       resolveInitialSnapshot = resolve
     })
     const connection: SessionRuntimeConnection = {
+      historyFailed: false,
+      retryHistory: null,
       prepared: false,
       pending: [],
       initialSnapshotReady,
@@ -242,13 +265,22 @@ export function createChatRealtimeController(
       applyHistory()
       applyBufferedProjections()
     }
-    void callbacks.prepareSessionRuntime(bid, sid, commitInitialHistory)
-      .catch(error => console.error('Failed to load session messages:', error))
-      .finally(() => {
-        if (sessionRuntimeConnections.get(key) !== connection) return
-        connection.prepared = true
-        applyBufferedProjections()
-      })
+    connection.retryHistory = () => {
+      connection.historyFailed = false
+      connection.prepared = false
+      void callbacks.prepareSessionRuntime(bid, sid, commitInitialHistory)
+        .catch(error => {
+          if (sessionRuntimeConnections.get(key) !== connection) return
+          connection.historyFailed = true
+          console.error('Failed to load session messages:', error)
+        })
+        .finally(() => {
+          if (sessionRuntimeConnections.get(key) !== connection) return
+          connection.prepared = true
+          applyBufferedProjections()
+        })
+    }
+    connection.retryHistory()
   }
 
   function stopBotSessionsActivityStream() {
@@ -296,6 +328,15 @@ export function createChatRealtimeController(
     stopBotSessionsActivityStream()
   }
 
+  function runtimeObservation(botId: string, sessionId: string) {
+    void observationVersion.value
+    const state = runtimeClient.projection(sessionId)
+    const synchronized = activeWebSocketBotId === botId
+      && runtimeClient.synchronized(sessionId)
+      && state?.botId === botId && state.sessionId === sessionId
+    return { synchronized, run: synchronized ? state.currentRunView : null }
+  }
+
   return {
     startWebSocket,
     stopWebSocket,
@@ -309,5 +350,6 @@ export function createChatRealtimeController(
     startBotSessionsActivityStream,
     stopStreams,
     runtimeProjection: runtimeClient.projection,
+    runtimeObservation,
   }
 }

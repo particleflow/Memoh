@@ -231,6 +231,15 @@ func (c *agentStepCommitter) persist(ctx context.Context, stepIndex int, record 
 			}
 		}
 	}
+	if c.req.TaskResultReceipt != "" && taskResultFinalStep(record, messages, mode) {
+		if c.service.delegationScope == nil {
+			return fail(errors.New("task result authority unavailable"))
+		}
+		if _, _, err := c.service.delegationScope(ctx, c.req); err != nil {
+			return fail(err)
+		}
+		opts = withTaskResultReceipt(opts, c.req.TaskResultReceipt, messages)
+	}
 	opts = withOutputTruncatedNotice(opts, record, messages)
 	opts = opts.withContextLifecycleMetadata(c.service.logger, storeReq, messages)
 	var (

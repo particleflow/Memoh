@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/job"
 )
 
@@ -32,17 +33,21 @@ type AttachmentInput struct {
 }
 
 type View struct {
-	ID              string       `json:"delegation_id" validate:"required" format:"uuid"`
-	RequestID       string       `json:"request_id" validate:"required" format:"uuid"`
-	SourceSessionID string       `json:"source_session_id" validate:"required" format:"uuid"`
-	TargetBotID     string       `json:"target_bot_id" validate:"required" format:"uuid"`
-	TargetSessionID string       `json:"target_session_id,omitempty" format:"uuid"`
-	State           string       `json:"state" validate:"required" enums:"accepted,running,unknown,completed,failed"`
-	DeliveryState   string       `json:"delivery_state" validate:"required" enums:"pending,accepted,unknown,unavailable"`
-	Summary         *Summary     `json:"summary,omitempty"`
-	Attachments     []Attachment `json:"attachments" validate:"required"`
-	CreatedAt       time.Time    `json:"created_at" validate:"required"`
-	UpdatedAt       time.Time    `json:"updated_at" validate:"required"`
+	ID                 string       `json:"delegation_id" validate:"required" format:"uuid"`
+	RequestID          string       `json:"request_id" validate:"required" format:"uuid"`
+	SourceSessionID    string       `json:"source_session_id" validate:"required" format:"uuid"`
+	TargetBotID        string       `json:"target_bot_id" validate:"required" format:"uuid"`
+	TargetSessionID    string       `json:"target_session_id,omitempty" format:"uuid"`
+	TargetRunID        string       `json:"target_run_id,omitempty" format:"uuid"`
+	TargetRunState     string       `json:"target_run_state,omitempty" enums:"accepted,running,waiting_decision,finishing,completed,aborted,failed,lost"`
+	TargetRunCreatedAt *time.Time   `json:"target_run_created_at,omitempty"`
+	TargetRunUpdatedAt *time.Time   `json:"target_run_updated_at,omitempty"`
+	State              string       `json:"state" validate:"required" enums:"accepted,running,unknown,completed,failed"`
+	DeliveryState      string       `json:"delivery_state" validate:"required" enums:"pending,accepted,unknown,unavailable"`
+	Summary            *Summary     `json:"summary,omitempty"`
+	Attachments        []Attachment `json:"attachments" validate:"required"`
+	CreatedAt          time.Time    `json:"created_at" validate:"required"`
+	UpdatedAt          time.Time    `json:"updated_at" validate:"required"`
 }
 
 // Host uses existing Bot chat, sessions, and follow-up delivery. There is no
@@ -132,12 +137,22 @@ func (s *Service) Submit(ctx context.Context, bot, user, session string, in Inpu
 	if err != nil {
 		return View{}, err
 	}
+	// Opt in only where the native result-only publication proof is supported.
+	// Other ingress/runtime types keep their existing delivery behavior.
+	resultVersion := 0
+	source, err := s.Authority.Sessions.Get(ctx, b.SourceSessionID)
+	if err != nil {
+		return View{}, err
+	}
+	if returnRoute.Channel == "web" && (source.RuntimeType == "" || source.RuntimeType == thread.RuntimeModel) {
+		resultVersion = 1
+	}
 	canonical, _ := json.Marshal(struct {
 		Target, Message string
 		Inputs          []string
 	}{in.TargetBotID, in.Message, hashes})
 	fp := sha256.Sum256(canonical)
-	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target, ReturnRoute: &returnRoute}}
+	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{ResultDeliveryVersion: resultVersion, Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target, ReturnRoute: &returnRoute}}
 	r, created, err := s.Ledger.Claim(ctx, r)
 	if err != nil {
 		return View{}, err
@@ -216,7 +231,9 @@ func (s *Service) execute(ctx context.Context, r Record) error {
 	if err != nil {
 		return err
 	}
-	if state == "unknown" {
+	// Legacy records and unvalidated ingress/runtime types keep their original
+	// unknown behavior. Only persisted Web/native opt-in permits notification.
+	if state == "unknown" && r.Payload.ResultDeliveryVersion != 1 {
 		return runErr
 	}
 	if _, err = s.Authority.Authorize(saveCtx, r.Identity); err != nil {
@@ -271,10 +288,10 @@ func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id stri
 	if err != nil {
 		return View{}, err
 	}
-	if r.State != "completed" && r.State != "failed" {
+	if r.State != "completed" && r.State != "failed" && (r.State != "unknown" || r.Payload.ResultDeliveryVersion != 1) {
 		return View{}, ErrConflict
 	}
-	if r.DeliveryState == "accepted" {
+	if r.DeliveryState == "accepted" && r.Payload.ResultDeliveryVersion == 0 {
 		return s.project(ctx, r)
 	}
 	if s.Host == nil {
@@ -306,12 +323,11 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 	if _, err := s.Authority.Authorize(ctx, r.Identity); err != nil {
 		return View{}, err
 	}
-	state := r.State
-	if _, active := s.active.Load(r.ID); !active && (state == "running" || state == "accepted") {
-		state = "unknown"
+	v, err := s.projectMetadata(ctx, r)
+	if err != nil {
+		return View{}, err
 	}
-	v := View{ID: r.ID, RequestID: r.RequestID, SourceSessionID: r.Identity.SourceSessionID, TargetBotID: r.Identity.TargetBotID, TargetSessionID: r.Identity.TargetSessionID, State: state, DeliveryState: r.DeliveryState, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, Attachments: []Attachment{}}
-	if state == "completed" {
+	if v.State == "completed" {
 		v.Summary = r.Result.Summary
 		for _, hash := range r.Result.Outputs {
 			a, err := s.Attachments(r).Describe(ctx, hash, true)
@@ -321,6 +337,37 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 			a.URL = AttachmentURL(r, hash)
 			v.Attachments = append(v.Attachments, a)
 		}
+	}
+	return v, nil
+}
+
+// A past handoff remains a conversation reference after its execution binding
+// changes. This fallback grants no summary, attachment, continuation or delivery.
+func (s *Service) projectHistory(ctx context.Context, r Record) (View, error) {
+	v, err := s.project(ctx, r)
+	if !errors.Is(err, ErrDenied) {
+		return v, err
+	}
+	if _, err := s.Authority.authorizeHistory(ctx, r.Identity); err != nil {
+		return View{}, err
+	}
+	return s.projectMetadata(ctx, r)
+}
+
+// Callers must first authorize either the full projection or the history reference.
+func (s *Service) projectMetadata(ctx context.Context, r Record) (View, error) {
+	state := r.State
+	if _, active := s.active.Load(r.ID); !active && (state == "running" || state == "accepted") {
+		state = "unknown"
+	}
+	v := View{ID: r.ID, RequestID: r.RequestID, SourceSessionID: r.Identity.SourceSessionID, TargetBotID: r.Identity.TargetBotID, TargetSessionID: r.Identity.TargetSessionID, State: state, DeliveryState: r.DeliveryState, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, Attachments: []Attachment{}}
+	run, err := s.Ledger.TargetRun(ctx, r)
+	if err != nil {
+		return View{}, err
+	}
+	if run != nil {
+		v.TargetRunID, v.TargetRunState = run.ID, run.State
+		v.TargetRunCreatedAt, v.TargetRunUpdatedAt = &run.CreatedAt, &run.UpdatedAt
 	}
 	return v, nil
 }

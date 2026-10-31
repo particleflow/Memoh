@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  13:47:28
+   Duration  1.03s (transform 242ms, setup 0ms, import 502ms, tests 153ms, environment 535ms)
+

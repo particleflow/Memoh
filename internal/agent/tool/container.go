@@ -89,7 +89,7 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 		parts = append(parts,
 			locationRef+": discover the Server Workspace and connected computers authorized for this Bot. For requests to use a computer (including an unnamed Windows PC), inspect these locations before claiming no computer is configured or looking for a separate cloud computer.",
 			"Check each location's `provider`, `capabilities`, `available` and `status`. Authorization is not availability; an offline target is not an unconfigured account. A missing target means it is not exposed to this Bot, not that no account computer exists. Never substitute another location after a target fails.",
-			"An Agenvo location advertising `exec_foreground` supports foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`, a full workspace, filesystem or desktop. The computer task tools also own configured Herdr/Pi Agent dispatch and durable receipts. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
+			"A managed computer advertising `exec_foreground` routes foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`. This capability alone does not promise filesystem or desktop support; inspect its other advertised capabilities. The computer task tools also own configured Herdr/Pi Agent dispatch and durable receipts. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
 		)
 		if skillRef, ok := available.Ref(ToolUseSkill()); ok {
 			parts = append(parts, "For a connected-computer or local-agent task, use "+skillRef+" when an available skill covers that workflow. Skills explain usage; they do not grant target or connector access.")
@@ -305,9 +305,9 @@ Delete a file:
 			Name: ToolListExecutionLocations().String(),
 			Description: "List the execution locations configured for this Bot for file operations and command execution, with current availability and status. " +
 				"Results follow both Bot grants and conversation scope: a PC conversation lists only its selected PC; a Server Workspace conversation may list its Bot-authorized PCs. " +
-				"Check provider and capabilities before choosing a tool: Agenvo exec_foreground is foreground Bash only, not filesystem, desktop or agent lifecycle support. " +
+				"Check provider and capabilities before choosing a tool: exec_foreground denotes ledger-managed foreground Bash. Native Runtime may separately advertise filesystem support. " +
 				"The default field identifies the current turn's default (the request-selected target when present, otherwise the Bot's Primary). " +
-				"Use computer_task_submit for Agenvo tasks; ordinary exec and file tools cannot execute on an Agenvo target. Other workspace providers accept target_id on file/command tools. " +
+				"Use computer_task_submit for managed PC tasks; ordinary exec cannot bypass its durable ledger. Native Runtime file tools keep their existing permissions. Other workspace providers accept target_id on file/command tools. " +
 				"The available field says whether a location can currently be used. This tool does not change the default location or starting folder.",
 			Parameters: toolexec.SchemaFromValue(emptyObjectSchema()),
 			Execute: func(ctx *toolexec.ToolExecContext, _ sdk.ToolArguments) (sdk.ToolOutput, error) {
@@ -330,15 +330,6 @@ Delete a file:
 			},
 		}
 		toolList = append([]toolexec.Tool{locationTool}, toolList...)
-	}
-	if workspace.computerTaskOnly {
-		filtered := toolList[:0]
-		for _, tool := range toolList {
-			if tool.Name == ToolListExecutionLocations().String() {
-				filtered = append(filtered, tool)
-			}
-		}
-		return filtered, nil
 	}
 	return toolList, nil
 }
@@ -391,8 +382,7 @@ type execArgs struct {
 }
 
 type toolWorkspace struct {
-	computerTaskOnly bool
-	defaultWorkDir   string
+	defaultWorkDir string
 	// workdirPath is the session's working directory. It changes where
 	// relative tool paths land and what cwd exec defaults to; it never
 	// replaces defaultWorkDir, which stays the workspace root that
@@ -500,25 +490,13 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 			workspace.delayInstruction = "  - Do not use timeout /t or ping loops to wait for background work; use wait_until."
 		}
 	}
-	if info.Backend == bridge.WorkspaceBackendAgenvo {
-		workspace.computerTaskOnly = true
-		workspace.windows = true
-		// The executor resolves this against the current authorized target config.
-		workspace.defaultWorkDir = "."
-		workspace.locationDescription = "on the selected Agenvo Windows machine"
-		workspace.absolutePathDescription = "Windows path"
-		workspace.shellDescription = "Git Bash on Windows"
-		workspace.commandExamples = "pwd, ls, printf 'hello\\n'"
-		workspace.platformInstructions = "- Agenvo executes foreground Bash commands through the explicitly configured Git Bash on the selected Windows machine, not WSL. Use Bash syntax. Use root-relative work_dir paths (default: .); the base is the registered Windows target root, never the server or pane cwd. Paths escaping that root are rejected. Legacy absolute paths are accepted only inside the current root. Use relative file references in Bash; cygpath is available for explicit path conversion.\n- File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
-		workspace.delayInstruction = ""
-	}
 	return workspace
 }
 
 func workspaceTargetDescription(session SessionContext) string {
 	description := "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn."
 	if sessionUsesRemoteWorkspaceTarget(session) {
-		description = "This PC conversation is restricted to its selected computer: omit this parameter or pass only that computer's target_id. Other PCs and native are rejected. A target_id is a Memoh reference, never an Agenvo deviceId or instanceId."
+		description = "This PC conversation is restricted to its selected computer: omit this parameter or pass only that computer's target_id. Other PCs and native are rejected. A target_id is a Memoh reference, never a transport deviceId or instanceId."
 	} else if sessionIsWorkdirBound(session) && strings.TrimSpace(session.WorkspaceTargetID) == "" {
 		description = "This chat has a fixed working directory without a resolved target: omit this parameter."
 	}
@@ -1142,9 +1120,6 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 	command := strings.TrimSpace(args.Command)
 	if command == "" {
 		return nil, errors.New("command is required")
-	}
-	if target.workspace.computerTaskOnly {
-		return nil, agenvo.ErrComputerTaskRequired
 	}
 	workDir := strings.TrimSpace(args.WorkDir)
 	switch {

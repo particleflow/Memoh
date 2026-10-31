@@ -8,17 +8,11 @@
       <template v-if="step === 'command'">
         <DialogHeader class="pr-8">
           <DialogTitle>{{ existing ? t('computerConnect.restore') : t('computerConnect.title') }}</DialogTitle>
-          <DialogDescription>
-            {{ existing
-              ? t('computerConnect.existingDescription', { name: credential?.name })
-              : t('computerConnect.commandDescription') }}
-          </DialogDescription>
         </DialogHeader>
 
         <SettingsSection bordered>
           <SettingsRow
             :label="t('computerConnect.replaceAction')"
-            :description="t('computerConnect.replaceDescription')"
           >
             <Switch
               v-model="replaceBinding"
@@ -63,9 +57,6 @@
           <DialogTitle class="break-words">
             {{ adoptedName }}
           </DialogTitle>
-          <DialogDescription>
-            {{ t('computerAccess.subtitleRuntime') }}
-          </DialogDescription>
         </DialogHeader>
 
         <ComputerAccessList :runtime="{ id: runtimeId, name: adoptedName }" />
@@ -92,7 +83,6 @@ import {
   CodePanel,
   Dialog,
   DialogScrollContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,

@@ -80,6 +80,7 @@ func commonOptions() fx.Option {
 		channelmodule.FoundationModule(),
 		coremodule.ServerModule(),
 		fx.Provide(
+			provideCatalogTargetResolver,
 			provideServerHandler(handlers.NewPingHandler),
 			provideServerHandler(handlers.NewWebhookTunnelHandler),
 			provideServerHandler(provideAuthHandler),
@@ -128,7 +129,7 @@ func commonOptions() fx.Option {
 			provideServerHandler(handlers.NewNetworkHandler),
 			provideServerHandler(handlers.NewAudioHandler),
 			provideServerHandler(handlers.NewVideoHandler),
-			provideServerHandler(handlers.NewBotAudioHandler),
+			provideServerHandler(provideBotAudioHandler),
 			provideServerHandler(handlers.NewMCPHandler),
 			provideServerHandler(handlers.NewMCPOAuthHandler),
 			provideServerHandler(handlers.NewConnectorsHandler),
@@ -142,6 +143,7 @@ func commonOptions() fx.Option {
 		),
 		fx.Invoke(
 			startServer,
+			startCatalogSync,
 		),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger.With(slog.String("component", "fx"))}

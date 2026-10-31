@@ -1,0 +1,9 @@
+file:///workspace/scratch/durable-integration.mjs:28
+ const waitFor=async(expression)=>{for(let n=0;n<100;n++){if(await evaluate(expression))return;await delay(150)}throw new Error('Browser condition timed out: '+expression)}
+                                                                                                                      ^
+
+Error: Browser condition timed out: !!document.querySelector('textarea')
+    at waitFor (file:///workspace/scratch/durable-integration.mjs:28:119)
+    at async file:///workspace/scratch/durable-integration.mjs:30:2
+
+Node.js v25.9.0

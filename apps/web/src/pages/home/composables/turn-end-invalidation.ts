@@ -18,6 +18,10 @@ export function installTurnEndInvalidation(streamingSessionIds: Ref<readonly str
   installed.add(queryCache)
   const invalidate = (sessionId: string) => queryCache.invalidateQueries({
     predicate: entry => (entry.key[0] === 'session-status' || entry.key[0] === 'context-lifecycle') && entry.key[2] === sessionId,
+  }).catch(() => {
+    // This refetch is detached. Colada already retains genuine errors in query
+    // state; replacement/unmount cancellation must not escape as an unhandled
+    // rejection. Keep the scheduled follow-up and do not add a retry or UI.
   })
   effectScope(true).run(() => {
     watch(streamingSessionIds, (now, prev) => {

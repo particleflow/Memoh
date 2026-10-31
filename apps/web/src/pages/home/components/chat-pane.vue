@@ -8,15 +8,18 @@
       v-if="!currentBotId"
       class="flex-1"
     >
-      <PanePlaceholder :title="$t('chat.selectBot')">
-        {{ $t('chat.selectBotHint') }}
-      </PanePlaceholder>
+      <PanePlaceholder :title="$t('chat.selectBot')" />
     </div>
 
     <template v-else>
       <section class="flex-1 relative w-full px-3 sm:px-5 lg:px-8">
         <section class="absolute inset-0">
+          <PanePlaceholder
+            v-if="taskAnchor && taskRunAnchor.status.value !== 'located'"
+            :title="taskRunAnchor.status.value === 'unavailable' ? $t('chat.taskDirectory.historyUnavailable') : $t('common.loading')"
+          />
           <ScrollArea
+            v-show="!taskAnchor || taskRunAnchor.status.value === 'located'"
             ref="scrollContainer"
             class="h-full"
           >
@@ -121,36 +124,58 @@
                       @open-source="handleForkSourceClick"
                     />
 
-                    <div
-                      :data-message-id="msg.id"
-                      :data-external-message-id="(msg.role === 'user' || msg.role === 'assistant') ? msg.externalMessageId : undefined"
-                      class="transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2"
-                      :class="highlightedMessageId === msg.id ? 'bg-muted/45' : ''"
-                      :data-anchor="msg.id"
-                    >
-                      <MessageItem
-                        :message="msg"
-                        :bot-id="currentBotId"
-                        :session-id="activeSessionId"
-                        :channel-thread="isChannelThread"
-                        :channel-platform="channelPlatform"
-                        :bot-name="currentBot?.name"
-                        :bot-avatar-url="currentBot?.avatar_url"
-                        :on-open-media="galleryOpenBySrc"
-                        :on-reply-click="handleReplyJump"
-                        :on-retry-message="handleRetryMessage"
-                        :can-retry-latest-assistant="isRetryableTurn(msg)"
-                        :can-edit-latest-user="isEditableTurn(msg)"
-                        :can-fork-assistant="isForkableTurn(msg)"
-                        :inline-actions="isDirectBotAgentRuntime(activeChatTarget.runtimeType)"
-                        :goal-runtime="activeChatTarget.runtimeType"
-                        :is-scrolling="isScrolling"
-                        :is-last-message="msg.id === lastMessageId"
-                        @active="onMessageActive"
-                        @edit-message="handleEditMessage"
-                        @fork-message="handleForkMessage"
-                      />
-                    </div>
+                    <ContextMenu>
+                      <ContextMenuTrigger
+                        as-child
+                        :disabled="!readAloud.menuAvailable(msg)"
+                      >
+                        <div
+                          :data-message-id="msg.id"
+                          :data-external-message-id="(msg.role === 'user' || msg.role === 'assistant') ? msg.externalMessageId : undefined"
+                          class="transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2"
+                          :class="highlightedMessageId === msg.id ? 'bg-muted/45' : ''"
+                          :data-anchor="msg.id"
+                          @click.capture="readAloud.stop()"
+                        >
+                          <MessageItem
+                            :message="msg"
+                            :hide-process-activity="contactView && activeChatTarget.runtimeType === 'model'"
+                            :bot-id="currentBotId"
+                            :session-id="activeSessionId"
+                            :recovery-original-run-id="originalFailedRunId(msg)"
+                            :recovery-enabled="!activeChatReadOnly && !isChannelThread"
+                            :recovery-visible="isVisible"
+                            :channel-thread="isChannelThread"
+                            :channel-platform="channelPlatform"
+                            :bot-name="currentBot?.name"
+                            :bot-avatar-url="currentBot?.avatar_url"
+                            :on-open-media="galleryOpenBySrc"
+                            :on-reply-click="handleReplyJump"
+                            :on-retry-message="handleRetryMessage"
+                            :can-retry-latest-assistant="isRetryableTurn(msg)"
+                            :can-edit-latest-user="isEditableTurn(msg)"
+                            :inline-actions="isDirectBotAgentRuntime(activeChatTarget.runtimeType)"
+                            :goal-runtime="activeChatTarget.runtimeType"
+                            :is-scrolling="isScrolling"
+                            :is-last-message="msg.id === lastMessageId"
+                            :speech-enabled="readAloud.enabled.value"
+                            :speech-status="readAloud.status(msg)"
+                            :speech-can-replay="readAloud.canReplay(msg)"
+                            @replay-speech="readAloud.replay(msg)"
+                            @active="onMessageActive"
+                            @edit-message="handleEditMessage"
+                          />
+                        </div>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent v-if="readAloud.menuAvailable(msg)">
+                        <ContextMenuItem
+                          :disabled="!readAloud.canReplay(msg)"
+                          @select="readAloud.replay(msg)"
+                        >
+                          {{ $t(readAloud.replayLabel(msg)) }}
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
 
                     <ForkSourceDivider
                       v-if="showForkSourceDividerAfter(msg, turn.start + msgIndex)"
@@ -173,6 +198,16 @@
         </section>
       </section>
 
+      <div
+        v-if="activeChatReadOnly && currentBotId"
+        class="flex shrink-0 justify-end px-4 py-2 sm:px-6 lg:px-10"
+      >
+        <BotTaskDirectory
+          :bot-id="currentBotId"
+          :visible="isVisible"
+        />
+      </div>
+
       <MediaGalleryLightbox
         :items="galleryItems"
         :open-index="galleryOpenIndex"
@@ -194,11 +229,6 @@
           <pre class="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-surface-composer p-3 text-caption leading-relaxed text-foreground">{{ pastedViewerText }}</pre>
         </DialogContent>
       </Dialog>
-
-      <ChatForkDialog
-        v-model:open="forkDialogOpen"
-        :turn-id="pendingForkTurnId"
-      />
 
       <!-- Asked before a usage example or App "Try it" replaces unsent text. -->
       <ConfirmDeleteDialog
@@ -381,7 +411,6 @@
                         />
                         <span class="min-w-0 flex-1">
                           <span class="block truncate text-control">{{ action.id === 'plan' ? $t('chat.planMode.commandLabel') : action.id === 'goal' ? $t('chat.goal.label') : action.label }}</span>
-                          <span class="block truncate text-caption text-muted-foreground">{{ action.description }}</span>
                         </span>
                       </CommandItem>
                     </CommandGroup>
@@ -556,7 +585,7 @@
                       >
                         <InlineLoadingRow>{{ $t('chat.uploadingAttachments') }}</InlineLoadingRow>
                         <TextButton @click="cancelAttachmentUpload">
-                          {{ $t('common.cancel') }}
+                          {{ $t('chat.mediaRecovery.pause') }}
                         </TextButton>
                       </div>
                     </div>
@@ -647,6 +676,7 @@
                   :disabled="!currentBotId || activeChatReadOnly || loadingMessages || firstSendAwaiting || attachmentUploading"
                   class="order-none max-h-52 w-full basis-full field-sizing-content resize-none break-words bg-transparent pl-2 pr-1 pt-2 pb-1.5 text-base leading-[var(--chat-leading)] outline-none placeholder:text-[var(--field-placeholder)] disabled:cursor-not-allowed"
                   :class="[isWelcome ? 'min-h-12' : 'min-h-10', composerPreviewShown ? 'text-transparent' : 'text-foreground']"
+                  @input="readAloud.stop()"
                   @keydown="handleComposerKeydown"
                   @paste="handlePaste"
                 />
@@ -914,10 +944,8 @@
                         </svg>
                       </Button>
                     </div>
-                    <!-- Send and stop are one brand circle: the surface never
-                         changes between the two states, only the glyph cross-fades
-                         (arrow ⇄ stop square), so the button can't blink color or
-                         shape mid-turn. While streaming it stays clickable to abort. -->
+                    <!-- One control: a draft sends to the existing queue;
+                         only an empty running composer offers stop. -->
                     <div
                       class="absolute inset-0 [transition:opacity_150ms_ease,scale_281ms_cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
                       :class="sendButtonVisible ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'"
@@ -926,12 +954,13 @@
                         type="button"
                         variant="brand"
                         shape="circle"
-                        :disabled="attachmentUploading || (streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingMessages || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason))"
+                        :disabled="attachmentUploading || !currentBotId || activeChatReadOnly || loadingMessages || (streaming ? showSend && (pendingFiles.length > 0 || requestedSkills.length > 0) : !showSend || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
                         :title="goalSubmissionBlocked ? goalExecutionBlockedReason : undefined"
                         :class="runtimeModeChanging && !streaming && showSend && !!currentBotId && !activeChatReadOnly && !loadingMessages && !composerAgentConfigPending && !composerHasNoModel ? 'disabled:opacity-100' : undefined"
                         :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
-                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : (streaming ? 'Stop generating response' : 'Send message')"
+                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t(streaming ? 'chat.stopGenerating' : 'chat.send')"
                         class="size-full"
+                        @keydown.enter="$event.repeat && $event.preventDefault()"
                         @click="handleSendButton"
                       >
                         <span
@@ -943,13 +972,13 @@
                           <SendMorphIcon
                             :busy="firstSendAwaiting || attachmentUploading"
                             class="col-start-1 row-start-1 size-[18px] max-md:size-5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
                           />
                           <svg
                             viewBox="0 0 24 24"
                             fill="currentColor"
                             class="col-start-1 row-start-1 size-4 max-md:size-4.5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
                           >
                             <rect
                               x="4"
@@ -972,6 +1001,13 @@
                  mode pills, with the context-pressure ring pinned right.
                  Keep this row's height while recording so the dock stays
                  stable. -->
+              <p
+                v-if="readAloud.notice.value"
+                class="px-2 text-caption text-muted-foreground"
+                role="status"
+              >
+                {{ $t(readAloud.notice.value) }}
+              </p>
               <div
                 data-composer-context-row
                 class="flex min-w-0 items-center gap-1 px-2"
@@ -1239,14 +1275,19 @@
                   <Lightbulb class="size-3.5 shrink-0" />
                   <span class="text-label">{{ $t('chatExamples.tryThese') }}</span>
                 </Button>
-                <SessionTasks
-                  v-if="currentBotId && activeSessionId && !isWelcome"
-                  :key="`${currentBotId}:${activeSessionId}`"
+                <BotTaskDirectory
+                  v-if="currentBotId && voiceInputState === 'idle'"
                   :bot-id="currentBotId"
-                  :session-id="activeSessionId"
-                  :selection="selectedWorkspaceTargetId"
                   :visible="isVisible"
                 />
+                <template v-if="currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'">
+                  <SessionActivityTrigger
+                    kind="bots"
+                    :bot-id="currentBotId"
+                    :session-id="activeSessionId"
+                    :visible="isVisible"
+                  />
+                </template>
                 <SessionInfoRing
                   v-if="showSessionInfoRing && voiceInputState === 'idle'"
                   class="ml-auto shrink-0"
@@ -1288,7 +1329,7 @@ import { Memoh as MemohIcon, MemohColor } from '@memohai/icon'
 import { AddIcon, UploadIcon } from '@memohai/icon/ui'
 
 import { EXTERNAL_AGENT_DEFAULT_PROJECT_MODE, EXTERNAL_AGENT_DEFAULT_PROJECT_PATH, normalizeAgentID } from '@/utils/external-agent'
-import { ref, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'
+import { ref, shallowRef, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'
 import {
   ImagePlus,
   ChevronDown,
@@ -1299,12 +1340,11 @@ import {
   HelpCircle,
   List,
   Package,
-  SquarePen,
   ShieldCheck,
   Lightbulb,
   Target,
 } from 'lucide-vue-next'
-import { Button, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder, ScrollArea, Skeleton, Spinner, TextButton, toast } from '@felinic/ui'
+import { Button, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder, ScrollArea, Skeleton, Spinner, TextButton, toast } from '@felinic/ui'
 import { useChatStore, type ExternalAgentSessionInput, type ChatMessage, type ChatWorkspaceTargetSnapshot, type SendMessageResult } from '@/store/chat-list'
 import { useWorkdirsStore } from '@/store/workdirs'
 import type { BotWorkdir } from '@/composables/api/useWorkdirs'
@@ -1324,6 +1364,7 @@ import { useFileDropZone } from '@/composables/useFileDropZone'
 import { registerChatFileDropTarget } from '../composables/chat-file-drop-target'
 import { readDroppedFiles } from '@/utils/dropped-files'
 import MessageItem from './message-item.vue'
+import { useChatReadAloud } from '../composables/useChatReadAloud'
 import ComposerContinueOn from './composer-continue-on.vue'
 import ComposerConnectorsMenu from './composer-connectors-menu.vue'
 import RuntimeModeIcon from './runtime-mode-icon.vue'
@@ -1337,8 +1378,10 @@ import { isRuntimeContinuationUserTurn, isRuntimeSteerUserTurn } from '@/store/c
 import { resolveCommandErrorMessage } from '@/store/chat/messages'
 import { isAgentRuntimeType } from '@/store/chat-list.utils'
 import BgTaskPill from './bg-task-pill.vue'
+import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'
+import BotTaskDirectory from './bot-task-directory.vue'
+import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'
 import ForkSourceDivider from './fork-source-divider.vue'
-import ChatForkDialog from './chat-fork-dialog.vue'
 import ComposerDock from './composer-dock.vue'
 import SessionFollowUpQueue from './session-follow-up-queue.vue'
 import { usePendingApprovals } from '../composables/usePendingApprovals'
@@ -1346,13 +1389,13 @@ import ChatScrollRail, { type ScrollRailSegment } from './chat-scroll-rail.vue'
 import { provideBgTaskBeacons } from '../composables/useBgTaskBeacons'
 import MediaGalleryLightbox from './media-gallery-lightbox.vue'
 import SessionInfoRing from './session-info-ring.vue'
-import SessionTasks from './session-tasks.vue'
 import { useSessionInfo } from '../composables/useSessionInfo'
 import ComposerModelMenu from './composer-model-menu.vue'
 import { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort, reconcileStoredEffort } from '@/pages/bots/components/reasoning-effort'
 import { useMediaGallery } from '../composables/useMediaGallery'
 import { ATTACHMENT_ANIM_MS, attachmentToFile, useComposerAttachments } from '../composables/useComposerAttachments'
-import { AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'
+import { acknowledgeComposerAttachments, AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'
+import { forgetMediaFile, mediaFileJournalKey, MediaRecoveryError, restoreMediaUploads } from '@/lib/media-transfer'
 import { useComposerDrafts } from '../composables/useComposerDrafts'
 import ChatExampleSuggestions from './chat-example-suggestions.vue'
 import { useChatExamplesUi } from '@/components/chat-examples/use-chat-examples-ui'
@@ -1368,12 +1411,13 @@ import { provideConnectorLogos } from '../composables/useConnectorLogos'
 import { enqueueSteerQueue, enqueueFollowUpQueue, fetchSafeSkillCatalog, fetchSession, type ChatAttachment, type CommandActionListItem, type CommandEventResponse, type RequestedSkillSelection, type UIUserInput } from '@/composables/api/useChat'
 import { parseSessionQueueCommand, SessionQueueSubmissionGate } from './session-queue-submission'
 import { localizeRuntimeControls, localizeRuntimeCommandResult } from '@/utils/runtime-control-presentation'
-import { commandResultPresentation, isCommandResultItemVisible, resolveCommandResultSelection } from './slash-command-result'
+import { commandResultPresentation, isCommandResultItemVisible, isConversationResetCommand, resolveCommandResultSelection } from './slash-command-result'
 import SendMorphIcon from './send-morph-icon.vue'
 import { captureChatPaneSendContext, clearComposerPairDraft, composerRestoreForSendResult, composerHasNoModel as hasNoComposerModel, matchesChatPaneSendContext, pinnedSubagentModelId as resolvePinnedSubagentModelId, shouldRefreshACPComposerConfig, welcomeSendConsumedDraft } from './chat-pane-send'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { useACPRuntime } from '@/composables/useACPRuntime'
 import { useAgentModelCatalog } from '@/composables/useAgentModelCatalog'
+import { useModelSelectionLabel } from '@/composables/useModelSelectionLabel'
 import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard'
 import { isACPAgentConfigured } from '@/utils/acp'
 import { BOT_AGENT_RUNTIME_ACP, BOT_AGENT_RUNTIME_CODEX, botAgentIcon, botAgentName, botAgentProvider, isDirectBotAgentConfigured, isDirectBotAgentRuntime, normalizeBotAgentRuntime } from '@/utils/bot-agent'
@@ -1381,6 +1425,9 @@ import { UserFacingError, isApiErrorCode, parseMemohError, resolveApiErrorMessag
 import { hasBotPermission } from '@/utils/bot-permissions'
 import { workspaceTargetAvailable } from '@/utils/workspace-target'
 import { findLatestPendingChatDecision } from './chat-pending-decision'
+import { useTaskRunAnchor } from '../composables/useTaskRunAnchor'
+import type { TaskHistoryAnchor } from '@/utils/task-history-link'
+import { revalidateTaskHistoryAnchor } from '@/utils/task-history-link'
 import {
   runtimeCommandComposerText,
   composerLocalQuickActionID,
@@ -1395,11 +1442,17 @@ const props = withDefaults(defineProps<{
   // The session this pane renders (null = unsaved draft). Decoupled from tabId so
   // a draft→real promotion never remounts this pane.
   sessionId?: string | null
+  // Presentation intent from the resolved contact entry, scoped to this pane.
+  // Task/history panes keep the unabridged transcript for the same session.
+  contactView?: boolean
+  taskAnchor?: TaskHistoryAnchor
   visible?: boolean
   active?: boolean
 }>(), {
   tabId: 'chat',
   sessionId: null,
+  contactView: false,
+  taskAnchor: undefined,
   visible: true,
   active: true,
 })
@@ -1434,12 +1487,21 @@ function removeAttachment(index: number) {
   // The last card's visual collapse delays removal from pendingFiles.
   // Abort immediately, before that animation can race upload completion.
   cancelAttachmentUpload()
+  const file = pendingFiles.value[index]
+  if (file) void forgetMediaFile(file).catch(() => { composerError.value = t('chat.mediaRecovery.storage') })
   removePendingAttachment(index)
 }
 
-const composerError = ref('')
-const forkDialogOpen = ref(false)
-const pendingForkTurnId = ref('')
+const composerErrorText = ref('')
+const composerFailure = shallowRef<SendMessageResult>()
+const composerError = computed({
+  get: () => composerErrorText.value,
+  set: (value: string) => { composerErrorText.value = value; composerFailure.value = undefined },
+})
+function setComposerFailure(failure: Pick<SendMessageResult, 'error' | 'errorCode' | 'errorTurnId' | 'errorRunId'>) {
+  composerError.value = failure.error || ''
+  composerFailure.value = { ok: false, ...failure }
+}
 const modelPopoverOpen = ref(false)
 const agentPopoverOpen = ref(false)
 const hoveredAgentChoice = ref('')
@@ -1450,11 +1512,13 @@ const agentChanging = ref(false)
 const acpConfigChangeScope = ref('')
 
 const {
-  currentBotId,
   bots,
   loadingChats,
   hasExplicitSessionSelection,
 } = storeToRefs(chatStore)
+// The keyed panel owns this Bot until disposal; Dockview may flush child
+// watchers after global selection changes but before removing the old pane.
+const currentBotId = ref(chatStore.currentBotId)
 
 const isActive = computed(() => props.active !== false)
 const { welcomeDismissed } = useChatExamplesUi()
@@ -1490,7 +1554,6 @@ const creatingSession = computed(() => chatStore.isChatViewCreatingSession(paneT
 const activeChatTarget = computed(() => chatStore.chatTargetFor(paneTarget.value))
 const activeSession = computed(() => activeChatTarget.value.session)
 const activeChatReadOnly = computed(() => chatStore.chatReadOnlyFor(paneTarget.value))
-const activeChatCanFork = computed(() => chatStore.chatCanForkFor(paneTarget.value))
 // The composer pair lives on the shared ChatViewEntry: same-session tabs share
 // one pair and repointing this pane swaps in the target view's own pair. Every
 // rule that changes it is in useComposerPair (registered below, once its
@@ -1529,7 +1592,9 @@ const firstSendEntry = computed(() => chatStore.firstSendFor(paneTarget.value))
 // External Agent's REST session creation).
 const draftSendStarting = ref(false)
 const firstSendAwaiting = computed(() =>
-  draftSendStarting.value || (!!firstSendEntry.value && !firstSendEntry.value.revealed))
+  draftSendStarting.value
+  || chatStore.isChatViewAwaitingProjection(paneTarget.value)
+  || (!!firstSendEntry.value && !firstSendEntry.value.revealed))
 // A draft whose first message is in flight is committed to its setup (the
 // folder travels with that message), even before a session id exists.
 const draftSetupEditable = computed(() => !hasRenderedSession.value && !firstSendEntry.value && !draftSendStarting.value)
@@ -1604,29 +1669,6 @@ const { items: pendingApprovals } = usePendingApprovals(messages)
 
 const hasPendingToolApproval = computed(() => pendingApprovals.value.length > 0)
 
-// A direct runtime's turn says itself whether it can anchor a fork
-// (runtimeForkable, below): only turns whose runtime recorded an anchor can.
-const canForkAssistant = computed(() =>
-  !streaming.value
-  && !loadingMessages.value
-  && !activeChatReadOnly.value
-  && activeChatCanFork.value
-  && (activeChatTarget.value.runtimeType === 'model'
-    || isDirectBotAgentRuntime(activeChatTarget.value.runtimeType)),
-)
-
-// A freshly committed turn can arrive before older history rows are refetched.
-// Keep the latest-only policy effective across that live transition as well.
-const latestRuntimeForkTurn = computed(() => messages.value.findLast(message =>
-  message.role === 'assistant' && message.runtimeForkable === true,
-))
-function isForkableTurn(message: ChatMessage): boolean {
-  return canForkAssistant.value && message.role === 'assistant'
-    && (activeChatTarget.value.runtimeType === 'model' || message.runtimeForkable === true)
-    && (!runtimeControls.controls.value?.capabilities?.fork_latest_only
-      || message === latestRuntimeForkTurn.value)
-}
-
 // Retry/edit rewrite persisted history and replay it, which only runtimes
 // whose context Memoh itself assembles can honor.
 const activeSupportsTurnReplacement = computed(() => activeChatTarget.value.runtimeType === 'model')
@@ -1660,6 +1702,16 @@ const latestEditableUserTurnId = computed(() => {
 
 // Both halves of a round share one turn id, so the role decides which
 // affordance a message gets: retry belongs to the reply, edit to the request.
+// A synchronized original turn match is identity evidence; never substitute
+// another/latest run for an error whose historical run ID is unavailable.
+function originalFailedRunId(message: ChatMessage): string | undefined {
+  if (message.role !== 'assistant') return
+  if (message.runtimeRunId) return message.runtimeRunId
+  const observation = chatStore.runtimeObservationFor(currentBotId.value || '', activeSessionId.value || '')
+  const run = observation.run
+  return observation.synchronized && run?.status === 'errored' && !!message.turnId && run.turn_id === message.turnId ? run.run_id : undefined
+}
+
 function isRetryableTurn(message: ChatMessage): boolean {
   const turnId = latestRetryableAssistantTurnId.value
   return message.role === 'assistant' && turnId !== '' && turnId === (message.turnId?.trim() ?? '')
@@ -2130,12 +2182,6 @@ const slashQuickActions = computed(() => [
         icon: List,
       }]
     : []),
-  {
-    id: 'new',
-    label: '/new',
-    description: t('chat.slash.newDescription'),
-    icon: SquarePen,
-  },
   ...((runtimeModes.value.length > 0 || (activeIsPendingExternalAgent.value && acpModes.value.length > 0))
     ? [{
         id: 'permission',
@@ -2321,7 +2367,9 @@ const runtimeModeScope = computed(() => JSON.stringify([paneTarget.value, active
 const runtimeModeChanging = computed(() => runtimeModeRequestScope.value === runtimeModeScope.value)
 const runtimeModeDisabled = computed(() => activeChatReadOnly.value || streaming.value || creatingSession.value || loadingMessages.value || agentChanging.value || runtimeModeChanging.value)
 const visibleRuntimeAgentCommands = computed(() =>
-  visibleRuntimeCommands(composerRuntimeCommands.value, slashQuery.value).filter(command => command.name !== 'goal' || !goalCommandAvailable.value),
+  visibleRuntimeCommands(composerRuntimeCommands.value, slashQuery.value).filter(command =>
+    !isConversationResetCommand(command.name)
+    && (command.name !== 'goal' || !goalCommandAvailable.value)),
 )
 const slashPanelHasResults = computed(() =>
   visibleSlashQuickActions.value.length > 0
@@ -2646,9 +2694,10 @@ const runtimeModeUnavailableReason = computed(() => unavailableRuntimeModes.valu
 // What the dock's error line shows. Standing reasons (goal blocked by plan
 // mode, runtime mode without a usable model) win over the transient
 // composerError, matching their precedence before dismissal existed.
+watchVisibleComposerFailure(() => composerFailure.value, () => messages.value, () => { composerError.value = '' })
 const rawComposerPanelError = computed(() => goalSubmissionBlocked.value
   ? goalExecutionBlockedReason.value
-  : runtimeModeUnavailableReason.value || composerError.value)
+  : runtimeModeUnavailableReason.value || (runtimeFailureAlreadyVisible(composerFailure.value, messages.value) ? '' : composerError.value))
 // Every error line can be dismissed, standing reasons included: a user who
 // already understands the reason should not be forced to keep reading it.
 // Dismissal hides that exact message only — a different message, or the same
@@ -2679,7 +2728,13 @@ const composerModelProviders = computed(() => composerModelCatalog.value.provide
 const composerDefaultModelId = computed(() => activeUsesDirectRuntime.value
   ? composerModelCatalog.value.configuredModelId || composerModelCatalog.value.defaultModelId
   : !activeUsesExternalAgentComposer.value ? botSettings.value?.chat_model_id ?? '' : '')
+const { label: nativeDefaultModelLabel } = useModelSelectionLabel(
+  composerDefaultModelId,
+  composerModels,
+  () => !activeUsesExternalAgentComposer.value,
+)
 const composerDefaultModelName = computed(() => {
+  if (!activeUsesExternalAgentComposer.value) return nativeDefaultModelLabel.value
   const id = composerDefaultModelId.value.trim()
   // Claude may advertise only its opaque `default` alias; that real model
   // option already supplies the Default row, without a second empty option.
@@ -2840,38 +2895,38 @@ const defaultExternalAgentAvailability = computed<DefaultExternalAgentAvailabili
   }
   if (!isAgentRuntimeType(settings.chat_runtime)) return { input: null, messageKey: '', loading: false }
   if (!hasBotPermission(currentBot.value?.current_user_permissions, 'workspace_exec')) {
-    return { input: null, messageKey: 'chat.defaultAgentNoWorkspaceExec', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   const botAgentId = settings.default_bot_agent_id?.trim() ?? ''
-  if (!botAgentId) return { input: null, messageKey: 'chat.defaultAgentMissing', loading: false }
+  if (!botAgentId) return { input: null, messageKey: '', loading: false }
   if (!botAgentData.value) {
     return {
       input: null,
-      messageKey: botAgentsLoading.value ? 'chat.defaultExternalAgentLoading' : 'chat.defaultAgentUnavailable',
+      messageKey: botAgentsLoading.value ? 'chat.defaultExternalAgentLoading' : '',
       loading: botAgentsLoading.value,
     }
   }
   const agent = botAgents.value.find(item => item.id === botAgentId)
   if (!agent || agent.enabled === false) {
-    return { input: null, messageKey: 'chat.defaultAgentDisabled', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   const agentId = botAgentProvider(agent)
   const directConfigured = isDirectBotAgentConfigured(agent)
   if (directConfigured === false) {
-    return { input: null, messageKey: 'chat.defaultAgentNotConfigured', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   if (directConfigured === null) {
     if (!acpProfileData.value) {
       return {
         input: null,
-        messageKey: acpProfilesLoading.value ? 'chat.defaultExternalAgentLoading' : 'chat.defaultAgentUnavailable',
+        messageKey: acpProfilesLoading.value ? 'chat.defaultExternalAgentLoading' : '',
         loading: acpProfilesLoading.value,
       }
     }
     const profile = acpProfiles.value.find(item => normalizeAgentID(item.id) === agentId)
-    if (!profile) return { input: null, messageKey: 'chat.defaultAgentUnavailable', loading: false }
+    if (!profile) return { input: null, messageKey: '', loading: false }
     if (!isACPAgentConfigured(agent, profile)) {
-      return { input: null, messageKey: 'chat.defaultAgentNotConfigured', loading: false }
+      return { input: null, messageKey: '', loading: false }
     }
   }
   return {
@@ -2911,7 +2966,14 @@ const composerHasNoModel = computed(() =>
   hasNoComposerModel(activeUsesExternalAgentComposer.value, overrideModelId.value),
 )
 
+const { label: nativeSelectedModelLabel, isUnavailable: nativeModelUnavailable } = useModelSelectionLabel(
+  composerModelId,
+  composerModels,
+  () => !activeUsesExternalAgentComposer.value,
+)
+
 const selectedModelLabel = computed(() => {
+  if (!activeUsesExternalAgentComposer.value && composerModelId.value) return nativeSelectedModelLabel.value
   const current = composerModels.value.find(model => model.id === composerModelId.value)
   if (current?.name || current?.model_id) return current.name || current.model_id
   // A configured-but-missing id still shows the raw id rather than "None": the
@@ -2946,7 +3008,7 @@ const reasoningActive = computed(() =>
 )
 
 const modelTriggerLabel = computed(() =>
-  reasoningActive.value
+  reasoningActive.value && (activeUsesExternalAgentComposer.value || !nativeModelUnavailable.value)
     ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`
     : selectedModelLabel.value,
 )
@@ -3364,11 +3426,8 @@ const voiceInputEnabled = false
 
 // Whether the trailing slot shows the send button (vs. its inactive
 // occupant — see inactiveSlotVisible just below, its exact complement).
-// Streaming always wins the slot for stop, same as before; unlike the old
-// ring-era rule this no longer special-cases ACP: the inactive occupant —
-// not a dimmed disabled send — is what fills the slot on empty input in
-// EVERY mode (the mic when voice input is on, a look-alike placeholder while
-// it's shelved).
+// Keep the one action slot visible during a run: send for a draft, stop
+// only when the existing content predicate says the composer is empty.
 const sendButtonVisible = computed(() => showSend.value || streaming.value)
 
 // The slot's inactive occupant: a grayed send stand-in while voice input is
@@ -3617,10 +3676,7 @@ async function startVoiceInput() {
     openTranscriptionSettings()
     return
   }
-  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-    toast.error(t('chat.voiceInput.unsupported'))
-    return
-  }
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') return
 
   const requestVersion = ++voiceRequestVersion
   try {
@@ -3736,7 +3792,28 @@ watch(
   cancelAttachmentUpload,
   { flush: 'sync' },
 )
-watch(() => pendingFiles.value.slice(), cancelAttachmentUpload, { flush: 'sync' })
+watch(() => pendingFiles.value.slice(), (files) => {
+  cancelAttachmentUpload()
+  if (files.length) workspaceTabs.pinPanel(props.tabId)
+}, { flush: 'sync' })
+const mediaDraftScope = computed(() => JSON.stringify([inputDraftKey.value, paneTarget.value.sessionId ?? '']))
+watch(() => [paneTarget.value.botId, mediaDraftScope.value] as const, async ([bot, draft], _, onCleanup) => {
+  if (!bot || !draft) return
+  const controller = new AbortController()
+  onCleanup(() => controller.abort())
+  try {
+    const restored = await restoreMediaUploads(bot, draft, controller.signal)
+    controller.signal.throwIfAborted()
+    for (const file of restored.files) {
+      if (!pendingFiles.value.some(f => mediaFileJournalKey(f) === mediaFileJournalKey(file))) pendingFiles.value.push(file)
+    }
+    if (restored.unknown) composerError.value = t('chat.mediaRecovery.unknown')
+    else if (restored.missing.length) composerError.value = t('chat.mediaRecovery.reselect', { names: restored.missing.join(', ') })
+  } catch (error) {
+    if (controller.signal.aborted) return
+    if (error instanceof MediaRecoveryError) composerError.value = t(`chat.mediaRecovery.${error.reason}`)
+  }
+}, { immediate: true })
 // Registered after useComposerDrafts so its draft restore runs first and
 // cannot overwrite a prefilled prompt (usage examples, App "Try it").
 const replaceDraftConfirm = useAsyncConfirm()
@@ -3827,7 +3904,7 @@ watch([
   requestedSkills.value = skillSlashEnabled.value
     ? (failure.restoreRequestedSkills ?? []).map(skill => ({ ...skill }))
     : []
-  composerError.value = failure.error ?? t('chat.sendFailed')
+  setComposerFailure({ ...failure, error: failure.error ?? t('chat.sendFailed') })
   chatStore.clearStartupSendFailure(failure.id)
 }, { immediate: true })
 
@@ -3880,6 +3957,7 @@ const lastMessageId = computed(() => messages.value[messages.value.length - 1]?.
 const {
   isScrolling,
   highlightedMessageId,
+  lockScroll,
   showJumpToBottom: showJumpToBottomFromScroll,
   scrollToBottom,
   scrollToMessage,
@@ -3902,6 +3980,43 @@ const {
   messages,
   isActive: isVisible,
   sessionId: computed(() => paneTarget.value.sessionId ?? `draft:${paneTarget.value.viewId}`),
+})
+
+const taskRunAnchor = useTaskRunAnchor({
+  anchor: () => props.taskAnchor,
+  session: () => props.sessionId,
+  visible: () => isVisible.value,
+  messages: () => messages.value,
+  loading: () => loadingMessages.value,
+  loadingOlder: () => loadingOlder.value,
+  hasMore: () => hasMoreOlder.value,
+  validate: (anchor, signal) => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? '', signal),
+  loadOlder: () => chatStore.loadOlderMessages(paneTarget.value),
+  scroll: scrollToMessage,
+})
+
+const readAloud = useChatReadAloud({
+  nativeInput: true,
+  botId: currentBotId,
+  modelId: computed(() => botSettings.value?.tts_model_id),
+  runIdentity: message => {
+    if (message.role !== 'assistant') return
+    if (message.runtimeRunId) return message.runtimeRunId
+    const anchor = props.taskAnchor
+    if (anchor && taskRunAnchor.status.value === 'located' && anchor.turnId === message.turnId) return anchor.runId
+    const observation = chatStore.runtimeObservationFor(currentBotId.value || '', activeSessionId.value || '')
+    return observation.synchronized && message.turnId && observation.run?.turn_id === message.turnId ? observation.run.run_id : undefined
+  },
+  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
+  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
+    && !chatStore.contactNavigationPending
+    && (!props.taskAnchor || taskRunAnchor.status.value === 'located')
+    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),
+  loading: computed(() => loadingMessages.value || loadingChats.value),
+  draft: inputText,
+  messages,
+  messageElement: findMessageElement,
+  bodyRoot: () => scrollEl.value,
 })
 
 useQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)
@@ -3956,7 +4071,14 @@ useIntersectionObserver(
 )
 
 onActivated(() => {
-  onActivatedRestoreScroll(loadingMessages)
+  if (props.taskAnchor) {
+    // The authorized execution anchor owns restoration in a task pane.
+    // A remembered arbitrary position must not override its async scroll.
+    lockScroll.value = false
+    markEscaped()
+  } else {
+    onActivatedRestoreScroll(loadingMessages)
+  }
 })
 
 onDeactivated(() => {
@@ -3994,14 +4116,6 @@ async function handleForkSourceClick() {
   } finally {
     openingForkSource.value = false
   }
-}
-
-function handleForkMessage(turnId: string) {
-  composerError.value = ''
-  const id = turnId.trim()
-  if (!id) return
-  pendingForkTurnId.value = id
-  forkDialogOpen.value = true
 }
 
 // Keyboard bridges into the two composer list surfaces (slash picker, command
@@ -4071,7 +4185,7 @@ async function handleRetryMessage(turnId: string) {
   finishPairSend(result.ok || result.stage === 'stream')
   await refreshACPComposerConfigAfterSelectionError(result)
   if (!result.ok && result.error) {
-    composerError.value = result.error
+    setComposerFailure(result)
   }
 }
 
@@ -4093,7 +4207,7 @@ async function handleEditMessage(turnId: string, text: string, done?: (started: 
     finishPairSend(result.ok || result.stage === 'stream')
     await refreshACPComposerConfigAfterSelectionError(result)
     if (!result.ok && result.error) {
-      composerError.value = result.error
+      setComposerFailure(result)
     }
     done?.(result.ok || result.stage === 'stream')
   } catch {
@@ -4104,6 +4218,7 @@ async function handleEditMessage(turnId: string, text: string, done?: (started: 
 }
 
 async function handleSend() {
+  readAloud.stop()
   if (!isActive.value || attachmentUploading.value || firstSendAwaiting.value) return
   if (!skillSlashEnabled.value && requestedSkills.value.length) {
     requestedSkills.value = []
@@ -4281,7 +4396,7 @@ async function handleSend() {
   let attachments: ChatAttachment[] | undefined
   try {
     if (files.length) {
-      attachments = await uploadAttachments(sentContext.target.botId, files)
+      attachments = await uploadAttachments(sentContext.target.botId, files, JSON.stringify([sentDraftKey, sentContext.target.sessionId ?? '']))
     }
   } catch (error) {
     pairSend.releaseReads()
@@ -4296,7 +4411,9 @@ async function handleSend() {
     if (error instanceof DOMException && error.name === 'AbortError') return
     composerError.value = error instanceof AttachmentUploadLimitError
       ? t('chat.attachmentUploadTooLarge', { name: error.fileName, limit: error.maxBytes.toLocaleString() })
-      : resolveApiErrorMessage(error, t('chat.sendFailed'))
+      : error instanceof MediaRecoveryError && error.reason !== 'unsupported'
+        ? t(`chat.mediaRecovery.${error.reason}`)
+        : resolveApiErrorMessage(error, t('chat.sendFailed'))
     return
   }
   if (!holdsInput) clearSentInput()
@@ -4344,6 +4461,11 @@ async function handleSend() {
     pairSend.finish(false)
     pairSend.releaseReads()
   })
+  if (result.messageSent === true && attachments) {
+    void acknowledgeComposerAttachments(attachments).catch(() => {
+      composerError.value = t('chat.mediaRecovery.storage')
+    })
+  }
   rollbackPin = null
   pairSend.finish(result.messageSent === true || result.stage === 'stream')
   await refreshACPComposerConfigAfterSelectionError(result)
@@ -4372,13 +4494,23 @@ async function handleSend() {
   }
 }
 
-function handleSendButton() {
+let lastSendButtonActivation = -Infinity
+function handleSendButton(event?: MouseEvent) {
   // A first send waits for the server to confirm it.
   if (firstSendAwaiting.value) return
+  const now = performance.now()
+  if ((event?.detail ?? 0) > 1) return
   if (streaming.value && !showSend.value) {
+    // Clearing a sent draft changes this same button into stop. Keep mouse
+    // multi-clicks, rapid taps and keyboard repeats in that send gesture.
+    if (now - lastSendButtonActivation < 500) {
+      lastSendButtonActivation = now
+      return
+    }
     chatStore.abort(paneTarget.value)
     return
   }
+  lastSendButtonActivation = now
   void handleSend()
 }
 

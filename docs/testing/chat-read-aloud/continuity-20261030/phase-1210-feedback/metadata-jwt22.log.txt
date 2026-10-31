@@ -1,0 +1,74 @@
+=== RUN   TestPlaybackIdentityIsReadOnlyAndBindsEffectiveVoiceModelFormat
+--- PASS: TestPlaybackIdentityIsReadOnlyAndBindsEffectiveVoiceModelFormat (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio	0.011s
+=== RUN   TestBotPlaybackConfigAccountBoundary
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_owner_same_Bot/header
+    bot_tts_playback_account_test.go:157: status=200 account_reads=2 bot_reads=1 settings_reads=1 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_owner_same_Bot/query
+    bot_tts_playback_account_test.go:157: status=200 account_reads=2 bot_reads=1 settings_reads=1 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_chat_grantee_same_Bot/header
+    bot_tts_playback_account_test.go:157: status=200 account_reads=2 bot_reads=2 settings_reads=1 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_chat_grantee_same_Bot/query
+    bot_tts_playback_account_test.go:157: status=200 account_reads=2 bot_reads=2 settings_reads=1 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_account_without_chat_permission/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=2 bot_reads=2 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/active_account_without_chat_permission/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=2 bot_reads=2 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/disabled_owner_account/header
+    bot_tts_playback_account_test.go:157: status=401 account_reads=1 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/disabled_owner_account/query
+    bot_tts_playback_account_test.go:157: status=401 account_reads=1 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_active_owner/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_active_owner/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_active_owner/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_active_owner/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_chat_grantee/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_chat_grantee/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_disabled_owner/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_disabled_owner/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_disabled_owner/header
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_disabled_owner/query
+    bot_tts_playback_account_test.go:157: status=403 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/anonymous/header
+    bot_tts_playback_account_test.go:157: status=401 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/anonymous/query
+    bot_tts_playback_account_test.go:157: status=401 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/expired_account/header
+    bot_tts_playback_account_test.go:157: status=401 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+=== RUN   TestBotPlaybackConfigAccountBoundary/expired_account/query
+    bot_tts_playback_account_test.go:157: status=401 account_reads=0 bot_reads=0 settings_reads=0 synthesis_calls=0
+--- PASS: TestBotPlaybackConfigAccountBoundary (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_owner_same_Bot/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_owner_same_Bot/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_chat_grantee_same_Bot/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_chat_grantee_same_Bot/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_account_without_chat_permission/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/active_account_without_chat_permission/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/disabled_owner_account/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/disabled_owner_account/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_active_owner/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_active_owner/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_active_owner/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_active_owner/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_chat_grantee/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_chat_grantee/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_disabled_owner/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_same_Bot_disabled_owner/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_disabled_owner/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/chat_route_wrong_Bot_disabled_owner/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/anonymous/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/anonymous/query (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/expired_account/header (0.00s)
+    --- PASS: TestBotPlaybackConfigAccountBoundary/expired_account/query (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.026s

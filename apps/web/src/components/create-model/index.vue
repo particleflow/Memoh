@@ -162,7 +162,6 @@
                which tiers the model accepts and whether it can be turned off. -->
           <FieldStack
             v-if="selectedType === 'chat' && selectedCompat.includes('reasoning') && !alwaysThinking"
-            :label="$t('models.reasoningEfforts')"
           >
             <Select
               :model-value="selectedEfforts"
@@ -171,7 +170,6 @@
             >
               <SelectTrigger
                 class="w-full"
-                :aria-label="$t('models.reasoningEfforts')"
               >
                 <SelectValue :placeholder="$t('models.reasoningEffortsPlaceholder')" />
               </SelectTrigger>

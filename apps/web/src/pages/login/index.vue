@@ -24,9 +24,6 @@
         <h1 class="text-display font-semibold text-foreground">
           {{ $t('auth.pageTitle') }}
         </h1>
-        <p class="max-w-[18rem] text-sm text-muted-foreground">
-          {{ $t('auth.pageSubtitle') }}
-        </p>
       </div>
 
       <!-- 两字段 + Continue 等距 gap-2.5(不学 SaaS 密码步拉开 CTA)。

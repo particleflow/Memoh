@@ -18,6 +18,10 @@ const QUICK_ACTION_SLASH_TEXT: Record<string, string> = {
   'skill.list': '/skill list',
 }
 
+export function isConversationResetCommand(command: string): boolean {
+  return ['new', 'reset', 'clear'].includes(command.trim().replace(/^\//, '').split(/\s+/)[0]?.toLowerCase() ?? '')
+}
+
 function commandResultItemKind(item: CommandActionListItem): string {
   return item.kind?.trim().toLowerCase() ?? ''
 }
@@ -50,6 +54,7 @@ export function resolveCommandResultSelection(
       : null
   }
   if (kind !== 'quick_action' || isCurrentQuickAction(item, currentActionID)) return null
+  if (isConversationResetCommand(id) || isConversationResetCommand(item.title)) return null
 
   const knownText = id ? QUICK_ACTION_SLASH_TEXT[id] : ''
   if (knownText) return { kind: 'quick_action', id, text: knownText }

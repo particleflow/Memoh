@@ -1,0 +1,47 @@
+{
+  "base": "eb1a9634c37097455f0eb055d791bc16598ef56d",
+  "platform": "linux/amd64",
+  "go": "1.25.7",
+  "isolated_powershell": "7.4.6",
+  "golangci_lint": "2.10.1",
+  "checks": [
+    {
+      "name": "tests-final",
+      "argv": [
+        "go",
+        "test",
+        "./internal/agenvo",
+        "./internal/computertask",
+        "./internal/nativeherdr",
+        "-count=1",
+        "-timeout=5m"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "vet-final",
+      "argv": [
+        "go",
+        "vet",
+        "./internal/agenvo",
+        "./internal/computertask",
+        "./internal/nativeherdr"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "lint-verified",
+      "argv": [
+        "golangci-lint",
+        "run",
+        "./internal/agenvo/...",
+        "./internal/computertask/...",
+        "./internal/nativeherdr/..."
+      ],
+      "exit_code": 0
+    }
+  ],
+  "windows_powershell_51": "not_run_locally; existing native CI selector added",
+  "production_requests": 0,
+  "agent_core_diff": []
+}

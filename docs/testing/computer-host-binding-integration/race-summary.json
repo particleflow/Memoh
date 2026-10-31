@@ -1,0 +1,35 @@
+{
+  "base": "3d5f145c452dda5e17861d401de049b7ddded2e6",
+  "source": "695269a7b2a5f271dd0c61f3bc169831fcd369fa",
+  "integration": "2702147a2378282193d110ffb0734bcbebd6f7dc",
+  "test_pass_events": 33,
+  "top_level_passed": 5,
+  "failed": [],
+  "skipped": [],
+  "packages": [
+    {
+      "Time": "2026-10-27T10:18:50.221745382Z",
+      "Action": "pass",
+      "Package": "github.com/felinics/memoh/internal/agent/application",
+      "Elapsed": 1.093
+    },
+    {
+      "Time": "2026-10-27T10:18:51.937706046Z",
+      "Action": "pass",
+      "Package": "github.com/felinics/memoh/internal/agent/tool",
+      "Elapsed": 1.11
+    },
+    {
+      "Time": "2026-10-27T10:18:56.322922285Z",
+      "Action": "pass",
+      "Package": "github.com/felinics/memoh/internal/toolcontext",
+      "Elapsed": 1.019
+    },
+    {
+      "Time": "2026-10-27T10:18:56.360902336Z",
+      "Action": "pass",
+      "Package": "github.com/felinics/memoh/internal/computertask",
+      "Elapsed": 1.057
+    }
+  ]
+}

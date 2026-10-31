@@ -1,0 +1,174 @@
+{
+  "product_commit": "29fd18fdd81dca8e747206b4d5344e3d0a6338dc",
+  "product_tree": "0461380b0099fd0a6c6cfd0e8bcd5779ed786c24",
+  "parents": [
+    "150219908c316d75272b77c65148436fac3b7074",
+    "82691d889c2fed40df50f72d1b32232028dfaf93"
+  ],
+  "source_commits": [
+    "fcbe5c2941bff9def230189b49499daf91f1049d",
+    "82691d889c2fed40df50f72d1b32232028dfaf93"
+  ],
+  "byte_copy": "Published selected files are unchanged copies of local outputs. No raw server log, token, config, private fixture or binary is included.",
+  "environment": "Existing installed Node/pnpm, Go 1.26 and golangci-lint 2.10.1; NODE_OPTIONS=--no-experimental-webstorage; Go/linter concurrency 2; task-owned /tmp caches and build directory. Original public module cache was restored at its existing symlink target.",
+  "files": {
+    "aggregate.txt": {
+      "bytes": 4170,
+      "sha256": "33c3a5596f96810147025b3a8d0d2bf7f468efae90979d993239ac1482d64415",
+      "command": "node .husky/checks.mjs",
+      "exit": 0
+    },
+    "aggregate-timeout-env.txt": {
+      "bytes": 9913,
+      "sha256": "dce14d3e0fa76ee19b97480114efd9daccb2e3cb9d4f28d85dd4e032dc9d479b",
+      "command": "MEMOH_CHECK_TIMEOUT_SECONDS=600 node .husky/checks.mjs",
+      "exit": 1
+    },
+    "aggregate-missing-module-cache.txt": {
+      "bytes": 3655,
+      "sha256": "8dd0a7118169a24172f040bfeff2abf2e2a7c870cae205668310d8221a8560a9",
+      "command": "node .husky/checks.mjs (GOMODCACHE omitted)",
+      "exit": 1
+    },
+    "aggregate-dangling-cache.txt": {
+      "bytes": 3535,
+      "sha256": "24d985d049f3c0858b074546bda33c6d6479286db4df1de073684545f479a03b",
+      "command": "node .husky/checks.mjs (original GOMODCACHE symlink target absent)",
+      "exit": 1
+    },
+    "aggregate-compile-enospc.txt": {
+      "bytes": 11292,
+      "sha256": "2d4e2e4a9081467a5e502d67d6bb2a59b9c800c28167e396a4fcfab2c9c228b5",
+      "command": "node .husky/checks.mjs (compiler ENOSPC)",
+      "exit": 1
+    },
+    "web-tests.txt": {
+      "bytes": 339,
+      "sha256": "01b51cffec357c9427918f6b1571baa1712801e001f369e1d77925aa87344544",
+      "command": "pnpm exec vitest run apps/web/src/lib/api-client.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/components/bot-delegation-tasks.test.ts apps/web/src/pages/home/composables/useBotDelegations.test.ts apps/web/src/pages/home/composables/useBotDelegations.reconnect.test.ts apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts",
+      "exit": 0
+    },
+    "typecheck.txt": {
+      "bytes": 116,
+      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit": 0
+    },
+    "sdk-typecheck.txt": {
+      "bytes": 112,
+      "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+      "command": "pnpm --filter @memohai/sdk typecheck",
+      "exit": 0
+    },
+    "build-web.txt": {
+      "bytes": 76364,
+      "sha256": "8832e60cba385c961d579002dc0ee3a1601515d3fb415c9f3eef3b44e0946a79",
+      "command": "pnpm --filter @memohai/web build",
+      "exit": 0
+    },
+    "build-server.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "go build -p=2 -ldflags='-s -w' -o /tmp/delegation-run-integration/server ./cmd/agent",
+      "exit": 0
+    },
+    "build-server-enospc.txt": {
+      "bytes": 2953,
+      "sha256": "5b3e86b8bb2af6a8d43fece5c23e7519e2d940e1650bc5d62f1922b275a20967",
+      "command": "go build -p=2 -ldflags='-s -w' -o /tmp/delegation-run-integration/server ./cmd/agent",
+      "exit": 1
+    },
+    "core.txt": {
+      "bytes": 95,
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+      "command": "bash scripts/check-agent-core-boundary.sh",
+      "exit": 0
+    },
+    "ui-contract.txt": {
+      "bytes": 1169,
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit": 0
+    },
+    "postgres.txt": {
+      "bytes": 588,
+      "sha256": "6d9cc23e052df1d361f3ce2656467bd0a5be1c8ed1f21758fb7aad35f2fbfbd6",
+      "command": "python3 /tmp/delegation-run-integration/postgres-check.py",
+      "exit": 0
+    },
+    "start-current.txt": {
+      "bytes": 135,
+      "sha256": "118975bba4cd75b8fc2c4f8c4a2968705c0f3ca42f8cecf4a8564c6fca1e06e1",
+      "command": "python3 /tmp/delegation-run-integration/start-current.py (existing owned test server replacement)",
+      "exit": 0
+    },
+    "browser.txt": {
+      "bytes": 483,
+      "sha256": "b6a274150a9bce0409894e6156ce64a00b0a001112bf23218ed44d538d908775",
+      "command": "node /tmp/delegation-run-integration/browser.mjs (published script)",
+      "exit": 0
+    },
+    "browser-history-probe.txt": {
+      "bytes": 721,
+      "sha256": "a008b6ae6262eb72a2a84e1b6f649f0c94425a0fe4381fab9a1bf451cb0e4ce0",
+      "command": "node /tmp/delegation-run-integration/browser.mjs (initial incorrect history endpoint matcher)",
+      "exit": 1
+    },
+    "browser-missing-fixture-asset.txt": {
+      "bytes": 450,
+      "sha256": "dd1cd4341d6c53a415be789b705374fbe061478694520d8f0f4a02bf73937b9c",
+      "command": "node /tmp/delegation-run-integration/browser.mjs (first existing fixture referenced missing original)",
+      "exit": 1
+    },
+    "browser-proof.json": {
+      "bytes": 300,
+      "sha256": "d8043f4d05fa5d0fb0555a266a4b7276cdd7a0bf33b3169650b6c27d66585d63"
+    },
+    "contract-proof.json": {
+      "bytes": 419,
+      "sha256": "95343d61a78dec273b1ca1b2f5c8c0ebc7e353c7b9cb896452bf6ac2516d5dd9"
+    },
+    "persistence-proof.json": {
+      "bytes": 289,
+      "sha256": "71e6f0e229a2c9cb354e1e06a94940838297c565edc55e11beb1e977cdeb22a1"
+    },
+    "cache-cleanup.json": {
+      "bytes": 1541,
+      "sha256": "a7b463a685f9e270ca49e2a76080e8c1295533f9a3f610b9c4505fd325015c2e"
+    },
+    "cache-cleanup-after-compile.json": {
+      "bytes": 13873,
+      "sha256": "683f9110bdc3617d6ed2e728d0d0c51960898f474d0a34430b2e9ded32a146a5"
+    },
+    "cache-cleanup-after-link.json": {
+      "bytes": 12839,
+      "sha256": "ac80ee1fc3948e49636105eec59e5134cc7ac1c96ecee290c0b72057d039d1f2"
+    },
+    "browser.mjs": {
+      "bytes": 5343,
+      "sha256": "26825dbb491718c50a93aa498a0d168d9af41b3d8210af9269e297cf0a4dcb00"
+    },
+    "postgres-check.py": {
+      "bytes": 886,
+      "sha256": "7014823c3116f7bcd854d5b1c7e8e87ede3721f8347df7083b8880765d85f083"
+    },
+    "specialist-run.png": {
+      "bytes": 112695,
+      "sha256": "e4e797f59df2aa25de4294a9a3cfc48c9f6502c90432b0e11c65ed340fdebf27"
+    },
+    "root-and-children.png": {
+      "bytes": 107846,
+      "sha256": "d391851977bfeeb0b258c81b9c2901d781e6f3824325ed9103ffa549e1aa4298"
+    },
+    "specialist-native-history.png": {
+      "bytes": 61918,
+      "sha256": "d2ace20671d491c7156eeb3947d1e39811cbcb04e0bad513a47e0338446264ce"
+    },
+    "evidence-lint.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "pnpm exec eslint docs/testing/specialist-run-integration/browser.mjs",
+      "exit": 0
+    }
+  }
+}

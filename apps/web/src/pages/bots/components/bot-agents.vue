@@ -36,9 +36,6 @@
             <p class="text-control font-medium text-foreground">
               {{ t('bots.agent.emptyTitle') }}
             </p>
-            <p class="mt-1 text-body text-muted-foreground">
-              {{ t('bots.agent.emptyDescription') }}
-            </p>
           </div>
           <Button
             variant="outline"
@@ -145,7 +142,6 @@
           <SettingsSection v-if="selectedAgent">
             <SettingsRow
               :label="t('common.name')"
-              :description="t('bots.agent.nameDescription')"
               stack="sm"
             >
               <Input

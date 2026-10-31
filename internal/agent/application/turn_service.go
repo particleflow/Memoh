@@ -14,6 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/errs"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 var _ turn.Service = (*Service)(nil)
@@ -37,9 +38,10 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 	if s.allowedTeam != "" && cmd.TeamID != s.allowedTeam {
 		return nil, fmt.Errorf("%w: %s", turn.ErrTeamNotServed, cmd.TeamID)
 	}
+	req := chatRequestFromCommand(cmd)
 	if s.delegationScope != nil {
 		var err error
-		ctx, _, err = s.delegationScope(ctx, chatRequestFromCommand(cmd))
+		ctx, req, err = s.delegationScope(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -47,6 +49,7 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 	if cmd.Mode == turn.ModeDiscuss && !s.discussRuntimeConfigured() {
 		return nil, errors.New("turn: discuss runtime not configured")
 	}
+	ctx = inputsource.WithContext(ctx, requestInputSource(req))
 
 	// The run context is cancellable by cause so a lost owner lease can stop
 	// execution with a reason, instead of a superseded owner racing the fence it
@@ -82,13 +85,12 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 		assets  = authorizedDelegationResultAssets(runCtx, cmd)
 	)
 
-	req := chatRequestFromCommand(cmd)
 	req.RunID = admission.RunID
 	req.RunHandle = admission.Handle
 	req.TurnID = admission.TurnID
 	req.TurnPosition = &admission.TurnPosition
 	req.InjectCh = injectCh
-	req.QueueSteerEnabled = injectCh != nil
+	req.QueueSteerEnabled = req.TaskResultReceipt == ""
 	req.OutboundAssetCollector = func() []turn.OutboundAssetRef {
 		assetMu.Lock()
 		defer assetMu.Unlock()

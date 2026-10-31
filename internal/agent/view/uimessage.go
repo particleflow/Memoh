@@ -6,6 +6,7 @@ import (
 
 	userinput "github.com/felinics/memoh/internal/agent/decision/input"
 	"github.com/felinics/memoh/internal/agent/turn"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 // UIMessageType identifies the frontend-friendly message block type.
@@ -130,6 +131,7 @@ type UIUserInput struct {
 
 // UITurn is the normalized chat turn used by the web frontend.
 type UITurn struct {
+	InputSource *inputsource.Source `json:"input_source,omitempty"`
 	// RuntimeForkable means this persisted turn has a runtime fork anchor.
 	// Session-level runtime support and access permissions still apply.
 	RuntimeForkable bool `json:"runtime_forkable"`

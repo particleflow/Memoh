@@ -1273,6 +1273,8 @@ func (q *Queries) ListTranscriptionModelsByProviderID(ctx context.Context, provi
 const listTranscriptionProviders = `-- name: ListTranscriptionProviders :many
 SELECT id, provider_template_id, name, client_type, icon, enable, config, metadata, created_at, updated_at, team_id FROM providers
 WHERE team_id = public.memoh_current_team_id() AND client_type IN (
+  'openai-completions',
+  'openai-responses',
   'openai-transcription',
   'openrouter-transcription',
   'elevenlabs-transcription',

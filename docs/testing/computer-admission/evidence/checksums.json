@@ -1,0 +1,167 @@
+[
+  {
+    "file": "unit.log",
+    "bytes": 2832,
+    "sha256": "6b04fa662f8005acb3b896c3300ab0f7be7d30121135d2dac40f73ee5090c2ec"
+  },
+  {
+    "file": "http-and-initial-catalog.log",
+    "bytes": 2126,
+    "sha256": "0d8c90fa543a8d7decbd4b6abf3c90ca2dcad30355801b0aab37f33926a0e8d7"
+  },
+  {
+    "file": "catalog-complete.log",
+    "bytes": 56,
+    "sha256": "f8b87ae96541efd34dd4ac463a0ae40493cc830c80437b3dcbdb781381bb4a6b"
+  },
+  {
+    "file": "postgres-initial.log",
+    "bytes": 1061,
+    "sha256": "6f1867db76b071220af00e6b6222fe0ba87ca2c0a51c2f36c7613b2df835487d"
+  },
+  {
+    "file": "postgres-test-compile-failure.log",
+    "bytes": 509,
+    "sha256": "b86031e80b2f287d30b6dea093c83e4da68d08c97abca18aa49dcd7ff99d3b89"
+  },
+  {
+    "file": "postgres-complete.log",
+    "bytes": 1474,
+    "sha256": "ca82838c3be98120362f84e995ba6fa4f72dd6ec43a135659a408f7d452ecb39"
+  },
+  {
+    "file": "postgres-race-gate.log",
+    "bytes": 9292,
+    "sha256": "fa33b324080820551ce522f6f7bd91b0d310a9cc1df059dce07d3665b922a24b"
+  },
+  {
+    "file": "lint-capacity-failure.log",
+    "bytes": 200,
+    "sha256": "f71f069afc87182aedd561679c3c1ddfa788a756c7961df870848b0465414241"
+  },
+  {
+    "file": "lint-corrections.log",
+    "bytes": 512,
+    "sha256": "c090d230abf14abfe2d616017a5f6f5a12a72d6d5378763f6867d61f31f4caf1"
+  },
+  {
+    "file": "lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "packages-before-locale-fix.log",
+    "bytes": 2182,
+    "sha256": "8b192973605246a207a50ad790051b7abbec3a8d0dbe90dae7c7a67e7695e2df"
+  },
+  {
+    "file": "aggregate.log",
+    "bytes": 13987,
+    "sha256": "45326a2fc479d75a5a2bdc2e33297cfe237c9340debc2da903793934aca4152d"
+  },
+  {
+    "file": "large-upload-low-space.log",
+    "bytes": 377,
+    "sha256": "fa0da77b530840b9c4e9809fc3ae1a54bfe4a826e774677d099a445988ad62bd"
+  },
+  {
+    "file": "large-upload-restored-space.log",
+    "bytes": 171,
+    "sha256": "46192f2d1760342f8fa83114ef36a532cb92480c1a6d82680a59d2a056afd0cb"
+  },
+  {
+    "file": "sdk-types.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "file": "web-types.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  },
+  {
+    "file": "desktop-dependencies-missing.log",
+    "bytes": 2521,
+    "sha256": "828710a51f11ed497037c6c7b3a5e2d4c028e9a0e565bf5cf07da4ee3c5b72ea"
+  },
+  {
+    "file": "desktop-node-pass-web-path-missing.log",
+    "bytes": 1000,
+    "sha256": "b773c10c52dbb42c7a449ae8c28be4a59e831a141a85bbb3c2d702de78224f43"
+  },
+  {
+    "file": "desktop-web-types.log",
+    "bytes": 146,
+    "sha256": "f214ba4eaeee3629b65c03c724b28e616aa9273f3e6a79deb5b06cd9eccd43ff"
+  },
+  {
+    "file": "web-i18n.log",
+    "bytes": 316,
+    "sha256": "4e2bf27a5cabea81b16367a05cd7c288a1d24ee52090c1944e4275680703eb04"
+  },
+  {
+    "file": "runtime.log",
+    "bytes": 163,
+    "sha256": "e65dd789d9e3243aa9c04812729705b1a94cf274f2c09b8b60910942981eb093"
+  },
+  {
+    "file": "runtime-browser.log",
+    "bytes": 515,
+    "sha256": "356486b2a328faa594294d5b8e689c2ded6c9b7b21ae601fe948d9efa8ec5cbe"
+  },
+  {
+    "file": "runtime-restart-socket-failure.log",
+    "bytes": 1226,
+    "sha256": "da68e3e7fcd30a6ad8e564d1cfbcb8f6a87a05d6dbddd12d6cbc7e5d741da774"
+  },
+  {
+    "file": "runtime-restart-browser-final.log",
+    "bytes": 606,
+    "sha256": "9c89da0a4bfdceef89df14a2c888ecc199d0f78d192165288610268c36cf997d"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 336,
+    "sha256": "fa2ab6ed1aedf17fb86bef36c144acd321c322a0b5b48c2a36a500c47351504c"
+  },
+  {
+    "file": "core.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+  },
+  {
+    "file": "task-while-paused.png",
+    "bytes": 105398,
+    "sha256": "386eee937bf76ce2fd88a8d26a6dba8105d8e023785a92b5d52cb8f93da252bd"
+  },
+  {
+    "file": "lan-combined-race.log",
+    "bytes": 4072,
+    "sha256": "c946db0de98fba4ff9c2829d84c5baf5c7ca6108a2fd2f1f402b51c7ee1214c7"
+  },
+  {
+    "file": "lan-combined-lint.log",
+    "bytes": 104,
+    "sha256": "4b147885bde10e8d4b54e2426179420745e0584e87c281623aafd2d2f64ba7ff"
+  },
+  {
+    "file": "lan-combined-lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "lan-combined-cli.log",
+    "bytes": 56,
+    "sha256": "16a9be74bfafc72b5733f7f3b892a5e3f82e282a5360018c1884c3f3f009c6cb"
+  },
+  {
+    "file": "lan-combined-build.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "combined-core.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+  }
+]

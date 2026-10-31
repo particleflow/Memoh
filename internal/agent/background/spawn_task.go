@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -69,6 +70,19 @@ type AgentTaskResult struct {
 // to background task status immediately but do not get a cancelable run context until
 // MarkAgentTaskRunning is called.
 func (m *Manager) StartAgentTask(parentCtx context.Context, botID, sessionID, agentID, agentSessionID, message, description string, queued bool) (string, context.Context, error) {
+	return m.restoreAgentTask(parentCtx, "", botID, sessionID, agentID, agentSessionID, message, description, queued)
+}
+
+// RestoreAgentTask installs a host-persisted task identity before execution.
+// It never replaces an existing in-process task or generates a new identity.
+func (m *Manager) RestoreAgentTask(parentCtx context.Context, taskID, botID, sessionID, agentID, agentSessionID, message, description string, queued bool) (string, context.Context, error) {
+	if taskID == "" {
+		return "", nil, errors.New("persisted task identity is required")
+	}
+	return m.restoreAgentTask(parentCtx, taskID, botID, sessionID, agentID, agentSessionID, message, description, queued)
+}
+
+func (m *Manager) restoreAgentTask(parentCtx context.Context, taskID, botID, sessionID, agentID, agentSessionID, message, description string, queued bool) (string, context.Context, error) {
 	status := TaskRunning
 	var (
 		ctx    context.Context
@@ -81,7 +95,16 @@ func (m *Manager) StartAgentTask(parentCtx context.Context, botID, sessionID, ag
 	}
 
 	m.mu.Lock()
-	taskID := m.newTaskIDLocked(botID)
+	if taskID == "" {
+		taskID = m.newTaskIDLocked(botID)
+	}
+	if _, exists := m.tasks[taskID]; exists {
+		m.mu.Unlock()
+		if cancel != nil {
+			cancel()
+		}
+		return "", nil, errors.New("task identity already installed")
+	}
 	task := &Task{
 		ID:             taskID,
 		Kind:           KindAgent,
@@ -195,6 +218,8 @@ func (m *Manager) CompleteAgentTask(taskID string, result AgentTaskResult) {
 	switch status {
 	case TaskKilled:
 		eventType = TaskEventKilled
+	case TaskUnknown:
+		eventType = TaskEventUnknown
 	case TaskCompleted:
 	default:
 		eventType = TaskEventFailed

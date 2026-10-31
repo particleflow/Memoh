@@ -7,10 +7,15 @@ import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
 import { client } from '@memohai/sdk/client'
-vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'wrong-global-bot' }) }))
+const navigation = vi.hoisted(() => ({ bot: 'wrong-global-bot', select: vi.fn(), push: vi.fn(), open: vi.fn() }))
+vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ get currentBotId() { return navigation.bot }, selectBot: navigation.select, runtimeObservationFor: () => ({ synchronized: false, run: null }) }) }))
+vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChat: navigation.open }) }))
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: navigation.push }) }))
 
-const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn(), deliveries: vi.fn() }))
+const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn(), deliveries: vi.fn(), session: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdSessionsBySessionId: api.session,
+  getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservation: vi.fn().mockResolvedValue({ data: { operation_id: 'operation', native: { availability: 'connection_unavailable' } } }),
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries: api.deliveries,
   postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDelivery: api.retryDelivery,
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
@@ -53,7 +58,7 @@ async function open(group = 'execution', selectDetail = true) {
   app.use(createI18n({ legacy: false, locale: 'en', messages: { en } }))
   app.mount(root)
   await settled()
-  button('Tasks').click()
+  button(en.chat.tasks.records).click()
   await settled()
   if (group === 'delegations') {
     await selectGroup('Specialist Bot handoffs')
@@ -64,6 +69,10 @@ async function open(group = 'execution', selectDetail = true) {
 
 describe('task detail identity and rendering boundary', () => {
   beforeEach(() => {
+  navigation.bot = 'wrong-global-bot'
+  navigation.open.mockReset(); navigation.push.mockReset().mockResolvedValue(undefined)
+  navigation.select.mockReset().mockImplementation(async (bot: string) => { navigation.bot = bot })
+  api.session.mockReset().mockResolvedValue({ data: { id: 'specialist-session', bot_id: 'specialist-a', title: 'Synthetic specialist' } })
     vi.useFakeTimers()
     vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
     client.setConfig({ baseUrl: '/api' })
@@ -81,6 +90,73 @@ describe('task detail identity and rendering boundary', () => {
     root?.remove()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it('shows the specialist root run with no children and opens its native history without dispatch', async () => {
+    const withRun = { ...delegation, target_session_id: 'specialist-session', target_run_id: 'native-run-a', target_run_state: 'completed' as const }
+    api.delegationDetail.mockResolvedValue({ data: withRun })
+    api.list.mockResolvedValue({ data: { items: [] } })
+    await open('delegations')
+    expect(document.body.textContent).toContain('native-run-a')
+    button(en.chat.delegations.openTasks).click(); await settled()
+    expect(document.body.textContent).toContain(en.chat.delegations.nativeRun)
+    expect(document.body.textContent).toContain('native-run-a')
+    expect(document.body.textContent).toContain(en.chat.delegations.childTasks)
+    button(en.chat.delegations.openHistory).click(); await settled()
+    expect(api.session).toHaveBeenCalledWith(expect.objectContaining({ path: { bot_id: 'specialist-a', session_id: 'specialist-session' }, cache: 'no-store' }))
+    expect(navigation.select).toHaveBeenCalledWith('specialist-a')
+    expect(navigation.open).toHaveBeenCalledWith({ sessionId: 'specialist-session', title: 'Synthetic specialist' })
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+  })
+
+  it.each([401, 403, 404, 503])('keeps native history closed after target session rejection %s', async status => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session', target_run_id: 'native-run-a' } })
+    api.session.mockRejectedValue({ status, message: 'PRIVATE' })
+    await open('delegations')
+    button(en.chat.delegations.openHistory).click(); await settled()
+    expect(navigation.select).not.toHaveBeenCalled()
+    expect(navigation.open).not.toHaveBeenCalled()
+    expect(document.body.textContent).not.toContain('PRIVATE')
+  })
+
+  it('clears an unconfirmed root run on disconnect and restores the same delegation/run after refresh', async () => {
+    const withRun = { ...delegation, target_session_id: 'specialist-session', target_run_id: 'native-run-a', target_run_state: 'completed' as const }
+    api.delegationDetail.mockResolvedValue({ data: withRun })
+    api.list.mockResolvedValue({ data: { items: [] } })
+    await open('delegations')
+    button(en.chat.delegations.openTasks).click(); await settled()
+    expect(document.body.textContent).toContain('native-run-a')
+    api.delegationDetail.mockRejectedValue({ status: 503 })
+    await vi.advanceTimersByTimeAsync(5000); await settled()
+    expect(document.body.textContent).not.toContain('native-run-a')
+    api.delegationDetail.mockResolvedValue({ data: withRun })
+    button(en.chat.tasks.reload).click(); await settled()
+    expect(document.body.textContent).toContain('native-run-a')
+    expect(api.delegationDetail.mock.lastCall![0].path.delegation_id).toBe('handoff-a')
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+    expect(navigation.select).not.toHaveBeenCalled()
+  })
+
+  it('retires pending native history navigation on logout', async () => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session', target_run_id: 'native-run-a' } })
+    let resolve!: (value: unknown) => void
+    api.session.mockReturnValue(new Promise(done => { resolve = done }))
+    await open('delegations')
+    button(en.chat.delegations.openHistory).click(); await settled()
+    notifyAuthSessionCleared('logout'); await settled()
+    resolve({ data: { id: 'specialist-session', bot_id: 'specialist-a' } }); await settled()
+    expect(navigation.select).not.toHaveBeenCalled()
+    expect(navigation.open).not.toHaveBeenCalled()
+  })
+
+  it('rejects a changed admitted run during native history revalidation', async () => {
+    const withRun = { ...delegation, target_session_id: 'specialist-session', target_run_id: 'native-run-a' }
+    api.delegationDetail.mockResolvedValue({ data: withRun })
+    await open('delegations')
+    api.delegationDetail.mockResolvedValue({ data: { ...withRun, target_run_id: 'different-run' } })
+    button(en.chat.delegations.openHistory).click(); await settled()
+    expect(api.session).not.toHaveBeenCalled()
+    expect(navigation.open).not.toHaveBeenCalled()
   })
 
   it('shows all recorded files automatically, with pending and failed separate from task completion', async () => {
@@ -105,7 +181,7 @@ describe('task detail identity and rendering boundary', () => {
   })
 
   it.each([
-    { status: 404, code: 'http.not_found', expected: en.chat.tasks.files.unsupported },
+    { status: 404, code: 'http.not_found', expected: en.errors.http.not_found },
     { status: 404, code: 'session.not_found', expected: en.chat.tasks.inaccessible },
     { status: 403, code: 'http.forbidden', expected: en.errors.http.forbidden },
   ])('keeps task summary but distinguishes file observation failure: $code', async ({ status, code, expected }) => {
@@ -146,7 +222,7 @@ describe('task detail identity and rendering boundary', () => {
   })
 
   it.each([
-    { error: { status: 404, code: 'http.not_found' }, expected: en.chat.tasks.unsupported },
+    { error: { status: 404, code: 'http.not_found' }, expected: en.errors.http.not_found },
     { error: { status: 404, code: 'session.not_found' }, expected: en.chat.tasks.inaccessible },
     { error: { status: 403, code: 'http.forbidden' }, expected: en.errors.http.forbidden },
     { error: { status: 401, code: 'http.unauthorized' }, expected: en.errors.http.unauthorized },
@@ -212,7 +288,7 @@ describe('task detail identity and rendering boundary', () => {
     root = document.createElement('div'); document.body.append(root)
     app = createApp({ setup: () => () => h(SessionTasks, props.value) })
     app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root)
-    await settled(); button('Tasks').click(); await settled()
+    await settled(); button(en.chat.tasks.records).click(); await settled()
     await selectGroup('Specialist Bot handoffs'); button(/Target Bot/).click(); await settled()
     let finish!: (value: { data: { items: SessiontaskTask[] } }) => void
     api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
@@ -243,7 +319,7 @@ describe('task detail identity and rendering boundary', () => {
     button(en.chat.delegations.retryDelivery).click(); await settled()
     expect(api.retryDelivery).toHaveBeenCalledTimes(1)
     expect(api.retryDelivery.mock.calls[0]![0].path).toEqual({ bot_id: 'bot', session_id: 'parent', delegation_id: 'handoff-a' })
-    expect(document.body.textContent).toContain(en.chat.delegations.deliveryAccepted)
+    expect(document.body.textContent).not.toContain(en.chat.delegations.deliveryAccepted)
     expect(document.body.textContent).toContain('Delivery request response · Accepted')
     expect([...document.querySelectorAll('button')].some(b => b.textContent?.trim() === en.chat.delegations.retryDelivery)).toBe(false)
   })
@@ -305,7 +381,7 @@ describe('task detail identity and rendering boundary', () => {
     document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settled(); await vi.advanceTimersByTimeAsync(300); await nextTick()
     expect(document.querySelector('[role=dialog]')).toBeNull()
-    expect(document.activeElement).toBe(button('Tasks'))
+    expect(document.activeElement).toBe(button(en.chat.tasks.records))
   })
 
   it('closes specialist detail and ignores its late reply after same-tab logout', async () => {
@@ -330,7 +406,7 @@ describe('task detail identity and rendering boundary', () => {
     button(/Subagent/).click(); await settled()
     expect(document.body.textContent).toContain('Run completed')
     expect(document.body.textContent).toContain('child own output')
-    expect(document.body.textContent).toContain('Updated by polling')
+    expect(document.body.textContent).not.toContain('Updated by polling')
     api.detail.mockResolvedValue({ data: { ...child, status: 'accepted', run_id: 'next-run', content_available: false, result_summary: undefined } })
     await vi.advanceTimersByTimeAsync(5000); await settled()
     expect(document.body.textContent).toContain('Accepted; waiting to run')

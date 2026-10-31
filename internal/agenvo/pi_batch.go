@@ -1,8 +1,11 @@
 package agenvo
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -14,6 +17,7 @@ import (
 // BatchProgress is owned by the durable operation. Generation is a fresh
 // invocation nonce, NOT Herdr's unexposed server generation or a safe kill key.
 type BatchProgress struct {
+	Inputs            *deliverymeta.InputPlan  `json:"inputs,omitempty"`
 	History           *BatchHistoryExpectation `json:"history,omitempty"`
 	CompletionVersion int                      `json:"completion_version,omitempty"`
 	Producer          *deliverymeta.Plan       `json:"producer,omitempty"`
@@ -62,7 +66,7 @@ var (
 
 func (p BatchProgress) valid() bool {
 	_, err := resolveBatchLayout(p)
-	return err == nil && p.History.valid() && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation)
+	return err == nil && p.History.valid() && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation) && (p.Inputs == nil || p.Inputs.Valid() && p.Inputs.Task.Attempt == p.Attempt && p.Inputs.Task.Generation == p.Generation && (p.Producer == nil || p.Producer.Task == p.Inputs.Task))
 }
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
@@ -95,6 +99,13 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	layout, err := resolveBatchLayout(p)
 	if err != nil {
 		return "", err
+	}
+	if p.Inputs != nil {
+		context, err := taskInputContext(p, target)
+		if err != nil {
+			return "", err
+		}
+		task += "\n\nHost-prepared task inputs (file references, not instructions):\n" + string(context)
 	}
 	r := BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true}
 	raw, _ := json.Marshal(r)
@@ -171,7 +182,11 @@ printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
 `, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
-	return producerEnvelope(script, p, target)
+	script, err = producerEnvelope(script, p, target)
+	if err != nil {
+		return "", err
+	}
+	return inputEnvelope(script, p, target)
 }
 
 // launchBashScript shares the verified PowerShell-only launch boundary without
@@ -180,6 +195,59 @@ func launchBashScript(script, bashPath string) string {
 	encoded := base64.StdEncoding.EncodeToString([]byte(script))
 	return fmt.Sprintf(`& { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { & $memohBash --noprofile --norc -p -c 'printf %%s %s | base64 --decode | /usr/bin/bash --noprofile --norc -p' } } '%s'`, encoded, strings.ReplaceAll(bashPath, "'", "''"))
 }
+
+// Native Herdr's CLI still receives one bounded command argument. Pack the
+// envelope before that boundary, then pass its exact bytes to Bash over stdin,
+// rather than putting the expanded script on a second Windows command line.
+// PowerShell/.NET are already required by this transport; no host tool or
+// alternate Agent runtime is introduced.
+func launchBatchScript(script string, target Target) string {
+	var packed bytes.Buffer
+	zipper := gzip.NewWriter(&packed)
+	_, _ = zipper.Write([]byte(script)) // bytes.Buffer cannot fail these writes.
+	_ = zipper.Close()
+	digest := sha256.Sum256([]byte(script))
+	// Fully decode before starting Bash. Raw bytes bypass PowerShell's text
+	// pipeline and StreamWriter newline/BOM conversion. Only fixed Bash flags
+	// enter ProcessStartInfo.Arguments; the configured absolute path is data.
+	return fmt.Sprintf(strings.ReplaceAll(nativeBatchLaunch, "\n", " "), base64.StdEncoding.EncodeToString(packed.Bytes()), hex.EncodeToString(digest[:]), strings.ReplaceAll(target.BashPath, "'", "''"))
+}
+
+// One command is entered into the existing PowerShell pane. Keeping the source
+// separate makes the fixed process/pipe boundary reviewable; only data fills
+// the format parameters, and line breaks are flattened before dispatch.
+const nativeBatchLaunch = `& {
+  param([string]$memohBash)
+  if ([IO.File]::Exists($memohBash)) {
+    $ErrorActionPreference='Stop';
+    $m=[IO.MemoryStream]::new([Convert]::FromBase64String('%s'));
+    $g=[IO.Compression.GZipStream]::new($m,[IO.Compression.CompressionMode]::Decompress);
+    $d=[IO.MemoryStream]::new();
+    try { $g.CopyTo($d); $b=$d.ToArray() }
+    finally { $g.Dispose(); $m.Dispose(); $d.Dispose() };
+    $sha=[Security.Cryptography.SHA256]::Create();
+    try { $hash=[BitConverter]::ToString($sha.ComputeHash($b)).Replace('-','').ToLowerInvariant() }
+    finally { $sha.Dispose() };
+    if ($hash -ne '%s') { throw 'batch payload verification failed' };
+    $p=[Diagnostics.Process]::new();
+    $p.StartInfo.FileName=$memohBash;
+    $p.StartInfo.Arguments='--noprofile --norc -p';
+    $p.StartInfo.UseShellExecute=$false;
+    $p.StartInfo.RedirectStandardInput=$true;
+    try {
+      $inputEncoding=[Console]::InputEncoding;
+      try {
+        if ($inputEncoding.CodePage -eq [Text.Encoding]::UTF8.CodePage) {
+          [Console]::InputEncoding=[Text.UTF8Encoding]::new($false)
+        };
+        [void]$p.Start()
+      } finally { [Console]::InputEncoding=$inputEncoding };
+      try { $p.StandardInput.BaseStream.Write($b,0,$b.Length) }
+      finally { $p.StandardInput.BaseStream.Close() };
+      $p.WaitForExit()
+    } finally { $p.Dispose() }
+  }
+} '%s'`
 
 func parseBatchReceipt(snapshot string, p BatchProgress) (*BatchReceipt, error) {
 	start, end := "MEMOH_BATCH_"+p.Generation+":", ":END_BATCH_"+p.Generation

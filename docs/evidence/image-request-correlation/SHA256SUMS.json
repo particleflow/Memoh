@@ -1,0 +1,9 @@
+{
+  "README.md": "b021051b73c1fc4d4d4b76c9a610aeb3e2171b4e08f854ce458c32d7e46c4c0e",
+  "initial-fixture-build-failure.txt": "8889d25047009c7490f6be144cb9dc078de021744985d7e99fe41c5da1b19ec4",
+  "initial-lint-failure.txt": "0b3f2742f4e7f1ba3eb392e51ce4fc7141b760e92def4e88705a502798876ec3",
+  "lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "package-tests.txt": "208ed29109b29e36efcd490f27a55605d46043f689e4a647c299712c1d5089ad",
+  "race.txt": "4f1b7fe88a63baa222c4695ee3dbc90dcc71f3510ca1ad3711713a5a65a8a0d6",
+  "scenarios.txt": "c16c2551ca8273d56f9c827b607b5a10c6ca40f361f5f595ca2b78fa6e07c730"
+}

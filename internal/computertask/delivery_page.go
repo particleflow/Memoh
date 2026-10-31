@@ -107,7 +107,7 @@ func (s *DeliveryService) Page(ctx context.Context, operation, after string) (De
 }
 
 func (s *Service) deliveryPage(ctx context.Context, b toolcontext.ComputerBinding, id, after string) (DeliveryPage, error) {
-	r, _, err := s.load(ctx, b, id)
+	r, _, err := s.loadHistory(ctx, b, id)
 	if err != nil {
 		return DeliveryPage{}, err
 	}

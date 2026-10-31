@@ -1,0 +1,511 @@
+{
+  "phase": "before-cold",
+  "bot": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+  "session": "6f25432a-e437-4a17-93aa-8ed808624def",
+  "http": [
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "session_id": null,
+      "status": 200,
+      "at_ms": 4258.39
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "session_id": null,
+      "status": 200,
+      "at_ms": 4471.36
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "session_id": [
+        "c7b62199-0c98-4fd4-9b66-22dc17aa4f72"
+      ],
+      "status": 200,
+      "at_ms": 4469.06,
+      "items": 0,
+      "ids": []
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "session_id": [
+        "6f25432a-e437-4a17-93aa-8ed808624def"
+      ],
+      "status": 200,
+      "at_ms": 4469.65,
+      "items": 2,
+      "ids": [
+        "a09d7a64-2c22-4cdd-9fb6-8d0f78444dce",
+        "0eb0c8d8-f956-4769-b1a7-96799ece4d7a"
+      ]
+    }
+  ],
+  "sockets": [
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/web/ws",
+      "at_ms": 4459.96
+    }
+  ],
+  "frames": [
+    {
+      "direction": "received",
+      "type": "connected",
+      "session_id": null,
+      "snapshot_bot": null,
+      "snapshot_session": null,
+      "at_ms": 1376.23
+    },
+    {
+      "direction": "received",
+      "type": "full-reload",
+      "session_id": null,
+      "snapshot_bot": null,
+      "snapshot_session": null,
+      "at_ms": 1384.4
+    },
+    {
+      "direction": "received",
+      "type": "connected",
+      "session_id": null,
+      "snapshot_bot": null,
+      "snapshot_session": null,
+      "at_ms": 1550.16
+    },
+    {
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "snapshot_bot": null,
+      "snapshot_session": null,
+      "at_ms": 4472.7
+    },
+    {
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "snapshot_bot": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+      "snapshot_session": "6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 4575.38
+    }
+  ],
+  "samples": [
+    {
+      "visible": [
+        false,
+        false
+      ],
+      "contentRows": 0,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 4227.74
+    },
+    {
+      "visible": [
+        false,
+        false
+      ],
+      "contentRows": 0,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 4470.27
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 4676.91
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 4881.55
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 5089.57
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 5296.66
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 5517.19
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 5722.03
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 5926.94
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 6130.36
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 6342.68
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 6549.76
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 6755.62
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 6958.0
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 7160.68
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 7362.78
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 7565.67
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 7768.37
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 7971.24
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 8174.45
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 8377.47
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 8580.21
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 8784.42
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 8987.51
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 9190.55
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 9393.83
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 9596.84
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 9798.88
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 10003.64
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 10206.54
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 10410.67
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 10616.05
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 10820.7
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 11023.49
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 11227.18
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 11432.36
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 11636.07
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 11840.09
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 12043.15
+    },
+    {
+      "visible": [
+        true,
+        true
+      ],
+      "contentRows": 2,
+      "skeletons": 0,
+      "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+      "at_ms": 12247.49
+    }
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact"
+    }
+  ],
+  "final": {
+    "visible": [
+      true,
+      true
+    ],
+    "contentRows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+    "at_ms": 12247.49
+  },
+  "page_title": "Memoh \u00b7 History A1",
+  "inference_frames": []
+}

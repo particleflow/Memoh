@@ -157,7 +157,6 @@ const submit = form.handleSubmit(({ version }) => {
           >
             <FieldStack
               :label="t('bots.dependencies.confirm.version')"
-              :help="t('bots.dependencies.confirm.versionHelp')"
             >
               <FormControl>
                 <Input

@@ -25,7 +25,10 @@
           </Select>
         </SettingsRow>
 
-        <SettingsRow :label="t('settings.theme')">
+        <SettingsRow
+          :label="t('settings.theme')"
+          stack="sm"
+        >
           <SegmentedControl
             :model-value="theme"
             :items="themeItems"
@@ -36,7 +39,9 @@
               <component
                 :is="themeIcons[item.value]"
                 class="size-4"
+                aria-hidden="true"
               />
+              <span>{{ t(`settings.theme${item.value.charAt(0).toUpperCase()}${item.value.slice(1)}`) }}</span>
             </template>
           </SegmentedControl>
         </SettingsRow>
@@ -90,7 +95,6 @@
       <SettingsSection :title="t('settings.appearance.typography')">
         <SettingsRow
           :label="t('settings.appearance.uiFontSize')"
-          :description="t('settings.appearance.uiFontSizeDescription')"
         >
           <!-- NumberField emits only on commit (blur/Enter/stepper); reka
                clamps to min/max first. An emptied field commits undefined,
@@ -110,7 +114,6 @@
 
         <SettingsRow
           :label="t('settings.appearance.codeFontSize')"
-          :description="t('settings.appearance.codeFontSizeDescription')"
         >
           <NumberField
             id="code-font-size"
@@ -127,7 +130,6 @@
 
         <SettingsRow
           :label="t('settings.appearance.uiFontFamily')"
-          :description="t('settings.appearance.uiFontFamilyDescription')"
         >
           <Input
             id="ui-font-family"
@@ -143,7 +145,6 @@
 
         <SettingsRow
           :label="t('settings.appearance.codeFontFamily')"
-          :description="t('settings.appearance.codeFontFamilyDescription')"
         >
           <Input
             id="code-font-family"
@@ -196,9 +197,6 @@
           <h3 class="text-sm font-medium text-foreground">
             {{ t('settings.appearance.codeHighlight') }}
           </h3>
-          <p class="text-xs text-muted-foreground">
-            {{ t('settings.appearance.codeHighlightDescription') }}
-          </p>
           <div class="grid gap-3 sm:grid-cols-2">
             <div class="space-y-2">
               <SearchableSelectPopover
@@ -259,9 +257,6 @@
               <h3 class="text-sm font-medium text-foreground">
                 {{ t('settings.appearance.mermaidTheme') }}
               </h3>
-              <p class="mt-0.5 text-xs text-muted-foreground">
-                {{ t('settings.appearance.mermaidThemeDescription') }}
-              </p>
             </div>
             <div class="shrink-0">
               <Select

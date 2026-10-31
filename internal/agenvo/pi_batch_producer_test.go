@@ -18,9 +18,28 @@ import (
 )
 
 // Synthetic Bash utilities, not a Herdr installation or Windows acceptance.
-func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T)          { exerciseBatchProducer(t, false) }
-func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) { exerciseBatchProducer(t, true) }
-func exerciseBatchProducer(t *testing.T, multiple bool) {
+func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T) {
+	exerciseBatchProducer(t, false, true)
+}
+
+func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) {
+	exerciseBatchProducer(t, true, true)
+}
+
+// Regression for the disabled-plugin completion reproduction supplied by the
+// file integration lane (ddb7872e). The actual generated envelope must collect.
+func TestNativeCompletionRegistersWithoutLegacyPlugin(t *testing.T) {
+	exerciseBatchProducer(t, true, true)
+}
+
+func TestNativePackedLauncherPreservesProducerHandoff(t *testing.T) {
+	if os.Getenv("MEMOH_TEST_PWSH") == "" {
+		t.Skip("set MEMOH_TEST_PWSH to an isolated PowerShell executable")
+	}
+	exerciseBatchProducer(t, true, true, true)
+}
+
+func exerciseBatchProducer(t *testing.T, multiple bool, native ...bool) {
 	t.Helper()
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "bin")
@@ -28,10 +47,11 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 		t.Fatal(err)
 	}
 	for name, script := range map[string]string{
-		"uname":   "#!/bin/sh\nprintf MINGW64_NT-SYNTHETIC\n",
-		"cygpath": "#!/bin/sh\ncase \"$2\" in 'C:\\Synthetic') printf '%s' \"$SYNTH_ROOT\";; *) printf '%s' \"$2\";; esac\n",
-		"pi":      "#!/bin/sh\ncat > /dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\nprintf 'PRIVATE-OUTPUT-CONTENT' > result_one\nprintf 'SECOND-OUTPUT' > result_two\nprintf 'run' >> \"$SYNTH_ROOT/pi-count\"\nprintf 'unrelated' > unrelated\n",
-		"herdr":   "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/hook-args\"\nprintf 'fixture-accepted'\n",
+		"uname":        "#!/bin/sh\nprintf MINGW64_NT-SYNTHETIC\n",
+		"cygpath":      "#!/bin/sh\nif [ \"$2\" = \"$SYNTH_PRODUCER_WINDOWS\" ]; then printf '%s' \"$SYNTH_ROOT/bin/producer.exe\"; else case \"$2\" in 'C:\\Synthetic') printf '%s' \"$SYNTH_ROOT\";; *) printf '%s' \"$2\";; esac; fi\n",
+		"pi":           "#!/bin/sh\ncat > /dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\nprintf 'PRIVATE-OUTPUT-CONTENT' > result_one\nprintf 'SECOND-OUTPUT' > result_two\nprintf 'run' >> \"$SYNTH_ROOT/pi-count\"\nprintf 'unrelated' > unrelated\n",
+		"herdr":        "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/hook-args\"\nif [ -n \"$SYNTH_PRODUCER_WINDOWS\" ]; then printf 'synthetic legacy plugin disabled' >&2; exit 17; fi\nprintf 'fixture-accepted'\n",
+		"producer.exe": "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/producer-args\"\nprintf '%s' \"$HERDR_PLUGIN_CONFIG_DIR\" > \"$SYNTH_ROOT/producer-config\"\nprintf '%s' \"$HERDR_PLUGIN_STATE_DIR\" > \"$SYNTH_ROOT/producer-state\"\nprintf 'collect' >> \"$SYNTH_ROOT/producer-count\"\nprintf 'fixture-accepted'\n",
 	} {
 		//nolint:gosec // Fixed synthetic executable confined to t.TempDir.
 		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil {
@@ -45,12 +65,26 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 		p.Producer.Artifacts = []deliverymeta.Artifact{p.Producer.Artifact, {SourceRef: "result_two", Mime: "text/plain"}, {SourceRef: "missing_result", Mime: "text/plain"}}
 		p.Producer.Artifact = deliverymeta.Artifact{}
 	}
-	target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
-	script := batchFixtureScript(t, p, target, target.WorkDir, "create the declared result")
+	target := Target{NativeRuntimeID: uuid.NewString(), Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}, WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	if len(native) != 0 && native[0] {
+		target.NativeRuntimeID = uuid.NewString()
+		target.Producer = ProducerLocator{ProgramPath: `C:\Synthetic Owner's Bin\producer.exe`, ConfigDir: `C:\Native Owner's Config\$(touch MUST_NOT_EXIST)`, StateDir: `C:\Native State\queue`}
+	}
+	task := "create the declared result"
+	if len(native) > 1 && native[1] {
+		task += strings.Repeat("雪", 1136) + "x" // 3,435 synthetic UTF-8 bytes in total.
+	}
+	script := batchFixtureScript(t, p, target, target.WorkDir, task)
 	//nolint:gosec // Fixed wrapper and isolated synthetic binaries only.
 	command := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)
 	command.Dir = dir
-	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir}
+	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir, "SYNTH_PRODUCER_WINDOWS=" + target.Producer.ProgramPath, "HERDR_PLUGIN_CONFIG_DIR=retired-config", "HERDR_PLUGIN_STATE_DIR=retired-state"}
+	if len(native) > 1 && native[1] {
+		launcher := target
+		launcher.BashPath = "/bin/bash"                                                                                                                                       // Isolated Linux test peer, not a product profile.
+		command = exec.CommandContext(t.Context(), os.Getenv("MEMOH_TEST_PWSH"), "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", launchBatchScript(script, launcher)) //nolint:gosec // Explicit isolated PowerShell and generated script only.
+		command.Dir, command.Env = dir, []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir, "SYNTH_PRODUCER_WINDOWS=" + target.Producer.ProgramPath, "XDG_CONFIG_HOME=" + dir, "XDG_CACHE_HOME=" + dir, "POWERSHELL_TELEMETRY_OPTOUT=1", "POWERSHELL_UPDATECHECK=Off"}
+	}
 	out, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("wrapper: %v %s", err, out)
@@ -90,6 +124,21 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 	if string(readBatchFixture(t, filepath.Join(dir, "pi-count"))) != "run" {
 		t.Fatal("Pi ran again")
 	}
+	if target.NativeRuntimeID != "" {
+		if _, err := os.Stat(filepath.Join(dir, "hook-args")); !os.IsNotExist(err) {
+			t.Fatal("native route invoked the retired plugin hook")
+		}
+		if string(readBatchFixture(t, filepath.Join(dir, "producer-args"))) != "-action\ncollect-result\n" || string(readBatchFixture(t, filepath.Join(dir, "producer-count"))) != "collect" {
+			t.Fatal("wrong or repeated producer invocation")
+		}
+		if string(readBatchFixture(t, filepath.Join(dir, "producer-config"))) != target.Producer.ConfigDir || string(readBatchFixture(t, filepath.Join(dir, "producer-state"))) != target.Producer.StateDir {
+			t.Fatal("producer inherited the retired directory pair")
+		}
+		if _, err := os.Stat(filepath.Join(dir, "MUST_NOT_EXIST")); !os.IsNotExist(err) {
+			t.Fatal("locator became shell source")
+		}
+		return
+	}
 	args := string(readBatchFixture(t, filepath.Join(dir, "hook-args")))
 	if args != "plugin\naction\ninvoke\ncollect-result\n--plugin\nmemoh.delivery\n" {
 		t.Fatal("non-fixed plugin action", args)
@@ -113,15 +162,15 @@ func exerciseProducerCommandBound(t *testing.T, completion int) {
 	for i := range deliverymeta.MaxArtifacts {
 		p.Producer.Artifacts = append(p.Producer.Artifacts, deliverymeta.Artifact{SourceRef: fmt.Sprintf("file_%02d", i), Mime: "application/octet-stream"})
 	}
-	target := Target{WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	target := Target{NativeRuntimeID: uuid.NewString(), Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}, WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
 	if err := ValidateBatchRequest(p, target, ".", "create declared results"); err != nil {
 		t.Fatal("16 short declarations rejected", err)
 	}
 	script := batchFixtureScript(t, p, target, target.WorkDir, "create declared results")
-	if size := len(launchBashScript(script, target.BashPath)); size > 30000 {
+	if size := len(launchBatchScript(script, target)); size > 30000 {
 		t.Fatal("launch exceeds finite producer command bound", size)
 	}
-	if err := ValidateBatchRequest(p, target, ".", strings.Repeat("x", 32000)); err == nil {
+	if err := ValidateBatchRequest(p, target, ".", variedSyntheticTask(32000)); err == nil {
 		t.Fatal("oversized launch accepted")
 	}
 }

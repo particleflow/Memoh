@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	sdk "github.com/felinics/twilight/sdk"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
@@ -14,15 +16,51 @@ import (
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/db"
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
 type continuationTurnRequestResolverService struct {
 	messagepkg.Service
 	requestMessageID string
+	err              error
 }
 
 func (s *continuationTurnRequestResolverService) GetVisibleHistoryTurnRequestMessageIDByTurn(context.Context, string, string) (string, error) {
-	return s.requestMessageID, nil
+	return s.requestMessageID, s.err
+}
+
+type continuationRecoveryQueries struct {
+	dbstore.Queries
+	run sqlc.SessionRun
+}
+
+func (q continuationRecoveryQueries) GetSessionRun(context.Context, pgtype.UUID) (sqlc.SessionRun, error) {
+	return q.run, nil
+}
+
+func TestContinuationMissingTurnNeverFallsBackToLatestInput(t *testing.T) {
+	for _, scenario := range []string{"ordinary_run", "wrong_scope", "wrong_fence"} {
+		t.Run(scenario, func(t *testing.T) {
+			botID, sessionID, runID := "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+			row := sqlc.SessionRun{BotID: db.ParseUUIDOrEmpty(botID), SessionID: db.ParseUUIDOrEmpty(sessionID), FencingToken: 9, InputJson: []byte(`{"kind":"accepted_user_input_recovery","request_message_id":"dddddddd-dddd-4ddd-8ddd-dddddddddddd"}`)}
+			switch scenario {
+			case "ordinary_run":
+				row.InputJson = []byte(`{"kind":"message"}`)
+			case "wrong_scope":
+				row.SessionID = db.ParseUUIDOrEmpty(runID)
+			case "wrong_fence":
+				row.FencingToken++
+			}
+			// Any accidental latest-message or arbitrary-message lookup invokes
+			// the nil embedded service and fails this test instead of succeeding.
+			service := &Service{queries: continuationRecoveryQueries{run: row}, messageService: &continuationTurnRequestResolverService{err: pgx.ErrNoRows}}
+			if _, err := service.continuationTurnRequestMessageID(t.Context(), sessionID, sessionruntime.RunHandle{BotID: botID, SessionID: sessionID, RunID: runID, TurnID: runID, FencingToken: 9}); !errors.Is(err, pgx.ErrNoRows) {
+				t.Fatalf("missing original turn was replaced: %v", err)
+			}
+		})
+	}
 }
 
 func TestContinuationTurnRequestMessageIDUsesAdmittedTurn(t *testing.T) {

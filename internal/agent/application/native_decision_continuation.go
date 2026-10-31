@@ -14,6 +14,11 @@ import (
 // Authorization and answer/tool-result persistence remain with each decision
 // kind; cancellation, step persistence and terminal publication share one path.
 func (s *Service) runNativeDecisionContinuation(ctx context.Context, req ChatRequest, cfg native.RunConfig, modelID string, runtimeLifecycle *continuationLifecycleResult, eventCh chan<- WSStreamEvent) error {
+	var err error
+	ctx, req, cfg, err = s.prepareDecisionWorkspace(ctx, req, cfg)
+	if err != nil {
+		return err
+	}
 	terminal := s.contextLifecycleTerminal(ctx, cfg)
 	var lifecycleCause error
 	var lifecycleDeferred bool

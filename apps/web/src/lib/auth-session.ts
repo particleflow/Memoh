@@ -26,6 +26,10 @@ const USER_SCOPED_STORAGE_KEYS = [
   // Cross-reload query-cache snapshot (lib/query-cache-persistence.ts) —
   // without this the next account would see the previous one's catalog data.
   QUERY_CACHE_STORAGE_KEY,
+  'memoh:new-bot:pending',
+  'memoh:onboarding:pending',
+  'memoh:new-bot:authorization',
+  'memoh:onboarding:creation',
 ]
 
 export function clearPersistedUserScopedState() {
@@ -33,9 +37,19 @@ export function clearPersistedUserScopedState() {
     if (typeof localStorage !== 'undefined') localStorage.removeItem(key)
     if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(key)
   }
+  if (typeof sessionStorage !== 'undefined') {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i)
+      if (key?.startsWith('memoh:new-bot:pending:') || key?.startsWith('memoh:onboarding:pending:')) sessionStorage.removeItem(key)
+    }
+  }
 }
 
+let authGeneration = 0
+export function authSessionGeneration() { return authGeneration }
+
 export function notifyAuthSessionCleared(reason: AuthSessionClearReason) {
+  authGeneration++
   clearPersistedUserScopedState()
 
   if (typeof window === 'undefined') return

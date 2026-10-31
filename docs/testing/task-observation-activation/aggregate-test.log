@@ -1,0 +1,7 @@
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/handlers ./internal/mcp
+[hooks] Go package selection: 0.19s
+[hooks] Go test: go test -p=2 -timeout=180s <repo>/internal/handlers <repo>/internal/mcp
+ok  	github.com/felinics/memoh/internal/handlers	4.324s
+ok  	github.com/felinics/memoh/internal/mcp	0.335s
+[hooks] Go test: 6.94s
+[hooks] Total: 7.13s

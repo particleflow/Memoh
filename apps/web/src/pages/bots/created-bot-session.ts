@@ -10,6 +10,7 @@ const ONBOARDING_KEY = 'memoh:onboarding:creation'
 // posting a second create (which would take another Bot slot or collide on the
 // name). Agent fields are only present for the direct runtime flows.
 export interface CreatedBotSession {
+  scope?: string
   botId: string
   botName: string
   displayName: string
@@ -26,15 +27,17 @@ function optionalString(value: unknown): string | undefined {
 }
 
 // Keep only the created target, never credentials or a device login session.
-export function readCreatedBotSession(onboarding = false): CreatedBotSession | null {
+export function readCreatedBotSession(onboarding = false, scope?: string): CreatedBotSession | null {
   try {
     const value = JSON.parse(safeSessionGet(onboarding ? ONBOARDING_KEY : KEY) || 'null') as Partial<CreatedBotSession> | null
     if (!value || typeof value.botId !== 'string' || !value.botId.trim()) return null
+    if (scope !== undefined && (!scope || value.scope !== scope)) return null
     // A saved Agent must name a supported direct runtime; anything else is a
     // stale shape from an older client and is dropped as a whole.
     if (value.runtime !== undefined && !isDirectBotAgentRuntime(value.runtime)) return null
     if (value.agentId !== undefined && typeof value.agentId !== 'string') return null
     return {
+      ...(value.scope && { scope: value.scope }),
       botId: value.botId,
       botName: typeof value.botName === 'string' ? value.botName : '',
       displayName: typeof value.displayName === 'string' ? value.displayName : '',

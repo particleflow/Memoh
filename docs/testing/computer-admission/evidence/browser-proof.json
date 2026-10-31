@@ -1,0 +1,13 @@
+{
+  "realServer": true,
+  "realSyntheticPG": true,
+  "nativeTransport": "temporary read-only MCP fixture",
+  "modelCalls": 0,
+  "pcDispatches": 0,
+  "pageErrors": [],
+  "pauseRevision": "5",
+  "duplicateNoNewRevision": true,
+  "serverRestartRetainedExactGate": true,
+  "existingTaskObservedWhilePaused": true,
+  "resumeRevision": "6"
+}

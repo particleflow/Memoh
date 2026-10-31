@@ -35,6 +35,7 @@ import (
 	"github.com/felinics/memoh/internal/errlog"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/i18n"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/runtimekind"
 	skillset "github.com/felinics/memoh/internal/skills"
@@ -577,7 +578,7 @@ func (p *ChannelInboundProcessor) HandleInbound(ctx context.Context, cfg channel
 		return p.handleStartCommand(ctx, msg, sender, identity)
 	}
 	if isNewCommand && invocation != nil && (isDirectedAtBot(msg) || slashDirected) {
-		return p.handleNewSessionCommand(ctx, cfg, msg, sender, identity, *invocation)
+		return p.sendSlashError(ctx, sender, msg, apperror.New(slash.CodePermissionDenied, nil))
 	}
 	if isStopCommand && (isDirectedAtBot(msg) || slashDirected) {
 		return p.handleStopCommand(ctx, cfg, msg, sender, identity)
@@ -1959,8 +1960,9 @@ func (p *ChannelInboundProcessor) persistPassiveMessage(
 	}
 
 	meta := map[string]any{
-		"route_id": strings.TrimSpace(routeID),
-		"platform": msg.Channel.String(),
+		"route_id":     strings.TrimSpace(routeID),
+		"platform":     msg.Channel.String(),
+		"input_source": inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: ident.UserID, ChannelIdentityID: ident.ChannelIdentityID, Channel: msg.Channel.String()},
 	}
 	if reply := messageReplyMetadata(msg.Message.Reply); reply != nil {
 		meta["reply"] = reply

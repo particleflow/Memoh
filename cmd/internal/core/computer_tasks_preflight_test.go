@@ -18,7 +18,7 @@ import (
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-// The real source, authorizer, workspace resolver and Agenvo probe share this
+// The real source, authorizer and native workspace resolver share this
 // synthetic registry. No gateway, token or remote computer is contacted.
 type computerPreflightStore struct {
 	dbstore.AgenvoRuntimeStore
@@ -44,13 +44,6 @@ func (s *computerPreflightStore) ListMounts(_ context.Context, bot string) ([]db
 	return []dbstore.BotRemoteRuntimeBindingRecord{s.mount}, nil
 }
 
-func (s *computerPreflightStore) OwnedHTTPMCPConnectionBot(_ context.Context, owner, connection string) (string, error) {
-	if owner != s.mount.RuntimeUserID || connection != "55555555-5555-4555-8555-555555555555" {
-		return "", agenvo.ErrForbidden
-	}
-	return s.mount.BotID, nil
-}
-
 func (s *computerPreflightStore) ClaimComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, bool, error) {
 	s.claims++
 	if s.operation != nil {
@@ -74,10 +67,10 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 		want                       error
 		probes                     int
 	}{
-		{name: "native_explicit", target: "44444444-4444-4444-8444-444444444444", want: computertask.ErrPreflightUnavailable, probes: 1},
-		{name: "native_inferred", want: computertask.ErrPreflightUnavailable, probes: 1},
-		{name: "unknown_native_explicit", target: "44444444-4444-4444-8444-444444444444", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 1},
-		{name: "unknown_native_inferred", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 1},
+		{name: "native_explicit", target: "44444444-4444-4444-8444-444444444444", want: computertask.ErrPreflightUnavailable, probes: 0},
+		{name: "native_inferred", want: computertask.ErrPreflightUnavailable, probes: 0},
+		{name: "unknown_native_explicit", target: "44444444-4444-4444-8444-444444444444", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 0},
+		{name: "unknown_native_inferred", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 0},
 		{name: "missing_binding", missing: true, want: toolcontext.ErrComputerBinding},
 		{name: "wrong_session", mismatch: true, want: toolcontext.ErrComputerBinding},
 		{name: "other_pc_scope", otherPC: true, target: "44444444-4444-4444-8444-444444444444", want: computertask.ErrDenied},
@@ -88,12 +81,12 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			const bot = "11111111-1111-4111-8111-111111111111"
 			const owner = "33333333-3333-4333-8333-333333333333"
-			target := agenvo.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
-			raw, err := json.Marshal(target)
+			target := agenvo.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
+			raw, err := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent}})
 			if err != nil {
 				t.Fatal(err)
 			}
-			store := &computerPreflightStore{mount: dbstore.BotRemoteRuntimeBindingRecord{ID: "44444444-4444-4444-8444-444444444444", BotID: bot, RuntimeUserID: owner, BotOwnerUserID: owner, RuntimeProvider: agenvo.Provider, RuntimeProviderConfig: raw}}
+			store := &computerPreflightStore{mount: dbstore.BotRemoteRuntimeBindingRecord{ID: "44444444-4444-4444-8444-444444444444", BotID: bot, RuntimeUserID: owner, BotOwnerUserID: owner, RuntimeID: target.ConnectionID, RuntimeProvider: "memoh", RuntimeProviderConfig: raw}}
 			if tc.unknown {
 				store.operation = &dbstore.ComputerOperationRecord{
 					ID: "66666666-6666-4666-8666-666666666666", BotID: bot, UserID: owner,
@@ -108,16 +101,12 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 			}
 			probes := 0
 			permissions := computerPermissions{denied: tc.denied}
-			relay := agenvo.NewService(store, permissions, func(_ context.Context, _, _, tool string, args map[string]any) (json.RawMessage, error) {
+			relay := agenvo.NewService(store, permissions, nil)
+			relay.SetNativeCaller(func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 				probes++
-				code, _ := args["code"].(string)
-				if tool != "execute" || !strings.Contains(code, `"workspace.list"`) {
-					t.Fatal("preflight failure dispatched a business operation")
-				}
-				return nil, errors.New("synthetic OAuth refresh failure: SECRET")
+				return agenvo.Receipt{}, errors.New("unexpected native dispatch: SECRET")
 			})
 			remote := workspace.NewRemoteWorkspaceService(store, nil)
-			remote.SetAgenvoService(relay)
 			manager := workspace.NewManager(slog.New(slog.DiscardHandler), nil, nil, config.WorkspaceConfig{}, "", nil)
 			manager.SetRemoteWorkspaceService(remote)
 			authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, nil)

@@ -7,6 +7,8 @@ import type {
   UIStreamEventHandler,
 } from './useChat.types'
 
+export type WSAbortReason = 'user_stop' | 'bot_switch' | 'auth_reset' | 'workdir_mismatch' | 'client_cleanup' | 'unspecified'
+
 export interface WSUserInputAnswer {
   question_id: string
   option_ids?: string[]
@@ -55,6 +57,7 @@ export type WSClientMessage =
     } & WSTurnOptions)
   | {
       type: 'abort'
+      abort_reason?: WSAbortReason
       run_id: string
       session_id: string
       control_id: string
@@ -125,7 +128,7 @@ function acknowledgedRequestKey(event: UIStreamEvent): string {
 
 export interface ChatWebSocket {
   send: (msg: WSClientMessage) => void
-  abort: (runId: string, sessionId: string, controlId: string) => void
+  abort: (runId: string, sessionId: string, controlId: string, reason?: WSAbortReason) => void
   // Drops a reliable request so a reconnect does not resend it.
   forget: (invocationId: string) => void
   // Points a pending message at the session the server created for it, so a
@@ -178,13 +181,14 @@ export function connectWebSocket(
       }
       sendQueue.push(payload)
     },
-    abort(runId: string, sessionId: string, controlId: string) {
+    abort(runId: string, sessionId: string, controlId: string, reason?: WSAbortReason) {
       const id = runId.trim()
       const sid = sessionId.trim()
       const cid = controlId.trim()
       if (!id || !sid || !cid) return
       handle.send({
         type: 'abort',
+        ...(reason ? { abort_reason: reason } : {}),
         run_id: id,
         session_id: sid,
         control_id: cid,

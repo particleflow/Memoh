@@ -1,0 +1,19 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (11117bcb)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 4 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 1.26s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/computertask ./internal/handlers ./spec
+go: parsing $GOFLAGS: unknown flag -w'
+[hooks] Go package selection: 0.01s
+[hooks] Go package selection failed (1)

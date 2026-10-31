@@ -1,0 +1,19 @@
+2026/10/30 17:11:00 INFO migration log detail="169/u agenvo_execution_targets (18.421596ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="170/u computer_operations (40.666482ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="171/u computer_delivery_guard (50.665478ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="172/u runtime_transfer_credentials (58.502888ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="173/u bot_delegations (80.38962ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="174/u computer_delivery_entries (97.413408ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="175/u computer_admission (111.695453ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="176/u native_herdr_admission (120.854657ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="177/u session_abort_observation (130.908202ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="178/u native_profile_cutover (141.225172ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="179/u session_abort_outcome (147.162683ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="180/u schedule_history_retention (134.117856ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="181/u schedule_result_delivery (123.442874ms)\n"
+2026/10/30 17:11:00 INFO migration log detail="182/u conversation_presence (129.123878ms)\n"
+2026/10/30 17:11:00 INFO migration complete version=182 dirty=false
+baseline status 0 false: ERROR: relation "schema_migrations" does not exist (SQLSTATE 42P01)
+exit status 1
+
+exit=1

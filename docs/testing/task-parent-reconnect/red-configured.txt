@@ -1,0 +1,54 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/pages/home/composables/useSessionTasks.native-reconnect.test.ts (2 tests | 2 failed) 38ms
+     × resumes an opened sample only after the same parent task recovers from a failed detail read 34ms
+     × retains the unknown follow-up UUID through parent revalidation without another prompt 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/useSessionTasks.native-reconnect.test.ts > native content within the authorized task reader > resumes an opened sample only after the same parent task recovers from a failed detail read
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/pages/home/composables/useSessionTasks.native-reconnect.test.ts:57:44
+     55|     await vi.advanceTimersByTimeAsync(5000); await settle()
+     56|     expect(reader.detail.value?.status).toBe('submitted')
+     57|     expect(reader.nativeTask.value.opened).toBe(true)
+       |                                            ^
+     58|     expect(reader.nativeTask.value.data?.observation?.task_success_ver…
+     59|     expect(api.read).toHaveBeenLastCalledWith(expect.objectContaining(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/pages/home/composables/useSessionTasks.native-reconnect.test.ts > native content within the authorized task reader > retains the unknown follow-up UUID through parent revalidation without another prompt
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/pages/home/composables/useSessionTasks.native-reconnect.test.ts:75:44
+     73|     await reader.nativeTask.value.send('must not resend', 'bound_sessi…
+     74|     paused.value = false; await settle()
+     75|     expect(reader.nativeTask.value.opened).toBe(true)
+       |                                            ^
+     76|     expect(reader.nativeTask.value.requestId).toBe(id)
+     77|     await reader.nativeTask.value.send('must still not resend', 'bound…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  03:12:59
+   Duration  877ms (transform 214ms, setup 0ms, import 324ms, tests 38ms, environment 394ms)
+

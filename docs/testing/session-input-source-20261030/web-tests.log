@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/Memoh
+
+
+ Test Files  4 passed (4)
+      Tests  99 passed (99)
+   Start at  09:45:17
+   Duration  13.22s (transform 11.42s, setup 0ms, import 5.48s, tests 9.62s, environment 1.13s)

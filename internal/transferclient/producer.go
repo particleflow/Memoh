@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -128,7 +127,7 @@ func (h *HostConfig) readProducerManifest(name, revision string) ([]byte, error)
 		return nil, ErrProducerManifest
 	}
 	_, closed, err := ProducerAdmission(bytes.NewReader(raw), revision)
-	if err != nil || name != closed.ManifestName() || closed.Task.RootHash != deliverymeta.RootHash(h.sourcePath) {
+	if err != nil || name != closed.ManifestName() || closed.Task.RootHash != deliverymeta.RootHash(h.sourcePath) || h.sourceDeclares(closed) != nil {
 		return nil, ErrProducerManifest
 	}
 	return raw, nil
@@ -151,11 +150,8 @@ func collectProducerManifest(ctx context.Context, cfg *HostConfig, getenv func(s
 	}
 	// Admission fsync precedes consuming the manifest. Lost acknowledgement or a
 	// crash before unlink replays the original ID and sealed snapshot, not Create.
-	if err = cfg.sources.Remove(name); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return status, ErrStore
-	}
-	if err = syncQueueDir(cfg.sources); err != nil {
-		return status, ErrStore
+	if err = cfg.consumeSourceManifest(name, raw); err != nil {
+		return status, errors.Join(ErrProducerSource, err)
 	}
 	return advanceProducerID(ctx, getenv, revision, limits, status.Job.DeliveryID, transport, now)
 }
@@ -214,12 +210,16 @@ func AdvanceProducer(ctx context.Context, getenv func(string) string, revision s
 }
 
 func advanceProducerID(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, id string, transport *http.Client, now time.Time) (QueueStatus, error) {
+	return advanceProducerIDWithKind(ctx, getenv, revision, limits, id, "advance", transport, now)
+}
+
+func advanceProducerIDWithKind(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, id, kind string, transport *http.Client, now time.Time) (QueueStatus, error) {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 	var status QueueStatus
 	for range 64 {
 		var err error
-		status, err = InvokeConfiguredHerdr(ctx, getenv, revision, limits, ConfiguredAction{Kind: "advance", DeliveryID: id}, transport, now)
+		status, err = InvokeConfiguredHerdr(ctx, getenv, revision, limits, ConfiguredAction{Kind: kind, DeliveryID: id}, transport, now)
 		if err != nil {
 			if errors.Is(err, ErrAdmissionPending) {
 				return status, nil

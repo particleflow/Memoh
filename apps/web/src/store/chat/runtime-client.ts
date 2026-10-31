@@ -123,7 +123,7 @@ export function createRuntimeClient({ send, onProjection, scheduleFrame }: Runti
       epoch: batch.epoch,
       seq: batch.seq,
       currentRunView: batch.currentRunView,
-      transcript: projectRuntimeTranscript(batch.currentRunView),
+      transcript: projectRuntimeTranscript(batch.currentRunView, { botId: batch.base.botId, sessionId: sid }),
     }
     projections.set(sid, current)
     onProjection(sid, { previous: batch.base, current, event: batch.lastEvent })
@@ -221,6 +221,12 @@ export function createRuntimeClient({ send, onProjection, scheduleFrame }: Runti
     return projections.get(sessionId.trim())
   }
 
+  // A cached projection is not a fresh observation during reconnect or a gap.
+  function synchronized(sessionId: string): boolean {
+    const sid = sessionId.trim()
+    return connected && subscriptions.has(sid) && !awaitingSnapshots.has(sid) && projections.has(sid)
+  }
+
   function reset() {
     subscriptions.clear()
     projections.clear()
@@ -237,6 +243,7 @@ export function createRuntimeClient({ send, onProjection, scheduleFrame }: Runti
     onConnected,
     onDisconnected,
     projection,
+    synchronized,
     reset,
   }
 }

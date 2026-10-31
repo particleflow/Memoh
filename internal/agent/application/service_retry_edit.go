@@ -13,6 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	messageevent "github.com/felinics/memoh/internal/chat/event"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 type RetryLatestMessageInput struct {
@@ -119,6 +120,8 @@ func (s *Service) RetryLatestMessageWS(ctx context.Context, input RetryLatestMes
 		RequiredHistoryMessageID:     requestMessage.ID,
 		OnModelPreferenceSettled:     input.OnModelPreferenceSettled,
 	}
+	source := inputsource.FromMetadata(requestMessage.Metadata, req.BotID, req.ThreadID)
+	req.InputSource = &source
 	return s.streamReplacementWS(ctx, req, turn.ID, requestMessage.ID, "retry", eventCh, abortCh)
 }
 
@@ -187,6 +190,9 @@ func (s *Service) prepareRetryLatestTurnOperation(ctx context.Context, sessionID
 	if strings.TrimSpace(turn.RequestMessageID) == "" {
 		return messagepkg.HistoryTurn{}, "", errors.New("retry target has no request message")
 	}
+	if err := s.requireUserTurnRequest(ctx, sessionID, turn.RequestMessageID); err != nil {
+		return messagepkg.HistoryTurn{}, "", err
+	}
 	// The turn's own assistant anchor, not a message the client named: a turn
 	// that reached the client without one is a history the server cannot cut.
 	// The request message is still there, so the client may edit instead.
@@ -222,7 +228,29 @@ func (s *Service) prepareEditLatestTurnOperation(ctx context.Context, sessionID,
 	if strings.TrimSpace(turn.RequestMessageID) == "" {
 		return messagepkg.HistoryTurn{}, errors.New("edit target has no request message")
 	}
+	if err := s.requireUserTurnRequest(ctx, sessionID, turn.RequestMessageID); err != nil {
+		return messagepkg.HistoryTurn{}, err
+	}
 	return turn, nil
+}
+
+func (s *Service) requireUserTurnRequest(ctx context.Context, sessionID, requestID string) error {
+	request, err := s.messageService.GetByIDBySession(ctx, sessionID, requestID)
+	if err != nil {
+		return err
+	}
+	metadata := request.Metadata
+	if metadata == nil && len(request.RawMetadata) > 0 {
+		if err := json.Unmarshal(request.RawMetadata, &metadata); err != nil {
+			return err
+		}
+	}
+	if messagepkg.IsInternalInput(metadata) {
+		// Result extraction can only be retried through its host-authorized
+		// delivery identity. A UI retry/edit must not turn it into user speech.
+		return apperror.New(apperror.CodeSessionTurnIncomplete, nil)
+	}
+	return nil
 }
 
 // ResolveTurnIDForMessage maps a stored message id onto the round that contains

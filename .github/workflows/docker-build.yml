@@ -5,6 +5,12 @@ on:
       publish:
         type: boolean
         default: false
+      image_scope:
+        type: string
+        default: all
+      source_sha:
+        type: string
+        default: ''
 
 env:
   PUSH: ${{ inputs.publish }}
@@ -18,11 +24,57 @@ jobs:
       server: ${{ steps.filter.outputs.server }}
       web: ${{ steps.filter.outputs.web }}
       workspace: ${{ steps.filter.outputs.workspace }}
+      source_sha: ${{ steps.selection.outputs.source_sha }}
+      workflow_sha: ${{ steps.selection.outputs.workflow_sha }}
+      build_matrix: ${{ steps.selection.outputs.build_matrix }}
+      publish_matrix: ${{ steps.selection.outputs.publish_matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
           submodules: recursive
+          fetch-depth: 0
+      - name: Validate source and select image matrices
+        id: selection
+        env:
+          IMAGE_SCOPE: ${{ inputs.image_scope }}
+          REQUESTED_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          case "$IMAGE_SCOPE" in all|web|server|server-web) ;; *) exit 1 ;; esac
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          selected_source="${REQUESTED_SOURCE_SHA:-$GITHUB_SHA}"
+          [[ "$selected_source" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "${selected_source}^{commit}"
+          if [[ "$selected_source" != "$GITHUB_SHA" ]]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$PUSH" = true
+            test "$IMAGE_SCOPE" = web
+            git merge-base --is-ancestor "$selected_source" "$GITHUB_SHA"
+            git diff --no-ext-diff --no-renames --name-only -z "$selected_source" "$GITHUB_SHA" > "$RUNNER_TEMP/selected-source-files"
+            while IFS= read -r -d '' path; do
+              case "$path" in
+                .github/workflows/docker.yml|.github/workflows/docker-build.yml) ;;
+                *) printf 'Source differs outside release workflows: %q\n' "$path" >&2; exit 1 ;;
+              esac
+            done < "$RUNNER_TEMP/selected-source-files"
+          fi
+          printf 'source_sha=%s\nworkflow_sha=%s\n' "$selected_source" "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          printf 'Workflow commit: `%s`\n\nSource commit: `%s`\n\nImage scope: `%s`\n' "$GITHUB_SHA" "$selected_source" "$IMAGE_SCOPE" >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          scope = os.environ['IMAGE_SCOPE']
+          images = ['server', 'web', 'workspace'] if scope == 'all' else ['server', 'web'] if scope == 'server-web' else [scope]
+          build, publish = [], []
+          for image in images:
+              variant = 'debian' if image == 'workspace' else ''
+              publish.append({'image': image, 'artifact_key': image + ('-' + variant if variant else ''), 'variant': variant})
+              for arch, runner in [('amd64', 'ubuntu-latest'), ('arm64', 'ubuntu-24.04-arm')]:
+                  build.append({'image': image, 'variant': variant, 'platform': 'linux/' + arch, 'runner': runner, 'dockerfile': 'docker/Dockerfile.' + image})
+          print('build_matrix=' + json.dumps({'include': build}, separators=(',', ':')))
+          print('publish_matrix=' + json.dumps({'include': publish}, separators=(',', ':')))
+          PY
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -66,30 +118,11 @@ jobs:
   build:
     name: build ${{ matrix.image }}${{ matrix.variant != '' && format(' ({0})', matrix.variant) || '' }} ${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
     needs: detect-changes
+    env:
+      SOURCE_SHA: ${{ needs.detect-changes.outputs.source_sha }}
     strategy:
       fail-fast: false
-      matrix:
-        image: [server, web, workspace]
-        platform: [linux/amd64, linux/arm64]
-        variant: ["", debian]
-        exclude:
-          - image: server
-            variant: debian
-          - image: web
-            variant: debian
-          - image: workspace
-            variant: ""
-        include:
-          - image: server
-            dockerfile: docker/Dockerfile.server
-          - image: web
-            dockerfile: docker/Dockerfile.web
-          - image: workspace
-            dockerfile: docker/Dockerfile.workspace
-          - platform: linux/amd64
-            runner: ubuntu-latest
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.build_matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Check if build is needed
@@ -121,6 +154,11 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+          ref: ${{ needs.detect-changes.outputs.source_sha }}
+
+      - name: Verify checked-out source
+        if: steps.should-build.outputs.skip != 'true'
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
 
       - name: Set up Docker Buildx
         if: steps.should-build.outputs.skip != 'true'
@@ -178,10 +216,10 @@ jobs:
           build-contexts: ${{ matrix.image == 'server' && format('gomodcache={0}/.go-cache', github.workspace) || '' }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.revision=${{ needs.detect-changes.outputs.source_sha }}
           build-args: |
             VERSION=${{ github.ref_name }}
-            COMMIT_HASH=${{ github.sha }}
+            COMMIT_HASH=${{ needs.detect-changes.outputs.source_sha }}
             VITE_API_URL=/api
             VITE_AGENT_URL=/agent
           cache-from: |
@@ -227,18 +265,11 @@ jobs:
     runs-on: ubuntu-latest
     if: inputs.publish
     needs: [detect-changes, build]
+    env:
+      SOURCE_SHA: ${{ needs.detect-changes.outputs.source_sha }}
+      WORKFLOW_SHA: ${{ needs.detect-changes.outputs.workflow_sha }}
     strategy:
-      matrix:
-        include:
-          - image: server
-            artifact_key: server
-            variant: ""
-          - image: web
-            artifact_key: web
-            variant: ""
-          - image: workspace
-            artifact_key: workspace-debian
-            variant: debian
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.publish_matrix) }}
     steps:
       - name: Check if publish is needed
         id: should-publish
@@ -297,14 +328,14 @@ jobs:
           done
           docker buildx imagetools create \
             --annotation "index:org.opencontainers.image.source=${SOURCE_URL}" \
-            --annotation "index:org.opencontainers.image.revision=${GITHUB_SHA}" \
-            -t "${IMAGE}:sha-${GITHUB_SHA}" "${sources[@]}"
-          manifest_digest=$(docker buildx imagetools inspect "${IMAGE}:sha-${GITHUB_SHA}" | awk '$1 == "Digest:" {print $2; exit}')
+            --annotation "index:org.opencontainers.image.revision=${SOURCE_SHA}" \
+            -t "${IMAGE}:sha-${SOURCE_SHA}" "${sources[@]}"
+          manifest_digest=$(docker buildx imagetools inspect "${IMAGE}:sha-${SOURCE_SHA}" | awk '$1 == "Digest:" {print $2; exit}')
           [[ "$manifest_digest" =~ ^sha256:[a-f0-9]{64}$ ]] || exit 1
           mkdir -p /tmp/release
-          jq -n --arg image "$IMAGE" --arg digest "$manifest_digest" --arg commit "$GITHUB_SHA" \
-            '{image: $image, digest: $digest, commit: $commit}' > /tmp/release/${{ matrix.image }}.json
-          printf '%s@%s (commit %s)\n' "$IMAGE" "$manifest_digest" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          jq -n --arg image "$IMAGE" --arg digest "$manifest_digest" --arg commit "$SOURCE_SHA" --arg workflow_commit "$WORKFLOW_SHA" \
+            '{image: $image, digest: $digest, commit: $commit, workflow_commit: $workflow_commit}' > /tmp/release/${{ matrix.image }}.json
+          printf '%s@%s (source %s, workflow %s)\n' "$IMAGE" "$manifest_digest" "$SOURCE_SHA" "$WORKFLOW_SHA" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save candidate image reference
         if: steps.should-publish.outputs.skip != 'true'

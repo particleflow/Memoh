@@ -1,0 +1,12 @@
+{
+  "feedback-reader-green.log.txt": "720aa286323e0342e3763cb1b0739598319453bddf6eda9934786e01b8cbf759",
+  "feedback-reader-red.log.txt": "ffe2c5bef792e2ed9d7a496f747de451bb54a2ed7301a281b11a5752e6a7b340",
+  "feedback-staged-checks.log.txt": "1829011b5a5e48fee8ef710d427f09fead7192e0c4eab2f801b5e4d4e003384e",
+  "source-combination.log.txt": "e994a0dfa2408320b8d4558d4b01fa0f847b22b9dd441accecdde29648048e30",
+  "staged-checks-final.log.txt": "4c0caa374134970df12d18903fd329447a17421deefef0bd61e18811288aebd4",
+  "staged-checks-initial-failure.log.txt": "9307197ab0e08f2116561c8bcd1fd91077501b893d59cd3b31b4b8f9faeec5f8",
+  "transfer-regression.log.txt": "313099794c25d82c2097a9bea4efe8fd41f008846da39aca2fbe17ff0deb76b6",
+  "windows-crosscompile.txt": "cf0ea348e038e75c1c6846c4b50bf26172a5640b4b7b7deba0e216d8883c7602",
+  "windows-initial-failure.txt": "54120e64006b459f1deaa4d0eb93aed8c2a15a62d684c26219d5bc18135c773a",
+  "workspace-combination.log.txt": "23dffc4a45254f103dc9ce234df3d053c3fed76063b5da528342d126d9d4bb5a"
+}

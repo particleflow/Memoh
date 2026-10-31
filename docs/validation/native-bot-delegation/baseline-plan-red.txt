@@ -1,0 +1,8 @@
+--- FAIL: TestNativeDelegationPlanUsesExistingDistinctMounts (0.00s)
+    --- FAIL: TestNativeDelegationPlanUsesExistingDistinctMounts/native (0.00s)
+        bot_delegation_plan_test.go:103: pairs=[] target=native err=<nil>
+    --- FAIL: TestNativeDelegationPlanUsesExistingDistinctMounts/44444444-4444-4444-8444-444444444444 (0.00s)
+        bot_delegation_plan_test.go:103: pairs=[] target= err=delegation is unavailable in this conversation
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.021s
+FAIL

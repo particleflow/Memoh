@@ -45,8 +45,6 @@ const visibleManagedFields = computed(() =>
   filterCreateVisibleManagedFields(props.profile, managed, setupMode.value),
 )
 
-const selfModeHint = computed(() => t('bots.settings.acpSelfModeHint'))
-
 watch(() => props.profile, (profile) => {
   for (const key of Object.keys(managed)) delete managed[key]
   for (const field of profile.managed_fields ?? []) {
@@ -121,18 +119,6 @@ defineExpose({ selection, missingRequiredField })
       @field-change="clearErrorMessage"
     />
 
-    <p
-      v-else-if="setupMode === 'oauth'"
-      class="text-sm text-muted-foreground"
-    >
-      {{ oauthHint }}
-    </p>
-    <p
-      v-else-if="setupMode === 'self'"
-      class="text-sm text-muted-foreground"
-    >
-      {{ selfModeHint }}
-    </p>
 
     <p
       v-if="errorMessage"

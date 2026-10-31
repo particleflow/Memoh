@@ -19,7 +19,6 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	thread "github.com/felinics/memoh/internal/chat/thread"
-	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
@@ -44,6 +43,7 @@ type Workdirs interface {
 	Get(context.Context, string, string) (workdir.Workdir, error)
 }
 type Targets interface {
+	AuthorizeOperationHistory(context.Context, agenvo.Scope) error
 	ResolveTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
 }
 
@@ -53,6 +53,7 @@ type Service struct {
 	workdirs     Workdirs
 	targets      Targets
 	cursorCipher cipher.AEAD
+	delegations  DelegationDirectory
 }
 
 func NewService(store dbstore.SessionTaskReader, sessions Sessions, workdirs Workdirs, targets Targets, cursorSecret string) *Service {
@@ -73,22 +74,26 @@ type Task struct {
 	TaskID    string `json:"task_id" validate:"required" format:"uuid"`
 	SessionID string `json:"session_id" validate:"required" format:"uuid"`
 	// ParentSessionID is the requested aggregation root, not a rewritten owner.
-	ParentSessionID      string         `json:"parent_session_id" validate:"required" format:"uuid"`
-	CreatedAt            time.Time      `json:"created_at" validate:"required"`
-	UpdatedAt            time.Time      `json:"updated_at" validate:"required"`
-	Status               string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected,accepted,running,waiting_decision,finishing,completed,failed,aborted,lost"`
-	Summary              string         `json:"summary" validate:"required"`
-	ContentAvailable     bool           `json:"content_available" validate:"required"`
-	AttachmentsAvailable bool           `json:"attachments_available" validate:"required"`
-	RunID                string         `json:"run_id,omitempty" format:"uuid"`
-	TargetID             string         `json:"target_id,omitempty" format:"uuid"`
-	OperationKind        string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
-	Revision             string         `json:"revision,omitempty"`
-	CancelRequested      *bool          `json:"cancel_requested,omitempty"`
-	ProcessState         string         `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
-	PiResult             string         `json:"pi_result,omitempty" enums:"unknown,not_applicable,succeeded,failed,aborted,incomplete,not_started,invalid_protocol,output_limit"`
-	BusinessState        string         `json:"business_state,omitempty" enums:"unknown"`
-	ResultSummary        *ResultSummary `json:"result_summary,omitempty"`
+	ParentSessionID string `json:"parent_session_id" validate:"required" format:"uuid"`
+	// DirectParentSessionID is the owning session's persisted direct parent,
+	// exposed only after the complete ancestor path is authorized. Omitted when
+	// that session has no parent; older servers also omit this optional field.
+	DirectParentSessionID string         `json:"direct_parent_session_id,omitempty" format:"uuid"`
+	CreatedAt             time.Time      `json:"created_at" validate:"required"`
+	UpdatedAt             time.Time      `json:"updated_at" validate:"required"`
+	Status                string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected,accepted,running,waiting_decision,finishing,completed,failed,aborted,lost"`
+	Summary               string         `json:"summary" validate:"required"`
+	ContentAvailable      bool           `json:"content_available" validate:"required"`
+	AttachmentsAvailable  bool           `json:"attachments_available" validate:"required"`
+	RunID                 string         `json:"run_id,omitempty" format:"uuid"`
+	TargetID              string         `json:"target_id,omitempty" format:"uuid"`
+	OperationKind         string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
+	Revision              string         `json:"revision,omitempty"`
+	CancelRequested       *bool          `json:"cancel_requested,omitempty"`
+	ProcessState          string         `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
+	PiResult              string         `json:"pi_result,omitempty" enums:"unknown,not_applicable,succeeded,failed,aborted,incomplete,not_started,invalid_protocol,output_limit"`
+	BusinessState         string         `json:"business_state,omitempty" enums:"unknown"`
+	ResultSummary         *ResultSummary `json:"result_summary,omitempty"`
 }
 
 // ResultSummary is allowlisted visible assistant text, not logs or general
@@ -130,13 +135,20 @@ func (s *Service) decodeCursor(raw, bot, user, parent string) (cursor, error) {
 		return c, ErrCursor
 	}
 	data, err = s.cursorCipher.Open(nil, data[:s.cursorCipher.NonceSize()], data[s.cursorCipher.NonceSize():], nil)
-	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (c.Before.Type != Subagent && c.Before.Type != ComputerOperation) {
+	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || !validCursorType(parent, c.Before.Type) {
 		return c, ErrCursor
 	}
 	if _, err := uuid.Parse(c.Before.ID); err != nil {
 		return c, ErrCursor
 	}
 	return c, nil
+}
+
+func validCursorType(scope, kind string) bool {
+	if scope == directoryCursorScope {
+		return directoryKind(kind)
+	}
+	return kind == Subagent || kind == ComputerOperation || (scope == activityCursorScope && kind == sessionRun)
 }
 
 func (s *Service) encodeCursor(c cursor) (string, error) {
@@ -174,8 +186,8 @@ func (s *Service) path(ctx context.Context, bot, user, id string) ([]thread.Thre
 	return path, nil
 }
 
-// scope reads workdir records only. It must never resolve a bridge or probe a
-// device: an unavailable computer is still a valid persisted receipt target.
+// scope retains the persisted workdir/selection boundary and checks current Bot
+// permission. It never resolves a registration or probes a retired computer.
 func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thread) (string, error) {
 	selected := "native"
 	for i := len(path) - 1; i >= 0; i-- {
@@ -192,21 +204,8 @@ func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thr
 			if err != nil {
 				return "", err
 			}
-			// A missing child selection inherits its parent. Only the top
-			// unbound session falls back to the current Bot primary.
-			if candidate == "" && i == len(path)-1 {
-				primary, err := s.store.GetPrimaryMount(ctx, bot)
-				switch {
-				case errors.Is(err, db.ErrNotFound):
-					candidate = "native"
-				case err != nil:
-					return "", err
-				case primary.BotID != bot || primary.ID == "":
-					return "", ErrUnavailable
-				default:
-					candidate = primary.ID
-				}
-			}
+			// Missing selection inherits any persisted ancestor boundary. Never
+			// substitute today's primary for an original owned operation target.
 		}
 		if candidate == "" {
 			continue
@@ -217,7 +216,7 @@ func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thr
 		selected = candidate
 	}
 	if selected != "native" {
-		if _, err := s.targets.ResolveTarget(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
+		if err := s.targets.AuthorizeOperationHistory(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
 			return "", ErrUnavailable
 		}
 	}
@@ -278,7 +277,7 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 	if err != nil {
 		return Task{}, err
 	}
-	t := Task{TaskType: c.Type, TaskID: c.ID, SessionID: c.SessionID, ParentSessionID: parent, CreatedAt: c.CreatedAt, UpdatedAt: p[0].UpdatedAt, Status: "unknown", Summary: "Subagent session recorded; live execution status and content are unavailable."}
+	t := Task{TaskType: c.Type, TaskID: c.ID, SessionID: c.SessionID, ParentSessionID: parent, DirectParentSessionID: p[0].ParentThreadID, CreatedAt: c.CreatedAt, UpdatedAt: p[0].UpdatedAt, Status: "unknown", Summary: "Subagent session recorded; live execution status and content are unavailable."}
 	if c.Type == Subagent {
 		if c.ID != c.SessionID || c.ID == parent || p[0].Type != Subagent {
 			return Task{}, ErrUnavailable
@@ -289,21 +288,27 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 		return Task{}, ErrUnavailable
 	}
 	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: c.ID, BotID: bot, UserID: user, SessionID: c.SessionID})
-	if err != nil || r.ID != c.ID || r.BotID != bot || r.UserID != user || r.SessionID != c.SessionID || r.TargetID == "" || (selected != "native" && selected != r.TargetID) {
+	if err != nil || r.ID != c.ID || r.BotID != bot || r.UserID != user || r.SessionID != c.SessionID || r.TargetID == "" || r.TargetFingerprint == "" || (selected != "native" && selected != r.TargetID) {
 		return Task{}, ErrUnavailable
 	}
-	target, err := s.targets.ResolveTarget(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID})
-	if err != nil || r.TargetFingerprint == "" || r.TargetFingerprint != agenvo.TargetFingerprint(target) {
+	if err := s.targets.AuthorizeOperationHistory(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID}); err != nil {
 		return Task{}, ErrUnavailable
 	}
 	// Decode only approved persisted facts. Top-level output, observations,
 	// raw JSONL, transfer refs and arbitrary metadata are not display content.
 	var facts struct {
-		Kind     string            `json:"kind"`
-		ExitCode *int              `json:"exit_code"`
-		Batch    *persistedPiFacts `json:"batch"`
+		TargetSnapshot *agenvo.Target    `json:"target_snapshot"`
+		Kind           string            `json:"kind"`
+		ExitCode       *int              `json:"exit_code"`
+		Batch          *persistedPiFacts `json:"batch"`
 	}
 	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
+		return Task{}, ErrUnavailable
+	}
+	// The original owned ledger is the authority for historical facts. A saved
+	// snapshot must match its persisted fingerprint; legacy rows without one
+	// remain readable without fabricating a current target or execution permit.
+	if facts.TargetSnapshot != nil && agenvo.TargetFingerprint(*facts.TargetSnapshot) != r.TargetFingerprint {
 		return Task{}, ErrUnavailable
 	}
 	t.TargetID = r.TargetID
@@ -399,4 +404,35 @@ func (s *Service) Get(ctx context.Context, bot, user, parent, kind, id string) (
 		return Task{}, ErrUnavailable
 	}
 	return s.project(ctx, bot, user, parent, rows[0])
+}
+
+// GetLive checks the original owned history before requiring a current device
+// registration. Live task actions must not treat historical visibility as a
+// grant to observe or interact with a retired or unbound device.
+func (s *Service) GetLive(ctx context.Context, bot, user, parent, kind, id string) (Task, error) {
+	item, err := s.Get(ctx, bot, user, parent, kind, id)
+	if err != nil {
+		return Task{}, err
+	}
+	if item.TaskType != ComputerOperation {
+		return Task{}, ErrUnavailable
+	}
+	if err := toolcontext.CheckComputerTarget(ctx, item.TargetID); err != nil {
+		return Task{}, ErrUnavailable
+	}
+	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: bot, UserID: user, SessionID: item.SessionID})
+	if err != nil || r.ID != id || r.BotID != bot || r.UserID != user || r.SessionID != item.SessionID || r.TargetID != item.TargetID {
+		return Task{}, ErrUnavailable
+	}
+	var facts struct {
+		TargetSnapshot *agenvo.Target `json:"target_snapshot"`
+	}
+	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
+		return Task{}, ErrUnavailable
+	}
+	current, err := s.targets.ResolveTarget(toolcontext.WithComputerScope(ctx, item.TargetID), agenvo.Scope{BotID: bot, UserID: user, TargetID: item.TargetID})
+	if err != nil || !agenvo.HistoricalTargetMatches(current, facts.TargetSnapshot, r.TargetFingerprint) {
+		return Task{}, ErrUnavailable
+	}
+	return item, nil
 }

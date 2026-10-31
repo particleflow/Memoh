@@ -239,7 +239,6 @@
       <Empty class="py-12">
         <EmptyHeader>
           <EmptyTitle>{{ $t('bots.memory.emptyTitle') }}</EmptyTitle>
-          <EmptyDescription>{{ $t('bots.memory.empty') }}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button
@@ -325,7 +324,6 @@
             <Textarea
               id="memory-content"
               v-model="dialogContent"
-              :placeholder="$t('bots.memory.contentPlaceholder')"
               rows="3"
               class="min-h-[4.5rem] resize-y"
             />

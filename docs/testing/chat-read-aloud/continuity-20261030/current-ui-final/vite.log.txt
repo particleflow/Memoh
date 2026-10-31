@@ -1,0 +1,12 @@
+✓ patched dependencies verified against installed content
+
+  VITE v8.1.5  ready in 1833 ms
+
+  ➜  Local:   http://127.0.0.1:18595/
+1:20:35 PM [vite] vite.read-aloud-review.config.ts changed, restarting server...
+failed to load config from /workspace/memoh-speech-continuity/apps/web/vite.read-aloud-review.config.ts
+1:20:35 PM [vite] Build failed with 1 error:
+
+[31m[UNRESOLVED_ENTRY] [0mCannot resolve entry module vite.read-aloud-review.config.ts.
+
+1:20:35 PM [vite] server restart failed

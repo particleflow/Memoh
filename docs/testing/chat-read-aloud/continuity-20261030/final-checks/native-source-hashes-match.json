@@ -1,0 +1,10 @@
+{
+  "match": true,
+  "measuredSourceHashes": {
+    "chat-read-aloud.ts": "fc66a005b0d50f4b65c88552d5e56f84830643692d76edb6e37cd5090ab50493",
+    "useChatReadAloud.ts": "ffb6911465f94687dba18df3a923c42f43e9bbeb4fb51c708326eb8598cec6c5",
+    "speech-sentence-boundary.ts": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+    "speech-replay-cache.ts": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+    "speech-audio-stream.ts": "ae5d84ccbb1a833bef1c34bbb7c91dae16af507fc99977ec6c5f16237bf984ad"
+  }
+}

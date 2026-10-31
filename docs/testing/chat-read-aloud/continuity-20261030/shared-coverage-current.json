@@ -1,0 +1,108 @@
+{
+  "webBase": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "HAP36Source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+  "phoneGeneratedOrBuilt": false,
+  "phoneInstalledReadback": false,
+  "files": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "baseSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "HAP36SharedSourceSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "fc66a005b0d50f4b65c88552d5e56f84830643692d76edb6e37cd5090ab50493",
+      "action": "copy shared source through existing consumer mapping"
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "baseSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "HAP36SharedSourceSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "ffb6911465f94687dba18df3a923c42f43e9bbeb4fb51c708326eb8598cec6c5",
+      "action": "copy shared source through existing consumer mapping"
+    },
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": {
+      "baseSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "HAP36SharedSourceSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "ae5d84ccbb1a833bef1c34bbb7c91dae16af507fc99977ec6c5f16237bf984ad",
+      "action": "copy shared source through existing consumer mapping"
+    },
+    "apps/web/src/pages/home/composables/speech-rendered-text.ts": {
+      "baseSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "HAP36SharedSourceSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "action": "unchanged reuse; no new test"
+    },
+    "apps/web/src/pages/home/composables/speech-visible-text.ts": {
+      "baseSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "HAP36SharedSourceSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "action": "unchanged reuse; no new test"
+    },
+    "apps/web/src/pages/home/composables/speech-timing.ts": {
+      "baseSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "HAP36SharedSourceSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "baseEqualsHAP36SharedSource": true,
+      "candidateSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "action": "unchanged reuse; no new test"
+    },
+    "apps/web/src/pages/home/composables/speech-replay-cache.ts": {
+      "baseSHA256": null,
+      "HAP36SharedSourceSHA256": null,
+      "baseEqualsHAP36SharedSource": null,
+      "candidateSHA256": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+      "action": "copy shared source through existing consumer mapping"
+    },
+    "apps/web/src/pages/home/composables/speech-sentence-boundary.ts": {
+      "baseSHA256": null,
+      "HAP36SharedSourceSHA256": null,
+      "baseEqualsHAP36SharedSource": null,
+      "candidateSHA256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+      "action": "copy shared source through existing consumer mapping"
+    },
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "baseSHA256": "654d8c3c869386d19cca10f3b019edc111b85259a81c9983fba8581bd5d6ee72",
+      "HAP36SharedSourceSHA256": "a9f261fb41e6d041e6640d32d53684f765678d787ff902d9313075a3b5e05621",
+      "baseEqualsHAP36SharedSource": false,
+      "candidateSHA256": "aaba146167dc7f8a488620f3c1174bd3f4faa2fe61526e0bcfe9112ace78b8f0",
+      "action": "overlay source delta through existing mobile consumer mapping; preserve native adaptations"
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "9c9b264989f8b166376e7770003f628cae025c4bc6aeaba64fe879e0838bf1dd",
+      "HAP36SharedSourceSHA256": "1d4bc597ea202882a978cb7c07bfa4c8603a30c3427e165f4c4c902aba5db4fb",
+      "baseEqualsHAP36SharedSource": false,
+      "candidateSHA256": "517de2226c8d340e30555d4be72e967cf807394fd69383028babcf51ac538853",
+      "action": "overlay source delta through existing mobile consumer mapping; preserve native adaptations"
+    }
+  },
+  "localeKeys": {
+    "en": {
+      "configurationChanged": "Replay unavailable: saved audio does not match the current voice settings or text.",
+      "unavailable": "Replay unavailable: audio is not cached",
+      "incomplete": "Replay unavailable: audio is incomplete",
+      "continue": "Continue reading"
+    },
+    "zh": {
+      "configurationChanged": "暂不可重播：缓存音频与当前语音配置或正文不匹配。",
+      "unavailable": "暂不可重播：无可用缓存音频",
+      "incomplete": "暂不可重播：音频尚未生成完整",
+      "continue": "继续朗读"
+    },
+    "ja": {
+      "configurationChanged": "再生不可：保存済みの音声が現在の音声設定または本文と一致しません。",
+      "unavailable": "再生不可：保存済みの音声がありません",
+      "incomplete": "再生不可：音声の生成が完了していません",
+      "continue": "読み上げを続ける"
+    }
+  },
+  "sdkAction": "regenerate/map only getBotsByBotIdTtsPlaybackConfig plus its response types; preserve Harmony SDK/native transport overlays",
+  "backendRequired": [
+    "GET /bots/:bot_id/tts/playback/config (same active-account JWT/Bot chat gate)",
+    "X-Speech-Playback-Identity on POST playback, exposed through CORS"
+  ],
+  "sourceHead": "ba44c06261fb3be30557160840bc25e339cab650",
+  "sourceCommitsInOrder": [
+    "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+    "ba44c06261fb3be30557160840bc25e339cab650"
+  ]
+}

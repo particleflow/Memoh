@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
-import { useDocumentVisibility, useLocalStorage } from '@vueuse/core'
+import { until, useDocumentVisibility, useLocalStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
+import { useChatStore } from '@/store/chat-list'
+import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
+import { useBotDelegationHistory } from '../composables/useBotDelegationHistory'
+import BotDelegationRun from './bot-delegation-run.vue'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
-import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
+import { Button, Collapsible, CollapsibleTrigger, CollapsibleContent, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { apiErrorStatus } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
@@ -12,6 +17,7 @@ import { useBotDelegationDownload } from '../composables/useBotDelegationDownloa
 import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
 import SessionTaskResults from './session-task-results.vue'
+import SessionBotRun from './session-bot-run.vue'
 
 const props = defineProps<{ botId: string, sessionId: string, selection: string, visible: boolean }>()
 const { t } = useI18n()
@@ -23,10 +29,22 @@ const visible = computed(() => open.value && props.visible && documentVisibility
 const scope = computed(() => props.botId && props.sessionId ? {
   bot: props.botId, session: props.sessionId, selection: props.selection, identity: token.value,
 } : null)
-const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
+const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries, observation, nativeTask } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
 const delegationVisible = computed(() => visible.value && group.value === 'delegations')
 const delegationReader = useBotDelegations(scope, delegationVisible)
 const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
+const chatStore = useChatStore()
+const workspaceTabs = useWorkspaceTabsStore()
+const router = useRouter()
+const historyAction = useBotDelegationHistory(scope, delegationVisible, delegationReader, async target => {
+  await chatStore.selectBot(target.bot)
+  if (token.value !== target.identity || chatStore.currentBotId !== target.bot) return
+  await router.push({ name: 'bot', params: { botName: target.bot } })
+  await until(() => workspaceTabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
+  if (token.value !== target.identity || chatStore.currentBotId !== target.bot) return
+  workspaceTabs.openSessionChat({ sessionId: target.session, title: target.title })
+  open.value = false
+})
 const downloadAction = useBotDelegationDownload(scope, delegationVisible, delegationReader)
 const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = delegationReader
 const specialist = shallowRef<{ bot: string, session: string, delegation: string }>()
@@ -40,7 +58,7 @@ const specialistPaused = computed(() => !!specialist.value && (!!delegationError
   || delegationDetail.value?.target_bot_id !== specialist.value.bot
   || delegationDetail.value?.target_session_id !== specialist.value.session))
 const specialistReader = useSessionTasks(specialistScope, specialistVisible, specialistPaused)
-const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist, deliveries: specialistDeliveries } = specialistReader
+const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist, deliveries: specialistDeliveries, observation: specialistObservation, nativeTask: specialistNativeTask } = specialistReader
 const hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))
 function openSpecialistTasks() {
   if (specialist.value) return
@@ -88,7 +106,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
         size="sm"
       >
         <ListTree />
-        {{ t('chat.tasks.title') }}
+        {{ t('chat.tasks.records') }}
       </Button>
     </DialogTrigger>
     <DialogPanel view-swap>
@@ -102,7 +120,18 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
       </DialogViewHeader>
       <DialogBody class="space-y-4">
         <template v-if="specialist">
-          <DialogDescription>{{ t('chat.delegations.downstreamDescription') }}</DialogDescription>
+          <BotDelegationRun
+            v-if="!specialistSelected && !specialistPaused && delegationDetail"
+            :task="delegationDetail"
+            :loading="delegationLoading"
+            :history-action="historyAction"
+          />
+          <h3
+            v-if="!specialistSelected && !specialistPaused"
+            class="text-label font-medium"
+          >
+            {{ t('chat.delegations.childTasks') }}
+          </h3>
           <SessionTaskResults
             :items="specialistItems"
             :detail="specialistDetail"
@@ -112,6 +141,8 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             :loading="specialistLoading || (specialistPaused && delegationLoading)"
             :error="delegationError || specialistError"
             :deliveries="specialistDeliveries"
+            :observation="specialistObservation"
+            :native-task="specialistNativeTask"
             @asset-opened="open = false"
             @open-task="openSpecialistTask"
             @page="specialistPage"
@@ -131,7 +162,9 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             </TabsTrigger>
           </TabsList>
           <TabsContent value="delegations">
-            <DialogDescription>{{ t('chat.delegations.description') }}</DialogDescription>
+            <DialogDescription class="sr-only">
+              {{ t('chat.delegations.description') }}
+            </DialogDescription>
             <BotDelegationTasks
               :items="delegations"
               :detail="delegationDetail"
@@ -140,6 +173,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
               :next-cursor="delegationNext"
               :loading="delegationLoading"
               :error="delegationError"
+              :history-action="historyAction"
               :delivery-action="deliveryAction"
               :download-action="downloadAction"
               :tasks-action="delegationDetail?.target_session_id ? openSpecialistTasks : undefined"
@@ -149,7 +183,26 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             />
           </TabsContent>
           <TabsContent value="execution">
-            <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
+            <DialogDescription class="sr-only">
+              {{ t('chat.tasks.description') }}
+            </DialogDescription>
+            <Collapsible v-if="!selected">
+              <CollapsibleTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                >
+                  {{ t('chat.botRun.title') }}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SessionBotRun
+                  :bot-id="botId"
+                  :session-id="sessionId"
+                  :visible="visible && group === 'execution'"
+                />
+              </CollapsibleContent>
+            </Collapsible>
             <SessionTaskResults
               :items="items"
               :detail="detail"
@@ -159,6 +212,8 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
               :loading="loading"
               :error="error"
               :deliveries="deliveries"
+              :observation="observation"
+              :native-task="nativeTask"
               @asset-opened="open = false"
               @open-task="openTask"
               @page="page"

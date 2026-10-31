@@ -1,0 +1,12 @@
+=== RUN   TestUnified177To181PreservesAcceptedWorkAndHistory
+2026/10/30 16:00:39 INFO migration log detail="178/u native_profile_cutover (15.265661ms)\n"
+2026/10/30 16:00:39 INFO migration log detail="179/u session_abort_outcome (22.925897ms)\n"
+2026/10/30 16:00:39 INFO migration log detail="180/u schedule_history_retention (29.314359ms)\n"
+2026/10/30 16:00:39 INFO migration log detail="181/u schedule_result_delivery (37.00037ms)\n"
+2026/10/30 16:00:39 INFO migration log detail="182/u conversation_presence (45.36195ms)\n"
+2026/10/30 16:00:39 INFO migration complete version=182 dirty=false
+--- PASS: TestUnified177To181PreservesAcceptedWorkAndHistory (3.50s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.522s
+
+exit=0

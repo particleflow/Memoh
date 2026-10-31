@@ -1,0 +1,78 @@
+{
+  "base": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+  "product_files": [
+    "internal/agenvo/pi_batch_service.go",
+    "internal/nativeherdr/commands.go",
+    "internal/agenvo/batch_read_trace.go",
+    "internal/computertask/source.go"
+  ],
+  "baseline_contract": {
+    "command": "go test ./internal/agenvo -run '^TestNativeBatchSnapshotUsesDirectANSIFormat$' -count=1 -v",
+    "exit_code": 1,
+    "cause": "previous native batch read lacked direct format and presentation normalization"
+  },
+  "focused_contract": {
+    "exit_code": 0,
+    "passed_test_and_subtest_events": 14,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "native format/defaults; SGR-only; two-page original hash and trace invariance"
+  },
+  "aggregate": {
+    "command": "node .husky/checks.mjs",
+    "exit_code": 0,
+    "packages": [
+      "./internal/agenvo",
+      "./internal/computertask",
+      "./internal/nativeherdr"
+    ],
+    "lint_and_package_tests_ran": true,
+    "web": "no staged UI changes"
+  },
+  "race": {
+    "command": "go test -race ./internal/agenvo ./internal/nativeherdr ./internal/computertask -run '^Test(NativeBatchSnapshotUsesDirectANSIFormat|BatchSnapshotStripsOnlyPresentationSGR|BatchReadExplicitANSIIsOfficialAndOrdinaryDefaultUnchanged|ResultReadTracePreservesErrorsAndDispatch)$' -count=1",
+    "exit_code": 0
+  },
+  "vet": {
+    "command": "go vet ./internal/agenvo ./internal/nativeherdr ./internal/computertask",
+    "exit_code": 0
+  },
+  "official_core_boundary": {
+    "command": "bash scripts/check-agent-core-boundary.sh",
+    "exit_code": 0,
+    "baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046"
+  },
+  "upstream": {
+    "version": "v0.9.5",
+    "commit": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
+    "binary_sha256": "14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d",
+    "cli_pane_blob": "33583ee48690330df7a56f6e4b313d58ccf772e8",
+    "headless_blob": "cb2c61964024ed3920b81943998dc03f3e527d0c",
+    "source_blob_matches_verified": true
+  },
+  "official_cli_experiments": {
+    "commands": "pane read <synthetic-pane> --source recent-unwrapped --lines 64 [--format ansi]",
+    "exit_code": 0,
+    "normal_ansi_decoded_page_bytes": 2048,
+    "original_page_bytes_and_hash_equal": true,
+    "synthetic_alt_text_elapsed_ms": 5112,
+    "synthetic_alt_ansi_elapsed_ms": 1,
+    "scope": "isolated Linux official binary; synthetic actor, not Codex/model or Windows field"
+  },
+  "negative_result": "20-second empty8-line poll loop did not reproduce a single20-second native hang; aggregate timing alone is ambiguous",
+  "prior_failures_preserved": [
+    "baseline direct-format contract red",
+    "aggregate regexp literal style failure, corrected without disabling rules"
+  ],
+  "field_calls": 0,
+  "producer_recollections": 0,
+  "real_Pi_or_model_calls": 0,
+  "identity_permission_CAS_timeout_changes": 0,
+  "runtime_registration_changes": 0,
+  "public_API_or_migration_changes": 0,
+  "field_root_cause": "unconfirmed; exact one read-only CLI comparison pending unique owner",
+  "deployment": "not performed",
+  "CI": "not run on this branch",
+  "UI_or_Windows_acceptance": "not performed",
+  "WindowsPS51_and_required_PG": "not newly executed in this isolated Linux environment"
+}

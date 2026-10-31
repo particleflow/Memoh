@@ -1,0 +1,13 @@
+{
+  "schema": 177,
+  "dirty": false,
+  "runs": 0,
+  "computer_operations": 0,
+  "delegations": 228,
+  "messages": 22,
+  "sessions": 25,
+  "target_grant_restored": true,
+  "original_md5": "84dd3c9d398db3757b602a60fab0548f",
+  "original_receipt_unchanged": true,
+  "old_byte_evidence_reused": true
+}

@@ -2,10 +2,12 @@
   <DockPanelFrame>
     <KeepAlive>
       <ChatPane
-        v-if="visible"
-        :key="`chat-pane:${currentBotId}:${panelId}`"
+        v-if="visible && currentBotId === panelBotId"
+        :key="`chat-pane:${panelBotId}:${panelId}`"
         :tab-id="panelId"
         :session-id="paramsSessionId"
+        :contact-view="params.params.contactView === true"
+        :task-anchor="params.params.taskAnchor ?? undefined"
         :visible="visible"
         :active="focused"
       />
@@ -18,6 +20,7 @@ import { computed, onBeforeUnmount, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { DockviewApi, DockviewPanelApi } from 'dockview-vue'
 import { useChatStore } from '@/store/chat-list'
+import type { TaskHistoryAnchor } from '@/utils/task-history-link'
 import ChatPane from '../chat-pane.vue'
 import { usePanelFocused, usePanelVisible } from './use-panel-visible'
 import DockPanelFrame from './panel-frame.vue'
@@ -31,7 +34,7 @@ import DockPanelFrame from './panel-frame.vue'
 // No breadcrumb: the tab already carries the session title.
 const props = defineProps<{
   params: {
-    params: { sessionId?: string | null }
+    params: { sessionId?: string | null, contactView?: boolean, taskAnchor?: TaskHistoryAnchor | null }
     api: DockviewPanelApi
     containerApi: DockviewApi
   }
@@ -39,6 +42,8 @@ const props = defineProps<{
 
 const chatStore = useChatStore()
 const { currentBotId } = storeToRefs(chatStore)
+// Dock cleanup follows the Bot change; this panel still belongs to its creator.
+const panelBotId = currentBotId.value?.trim() ?? ''
 
 const visible = usePanelVisible(props.params.api)
 const focused = usePanelFocused(props.params.api)
@@ -47,7 +52,7 @@ const paramsSessionId = computed(() => props.params.params.sessionId ?? null)
 
 watch([currentBotId, paramsSessionId, visible], ([botId, sessionId, isVisible]) => {
   const bid = botId?.trim() ?? ''
-  if (!bid) return
+  if (!bid || bid !== panelBotId) return
   chatStore.bindChatView(panelId, {
     botId: bid,
     sessionId,

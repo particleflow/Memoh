@@ -30,6 +30,26 @@ func oauthFailure(category string, status int, oauthCode string) error {
 	return errs.WrapDependency(&oauthTokenFailure{category: category, status: status, oauthCode: oauthCode}, "OAuth token unavailable")
 }
 
+// IsOAuthAuthenticationUnavailable classifies only known missing credentials or
+// explicit authorization rejection. DNS/TLS/timeouts, server failures, malformed
+// responses and persistence errors do not prove revoked authorization.
+func IsOAuthAuthenticationUnavailable(err error) bool {
+	var failure *oauthTokenFailure
+	if !errors.As(err, &failure) {
+		return false
+	}
+	if failure.category == "access_token_missing" || failure.category == "refresh_token_missing" {
+		return true
+	}
+	if failure.category == "oauth_rejected" {
+		switch failure.oauthCode {
+		case "invalid_grant", "invalid_client", "unauthorized_client", "invalid_scope", "access_denied":
+			return true
+		}
+	}
+	return false
+}
+
 // OAuthTokenFailureAttrs is the only diagnostic projection used by the
 // federation logger. Unknown causes are deliberately not stringified.
 func OAuthTokenFailureAttrs(err error) []slog.Attr {

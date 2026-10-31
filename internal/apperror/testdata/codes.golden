@@ -95,6 +95,9 @@ chat.message_empty	400
 codex_auth_token_missing	409
 codex_oauth_incomplete	409
 compaction.model_unavailable	400
+computer.admission_conflict	409
+computer.admission_paused	409
+computer.admission_scope_unverified	409
 connector.conflict	409
 connector.not_configured	503
 connector.not_found	404
@@ -291,6 +294,7 @@ workspace.display_prepare_failed	500
 workspace.image_not_found	400
 workspace.image_registry_unavailable	503
 workspace.operation_unsupported	501
+workspace.storage_unavailable	503
 workspace.teardown_failed	500
 workspace.template_bootstrap_failed	500
 workspace.unreachable	503

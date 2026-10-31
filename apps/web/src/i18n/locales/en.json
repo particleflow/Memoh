@@ -180,7 +180,7 @@
       "revoked": "This Agent account has been disconnected. Connect it again or choose another account.",
       "runtime_busy": "Wait for the current response to finish before switching Agent accounts.",
       "usage_auth_expired": "The account sign-in has expired. It renews after the next conversation; if usage still can't load, connect the account again.",
-      "usage_unavailable": "Couldn't load usage limits right now. Try again later."
+      "usage_unavailable": "Couldn't load usage limits right now"
     },
     "agent_dependency_missing": "{dep_id} is not installed in this workspace. Install it from the bot's dependencies, or wait for the running installation to finish, then send the message again.",
     "app": {
@@ -242,6 +242,11 @@
     "codex_oauth_incomplete": "Codex ChatGPT sign-in is not complete for this bot workspace.",
     "compaction": {
       "model_unavailable": "The compaction model is unavailable. Pick an enabled chat model with a declared context window."
+    },
+    "computer": {
+      "admission_conflict": "The computer admission revision changed. Read the current state before continuing.",
+      "admission_paused": "This computer is paused for new work. Existing task recovery remains available.",
+      "admission_scope_unverified": "The registered native identity cannot establish admission coverage."
     },
     "connector": {
       "conflict": "This connector conflicts with an existing connection.",
@@ -514,7 +519,7 @@
     },
     "workdir": {
       "git_branch_unavailable": "This local branch is unavailable. Refresh and select an existing branch.",
-      "git_busy": "An agent is using this working directory. Wait for it to finish before switching branches.",
+      "git_busy": "An agent is using this working directory",
       "git_switch_failed": "Git could not switch branches. Check uncommitted changes and whether the branch is used by another worktree.",
       "git_unavailable": "The Git working directory could not be read. Check the workspace and try again.",
       "not_found": "This working directory no longer exists. Refresh the list and choose another one.",
@@ -528,6 +533,7 @@
       "image_not_found": "The workspace image does not exist, needs registry credentials, or its name is invalid. Check the image name and try again.",
       "image_registry_unavailable": "The image registry could not be reached. Please try again later.",
       "operation_unsupported": "This target supports foreground commands only. Choose another computer for file or terminal operations.",
+      "storage_unavailable": "NAS workspace storage is unavailable.",
       "teardown_failed": "Workspace removal failed. Retry deleting the bot.",
       "template_bootstrap_failed": "The workspace files could not be initialized. Please try rebuilding the workspace.",
       "unreachable": "The workspace could not be reached."
@@ -577,7 +583,6 @@
     "workspace_snapshot_rollback_request_invalid": "The rollback request is invalid.",
     "workspace_snapshot_version_invalid": "The snapshot version is invalid.",
     "workspace_snapshots_load_failed": "Failed to load snapshots. Please try again.",
-    "workspace_snapshots_unsupported": "Snapshots are not supported by this workspace runtime.",
     "workspace_snapshotter_mismatch": "The snapshotter does not match the workspace runtime.",
     "workspace_start_failed": "Failed to start the workspace. Please try again.",
     "workspace_stop_failed": "Failed to stop the workspace. Please try again.",
@@ -672,7 +677,6 @@
     "copyCommand": "Copy connection command",
     "revoke": "Disconnect",
     "revokeTitle": "Disconnect this computer?",
-    "revokeDescription": "{name} will disconnect and its connection key will stop working. Files on the computer are not deleted.",
     "revokeSuccess": "Computer disconnected",
     "revokeFailed": "Couldn’t disconnect computer",
     "status": {
@@ -1021,13 +1025,45 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "inputSources": {
+      "channelIdentity": "Channel identity",
+      "occurrence": "Occurrence",
+      "originRun": "Source run",
+      "native_task": "Background task",
+      "unknown": "Unknown source",
+      "user": "User input",
+      "schedule": "Scheduled task",
+      "bot_delegation": "Bot delegation",
+      "task_result": "Task result",
+      "bot": "Bot",
+      "session": "Conversation",
+      "originBot": "Source Bot",
+      "originSession": "Source conversation",
+      "task": "Task",
+      "run": "Task run"
+    },
+    "readAloud": {
+      "replay": "Read aloud",
+      "continue": "Continue reading",
+      "playing": "Reading this reply aloud",
+      "failed": "Reading stopped."
+    },
     "delegations": {
+      "nativeRun": "Specialist session run",
+      "runId": "Run ID",
+      "runCreated": "Admitted",
+      "runUpdated": "Last recorded update",
+      "runRecorded": "Persisted native run state; this does not confirm a live connection. The session history may include other turns.",
+      "runUnavailable": "No verified native run is available for this handoff.",
+      "openHistory": "Open specialist session history",
+      "historyUnavailable": "Could not open the specialist session",
+      "childTasks": "Subagents and computer tasks",
       "openTasks": "View downstream tasks",
       "downstreamTitle": "Specialist Bot tasks",
       "downstreamDescription": "Execution tasks recorded under this specialist session. Access is checked by the server; this view does not provide live logs or a runnable queue.",
       "retryDelivery": "Retry result delivery",
       "deliveryResponse": "Delivery request response",
-      "deliveryRequestUnconfirmed": "The delivery request could not be confirmed. Reload to check its state.",
+      "deliveryRequestUnconfirmed": "The delivery request could not be confirmed",
       "title": "Specialist Bot handoffs",
       "executionGroup": "Execution tasks",
       "description": "Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.",
@@ -1040,7 +1076,6 @@
       "noLiveContent": "Live work and tool logs are not available in this view.",
       "attachmentsUnavailable": "{count} returned reference(s). Downloads are not available in this view yet.",
       "empty": "No specialist Bot handoffs in this conversation.",
-      "unsupported": "This server does not support Bot handoff observation yet. Reload after upgrading the server.",
       "inaccessible": "This handoff or conversation is no longer accessible.",
       "loadFailed": "Could not read Bot handoffs. Try reloading.",
       "states": {
@@ -1057,10 +1092,23 @@
         "unavailable": "Unavailable"
       },
       "downloadResult": "Download result {hash}",
-      "downloadFailed": "Could not prepare the download. Reload the view and check access."
+      "downloadFailed": "Could not prepare the download"
     },
     "tasks": {
-      "unsupported": "This server does not support task observation yet.",
+      "records": "Task records",
+      "resume": {
+        "action": "Continue original native batch",
+        "ready": "Continue the original native batch with its original instruction. The server will check whether continuation is available.",
+        "sending": "Requesting continuation of the original batch…",
+        "submitted": "The original instruction was acknowledged. Task success is still unknown. Check this task’s current status and native terminal.",
+        "unchanged": "The original operation was left unchanged. Check this task’s current status and native terminal; task success is still unknown.",
+        "unknown": "The continuation outcome is unknown. Check this task’s current status and native terminal.",
+        "unavailable": "Continuation is unavailable. The complete original arguments and an eligible native operation receipt are required; a disconnected Runtime must reconnect before continuation.",
+        "blocked": "Continuation was blocked. Review access, target and task status before explicitly checking again.",
+        "unauthorized": "Sign in again before requesting continuation.",
+        "forbidden": "Your account does not have permission to continue this task.",
+        "storageUnavailable": "Continuation is unavailable because this browser cannot retain request tracking."
+      },
       "inaccessible": "This conversation or task is no longer accessible.",
       "title": "Tasks",
       "detail": "Task details",
@@ -1071,16 +1119,16 @@
       "unavailable": "No final summary is available.",
       "truncated": "This summary is truncated.",
       "businessUnknown": "Business completion remains unverified.",
-      "cancelIntent": "Cancellation was requested; this does not confirm termination.",
-      "filteredPage": "No accessible tasks on this page. Continue to the next page.",
-      "empty": "No recorded tasks.",
-      "newest": "Back to newest",
+      "cancelIntent": "Cancellation was requested",
+      "filteredPage": "No accessible tasks on this page",
+      "empty": "No subagent or computer tasks are recorded.",
       "next": "Next page",
       "types": {
         "subagent": "Subagent",
         "computer_operation": "Computer task"
       },
       "statuses": {
+        "queued": "Queued",
         "unknown": "Execution status unknown",
         "submitted": "Submission recorded",
         "process_exited": "Process exited",
@@ -1109,7 +1157,6 @@
       "files": {
         "title": "Task files",
         "empty": "No file deliveries have been recorded.",
-        "unsupported": "This server does not support task file observation yet.",
         "loadFailed": "Unable to load task files.",
         "upload": "Stored on NAS",
         "download": "Received by PC",
@@ -1121,8 +1168,162 @@
           "failed": "Delivery failed",
           "unknown": "Delivery status unknown"
         }
+      },
+      "observation": {
+        "title": "Current computer observation",
+        "paused": "Automatic checks are paused.",
+        "loadFailed": "Computer observation could not be loaded.",
+        "agentState": "Native Agent: {state}",
+        "receivedAt": "Last response received at {time}",
+        "availability": {
+          "online": "Computer connection available",
+          "offline": "Computer reported offline",
+          "authentication_unavailable": "Computer connection authentication unavailable",
+          "runtime_unavailable": "Herdr unavailable",
+          "connection_unavailable": "Computer connection unavailable",
+          "unknown": "Computer connection unknown"
+        },
+        "states": {
+          "working": "Working",
+          "idle": "Idle",
+          "blocked": "Waiting / blocked",
+          "done": "Native done (task result unverified)",
+          "unknown": "Unknown"
+        },
+        "match": {
+          "observed": "Original task references matched at this observation.",
+          "mismatch": "The original terminal identity changed. Tracking is unconfirmed; the task has not been restarted.",
+          "unknown": "Original task references could not be confirmed."
+        },
+        "fields": {
+          "target_id": "Computer target",
+          "workspace_id": "Herdr workspace",
+          "pane_id": "Execution pane",
+          "pi_session_id": "Recorded Pi session"
+        },
+        "refresh": "Refresh computer",
+        "checkpoints": {
+          "connection": "Current connection",
+          "receipt": "Persisted receipt and Pi result",
+          "history": "Historical continuity",
+          "collection": "Collection checkpoints",
+          "receiptNotice": "Persisted execution evidence is separate from the current connection and business outcome.",
+          "historyNotice": "Last-invocation evidence does not confirm that history is available now or has been restored.",
+          "collectionNotice": "Recorded checkpoints are not a current availability check or downloadable file deliveries.",
+          "bytes": "{offset} / {size} bytes",
+          "fields": {
+            "revision": "Exact revision",
+            "attempt": "Original attempt",
+            "generation": "Original generation",
+            "receipt_state": "Receipt validation",
+            "process_state": "Process state",
+            "pi_result": "Pi result",
+            "result_reason": "Result evidence",
+            "business_outcome": "Business outcome",
+            "continuity": "Continuity status",
+            "continuity_reason": "Continuity evidence",
+            "before": "Before the last invocation",
+            "after": "After the last invocation",
+            "confirmed_offset": "Confirmed bytes / reported size",
+            "current_availability": "Current file availability",
+            "recorded_content_hash": "Recorded content hash"
+          },
+          "receiptStates": {
+            "not_applicable": "Not applicable",
+            "missing": "Receipt missing",
+            "invalid": "Receipt invalid",
+            "validated": "Persisted receipt validated"
+          },
+          "processStates": {
+            "exited": "Process exited",
+            "not_started": "Not started"
+          },
+          "resultReasons": {
+            "receipt_missing": "Receipt missing",
+            "legacy_result_protocol": "Legacy result protocol",
+            "receipt_mismatch": "Receipt mismatch",
+            "verified_receipt": "Validated receipt",
+            "verified_persisted_result": "Validated persisted Pi result",
+            "completion_result_unavailable": "Completion result unavailable",
+            "legacy_observation_only": "Legacy observation only"
+          },
+          "continuityStates": {
+            "unconfirmed": "Unconfirmed"
+          },
+          "continuityReasons": {
+            "history_not_rechecked": "History not rechecked",
+            "legacy_evidence_missing": "Legacy history evidence missing",
+            "prior_evidence_unconfirmed": "Prior history evidence unconfirmed"
+          },
+          "historyStates": {
+            "new": "New history at that invocation",
+            "verified": "Verified at that invocation",
+            "created": "Created at that invocation",
+            "missing": "Missing",
+            "corrupt": "Corrupt",
+            "unreadable": "Unreadable",
+            "changed": "Changed",
+            "unconfirmed": "Unconfirmed",
+            "not_checked": "Not checked",
+            "not_started": "Not started"
+          },
+          "collectionStates": {
+            "not_collected": "Not collected",
+            "empty": "Empty; no media object",
+            "invalid": "Invalid checkpoint",
+            "recorded": "Recorded checkpoint",
+            "collecting": "Partially collected"
+          },
+          "fileAvailability": {
+            "not_rechecked": "Current availability not checked"
+          }
+        }
+      },
+      "native": {
+        "title": "Native Agent content and follow-up",
+        "notice": "This is a bounded, unverified terminal sample. It can include tool output; it is not a full log or proof that this instruction succeeded.",
+        "open": "Open terminal sample",
+        "failed": "Content or instruction status could not be retrieved. Check the existing request before sending again.",
+        "truncated": "Truncated",
+        "bounded": "Recent sample only",
+        "empty": "No terminal text returned.",
+        "sequence": "Native completion sequence: {sequence} (not a per-instruction result)",
+        "unavailable": "The original Agent is currently unavailable",
+        "refresh": "Refresh content and request status",
+        "pending": "Instruction outcome remains unresolved",
+        "mode": "Session selection",
+        "bound": "Require the observed logical session",
+        "current": "Use the currently associated Agent",
+        "modeNotice": "Current Agent mode does not require logical-session continuity. Neither mode guarantees atomic identity or restores history.",
+        "instruction": "New instruction",
+        "invalid": "Enter an instruction within 32,000 UTF-8 bytes, without NUL.",
+        "send": "Send one instruction",
+        "results": {
+          "accepted": "Input accepted. Work completion and output ownership remain unverified.",
+          "rejected": "Input was rejected; this does not change previous task results.",
+          "blocked": "An earlier unresolved instruction blocks this request.",
+          "conflict": "This request ID belongs to a different instruction.",
+          "unknown": "Input delivery is unknown. Check the same request; do not resend with a new ID."
+        }
+      },
+      "relationship": {
+        "title": "Session relationship",
+        "session_id": "Owning session",
+        "direct_parent_session_id": "Session’s direct parent",
+        "parent_session_id": "Requested conversation root",
+        "unavailable": "No reference provided"
       }
     },
+    "mediaRecovery": {
+      "pause": "Pause",
+      "unknown": "The upload outcome is unknown. The original record is kept.",
+      "receiptMissing": "The original upload is unavailable or expired. Its ID and progress are kept; no replacement upload was created.",
+      "sourceMissing": "The local file is unavailable. Select the original file again to resume.",
+      "integrity": "File size or checksum verification failed. No attachment was accepted.",
+      "storage": "Local recovery storage is unavailable. Keep this tab open and try again.",
+      "reselect": "Select the original files again to resume: {names}"
+    },
+    "attachmentUnavailable": "Attachment inaccessible",
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
     "workspaceLinkUnavailable": "This workspace link is unavailable here. Open the conversation in Memoh with workspace access.",
@@ -1260,7 +1461,6 @@
       "stop": "Stop recording",
       "transcribing": "Transcribing",
       "notConfigured": "Choose a transcription model before using voice input.",
-      "unsupported": "Voice input is not supported in this browser.",
       "permissionDenied": "Microphone access was denied.",
       "empty": "No speech was detected.",
       "failed": "Voice input failed.",
@@ -1295,6 +1495,7 @@
     "pdfTooLargeForNative": "This PDF exceeds 12MB, so it will be saved to the workspace as a path; the model can't view its content directly.",
     "pdfUnsupportedByModel": "The current model can't read PDFs natively. The file will be saved to the workspace as a path, but the model won't be able to view its content.",
     "send": "Send",
+    "stopGenerating": "Stop generating response",
     "sendFailed": "Message failed to send",
     "sendOutcomeUnknown": "The server hasn't confirmed this message, so it may already have been received. Check the conversation list before sending it again.",
     "sendWorkdirUnsupported": "The server couldn't start this chat in the selected folder. Update the server, or send without a folder.",
@@ -1368,6 +1569,7 @@
       "unanswered": "No answer"
     },
     "tools": {
+      "userInputRecoveryState": "Recovery: {state}",
       "elapsedRunning": "Running · {seconds}s",
       "read": "Read",
       "read_image": "View image",
@@ -1570,7 +1772,12 @@
         "noContent": "No content",
         "contentTruncated": "Preview truncated. Full write size: {bytes} bytes.",
         "noTasks": "No tasks",
-        "noImage": "No image",
+        "noImage": "No image preview or file reference was returned.",
+        "imageReference": "File reference",
+        "imageSaved": "Image saved.",
+        "imageReturned": "Image attachment returned to this conversation.",
+        "imageUnconfirmed": "Image result is unconfirmed. Do not automatically generate again.",
+        "imageStorageUnconfirmed": "Image bytes were returned, but file storage is unconfirmed. Do not generate again to retry delivery.",
         "noResults": "No results",
         "noPreview": "No preview",
         "noContacts": "No contacts",
@@ -1650,11 +1857,6 @@
     "modelEffort": "Effort",
     "noModels": "No models available",
     "defaultExternalAgentLoading": "Default Agent is still loading. Try again in a moment.",
-    "defaultAgentNoWorkspaceExec": "Default Agent is enabled, but you do not have permission to run workspace commands.",
-    "defaultAgentMissing": "Default Agent is enabled, but no agent is selected.",
-    "defaultAgentUnavailable": "Default Agent is enabled, but the selected agent is unavailable.",
-    "defaultAgentDisabled": "Default Agent is enabled, but the selected agent is disabled.",
-    "defaultAgentNotConfigured": "Default Agent is enabled, but the selected agent is not configured.",
     "externalAgent": {
       "agentNotConfigured": "External agent setup is incomplete for this bot.",
       "agentCommandStale": "The agent no longer offers this command. Reopen the command picker and try again.",
@@ -1781,7 +1983,7 @@
       "description": "Switch bots, chat, files, schedule, and settings"
     },
     "activityBar": {
-      "sessions": "Chat",
+      "sessions": "Contacts",
       "files": "Files",
       "search": "Search",
       "schedule": "Schedule"
@@ -1939,7 +2141,7 @@
       "changeFailed": "Could not change plan mode. Please try again."
     },
     "runtimeModeNextTurn": "Applies when the next run starts.",
-    "runtimeModeModelUnavailable": "This model does not support this permission mode. Choose another mode or model.",
+    "runtimeModeModelUnavailable": "This model does not support this permission mode",
     "permissionMode": "Permission mode",
     "goal": {
       "label": "Goal",
@@ -1958,6 +2160,44 @@
         "usageLimited": "Usage limit reached",
         "budgetLimited": "Token budget reached",
         "complete": "Goal completed"
+      }
+    },
+    "botRun": {
+      "title": "Latest Bot run in this conversation",
+      "unavailable": "Run state is not synchronized.",
+      "empty": "No Bot run is recorded in the current snapshot.",
+      "configuration": "The latest activity is a configuration change, not a task run.",
+      "aborting": "Cancellation in progress",
+      "runError": "This run recorded an error.",
+      "boundary": "Run status and tool results are separate. A finished run does not confirm an unreturned tool result.",
+      "content": "View run content and tools",
+      "noContent": "No visible content is available in the received record.",
+      "tools": {
+        "failed": "Tool returned an error",
+        "received": "Tool result received",
+        "running": "Tool is running",
+        "unconfirmed": "Tool result unconfirmed"
+      }
+    },
+    "contact": {
+      "contacts": "Contacts",
+      "history": "History & debug",
+      "chooseTitle": "Continue a conversation",
+      "chooseDescription": "Choose which conversation to keep using with this Bot. Other history stays available.",
+      "startNew": "Start a new ongoing conversation",
+      "more": "More conversations",
+      "failed": "Could not open the Bot conversation. Please try again.",
+      "historyFailed": "Could not open this history link.",
+      "current": "current conversation"
+    },
+    "taskDirectory": {
+      "historyUnavailable": "The original execution could not be located in this history.",
+      "empty": "No tasks are recorded for this Bot.",
+      "types": {
+        "native_agent": "Agent task",
+        "computer_operation": "Computer task",
+        "bot_delegation": "Delegated task",
+        "schedule_fire": "Scheduled task"
       }
     }
   },
@@ -1993,6 +2233,8 @@
     }
   },
   "models": {
+    "unknownSelection": "Unavailable model",
+    "unavailableSelection": "{name} (unavailable)",
     "title": "Models",
     "searchPlaceholder": "Search providers…",
     "addModel": "Add Model",
@@ -2027,7 +2269,6 @@
     },
     "contextWindow": "Context Window",
     "contextWindowPlaceholder": "e.g. 128000",
-    "reasoningEfforts": "Supported efforts",
     "reasoningEffortsPlaceholder": "Select efforts",
     "contextWindowMin": "Context window must be greater than 0",
     "maxOutputTokens": "Max Output Tokens",
@@ -2052,6 +2293,26 @@
     "showingCount": "Showing {count} of {total}"
   },
   "provider": {
+    "mediaCatalog": {
+      "close": "Close",
+      "errorTitle": "Catalog unavailable",
+      "title": "Media catalog",
+      "protocol": "Magpie directory protocol",
+      "read": "Read catalog",
+      "readOnly": "Read saved provider catalog",
+      "hint": "Uses this provider’s saved connection. Does not import, delete or test models. Listed capabilities do not prove model execution or attachment delivery.",
+      "failed": "Could not read the catalog. Check the saved connection and catalog permission.",
+      "checkedAt": "Observed at",
+      "empty": "The provider returned an empty catalog.",
+      "unspecified": "Not advertised",
+      "modelFacts": "Kind: {kind} · Input: {input} · Output: {output} · Source: {source}",
+      "sources": {
+        "unspecified": "No capability metadata",
+        "catalog_kind": "Catalog kind",
+        "catalog_modalities": "Catalog modalities",
+        "catalog_kind_and_modalities": "Catalog kind and modalities"
+      }
+    },
     "add": "Add Provider",
     "addBtn": "Add",
     "searchPlaceholder": "Search providers...",
@@ -2080,7 +2341,7 @@
     "reachable": "Reachable",
     "unreachable": "Unreachable",
     "testFailed": "Test failed",
-    "testUnverifiedHint": "Connected, but the model list could not confirm availability — this provider may not support it. Test a specific model instead.",
+    "testUnverifiedHint": "Connected, but the model list could not confirm availability",
     "autoImport": "Auto Import Models",
     "autoImportHint": "Automatically fetch and import models from the provider after creation",
     "configurationTitle": "Configuration",
@@ -2089,6 +2350,11 @@
     "iconPlaceholder": "Icon URL or identifier (optional)",
     "enable": "Enable",
     "enableHint": "Only models from enabled providers appear in the available model list",
+    "imageReferences": {
+      "label": "Allow reference images",
+      "protocolRequired": "Select OpenAI Images before allowing reference images.",
+      "legacyPolicy": "The stored image policy must be migrated before reference images can be enabled. Existing model and encoding settings have been preserved."
+    },
     "imagesProtocol": {
       "label": "Image generation protocol",
       "description": "Uses the Bot's configured image model. Other saved image options are preserved.",
@@ -2120,7 +2386,7 @@
         "authorizedCurrent": "Current account connected",
         "oauthing": "OAuthing...",
         "pendingDevice": "Waiting for device authorization to complete...",
-        "expired": "Authorization expired. Re-authorize to continue.",
+        "expired": "Authorization expired",
         "missing": "Not authorized yet.",
         "notConfigured": "This provider is not configured for OAuth."
       },
@@ -2221,7 +2487,7 @@
     "graphEdges": "Links",
     "semanticEmbeddingModel": "Embedding Model",
     "semanticEmbeddingModelPlaceholder": "Select embedding model",
-    "graphEmpty": "No memories yet — add some to see the graph."
+    "graphEmpty": "No memories yet"
   },
   "network": {
     "title": "Network",
@@ -2245,12 +2511,12 @@
     "speakHint": "Read replies aloud.",
     "listenTitle": "Listening",
     "listenHint": "Turn speech into text.",
-    "empty": "No backends yet — add a provider with voice support."
+    "empty": "No backends yet"
   },
   "video": {
     "title": "Video",
     "providersHint": "Generate videos through OpenRouter, ModelArk, or Volcengine.",
-    "empty": "No video backends yet. Add a provider to enable video generation.",
+    "empty": "No video backends yet.",
     "models": "Video Models",
     "importModels": "Import Models",
     "importSuccess": "Models imported: {created} new, {skipped} skipped",
@@ -2274,7 +2540,7 @@
     "addModel": "Add Model",
     "modelId": "Model ID",
     "modelIdPlaceholder": "Enter model identifier (e.g. custom-voice)",
-    "noModels": "No models found. Click \"Import Models\" to discover available models or \"Add Model\" to create one manually.",
+    "noModels": "No models found",
     "noCapabilities": "No capabilities available for this model.",
     "saveSuccess": "Speech configuration saved",
     "synthesis": {
@@ -2308,7 +2574,7 @@
     "emptyTitle": "No Transcription Providers",
     "emptyDescription": "Add a transcription provider to enable speech-to-text for your bots",
     "models": "Transcription Models",
-    "noModels": "No transcription models found. Import available models or keep the default template model.",
+    "noModels": "No transcription models found",
     "noCapabilities": "No capabilities available for this model.",
     "importModels": "Import Models",
     "importSuccess": "Transcription models imported successfully",
@@ -2719,7 +2985,6 @@
       "createMode": "Create new",
       "importMode": "Import from backup",
       "dropzoneTitle": "Click to select or drag a backup file here",
-      "dropzoneHint": "Supports .memoh.zip backup files",
       "removeFile": "Remove file",
       "exportTitle": "Export Bot",
       "exportDescription": "Export bot configuration, history, attachments, and workspace files for restore, device transfer, or sharing. Set a passphrase to encrypt the bundle; otherwise credentials are stored in plaintext — keep the file safe.",
@@ -3089,7 +3354,7 @@
         "browseUnreachable": "Couldn’t reach this computer. Check that it’s connected, then retry",
         "path": "Directory path",
         "remotePathHelp": "Pick a folder below or type an absolute path. It must already exist.",
-        "remoteOffline": "{name} isn’t connected. Connect it to choose a folder there.",
+        "remoteOffline": "{name} isn’t connected",
         "remotePathPlaceholder": "/Users/you/code/project"
       }
     },
@@ -3231,9 +3496,7 @@
       "createGpuDevicesLabel": "CDI devices",
       "createGpuDevicesDescription": "Enter one CDI device per line or use commas. Turning GPU off clears saved preferences.",
       "createGpuDevicesPlaceholder": "nvidia.com/gpu=0\namd.com/gpu=0",
-      "gpuDevicesRequired": "At least one CDI device is required for GPU.",
       "cdiDevicesEmpty": "No GPU attached",
-      "gpuRecreateHint": "GPU changes require recreation. A simple start/stop will not update devices.",
       "deleteConfirm": "Delete this workspace permanently? Unpreserved data cannot be recovered.",
       "deletePreserveConfirm": "Export `/data` and then delete this workspace?",
       "restoreConfirm": "Restore preserved data into `/data`?",
@@ -3290,7 +3553,6 @@
       "metricsTitle": "Resources",
       "metricsSubtitle": "CPU, memory, and storage usage and limits.",
       "metricsLoadFailed": "Failed to load metrics",
-      "metricsUnsupported": "Resource monitoring not supported by backend",
       "metricsUnavailable": "No metrics available.",
       "metricsStopped": "Workspace isn't running; only storage usage is available.",
       "metricsPath": "Path",
@@ -3307,8 +3569,6 @@
         "cpuLabel": "CPU cores",
         "memoryLabel": "Memory (GiB)",
         "storageLabel": "Storage (GiB)",
-        "cpuHint": "Applied as a hard limit on supported container and VM runtime backends.",
-        "memoryHint": "Applied as a hard limit on supported container and VM runtime backends.",
         "storageHint": "Reserved as a VM hard limit; container runtime backends currently track it as a soft limit.",
         "unlimited": "Unlimited",
         "unlimitedPlaceholder": "unlimited",
@@ -3418,7 +3678,6 @@
         "multimedia": "Multimedia"
       },
       "chatModel": "Default chat model",
-      "chatModelDescription": "Used by Memoh Agent in new channel conversations, such as Telegram. Choosing a model in a web conversation does not change this default.",
       "chatModelPlaceholder": "Select model",
       "defaultAgent": "Default Agent",
       "defaultAgentDescription": "Used for new local chats. Existing conversations keep their current Agent.",
@@ -3797,7 +4056,7 @@
         "description": "Scan the QR code with WeChat to connect your account.",
         "startScan": "Get QR Code",
         "waitingScan": "Open WeChat and scan this QR code",
-        "scanned": "Scanned — confirm on your phone",
+        "scanned": "Scanned",
         "expired": "QR code expired",
         "refresh": "Refresh QR Code",
         "success": "WeChat connected successfully!",
@@ -3806,7 +4065,7 @@
         "verifyCodeWrong": "The number didn't match. Try again.",
         "verifyCodePlaceholder": "Number shown on your phone",
         "verifyCodeSubmit": "Confirm",
-        "verifyCodeBlocked": "Too many wrong attempts. Refresh the QR code and try again later.",
+        "verifyCodeBlocked": "Too many wrong attempts",
         "alreadyBound": "This WeChat account is already connected to this bot"
       },
       "types": {
@@ -3826,8 +4085,7 @@
         "cli": "CLI",
         "local": "Local"
       },
-      "modelRequiredTitle": "Choose a default chat model",
-      "modelRequiredDescription": "Channel connections can be enabled without a model. Set a default model so the bot can reply in new conversations."
+      "modelRequiredTitle": "Choose a default chat model"
     },
     "memory": {
       "title": "Memories",
@@ -3840,7 +4098,6 @@
       "openFile": "Open attachment",
       "fileUnavailable": "Attachment unavailable. Check the original file and try again.",
       "contentLabel": "Content",
-      "contentPlaceholder": "Write the memory content here (Markdown supported)...",
       "totalCount": "Total memories",
       "lastUpdated": "Last updated",
       "compact": "Compact",
@@ -3861,7 +4118,7 @@
       "searchResults": "Search results",
       "searchFailed": "Search failed",
       "degradedTitle": "Memory index degraded",
-      "degradedDesc": "The semantic seed index is behind the wiki store; graph recall still works. Re-ingest files to resync.",
+      "degradedDesc": "The semantic seed index is behind the wiki store; graph recall still works.",
       "ingestAction": "Sync files",
       "ingestSuccess": "Ingested {n} memories from files",
       "ingestFailed": "Failed to ingest memories from files",
@@ -4302,7 +4559,7 @@
         "selectPlaceholder": "Select a model",
         "hint": "Pick the model your bot replies with. Recommended, but you can change it anytime in settings.",
         "loading": "Loading models...",
-        "loadFailed": "Failed to load the model list. Try again.",
+        "loadFailed": "Failed to load the model list",
         "retry": "Retry"
       },
       "acp": {
@@ -4319,7 +4576,7 @@
       "action": "Open Memoh",
       "saveFailed": "Failed to save, please try again",
       "navigationFailed": "Couldn't open your bot. Please try again.",
-      "noModelWarning": "No model is selected for this bot, so it cannot reply yet. You can configure one later in Bot Settings.",
+      "noModelWarning": "No model is selected for this bot, so it cannot reply yet.",
       "examplesHint": "Or start with one of these"
     }
   },
@@ -4612,30 +4869,21 @@
     "done": "Done",
     "cancel": "Cancel"
   },
-  "agenvo": {
-    "bashPathHelp": "Absolute Windows path to the verified Git Bash bash.exe. Do not use the WSL launcher or rely on PATH.",
-    "bashPath": "Git Bash executable",
-    "connect": "Connect Agenvo",
-    "description": "Register an existing Agenvo connection as a Windows Bash command target.",
-    "limits": "Foreground Bash commands only. File/HostFS APIs, interactive terminals and managed background tasks are unavailable. Cancellation stops waiting; workspaces remain for inspection. Authorized Bots share the Windows account’s access.",
-    "sourceBot": "Bot with the existing connection",
-    "connection": "Agenvo MCP connection",
-    "connectionHelp": "Only active HTTP connections owned by your account can be shared.",
-    "device": "Windows device / Herdr instance",
-    "choose": "Choose…",
-    "name": "Computer name",
-    "session": "Herdr session",
-    "sessionHelp": "Enter an existing session name. Registration checks that this session is reachable.",
-    "workDir": "Windows working directory",
-    "discovering": "Checking available connections…",
-    "register": "Connect and choose Bots",
-    "noConnections": "No active HTTP MCP connection on this Bot. Configure Agenvo in its MCP settings first.",
-    "noDevices": "No Herdr instances found on this connection.",
-    "capability": "Agenvo · commands",
-    "agentCapability": "Agenvo · Pi tasks and commands",
-    "completed": "Foreground command completed. Output combines stdout and error text.",
-    "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
-    "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",
+  "computerExec": {
+    "completed": "Foreground command completed.",
+    "uncertain": "Command outcome is unknown or rejected.",
+    "retained": "Workspace {id} is retained.",
     "truncated": "Output was truncated."
+  },
+  "workspaceStorage": {
+    "title": "Workspace storage",
+    "choose": "Choose NAS directory",
+    "newDirectory": "New directory",
+    "create": "Create",
+    "saved": "NAS directory saved",
+    "loadFailed": "Unable to read computers",
+    "unavailable": "NAS storage is not configured or its existing LAN share is unavailable",
+    "loading": "Loading computers",
+    "empty": "No registered computers"
   }
 }

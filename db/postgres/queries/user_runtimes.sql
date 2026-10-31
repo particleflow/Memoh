@@ -57,10 +57,13 @@ WHERE binding.team_id = public.memoh_current_team_id()
   AND binding.runtime_id = expired.id;
 
 -- name: ListUserRuntimes :many
-SELECT * FROM user_runtimes
-WHERE team_id = public.memoh_current_team_id()
-  AND user_id = sqlc.arg(user_id) AND revoked_at IS NULL
-ORDER BY created_at ASC, id ASC;
+-- Only native Memoh Runtimes are selectable. Historical provider rows, mounts,
+-- workdirs, credentials and task records remain unchanged.
+SELECT runtime.* FROM user_runtimes runtime
+WHERE runtime.team_id = public.memoh_current_team_id()
+  AND runtime.user_id = sqlc.arg(user_id) AND runtime.revoked_at IS NULL
+  AND runtime.provider = 'memoh'
+ORDER BY runtime.created_at ASC, runtime.id ASC;
 
 -- name: RevokeUserRuntime :one
 UPDATE user_runtimes
@@ -98,6 +101,7 @@ JOIN user_runtimes r
  AND r.user_id = b.owner_user_id
  AND r.revoked_at IS NULL
  AND r.activated_at IS NOT NULL
+ AND r.provider = 'memoh'
 JOIN team_members owner_membership
   ON owner_membership.team_id = public.memoh_current_team_id()
  AND owner_membership.user_id = b.owner_user_id
@@ -134,6 +138,7 @@ JOIN users owner ON owner.id = owner_membership.user_id
 WHERE binding.team_id = public.memoh_current_team_id()
   AND binding.bot_id = sqlc.arg(bot_id)
   AND runtime.revoked_at IS NULL
+  AND runtime.provider = 'memoh'
 ORDER BY binding.created_at ASC, binding.id ASC;
 
 -- name: GetBotRemoteRuntimeMount :one
@@ -235,6 +240,7 @@ JOIN user_runtimes runtime ON runtime.id = binding.runtime_id AND runtime.team_i
 WHERE binding.team_id = public.memoh_current_team_id()
   AND bot.owner_user_id = sqlc.arg(owner_user_id)
   AND runtime.revoked_at IS NULL
+  AND runtime.provider = 'memoh'
 ORDER BY binding.created_at ASC, binding.id ASC;
 
 -- name: OwnedHTTPMCPConnectionBot :one
@@ -246,18 +252,3 @@ WHERE connection.team_id = public.memoh_current_team_id()
   AND connection.id = sqlc.arg(connection_id)
   AND bot.owner_user_id = sqlc.arg(owner_id)
   AND connection.is_active AND connection.type = 'http';
-
--- name: CreateAgenvoUserRuntime :one
-INSERT INTO user_runtimes (user_id, name, api_token, provider, provider_config, activated_at, pending_expires_at)
-VALUES (sqlc.arg(owner_id), sqlc.arg(name), 'agenvo_' || gen_random_uuid()::text, 'agenvo', sqlc.arg(provider_config), now(), NULL)
-ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
-DO UPDATE SET updated_at = user_runtimes.updated_at
-WHERE user_runtimes.provider_config = EXCLUDED.provider_config
-RETURNING *;
-
--- name: FindAgenvoUserRuntime :one
-SELECT * FROM user_runtimes
-WHERE team_id = public.memoh_current_team_id() AND user_id = sqlc.arg(owner_id)
-  AND provider = 'agenvo' AND provider_config = sqlc.arg(provider_config)
-  AND revoked_at IS NULL
-ORDER BY created_at LIMIT 1;

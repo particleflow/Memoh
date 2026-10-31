@@ -639,14 +639,63 @@ definitions:
       updated_at:
         type: string
     type: object
+  agenvo.Admission:
+    properties:
+      agent_config_dir:
+        type: string
+      config_sha256:
+        type: string
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      paused:
+        type: boolean
+      request_id:
+        type: string
+      revision:
+        type: string
+      scope:
+        type: string
+      target_fingerprint:
+        type: string
+    type: object
+  agenvo.AgentObservation:
+    properties:
+      completion_changed:
+        type: boolean
+      completion_seq:
+        type: string
+      interactive_ready:
+        type: boolean
+      output:
+        type: string
+      output_fidelity:
+        type: string
+      session_relation:
+        type: string
+      starting:
+        type: boolean
+      status:
+        type: string
+      task_success_verified:
+        description: |-
+          No Herdr status, completion sequence or terminal text independently
+          proves that the requested work succeeded. No lifecycle hook is assumed.
+        type: boolean
+      truncated:
+        type: boolean
+    type: object
   agenvo.AgentProfile:
     properties:
       config_dir:
         type: string
       execution_mode:
         description: |-
-          Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
-          finite official CLI invocations; no automatic protocol fallback occurs.
+          Empty is decoded only for historical profiles. Native configuration
+          requires pi-json-v1; no protocol fallback occurs.
         type: string
       model:
         type: string
@@ -655,34 +704,148 @@ definitions:
       provider:
         type: string
     type: object
-  agenvo.DiscoveredInstance:
+  agenvo.BatchFile:
     properties:
-      device_id:
-        type: string
-      device_name:
-        type: string
-      instance_id:
-        type: string
       name:
         type: string
-      online:
-        type: boolean
+      sha256:
+        type: string
+      size:
+        type: integer
     type: object
-  agenvo.Target:
+  agenvo.BatchHistoryEvidence:
+    properties:
+      file:
+        type: string
+      sha256:
+        type: string
+      size:
+        type: integer
+    type: object
+  agenvo.BatchHistoryReport:
+    properties:
+      after:
+        type: string
+      before:
+        type: string
+      evidence:
+        $ref: '#/definitions/agenvo.BatchHistoryEvidence'
+    type: object
+  agenvo.BatchReceipt:
+    properties:
+      attempt:
+        type: string
+      completion:
+        $ref: '#/definitions/agenvo.BatchFile'
+      exit_code:
+        type: integer
+      exited:
+        type: boolean
+      generation:
+        type: string
+      history:
+        $ref: '#/definitions/agenvo.BatchHistoryReport'
+      pane_id:
+        type: string
+      pi_session_id:
+        type: string
+      request_hash:
+        type: string
+      started:
+        type: boolean
+      stderr:
+        $ref: '#/definitions/agenvo.BatchFile'
+      stdout:
+        $ref: '#/definitions/agenvo.BatchFile'
+      terminal_id:
+        type: string
+      version:
+        type: integer
+      workspace_id:
+        type: string
+    type: object
+  agenvo.ChangeAdmission:
+    properties:
+      expected_revision:
+        type: string
+      paused:
+        type: boolean
+      request_id:
+        type: string
+    type: object
+  agenvo.NativeHerdrProfile:
     properties:
       agent:
         $ref: '#/definitions/agenvo.AgentProfile'
       bash_path:
         type: string
-      connection_id:
+      herdr_cli:
         type: string
-      device_id:
+      herdr_config_root:
         type: string
       instance_id:
         type: string
+      producer:
+        $ref: '#/definitions/agenvo.ProducerLocator'
       session:
         type: string
       work_dir:
+        type: string
+    required:
+    - bash_path
+    - herdr_cli
+    - herdr_config_root
+    - instance_id
+    - session
+    - work_dir
+    type: object
+  agenvo.NativeProfileCutoverRequest:
+    properties:
+      agent_config_dir:
+        type: string
+      expected_config_sha256:
+        type: string
+      expected_pause_revision:
+        type: string
+      expected_target_fingerprint:
+        type: string
+      instance_id:
+        type: string
+      pause_request_id:
+        type: string
+      runtime_id:
+        type: string
+      target_id:
+        type: string
+    type: object
+  agenvo.ProducerLocator:
+    properties:
+      config_dir:
+        type: string
+      program_path:
+        type: string
+      state_dir:
+        type: string
+    required:
+    - config_dir
+    - program_path
+    - state_dir
+    type: object
+  agenvo.ReferenceObservation:
+    properties:
+      agent_status:
+        type: string
+      availability:
+        type: string
+      control_pane:
+        type: string
+      pane:
+        type: string
+      reason:
+        type: string
+      reference_match:
+        type: string
+      workspace:
         type: string
     type: object
   apperror.Fault:
@@ -697,6 +860,23 @@ definitions:
     - FaultServer
     - FaultDependency
     - FaultCanceled
+  application.UserInputRecoveryResult:
+    properties:
+      decision_id:
+        type: string
+      invocation_id:
+        type: string
+      original_run_id:
+        type: string
+      recovery_run_id:
+        type: string
+      replayed:
+        type: boolean
+      started:
+        type: boolean
+      state:
+        type: string
+    type: object
   audio.ConfigSchema:
     properties:
       fields:
@@ -1235,6 +1415,23 @@ definitions:
     required:
     - items
     type: object
+  botdelegation.RecoveryInput:
+    properties:
+      event_id:
+        type: string
+      expected_attempt:
+        type: integer
+    required:
+    - event_id
+    - expected_attempt
+    type: object
+  botdelegation.RecoveryView:
+    properties:
+      event:
+        $ref: '#/definitions/taskresult.Event'
+      event_id:
+        type: string
+    type: object
   botdelegation.Summary:
     properties:
       source:
@@ -1280,6 +1477,24 @@ definitions:
         $ref: '#/definitions/botdelegation.Summary'
       target_bot_id:
         format: uuid
+        type: string
+      target_run_created_at:
+        type: string
+      target_run_id:
+        format: uuid
+        type: string
+      target_run_state:
+        enum:
+        - accepted
+        - running
+        - waiting_decision
+        - finishing
+        - completed
+        - aborted
+        - failed
+        - lost
+        type: string
+      target_run_updated_at:
         type: string
       target_session_id:
         format: uuid
@@ -2052,6 +2267,143 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  computertask.FollowupResult:
+    properties:
+      atomic_identity_guaranteed:
+        type: boolean
+      business_outcome:
+        type: string
+      continuity_verified:
+        type: boolean
+      input_may_have_been_sent:
+        type: boolean
+      mode:
+        type: string
+      prompt_accepted:
+        type: boolean
+      reason:
+        type: string
+      request_id:
+        type: string
+      session_observed:
+        type: boolean
+      session_relation:
+        type: string
+      state:
+        type: string
+      strict_resume_available:
+        type: boolean
+    type: object
+  computertask.NativeContent:
+    properties:
+      availability:
+        type: string
+      followup_available:
+        type: boolean
+      followups:
+        items:
+          $ref: '#/definitions/computertask.FollowupResult'
+        type: array
+      observation:
+        $ref: '#/definitions/agenvo.AgentObservation'
+      operation_id:
+        type: string
+      session_binding:
+        type: string
+      supported:
+        type: boolean
+    type: object
+  computertask.OperationReconciliation:
+    properties:
+      control_pane_id:
+        type: string
+      control_terminal_id:
+        type: string
+      files:
+        items:
+          $ref: '#/definitions/computertask.RecoveryFile'
+        type: array
+      generation:
+        type: string
+      receipt:
+        $ref: '#/definitions/agenvo.BatchReceipt'
+      receipt_state:
+        type: string
+      request_hash:
+        type: string
+      revision:
+        type: string
+      target_fingerprint:
+        type: string
+      terminal_id:
+        type: string
+    type: object
+  computertask.PiContinuity:
+    properties:
+      last_invocation:
+        $ref: '#/definitions/agenvo.BatchHistoryReport'
+      reason:
+        type: string
+      status:
+        type: string
+    type: object
+  computertask.Recovery:
+    properties:
+      attempt:
+        type: string
+      business_outcome:
+        type: string
+      cancel_requested:
+        type: boolean
+      continuity:
+        $ref: '#/definitions/computertask.PiContinuity'
+      native:
+        $ref: '#/definitions/agenvo.ReferenceObservation'
+      operation_id:
+        type: string
+      pane_id:
+        type: string
+      pi_result:
+        type: string
+      pi_session_id:
+        type: string
+      process_state:
+        type: string
+      reconciliation:
+        $ref: '#/definitions/computertask.OperationReconciliation'
+      result_reason:
+        type: string
+      result_summary:
+        $ref: '#/definitions/computertask.RecoverySummary'
+      state:
+        type: string
+      target_id:
+        type: string
+      workspace_id:
+        type: string
+    type: object
+  computertask.RecoveryFile:
+    properties:
+      confirmed_offset:
+        type: integer
+      current_availability:
+        type: string
+      meta:
+        $ref: '#/definitions/agenvo.BatchFile'
+      recorded_content_hash:
+        type: string
+      state:
+        type: string
+    type: object
+  computertask.RecoverySummary:
+    properties:
+      source:
+        type: string
+      text:
+        type: string
+      truncated:
+        type: boolean
     type: object
   connectit.AuthMethod:
     properties:
@@ -2865,6 +3217,8 @@ definitions:
         $ref: '#/definitions/conversation.UIForwardRef'
       id:
         type: string
+      input_source:
+        $ref: '#/definitions/inputsource.Source'
       kind:
         type: string
       messages:
@@ -2932,6 +3286,13 @@ definitions:
       status:
         type: string
       user_input_id:
+        type: string
+    type: object
+  deliverymeta.Artifact:
+    properties:
+      mime:
+        type: string
+      source_ref:
         type: string
     type: object
   display.SessionInfo:
@@ -3211,6 +3572,14 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  handlers.AcceptedUserInputRecoveryInput:
+    properties:
+      original_run_id:
+        format: uuid
+        type: string
+    required:
+    - original_run_id
     type: object
   handlers.AgentAuthorizationClaimRequest:
     properties:
@@ -3541,6 +3910,11 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  handlers.BindPrivateChatRequest:
+    properties:
+      session_id:
+        type: string
     type: object
   handlers.BotUserCandidate:
     properties:
@@ -3913,6 +4287,46 @@ definitions:
       version:
         type: integer
     type: object
+  handlers.CurrentUserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      joined_at:
+        type: string
+      last_login_at:
+        type: string
+      membership_is_active:
+        type: boolean
+      membership_updated_at:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
+      principal_is_active:
+        type: boolean
+      role:
+        type: string
+      timezone:
+        type: string
+      title_model_id:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
   handlers.DailyTokenUsage:
     properties:
       cache_read_tokens:
@@ -3925,13 +4339,6 @@ definitions:
         type: integer
       reasoning_tokens:
         type: integer
-    type: object
-  handlers.DiscoverAgenvoRequest:
-    properties:
-      connection_id:
-        type: string
-    required:
-    - connection_id
     type: object
   handlers.FSArchiveRequest:
     properties:
@@ -4240,6 +4647,8 @@ definitions:
         type: integer
       max_upload_bytes:
         type: integer
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
       resumable_enabled:
         type: boolean
     required:
@@ -4258,6 +4667,36 @@ definitions:
     - mime
     - size_bytes
     type: object
+  handlers.MediaUploadStatusResponse:
+    properties:
+      content_hash:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      mime:
+        type: string
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
+      offset:
+        type: integer
+      size_bytes:
+        type: integer
+      state:
+        enum:
+        - uploading
+        - ready
+        - canceled
+        type: string
+    required:
+    - expires_at
+    - id
+    - mime
+    - offset
+    - size_bytes
+    - state
+    type: object
   handlers.ModelTokenUsage:
     properties:
       input_tokens:
@@ -4271,6 +4710,85 @@ definitions:
       output_tokens:
         type: integer
       provider_name:
+        type: string
+    type: object
+  handlers.NativeTaskFollowupInput:
+    properties:
+      mode:
+        enum:
+        - current_agent
+        - bound_session
+        type: string
+      request_id:
+        format: uuid
+        type: string
+      task:
+        type: string
+    required:
+    - mode
+    - request_id
+    - task
+    type: object
+  handlers.NativeTaskFollowupResponse:
+    properties:
+      blocked_by_request:
+        type: string
+      followup:
+        $ref: '#/definitions/computertask.FollowupResult'
+      operation_id:
+        type: string
+      request_conflict:
+        type: boolean
+      state:
+        type: string
+    type: object
+  handlers.NativeTaskResumeInput:
+    properties:
+      artifact:
+        $ref: '#/definitions/deliverymeta.Artifact'
+      artifacts:
+        items:
+          $ref: '#/definitions/deliverymeta.Artifact'
+        type: array
+      inputs:
+        items:
+          type: string
+        type: array
+      kind:
+        enum:
+        - herdr_pi_task
+        type: string
+      target_id:
+        type: string
+      task:
+        type: string
+      work_dir:
+        type: string
+    required:
+    - kind
+    - task
+    type: object
+  handlers.NativeTaskResumeResponse:
+    properties:
+      automatic_retry:
+        type: boolean
+      business_outcome:
+        enum:
+        - unknown
+        type: string
+      operation_id:
+        type: string
+      outcome:
+        enum:
+        - submitted
+        - unchanged
+        - unknown
+        - unavailable
+        - blocked
+        type: string
+      phase:
+        type: string
+      state:
         type: string
     type: object
   handlers.PingResponse:
@@ -5862,8 +6380,67 @@ definitions:
       state:
         type: string
     type: object
+  handlers.playbackConfigResponse:
+    properties:
+      identity:
+        type: string
+      input_content_type:
+        type: string
+    type: object
+  handlers.playbackInputRequest:
+    properties:
+      final:
+        type: boolean
+      id:
+        type: string
+      offset:
+        type: integer
+      sequence:
+        type: integer
+      text:
+        type: string
+    type: object
+  handlers.sessionAbortControlResponse:
+    properties:
+      applied:
+        description: Applied is the observed control return, not proof of a unique
+          abort cause.
+        type: boolean
+      client_reason:
+        description: ClientReason is a client-reported enum, not proof of a human
+          action.
+        type: string
+      completed_at:
+        description: CompletedAt is a stored server return observation, not the run
+          finish time.
+        type: string
+      error_class:
+        type: string
+      received_at:
+        type: string
+      server_source:
+        description: ServerSource names the server branch; it is not an authenticated
+          actor.
+        type: string
+      source:
+        description: Source is assigned by the receiving server, not inferred from
+          a user agent.
+        type: string
+    type: object
   handlers.sessionInvocationResponse:
     properties:
+      abort_control:
+        allOf:
+        - $ref: '#/definitions/handlers.sessionAbortControlResponse'
+        description: |-
+          AbortControl is the earliest observed incoming request, not necessarily
+          the request that caused runtime intent. Delivery to storage is best effort.
+          Its client_reason is client-reported, never an authenticated actor.
+      abort_requested_at:
+        description: |-
+          AbortRequestedAt is durable runtime intent. Missing means unknown, not
+          proof that no cancellation occurred. Old records are never backfilled.
+        type: string
       found:
         description: |-
           Found is false when the session has no run for this invocation, which
@@ -6102,6 +6679,35 @@ definitions:
         type: string
       result: {}
     type: object
+  inputsource.Source:
+    properties:
+      bot_id:
+        type: string
+      channel:
+        type: string
+      channel_identity_id:
+        type: string
+      kind:
+        type: string
+      occurrence_id:
+        type: string
+      origin_bot_id:
+        type: string
+      origin_run_id:
+        type: string
+      origin_session_id:
+        type: string
+      session_id:
+        type: string
+      task_id:
+        type: string
+      task_kind:
+        type: string
+      task_run_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   mcp.AuthorizeResult:
     properties:
       authorization_id:
@@ -6237,6 +6843,24 @@ definitions:
       url:
         type: string
     type: object
+  media.TransferEndpoint:
+    properties:
+      logical_origin:
+        type: string
+      physical_origin:
+        type: string
+    type: object
+  media.TransferNetworkPolicy:
+    properties:
+      endpoint:
+        $ref: '#/definitions/media.TransferEndpoint'
+      lan_addresses:
+        items:
+          type: string
+        type: array
+      version:
+        type: integer
+    type: object
   media.Upload:
     properties:
       content_hash:
@@ -6264,6 +6888,55 @@ definitions:
     - offset
     - size_bytes
     - state
+    type: object
+  media.UploadFailure:
+    properties:
+      at:
+        type: integer
+      code:
+        type: string
+      expires_at:
+        type: string
+      handle:
+        type: string
+      operation:
+        type: string
+      phase:
+        type: string
+      received_at:
+        type: string
+      sdk_code:
+        type: integer
+      version:
+        type: integer
+    required:
+    - at
+    - code
+    - expires_at
+    - operation
+    - phase
+    - received_at
+    - version
+    type: object
+  media.UploadFailureInput:
+    properties:
+      at:
+        type: integer
+      code:
+        type: string
+      handle:
+        type: string
+      phase:
+        type: string
+      sdk_code:
+        type: integer
+      version:
+        type: integer
+    required:
+    - at
+    - code
+    - phase
+    - version
     type: object
   media.UploadInput:
     properties:
@@ -6530,6 +7203,40 @@ definitions:
       updated:
         type: integer
     type: object
+  providers.MediaCatalogModel:
+    properties:
+      capability_source:
+        type: string
+      id:
+        type: string
+      input:
+        items:
+          type: string
+        type: array
+      kind:
+        type: string
+      output:
+        items:
+          type: string
+        type: array
+    type: object
+  providers.MediaCatalogResponse:
+    properties:
+      checked_at:
+        type: string
+      models:
+        items:
+          $ref: '#/definitions/providers.MediaCatalogModel'
+        type: array
+      protocol:
+        type: string
+      provider_id:
+        type: string
+      transcription_status:
+        description: Audio input metadata does not prove a model implements the transcription
+          API.
+        type: string
+    type: object
   providers.OAuthAccount:
     properties:
       avatar_url:
@@ -6718,6 +7425,17 @@ definitions:
           Supported is false when the model has no thinking concept; the other fields
           are then empty and no control should be rendered at all.
         type: boolean
+    type: object
+  route.PrivateChatEntry:
+    properties:
+      candidates:
+        items:
+          $ref: '#/definitions/session.Session'
+        type: array
+      next_cursor:
+        type: string
+      session:
+        $ref: '#/definitions/session.Session'
     type: object
   schedule.CreateRequest:
     properties:
@@ -7203,6 +7921,90 @@ definitions:
       item_id:
         type: string
     type: object
+  sessiontask.Activity:
+    properties:
+      bot_id:
+        type: string
+      id:
+        type: string
+      kind:
+        enum:
+        - bot
+        - agent
+        - task
+        type: string
+      name:
+        type: string
+      session_id:
+        type: string
+      state:
+        enum:
+        - accepted
+        - submitted
+        - running
+        - waiting_decision
+        - finishing
+        type: string
+    required:
+    - bot_id
+    - id
+    - kind
+    - name
+    - session_id
+    - state
+    type: object
+  sessiontask.ActivityPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/sessiontask.Activity'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
+  sessiontask.DirectoryPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/sessiontask.DirectoryTask'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
+  sessiontask.DirectoryTask:
+    properties:
+      created_at:
+        type: string
+      destination:
+        $ref: '#/definitions/sessiontask.TaskDestination'
+      name:
+        type: string
+      record_id:
+        format: uuid
+        type: string
+      state:
+        type: string
+      task_id:
+        type: string
+      task_type:
+        enum:
+        - native_agent
+        - computer_operation
+        - bot_delegation
+        - schedule_fire
+        type: string
+    required:
+    - created_at
+    - name
+    - record_id
+    - state
+    - task_id
+    - task_type
+    type: object
   sessiontask.Page:
     properties:
       items:
@@ -7243,6 +8045,13 @@ definitions:
       content_available:
         type: boolean
       created_at:
+        type: string
+      direct_parent_session_id:
+        description: |-
+          DirectParentSessionID is the owning session's persisted direct parent,
+          exposed only after the complete ancestor path is authorized. Omitted when
+          that session has no parent; older servers also omit this optional field.
+        format: uuid
         type: string
       operation_kind:
         enum:
@@ -7325,6 +8134,23 @@ definitions:
     - task_id
     - task_type
     - updated_at
+    type: object
+  sessiontask.TaskDestination:
+    properties:
+      bot_id:
+        format: uuid
+        type: string
+      run_id:
+        type: string
+      session_id:
+        format: uuid
+        type: string
+      turn_id:
+        format: uuid
+        type: string
+    required:
+    - bot_id
+    - session_id
     type: object
   settings.Settings:
     properties:
@@ -7536,6 +8362,44 @@ definitions:
       state:
         type: string
     type: object
+  taskresult.Event:
+    properties:
+      attempt:
+        type: integer
+      automatic_attempts:
+        type: integer
+      message_id:
+        type: string
+      recoveries:
+        items:
+          $ref: '#/definitions/taskresult.Recovery'
+        type: array
+      report_state:
+        type: string
+      run_id:
+        type: string
+      state:
+        type: string
+      summary_run_id:
+        type: string
+      text:
+        type: string
+    type: object
+  taskresult.Recovery:
+    properties:
+      attempt:
+        type: integer
+      from_attempt:
+        type: integer
+      previous_run_id:
+        type: string
+      previous_run_state:
+        type: string
+      requested_at:
+        type: string
+      requested_by:
+        type: string
+    type: object
   turn.RuntimeCommand:
     properties:
       completed_text:
@@ -7679,11 +8543,26 @@ definitions:
     type: object
   userruntime.CreateRuntimeRequest:
     properties:
-      agenvo:
-        $ref: '#/definitions/agenvo.Target'
       name:
         type: string
       provider:
+        enum:
+        - memoh
+        type: string
+    type: object
+  userruntime.NativeHerdrIdentity:
+    properties:
+      config_sha256:
+        type: string
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      session:
+        type: string
+      target_fingerprint:
         type: string
     type: object
   userruntime.Runtime:
@@ -7708,6 +8587,8 @@ definitions:
         type: string
       name:
         type: string
+      native_herdr:
+        $ref: '#/definitions/userruntime.NativeHerdrIdentity'
       online:
         type: boolean
       os:
@@ -7733,6 +8614,31 @@ definitions:
       credential_id:
         type: string
       expires_at:
+        type: string
+    type: object
+  userruntime.WorkspaceDirectory:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  userruntime.WorkspaceStorage:
+    properties:
+      directories:
+        items:
+          $ref: '#/definitions/userruntime.WorkspaceDirectory'
+        type: array
+      path:
+        type: string
+      selected_path:
+        type: string
+      windows_path:
+        type: string
+    type: object
+  userruntime.WorkspaceStorageRequest:
+    properties:
+      path:
         type: string
     type: object
   video.ConfigSchema:
@@ -8923,6 +9829,59 @@ paths:
       summary: Set an ACP runtime's reasoning effort
       tags:
       - acp
+  /bots/{bot_id}/activity:
+    get:
+      description: Read-only existing persisted states, independent of the open conversation.
+        Ordinary session/ancestor permissions and current computer target grants are
+        rechecked. Unknown and terminal entries are not active. Names and original
+        session references only; no transcripts, dispatch or device calls. Continue
+        while next_cursor is nonempty, including an empty filtered page. Account authentication
+        required.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - default: 100
+        description: Page size (1-100)
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque continuation scoped to caller and Bot
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.ActivityPage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List readable active Bot runs, Agent runs and computer tasks
+      tags:
+      - sessions
   /bots/{bot_id}/agents:
     get:
       description: List active and disabled non-deleted Agents attached to a bot.
@@ -12801,6 +13760,169 @@ paths:
       summary: Get the attachment upload limit
       tags:
       - messages
+  /bots/{bot_id}/media/upload-failures:
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/media.UploadFailure'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read scoped attachment failure reports
+      tags:
+      - messages
+  /bots/{bot_id}/media/upload-failures/{operation}:
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Existing client operation ID
+        in: path
+        name: operation
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/media.UploadFailure'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one scoped attachment failure report
+      tags:
+      - messages
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Existing client operation ID
+        in: path
+        name: operation
+        required: true
+        type: string
+      - description: Whitelisted failure metadata
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media.UploadFailureInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.UploadFailure'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Record a scoped attachment failure
+      tags:
+      - messages
   /bots/{bot_id}/media/uploads:
     post:
       consumes:
@@ -12928,7 +14050,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/media.Upload'
+            $ref: '#/definitions/handlers.MediaUploadStatusResponse'
         "401":
           description: Unauthorized
           schema:
@@ -14586,6 +15708,74 @@ paths:
       summary: Get session context lifecycle
       tags:
       - sessions
+  /bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover:
+    post:
+      consumes:
+      - application/json
+      description: Account/session-authenticated owner action for a failed native
+        retry run whose accepted answer has no persisted tool result. Uses only the
+        original saved input and accepted decision. Reconciles its exact hidden history
+        and admits one idempotent continuation run; keeps the original run failed.
+        Never resubmits the answer or retries the whole original turn. Repeated requests
+        return the same recovery run, including failed/unknown outcomes. No automatic
+        invocation on reconnect. A successful response acknowledges admission, not
+        model or business completion.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned chat session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Original submitted ask_user decision ID
+        in: path
+        name: decision_id
+        required: true
+        type: string
+      - description: Original failed run identity
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AcceptedUserInputRecoveryInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/application.UserInputRecoveryResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Explicitly continue a submitted ask_user answer after history failure
+      tags:
+      - sessions
   /bots/{bot_id}/sessions/{session_id}/delegations:
     get:
       description: Persisted facts only. Follow nonempty next_cursor even for an empty
@@ -14941,6 +16131,70 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Retry only result delivery to the supervisor
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover:
+    post:
+      consumes:
+      - application/json
+      description: Uses the original event, its current expected attempt, attention
+        state and durable execution/publication evidence. New authorizations conflict
+        while active; repeating the same authorization resumes it. Published results
+        conflict. Never reruns the specialist or changes an unknown outcome to success.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      - description: Exact saved event and expected attempt
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/botdelegation.RecoveryInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/botdelegation.RecoveryView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Authorize one summary attempt for a saved task outcome
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/follow-up-queue:
@@ -15686,9 +16940,13 @@ paths:
   /bots/{bot_id}/sessions/{session_id}/tasks:
     get:
       description: Read-only persisted facts. Includes owned subagent descendants
-        and computer receipts; rechecks current target grants. No dispatch, device
-        polling, reasoning, raw output or attachments. Continue while next_cursor
-        is nonempty, even for an empty page. States are live; creation order is stable.
+        and computer receipts; rechecks current target grants. session_id is the owning
+        session; parent_session_id remains the requested aggregation root. Optional
+        direct_parent_session_id is the owning session's persisted direct parent,
+        authorized through the ancestor path; omission supplies no parent reference.
+        No dispatch, device polling, reasoning, raw output or attachments. Continue
+        while next_cursor is nonempty, even for an empty page. States are live; creation
+        order is stable.
       parameters:
       - description: Bot ID
         in: path
@@ -15741,7 +16999,9 @@ paths:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}:
     get:
-      description: Same projection as a list item, with fresh authorization. Unknown
+      description: Same projection as a list item, with fresh authorization. session_id
+        and optional direct_parent_session_id describe the owning session and its
+        direct parent; parent_session_id remains the requested aggregation root. Unknown
         execution and cancel intent never assert termination or business completion.
         Subagents expose their own latest persisted run and bounded visible assistant
         text; computer tasks expose verified result summaries. No raw logs or attachment
@@ -15798,6 +17058,61 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read a safe task summary within an owned conversation
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content:
+    get:
+      description: Uses existing agent.get/read without recording evidence or collecting
+        files. A terminal_snapshot_unverified sample can include tool output and is
+        not a complete log, verified assistant answer or task completion. Batch Pi
+        returns supported=false.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/computertask.NativeContent'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read a bounded native Agent terminal sample
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries:
@@ -15863,6 +17178,373 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read one page of persisted computer task file deliveries
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup:
+    post:
+      consumes:
+      - application/json
+      description: Returns the saved receipt for an exact request ID and matching
+        input. New requests are unsupported. An unknown outcome remains unknown and
+        must not be resent.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Original input and retained request ID
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.NativeTaskFollowupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.NativeTaskFollowupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read a retained interactive Agent input receipt
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation:
+    get:
+      description: Read-only, bounded Herdr metadata and an operation-revision-bound
+        persisted reconciliation snapshot. Rechecks parent/descendant ownership and
+        current device grants before and after observation. A concurrent operation
+        revision change fails closed. No dispatch, terminal input, logs, cancellation,
+        result collection or receipt writes. Native idle/done and matching references
+        never prove business success or restored conversation history. Reconciliation
+        neither pauses target admission nor authorizes host stop/upgrade; recorded
+        file references are not live media checks.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/computertask.Recovery'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Observe a computer task's original native references
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume:
+    post:
+      consumes:
+      - application/json
+      description: Requires a current account JWT and the complete unchanged original
+        computer_task_submit arguments. Chat-route reply credentials cannot resume
+        execution. Resolves host authority from the authenticated user, conversation
+        ancestry, operation ownership and target grant; reuses the persisted original
+        run even when terminal. No model call, new run, new operation or workspace.
+        Existing admission/CAS and uncertain-dispatch fences apply. submitted is input
+        acknowledgement, not business success; never automatically retry unknown outcomes.
+        Disconnected Runtime remains unavailable. Read the same task afterward. No
+        raw native output is returned.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Original computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Complete original tool arguments
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.NativeTaskResumeInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.NativeTaskResumeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Explicitly continue one original native batch before prompt submission
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/contact:
+    get:
+      description: Returns the bound conversation or eligible user-owned local model
+        chats. Candidates require explicit confirmation; ID ordering is not a preference.
+        A known deleted contact is resolved by POST. No task or hook is dispatched.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Candidate ID cursor
+        in: query
+        name: after
+        type: string
+      - description: Explicitly opened conversation; eligibility is verified before
+          offering
+        in: query
+        name: selected_session_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/route.PrivateChatEntry'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Inspect this account's Bot contact without changing history
+      tags:
+      - sessions
+    post:
+      description: Reuses a server-owned Web route for this authenticated account
+        and Bot across devices. Atomically creates its chat only when absent. No model
+        call, task dispatch, adoption or mutation of historical sessions. Chat-route
+        tokens and client-supplied identity/route/body are not accepted.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/session.Session'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Resolve this account's persistent private chat with a Bot
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/contact/bind:
+    post:
+      consumes:
+      - application/json
+      description: First binding only. The server verifies account ownership, ordinary
+        local model chat, user visibility, no parent/channel route/delegation. Does
+        not merge, copy, retarget tasks, replay hooks or replace another device's
+        binding. On conflict or uncertain outcome, inspect the contact before deciding
+        again.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Explicitly selected conversation
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.BindPrivateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/session.Session'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Confirm an existing conversation as this account's Bot contact
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:
@@ -16151,6 +17833,117 @@ paths:
       summary: Generate a different set of new-chat starter prompts
       tags:
       - bots
+  /bots/{bot_id}/tasks:
+    get:
+      description: Account-only read of native Agent admissions, computer receipts,
+        incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown
+        records and multiple tasks per session. Sessions, configured Agents and ordinary
+        chat runs are not tasks. Each source rechecks its existing permissions. Native
+        task_id and provider run_id are opaque strings; record_id identifies the durable
+        occurrence. Continue nonempty next_cursor even on an empty page. Native tool
+        requests are included from their persisted queue admission, before an execution
+        run exists. No execution, device polling, result text or attachments.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - default: 20
+        description: Page size 1-100
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque Bot and account scoped continuation
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.DirectoryPage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List original persisted tasks across this Bot's history
+      tags:
+      - sessions
+  /bots/{bot_id}/tasks/{task_type}/{record_id}:
+    get:
+      description: Same source-specific live authorization as the directory. A missing
+        destination does not remove a real failed or unknown task. This read never
+        submits or resumes work.
+      parameters:
+      - description: Directory Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Original task type
+        enum:
+        - native_agent
+        - computer_operation
+        - bot_delegation
+        - schedule_fire
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Durable occurrence ID
+        in: path
+        name: record_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.DirectoryTask'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Recheck one original task occurrence before navigation
+      tags:
+      - sessions
   /bots/{bot_id}/token-usage:
     get:
       description: Get daily aggregated token usage for a bot, split by chat, discuss,
@@ -16391,6 +18184,178 @@ paths:
       summary: Unified MCP tools gateway
       tags:
       - containerd
+  /bots/{bot_id}/tts/playback:
+    post:
+      consumes:
+      - application/json
+      description: Ephemeral playback only; does not create a message, attachment
+        or history record. Uses the configured TTS model and voice. Maximum 500 Unicode
+        characters per request. Requires Bot chat permission.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Text to read aloud
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.synthesizeRequest'
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Audio bytes; Content-Type is the configured model's audio format
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read text aloud using a bot's configured voice
+      tags:
+      - bots
+  /bots/{bot_id}/tts/playback/config:
+    get:
+      description: Returns an opaque effective configuration identity. Never synthesizes
+        audio. Requires the same account JWT and Bot chat permission as Playback.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.playbackConfigResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Validate access and current voice configuration for cached playback
+      tags:
+      - bots
+  /bots/{bot_id}/tts/playback/input:
+    post:
+      consumes:
+      - application/json
+      description: Requires an active account JWT and Bot chat permission. Streams
+        one task's audio until final input and provider completion. Maximum 20000
+        Unicode characters per frame, within the native protocol limit. Never retry
+        an uncertain synthesis. No message or attachment is created.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Initial exact spoken-text frame, sequence and Unicode offset
+          zero
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.playbackInputRequest'
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Configured audio bytes
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Start one configured native incremental speech task
+      tags:
+      - bots
+    put:
+      consumes:
+      - application/json
+      description: Revalidates the active account, Bot chat permission and current
+        effective configuration. Exact next sequence and Unicode offset are required.
+        Missing/closed input never creates another synthesis.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Next frame; final closes text input, not audio output
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.playbackInputRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Append or finish the current native speech input
+      tags:
+      - bots
   /bots/{bot_id}/tts/synthesize:
     post:
       consumes:
@@ -18494,6 +20459,14 @@ paths:
             items:
               $ref: '#/definitions/providers.GetResponse'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -18523,6 +20496,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -18548,6 +20529,14 @@ paths:
           description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18580,6 +20569,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18620,6 +20617,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -18658,6 +20663,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -18667,6 +20680,58 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Import models from provider
+      tags:
+      - providers
+  /providers/{id}/media-catalog:
+    get:
+      description: Requires an active account token; chat-route reply tokens are not
+        accepted. Read the saved provider's Magpie catalog. Does not import models
+        or call a model; transcription support remains unverified.
+      parameters:
+      - description: Provider ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Catalog protocol
+        enum:
+        - magpie
+        in: query
+        name: protocol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/providers.MediaCatalogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read provider media catalog
       tags:
       - providers
   /providers/{id}/models:
@@ -18691,6 +20756,14 @@ paths:
             type: array
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18721,6 +20794,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -18743,6 +20824,14 @@ paths:
             $ref: '#/definitions/providers.OAuthStatus'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18769,6 +20858,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -18789,6 +20886,14 @@ paths:
           description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18821,6 +20926,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -18844,6 +20957,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/providers.CountResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -18873,6 +20994,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -18910,6 +21039,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -20142,7 +22279,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/accounts.Account'
+            $ref: '#/definitions/handlers.CurrentUserResponse'
         "400":
           description: Bad Request
           schema:
@@ -20373,9 +22510,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a native Remote Runtime credential or an Agenvo command
-        target backed by an existing account-owned MCP connection. Agenvo registrations
-        return no API token.
+      description: Register a native Memoh Remote Runtime credential. Legacy providers
+        are retired.
       parameters:
       - description: Runtime configuration
         in: body
@@ -20431,15 +22567,91 @@ paths:
       summary: Revoke a Remote Runtime credential
       tags:
       - user-runtimes
-  /users/me/runtimes/{id}/agenvo-agent:
+  /users/me/runtimes/{id}/admission:
+    get:
+      description: Reads native profile identity and admission from one database snapshot.
+        Includes config_sha256, target_fingerprint and agent_config_dir for owner
+        cutover reconciliation; never returns a credential or complete provider config.
+        A pause is not proof that accepted work has drained.
+      parameters:
+      - description: Existing owner runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read owned computer admission state
+      tags:
+      - user-runtimes
     put:
       consumes:
       - application/json
-      description: Updates non-secret provider/model/config-directory references without
-        creating credentials, changing the device mapping, or granting Bots. An empty
-        profile disables Agent tasks.
+      description: Atomically fences new operation claims across matching mounts.
+        Configured native Runtimes use the owned registry identity and remain manageable
+        while offline. Retain request_id after an uncertain response. Resume requires
+        the pause request ID and current revision. Does not stop processes, drain
+        accepted work or authorize a host restart.
       parameters:
-      - description: Existing runtime ID
+      - description: Existing owner runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Compare-and-swap admission request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.ChangeAdmission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Pause or resume new work for an owned native instance
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/native-herdr:
+    put:
+      consumes:
+      - application/json
+      description: Stores non-secret local references on an activated Runtime. Does
+        not enroll a device, grant Bots, start Herdr, or change credentials. Native
+        Pi tasks require pi-json-v1.
+      parameters:
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -20449,7 +22661,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/agenvo.AgentProfile'
+          $ref: '#/definitions/agenvo.NativeHerdrProfile'
       produces:
       - application/json
       responses:
@@ -20465,13 +22677,66 @@ paths:
           description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: Configure Pi on an existing owned Agenvo computer
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Configure Herdr on an existing owned native Runtime
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/native-herdr/profile-cutover:
+    put:
+      consumes:
+      - application/json
+      description: Owner account only. Checks the current config digest, target fingerprint
+        and paused request/revision. Atomic CAS changes only agent.config_dir and
+        advances the paused admission revision; use the returned revision for the
+        next cutover or resume. No host action, task dispatch or unpause. A lost response
+        requires rereading the current state.
+      parameters:
+      - description: Existing native Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Cutover CAS facts
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.NativeProfileCutoverRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Switch the Pi configuration directory while admission stays paused
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/transfer-credential:
     delete:
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -20501,7 +22766,7 @@ paths:
       - user-runtimes
     get:
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -20531,7 +22796,7 @@ paths:
         CAS; a lost response requires status read and explicit rotation. Never a per-file
         action.
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -20568,26 +22833,73 @@ paths:
       summary: Enroll or explicitly rotate an owned computer file credential
       tags:
       - user-runtimes
-  /users/me/runtimes/agenvo/discover:
-    post:
-      consumes:
-      - application/json
+  /users/me/runtimes/{id}/workspace-storage:
+    get:
+      description: Account session required. Uses an existing configured private LAN
+        share and existing Runtime identity. No directory creation, execution or credential
+        changes.
       parameters:
-      - description: Existing MCP connection
-        in: body
-        name: request
+      - description: Owned Runtime ID
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/handlers.DiscoverAgenvoRequest'
+        type: string
+      - description: Relative directory within this computer's NAS storage
+        in: query
+        name: path
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/agenvo.DiscoveredInstance'
-            type: array
+            $ref: '#/definitions/userruntime.WorkspaceStorage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Browse this owned computer's NAS workspace directories
+      tags:
+      - user-runtimes
+    put:
+      consumes:
+      - application/json
+      description: Persists only workspace_storage in the existing Runtime configuration
+        with compare-and-swap. Creates the default folder if missing after LAN/share
+        access validation. Does not rewrite Herdr WorkDir, existing tasks, sessions,
+        local sourceRoot or credentials.
+      parameters:
+      - description: Owned Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Relative selected directory
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userruntime.WorkspaceStorageRequest'
+      responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -20596,11 +22908,59 @@ paths:
           description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
         "503":
           description: Service Unavailable
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: List Herdr instances from an existing account-owned MCP connection
+      summary: Save this owned computer's default NAS storage directory
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/workspace-storage/directories:
+    post:
+      consumes:
+      - application/json
+      description: Requires the existing private LAN share to be readable before any
+        NAS write. Does not change selection, local defaults, tasks or sessions.
+      parameters:
+      - description: Owned Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Relative path
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userruntime.WorkspaceStorageRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Create a directory in this owned computer's NAS storage
       tags:
       - user-runtimes
   /video-models:

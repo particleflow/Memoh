@@ -18,8 +18,12 @@ foreach ($entry in $manifest.files) {
 }
 # The test executable creates private directories ONLY under its own temporary
 # fixtures. It does not consume HERDR_PLUGIN_STATE_DIR or remote endpoints.
-& (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNative' '-test.v' '-test.timeout=5m'
-if ($LASTEXITCODE -ne 0) { throw "Native fixture validation failed: $LASTEXITCODE" }
+# Match the source CI split: keep every native case, including every journal
+# durability assertion, without sharing its timeout with publication/catalog I/O.
+& (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNativeActiveJournal$' '-test.v' '-test.timeout=5m'
+if ($LASTEXITCODE -ne 0) { throw "Native journal fixture validation failed: $LASTEXITCODE" }
+& (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNative' '-test.skip=^TestWindowsNativeActiveJournal$' '-test.v' '-test.timeout=10m'
+if ($LASTEXITCODE -ne 0) { throw "Remaining native fixture validation failed: $LASTEXITCODE" }
 
 # The CLI test binary invokes its real command dispatcher in fresh processes,
 # with an ephemeral TLS root supplied only by test code. Production has no bypass.

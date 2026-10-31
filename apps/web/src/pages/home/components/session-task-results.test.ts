@@ -11,7 +11,10 @@ import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
 vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'wrong-global-bot' }) }))
 import { useSessionTasks, type TaskScope } from '../composables/useSessionTasks'
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), files: vi.fn() }))
+const transfer = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/media-transfer', () => ({ saveMediaDownload: transfer.save, MediaRecoveryError: class extends Error {} }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservation: vi.fn().mockResolvedValue({ data: { operation_id: 'task', native: { availability: 'connection_unavailable' } } }),
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId: api.detail,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries: api.files,
@@ -20,6 +23,7 @@ let app: ReturnType<typeof createApp>
 let root: HTMLDivElement
 beforeEach(() => {
   vi.useFakeTimers()
+  transfer.save.mockClear()
   client.setConfig({ baseUrl: '/api' })
   localStorage.setItem('token', 'synthetic-token')
   vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => { fn(0); return 0 })
@@ -92,8 +96,14 @@ describe.each(['web', 'native'])('native committed attachment access in %s host'
     if (host === 'web') {
       expect(preview).toHaveBeenCalledWith(expect.objectContaining({ botId: 'specialist', contentHash: hash, src: undefined }))
       expect(opened).toHaveBeenCalledOnce()
-      expect(download).not.toHaveBeenCalled()
-    } else expect(download).toHaveBeenCalledOnce()
+      expect(transfer.save).not.toHaveBeenCalled()
+    } else {
+      // This dialog-only host has no preview injection or phone byte bridge.
+      // Its fallback must use the shared durable downloader with the reader
+      // identity, rather than a bare URL or the global Bot.
+      expect(transfer.save).toHaveBeenCalledExactlyOnceWith('specialist', hash, 42, undefined, 'output', expect.any(AbortSignal))
+    }
+    expect(download).not.toHaveBeenCalled()
     deliveries.value = { ...deliveries.value, error: { status: 403 } }
     await nextTick()
     expect(root.querySelectorAll('a')).toHaveLength(0)
@@ -122,5 +132,45 @@ describe.each(['web', 'native'])('native committed attachment access in %s host'
     deliveries.value = { ...deliveries.value, botId: 'changed', files: [] }
     await nextTick(); await vi.advanceTimersByTimeAsync(400)
     expect(root.querySelector('[data-keyboard-scope="mediaLightbox"]')).toBeNull()
+  })
+})
+
+describe.each(['web', 'native'])('computer observation in %s host', host => {
+  it('keeps native status separate from the task outcome and clears unavailable identity', async () => {
+    root = document.createElement('div'); document.body.append(root)
+    const detail = { task_type: 'computer_operation' as const, task_id: 'operation', session_id: 'session', parent_session_id: 'root', created_at: '', updated_at: '', status: 'submitted' as const, summary: '', content_available: false, attachments_available: false }
+    const observation = ref<import('../composables/useComputerTaskObservation').ComputerTaskObservationView>({
+      loading: false, refresh: vi.fn().mockResolvedValue(undefined), receivedAt: '12:00:00',
+      data: { operation_id: 'operation', target_id: 'synthetic-pc', workspace_id: 'w-observed', pane_id: 'p-observed', state: 'submitted', reconciliation: { revision: '9007199254740993123', receipt_state: 'validated' }, business_outcome: 'unknown', native: { availability: 'online', agent_status: 'working', reference_match: 'observed' } },
+    })
+    app = createApp({ setup() {
+      const body = () => h(SessionTaskResults, { items: [], detail, selected: detail, loading: false, observation: observation.value })
+      if (host === 'web') return () => h(Dialog, { open: true }, { default: () => h(DialogPanel, {}, { default: () => [
+        h(DialogTitle, {}, { default: () => 'Synthetic task' }), h(DialogDescription, {}, { default: () => 'Synthetic observation' }), body(),
+      ] }) })
+      return () => h('dialog', { open: true, 'aria-label': 'Synthetic task' }, [body()])
+    } })
+    app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root)
+    await nextTick(); await vi.advanceTimersByTimeAsync(50); await nextTick()
+    const dialog = document.querySelector(host === 'web' ? '[role=dialog]' : 'dialog')!
+    expect(dialog.textContent).toContain('Native Agent: Working')
+    expect(dialog.textContent).toContain('w-observed')
+    expect(dialog.textContent).toContain('9007199254740993123')
+    observation.value = { ...observation.value, data: { ...observation.value.data, native: { availability: 'online', agent_status: 'done', reference_match: 'observed' } } }
+    await nextTick()
+    expect(dialog.textContent).toContain(en.chat.tasks.observation.states.done)
+    expect(dialog.textContent).toContain(en.chat.tasks.statuses.submitted)
+    expect(dialog.textContent).not.toContain(en.chat.tasks.businessUnknown)
+    expect(dialog.textContent).toContain(en.chat.tasks.observation.checkpoints.fields.business_outcome)
+    observation.value = { ...observation.value, error: { status: 403 } } // Even stale data must be hidden on access loss.
+    await nextTick()
+    expect(dialog.textContent).not.toContain('9007199254740993123')
+    expect(dialog.textContent).not.toContain('w-observed')
+    observation.value = { ...observation.value, data: undefined, error: { status: 404, code: 'http.not_found' } }
+    await nextTick()
+    expect(dialog.textContent).toContain(en.errors.http.not_found)
+    expect(dialog.textContent).not.toContain('w-observed')
+    const refresh = [...dialog.querySelectorAll('button')].find(button => button.textContent?.includes(en.chat.tasks.observation.refresh))!
+    refresh.click(); expect(observation.value.refresh).toHaveBeenCalledOnce()
   })
 })

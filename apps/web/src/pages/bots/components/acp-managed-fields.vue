@@ -14,7 +14,6 @@ import type { AcpprofileManagedField, AcpprofilePublicProfile } from '@memohai/s
 import {
   acpInputType,
   acpManagedFieldAutocomplete,
-  acpManagedFieldHelp,
   acpManagedFieldLabel,
   acpManagedFieldName,
   acpManagedPlaceholder,
@@ -61,7 +60,7 @@ function handleFieldCommit() {
       v-for="field in fields"
       :key="field.id"
       :label="acpManagedFieldLabel(profile, field, t)"
-      :help="acpManagedFieldHelp(profile, field)"
+
       :gap="fieldGap"
     >
       <Textarea

@@ -1,5 +1,7 @@
+import { routerKey } from 'vue-router'
+import { createChatRouteContext } from './chat/route-context'
 import { defineStore, storeToRefs } from 'pinia'
-import { computed, onScopeDispose, ref } from 'vue'
+import { computed, hasInjectionContext, inject, onScopeDispose, ref } from 'vue'
 import { toast } from '@felinic/ui'
 import { useChatSelectionStore } from '@/store/chat-selection'
 import { useWorkdirsStore } from '@/store/workdirs'
@@ -28,15 +30,9 @@ import {
   sendFailedMessage,
   userInputConnectionLostMessage, workdirMismatchMessage, sendOutcomeUnknownMessage,
 } from './chat/messages'
-import {
-  createBackgroundTaskTracker,
-} from './chat/background-tasks'
+import { createBackgroundTaskTracker } from './chat/background-tasks'
 import { fetchSessions } from '@/composables/api/useChat'
-import {
-  bindBotIdInitializeWatch,
-  createInitializeRecovery,
-  createSessionListSnapshot,
-} from './chat/session-list-init-recovery'
+import { bindBotIdInitializeWatch, createInitializeRecovery, createSessionListSnapshot } from './chat/session-list-init-recovery'
 
 import type {
   ChatAssistantTurn,
@@ -54,6 +50,7 @@ export type { FsChangeBatch, FsChangeEvent, FsToolKind } from './chat/fs-beacon'
 export type { ChatViewEntry, ChatViewTarget } from './chat/view-registry'
 
 export const useChatStore = defineStore('chat', () => {
+  const { bindRouteContext, hasHistoryEntry, hasContactEntry } = createChatRouteContext(hasInjectionContext() ? inject(routerKey, null) : null)
   const selectionStore = useChatSelectionStore()
   const workdirsStore = useWorkdirsStore()
   const { currentBotId, sessionId, draftIntent, explicitSelection: explicitSessionSelection } = storeToRefs(selectionStore)
@@ -95,7 +92,7 @@ export const useChatStore = defineStore('chat', () => {
     refreshCurrentSession, resyncRuntimeTranscript, loadInitialMessages, fetchSessionWindow,
     loadOlderMessages, findMessageIdByExternalId, locateMessageByExternalId,
     isSessionStreaming, streamingSessionId, streamingSessionIds, streaming, isChatViewStreaming,
-    workspaceTargetSelectionFor, setWorkspaceTargetSelection,
+    isChatViewAwaitingProjection, workspaceTargetSelectionFor, setWorkspaceTargetSelection,
     initializeWorkspaceTargetSelection, resetWorkspaceTargetSelection,
     releaseHiddenSessionView, bindChatView, setChatViewVisible, unbindChatView,
     focusChatView, promoteDraftChatView,
@@ -331,7 +328,6 @@ export const useChatStore = defineStore('chat', () => {
   } = externalAgents.orchestration
   const {
     settingsForAgent: defaultExternalAgentSettingsForAgent,
-    defaultRuntimeIsExternalAgent,
     stageFromSettings: stageDefaultExternalAgentFromSettings,
   } = externalAgents.defaults
   const {
@@ -369,6 +365,7 @@ export const useChatStore = defineStore('chat', () => {
     explicitSessionSelection,
     normalizeTarget: normalizedChatViewTarget,
     knownSession: knownSessionSummary,
+    contactSessionFor: botId => contactSessionIds.value[botId],
     pendingExternalAgentState: pendingExternalAgentStateFor,
   })
 
@@ -376,7 +373,7 @@ export const useChatStore = defineStore('chat', () => {
   function resetUserScopedState(options: { clearSelection?: boolean } = {}) {
     userScopeGeneration += 1
     stopStreams()
-    abortAllAssistantStreams()
+    abortAllAssistantStreams('auth_reset')
     stopWebSocket()
 
     resetRefreshCoordinator()
@@ -409,14 +406,15 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const {
-    loadingChats,
+    loadingChats, contactSessionIds, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
+    openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,
     selectSession,
-    createNewSession,
-    selectDraft,
+    createNewSession, selectDraft,
     reset: resetBootstrap,
   } = createChatBootstrap({
+    hasHistoryEntry, hasContactEntry,
     currentBotId,
     sessionId,
     draftIntent,
@@ -433,14 +431,13 @@ export const useChatStore = defineStore('chat', () => {
     replaceSessions,
     sessionsCursor,
     hasMoreSessions,
-    defaultRuntimeIsExternalAgent,
     ensureSessionSummary,
     pendingExternalAgentSessionInput,
     clearPendingExternalAgentSession,
     clearHistoryView,
     markHistoryEmpty,
     knownSessionSummary,
-    startWebSocket,
+    startWebSocket, ensureWebSocket,
     startBotSessionsActivityStream,
     startSessionRuntime,
     releasePreviousSession: (botId, targetSessionId) => {
@@ -584,7 +581,7 @@ export const useChatStore = defineStore('chat', () => {
 
   return {
     messages, chatView, bindChatView, setChatViewVisible, unbindChatView,
-    focusChatView, promoteDraftChatView, chatTargetFor,
+    runtimeObservationFor: realtime.runtimeObservation, focusChatView, promoteDraftChatView, chatTargetFor,
     workspaceTargetSelectionFor, setWorkspaceTargetSelection,
     initializeWorkspaceTargetSelection, resetWorkspaceTargetSelection,
     chatReadOnlyFor, chatCanForkFor, isChatViewStreaming,
@@ -602,17 +599,19 @@ export const useChatStore = defineStore('chat', () => {
     pendingExternalAgentMatchesInput,
     sessionId, hasExplicitSessionSelection, currentBotId, bots,
     activeChatTarget, isSessionStreaming,
+    contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
+    openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     loadingChats, loadingMessages, loadingOlder, hasMoreOlder,
     // Exposed for tests only — do not branch on this in components. The
     // leading underscore reflects the test-only contract at the call site.
     _hasLoadedOlder: hasLoadedOlder,
 
     startupSendFailure, startupSendFailureFor,
-    firstSendFor: firstSend.entryFor, isSessionTentative: firstSend.isSessionTentative,
+    isChatViewAwaitingProjection, firstSendFor: firstSend.entryFor, isSessionTentative: firstSend.isSessionTentative,
     commandEvent, commandEventForScope, rememberCommandEvent, beginCommandEvent, showCommandError,
     fsChangedAt, markFsChanged, affectsPath, fsEventForPath,
     backgroundTaskFor,
-    initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
+    bindRouteContext, initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
     selectDraft, userSentInSession, draftPromoted, draftViewRequested, applyDraftViewRequest,
     forkedSessionRequested, deletedSession,
     stageExternalAgentSession, stageDefaultExternalAgentSession, cacheDefaultExternalAgentSession,

@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
+	"github.com/felinics/memoh/internal/media"
 )
 
 const (
@@ -60,6 +61,8 @@ const (
 )
 
 type FilesConfig struct {
+	// NetworkPolicy is distributed only by existing authenticated metadata GETs.
+	NetworkPolicy *media.TransferNetworkPolicy `toml:"network_policy"`
 	// DeviceTransfersEnabled mounts device-authenticated transfers after explicit setup.
 	DeviceTransfersEnabled bool `toml:"device_transfers_enabled"`
 	// OriginalsRoot keeps attachment originals outside disposable workspaces.
@@ -91,6 +94,7 @@ type Config struct {
 	Postgres              PostgresConfig              `toml:"postgres"`
 	PGVector              PGVectorConfig              `toml:"pgvector"`
 	Registry              RegistryConfig              `toml:"registry"`
+	ModelCatalogSync      ModelCatalogSyncConfig      `toml:"model_catalog_sync"`
 	Supermarket           SupermarketConfig           `toml:"supermarket"`
 	WorkspaceDependencies WorkspaceDependenciesConfig `toml:"workspace_dependencies"`
 	OAuthClients          OAuthClientsConfig          `toml:"oauth_clients"`
@@ -100,6 +104,12 @@ type Config struct {
 	WebhookTunnel         WebhookTunnelConfig         `toml:"webhook_tunnel"`
 	ConnectIt             ConnectItConfig             `toml:"connect_it"`
 	Telemetry             TelemetryConfig             `toml:"telemetry"`
+}
+
+// ModelCatalogSyncConfig identifies one existing provider to synchronize.
+// ProviderID is a non-secret, stable provider UUID; empty disables discovery.
+type ModelCatalogSyncConfig struct {
+	ProviderID string `toml:"provider_id"`
 }
 
 // TelemetryConfig configures OpenTelemetry trace and metric export. It is off
@@ -378,10 +388,11 @@ type AuthConfig struct {
 }
 
 type AgentConfig struct {
-	ToolOutputMaxBytes  int    `toml:"tool_output_max_bytes"`
-	ToolOutputMaxLines  int    `toml:"tool_output_max_lines"`
-	SystemFilesMaxBytes int    `toml:"system_files_max_bytes"`
-	ContextLoopReselect string `toml:"context_loop_reselect"`
+	ConversationPresence ConversationPresenceConfig `toml:"conversation_presence"`
+	ToolOutputMaxBytes   int                        `toml:"tool_output_max_bytes"`
+	ToolOutputMaxLines   int                        `toml:"tool_output_max_lines"`
+	SystemFilesMaxBytes  int                        `toml:"system_files_max_bytes"`
+	ContextLoopReselect  string                     `toml:"context_loop_reselect"`
 	// ContextAbsoluteMaxTokens is the server-wide context admission cap
 	// (CM-ADM-001): the effective per-turn budget is
 	// min(model context window − reserve, this cap), and the cap alone when
@@ -642,18 +653,26 @@ type AppleConfig struct {
 }
 
 type WorkspaceConfig struct {
-	Registry        string `toml:"registry"`
-	DefaultImage    string `toml:"default_image"`
-	ImagePullPolicy string `toml:"image_pull_policy"`
-	Snapshotter     string `toml:"snapshotter"`
-	DataRoot        string `toml:"data_root"`
-	CNIBinaryDir    string `toml:"cni_bin_dir"`
-	CNIConfigDir    string `toml:"cni_conf_dir"`
-	BridgePath      string `toml:"bridge_path"`
+	Storage         WorkspaceStorageConfig `toml:"storage"`
+	Registry        string                 `toml:"registry"`
+	DefaultImage    string                 `toml:"default_image"`
+	ImagePullPolicy string                 `toml:"image_pull_policy"`
+	Snapshotter     string                 `toml:"snapshotter"`
+	DataRoot        string                 `toml:"data_root"`
+	CNIBinaryDir    string                 `toml:"cni_bin_dir"`
+	CNIConfigDir    string                 `toml:"cni_conf_dir"`
+	BridgePath      string                 `toml:"bridge_path"`
 	// RuntimeDir is accepted for one compatibility release. New deployments
 	// should configure bridge_path because the Server no longer owns a toolkit
 	// or workspace templates directory.
 	RuntimeDir string `toml:"runtime_dir"`
+}
+
+// WorkspaceStorageConfig maps one existing NAS directory to its existing LAN
+// share. Empty values disable computer storage; this does not mount a share.
+type WorkspaceStorageConfig struct {
+	Root      string `toml:"root"`
+	ShareRoot string `toml:"share_root"`
 }
 
 // ImageRef returns the fully qualified image reference for the base image,
@@ -991,7 +1010,13 @@ func Load(path string) (Config, error) {
 }
 
 func (cfg Config) validate() error {
+	if _, err := cfg.Files.NetworkPolicy.Normalized(); err != nil {
+		return fmt.Errorf("files.network_policy: %w", err)
+	}
 	if _, err := cfg.BotDelegation.ExecutionTimeoutDuration(); err != nil {
+		return err
+	}
+	if _, err := cfg.BotDelegation.SummaryAttemptLimit(); err != nil {
 		return err
 	}
 	if cfg.ComputerTasks.NativeObservationLimit < 0 || cfg.ComputerTasks.NativeObservationLimit > 128 {
@@ -1125,6 +1150,9 @@ func (cfg *Config) resolvePaths() {
 	cfg.Container.DataRoot = cfg.Container.DataRootPath()
 	cfg.Container.RuntimeDir = cfg.Container.RuntimePath()
 	cfg.Container.BridgePath = cfg.Container.BridgeBinaryPath()
+	if strings.TrimSpace(cfg.Container.Storage.Root) != "" {
+		cfg.Container.Storage.Root = absPath(cfg.Container.Storage.Root)
+	}
 	cfg.Workspace = cfg.Container.WorkspaceConfig
 	if strings.TrimSpace(cfg.Registry.ProvidersDir) != "" {
 		cfg.Registry.ProvidersDir = cfg.Registry.ProvidersPath()
@@ -1145,6 +1173,7 @@ func containerHasWorkspaceFields(values map[string]any) bool {
 		"cni_conf_dir",
 		"bridge_path",
 		"runtime_dir",
+		"storage",
 	} {
 		if _, ok := values[key]; ok {
 			return true

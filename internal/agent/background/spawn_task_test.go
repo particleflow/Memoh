@@ -8,6 +8,38 @@ import (
 	"time"
 )
 
+func TestPersistedAgentIdentityCancelFailureAndUnknownEvent(t *testing.T) {
+	mgr := New(nil)
+	var events []TaskEvent
+	mgr.SetEventFunc(func(e TaskEvent) { events = append(events, e) })
+	id, _, err := mgr.RestoreAgentTask(context.Background(), "original-task", "bot", "parent", "worker", "child", "work", "work", true)
+	if err != nil || id != "original-task" {
+		t.Fatal(id, err)
+	}
+	if _, _, err = mgr.RestoreAgentTask(context.Background(), id, "bot", "parent", "worker", "child", "different", "different", true); err == nil {
+		t.Fatal("duplicate identity replaced")
+	}
+	mgr.SetBeforeAgentCancel(func(string) error { return errors.New("storage unavailable") })
+	if err = mgr.Kill(id); err == nil || mgr.Get(id).Snapshot().Status != TaskQueued {
+		t.Fatal("reported cancellation before persistence")
+	}
+	mgr.SetBeforeAgentCancel(func(string) error { return nil })
+	if err = mgr.Kill(id); err != nil {
+		t.Fatal(err)
+	}
+	if _, start, err := mgr.MarkAgentTaskRunning(context.Background(), id); err != nil || start {
+		t.Fatal("canceled task started")
+	}
+	id, _, err = mgr.RestoreAgentTask(context.Background(), "unknown-task", "bot", "parent", "worker", "child", "work", "work", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mgr.CompleteAgentTask(id, AgentTaskResult{Status: TaskUnknown, Error: "unconfirmed"})
+	if events[len(events)-1].Event != TaskEventUnknown || mgr.Get(id).Snapshot().Status != TaskUnknown {
+		t.Fatal("unknown emitted as success/failure")
+	}
+}
+
 func TestCompleteAgentTaskStoresResultAndWakesWaiter(t *testing.T) {
 	mgr := New(nil)
 	taskID, _, err := mgr.StartAgentTask(context.Background(), "bot1", "sess1", "worker", "child-1", "do work", "worker: do work", false)

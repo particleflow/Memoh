@@ -1,0 +1,6 @@
+# github.com/felinics/memoh/internal/db_test [github.com/felinics/memoh/internal/db.test]
+internal/db/session_tasks_postgres_integration_test.go:138:73: cannot use s (variable of type *postgresstore.Store) as thread.Queries value in argument to thread.NewService: *postgresstore.Store does not implement thread.Queries (wrong type for method GetVisibleHistoryTurnByMessage)
+		have GetVisibleHistoryTurnByMessage("context".Context, sqlc.GetVisibleHistoryTurnByMessageParams) (sqlc.GetVisibleHistoryTurnByMessageRow, error)
+		want GetVisibleHistoryTurnByMessage("context".Context, sqlc.GetVisibleHistoryTurnByMessageParams) (store.HistoryTurn, error)
+FAIL	github.com/felinics/memoh/internal/db [build failed]
+FAIL

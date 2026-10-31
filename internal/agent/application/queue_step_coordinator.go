@@ -148,7 +148,11 @@ func (q *queueStepCoordinator) commit(
 		// the run waits. The resumed execution claims at its next complete
 		// step or model-interruption checkpoint, keeping the approved tool
 		// result ahead of the new input.
-		return outcome, nil
+		// A deferred decision ends this producer just like a final step. Its
+		// replacement must be visible before an accepted answer re-enters the
+		// run: that continuation resolves its request by the admitted turn.
+		// Keep the steer boundary unchanged; no input is claimed while parked.
+		return q.finalizeReplacement(ctx, outcome, previouslyPersisted)
 	}
 
 	var item sessionruntime.SteerItem
@@ -166,22 +170,29 @@ func (q *queueStepCoordinator) commit(
 		outcome.claimedSteer = &item
 		outcome.claimedSteerTurn = q.pendingSteerTurn
 	} else if q.req.TurnReplacement != nil && kind == queueStepFinal {
-		allPersisted := append([]messagepkg.Message(nil), previouslyPersisted...)
-		allPersisted = append(allPersisted, persisted...)
-		requestID := strings.TrimSpace(q.req.TurnReplacement.RequestMessageID)
-		if requestID == "" {
-			requestID = firstUserID(allPersisted)
-		}
-		assistantID := firstAssistantID(allPersisted)
-		if assistantID == "" {
-			return outcome, errors.New("replacement assistant message was not persisted")
-		}
-		err = q.replacementPersister.FinalizeAgentReplacement(ctx, q.req.ThreadID, *q.req.TurnReplacement, requestID, assistantID)
-		if err != nil {
-			return outcome, err
-		}
-		outcome.replacementFinalized = true
+		return q.finalizeReplacement(ctx, outcome, previouslyPersisted)
 	}
+	return outcome, nil
+}
+
+func (q *queueStepCoordinator) finalizeReplacement(ctx context.Context, outcome queueStepOutcome, previouslyPersisted []messagepkg.Message) (queueStepOutcome, error) {
+	if q.req.TurnReplacement == nil {
+		return outcome, nil
+	}
+	allPersisted := append([]messagepkg.Message(nil), previouslyPersisted...)
+	allPersisted = append(allPersisted, outcome.persisted...)
+	requestID := strings.TrimSpace(q.req.TurnReplacement.RequestMessageID)
+	if requestID == "" {
+		requestID = firstUserID(allPersisted)
+	}
+	assistantID := firstAssistantID(allPersisted)
+	if assistantID == "" {
+		return outcome, errors.New("replacement assistant message was not persisted")
+	}
+	if err := q.replacementPersister.FinalizeAgentReplacement(ctx, q.req.ThreadID, *q.req.TurnReplacement, requestID, assistantID); err != nil {
+		return outcome, err
+	}
+	outcome.replacementFinalized = true
 	return outcome, nil
 }
 

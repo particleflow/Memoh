@@ -1,0 +1,1 @@
+ok  	github.com/felinics/memoh/internal/imagecapability	2.397s

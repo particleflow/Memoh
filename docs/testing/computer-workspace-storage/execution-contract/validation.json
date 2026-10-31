@@ -1,0 +1,33 @@
+{
+  "base": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+  "migration": false,
+  "sdk_or_http_changes": false,
+  "production_changes": false,
+  "tests": {
+    "current_source_contract_command_exit": 0,
+    "current_source_command": "go test -p=1 -ldflags=\"-s -w\" ./internal/userruntime ./internal/computertask ./internal/toolcontext -run \"^Test(NASDefault|WorkspaceDefault|BoundWorkdirDefaultPrecedence)\" -count=1 -v",
+    "core_helper_file_list_exit": 0,
+    "core_helper_cases": 7,
+    "host_application_selected_tests_exit": 0,
+    "whole_host_and_core_command_exit": 1,
+    "whole_core_failure": "compiler archive/vet.cfg ENOSPC; no full DI/startup or whole Core test pass claimed",
+    "four_domain_packages_unfiltered_lint_exit": 0,
+    "whole_selected_scope_lint_exit": 1,
+    "whole_lint_failure": "application test package typecheck ENOSPC",
+    "format_exit": 0,
+    "official_core_boundary_exit": 0,
+    "current_source_pass_events": 12
+  },
+  "evidence_boundary": "controlled existing gRPC source and actual trusted tool Source/operation service; native stub stops at workspace.create; zero Pi input. Not real Windows/SMB/producer/whole Server UI acceptance.",
+  "producer_files_changed": false,
+  "human_qa": false,
+  "remaining": [
+    "existing NAS mount to existing Windows UNC mapping and effective access",
+    "sourceRoot/profile/producer roots and immutable old directory pairs",
+    "producer shared-source capability while local NTFS queue protections remain intact",
+    "flat artifact/non-root workdir compatibility",
+    "new final-combination CI and real deployment/field acceptance",
+    "old global profile/producer-pair cutover remains fail-closed; no automatic cross-root adoption"
+  ],
+  "immutable_target_snapshot": "new native claims retain existing Target root and producer directory pair; verified against original TargetFingerprint; not a grant to use a changed registration"
+}

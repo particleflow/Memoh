@@ -10,12 +10,6 @@
       >
         {{ field.title || fieldKey }}
       </Label>
-      <p
-        v-if="field.description"
-        class="mt-0.5 text-xs text-muted-foreground"
-      >
-        {{ field.description }}
-      </p>
     </template>
 
     <!-- Fixed control width so every field type lines up down the card. -->

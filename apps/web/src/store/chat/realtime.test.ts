@@ -1,3 +1,4 @@
+import { computed } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import type {
   BotSessionActivityEvent,
@@ -36,7 +37,7 @@ function createSocket(connected = true): ChatWebSocket & {
   return {
     connected,
     send: vi.fn<(message: WSClientMessage) => void>(),
-    abort: vi.fn<(runId: string, sessionId: string, controlId: string) => void>(),
+    abort: vi.fn<ChatWebSocket['abort']>(),
     close: vi.fn<() => void>(),
     onOpen: null,
     onClose: null,
@@ -95,6 +96,35 @@ async function flushPromises() {
 }
 
 describe('chat realtime controller', () => {
+  it('reactively exposes the authorized native run without sending new work or leaking stale scope', async () => {
+    const { controller, sockets } = makeController()
+    controller.startWebSocket('bot-1')
+    controller.startSessionRuntime('bot-1', 'session-1')
+    await flushPromises()
+    const observation = computed(() => controller.runtimeObservation('bot-1', 'session-1'))
+    expect(observation.value.synchronized).toBe(false)
+    const frame = {
+      type: 'runtime_snapshot' as const, session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+      snapshot: { bot_id: 'bot-1', session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+        updated_at: '2026-10-25T00:00:01Z', current_run_view: {
+          run_id: 'run-a', turn_id: 'turn-a', generation: 'generation-a', status: 'aborted' as const,
+          started_at: '2026-10-25T00:00:00Z', updated_at: '2026-10-25T00:00:01Z', messages: [],
+        } },
+    }
+    sockets[0]!.handler(frame)
+    expect(observation.value.run?.run_id).toBe('run-a')
+    expect(controller.runtimeObservation('bot-2', 'session-1').run).toBeNull()
+    sockets[0]!.socket.onClose?.()
+    expect(observation.value.run).toBeNull()
+    sockets[0]!.socket.onOpen?.()
+    expect(observation.value.run).toBeNull()
+    sockets[0]!.handler(frame)
+    expect(observation.value.run?.run_id).toBe('run-a')
+    controller.stopSessionRuntime('bot-1', 'session-1')
+    expect(observation.value.run).toBeNull()
+    expect(sockets[0]!.socket.send.mock.calls.every(([message]) => ['runtime_subscribe', 'runtime_unsubscribe'].includes(message.type))).toBe(true)
+  })
+
   it('closes the previous websocket and rejects events from its generation', () => {
     const { controller, callbacks, sockets } = makeController()
     controller.startWebSocket('bot-1')
@@ -154,7 +184,7 @@ describe('chat realtime controller', () => {
     expect(sockets[0]!.socket.send).toHaveBeenCalledWith(message)
   })
 
-  it('aborts only a connected websocket for the matching bot', () => {
+  it.each([undefined, 'user_stop'] as const)('aborts only a connected websocket for the matching bot (reason: %s)', (reason) => {
     const { controller, sockets } = makeController()
     controller.startWebSocket('bot-1')
 
@@ -163,18 +193,52 @@ describe('chat realtime controller', () => {
       'bot-2',
       'session-1',
       'control-1',
+      reason,
     )).toBe(false)
+    expect(sockets[0]!.socket.abort).not.toHaveBeenCalled()
     expect(controller.abortWebSocketRun(
       'run-1',
       'bot-1',
       'session-1',
       'control-1',
+      reason,
     )).toBe(true)
     expect(sockets[0]!.socket.abort).toHaveBeenCalledWith(
       'run-1',
       'session-1',
       'control-1',
+      reason,
     )
+  })
+
+  it('retries failed history on reopen without replacing the runtime subscription', async () => {
+    const { controller, callbacks, sockets } = makeController()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      callbacks.prepareSessionRuntime = vi.fn().mockRejectedValueOnce(new Error('history read failed'))
+      controller.startWebSocket('bot-1')
+      controller.startSessionRuntime('bot-1', 'session-1')
+      await flushPromises()
+      // REST may fail before the first runtime snapshot arrives. A later
+      // reopen must still be able to commit history against that snapshot.
+      sockets[0]!.handler({ type: 'runtime_snapshot', session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+        snapshot: { bot_id: 'bot-1', session_id: 'session-1', epoch: 'epoch-1', seq: 1, updated_at: '2026-10-29T00:00:00Z' } })
+      let finish!: () => void
+      let applied = false
+      vi.mocked(callbacks.prepareSessionRuntime).mockImplementationOnce(async (_bot, _session, commit) => {
+        await new Promise<void>(resolve => { finish = resolve })
+        await commit(() => { applied = true })
+      })
+      controller.startSessionRuntime('bot-1', 'session-1')
+      controller.startSessionRuntime('bot-1', 'session-1')
+      expect(callbacks.prepareSessionRuntime).toHaveBeenCalledTimes(2)
+      expect(sockets[0]!.socket.send.mock.calls.filter(([message]) => message.type === 'runtime_subscribe')).toHaveLength(1)
+      expect(sockets[0]!.socket.send.mock.calls.some(([message]) => message.type === 'runtime_unsubscribe')).toBe(false)
+      finish(); await flushPromises()
+      expect(applied).toBe(true)
+      controller.startSessionRuntime('bot-1', 'session-1')
+      expect(callbacks.prepareSessionRuntime).toHaveBeenCalledTimes(2)
+    } finally { consoleError.mockRestore() }
   })
 
   it('hydrates once, then subscribes to the session runtime on the websocket', async () => {

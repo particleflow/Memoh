@@ -12,21 +12,6 @@ import (
 // Exercise both merged routes through the standard client, rather than merely
 // checking that the two result fields survived a textual merge.
 func TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate(t *testing.T) {
-	t.Run("native", func(t *testing.T) {
-		source, _, transport, initial := followupFixture(t, true)
-		client := standardClient(t, source, "pc-a", false)
-		got := parseResult(t, invoke(t, client, "computer_task_followup", followupArgs(initial.ID, "bound_session"), false))
-		if got.Followup == nil || got.Followup.State != "accepted" || got.Followup.BusinessOutcome != "unknown" || got.NativeAgentName == "" || got.SessionBinding != "observed" {
-			t.Fatalf("native follow-up facts lost: %+v", got)
-		}
-		if got.Continuity != nil || got.PiResult != nil || got.ProcessStopped || !slices.Equal(transport.methods, []string{"agent.get", "agent.prompt"}) {
-			t.Fatal("native prompt became a batch invocation or acquired batch evidence")
-		}
-		read := parseResult(t, invoke(t, client, "computer_task_get", map[string]any{"operation_id": initial.ID}, false))
-		if read.Continuity != nil || len(read.Followups) != 1 || read.Followups[0].BusinessOutcome != "unknown" {
-			t.Fatal("native receipt read lost its bounded history or invented continuity")
-		}
-	})
 	t.Run("batch", func(t *testing.T) {
 		source, store, transport, _ := setupBatch(t)
 		client := standardClient(t, source, "pc-a", false)

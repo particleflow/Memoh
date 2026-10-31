@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'internal/transferclient/**'
+      - 'internal/nativeherdr/**'
+      - 'internal/agenvo/**'
       - 'cmd/transferqueue/**'
       - 'contrib/herdr/memoh-delivery/**'
       - 'scripts/build-transferqueue-bundle.py'
@@ -30,7 +32,11 @@ jobs:
   windows:
     name: Windows NTFS isolated fixtures
     runs-on: windows-2025
-    timeout-minutes: 15
+    # Source contracts and the packaged native replay both perform real NTFS
+    # flushes. Publication/catalog aggregates exhausted 5m on two runners.
+    # Allow 10m for each source/package aggregate and retain the existing
+    # overall headroom; other groups keep their original process deadlines.
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,13 +45,26 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Verify native Herdr CLI bytes through Windows PowerShell
+        run: go test -count=1 -v -timeout=3m ./internal/nativeherdr
+      - name: Verify native batch stdin through Windows PowerShell
+        run: go test -count=1 -v -timeout=3m -run '^TestNativeBatchLauncherWindowsPowerShell$' ./internal/agenvo
       # Filesystem durability/catalog tests can exceed one package's aggregate
-      # five-minute budget. These complementary selectors retain every test;
-      # the per-process timeout and the overall job budget remain unchanged.
-      - name: Execute transfer contracts except Windows-prefixed cases
-        run: go test -count=1 -v -timeout=5m -skip '^TestWindows' ./internal/transferclient
-      - name: Execute Windows-prefixed transfer contracts
-        run: go test -count=1 -v -timeout=5m -run '^TestWindows' ./internal/transferclient
+      # five-minute budget. These disjoint selectors retain every test once,
+      # including both the shared progress test and its native wrapper.
+      # The non-Windows-name aggregate exhausted 10m on NTFS while individual
+      # publication cases were passing. Keep every case once and the same
+      # process deadline; isolate that durable publication family instead.
+      - name: Execute transfer contracts except Windows, publication and journal progress
+        run: go test -count=1 -v -timeout=10m -skip '^Test(Windows|PublicationMetadata|ActiveJournalBoundedAcrossProgress$)' ./internal/transferclient
+      - name: Execute publication metadata durability contracts
+        run: go test -count=1 -v -timeout=10m -run '^TestPublicationMetadata' ./internal/transferclient
+      - name: Execute active journal progress contract
+        run: go test -count=1 -v -timeout=5m -run '^TestActiveJournalBoundedAcrossProgress$' ./internal/transferclient
+      - name: Execute Windows active journal contracts
+        run: go test -count=1 -v -timeout=5m -run '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+      - name: Execute remaining Windows-prefixed transfer contracts
+        run: go test -count=1 -v -timeout=10m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
       - name: Execute complete CLI contracts
         run: go test -count=1 -v -timeout=5m ./cmd/transferqueue
       - name: Execute native publication with PostgreSQL

@@ -66,9 +66,10 @@ func nativeDeliveryDatabase(t *testing.T) (*postgresstore.Store, computertask.De
 	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id) VALUES($1,$2,$3)", session, bot, user)
 	exec(`INSERT INTO bot_user_grants(bot_id,subject_type,user_id,permissions) VALUES($1,'user',$2,'["chat","workspace_read","workspace_write","workspace_exec"]')`, bot, user)
 	exec("INSERT INTO mcp_connections(id,bot_id,name,type) VALUES($1,$2,'native-fixture','http')", connection, bot)
-	target := agenvo.Target{ConnectionID: connection, DeviceID: "synthetic-device", InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
-	raw, _ := json.Marshal(target)
-	runtime, err := store.CreateAgenvoRuntime(t.Context(), owner, "native-fixture", raw)
+	target := agenvo.Target{ConnectionID: connection, DeviceID: connection, NativeRuntimeID: connection, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
+	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: target.HerdrCLI, HerdrConfigRoot: target.HerdrConfigRoot, Agent: target.Agent}})
+	exec("INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'memoh',$5,now(),NULL)", connection, owner, "native-fixture", "synthetic-"+uuid.NewString(), raw)
+	runtime, err := store.OwnedNativeHerdrRuntime(t.Context(), owner, connection)
 	if err != nil {
 		t.Fatal(err)
 	}

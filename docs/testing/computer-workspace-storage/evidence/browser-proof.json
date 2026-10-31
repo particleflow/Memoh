@@ -1,0 +1,90 @@
+{
+  "realPGAndHTTP": true,
+  "simulatedWindowsShare": true,
+  "mkdir": 2,
+  "save": 1,
+  "modelCalls": 0,
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": false
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "POST",
+      "status": 204,
+      "storageRead": false
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "PUT",
+      "status": 204,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": false
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "storageRead": true
+    },
+    {
+      "method": "POST",
+      "status": 503,
+      "storageRead": false
+    },
+    {
+      "method": "GET",
+      "status": 503,
+      "storageRead": true
+    }
+  ]
+}

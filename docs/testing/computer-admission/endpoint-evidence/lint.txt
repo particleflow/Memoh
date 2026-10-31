@@ -1,0 +1,3 @@
+internal/agenvo/endpoint_test.go:61:95: `ther` is a misspelling of `there` (misspell)
+	for _, value := range []string{"", "relative", `C:relative`, `\drive-relative`, `C:\Host\..\other`, `C:\Host\.\file`, `C:\Host\file:stream`, `C:\Host\bad"name`, "C:\\Host\\bad\nname", `C:\`, `\\?\C:\Host`, strings.Repeat("x", 4097)} {
+	                                                                                             ^

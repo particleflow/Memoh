@@ -30,6 +30,7 @@ import (
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/channel"
+	"github.com/felinics/memoh/internal/channel/route"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/command"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -508,67 +509,31 @@ func (q localChannelSessionAuthQueries) ListBotUserGrantsForUser(_ context.Conte
 	return q.grants, nil
 }
 
-func TestLocalChannelCreateWSChatSessionDoesNotBindRoute(t *testing.T) {
+func TestLocalChannelCreateWSChatSessionReusesFixedContactWithoutWrites(t *testing.T) {
 	t.Parallel()
-
-	const (
-		botID     = "11111111-1111-1111-1111-111111111111"
-		userID    = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
-		sessionID = "22222222-2222-2222-2222-222222222222"
-	)
-	var gotParams sqlc.CreateSessionParams
-	called := false
-	now := time.Now()
+	const botID = "11111111-1111-1111-1111-111111111111"
+	const userID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+	const sessionID = "22222222-2222-2222-2222-222222222222"
 	queries := localChannelSessionAuthQueries{
-		createSession: func(_ context.Context, params sqlc.CreateSessionParams) (sqlc.BotSession, error) {
-			called = true
-			gotParams = params
-			return sqlc.BotSession{
-				ID:              testUUID(sessionID),
-				BotID:           params.BotID,
-				RouteID:         params.RouteID,
-				ChannelType:     params.ChannelType,
-				Type:            params.Type,
-				SessionMode:     params.SessionMode,
-				RuntimeType:     params.RuntimeType,
-				RuntimeMetadata: params.RuntimeMetadata,
-				Metadata:        params.Metadata,
-				CreatedByUserID: params.CreatedByUserID,
-				CreatedAt:       pgtype.Timestamptz{Time: now, Valid: true},
-				UpdatedAt:       pgtype.Timestamptz{Time: now, Valid: true},
-			}, nil
+		createSession: func(context.Context, sqlc.CreateSessionParams) (sqlc.BotSession, error) {
+			t.Fatal("public WS must not create a parallel session")
+			return sqlc.BotSession{}, nil
 		},
 		setActiveSession: func(context.Context, sqlc.SetRouteActiveSessionParams) error {
-			t.Fatal("WS chat session creation should not set a route active session")
+			t.Fatal("WS must not rebind the route")
 			return nil
 		},
 	}
-	handler := &LocalChannelHandler{
-		channelType:    channel.ChannelTypeLocal,
-		sessionService: sessionpkg.NewService(nil, queries, nil),
+	contact := &fixedContactStub{entry: route.PrivateChatEntry{Session: &sessionpkg.Thread{ID: sessionID, BotID: botID, CreatedByUserID: userID, RouteID: "committed-contact-route"}}}
+	handler := &LocalChannelHandler{channelType: channel.ChannelTypeLocal, sessionService: sessionpkg.NewService(nil, queries, nil), privateChats: contact}
+	for range 2 {
+		sess, err := handler.createWSChatSession(context.Background(), botID, userID, "", "", "")
+		if err != nil || sess.ID != sessionID || sess.RouteID != "committed-contact-route" {
+			t.Fatalf("fixed contact changed: %#v %v", sess, err)
+		}
 	}
-
-	sess, err := handler.createWSChatSession(context.Background(), botID, userID, "", "", "")
-	if err != nil {
-		t.Fatalf("createWSChatSession: %v", err)
-	}
-	if !called {
-		t.Fatal("CreateSession was not called")
-	}
-	if gotParams.RouteID.Valid {
-		t.Fatalf("route id valid = true, want false; route=%s", gotParams.RouteID.String())
-	}
-	if sess.RouteID != "" {
-		t.Fatalf("session route id = %q, want empty", sess.RouteID)
-	}
-	if got := gotParams.BotID.String(); got != botID {
-		t.Fatalf("bot id = %q, want %q", got, botID)
-	}
-	if got := gotParams.CreatedByUserID.String(); got != userID {
-		t.Fatalf("created by user id = %q, want %q", got, userID)
-	}
-	if got := gotParams.ChannelType.String; got != channel.ChannelTypeLocal.String() {
-		t.Fatalf("channel type = %q, want local", got)
+	if contact.creates != 0 || contact.binds != 0 {
+		t.Fatal("existing contact was recreated or rebound")
 	}
 }
 
@@ -890,7 +855,7 @@ func TestLocalChannelWSMessageAuthorizesSessionBeforeSlashCommand(t *testing.T) 
 				BotID:       testUUID(botID),
 				SubjectType: bots.GrantSubjectUser,
 				UserID:      testUUID(currentUser),
-				Permissions: []byte(`["workspace_exec"]`),
+				Permissions: []byte(`["chat","workspace_exec"]`),
 			},
 		},
 	}
@@ -903,6 +868,8 @@ func TestLocalChannelWSMessageAuthorizesSessionBeforeSlashCommand(t *testing.T) 
 		commandHandler: command.NewHandler(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil),
 		logger:         slog.Default(),
 	}
+
+	handler.SetPrivateChatResolver(&fixedContactStub{entry: route.PrivateChatEntry{Session: &sessionpkg.Thread{ID: sessionID, BotID: botID}}})
 
 	e := echo.New()
 	e.GET("/bots/:bot_id/local/ws", func(c echo.Context) error {
@@ -1066,6 +1033,8 @@ func TestLocalChannelWSQuickActionHelpOmitsSkillsForACPSession(t *testing.T) {
 		logger: slog.Default(),
 	}
 
+	handler.SetPrivateChatResolver(&fixedContactStub{entry: route.PrivateChatEntry{Session: &sessionpkg.Thread{ID: sessionID, BotID: botID}}})
+
 	client := openLocalChannelTestWS(t, handler, botID, currentUser)
 	if err := client.WriteJSON(map[string]any{
 		"type":          "message",
@@ -1136,6 +1105,8 @@ func TestLocalChannelWSQuickActionSkillListRejectsACPSession(t *testing.T) {
 		}},
 		logger: slog.Default(),
 	}
+
+	handler.SetPrivateChatResolver(&fixedContactStub{entry: route.PrivateChatEntry{Session: &sessionpkg.Thread{ID: sessionID, BotID: botID}}})
 
 	client := openLocalChannelTestWS(t, handler, botID, currentUser)
 	if err := client.WriteJSON(map[string]any{
@@ -1444,14 +1415,18 @@ func TestExecuteWebQuickActionHelpListsAllQuickActions(t *testing.T) {
 	for _, item := range full.Items {
 		gotIDs = append(gotIDs, item.ID)
 	}
-	wantIDs := []string{"help", "new", "skill.list", "model"}
+	wantIDs := []string{"help", "skill.list", "model"}
 	if !slices.Equal(gotIDs, wantIDs) {
 		t.Fatalf("item ids = %v, want %v", gotIDs, wantIDs)
 	}
-	for _, label := range []string{"/help", "/new", "/skill list", "/model"} {
+	for _, label := range []string{"/help", "/skill list", "/model"} {
 		if !strings.Contains(full.Text, label) {
 			t.Fatalf("help text = %q, missing %q", full.Text, label)
 		}
+	}
+
+	if strings.Contains(full.Text, "/new") {
+		t.Fatal("quick help must not offer a parallel chat")
 	}
 
 	restricted, slashErr := handler.executeWebQuickAction(context.Background(), "bot-1", "help", false, webQuickActionContext{})
@@ -1462,11 +1437,11 @@ func TestExecuteWebQuickActionHelpListsAllQuickActions(t *testing.T) {
 	for _, item := range restricted.Items {
 		gotRestrictedIDs = append(gotRestrictedIDs, item.ID)
 	}
-	wantRestrictedIDs := []string{"help", "new"}
+	wantRestrictedIDs := []string{"help"}
 	if !slices.Equal(gotRestrictedIDs, wantRestrictedIDs) {
 		t.Fatalf("restricted item ids = %v, want %v", gotRestrictedIDs, wantRestrictedIDs)
 	}
-	if strings.Contains(restricted.Text, "/skill list") || strings.Contains(restricted.Text, "/model") {
+	if strings.Contains(restricted.Text, "/skill list") || strings.Contains(restricted.Text, "/model") || strings.Contains(restricted.Text, "/new") {
 		t.Fatalf("restricted help text should omit skill/model actions: %q", restricted.Text)
 	}
 }

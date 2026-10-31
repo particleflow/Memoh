@@ -15,7 +15,7 @@ vi.mock('@felinic/ui', () => ({
   toast, Button: 'button', DiffTitleBar: 'div', PanePlaceholder: 'div',
 }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))
-vi.mock('@/lib/api-client', () => ({ sdkApiUrl: vi.fn(), sdkAuthQuery: vi.fn() }))
+vi.mock('@/lib/api-client', () => ({ sdkFileApiUrl: vi.fn(), sdkAuthQuery: vi.fn() }))
 vi.mock('@/composables/useKeyboardCommand', () => ({ useKeyboardCommand: vi.fn() }))
 vi.mock('@/store/chat-list', () => ({
   useChatStore: () => ({

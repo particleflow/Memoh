@@ -1,0 +1,61 @@
+{
+  "kind": "publication_redaction_and_source_equivalence",
+  "original_local_tip": "64cfcbafe024b13875dc8f235505958da645af16",
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "history_mapping": [
+    {
+      "original_local_commit": "1e0950077a4e2ec025cbda68a5388bae15a75d6f",
+      "published_commit": "60fd4c8e69140786ffc78bc3f3ab5ea135f28afc",
+      "tree": "c4cdb55e238c639a2f64869f5e4ee588a23e148c"
+    },
+    {
+      "original_local_commit": "b38cb2b4f287bca2da7b4a6d819cebf3d7d7cfef",
+      "published_commit": "c25e3462dfcc04d3fcae4eb7ca9c7027189b24bf",
+      "tree": "fec5fb2fad8951ee2c4cf50bac4ac8dc9d45b99c"
+    },
+    {
+      "original_local_commit": "a39ee816b2dd8d178ae05c916edce514e22ce98a",
+      "published_commit": "a9c5964fe5affc9bbf396f97b0a98ce022bf247f",
+      "tree": "28d52456a489623ffb32ba0a7531570d61dfc592"
+    },
+    {
+      "original_local_commit": "46f31c8db4f6346da7eb1076737fe00329fa4638",
+      "published_commit": "8f59956c2451f77f63d46ee102af73926246b084",
+      "tree": "8ec5955ec0183d9c63a104868b8381c7ab2b2958"
+    },
+    {
+      "original_local_commit": "7b2f4deeab5bbf9a409f6c0a6fcd9558f9602309",
+      "published_commit": "4b9a2dc401dbcc6a57b7f4b1864e4897c7ed1276",
+      "tree": "ee434055f6e97e1acd59f075a006dcaae48b5208"
+    },
+    {
+      "original_local_commit": "ad2128d1fb96f617fdff6ef1bb6fa757afe327a4",
+      "published_commit": "1c1951f43746f5818c3bd1cd7091d87fb672d45b",
+      "tree": "ab96a9be6a6b9476b28f2eae2d4807bdbf29553c"
+    },
+    {
+      "original_local_commit": "64cfcbafe024b13875dc8f235505958da645af16",
+      "published_commit": "1fdfcb2e1670d00f0b0fb8d7237a7a101d307cfb",
+      "tree": "2a0fcb90ccc78cea2d1fcd0ce2a87570fac1d7fd"
+    }
+  ],
+  "publication_changes": [
+    "private acceptance URL omitted",
+    "conversation identifiers and quoted transcript attribution omitted",
+    "production runtime identifiers/snapshot omitted",
+    "unnecessary prepared-environment paths normalized"
+  ],
+  "evidence_policy": "Test names, timestamps, outcomes, elapsed values and synthetic failure history retained. Historical file hashes refer to original local inputs and need not match redacted public copies. No test rerun is claimed.",
+  "test_version_boundaries": {
+    "18_race_plus_17_regressions_plus_3_reasoning": "ad2128d1fb96f617fdff6ef1bb6fa757afe327a4",
+    "two_additional_targeted_race_tests": "64cfcbafe024b13875dc8f235505958da645af16"
+  },
+  "not_validated": [
+    "production served model/effort",
+    "gateway concurrency/fallback",
+    "production latency/cost",
+    "ack audio integration",
+    "human QA"
+  ],
+  "rollback": "Migration 0182 adds an optional receipt table. Operational rollback retains the table and receipts; the down migration deletes them."
+}

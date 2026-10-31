@@ -45,7 +45,7 @@
         disabled
         class="whitespace-normal"
       >
-        {{ t('chat.runtimeProject.empty') }}
+        {{ t('common.noData') }}
       </DropdownMenuItem>
       <template v-if="pickable">
         <DropdownMenuItem

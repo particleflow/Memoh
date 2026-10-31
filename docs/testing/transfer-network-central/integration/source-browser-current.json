@@ -1,0 +1,183 @@
+{
+  "url": "http://127.0.0.1:18583/bot/policy-synthetic",
+  "result": {
+    "origin": "http://127.0.0.1:18583/api",
+    "policy": {
+      "version": 1,
+      "lan_addresses": [
+        "192.0.2.1",
+        "2001:db8::1"
+      ]
+    },
+    "size": 65573,
+    "hash": "7f38ce5c2014837812bf5e26ae1f70349c074209bdc7468019c308b903bc1699"
+  },
+  "apiRequests": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18583/api/auth/login"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/policy-synthetic"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/settings"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/container"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/workdirs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/ping"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/sessions/model-preference-seed"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/settings"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/acp/profiles"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/agents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/skills/catalog"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/models"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/providers"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/settings"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/workspace-targets"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/container/fs/list?path=%2Fdata"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me/runtimes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/sessions?types=chat%2Cdiscuss%2Cacp_agent%2Cschedule&hide_schedule_runs=true&limit=50"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/settings"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/limits"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/limits"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/starter-prompts?locale=en"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/sessions/events"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/container/fs/list?path=%2Fdata"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/uploads"
+    },
+    {
+      "method": "PATCH",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/uploads/03df3f45-b270-48c5-b93e-269a251e44f7"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/uploads/03df3f45-b270-48c5-b93e-269a251e44f7/complete"
+    },
+    {
+      "method": "HEAD",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/7f38ce5c2014837812bf5e26ae1f70349c074209bdc7468019c308b903bc1699"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/7f38ce5c2014837812bf5e26ae1f70349c074209bdc7468019c308b903bc1699"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/users/me"
+    },
+    {
+      "method": "HEAD",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/7f38ce5c2014837812bf5e26ae1f70349c074209bdc7468019c308b903bc1699"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18583/api/bots/41e520ba-c03c-42a7-afd9-dbdc1b981d19/media/7f38ce5c2014837812bf5e26ae1f70349c074209bdc7468019c308b903bc1699"
+    }
+  ],
+  "pageErrors": [],
+  "noModelCalls": true
+}

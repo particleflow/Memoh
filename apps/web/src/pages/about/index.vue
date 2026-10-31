@@ -34,15 +34,9 @@
                   {{ $t('settings.versionTag', { version: displayVersion }) }}
                 </Badge>
               </div>
-              <p class="mt-0.5 text-[13px] leading-[18px] tracking-[-0.08px] font-[360] text-muted-foreground">
-                {{ $t('about.tagline') }}
-              </p>
             </div>
           </div>
 
-          <p class="mt-4 text-[13px] leading-[19px] tracking-[-0.06px] font-[380] text-muted-foreground">
-            {{ $t('about.description') }}
-          </p>
 
           <div class="mt-5 flex flex-wrap gap-2">
             <Button
@@ -256,13 +250,11 @@
       <DialogPanel width="lg">
         <DialogHeader>
           <DialogTitle>{{ $t('about.advanced') }}</DialogTitle>
-          <DialogDescription>{{ $t('about.advancedDescription') }}</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <SettingsSection>
             <SettingsRow
               :label="$t('about.serverConnection')"
-              :description="$t('about.serverConnectionDescription')"
             >
               <Button
                 variant="outline"
@@ -393,7 +385,7 @@ const updateLabel = computed(() => {
 const updateDesc = computed(() => {
   if (desktopUpdates.value) {
     const state = desktopUpdate.value
-    if (!state || state.status === 'idle') return t('about.desktopCheckHint')
+    if (!state || state.status === 'idle') return ''
     if (state.status === 'checking') return t('about.checking')
     if (state.status === 'up-to-date') return ''
     if (state.status === 'installing') return t('about.installingUpdate')

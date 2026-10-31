@@ -1,5 +1,7 @@
 # Native workspace observation and operation recovery
 
+> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+
 This increment starts from `4521d323050e27d12a0e496ff51f0bd9bea938f6`.
 It adds two tools to the existing authenticated computer-task MCP source.
 It does not add a control plane, HTTP endpoint, grant, credential, migration,

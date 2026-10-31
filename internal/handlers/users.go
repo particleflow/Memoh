@@ -28,6 +28,7 @@ import (
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
 	"github.com/felinics/memoh/internal/identity"
+	"github.com/felinics/memoh/internal/media"
 	runtimeRpc "github.com/felinics/memoh/internal/rpc/runtime"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/workspace"
@@ -48,6 +49,7 @@ type createBotStreamBotEvent struct {
 // UsersHandler manages user/account CRUD and bot operations via REST API.
 type UsersHandler struct {
 	service        *accounts.Service
+	mediaService   *media.Service
 	botService     *bots.Service
 	routeService   route.Service
 	channelStore   *channel.Store
@@ -93,6 +95,15 @@ func (h *UsersHandler) SetCredentialService(service *agentcredential.Service) {
 	h.credentials = service
 }
 
+func (h *UsersHandler) SetMediaService(service *media.Service) { h.mediaService = service }
+
+// CurrentUserResponse preserves the existing profile fields and adds only the
+// same file policy returned by the Bot/task-scoped limits GET.
+type CurrentUserResponse struct {
+	accounts.Account
+	NetworkPolicy *media.TransferNetworkPolicy `json:"network_policy,omitempty"`
+}
+
 func (h *UsersHandler) Register(e *echo.Echo) {
 	userGroup := e.Group("/users")
 	userGroup.GET("/me", h.GetMe)
@@ -126,7 +137,7 @@ func (h *UsersHandler) Register(e *echo.Echo) {
 // @Summary Get current user
 // @Description Get current user profile
 // @Tags users
-// @Success 200 {object} accounts.Account
+// @Success 200 {object} CurrentUserResponse
 // @Failure 400 {object} server.Problem
 // @Failure 401 {object} server.Problem
 // @Failure 500 {object} server.Problem
@@ -143,7 +154,8 @@ func (h *UsersHandler) GetMe(c echo.Context) error {
 		}
 		return errs.Wrap(err, "get me")
 	}
-	return c.JSON(http.StatusOK, resp)
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+	return c.JSON(http.StatusOK, CurrentUserResponse{Account: resp, NetworkPolicy: h.mediaService.TransferNetworkPolicy()})
 }
 
 // UpdateMe godoc

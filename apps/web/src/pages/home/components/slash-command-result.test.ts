@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isCommandResultItemSelectable, resolveCommandResultSelection } from './slash-command-result'
+import { isCommandResultItemSelectable, isCommandResultItemVisible, isConversationResetCommand, resolveCommandResultSelection } from './slash-command-result'
 
 describe('slash command result helpers', () => {
   it('maps known help quick actions to sendable slash text', () => {
@@ -43,6 +43,17 @@ describe('slash command result helpers', () => {
     expect(isCommandResultItemSelectable({ id: 'skill-a', title: 'skill-a', kind: 'skill' })).toBe(true)
     expect(isCommandResultItemSelectable({ id: 'note', title: 'Note', kind: 'quick_action' })).toBe(false)
     expect(isCommandResultItemSelectable({ id: 'note', title: 'Note' })).toBe(false)
+  })
+
+  it('excludes conversation creation and reset controls from command results', () => {
+    for (const command of ['new', '/new', '/reset now', ' CLEAR ']) {
+      expect(isConversationResetCommand(command)).toBe(true)
+      const item = { id: command, title: command, kind: 'quick_action' }
+      expect(isCommandResultItemVisible(item)).toBe(false)
+      expect(resolveCommandResultSelection(item)).toBeNull()
+    }
+    expect(isConversationResetCommand('goal clear')).toBe(false)
+    expect(isCommandResultItemVisible({ id: 'goal', title: '/goal clear', kind: 'quick_action' })).toBe(true)
   })
 
 })

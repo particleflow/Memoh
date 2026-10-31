@@ -1,0 +1,3 @@
+internal/handlers/local_channel.go:2720:98: unused-parameter: parameter 'modelID' seems to be unused, consider removing or renaming it as _ (revive)
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, _, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
+                                                                                                 ^

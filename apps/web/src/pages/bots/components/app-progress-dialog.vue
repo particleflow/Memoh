@@ -280,7 +280,6 @@ function finish() {
           v-if="status === 'error' || status === 'unknown'"
           :tone="status === 'error' ? 'destructive' : 'neutral'"
           :title="status === 'unknown' ? t('apps.progress.unknownTitle') : t('apps.progress.failedTitle')"
-          :description="t(status === 'unknown' ? 'apps.progress.unknownHint' : 'apps.progress.failedHint')"
         >
           <template
             v-if="status === 'error' && error"
@@ -294,7 +293,6 @@ function finish() {
           v-else-if="status === 'done' && result === 'partial' && !needsSetup"
           tone="warning"
           :title="t('apps.progress.partialTitle')"
-          :description="t('apps.progress.partialHint')"
         />
       </DialogBody>
 

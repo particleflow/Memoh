@@ -6,7 +6,7 @@ import { installTurnEndInvalidation } from './turn-end-invalidation'
 type FakeCache = QueryCache & { invalidateQueries: ReturnType<typeof vi.fn> }
 
 function fakeCache(): FakeCache {
-  return { invalidateQueries: vi.fn() } as unknown as FakeCache
+  return { invalidateQueries: vi.fn().mockResolvedValue([]) } as unknown as FakeCache
 }
 
 function predicateOf(cache: FakeCache, call = 0): (entry: { key: unknown[] }) => boolean {

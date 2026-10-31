@@ -26,6 +26,10 @@ WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) RETURNING *;
 
+-- name: AssertComputerOperationAdmission :exec
+-- Hold the existing owner admission lock until the caller's revision CAS commits.
+SELECT public.memoh_assert_computer_admission(sqlc.arg(bot_id)::uuid, sqlc.arg(target_id)::uuid);
+
 -- name: UpdateComputerDelivery :one
 UPDATE computer_operations
 SET details=jsonb_set(details, '{delivery_ledger}', sqlc.arg(delivery_ledger)::jsonb),
@@ -44,16 +48,6 @@ JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
  AND candidate.id::text=sqlc.arg(connection_id)::text
 WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo';
 
--- name: GetOwnedAgenvoRuntime :one
-SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
-AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id) AND provider='agenvo' AND revoked_at IS NULL;
-
--- name: UpdateAgenvoRuntimeConfig :one
-UPDATE user_runtimes SET provider_config=sqlc.arg(provider_config),updated_at=now()
-WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
-AND provider='agenvo' AND revoked_at IS NULL AND provider_config=sqlc.arg(expected_config)
-RETURNING *;
-
 -- name: PreviousComputerPiOperation :one
 -- Called only after owning the unsettled slot. A missing receipt in the latest
 -- operation is evidence of uncertainty, never permission to search past it.
@@ -63,3 +57,15 @@ AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND target_id=sqlc.arg(target_id) AND id<>sqlc.arg(id)
 AND details->'batch'->'progress'->>'pi_session_id'=sqlc.arg(pi_session_id)::text
 ORDER BY created_at DESC, id DESC LIMIT 1;
+
+-- name: GetOwnedNativeHerdrRuntime :one
+SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
+AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id) AND provider='memoh' AND revoked_at IS NULL
+AND activated_at IS NOT NULL;
+
+-- name: UpdateNativeHerdrRuntimeConfig :one
+UPDATE user_runtimes SET provider_config=sqlc.arg(provider_config),updated_at=now()
+WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
+AND provider='memoh' AND revoked_at IS NULL AND activated_at IS NOT NULL
+AND provider_config=sqlc.arg(expected_config)
+RETURNING *;

@@ -7,7 +7,6 @@
   <component :is="embedded ? 'div' : SettingsSection">
     <SettingsRow
       :label="$t('bots.access.userAccess.title')"
-      :description="$t('bots.access.userAccess.subtitle')"
     >
       <Button
         v-if="!formVisible"

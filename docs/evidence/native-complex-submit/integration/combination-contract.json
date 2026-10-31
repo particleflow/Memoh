@@ -1,0 +1,14 @@
+{
+  "base": "eb1a9634c37097455f0eb055d791bc16598ef56d",
+  "image_checkpoint": "9f45edd7e2f708caeded47aaf53c5e9cb09081c7",
+  "pc_source": "8804d76686aeb000e33f70f547e1e5f6a2571894",
+  "pc_combined": "8c74d4a73b0fca3c5dfe6a7226b3fb495e41b433",
+  "source18_files_byte_identical": true,
+  "source_tree": "4e91bede044042742932e255d03a340794bbe6ab",
+  "protected_diff": [],
+  "schema_177_unchanged": true,
+  "existing_timeout_budget_preserved": true,
+  "new_windows_51_selector_present": true,
+  "field_models": 0,
+  "production_mutations": 0
+}

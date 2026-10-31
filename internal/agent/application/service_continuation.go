@@ -2,12 +2,18 @@ package application
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
 
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
+	"github.com/felinics/memoh/internal/db"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 type continuationTurnRequestMessageResolver interface {
@@ -23,7 +29,34 @@ func (s *Service) continuationTurnRequestMessageID(ctx context.Context, sessionI
 	if !ok {
 		return "", nil
 	}
-	return resolver.GetVisibleHistoryTurnRequestMessageIDByTurn(ctx, sessionID, turnID)
+	id, err := resolver.GetVisibleHistoryTurnRequestMessageIDByTurn(ctx, sessionID, turnID)
+	if !errors.Is(err, pgx.ErrNoRows) || s.queries == nil {
+		return id, err
+	}
+	if _, parseErr := db.ParseUUID(runHandle.RunID); parseErr != nil || runHandle.FencingToken <= 0 {
+		return "", err
+	}
+	// An explicitly recovered answer continues an existing history turn under
+	// a new run. Only the server-authored recovery admission can name that
+	// anchor; never fall back to the latest input in the conversation.
+	run, readErr := s.queries.GetSessionRun(ctx, db.ParseUUIDOrEmpty(runHandle.RunID))
+	if readErr != nil {
+		return "", readErr
+	}
+	var saved acceptedUserInputRecovery
+	if json.Unmarshal(run.InputJson, &saved) != nil || saved.Kind != acceptedUserInputRecoveryKind ||
+		run.SessionID.String() != sessionID || run.BotID.String() != runHandle.BotID ||
+		run.FencingToken != runHandle.FencingToken || saved.RequestMessageID == "" {
+		return "", err
+	}
+	turn, readErr := s.messageService.GetVisibleTurnByMessage(ctx, sessionID, saved.RequestMessageID)
+	if readErr != nil {
+		return "", readErr
+	}
+	if turn.BotID != runHandle.BotID || turn.RequestMessageID != saved.RequestMessageID {
+		return "", ErrUserInputRecoveryUnavailable
+	}
+	return turn.RequestMessageID, nil
 }
 
 func (s *Service) prepareContinuationRunConfig(
@@ -33,11 +66,26 @@ func (s *Service) prepareContinuationRunConfig(
 	summaryScope contextfrag.Scope,
 	eventCh chan<- WSStreamEvent,
 ) (native.RunConfig, error) {
+	return s.prepareContinuationRunConfigWithRequiredInput(ctx, base, fallback, summaryScope, eventCh, "")
+}
+
+func (s *Service) prepareContinuationRunConfigWithRequiredInput(
+	ctx context.Context,
+	base native.RunConfig,
+	fallback historyfrag.ScopeFallback,
+	summaryScope contextfrag.Scope,
+	eventCh chan<- WSStreamEvent,
+	requestMessageID string,
+) (native.RunConfig, error) {
 	loaded, err := s.loadHistoryRecords(ctx, fallback, summaryScope.SessionID, defaultMaxContextMinutes, 0)
 	if err != nil {
 		return native.RunConfig{}, err
 	}
 	loaded = pruneHistoryForGateway(loaded)
+	loaded, err = s.ensureRequiredHistoryMessage(ctx, loaded, ChatRequest{BotID: summaryScope.BotID, ChatID: fallback.ChatID, ThreadID: summaryScope.SessionID, RequiredHistoryMessageID: requestMessageID, ConversationType: fallback.ConversationType, ReplyTarget: fallback.ReplyTarget})
+	if err != nil {
+		return native.RunConfig{}, err
+	}
 	loaded, err = s.replaceCompactedMessages(ctx, summaryScope.SessionID, summaryScope, loaded, compactionArtifactBoundary{})
 	if err != nil {
 		return native.RunConfig{}, err
@@ -66,5 +114,12 @@ func (s *Service) prepareContinuationRunConfig(
 	base.Query = ""
 	base.LiveToolStream = eventCh != nil
 	base.CanRequestUserInput = s.canDeliverUserInputWS(eventCh)
-	return s.prepareRunConfig(ctx, base), nil
+	source := inputsource.Unattributed(summaryScope.BotID, summaryScope.SessionID)
+	for _, record := range retained {
+		if requestMessageID != "" && record.DBMessageID == requestMessageID {
+			source = inputsource.FromMetadata(record.Metadata, summaryScope.BotID, summaryScope.SessionID)
+			break
+		}
+	}
+	return s.prepareRunConfig(ctx, base, ChatRequest{BotID: summaryScope.BotID, ThreadID: summaryScope.SessionID, InputSource: &source}), nil
 }

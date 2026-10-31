@@ -1,0 +1,18 @@
+{
+  "currentWebSource": true,
+  "existingServer391": true,
+  "syntheticPG": true,
+  "fieldNetwork": false,
+  "mutations": 0,
+  "pageErrors": [],
+  "identityGets": 5,
+  "screenshots": [
+    "current-web-old-server-compatible.png"
+  ],
+  "identity": {
+    "ownerPresent": true,
+    "origin": "http://127.0.0.1:18402/api",
+    "botUnchanged": true,
+    "policyOmitted": true
+  }
+}

@@ -677,7 +677,7 @@ func TestGlobalHelpKeepsTelegramGroupCommandsCompact(t *testing.T) {
 	t.Parallel()
 	h := newTestHandler(nil)
 	help := h.registry.GlobalHelp(i18n.New("en"), "snowluocat_bot")
-	for _, commandName := range []string{"help", "start", "new", "link", "compact"} {
+	for _, commandName := range []string{"help", "start", "link", "compact"} {
 		want := "/" + commandName
 		if !strings.Contains(help, "- "+want+" —") {
 			t.Errorf("compact global help missing list row for %q:\n%s", want, help)
@@ -685,6 +685,9 @@ func TestGlobalHelpKeepsTelegramGroupCommandsCompact(t *testing.T) {
 		if strings.Contains(help, "- `"+want+"`") || strings.Contains(help, "- "+want+"@snowluocat_bot") {
 			t.Errorf("single-token command %q must remain tap-to-send, not code-spanned", want)
 		}
+	}
+	if strings.Contains(help, "- /new") {
+		t.Fatal("help must not offer a parallel chat or contact reset")
 	}
 	if strings.Contains(help, "group's actions") || strings.Contains(help, "<group>") {
 		t.Errorf("global help leaked internal command-group terminology:\n%s", help)

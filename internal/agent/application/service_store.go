@@ -15,6 +15,7 @@ import (
 	turnpkg "github.com/felinics/memoh/internal/agent/turn"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 func (s *Service) storeRound(ctx context.Context, req ChatRequest, messages []ModelMessage, modelID string) error {
@@ -257,6 +258,8 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 		pruneToolResults = !botSettings.PersistFullToolResults
 	}
 	meta := buildRouteMetadata(req)
+	currentSource := requestInputSource(req)
+	meta = mergeMetadata(meta, map[string]any{"input_source": currentSource})
 	meta = mergeMetadata(meta, workspaceTargetMetadata(req.WorkspaceTarget))
 	senderChannelIdentityID, senderUserID := s.resolvePersistSenderIDs(ctx, req)
 	sessionMode, runtimeType := s.persistSessionRuntimeSnapshot(ctx, req)
@@ -310,7 +313,7 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 		messageEventID := ""
 		displayText := ""
 		assets := []messagepkg.AssetRef(nil)
-		persistMeta := meta
+		persistMeta := mergeMetadata(meta, map[string]any{inputsource.MetadataKey: currentSource})
 		// The admitted turn belongs to exactly one row: the turn-leading user
 		// query. Everything else in the round either binds to it or is a
 		// synthetic mid-turn message that must not claim the turn's identity.
@@ -332,6 +335,7 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 			isOriginalQuery := originalQueryAvailable && ((ownText != "" && ownText == strings.TrimSpace(req.Query)) || isOriginalSkillActivation)
 
 			if isOriginalQuery {
+				currentSource = requestInputSource(req)
 				originalQueryAvailable = false
 				externalMessageID = req.ExternalMessageID
 				sourceReplyToMessageID = req.SourceReplyToMessageID
@@ -354,8 +358,17 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 				displayText = strings.TrimSpace(turnpkg.UnwrapUserMessageEnvelope(displayText))
 				assets = chatAttachmentsToAssetRefs(req.Attachments)
 				persistMeta = mergeMetadata(meta, buildInteractionMetadata(req))
+				if req.DelegationResultID != "" || req.TaskResultReceipt != "" {
+					displayText = ""
+					persistMeta = mergeMetadata(persistMeta, botTaskResultMetadata(req))
+				}
 			} else {
 				displayText = ownText
+				// A steered/synthetic input has its own sender. Do not borrow the
+				// enclosing turn's attribution when its source is unavailable.
+				messageSenderChannelIdentityID, messageSenderUserID = "", ""
+				currentSource = inputsource.Unattributed(req.BotID, req.ThreadID)
+				persistMeta = mergeMetadata(meta, map[string]any{inputsource.MetadataKey: currentSource})
 			}
 		} else if !isInternalFeedback && strings.TrimSpace(req.ExternalMessageID) != "" {
 			sourceReplyToMessageID = req.ExternalMessageID
@@ -710,6 +723,9 @@ func mergeMetadata(base, extra map[string]any) map[string]any {
 }
 
 func (s *Service) resolvePersistSenderIDs(ctx context.Context, req ChatRequest) (string, string) {
+	if requestInputSource(req).Kind != inputsource.User {
+		return "", ""
+	}
 	channelIdentityID := strings.TrimSpace(req.SourceChannelIdentityID)
 	userID := strings.TrimSpace(req.UserID)
 

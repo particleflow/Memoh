@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { UIAttachment } from '@/composables/api/useChat.types'
 
 vi.mock('@/lib/api-client', () => ({
-  sdkApiUrl: ({ url, path }: { url: string, path?: Record<string, string> }) => path
+  sdkFileApiUrl: ({ url, path }: { url: string, path?: Record<string, string> }) => path
     ? Object.entries(path).reduce((result, [key, value]) => result.replace(`{${key}}`, value), url)
     : url,
   sdkAuthQuery: () => ({ token: 'synthetic' }),

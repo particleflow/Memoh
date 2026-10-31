@@ -6,10 +6,11 @@ import (
 
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 // DeliveryEntries reads one bounded page after the same parent/descendant, user,
-// target and current-grant checks as task detail. It never polls a device,
+// target and current Bot-permission checks as historical task detail. It never polls a device,
 // dispatches work, marks completion, or turns a reference into download authority.
 func (s *Service) DeliveryEntries(ctx context.Context, bot, user, parent, kind, id, after string) (dbstore.ComputerOperationRecord, []dbstore.ComputerDeliveryEntry, error) {
 	item, err := s.Get(ctx, bot, user, parent, kind, id)
@@ -41,4 +42,18 @@ func (s *Service) DeliveryEntries(ctx context.Context, bot, user, parent, kind, 
 		return dbstore.ComputerOperationRecord{}, nil, err
 	}
 	return record, entries, nil
+}
+
+// ComputerBinding resolves the actual operation owner after validating every
+// ancestor, the selected device and its current grant. It narrows observation
+// to that device even for a NAS parent; callers cannot supply native references.
+func (s *Service) ComputerBinding(ctx context.Context, bot, user, parent, kind, id string) (toolcontext.ComputerBinding, error) {
+	item, err := s.GetLive(ctx, bot, user, parent, kind, id)
+	if err != nil {
+		return toolcontext.ComputerBinding{}, err
+	}
+	if item.TaskType != ComputerOperation {
+		return toolcontext.ComputerBinding{}, ErrUnavailable
+	}
+	return toolcontext.ComputerBinding{BotID: bot, UserID: user, SessionID: item.SessionID, TargetID: item.TargetID}, nil
 }

@@ -50,6 +50,7 @@ type Workdirs interface {
 type Mounts interface {
 	GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
+	OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error)
 	OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
 }
 
@@ -69,22 +70,45 @@ type Authority struct {
 // Source authorizes an owned source conversation before listing its handoffs.
 // Each returned record still requires both Bots' current permissions.
 func (a *Authority) Source(ctx context.Context, user, bot, session string) (Identity, error) {
+	b, path, err := a.sourceIdentity(ctx, user, bot, session)
+	if err != nil {
+		return Identity{}, err
+	}
+	b.SourceSelection, err = a.selection(ctx, b, path)
+	return b, err
+}
+
+// ContactSource validates the owned root and parses only its recorded target.
+// Ordinary chat uses the workspace resolver's registration/capability contract,
+// not the stricter cross-Bot device-profile contract or an inferred primary.
+func (a *Authority) ContactSource(ctx context.Context, user, bot, session string) (Identity, error) {
+	b, path, err := a.sourceIdentity(ctx, user, bot, session)
+	if err != nil {
+		return Identity{}, err
+	}
+	if len(path) != 1 || path[0].WorkdirID != "" {
+		return Identity{}, ErrDenied
+	}
+	b.SourceSelection, err = storedSelection(path[0].Metadata)
+	return b, err
+}
+
+func (a *Authority) sourceIdentity(ctx context.Context, user, bot, session string) (Identity, []thread.Thread, error) {
 	b := Identity{UserID: user, SourceBotID: bot, SourceSessionID: session}
 	path, err := a.sourcePath(ctx, b)
 	if err != nil || a.Permissions == nil || a.Permissions.ValidateSession(ctx, user) != nil {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
 	b.TeamID, b.SourceRootID = path[0].TeamID, path[len(path)-1].ID
 	team, err := a.Permissions.BotTeam(ctx, bot)
 	if err != nil || team != b.TeamID {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
 	ok, err := a.Permissions.Allowed(ctx, user, bot, bots.PermissionChat)
 	if err != nil || !ok {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
-	b.SourceSelection, err = a.selection(ctx, b, path)
-	return b, err
+	return b, path, nil
 }
 
 // Bind checks the caller's complete owned source ancestry and both Bot grants.
@@ -111,24 +135,34 @@ func (a *Authority) Bind(ctx context.Context, user, sourceBot, sourceSession, ta
 // Authorize rechecks stored identity against current data. An administrator's
 // Bot access does not waive source-session ownership or same-team membership.
 func (a *Authority) Authorize(ctx context.Context, b Identity) (string, error) {
-	path, err := a.sourcePath(ctx, b)
-	if err != nil || b.TeamID == "" || path[0].TeamID != b.TeamID || path[len(path)-1].ID != b.SourceRootID {
-		return "", ErrDenied
-	}
-	if err := a.authorizeBots(ctx, b); err != nil {
+	path, err := a.authorizeHistory(ctx, b)
+	if err != nil {
 		return "", err
-	}
-	if b.TargetSessionID != "" {
-		s, err := a.Sessions.Get(ctx, b.TargetSessionID)
-		if err != nil || s.ID != b.TargetSessionID || s.TeamID != b.TeamID || s.BotID != b.TargetBotID || s.CreatedByUserID != b.UserID || s.ParentThreadID != "" || s.Type != thread.TypeChat {
-			return "", ErrDenied
-		}
 	}
 	selected, err := a.selection(ctx, b, path)
 	if err != nil || (b.SourceSelection != "" && b.SourceSelection != selected) {
 		return "", ErrDenied
 	}
 	return selected, nil
+}
+
+// authorizeHistory checks conversation ownership and live Bot grants without
+// transferring an old execution binding to the currently selected computer.
+func (a *Authority) authorizeHistory(ctx context.Context, b Identity) ([]thread.Thread, error) {
+	path, err := a.sourcePath(ctx, b)
+	if err != nil || b.TeamID == "" || path[0].TeamID != b.TeamID || path[len(path)-1].ID != b.SourceRootID {
+		return nil, ErrDenied
+	}
+	if err := a.authorizeBots(ctx, b); err != nil {
+		return nil, err
+	}
+	if b.TargetSessionID != "" {
+		s, err := a.Sessions.Get(ctx, b.TargetSessionID)
+		if err != nil || s.ID != b.TargetSessionID || s.TeamID != b.TeamID || s.BotID != b.TargetBotID || s.CreatedByUserID != b.UserID || s.ParentThreadID != "" || s.Type != thread.TypeChat {
+			return nil, ErrDenied
+		}
+	}
+	return path, nil
 }
 
 func (a *Authority) authorizeBots(ctx context.Context, b Identity) error {
@@ -284,17 +318,50 @@ func (a *Authority) registration(ctx context.Context, bot, mount string) (dbstor
 		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
 	}
 	m, err := a.Mounts.GetMount(ctx, bot, mount)
-	if err != nil || m.BotID != bot || m.ID != mount || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID || m.RuntimeProvider != agenvo.Provider {
+	if err != nil || m.BotID != bot || m.ID != mount || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
 	}
-	t, err := agenvo.DecodeTarget(m.RuntimeProviderConfig)
+	t, err := agenvo.DecodeRuntimeTarget(m.RuntimeProvider, m.RuntimeID, m.RuntimeProviderConfig)
 	if err != nil {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
 	}
-	if _, err = a.Mounts.OwnedHTTPMCPConnectionBot(ctx, m.RuntimeUserID, t.ConnectionID); err != nil {
-		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+	if t.NativeRuntimeID != "" {
+		// The mount alone does not establish activation. Reuse the existing
+		// owner-scoped registry query and reject a changed registration snapshot.
+		r, err := a.Mounts.OwnedNativeHerdrRuntime(ctx, m.RuntimeUserID, m.RuntimeID)
+		if err != nil || r.ID != m.RuntimeID || r.UserID != m.RuntimeUserID || r.Provider != m.RuntimeProvider || r.ActivatedAt.IsZero() {
+			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		}
+		current, err := agenvo.DecodeRuntimeTarget(r.Provider, r.ID, r.ProviderConfig)
+		if err != nil || agenvo.TargetFingerprint(current) != agenvo.TargetFingerprint(t) {
+			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		}
+	} else {
+		// Retain authorization of historical registrations for receipt reads;
+		// new plans exclude them and production execution keeps Agenvo retired.
+		if _, err = a.Mounts.OwnedHTTPMCPConnectionBot(ctx, m.RuntimeUserID, t.ConnectionID); err != nil {
+			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		}
 	}
 	return m, t, nil
+}
+
+// PlanDevice pins two current mounts of the same activated native Runtime.
+// A plan grants no workspace permission; every tool still rechecks both Bots.
+func (a *Authority) PlanDevice(ctx context.Context, b Identity, source, target string) (DevicePair, error) {
+	selected, err := a.Authorize(ctx, b)
+	if err != nil || (selected != "native" && selected != source) {
+		return DevicePair{}, ErrDenied
+	}
+	m, t, err := a.registration(ctx, b.SourceBotID, source)
+	if err != nil || m.RuntimeProvider != "memoh" {
+		return DevicePair{}, ErrDenied
+	}
+	tm, tt, err := a.registration(ctx, b.TargetBotID, target)
+	if err != nil || tm.RuntimeProvider != "memoh" || tm.RuntimeID != m.RuntimeID || agenvo.TargetFingerprint(t) != agenvo.TargetFingerprint(tt) {
+		return DevicePair{}, ErrDenied
+	}
+	return DevicePair{SourceMountID: m.ID, TargetMountID: tm.ID, RuntimeID: m.RuntimeID, Fingerprint: agenvo.TargetFingerprint(t)}, nil
 }
 
 // AuthorizeAsset accepts a content hash only when the original is linked to

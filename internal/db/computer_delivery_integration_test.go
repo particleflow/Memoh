@@ -52,9 +52,10 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id) VALUES($1,$2,$3)", session, bot, user)
 	exec(`INSERT INTO bot_user_grants(bot_id,subject_type,user_id,permissions) VALUES($1,'user',$2,'["chat","workspace_read","workspace_write","workspace_exec"]')`, bot, user)
 	exec("INSERT INTO mcp_connections(id,bot_id,name,type) VALUES($1,$2,'delivery-fixture','http')", connection, bot)
-	target := agenvo.Target{ConnectionID: connection, DeviceID: "synthetic-device", InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
-	raw, _ := json.Marshal(target)
-	runtime, err := store.CreateAgenvoRuntime(ctx, owner, "delivery-fixture", raw)
+	target := agenvo.Target{ConnectionID: connection, DeviceID: connection, NativeRuntimeID: connection, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
+	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: target.HerdrCLI, HerdrConfigRoot: target.HerdrConfigRoot, Agent: target.Agent}})
+	exec("INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'memoh',$5,now(),NULL)", connection, owner, "delivery-fixture", "synthetic-"+uuid.NewString(), raw)
+	runtime, err := store.OwnedNativeHerdrRuntime(ctx, owner, connection)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,10 +240,14 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	if !errors.As(err, &guardError) || guardError.Code != "23514" {
 		t.Fatalf("old v2 writer downgraded principal ledger: %v", err)
 	}
-	// No outcome changes when the connection owner becomes unavailable.
+	// An unrelated old MCP row does not control native transfer authority.
 	exec("DELETE FROM mcp_connections WHERE id=$1", connection)
+	if _, err := s.Resolve(ctx, id.OperationID, "result", ref, false); err != nil {
+		t.Fatal("native depended on old MCP row", err)
+	}
+	exec("UPDATE user_runtimes SET revoked_at=now() WHERE id=$1", runtime.ID)
 	if _, err := s.Resolve(ctx, id.OperationID, "result", ref, false); !errors.Is(err, computertask.ErrDenied) {
-		t.Fatal("deleted connection resolved")
+		t.Fatal("revoked native Runtime resolved")
 	}
 }
 

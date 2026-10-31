@@ -44,6 +44,7 @@ import (
 	"github.com/felinics/memoh/internal/errlog"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/server"
@@ -64,6 +65,7 @@ type localSpeechModelResolver interface {
 
 // LocalChannelHandler handles local channel routes (WebUI / API) backed by bot history.
 type LocalChannelHandler struct {
+	privateChats        privateChatResolver
 	channelType         channel.ChannelType
 	channelManager      *channel.Manager
 	channelStore        *channel.Store
@@ -71,6 +73,7 @@ type LocalChannelHandler struct {
 	botService          *bots.Service
 	accountService      *accounts.Service
 	sessionService      *sessionpkg.Service
+	abortObservations   sessionAbortObservationStore
 	workdirs            sessionWorkdirService
 	agentService        *application.Service
 	sessionRuntime      wsTurnAdmitter
@@ -324,13 +327,15 @@ type webQuickActionContext struct {
 // executeWebQuickAction runs a Web quick action. A failure is returned with its
 // cause; the caller answers it and its result record carries the cause.
 func (h *LocalChannelHandler) executeWebQuickAction(ctx context.Context, botID, actionID string, skillActivationAllowed bool, control webQuickActionContext) (*CommandActionResult, error) {
+	if resetsConversation(actionID) {
+		return nil, apperror.New(slash.CodePermissionDenied, nil)
+	}
 	switch strings.TrimSpace(actionID) {
 	case "help":
 		items := []CommandActionListItem{
 			{ID: "help", Title: "/help", Description: "Show available quick actions", Kind: "quick_action"},
-			{ID: "new", Title: "/new", Description: "Start a new session", Kind: "quick_action"},
 		}
-		labels := []string{"/help", "/new"}
+		labels := []string{"/help"}
 		text := "Available Web quick actions: %s."
 		// skillActivationAllowed already reflects a native chat
 		// session, which is also the only context where the model picker
@@ -798,6 +803,9 @@ func (h *LocalChannelHandler) PostMessage(c echo.Context) error {
 	if err != nil {
 		return errs.Wrap(err, "resolve channel config")
 	}
+	if _, err := resolveContinuousContact(c.Request().Context(), h.privateChats, botID, channelIdentityID); err != nil {
+		return err
+	}
 	routeKey := botID
 	msg := channel.InboundMessage{
 		Channel:     h.channelType,
@@ -812,7 +820,7 @@ func (h *LocalChannelHandler) PostMessage(c echo.Context) error {
 			},
 		},
 		Conversation: channel.Conversation{
-			ID:   routeKey,
+			ID:   "contact:" + channelIdentityID,
 			Type: channel.ConversationTypePrivate,
 		},
 		ReceivedAt: time.Now().UTC(),
@@ -886,6 +894,7 @@ type wsClientMessage struct {
 	Decision          string                     `json:"decision,omitempty"`
 	OptionID          string                     `json:"option_id,omitempty"`
 	Reason            string                     `json:"reason,omitempty"`
+	AbortReason       string                     `json:"abort_reason,omitempty"`
 	Answers           []userinput.QuestionAnswer `json:"answers,omitempty"`
 	Canceled          bool                       `json:"canceled,omitempty"`
 	// WorkdirID is the workdir a first message binds to the session it
@@ -1702,10 +1711,16 @@ func (h *LocalChannelHandler) abortWSRun(ctx context.Context, writer *wsWriter, 
 		applied bool
 		err     error
 	)
+	completeObservation := h.observeAbortControl(ctx, botID, sessionID, runID, controlID, msg.AbortReason)
+	serverSource := "runtime_controller"
 	if h.agentService != nil {
+		serverSource = "agent_service"
 		applied, err = h.agentService.AbortRuntimeRun(ctx, botID, sessionID, runID, controlID)
 	} else {
 		applied, err = controller.AbortControl(ctx, botID, sessionID, runID, controlID)
+	}
+	if completeObservation != nil {
+		completeObservation(applied, err, serverSource)
 	}
 	if err != nil {
 		failWSControl(ctx, h.logger, writer, botID, ref, "ws.control.abort", "abort", controlID, string(apperror.CodeOf(err)), err)
@@ -1939,6 +1954,14 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, wsTurn("", msg.SessionID), "ws.runtime_command", apperror.FieldRequired("run_id"))
 				continue
 			}
+			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, strings.TrimSpace(msg.SessionID)); err != nil {
+				failWSControl(streamBaseCtx, h.logger, writer, botID, wsTurn(msg.InvocationID, msg.SessionID).withRun(runID), "ws.control.abort", msg.Type, msg.ControlID, string(wsSessionAuthAckCode(err, apperror.CodeSessionNotFound, apperror.CodeInternal)), err)
+				continue
+			}
+			if err := h.authorizeAbortRun(c.Request().Context(), botID, strings.TrimSpace(msg.SessionID), runID); err != nil {
+				failWSControl(streamBaseCtx, h.logger, writer, botID, wsTurn(msg.InvocationID, msg.SessionID).withRun(runID), "ws.control.abort", msg.Type, msg.ControlID, string(apperror.CodeOf(err)), err)
+				continue
+			}
 			h.abortWSRun(streamBaseCtx, writer, botID, msg, runID)
 
 		case "tool_approval_response":
@@ -2070,6 +2093,27 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 			if ref.InvocationID == "" {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", apperror.FieldRequired("invocation_id"))
 				continue
+			}
+			if strings.HasPrefix(text, "/") && resetsConversation(text) {
+				h.failWSCommand(streamBaseCtx, writer, botID, msg, apperror.New(slash.CodePermissionDenied, nil))
+				continue
+			}
+			if err := h.authorizeWSChatAccess(streamBaseCtx, channelIdentityID, botID); err != nil {
+				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", err)
+				continue
+			}
+			contact, contactErr := h.resolveWebMessageContact(streamBaseCtx, botID, channelIdentityID, sessionID, msg.WorkdirID)
+			if contactErr != nil {
+				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", contactErr)
+				continue
+			}
+			if sessionID == "" {
+				sessionID = contact.ID
+				msg.SessionID = sessionID
+				ref = ref.withSession(sessionID)
+				createdEvent := ref.event("session_created")
+				createdEvent.WorkdirID = contact.WorkdirID
+				writer.SendJSON(createdEvent)
 			}
 			if sessionID != "" {
 				if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
@@ -2394,6 +2438,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				handler: h,
 				botID:   botID,
 				request: chatview.UITurn{
+					InputSource:       &inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: channelIdentityID, ChannelIdentityID: channelIdentityID, Channel: h.channelType.String()},
 					Role:              "user",
 					Text:              userVisibleText,
 					UserMessageKind:   userMessageKind,
@@ -2485,7 +2530,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.retry_message", apperror.FieldRequired("session_id"))
 				continue
 			}
-			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
+			if err := h.authorizeWSContactWrite(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.retry_message", err)
 				continue
 			}
@@ -2571,7 +2616,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.edit_message", apperror.New(apperror.CodeChatMessageEmpty, nil))
 				continue
 			}
-			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
+			if err := h.authorizeWSContactWrite(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.edit_message", err)
 				continue
 			}
@@ -2619,6 +2664,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 					return h.agentService.PrepareEditLatestTurnOperation(ctx, sessionID, targetTurnID)
 				},
 				replacementUserTurn: &chatview.UITurn{
+					InputSource:  &inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: channelIdentityID, ChannelIdentityID: channelIdentityID, Channel: h.channelType.String()},
 					Role:         "user",
 					Text:         text,
 					Timestamp:    time.Now().UTC(),
@@ -2669,52 +2715,10 @@ func userInputResponseAppError(err error) error {
 	}
 }
 
-// createWSChatSession creates the web session for a first message. The
-// request's (model, effort) pair is written into the INSERT (issue #879,
-// spec §3.3-D) so the session is born with the pair: the session_created
-// broadcast that follows can never be observed with empty preference.
-// Channel-side creation (inbound) calls thread.Create without these fields,
-// so channel sessions are born with NULL preference.
-//
-// A requested workdir is validated by the same rule as the REST create
-// (resolveSessionWorkdirBinding) before anything is written, so an invalid
-// binding fails the send without leaving a session behind.
-func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
-	if h == nil || h.sessionService == nil {
-		return sessionpkg.Thread{}, errors.New("session service not configured")
-	}
-	input := sessionpkg.CreateInput{
-		BotID:           strings.TrimSpace(botID),
-		ChannelType:     h.channelType.String(),
-		Type:            sessionpkg.TypeChat,
-		CreatedByUserID: strings.TrimSpace(channelIdentityID),
-	}
-	boundWorkdir, err := resolveSessionWorkdirBinding(ctx, h.workdirs, input.BotID, workdirID, sessionpkg.RuntimeModel)
-	if err != nil {
-		return sessionpkg.Thread{}, err
-	}
-	if boundWorkdir != nil {
-		input.WorkdirID = boundWorkdir.ID
-		input.WorkdirPath = boundWorkdir.Path
-	}
-	// Reconcile a carried pair exactly like the REST first-send (spec §3.3:
-	// every write point reconciles). Without it a stale composer draft naming
-	// a deleted model dies as an FK violation, a slug degrades to a (NULL,
-	// effort) half pair, and an illegal effort lands in the row raw. Messages
-	// that omit the pair (default-sourced) keep both fields empty → NULL
-	// preference, and the session follows the bot default live.
-	if strings.TrimSpace(modelID) != "" || strings.TrimSpace(reasoningEffort) != "" {
-		if h.agentService == nil {
-			return sessionpkg.Thread{}, errors.New("agent service not configured")
-		}
-		prefModelID, prefEffort, err := h.agentService.ReconcileSessionModelPreference(ctx, input.BotID, modelID, reasoningEffort)
-		if err != nil {
-			return sessionpkg.Thread{}, err
-		}
-		input.PreferredChatModelID = prefModelID
-		input.PreferredReasoningEffort = prefEffort
-	}
-	return h.sessionService.Create(ctx, input)
+// createWSChatSession resolves the system-owned continuous contact. It never
+// creates a parallel Web session, resets preferences, or rebinds its workdir.
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, _, _, workdirID string) (sessionpkg.Thread, error) {
+	return h.resolveWebMessageContact(ctx, botID, channelIdentityID, "", workdirID)
 }
 
 func (h *LocalChannelHandler) wsSessionSupportsRequestedSkills(ctx context.Context, sessionID string) (bool, error) {

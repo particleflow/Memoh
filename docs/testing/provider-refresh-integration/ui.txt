@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 <repository>
+
+
+ Test Files  4 passed (4)
+      Tests  43 passed (43)
+   Start at  20:15:16
+   Duration  2.90s (transform 1.08s, setup 0ms, import 492ms, tests 4.00s, environment 1.79s)
+

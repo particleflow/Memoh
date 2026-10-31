@@ -1,0 +1,18 @@
+{
+  "realServer": true,
+  "realPG": true,
+  "syntheticHistory": true,
+  "modelOrDeviceExecution": false,
+  "pageErrors": [],
+  "unexpectedWrites": 0,
+  "deviceReads": 0,
+  "resumePOSTs": 1,
+  "abortControls": 0,
+  "reusedExistingControlObservation": true,
+  "observation": {
+    "state": "aborted",
+    "intentUnchanged": true,
+    "clientReason": "user_stop",
+    "source": "websocket"
+  }
+}

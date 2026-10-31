@@ -1564,6 +1564,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/activity": {
+            "get": {
+                "description": "Read-only existing persisted states, independent of the open conversation. Ordinary session/ancestor permissions and current computer target grants are rechecked. Unknown and terminal entries are not active. Names and original session references only; no transcripts, dispatch or device calls. Continue while next_cursor is nonempty, including an empty filtered page. Account authentication required.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "List readable active Bot runs, Agent runs and computer tasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Page size (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Opaque continuation scoped to caller and Bot",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.ActivityPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/agents": {
             "get": {
                 "description": "List active and disabled non-deleted Agents attached to a bot. Direct-runtime Agents carry the workspace dependency their runtime declares.",
@@ -7143,6 +7215,252 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/media/upload-failures": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Read scoped attachment failure reports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/media.UploadFailure"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/media/upload-failures/{operation}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Read one scoped attachment failure report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Existing client operation ID",
+                        "name": "operation",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/media.UploadFailure"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Record a scoped attachment failure",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Existing client operation ID",
+                        "name": "operation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Whitelisted failure metadata",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/media.UploadFailureInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/media.UploadFailure"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/media/uploads": {
             "post": {
                 "consumes": [
@@ -7260,7 +7578,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/media.Upload"
+                            "$ref": "#/definitions/handlers.MediaUploadStatusResponse"
                         }
                     },
                     "401": {
@@ -9311,6 +9629,235 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/sessions/contact": {
+            "get": {
+                "description": "Returns the bound conversation or eligible user-owned local model chats. Candidates require explicit confirmation; ID ordering is not a preference. A known deleted contact is resolved by POST. No task or hook is dispatched.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Inspect this account's Bot contact without changing history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Candidate ID cursor",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Explicitly opened conversation; eligibility is verified before offering",
+                        "name": "selected_session_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/route.PrivateChatEntry"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Reuses a server-owned Web route for this authenticated account and Bot across devices. Atomically creates its chat only when absent. No model call, task dispatch, adoption or mutation of historical sessions. Chat-route tokens and client-supplied identity/route/body are not accepted.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Resolve this account's persistent private chat with a Bot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/session.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/contact/bind": {
+            "post": {
+                "description": "First binding only. The server verifies account ownership, ordinary local model chat, user visibility, no parent/channel route/delegation. Does not merge, copy, retarget tasks, replay hooks or replace another device's binding. On conflict or uncertain outcome, inspect the contact before deciding again.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Confirm an existing conversation as this account's Bot contact",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Explicitly selected conversation",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.BindPrivateChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/session.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/sessions/events": {
             "get": {
                 "description": "Lightweight SSE for sidebar live-sort. Carries only session\nidentifiers and minimal metadata (touched timestamps, titles).\nNever includes message bodies. Filters out sessions with\ninternal visibility, such as managed subagent work.",
@@ -10021,6 +10568,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover": {
+            "post": {
+                "description": "Account/session-authenticated owner action for a failed native retry run whose accepted answer has no persisted tool result. Uses only the original saved input and accepted decision. Reconciles its exact hidden history and admits one idempotent continuation run; keeps the original run failed. Never resubmits the answer or retries the whole original turn. Repeated requests return the same recovery run, including failed/unknown outcomes. No automatic invocation on reconnect. A successful response acknowledges admission, not model or business completion.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Explicitly continue a submitted ask_user answer after history failure",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned chat session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Original submitted ask_user decision ID",
+                        "name": "decision_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Original failed run identity",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AcceptedUserInputRecoveryInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/application.UserInputRecoveryResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/sessions/{session_id}/delegations": {
             "get": {
                 "description": "Persisted facts only. Follow nonempty next_cursor even for an empty page. Reads do not dispatch, poll devices or retry delivery.",
@@ -10498,6 +11136,97 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/botdelegation.View"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover": {
+            "post": {
+                "description": "Uses the original event, its current expected attempt, attention state and durable execution/publication evidence. New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist or changes an unknown outcome to success.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Authorize one summary attempt for a saved task outcome",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supervisor Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned source session",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delegation ID",
+                        "name": "delegation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Exact saved event and expected attempt",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/botdelegation.RecoveryInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/botdelegation.RecoveryView"
                         }
                     },
                     "400": {
@@ -11650,7 +12379,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks": {
             "get": {
-                "description": "Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.",
+                "description": "Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. session_id is the owning session; parent_session_id remains the requested aggregation root. Optional direct_parent_session_id is the owning session's persisted direct parent, authorized through the ancestor path; omission supplies no parent reference. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.",
                 "produces": [
                     "application/json"
                 ],
@@ -11729,7 +12458,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}": {
             "get": {
-                "description": "Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.",
+                "description": "Same projection as a list item, with fresh authorization. session_id and optional direct_parent_session_id describe the owning session and its direct parent; parent_session_id remains the requested aggregation root. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.",
                 "produces": [
                     "application/json"
                 ],
@@ -11782,6 +12511,83 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content": {
+            "get": {
+                "description": "Uses existing agent.get/read without recording evidence or collecting files. A terminal_snapshot_unverified sample can include tool output and is not a complete log, verified assistant answer or task completion. Batch Pi returns supported=false.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Read a bounded native Agent terminal sample",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/computertask.NativeContent"
                         }
                     },
                     "401": {
@@ -11887,6 +12693,285 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup": {
+            "post": {
+                "description": "Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Read a retained interactive Agent input receipt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Original input and retained request ID",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskFollowupInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskFollowupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation": {
+            "get": {
+                "description": "Read-only, bounded Herdr metadata and an operation-revision-bound persisted reconciliation snapshot. Rechecks parent/descendant ownership and current device grants before and after observation. A concurrent operation revision change fails closed. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history. Reconciliation neither pauses target admission nor authorizes host stop/upgrade; recorded file references are not live media checks.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Observe a computer task's original native references",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/computertask.Recovery"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume": {
+            "post": {
+                "description": "Requires a current account JWT and the complete unchanged original computer_task_submit arguments. Chat-route reply credentials cannot resume execution. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Explicitly continue one original native batch before prompt submission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Original computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Complete original tool arguments",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskResumeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskResumeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -12218,6 +13303,157 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/tasks": {
+            "get": {
+                "description": "Account-only read of native Agent admissions, computer receipts, incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown records and multiple tasks per session. Sessions, configured Agents and ordinary chat runs are not tasks. Each source rechecks its existing permissions. Native task_id and provider run_id are opaque strings; record_id identifies the durable occurrence. Continue nonempty next_cursor even on an empty page. Native tool requests are included from their persisted queue admission, before an execution run exists. No execution, device polling, result text or attachments.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "List original persisted tasks across this Bot's history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Page size 1-100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Opaque Bot and account scoped continuation",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.DirectoryPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/tasks/{task_type}/{record_id}": {
+            "get": {
+                "description": "Same source-specific live authorization as the directory. A missing destination does not remove a real failed or unknown task. This read never submits or resumes work.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Recheck one original task occurrence before navigation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Directory Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "native_agent",
+                            "computer_operation",
+                            "bot_delegation",
+                            "schedule_fire"
+                        ],
+                        "type": "string",
+                        "description": "Original task type",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Durable occurrence ID",
+                        "name": "record_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.DirectoryTask"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -12579,6 +13815,252 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/tts/playback": {
+            "post": {
+                "description": "Ephemeral playback only; does not create a message, attachment or history record. Uses the configured TTS model and voice. Maximum 500 Unicode characters per request. Requires Bot chat permission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Read text aloud using a bot's configured voice",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Text to read aloud",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.synthesizeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Audio bytes; Content-Type is the configured model's audio format",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/tts/playback/config": {
+            "get": {
+                "description": "Returns an opaque effective configuration identity. Never synthesizes audio. Requires the same account JWT and Bot chat permission as Playback.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Validate access and current voice configuration for cached playback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackConfigResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/tts/playback/input": {
+            "put": {
+                "description": "Revalidates the active account, Bot chat permission and current effective configuration. Exact next sequence and Unicode offset are required. Missing/closed input never creates another synthesis.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Append or finish the current native speech input",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Next frame; final closes text input, not audio output",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackInputRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires an active account JWT and Bot chat permission. Streams one task's audio until final input and provider completion. Maximum 20000 Unicode characters per frame, within the native protocol limit. Never retry an uncertain synthesis. No message or attachment is created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Start one configured native incremental speech task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Initial exact spoken-text frame, sequence and Unicode offset zero",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackInputRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Configured audio bytes",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -15507,6 +16989,18 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -15551,6 +17045,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -15578,6 +17084,18 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/providers.CountResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
                         }
                     },
                     "500": {
@@ -15622,6 +17140,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -15678,6 +17208,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -15770,6 +17312,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -15827,6 +17381,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -15868,6 +17434,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -15930,6 +17508,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -15938,6 +17528,81 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/providers/{id}/media-catalog": {
+            "get": {
+                "description": "Requires an active account token; chat-route reply tokens are not accepted. Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "providers"
+                ],
+                "summary": "Read provider media catalog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "magpie"
+                        ],
+                        "type": "string",
+                        "description": "Catalog protocol",
+                        "name": "protocol",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/providers.MediaCatalogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -15979,6 +17644,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -16026,6 +17703,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -16059,6 +17748,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -16100,6 +17801,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/server.Problem"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -16130,6 +17843,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -16174,6 +17899,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -17829,7 +19566,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/accounts.Account"
+                            "$ref": "#/definitions/handlers.CurrentUserResponse"
                         }
                     },
                     "400": {
@@ -18174,7 +19911,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Register a native Remote Runtime credential or an Agenvo command target backed by an existing account-owned MCP connection. Agenvo registrations return no API token.",
+                "description": "Register a native Memoh Remote Runtime credential. Legacy providers are retired.",
                 "consumes": [
                     "application/json"
                 ],
@@ -18224,60 +19961,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me/runtimes/agenvo/discover": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-runtimes"
-                ],
-                "summary": "List Herdr instances from an existing account-owned MCP connection",
-                "parameters": [
-                    {
-                        "description": "Existing MCP connection",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.DiscoverAgenvoRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/agenvo.DiscoveredInstance"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    }
-                }
-            }
-        },
         "/users/me/runtimes/{id}": {
             "delete": {
                 "tags": [
@@ -18318,9 +20001,48 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me/runtimes/{id}/agenvo-agent": {
+        "/users/me/runtimes/{id}/admission": {
+            "get": {
+                "description": "Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Read owned computer admission state",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing owner runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
             "put": {
-                "description": "Updates non-secret provider/model/config-directory references without creating credentials, changing the device mapping, or granting Bots. An empty profile disables Agent tasks.",
+                "description": "Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
                 "consumes": [
                     "application/json"
                 ],
@@ -18330,11 +20052,76 @@ const docTemplate = `{
                 "tags": [
                     "user-runtimes"
                 ],
-                "summary": "Configure Pi on an existing owned Agenvo computer",
+                "summary": "Pause or resume new work for an owned native instance",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing runtime ID",
+                        "description": "Existing owner runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Compare-and-swap admission request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.ChangeAdmission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/native-herdr": {
+            "put": {
+                "description": "Stores non-secret local references on an activated Runtime. Does not enroll a device, grant Bots, start Herdr, or change credentials. Native Pi tasks require pi-json-v1.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Configure Herdr on an existing owned native Runtime",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -18345,7 +20132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/agenvo.AgentProfile"
+                            "$ref": "#/definitions/agenvo.NativeHerdrProfile"
                         }
                     }
                 ],
@@ -18367,6 +20154,80 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/native-herdr/profile-cutover": {
+            "put": {
+                "description": "Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir and advances the paused admission revision; use the returned revision for the next cutover or resume. No host action, task dispatch or unpause. A lost response requires rereading the current state.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Switch the Pi configuration directory while admission stays paused",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing native Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cutover CAS facts",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.NativeProfileCutoverRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
                     }
                 }
             }
@@ -18383,7 +20244,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -18425,7 +20286,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -18481,7 +20342,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -18506,6 +20367,193 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/workspace-storage": {
+            "get": {
+                "description": "Account session required. Uses an existing configured private LAN share and existing Runtime identity. No directory creation, execution or credential changes.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Browse this owned computer's NAS workspace directories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Relative directory within this computer's NAS storage",
+                        "name": "path",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Persists only workspace_storage in the existing Runtime configuration with compare-and-swap. Creates the default folder if missing after LAN/share access validation. Does not rewrite Herdr WorkDir, existing tasks, sessions, local sourceRoot or credentials.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Save this owned computer's default NAS storage directory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Relative selected directory",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/workspace-storage/directories": {
+            "post": {
+                "description": "Requires the existing private LAN share to be readable before any NAS write. Does not change selection, local defaults, tasks or sessions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Create a directory in this owned computer's NAS storage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Relative path",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -20025,6 +22073,77 @@ const docTemplate = `{
                 }
             }
         },
+        "agenvo.Admission": {
+            "type": "object",
+            "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "config_sha256": {
+                    "type": "string"
+                },
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.AgentObservation": {
+            "type": "object",
+            "properties": {
+                "completion_changed": {
+                    "type": "boolean"
+                },
+                "completion_seq": {
+                    "type": "string"
+                },
+                "interactive_ready": {
+                    "type": "boolean"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "output_fidelity": {
+                    "type": "string"
+                },
+                "session_relation": {
+                    "type": "string"
+                },
+                "starting": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_success_verified": {
+                    "description": "No Herdr status, completion sequence or terminal text independently\nproves that the requested work succeeded. No lifecycle hook is assumed.",
+                    "type": "boolean"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "agenvo.AgentProfile": {
             "type": "object",
             "properties": {
@@ -20032,7 +22151,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "execution_mode": {
-                    "description": "Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into\nfinite official CLI invocations; no automatic protocol fallback occurs.",
+                    "description": "Empty is decoded only for historical profiles. Native configuration\nrequires pi-json-v1; no protocol fallback occurs.",
                     "type": "string"
                 },
                 "model": {
@@ -20046,28 +22165,122 @@ const docTemplate = `{
                 }
             }
         },
-        "agenvo.DiscoveredInstance": {
+        "agenvo.BatchFile": {
             "type": "object",
             "properties": {
-                "device_id": {
-                    "type": "string"
-                },
-                "device_name": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
-                "online": {
-                    "type": "boolean"
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
                 }
             }
         },
-        "agenvo.Target": {
+        "agenvo.BatchHistoryEvidence": {
             "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "agenvo.BatchHistoryReport": {
+            "type": "object",
+            "properties": {
+                "after": {
+                    "type": "string"
+                },
+                "before": {
+                    "type": "string"
+                },
+                "evidence": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryEvidence"
+                }
+            }
+        },
+        "agenvo.BatchReceipt": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "string"
+                },
+                "completion": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "exit_code": {
+                    "type": "integer"
+                },
+                "exited": {
+                    "type": "boolean"
+                },
+                "generation": {
+                    "type": "string"
+                },
+                "history": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
+                },
+                "pane_id": {
+                    "type": "string"
+                },
+                "pi_session_id": {
+                    "type": "string"
+                },
+                "request_hash": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "boolean"
+                },
+                "stderr": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "stdout": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "terminal_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                },
+                "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ChangeAdmission": {
+            "type": "object",
+            "properties": {
+                "expected_revision": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.NativeHerdrProfile": {
+            "type": "object",
+            "required": [
+                "bash_path",
+                "herdr_cli",
+                "herdr_config_root",
+                "instance_id",
+                "session",
+                "work_dir"
+            ],
             "properties": {
                 "agent": {
                     "$ref": "#/definitions/agenvo.AgentProfile"
@@ -20075,19 +22288,96 @@ const docTemplate = `{
                 "bash_path": {
                     "type": "string"
                 },
-                "connection_id": {
+                "herdr_cli": {
                     "type": "string"
                 },
-                "device_id": {
+                "herdr_config_root": {
                     "type": "string"
                 },
                 "instance_id": {
                     "type": "string"
                 },
+                "producer": {
+                    "$ref": "#/definitions/agenvo.ProducerLocator"
+                },
                 "session": {
                     "type": "string"
                 },
                 "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.NativeProfileCutoverRequest": {
+            "type": "object",
+            "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "expected_config_sha256": {
+                    "type": "string"
+                },
+                "expected_pause_revision": {
+                    "type": "string"
+                },
+                "expected_target_fingerprint": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "pause_request_id": {
+                    "type": "string"
+                },
+                "runtime_id": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ProducerLocator": {
+            "type": "object",
+            "required": [
+                "config_dir",
+                "program_path",
+                "state_dir"
+            ],
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "program_path": {
+                    "type": "string"
+                },
+                "state_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ReferenceObservation": {
+            "type": "object",
+            "properties": {
+                "agent_status": {
+                    "type": "string"
+                },
+                "availability": {
+                    "type": "string"
+                },
+                "control_pane": {
+                    "type": "string"
+                },
+                "pane": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "reference_match": {
+                    "type": "string"
+                },
+                "workspace": {
                     "type": "string"
                 }
             }
@@ -20106,6 +22396,32 @@ const docTemplate = `{
                 "FaultDependency",
                 "FaultCanceled"
             ]
+        },
+        "application.UserInputRecoveryResult": {
+            "type": "object",
+            "properties": {
+                "decision_id": {
+                    "type": "string"
+                },
+                "invocation_id": {
+                    "type": "string"
+                },
+                "original_run_id": {
+                    "type": "string"
+                },
+                "recovery_run_id": {
+                    "type": "string"
+                },
+                "replayed": {
+                    "type": "boolean"
+                },
+                "started": {
+                    "type": "boolean"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
         },
         "audio.ConfigSchema": {
             "type": "object",
@@ -20896,6 +23212,32 @@ const docTemplate = `{
                 }
             }
         },
+        "botdelegation.RecoveryInput": {
+            "type": "object",
+            "required": [
+                "event_id",
+                "expected_attempt"
+            ],
+            "properties": {
+                "event_id": {
+                    "type": "string"
+                },
+                "expected_attempt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "botdelegation.RecoveryView": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "$ref": "#/definitions/taskresult.Event"
+                },
+                "event_id": {
+                    "type": "string"
+                }
+            }
+        },
         "botdelegation.Summary": {
             "type": "object",
             "properties": {
@@ -20970,6 +23312,29 @@ const docTemplate = `{
                 "target_bot_id": {
                     "type": "string",
                     "format": "uuid"
+                },
+                "target_run_created_at": {
+                    "type": "string"
+                },
+                "target_run_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "target_run_state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "running",
+                        "waiting_decision",
+                        "finishing",
+                        "completed",
+                        "aborted",
+                        "failed",
+                        "lost"
+                    ]
+                },
+                "target_run_updated_at": {
+                    "type": "string"
                 },
                 "target_session_id": {
                     "type": "string",
@@ -22064,6 +24429,215 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "integer"
+                }
+            }
+        },
+        "computertask.FollowupResult": {
+            "type": "object",
+            "properties": {
+                "atomic_identity_guaranteed": {
+                    "type": "boolean"
+                },
+                "business_outcome": {
+                    "type": "string"
+                },
+                "continuity_verified": {
+                    "type": "boolean"
+                },
+                "input_may_have_been_sent": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "prompt_accepted": {
+                    "type": "boolean"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "session_observed": {
+                    "type": "boolean"
+                },
+                "session_relation": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "strict_resume_available": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "computertask.NativeContent": {
+            "type": "object",
+            "properties": {
+                "availability": {
+                    "type": "string"
+                },
+                "followup_available": {
+                    "type": "boolean"
+                },
+                "followups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computertask.FollowupResult"
+                    }
+                },
+                "observation": {
+                    "$ref": "#/definitions/agenvo.AgentObservation"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "session_binding": {
+                    "type": "string"
+                },
+                "supported": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "computertask.OperationReconciliation": {
+            "type": "object",
+            "properties": {
+                "control_pane_id": {
+                    "type": "string"
+                },
+                "control_terminal_id": {
+                    "type": "string"
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computertask.RecoveryFile"
+                    }
+                },
+                "generation": {
+                    "type": "string"
+                },
+                "receipt": {
+                    "$ref": "#/definitions/agenvo.BatchReceipt"
+                },
+                "receipt_state": {
+                    "type": "string"
+                },
+                "request_hash": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                },
+                "terminal_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.PiContinuity": {
+            "type": "object",
+            "properties": {
+                "last_invocation": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.Recovery": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "string"
+                },
+                "business_outcome": {
+                    "type": "string"
+                },
+                "cancel_requested": {
+                    "type": "boolean"
+                },
+                "continuity": {
+                    "$ref": "#/definitions/computertask.PiContinuity"
+                },
+                "native": {
+                    "$ref": "#/definitions/agenvo.ReferenceObservation"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "pane_id": {
+                    "type": "string"
+                },
+                "pi_result": {
+                    "type": "string"
+                },
+                "pi_session_id": {
+                    "type": "string"
+                },
+                "process_state": {
+                    "type": "string"
+                },
+                "reconciliation": {
+                    "$ref": "#/definitions/computertask.OperationReconciliation"
+                },
+                "result_reason": {
+                    "type": "string"
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/computertask.RecoverySummary"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string"
+                },
+                "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.RecoveryFile": {
+            "type": "object",
+            "properties": {
+                "confirmed_offset": {
+                    "type": "integer"
+                },
+                "current_availability": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "recorded_content_hash": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.RecoverySummary": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
                 }
             }
         },
@@ -23222,6 +25796,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "input_source": {
+                    "$ref": "#/definitions/inputsource.Source"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -23306,6 +25883,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_input_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "deliverymeta.Artifact": {
+            "type": "object",
+            "properties": {
+                "mime": {
+                    "type": "string"
+                },
+                "source_ref": {
                     "type": "string"
                 }
             }
@@ -23714,6 +26302,18 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.AcceptedUserInputRecoveryInput": {
+            "type": "object",
+            "required": [
+                "original_run_id"
+            ],
+            "properties": {
+                "original_run_id": {
+                    "type": "string",
+                    "format": "uuid"
                 }
             }
         },
@@ -24186,6 +26786,14 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "handlers.BindPrivateChatRequest": {
+            "type": "object",
+            "properties": {
+                "session_id": {
+                    "type": "string"
                 }
             }
         },
@@ -24729,6 +27337,66 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CurrentUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "joined_at": {
+                    "type": "string"
+                },
+                "last_login_at": {
+                    "type": "string"
+                },
+                "membership_is_active": {
+                    "type": "boolean"
+                },
+                "membership_updated_at": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
+                "principal_is_active": {
+                    "type": "boolean"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title_model_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.DailyTokenUsage": {
             "type": "object",
             "properties": {
@@ -24746,17 +27414,6 @@ const docTemplate = `{
                 },
                 "reasoning_tokens": {
                     "type": "integer"
-                }
-            }
-        },
-        "handlers.DiscoverAgenvoRequest": {
-            "type": "object",
-            "required": [
-                "connection_id"
-            ],
-            "properties": {
-                "connection_id": {
-                    "type": "string"
                 }
             }
         },
@@ -25231,6 +27888,9 @@ const docTemplate = `{
                 "max_upload_bytes": {
                     "type": "integer"
                 },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
                 "resumable_enabled": {
                     "type": "boolean"
                 }
@@ -25255,6 +27915,48 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.MediaUploadStatusResponse": {
+            "type": "object",
+            "required": [
+                "expires_at",
+                "id",
+                "mime",
+                "offset",
+                "size_bytes",
+                "state"
+            ],
+            "properties": {
+                "content_hash": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "uploading",
+                        "ready",
+                        "canceled"
+                    ]
+                }
+            }
+        },
         "handlers.ModelTokenUsage": {
             "type": "object",
             "properties": {
@@ -25274,6 +27976,122 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "provider_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskFollowupInput": {
+            "type": "object",
+            "required": [
+                "mode",
+                "request_id",
+                "task"
+            ],
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "current_agent",
+                        "bound_session"
+                    ]
+                },
+                "request_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskFollowupResponse": {
+            "type": "object",
+            "properties": {
+                "blocked_by_request": {
+                    "type": "string"
+                },
+                "followup": {
+                    "$ref": "#/definitions/computertask.FollowupResult"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "request_conflict": {
+                    "type": "boolean"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskResumeInput": {
+            "type": "object",
+            "required": [
+                "kind",
+                "task"
+            ],
+            "properties": {
+                "artifact": {
+                    "$ref": "#/definitions/deliverymeta.Artifact"
+                },
+                "artifacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deliverymeta.Artifact"
+                    }
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "herdr_pi_task"
+                    ]
+                },
+                "target_id": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                },
+                "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskResumeResponse": {
+            "type": "object",
+            "properties": {
+                "automatic_retry": {
+                    "type": "boolean"
+                },
+                "business_outcome": {
+                    "type": "string",
+                    "enum": [
+                        "unknown"
+                    ]
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "outcome": {
+                    "type": "string",
+                    "enum": [
+                        "submitted",
+                        "unchanged",
+                        "unknown",
+                        "unavailable",
+                        "blocked"
+                    ]
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "state": {
                     "type": "string"
                 }
             }
@@ -27521,9 +30339,83 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.playbackConfigResponse": {
+            "type": "object",
+            "properties": {
+                "identity": {
+                    "type": "string"
+                },
+                "input_content_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playbackInputRequest": {
+            "type": "object",
+            "properties": {
+                "final": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "sequence": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.sessionAbortControlResponse": {
+            "type": "object",
+            "properties": {
+                "applied": {
+                    "description": "Applied is the observed control return, not proof of a unique abort cause.",
+                    "type": "boolean"
+                },
+                "client_reason": {
+                    "description": "ClientReason is a client-reported enum, not proof of a human action.",
+                    "type": "string"
+                },
+                "completed_at": {
+                    "description": "CompletedAt is a stored server return observation, not the run finish time.",
+                    "type": "string"
+                },
+                "error_class": {
+                    "type": "string"
+                },
+                "received_at": {
+                    "type": "string"
+                },
+                "server_source": {
+                    "description": "ServerSource names the server branch; it is not an authenticated actor.",
+                    "type": "string"
+                },
+                "source": {
+                    "description": "Source is assigned by the receiving server, not inferred from a user agent.",
+                    "type": "string"
+                }
+            }
+        },
         "handlers.sessionInvocationResponse": {
             "type": "object",
             "properties": {
+                "abort_control": {
+                    "description": "AbortControl is the earliest observed incoming request, not necessarily\nthe request that caused runtime intent. Delivery to storage is best effort.\nIts client_reason is client-reported, never an authenticated actor.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/handlers.sessionAbortControlResponse"
+                        }
+                    ]
+                },
+                "abort_requested_at": {
+                    "description": "AbortRequestedAt is durable runtime intent. Missing means unknown, not\nproof that no cancellation occurred. Old records are never backfilled.",
+                    "type": "string"
+                },
                 "found": {
                     "description": "Found is false when the session has no run for this invocation, which\nis an ordinary answer (never admitted, or not yet) rather than an error.",
                     "type": "boolean"
@@ -27867,6 +30759,50 @@ const docTemplate = `{
                 "result": {}
             }
         },
+        "inputsource.Source": {
+            "type": "object",
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "channel_identity_id": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "occurrence_id": {
+                    "type": "string"
+                },
+                "origin_bot_id": {
+                    "type": "string"
+                },
+                "origin_run_id": {
+                    "type": "string"
+                },
+                "origin_session_id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_kind": {
+                    "type": "string"
+                },
+                "task_run_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "mcp.AuthorizeResult": {
             "type": "object",
             "properties": {
@@ -28074,6 +31010,34 @@ const docTemplate = `{
                 }
             }
         },
+        "media.TransferEndpoint": {
+            "type": "object",
+            "properties": {
+                "logical_origin": {
+                    "type": "string"
+                },
+                "physical_origin": {
+                    "type": "string"
+                }
+            }
+        },
+        "media.TransferNetworkPolicy": {
+            "type": "object",
+            "properties": {
+                "endpoint": {
+                    "$ref": "#/definitions/media.TransferEndpoint"
+                },
+                "lan_addresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
         "media.Upload": {
             "type": "object",
             "required": [
@@ -28110,6 +31074,76 @@ const docTemplate = `{
                         "ready",
                         "canceled"
                     ]
+                }
+            }
+        },
+        "media.UploadFailure": {
+            "type": "object",
+            "required": [
+                "at",
+                "code",
+                "expires_at",
+                "operation",
+                "phase",
+                "received_at",
+                "version"
+            ],
+            "properties": {
+                "at": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "handle": {
+                    "type": "string"
+                },
+                "operation": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "received_at": {
+                    "type": "string"
+                },
+                "sdk_code": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "media.UploadFailureInput": {
+            "type": "object",
+            "required": [
+                "at",
+                "code",
+                "phase",
+                "version"
+            ],
+            "properties": {
+                "at": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "handle": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "sdk_code": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },
@@ -28463,6 +31497,56 @@ const docTemplate = `{
                 }
             }
         },
+        "providers.MediaCatalogModel": {
+            "type": "object",
+            "properties": {
+                "capability_source": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "input": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "output": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "providers.MediaCatalogResponse": {
+            "type": "object",
+            "properties": {
+                "checked_at": {
+                    "type": "string"
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.MediaCatalogModel"
+                    }
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "transcription_status": {
+                    "description": "Audio input metadata does not prove a model implements the transcription API.",
+                    "type": "string"
+                }
+            }
+        },
         "providers.OAuthAccount": {
             "type": "object",
             "properties": {
@@ -28722,6 +31806,23 @@ const docTemplate = `{
                 "supported": {
                     "description": "Supported is false when the model has no thinking concept; the other fields\nare then empty and no control should be rendered at all.",
                     "type": "boolean"
+                }
+            }
+        },
+        "route.PrivateChatEntry": {
+            "type": "object",
+            "properties": {
+                "candidates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/session.Session"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                },
+                "session": {
+                    "$ref": "#/definitions/session.Session"
                 }
             }
         },
@@ -29356,6 +32457,124 @@ const docTemplate = `{
                 }
             }
         },
+        "sessiontask.Activity": {
+            "type": "object",
+            "required": [
+                "bot_id",
+                "id",
+                "kind",
+                "name",
+                "session_id",
+                "state"
+            ],
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "bot",
+                        "agent",
+                        "task"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "submitted",
+                        "running",
+                        "waiting_decision",
+                        "finishing"
+                    ]
+                }
+            }
+        },
+        "sessiontask.ActivityPage": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sessiontask.Activity"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessiontask.DirectoryPage": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sessiontask.DirectoryTask"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessiontask.DirectoryTask": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "name",
+                "record_id",
+                "state",
+                "task_id",
+                "task_type"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "destination": {
+                    "$ref": "#/definitions/sessiontask.TaskDestination"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "record_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_type": {
+                    "type": "string",
+                    "enum": [
+                        "native_agent",
+                        "computer_operation",
+                        "bot_delegation",
+                        "schedule_fire"
+                    ]
+                }
+            }
+        },
         "sessiontask.Page": {
             "type": "object",
             "required": [
@@ -29428,6 +32647,11 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "direct_parent_session_id": {
+                    "description": "DirectParentSessionID is the owning session's persisted direct parent,\nexposed only after the complete ancestor path is authorized. Omitted when\nthat session has no parent; older servers also omit this optional field.",
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "operation_kind": {
                     "type": "string",
@@ -29516,6 +32740,30 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "sessiontask.TaskDestination": {
+            "type": "object",
+            "required": [
+                "bot_id",
+                "session_id"
+            ],
+            "properties": {
+                "bot_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "run_id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "turn_id": {
+                    "type": "string",
+                    "format": "uuid"
                 }
             }
         },
@@ -29813,6 +33061,64 @@ const docTemplate = `{
                 }
             }
         },
+        "taskresult.Event": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "integer"
+                },
+                "automatic_attempts": {
+                    "type": "integer"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "recoveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/taskresult.Recovery"
+                    }
+                },
+                "report_state": {
+                    "type": "string"
+                },
+                "run_id": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "summary_run_id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "taskresult.Recovery": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "integer"
+                },
+                "from_attempt": {
+                    "type": "integer"
+                },
+                "previous_run_id": {
+                    "type": "string"
+                },
+                "previous_run_state": {
+                    "type": "string"
+                },
+                "requested_at": {
+                    "type": "string"
+                },
+                "requested_by": {
+                    "type": "string"
+                }
+            }
+        },
         "turn.RuntimeCommand": {
             "type": "object",
             "properties": {
@@ -30014,13 +33320,36 @@ const docTemplate = `{
         "userruntime.CreateRuntimeRequest": {
             "type": "object",
             "properties": {
-                "agenvo": {
-                    "$ref": "#/definitions/agenvo.Target"
-                },
                 "name": {
                     "type": "string"
                 },
                 "provider": {
+                    "type": "string",
+                    "enum": [
+                        "memoh"
+                    ]
+                }
+            }
+        },
+        "userruntime.NativeHerdrIdentity": {
+            "type": "object",
+            "properties": {
+                "config_sha256": {
+                    "type": "string"
+                },
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "session": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
                     "type": "string"
                 }
             }
@@ -30057,6 +33386,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "native_herdr": {
+                    "$ref": "#/definitions/userruntime.NativeHerdrIdentity"
                 },
                 "online": {
                     "type": "boolean"
@@ -30096,6 +33428,45 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceDirectory": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceStorage": {
+            "type": "object",
+            "properties": {
+                "directories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/userruntime.WorkspaceDirectory"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "selected_path": {
+                    "type": "string"
+                },
+                "windows_path": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceStorageRequest": {
+            "type": "object",
+            "properties": {
+                "path": {
                     "type": "string"
                 }
             }

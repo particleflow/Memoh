@@ -1,0 +1,36 @@
+{
+  "realWeb": true,
+  "existingIsolatedLogin": true,
+  "syntheticTaskResponses": true,
+  "taskMethods": [
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET",
+    "GET"
+  ],
+  "observationIDs": [
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72"
+  ],
+  "pageErrors": [],
+  "mutations": 0,
+  "deviceRequests": 0,
+  "passed": true
+}

@@ -2,6 +2,10 @@
 import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import NativeTaskContent from './native-task-content.vue'
+import ComputerTaskCheckpoints from './computer-task-checkpoints.vue'
+import type { NativeTaskView } from '../composables/useNativeTask'
+import type { ComputerTaskObservationView } from '../composables/useComputerTaskObservation'
 import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
 import AttachmentBlock from './attachment-block.vue'
 import MediaGalleryLightbox, { type MediaGalleryItem } from './media-gallery-lightbox.vue'
@@ -10,7 +14,7 @@ import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
 import type { AttachmentItem } from '@/store/chat-list'
 import { formatFileSize } from '@/components/file-manager/utils'
 import type { SessiontaskTask } from '@memohai/sdk'
-import { apiErrorStatus, isApiErrorCode, parseMemohError, resolveApiErrorMessage } from '@/utils/api-error'
+import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 
 // Shared read-only content. The host owns dialog semantics, navigation and scope.
 const props = defineProps<{
@@ -22,6 +26,8 @@ const props = defineProps<{
   loading: boolean
   error?: unknown
   deliveries?: ComputerTaskDeliveryView
+  observation?: ComputerTaskObservationView
+  nativeTask?: NativeTaskView
 }>()
 const emit = defineEmits<{
   openTask: [task: SessiontaskTask]
@@ -62,13 +68,11 @@ watch(mediaItems, (items, previous) => {
   if (index !== null && items[index]?.src !== previous[index]?.src) mediaIndex.value = null
 })
 
-const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
-const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
-function readError(error: unknown, unsupported: string, fallback: string) {
-  const code = parseMemohError(error)?.code
-  // Legacy servers may return an untyped route 404. A current scoped denial
-  // uses session.not_found and must not be reported as a missing feature.
-  if (code === 'http.not_found' || (!code && apiErrorStatus(error) === 404)) return t(unsupported)
+const errorMessage = computed(() => readError(props.error, 'chat.tasks.loadFailed'))
+const observationError = computed(() => readError(props.observation?.error, 'chat.tasks.observation.loadFailed'))
+
+const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.loadFailed'))
+function readError(error: unknown, fallback: string) {
   if (isApiErrorCode(error, 'session.not_found')) return t('chat.tasks.inaccessible')
   return resolveApiErrorMessage(error, t(fallback))
 }
@@ -121,12 +125,64 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.cancelIntent') }}
         </p>
       </div>
-      <p
-        v-if="detail.task_type === 'subagent'"
-        class="text-body text-muted-foreground"
+      <dl
+        class="space-y-1 text-body"
+        :aria-label="t('chat.tasks.relationship.title')"
       >
-        {{ t('chat.tasks.pollingOutput') }}
-      </p>
+        <div
+          v-for="field in ['session_id', 'direct_parent_session_id', 'parent_session_id'] as const"
+          :key="field"
+          class="grid gap-x-4 sm:grid-cols-2"
+        >
+          <dt class="text-muted-foreground">
+            {{ t(`chat.tasks.relationship.${field}`) }}
+          </dt>
+          <dd class="min-w-0 break-all">
+            {{ detail[field] || t('chat.tasks.relationship.unavailable') }}
+          </dd>
+        </div>
+      </dl>
+      <NativeTaskContent
+        v-if="detail.task_type === 'computer_operation' && nativeTask"
+        :view="nativeTask"
+        :operation-id="detail.task_id"
+      />
+      <section
+        v-if="detail.task_type === 'computer_operation' && observation"
+        class="space-y-2"
+        :aria-label="t('chat.tasks.observation.title')"
+      >
+        <h3 class="text-label font-medium">
+          {{ t('chat.tasks.observation.title') }}
+        </h3>
+        <p
+          v-if="observation.error"
+          class="text-body"
+        >
+          {{ observationError }}
+        </p>
+        <InlineLoadingRow v-else-if="observation.loading && !observation.data">
+          {{ t('common.loading') }}
+        </InlineLoadingRow>
+        <ComputerTaskCheckpoints
+          v-else-if="observation.data"
+          :data="observation.data"
+          :received-at="observation.receivedAt"
+        />
+        <p
+          v-if="observation.pollingPaused"
+          class="text-body text-muted-foreground"
+        >
+          {{ t('chat.tasks.observation.paused') }}
+        </p>
+        <Button
+          variant="outline"
+          :disabled="observation.loading"
+          @click="observation.refresh()"
+        >
+          {{ t('chat.tasks.observation.refresh') }}
+        </Button>
+      </section>
       <div class="space-y-2">
         <h3 class="text-label font-medium">
           {{ t(detail.task_type === 'subagent' ? 'chat.tasks.visibleOutput' : 'chat.tasks.result') }}
@@ -217,9 +273,6 @@ function taskLabel(task: SessiontaskTask) {
           </Item>
         </template>
       </section>
-      <p class="text-body text-muted-foreground">
-        {{ t('chat.tasks.businessUnknown') }}
-      </p>
     </section>
   </template>
   <template v-else>
@@ -241,17 +294,9 @@ function taskLabel(task: SessiontaskTask) {
       </ItemContent>
     </Item>
     <div
-      v-if="cursor || nextCursor"
+      v-if="nextCursor"
       class="flex flex-wrap gap-2"
     >
-      <Button
-        v-if="cursor"
-        variant="ghost"
-        :disabled="loading"
-        @click="emit('page')"
-      >
-        {{ t('chat.tasks.newest') }}
-      </Button>
       <Button
         v-if="nextCursor"
         variant="outline"

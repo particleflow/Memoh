@@ -1,0 +1,26 @@
+{
+  "realExistingServerPG": true,
+  "activeListResponses": "controlled synthetic metadata, not executing PC/model work",
+  "originalRelationHTTP": 200,
+  "metadataModes": [
+    "active",
+    "active",
+    "active",
+    "active",
+    "active",
+    "active",
+    "active",
+    "offline",
+    "active"
+  ],
+  "sourceIDsUnchanged": true,
+  "businessRequests": [],
+  "observationRequests": [],
+  "pageErrors": [],
+  "humanQA": false,
+  "fieldAcceptance": false,
+  "reconnectSameScope": true,
+  "compactVisibleOutsideTaskDialog": true,
+  "onlyActiveRows": true,
+  "specialistNativeSessionNavigation": true
+}

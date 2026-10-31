@@ -1,0 +1,90 @@
+{
+  "base": "98081cf290e026e9d384d92cc733e0c202674e8f",
+  "original_release": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "sources": [
+    "8d48dfe7c7e84849c7986608f89a114b7bf85d75",
+    "b43875b5c541afef744909335004c0cb2f146c3a"
+  ],
+  "preview_tree_before_integration_docs": "af03880c145f3159f03ea6bfdb73c4305401c2d4",
+  "shared_and_sdk_exact_sources": [
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "sha256": "7075819f166127ae4f5e953435ea63986db4cd47d49ec919bfde6760adf8fda9",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "sha256": "e17c7300b5016a8aee4392ce8b1cf660bb766d9488eae4c3634ce4ac60aef64a",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "sha256": "db7ec92cc952e9e121035374e61560e0c21735b4b461acee8af102184d696287",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+      "sha256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "sha256": "435cd9b06a189cf8c3734856c5b9546ba8d52e8898e0a73ba2a257aaa68eeea3",
+      "source": "b43875b5c541afef744909335004c0cb2f146c3a"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/dockview/panel-chat.vue",
+      "sha256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "sha256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sha256": "386eb377661b29b86719eb77da93da11d0c6ef87770268bf3838b62c78020381",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "sha256": "42300dd572cf97fad15e088541d4ab3f0a9ce70d36899505deb479e0ac84791d",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "apps/web/src/utils/task-history-link.ts",
+      "sha256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "sha256": "a9fb08689adf1e78b548fdb3e4128960d0a6d1a226f7f54d98199c9538f2e1c5",
+      "source": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+    }
+  ],
+  "product_setup_order_checked": true,
+  "product_difference_beyond_sources": [
+    "Go store composite literal keeps unified formatting",
+    "PostgreSQL test import grouping and explicit ignored cleanup errors"
+  ],
+  "independent_red": "same-session anchor pending: expected idle, received playing",
+  "independent_green": "one same boundary case passed after b43875, no new synthesis",
+  "reused_not_rerun": [
+    "139 Web",
+    "9 Go with actual PG",
+    "4 speech boundary tests",
+    "author Chromium cases"
+  ],
+  "schema": 179,
+  "protected_paths_unchanged": [
+    "db/postgres/migrations",
+    "conf",
+    "internal/transferclient",
+    "internal/deliverymeta",
+    "internal/agenvo/pi_batch_producer.go",
+    "internal/agent/runtime"
+  ],
+  "HAP27_contains_fixes": false,
+  "field_accepted": false
+}

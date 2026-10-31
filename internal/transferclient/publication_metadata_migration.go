@@ -80,7 +80,7 @@ func (m *publicationMetadata) migrateLegacy(ctx context.Context) (bool, error) {
 			return false, err
 		}
 		count += u.Count
-		if u.Bytes > m.objectBytes-total {
+		if !m.fitsObjectBytes(total, u.Bytes) {
 			return false, ErrCapacity
 		}
 		total += u.Bytes

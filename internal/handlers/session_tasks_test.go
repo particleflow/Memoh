@@ -46,6 +46,7 @@ type taskHTTPFixture struct {
 	dbstore.AgenvoRuntimeStore
 	chat, exec, source, grant bool
 	reads, relayCalls         int
+	mountReads                int
 	registration              agenvo.Target
 	op                        dbstore.ComputerOperationRecord
 	pcScope                   bool
@@ -104,18 +105,12 @@ func (f *taskHTTPFixture) ReadComputerOperation(context.Context, dbstore.Compute
 }
 
 func (f *taskHTTPFixture) GetMount(_ context.Context, bot, id string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
-	if !f.grant || bot != taskBot || id != taskTarget {
+	f.mountReads++
+	if !f.grant || !f.source || bot != taskBot || id != taskTarget {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("SECRET")
 	}
-	raw, _ := json.Marshal(f.registration)
-	return dbstore.BotRemoteRuntimeBindingRecord{ID: taskTarget, BotID: taskBot, RuntimeUserID: taskOwner, BotOwnerUserID: taskOwner, RuntimeProvider: "agenvo", RuntimeProviderConfig: raw}, nil
-}
-
-func (f *taskHTTPFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	if !f.source {
-		return "", errors.New("SECRET")
-	}
-	return taskBot, nil
+	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: f.registration.InstanceID, Session: f.registration.Session, WorkDir: f.registration.WorkDir, BashPath: f.registration.BashPath, HerdrCLI: f.registration.HerdrCLI, HerdrConfigRoot: f.registration.HerdrConfigRoot}})
+	return dbstore.BotRemoteRuntimeBindingRecord{ID: taskTarget, BotID: taskBot, RuntimeUserID: taskOwner, BotOwnerUserID: taskOwner, RuntimeID: taskTarget, RuntimeProvider: "memoh", RuntimeProviderConfig: raw}, nil
 }
 
 func (f *taskHTTPFixture) HasBotPermission(_ context.Context, bot, user, permission string) (bool, error) {
@@ -123,13 +118,13 @@ func (f *taskHTTPFixture) HasBotPermission(_ context.Context, bot, user, permiss
 }
 
 func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", CancelRequested: true, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		f.relayCalls++
-		return nil, errors.New("unexpected dispatch")
+		return agenvo.Receipt{}, errors.New("unexpected dispatch")
 	})
-	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"))
+	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
@@ -191,23 +186,32 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	call("POST", base, taskUser, 405)
 	for _, scope := range []bool{false, true} {
 		f.pcScope = scope
-		for _, revoke := range []*bool{&f.exec, &f.source, &f.grant} {
+		// Removing a live registration cannot erase the original owned history.
+		for _, revoke := range []*bool{&f.source, &f.grant} {
 			*revoke = false
-			call("GET", detail, taskUser, 404)
-			if scope {
-				call("GET", base, taskUser, 404)
-			} else if body := call("GET", base, taskUser, 200); strings.Contains(body, taskOp) {
-				t.Fatal("revoked task listed")
+			for _, path := range []string{base, detail} {
+				body := call("GET", path, taskUser, 200)
+				if !strings.Contains(body, taskOp) || !strings.Contains(body, "Synthetic final answer") {
+					t.Fatal("retired task history lost")
+				}
 			}
 			*revoke = true
 		}
+		f.exec = false
+		call("GET", detail, taskUser, 404)
+		if scope {
+			call("GET", base, taskUser, 404)
+		} else if body := call("GET", base, taskUser, 200); strings.Contains(body, taskOp) {
+			t.Fatal("permission-revoked task listed")
+		}
+		f.exec = true
 	}
 	f.chat = false
 	for _, path := range []string{base, detail} {
 		call("GET", path, taskUser, 403)
 	}
-	if f.relayCalls != 0 || f.op.Revision != 0 {
-		t.Fatal("GET caused an external call or mutation")
+	if f.mountReads != 0 || f.relayCalls != 0 || f.op.Revision != 0 {
+		t.Fatal("historical GET resolved a live registration, dispatched or mutated")
 	}
 	after, _ := json.Marshal(f.op)
 	if string(before) != string(after) {
@@ -226,7 +230,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 		}
 		return nil
 	}))
-	NewSessionTaskHandler(nil, nil, nil).Register(e)
+	NewSessionTaskHandler(nil, nil, nil, nil).Register(e)
 	sign := func(secret string, expiry time.Time) string {
 		t.Helper()
 		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": taskUser, "exp": expiry.Unix()}).SignedString([]byte(secret))
@@ -251,6 +255,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 				{base + "/tasks/", true},
 				{base + "/tasks/computer_operation/" + taskOp, true},
 				{base + "/tasks/computer_operation/" + taskOp + "/deliveries", true},
+				{base + "/tasks/computer_operation/" + taskOp + "/observation", true},
 				{base + "/tasks/computer_operation/" + taskOp + "/attachments", true},
 				{base + "/tasks-extra", false},
 				{base + "/messages", false},
@@ -315,7 +320,7 @@ func (f *taskHTTPFixture) ListComputerDeliveryEntries(_ context.Context, r dbsto
 }
 
 func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Revision: 42, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET"}`)}
 	for i := range 35 {
 		outcome := "committed"
@@ -341,14 +346,14 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		}
 		f.entries = append(f.entries, dbstore.ComputerDeliveryEntry{DeliveryID: fmt.Sprintf("file_%d", i), Ordinal: int64(i + 1), Version: version, Data: data})
 	}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		f.relayCalls++
-		return nil, errors.New("unexpected dispatch")
+		return agenvo.Receipt{}, errors.New("unexpected dispatch")
 	})
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
-	NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user")).Register(e)
+	NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil).Register(e)
 	path := "/bots/" + taskBot + "/sessions/" + taskRoot + "/tasks/computer_operation/" + taskOp + "/deliveries"
 	call := func(path, user string, code int) computertask.DeliveryPage {
 		t.Helper()
@@ -400,7 +405,15 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	for _, cursor := range []string{"-1", "01", "9223372036854775808", "other"} {
 		call(path+"?after="+cursor, taskUser, 400)
 	}
-	for _, flag := range []*bool{&f.exec, &f.source, &f.grant, &f.chat} {
+	for _, flag := range []*bool{&f.source, &f.grant} {
+		*flag = false
+		page := call(path+"?after="+first.NextAfter, taskUser, 200)
+		if len(page.Files) != 16 || page.Files[0].Reference == nil || page.Revision != "42" {
+			t.Fatal("retired delivery history lost")
+		}
+		*flag = true
+	}
+	for _, flag := range []*bool{&f.exec, &f.chat} {
 		before := f.pageReads
 		*flag = false
 		code := 404
@@ -413,7 +426,17 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		}
 		*flag = true
 	}
-	if f.relayCalls != 0 || f.op.Revision != 42 {
-		t.Fatal("read dispatched or mutated")
+	if f.mountReads != 0 || f.relayCalls != 0 || f.op.Revision != 42 {
+		t.Fatal("history read resolved a live registration, dispatched or mutated")
 	}
+}
+
+func taskHTTPNativeRegistration() agenvo.Target {
+	p := agenvo.NativeHerdrProfile{InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`}
+	raw, _ := json.Marshal(map[string]any{"herdr": p})
+	target, err := agenvo.DecodeNativeTarget(taskTarget, raw)
+	if err != nil {
+		panic(err)
+	}
+	return target
 }

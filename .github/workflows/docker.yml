@@ -5,9 +5,18 @@ on:
   workflow_dispatch:
     inputs:
       validated_sha:
-        description: Exact commit selected for candidate image validation
+        description: Exact workflow commit selected for validation (must match ref)
         type: string
         required: true
+      image_scope:
+        description: Images to build and publish
+        type: choice
+        options: [all, web, server, server-web]
+        default: all
+      source_sha:
+        description: Optional exact Web source; only workflow files may differ from ref
+        type: string
+        default: ''
 permissions:
   contents: read
   packages: write
@@ -30,3 +39,5 @@ jobs:
     uses: ./.github/workflows/docker-build.yml
     with:
       publish: ${{ github.event_name == 'workflow_dispatch' }}
+      image_scope: ${{ inputs.image_scope || 'all' }}
+      source_sha: ${{ inputs.source_sha || '' }}

@@ -1,0 +1,655 @@
+{
+  "upload-patch": {
+    "stage": "upload-patch",
+    "browser_pid": 12270,
+    "journals": [
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 0,
+        "phase": "patch-unknown",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        }
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "POST",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": true,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nNew Session\nLet's get something done.\n\nNetwork connection failed. Check your connection and try again.\n\ndurable-real-bytes.bin\n3.0 MB\nBIN\nSynthetic no calls\nCloud Computer\nMemoh"
+  },
+  "upload-complete": {
+    "stage": "upload-complete",
+    "browser_pid": 12845,
+    "journals": [
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "complete-unknown",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "POST",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b/complete",
+        "range": null,
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": true,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nNew Session\nTell me what you need.\n\nNetwork connection failed. Check your connection and try again.\n\ndurable-real-bytes.bin\n3.0 MB\nBIN\nSynthetic no calls\nCloud Computer\nMemoh\nThe workspace could not be reached."
+  },
+  "verify": {
+    "stage": "verify",
+    "browser_pid": 13098,
+    "journals": [
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "HEAD",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": false,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nNew Session\nWhat's next on your list?\ndurable-real-bytes.bin\n3.0 MB\nBIN\nSynthetic no calls\nCloud Computer\nMemoh"
+  },
+  "download-fail": {
+    "stage": "download-fail",
+    "browser_pid": 13606,
+    "journals": [
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 1048576,
+        "phase": "downloading",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "HEAD",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=0-1048575",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=1048576-2097151",
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": true,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nrecovered-original.bin\n\nPreview not available for this file type\n\nDownload\nThe workspace could not be reached.\nError\n\nNetwork connection failed. Check your connection and try again."
+  },
+  "download-success": {
+    "stage": "download-success",
+    "browser_pid": 15150,
+    "journals": [
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [
+      {
+        "method": "HEAD",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=1048576-2097151",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=2097152-3145727",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=3145728-3145746",
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": false,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nrecovered-original.bin\n\nPreview not available for this file type\n\nDownload\nThe workspace could not be reached."
+  },
+  "create-unknown": {
+    "stage": "create-unknown",
+    "browser_pid": 15747,
+    "journals": [
+      {
+        "key": "4ed0e6e01ee9c7926fd70d227883c2574628b635d3e8f4cf76508b0ddcde26ae",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "create-loss-fixture",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 0,
+        "phase": "create-unknown",
+        "source": true
+      },
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "POST",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads",
+        "range": null,
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": true,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nrecovered-original.bin\n\nPreview not available for this file type\n\nDownload"
+  },
+  "create-reopen": {
+    "stage": "create-reopen",
+    "browser_pid": 16547,
+    "journals": [
+      {
+        "key": "4ed0e6e01ee9c7926fd70d227883c2574628b635d3e8f4cf76508b0ddcde26ae",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "create-loss-fixture",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 0,
+        "phase": "create-unknown",
+        "source": true,
+        "dismissed": false
+      },
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": false,
+    "text": "IM\nIsolated media recovery\nChat\nFiles\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nFolders\nRecents\nNo sessions yet\nSee what Memoh can do\nAD\nadmin\nrecovered-original.bin\n\nPreview not available for this file type\n\nDownload"
+  },
+  "reselect-setup": {
+    "stage": "reselect-setup",
+    "browser_pid": 17611,
+    "journals": [
+      {
+        "key": "4ed0e6e01ee9c7926fd70d227883c2574628b635d3e8f4cf76508b0ddcde26ae",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "create-loss-fixture",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 0,
+        "phase": "create-unknown",
+        "source": true,
+        "dismissed": false
+      },
+      {
+        "key": "98cb6e1671f8ebd1730769f2baadc22e675c2bee1ca9c821aee7091f60a38240",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "[\"a3457b23-8f58-41bb-be04-b7ceab54252b:chat:1\",\"\"]",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "source": true,
+        "receipt": {
+          "id": "17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+          "expires_at": "2026-10-27T04:46:30.975309072Z"
+        },
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": false,
+    "text": "IM\nIsolated media recovery\n对话\n文件\n日程\n市场\n快捷操作\n新会话\nBot 设置\n文件夹\n最近\n暂无会话\n看看 Memoh 能做什么\nAD\nadmin\nrecovered-original.bin\n\n无法预览此文件类型\n\n下载"
+  },
+  "reselect-ack": {
+    "stage": "reselect-ack",
+    "browser_pid": 21342,
+    "journals": [
+      {
+        "key": "4ed0e6e01ee9c7926fd70d227883c2574628b635d3e8f4cf76508b0ddcde26ae",
+        "kind": "upload",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "create-loss-fixture",
+        "name": "durable-real-bytes.bin",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 0,
+        "phase": "create-unknown",
+        "source": true,
+        "dismissed": false
+      },
+      {
+        "key": "e42e869a93a5cd2611f48e98c50527690c2017034e5ac65875b206241661d3bb",
+        "kind": "download",
+        "owner": "isolated-authenticated-account",
+        "origin": "http://127.0.0.1:18082/api",
+        "bot": "a3457b23-8f58-41bb-be04-b7ceab54252b",
+        "draft": "",
+        "name": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "mime": "application/octet-stream",
+        "hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "size": 3145747,
+        "offset": 3145747,
+        "phase": "ready",
+        "target": "/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/limits",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/uploads/17b5966f-95a1-4176-bfb8-df56d7f5f70b",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "HEAD",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": null,
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=0-1048575",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=1048576-2097151",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=2097152-3145727",
+        "offset": null
+      },
+      {
+        "method": "GET",
+        "path": "/api/bots/a3457b23-8f58-41bb-be04-b7ceab54252b/media/d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+        "range": "bytes=3145728-3145746",
+        "offset": null
+      }
+    ],
+    "page_errors": [],
+    "message_attempts": 0,
+    "dropped": false,
+    "text": "Isolated media recovery\n来，搞定一件事。\nSynthetic no calls\n云端电脑\nMemoh\n暂时无法连接工作区，请稍后重试。"
+  }
+}

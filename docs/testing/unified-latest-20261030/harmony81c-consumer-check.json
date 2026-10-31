@@ -1,0 +1,19 @@
+{
+  "source": "81c995a45626c9af5d40c87bd74ae3df68f5bad2",
+  "current_product_checkpoint": "68ea0304155a4998cb8a2bf49bf140b660efbd1c",
+  "files": [
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "sha256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269",
+      "exact_current_unified_bytes": true
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "sha256": "1a9ba6bc2ce53945a61dd2e3f99203546cbb931ac526beaf9da4273076da65fd",
+      "exact_current_unified_bytes": true
+    }
+  ],
+  "no_build_performed": true,
+  "HAP36_unchanged": true,
+  "field_history_issue_not_resolved_by_this_mapping": true
+}

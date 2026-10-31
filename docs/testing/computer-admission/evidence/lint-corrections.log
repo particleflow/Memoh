@@ -1,0 +1,12 @@
+internal/handlers/computer_admission.go:62:37: comparing with != will fail on wrapped errors. Use errors.Is to check for a specific error (errorlint)
+	if err = decoder.Decode(new(any)); err != io.EOF {
+	                                   ^
+internal/agenvo/admission_test.go:26:1: File is not properly formatted (gofumpt)
+}
+^
+internal/computertask/admission_test.go:19:1: File is not properly formatted (gofumpt)
+}
+^
+internal/handlers/computer_admission_test.go:38:1: File is not properly formatted (gofumpt)
+}
+^

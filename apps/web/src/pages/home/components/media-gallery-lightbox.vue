@@ -63,13 +63,21 @@
           class="lightbox-media max-w-[90vw] max-h-[90vh] flex items-center justify-center"
           @click.self="close"
         >
+          <p
+            v-if="currentItem && unavailableSources.has(currentItem.src)"
+            role="status"
+            :class="counterClass"
+          >
+            {{ t('chat.attachmentUnavailable') }}
+          </p>
           <img
-            v-if="currentItem?.type === 'image'"
+            v-else-if="currentItem?.type === 'image'"
             :src="currentItem.src"
             :alt="currentItem.name || 'image'"
             class="max-w-full max-h-[90vh] object-contain select-none cursor-zoom-out"
             draggable="false"
             @click="close"
+            @error="handleMediaError"
           >
           <video
             v-else-if="currentItem?.type === 'video'"
@@ -94,7 +102,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watchEffect, nextTick, ref } from 'vue'
+import { computed, watchEffect, nextTick, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { X, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useKeyboardCommand } from '@/composables/useKeyboardCommand'
 import { appKeyboardCommands } from '@/lib/keyboard-commands'
@@ -133,6 +142,14 @@ const counterClass = computed(() =>
 const emit = defineEmits<{
   'update:openIndex': [value: number | null]
 }>()
+
+const { t } = useI18n()
+const unavailableSources = reactive(new Set<string>())
+
+function handleMediaError(event: Event) {
+  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')
+  if (src) unavailableSources.add(src)
+}
 
 const isOpen = computed(() => props.openIndex !== null && props.items.length > 0)
 const closeButtonRef = ref<HTMLButtonElement | null>(null)

@@ -20,12 +20,14 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/errs"
+	"github.com/felinics/memoh/internal/followupqueue"
 )
 
 // SessionQueueHandler exposes the live steer and follow-up queues. It owns
 // authorization and request/response mapping only; transactions and queue
 // semantics live in the application service.
 type SessionQueueHandler struct {
+	privateChats   privateChatResolver
 	queries        dbstore.Queries
 	agentService   *application.Service
 	botService     *bots.Service
@@ -144,6 +146,11 @@ func (h *SessionQueueHandler) authorize(c echo.Context) (queueScope, error) {
 	// without runtime check summaries instead of through two full authorizations.
 	if err := h.authorizeQueueAccess(c.Request().Context(), identityID, botID, sess.CreatedByUserID.Valid && sess.CreatedByUserID.String() == identityID); err != nil {
 		return queueScope{}, err
+	}
+	if c.Request().Method != http.MethodGet {
+		if err := requireExistingContact(c.Request().Context(), h.privateChats, botID, identityID, sessionID); err != nil {
+			return queueScope{}, err
+		}
 	}
 	teamID := ""
 	if sess.TeamID.Valid {
@@ -332,7 +339,7 @@ func (h *SessionQueueHandler) EnqueueFollowUp(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	item, err := h.agentService.EnqueueFollowUp(c.Request().Context(), scope.input(req.InvocationID, req.Text))
+	item, err := h.agentService.EnqueueFollowUp(followupqueue.HTTPOrigin(c.Request().Context()), scope.input(req.InvocationID, req.Text))
 	if err = queueAdmissionError(err); err != nil {
 		return err
 	}

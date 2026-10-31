@@ -16,9 +16,6 @@
 
     <!-- Import from backup -->
     <div v-if="mode === 'import'">
-      <p class="text-xs text-muted-foreground mb-4">
-        {{ $t('bots.backup.importDescription') }}
-      </p>
       <BotImportPanel
         show-cancel
         @imported="handleImported"
@@ -97,7 +94,7 @@
                     ? 'text-destructive'
                     : 'text-muted-foreground'"
               >
-                {{ nameStatusMessage || $t('bots.nameHint') }}
+                {{ nameStatusMessage }}
               </p>
             </div>
           </template>
@@ -158,7 +155,6 @@
         <SettingsRow
           v-if="agentType === MEMOH_AGENT_VALUE"
           :label="$t('bots.settings.chatModel')"
-          :description="$t('bots.steps.modelDesc')"
           stack="sm"
         >
           <div class="w-full sm:w-56">
@@ -176,7 +172,6 @@
 
         <SettingsRow
           :label="$t('bots.settings.memory')"
-          :description="$t('bots.settings.memoryDescription')"
         >
           <Switch v-model="form.memory_enabled" />
         </SettingsRow>
@@ -222,9 +217,6 @@
                       <CircleHelp class="size-3.5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent class="max-w-80 text-left leading-relaxed">
-                    {{ $t('bots.aclPresetHelp') }}
-                  </TooltipContent>
                 </Tooltip>
               </div>
               <p
@@ -267,9 +259,6 @@
       </SettingsSection>
 
       <!-- Hint -->
-      <div class="rounded-md border bg-muted-soft px-3 py-2 text-xs text-muted-foreground">
-        {{ $t('bots.createBotWaitHint') }}
-      </div>
 
       <!-- Actions -->
       <div class="flex justify-end gap-3 pb-4">
@@ -318,11 +307,10 @@ import {
   TabsList,
   TabsTrigger,
   Tooltip,
-  TooltipContent,
   TooltipTrigger,
 } from '@felinic/ui'
 import { SquarePen, CircleHelp, Check, X, LoaderCircle } from 'lucide-vue-next'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -505,6 +493,11 @@ const canSubmit = computed(() => {
 })
 
 const store = useBotCreateProgressStore()
+onMounted(() => {
+  if (store.restorePending(false) || store.status === 'creating') {
+    void router.replace({ name: 'bot-create-progress' })
+  }
+})
 const submitLoading = ref(false)
 const isCreateFlowBlocked = computed(() => submitLoading.value)
 

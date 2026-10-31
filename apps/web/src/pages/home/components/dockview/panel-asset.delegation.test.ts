@@ -3,6 +3,8 @@ import { createApp, h, nextTick, ref, type App } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import PanelAsset from './panel-asset.vue'
 
+const transfer = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/media-transfer', () => ({ saveMediaDownload: transfer.save, MediaRecoveryError: class extends Error {} }))
 let credential = 'first'
 vi.mock('@/lib/api-client', () => ({
   sdkAuthQuery: () => ({ token: credential }),
@@ -34,6 +36,7 @@ afterEach(() => {
   app?.unmount()
   host?.remove()
   vi.restoreAllMocks()
+  transfer.save.mockClear()
 })
 
 async function render(delegationUrl?: string) {
@@ -51,14 +54,10 @@ describe('delegated asset preview downloads', () => {
     for (const token of ['first', 'renewed']) {
       credential = token
       await render(scoped)
-      let actual = ''
-      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
-        actual = this.getAttribute('href') ?? ''
-      })
       host.querySelector('button')!.click()
-      expect(click).toHaveBeenCalledOnce()
-      expect(actual).toBe(`${scoped}?token=${token}`)
-      click.mockRestore()
+      await nextTick()
+      expect(transfer.save).toHaveBeenCalledWith('supervisor', hash, undefined, scoped, 'file', expect.any(AbortSignal))
+      transfer.save.mockClear()
       app?.unmount()
       app = undefined
       host.remove()
@@ -72,12 +71,8 @@ describe('delegated asset preview downloads', () => {
 
   it('preserves ordinary owner-scoped media downloads', async () => {
     await render()
-    let actual = ''
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
-      actual = this.getAttribute('href') ?? ''
-    })
     host.querySelector('button')!.click()
-    expect(click).toHaveBeenCalledOnce()
-    expect(actual).toBe(`/bots/supervisor/media/${hash}?token=${credential}`)
+    await nextTick()
+    expect(transfer.save).toHaveBeenCalledWith('supervisor', hash, undefined, undefined, 'file', expect.any(AbortSignal))
   })
 })

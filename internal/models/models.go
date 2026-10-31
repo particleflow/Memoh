@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"github.com/felinics/memoh/internal/catalogsync"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -310,6 +311,12 @@ func (s *Service) UpdateByID(ctx context.Context, id string, req UpdateRequest) 
 	if err != nil {
 		return GetResponse{}, fmt.Errorf("marshal config: %w", err)
 	}
+	if len(current.Config) > 0 {
+		configJSON, err = catalogsync.RecordUserEdits(current.Config, configJSON)
+		if err != nil {
+			return GetResponse{}, fmt.Errorf("preserve catalog user edits: %w", err)
+		}
+	}
 
 	params := sqlc.UpdateModelParams{
 		ID:         uuid,
@@ -371,6 +378,12 @@ func (s *Service) UpdateByModelID(ctx context.Context, modelID string, req Updat
 	configJSON, err := json.Marshal(model.Config)
 	if err != nil {
 		return GetResponse{}, fmt.Errorf("marshal config: %w", err)
+	}
+	if len(current.Config) > 0 {
+		configJSON, err = catalogsync.RecordUserEdits(current.Config, configJSON)
+		if err != nil {
+			return GetResponse{}, fmt.Errorf("preserve catalog user edits: %w", err)
+		}
 	}
 
 	params := sqlc.UpdateModelParams{

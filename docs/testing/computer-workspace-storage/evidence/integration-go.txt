@@ -1,0 +1,30 @@
+=== RUN   TestBatchReadTracePreservesSentinelIdentity
+--- PASS: TestBatchReadTracePreservesSentinelIdentity (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	0.008s
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/success
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/native_first
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/native_second
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/short_second
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/bad_base64
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/parse
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/reader_not_ready
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/reader_save
+=== RUN   TestResultReadTracePreservesErrorsAndDispatch/frame_deadline
+--- PASS: TestResultReadTracePreservesErrorsAndDispatch (0.62s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/success (0.03s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/native_first (0.02s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/native_second (0.03s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/short_second (0.03s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/bad_base64 (0.03s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/parse (0.03s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/reader_not_ready (0.02s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/reader_save (0.02s)
+    --- PASS: TestResultReadTracePreservesErrorsAndDispatch/frame_deadline (0.42s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.639s
+# github.com/felinics/memoh/cmd/internal/core.test
+/workspace/.memoh-cloud/go/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device
+FAIL	github.com/felinics/memoh/cmd/internal/core [build failed]
+FAIL

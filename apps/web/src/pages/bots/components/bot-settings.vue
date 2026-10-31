@@ -8,7 +8,6 @@
       <SettingsSection>
         <SettingsRow
           :label="$t('bots.name')"
-          :description="$t('bots.nameHint')"
           stack="sm"
         >
           <div class="w-full sm:w-52 space-y-1">
@@ -48,7 +47,6 @@
         </SettingsRow>
         <SettingsRow
           :label="$t('bots.timezone')"
-          :description="$t('bots.timezoneHint')"
           stack="sm"
         >
           <div class="w-full sm:w-52">
@@ -96,7 +94,6 @@
       <SettingsSection>
         <SettingsRow
           :label="$t('bots.backup.cardTitle')"
-          :description="$t('bots.backup.cardSubtitle')"
         >
           <BotBackupActions
             :bot-id="botId"
