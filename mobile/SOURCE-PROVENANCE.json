@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "84ad62bca7dd39cde28fbc9f83104e5cd75523269dd9c5dac06fe427e8f7ad54",
+      "sha256": "97fe048c23dd68a4fb66bfa42548cf82b15f9756e9fdf857b9146f4a07209550",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1981,12 +1981,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "1aa1855b6edbc5451f4980dd4c70484e733050c7982e58b4ec2e900f7da042e9",
+      "sha256": "9015650c8a199642a61d272c5b50dce1a598dd6d9a7e7094fbc1f738887cb5b0",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Same-path post-override application after sharedHomeAdmissionFinal (paired959 and transfer lifetime) on the harmony platform; per-file baseSHA256 anchors the prior phone-side hash and sha256 the new source bytes, both computed by the build tool chain.",
-        "Eligibility rework, explicit capability decision tree, protocol frame split and typing decoupling per the reviewed read-aloud streaming design; no silent fallback remains."
+        "Eligibility rework, explicit capability decision tree, protocol frame split and typing decoupling per the reviewed read-aloud streaming design; no silent fallback remains.",
+        "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up)."
       ]
     }
   ],
