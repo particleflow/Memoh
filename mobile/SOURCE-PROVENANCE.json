@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "aad631a801c68f40ed9b4a677d4a20bfc35733dc5933ef581198d718cfaab96f",
+      "sha256": "3555880573b1f94e4e4a69210881de6147cb4891dd2b3d4dea1b34b0e6deb16c",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1982,14 +1982,15 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "c2a5a5668aab5152b245d38b64d0c3c76776702901e29c3b824824905b02efe0",
+      "sha256": "6a5db5d28d111a55895b7cb89fb16ec09bfa1d2ce032eb81bdd14dc986e2dd9c",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Same-path post-override application after sharedHomeAdmissionFinal (paired959 and transfer lifetime) on the harmony platform; per-file baseSHA256 anchors the prior phone-side hash and sha256 the new source bytes, both computed by the build tool chain.",
         "Eligibility rework, explicit capability decision tree, protocol frame split and typing decoupling per the reviewed read-aloud streaming design; no silent fallback remains.",
         "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up).",
-        "HAP39 field-fix round 2 (PR review): ack (conversation_ack) status line reads ahead of body text through the same incremental task; edit-resend and retry stop the reply being read; phone streaming projection holds an unstructured marker only within a bounded code-point window of the source tail (literal | or unclosed [ no longer stall the feed past the provider input-gap limit) with bounded spoken-cursor realignment when a released marker later closes."
+        "HAP39 field-fix round 2 (PR review): ack (conversation_ack) status line reads ahead of body text through the same incremental task; edit-resend and retry stop the reply being read; phone streaming projection holds an unstructured marker only within a bounded code-point window of the source tail (literal | or unclosed [ no longer stall the feed past the provider input-gap limit) with bounded spoken-cursor realignment when a released marker later closes.",
+        "HAP39 field-fix round 3 (PR review): ack reading is position-independent under the runtime projection (status block last: ack then body, including same-frame arrival and settled body frames, so long acks never silence the body), and a streaming reclassification rolls the spoken cursor back to the code-point common-prefix boundary and rereads, so a released long bracketed label closing into a link can no longer silence the rest of the reply."
       ]
     }
   ],
