@@ -74,6 +74,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-compat219-changes.json')
     files.append(ROOT / 'mobile/memoh/shared-fixed-contact-task-directory.json')
     files.append(ROOT / 'mobile/memoh/shared-home-admission-final.json')
+    files.append(ROOT / 'mobile/memoh/shared-read-aloud-streaming.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -131,6 +132,62 @@ def apply_paired_context(context, paired, patches):
             target.addfile(entry, io.BytesIO(data))
             seen.add(name)
     assert seen == files.keys() and deleted == removed.keys(), 'Paired source coverage drift'
+    temporary.replace(context)
+
+
+def apply_read_aloud_streaming(context, overlay, patches):
+    """Apply the streaming read-aloud rewrite after the paired phone snapshot.
+
+    Full files override the same path byte-anchored on the phone baseline they
+    replace; the pane edit anchors its replacement strings on the paired phone
+    source and records the adapted result. Removals reuse the paired deletion
+    registration form (path plus baseSHA256)."""
+    files = overlay['addedFiles']
+    edits = overlay.get('existingFiles', {})
+    removed = {item['path']: item for item in overlay.get('removedFiles', [])}
+    temporary = context.with_suffix('.streaming.tar')
+    seen, edited, deleted = set(), set(), set()
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        last = {item.name: item for item in source.getmembers()}
+        for member in source.getmembers():
+            name = member.name
+            data = source.extractfile(member).read() if member.isfile() else None
+            entry = copy.copy(member)
+            if name in removed:
+                assert data is not None and hashlib.sha256(data).hexdigest() == removed[name]['baseSHA256'], 'Retired streaming source drift'
+                deleted.add(name)
+                continue
+            if name in edits and member is last[name]:
+                item = edits[name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Streaming pane anchor drift'
+                text = data.decode()
+                for before, after, expected in item['replacements']:
+                    assert text.count(before) == expected, 'Streaming pane replacement drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == item['adaptedSHA256'], 'Streaming pane output drift'
+                entry.size = len(data)
+                edited.add(name)
+                patches[name] = {'upstreamSHA256': item['baseSHA256'], 'adaptedSHA256': item['adaptedSHA256']}
+            if name in files and member is last[name]:
+                item = files[name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Streaming shared baseline drift'
+                data = item['source'].encode()
+                assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Streaming shared output drift'
+                entry.size = len(data)
+                seen.add(name)
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+        for name, item in files.items():
+            if name in seen:
+                continue
+            assert item['baseSHA256'] is None and name not in last, 'Streaming source unexpectedly missing'
+            data = item['source'].encode()
+            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'New streaming source drift'
+            entry = tarfile.TarInfo(name)
+            entry.size, entry.mode = len(data), 0o644
+            target.addfile(entry, io.BytesIO(data))
+            seen.add(name)
+    assert seen == files.keys() and edited == edits.keys() and deleted == removed.keys(), 'Streaming source coverage drift'
     temporary.replace(context)
 
 
@@ -1027,6 +1084,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     home_admission = lock['sharedHomeAdmissionFinal']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / home_admission['local']) == home_admission['sha256'], 'Home admission source drift'
     home_admission_sources = json.loads((ROOT / 'mobile/memoh' / home_admission['local']).read_text())
+    read_aloud_streaming = lock['sharedReadAloudStreaming']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / read_aloud_streaming['local']) == read_aloud_streaming['sha256'], 'Read-aloud streaming source drift'
+    streaming_sources = json.loads((ROOT / 'mobile/memoh' / read_aloud_streaming['local']).read_text())
     for name, addition in fixed_contact_sources['sdkOverlays'].items():
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected task directory SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
@@ -1444,6 +1504,8 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         apply_paired_context(context, home_admission_sources['paired959'], patches)
         if platform == 'harmony':
             apply_transfer_lifetime_context(context, home_admission_sources['paired959'], patches)
+    if platform == 'harmony':
+        apply_read_aloud_streaming(context, streaming_sources, patches)
     return context, patches
 
 
