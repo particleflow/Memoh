@@ -14,7 +14,7 @@ import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
 import type { AttachmentItem } from '@/store/chat-list'
 import { formatFileSize } from '@/components/file-manager/utils'
 import type { SessiontaskTask } from '@memohai/sdk'
-import { apiErrorStatus, isApiErrorCode, parseMemohError, resolveApiErrorMessage } from '@/utils/api-error'
+import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 
 // Shared read-only content. The host owns dialog semantics, navigation and scope.
 const props = defineProps<{
@@ -68,15 +68,11 @@ watch(mediaItems, (items, previous) => {
   if (index !== null && items[index]?.src !== previous[index]?.src) mediaIndex.value = null
 })
 
-const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
-const observationError = computed(() => readError(props.observation?.error, 'chat.tasks.observation.unsupported', 'chat.tasks.observation.loadFailed'))
+const errorMessage = computed(() => readError(props.error, 'chat.tasks.loadFailed'))
+const observationError = computed(() => readError(props.observation?.error, 'chat.tasks.observation.loadFailed'))
 
-const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
-function readError(error: unknown, unsupported: string, fallback: string) {
-  const code = parseMemohError(error)?.code
-  // Legacy servers may return an untyped route 404. A current scoped denial
-  // uses session.not_found and must not be reported as a missing feature.
-  if (code === 'http.not_found' || (!code && apiErrorStatus(error) === 404)) return t(unsupported)
+const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.loadFailed'))
+function readError(error: unknown, fallback: string) {
   if (isApiErrorCode(error, 'session.not_found')) return t('chat.tasks.inaccessible')
   return resolveApiErrorMessage(error, t(fallback))
 }

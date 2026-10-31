@@ -6,7 +6,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { Button, FieldStack, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@felinic/ui'
 import type { NativeTaskView } from '../composables/useNativeTask'
-import { apiErrorStatus, isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
+import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 const props = defineProps<{ view: NativeTaskView; operationId: string }>()
 const { t } = useI18n()
 const { defineField, handleSubmit, resetForm, errors } = useForm({
@@ -18,7 +18,6 @@ const submit = handleSubmit(async value => { await props.view.send(value.task, v
 watch(() => props.operationId, () => resetForm())
 const failed = computed(() => {
   if (isApiErrorCode(props.view.error, 'session.not_found')) return t('chat.tasks.inaccessible')
-  if (apiErrorStatus(props.view.error) === 404) return t('chat.tasks.native.unsupported')
   return resolveApiErrorMessage(props.view.error, t('chat.tasks.native.failed'))
 })
 const receiptState = computed(() => {

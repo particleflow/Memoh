@@ -390,9 +390,8 @@ function openAccessDialog(runtime: UserruntimeRuntime): void {
 }
 
 function revokeMessage(runtime: UserruntimeRuntime): string {
-  const base = t('runtimes.revokeDescription', { name: runtime.name })
   const count = accessCount(runtime)
-  return count > 0 ? `${base} ${t('runtimes.revokeAccessWarning', { count })}` : base
+  return count > 0 ? t('runtimes.revokeAccessWarning', { count }) : ''
 }
 
 const desktopRuntimeState = ref<DesktopRuntimeState>()
@@ -612,7 +611,7 @@ async function removeDesktopRuntime(): Promise<void> {
 const desktopRuntimeRemoveMessage = computed(() => {
   const registered = desktopRuntimeRegistered.value
   if (registered) return revokeMessage(registered)
-  return t('runtimes.revokeDescription', { name: desktopRuntimeName.value })
+  return ''
 })
 
 const submitDesktopRuntimeName = connectForm.handleSubmit(values => enableDesktopRuntime(values.name.trim()))

@@ -2895,38 +2895,38 @@ const defaultExternalAgentAvailability = computed<DefaultExternalAgentAvailabili
   }
   if (!isAgentRuntimeType(settings.chat_runtime)) return { input: null, messageKey: '', loading: false }
   if (!hasBotPermission(currentBot.value?.current_user_permissions, 'workspace_exec')) {
-    return { input: null, messageKey: 'chat.defaultAgentNoWorkspaceExec', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   const botAgentId = settings.default_bot_agent_id?.trim() ?? ''
-  if (!botAgentId) return { input: null, messageKey: 'chat.defaultAgentMissing', loading: false }
+  if (!botAgentId) return { input: null, messageKey: '', loading: false }
   if (!botAgentData.value) {
     return {
       input: null,
-      messageKey: botAgentsLoading.value ? 'chat.defaultExternalAgentLoading' : 'chat.defaultAgentUnavailable',
+      messageKey: botAgentsLoading.value ? 'chat.defaultExternalAgentLoading' : '',
       loading: botAgentsLoading.value,
     }
   }
   const agent = botAgents.value.find(item => item.id === botAgentId)
   if (!agent || agent.enabled === false) {
-    return { input: null, messageKey: 'chat.defaultAgentDisabled', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   const agentId = botAgentProvider(agent)
   const directConfigured = isDirectBotAgentConfigured(agent)
   if (directConfigured === false) {
-    return { input: null, messageKey: 'chat.defaultAgentNotConfigured', loading: false }
+    return { input: null, messageKey: '', loading: false }
   }
   if (directConfigured === null) {
     if (!acpProfileData.value) {
       return {
         input: null,
-        messageKey: acpProfilesLoading.value ? 'chat.defaultExternalAgentLoading' : 'chat.defaultAgentUnavailable',
+        messageKey: acpProfilesLoading.value ? 'chat.defaultExternalAgentLoading' : '',
         loading: acpProfilesLoading.value,
       }
     }
     const profile = acpProfiles.value.find(item => normalizeAgentID(item.id) === agentId)
-    if (!profile) return { input: null, messageKey: 'chat.defaultAgentUnavailable', loading: false }
+    if (!profile) return { input: null, messageKey: '', loading: false }
     if (!isACPAgentConfigured(agent, profile)) {
-      return { input: null, messageKey: 'chat.defaultAgentNotConfigured', loading: false }
+      return { input: null, messageKey: '', loading: false }
     }
   }
   return {
@@ -3676,10 +3676,7 @@ async function startVoiceInput() {
     openTranscriptionSettings()
     return
   }
-  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-    toast.error(t('chat.voiceInput.unsupported'))
-    return
-  }
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') return
 
   const requestVersion = ++voiceRequestVersion
   try {

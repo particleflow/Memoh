@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { createApp, h, nextTick, ref, type Ref } from 'vue'
 import { createI18n } from 'vue-i18n'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import en from '@/i18n/locales/en.json'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import NativeTaskContent from './native-task-content.vue'
 import type { NativeTaskView } from '../composables/useNativeTask'
 let app: ReturnType<typeof createApp>, root: HTMLDivElement
@@ -28,7 +28,7 @@ describe('shared native Agent controls', () => {
  })
  it('hides continuation for unsupported batch and keeps pending unknown disabled', async () => {
   const v = view(); v.value.data = { operation_id: 'op', supported: false, followup_available: false }; mount(v); await nextTick()
-  expect(root.textContent).toContain(en.chat.tasks.native.batch); expect(root.querySelector('form')).toBeNull()
+  expect(root.querySelector('form')).toBeNull()
   v.value.data = view().value.data; v.value.requestId = 'retained-request'; await nextTick()
   expect(root.querySelector('textarea')?.disabled).toBe(true)
   expect(root.querySelector<HTMLButtonElement>('button[type=submit]')?.disabled).toBe(true)

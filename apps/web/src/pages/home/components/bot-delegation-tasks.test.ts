@@ -131,12 +131,11 @@ describe('specialist handoff content and states', () => {
   it('distinguishes a successful empty list from unsupported and inaccessible APIs', () => {
     expect(mount().textContent).toContain(en.chat.delegations.empty)
     const unsupported = mount({ error: { code: 'http.not_found', status: 404 } })
-    expect(unsupported.textContent).toContain(en.chat.delegations.unsupported)
+    expect(unsupported.textContent).toContain(en.errors.http.not_found)
     expect(unsupported.textContent).not.toContain(en.chat.delegations.empty)
     const hidden = mount({ error: { code: 'session.not_found', status: 404 } })
     expect(hidden.textContent).toContain(en.chat.delegations.inaccessible)
-    expect(hidden.textContent).not.toContain(en.chat.delegations.unsupported)
-  })
+      })
 
   it('keeps empty filtered pages pageable', () => {
     const root = mount({ nextCursor: 'opaque' })
@@ -164,8 +163,7 @@ describe('specialist handoff content and states', () => {
     expect(root.textContent).toContain(en.common.networkError)
     expect(root.textContent).not.toContain('PRIVATE_NETWORK')
     expect(root.textContent).not.toContain(en.chat.delegations.empty)
-    expect(root.textContent).not.toContain(en.chat.delegations.unsupported)
-  })
+      })
 })
 
 describe.each(['web', 'native'] as const)('shared body in a %s dialog host', (host) => {
