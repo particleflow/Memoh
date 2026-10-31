@@ -157,10 +157,10 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 	done := make(chan conversationpresence.Outcome, 1)
 	go func() {
 		defer close(done)
-		ticket, facts, inserted, err := claims.prepare(sideCtx, runtime.options.Policy.Continuity, req.SourceReplyToMessageID != "")
+		ticket, facts, decision, inserted, err := claims.prepare(sideCtx, req.SourceReplyToMessageID != "")
 		if err != nil || !inserted {
 			if s.logger != nil {
-				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "prepare_skipped"), slog.Bool("store_error", err != nil))
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "prepare_skipped"), slog.Bool("store_error", err != nil), slog.String("temperature", string(decision.Temperature)), slog.String("reason", decision.Reason))
 			}
 			return
 		}
@@ -198,7 +198,7 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 		select {
 		case outcome := <-handle.Done:
 			if s.logger != nil {
-				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", outcome.Status), slog.String("temperature", string(outcome.Decision.Temperature)), slog.Bool("usage_known", outcome.Usage.Known), slog.Int("input_tokens", outcome.Usage.InputTokens), slog.Int("output_tokens", outcome.Usage.OutputTokens))
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", outcome.Status), slog.String("temperature", string(outcome.Decision.Temperature)), slog.String("reason", outcome.Decision.Reason), slog.Bool("usage_known", outcome.Usage.Known), slog.Int("input_tokens", outcome.Usage.InputTokens), slog.Int("output_tokens", outcome.Usage.OutputTokens))
 			}
 			select {
 			case done <- outcome:

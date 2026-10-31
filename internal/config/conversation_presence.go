@@ -7,11 +7,9 @@ import (
 )
 
 // ConversationPresenceConfig is server policy, not a new management surface.
-// Values are tunable starting defaults, never a user latency guarantee or a
-// rule that an idle timer alone establishes a new conversation.
+// Values are tunable starting defaults, never a user latency guarantee.
 type ConversationPresenceConfig struct {
 	Enabled                  *bool `toml:"enabled"`
-	IdleAfterSeconds         *int  `toml:"idle_after_seconds"`
 	DeadlineSeconds          int   `toml:"deadline_seconds"`
 	MaxInputRunes            int   `toml:"max_input_runes"`
 	MaxOutputTokens          int   `toml:"max_output_tokens"`
@@ -22,10 +20,6 @@ type ConversationPresenceConfig struct {
 func (c ConversationPresenceConfig) IsEnabled() bool { return c.Enabled == nil || *c.Enabled }
 
 func (c ConversationPresenceConfig) Policy() conversationpresence.Policy {
-	idle := 15 * time.Minute
-	if c.IdleAfterSeconds != nil {
-		idle = time.Duration(*c.IdleAfterSeconds) * time.Second
-	}
 	deadline := c.DeadlineSeconds
 	if deadline <= 0 {
 		deadline = 15
@@ -40,7 +34,7 @@ func (c ConversationPresenceConfig) Policy() conversationpresence.Policy {
 	if text <= 0 {
 		text = 160
 	}
-	return conversationpresence.Policy{Continuity: conversationpresence.ContinuityPolicy{IdleAfter: idle, IdleStartsEpisode: true}, Limits: conversationpresence.Limits{Deadline: time.Duration(deadline) * time.Second, MaxInputRunes: input, MaxOutputTokens: output, MaxTextRunes: text}}
+	return conversationpresence.Policy{Limits: conversationpresence.Limits{Deadline: time.Duration(deadline) * time.Second, MaxInputRunes: input, MaxOutputTokens: output, MaxTextRunes: text}}
 }
 
 func (c ConversationPresenceConfig) ConcurrentLimit() int {

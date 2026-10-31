@@ -132,8 +132,7 @@ type Limits struct {
 }
 
 type Policy struct {
-	Continuity ContinuityPolicy
-	Limits     Limits
+	Limits Limits
 }
 
 type Outcome struct {
@@ -192,7 +191,7 @@ func (c Coordinator) Start(parent context.Context, in Input) (*Handle, error) {
 }
 
 func (c Coordinator) run(ctx context.Context, in Input) Outcome {
-	d := Classify(in.Source, in.Ticket.Scope.BotID, in.Ticket.Scope.SessionID, in.Facts, c.Policy.Continuity)
+	d := Classify(in.Source, in.Ticket.Scope.BotID, in.Ticket.Scope.SessionID, in.Facts)
 	out := Outcome{Decision: d, Status: "not_cold"}
 	if d.Temperature != Cold {
 		return out

@@ -105,9 +105,10 @@ func (s *postgresPresenceClaims) baseTicket() conversationpresence.Ticket {
 	return conversationpresence.Ticket{Scope: conversationpresence.Scope{ActorID: s.actor, BotID: s.handle.BotID, SessionID: s.handle.SessionID}, RunID: s.handle.RunID, Generation: s.handle.Generation, Fence: s.handle.FencingToken}
 }
 
-func (s *postgresPresenceClaims) prepare(ctx context.Context, policy conversationpresence.ContinuityPolicy, reply bool) (conversationpresence.Ticket, conversationpresence.Facts, bool, error) {
+func (s *postgresPresenceClaims) prepare(ctx context.Context, reply bool) (conversationpresence.Ticket, conversationpresence.Facts, conversationpresence.Decision, bool, error) {
 	ticket := s.baseTicket()
 	var facts conversationpresence.Facts
+	decision := conversationpresence.Decision{}
 	inserted := false
 	err := s.transaction(ctx, ticket, false, func(q presenceSQL, run sqlc.SessionRun) error {
 		f, err := q.ReadConversationPresenceFacts(ctx, sqlc.ReadConversationPresenceFactsParams{SessionID: run.SessionID, TurnID: run.TurnID, RunID: run.RunID})
@@ -123,17 +124,12 @@ func (s *postgresPresenceClaims) prepare(ctx context.Context, policy conversatio
 		if hasPrior {
 			anchor = prior.CreatedAt.Time
 		}
-		previousInputs, last, reliableHistory, err := presenceHistoryContinuity(f.PreviousSources, s.handle.BotID, s.handle.SessionID, anchor)
+		previousInputs, reliableHistory, err := presenceHistoryContinuity(f.PreviousSources, s.handle.BotID, s.handle.SessionID, anchor)
 		if err != nil {
 			return err
 		}
-		if hasPrior && prior.CreatedAt.Time.After(last) {
-			last = prior.CreatedAt.Time
-		}
-		now := run.CreatedAt.Time
-		facts = conversationpresence.Facts{Admitted: true, FirstDirectInput: previousInputs == 0 && !hasPrior, HistoryAvailable: reliableHistory, PreviousSettled: f.PreviousSettled, PendingUserInput: f.PendingInput.Bool, ReplyContinuation: reply, LastDirectInput: last, Now: now}
-		facts.RecentExchange = !last.IsZero() && (policy.IdleAfter <= 0 || now.Sub(last) < policy.IdleAfter)
-		decision := conversationpresence.Classify(s.source, s.handle.BotID, s.handle.SessionID, facts, policy)
+		facts = conversationpresence.Facts{Admitted: true, FirstDirectInput: previousInputs == 0 && !hasPrior, HistoryAvailable: reliableHistory, PreviousSettled: f.PreviousSettled, PendingUserInput: f.PendingInput.Bool, ReplyContinuation: reply}
+		decision = conversationpresence.Classify(s.source, s.handle.BotID, s.handle.SessionID, facts)
 		episode := run.RunID
 		if hasPrior && decision.Temperature != conversationpresence.Cold {
 			episode = prior.EpisodeID
@@ -146,28 +142,24 @@ func (s *postgresPresenceClaims) prepare(ctx context.Context, policy conversatio
 		inserted = err == nil
 		return err
 	})
-	return ticket, facts, inserted, err
+	return ticket, facts, decision, inserted, err
 }
 
-func presenceHistoryContinuity(raw []byte, botID, sessionID string, anchor time.Time) (int64, time.Time, bool, error) {
+func presenceHistoryContinuity(raw []byte, botID, sessionID string, anchor time.Time) (int64, bool, error) {
 	var entries []struct {
 		Source    json.RawMessage `json:"source"`
 		CreatedAt time.Time       `json:"created_at"`
 	}
 	if err := json.Unmarshal(raw, &entries); err != nil {
-		return 0, time.Time{}, false, err
+		return 0, false, err
 	}
 	var previousInputs int64
-	var lastDirect time.Time
 	reliable := true
 	for _, entry := range entries {
 		source := inputsource.FromMetadata(map[string]any{inputsource.MetadataKey: entry.Source}, botID, sessionID)
 		switch source.Kind {
 		case inputsource.User:
 			previousInputs++
-			if entry.CreatedAt.After(lastDirect) {
-				lastDirect = entry.CreatedAt
-			}
 		case inputsource.Schedule, inputsource.Result, inputsource.Delegation, inputsource.NativeTask:
 			// Ignore only supported machine sources validated by Scoped.
 		default:
@@ -179,7 +171,7 @@ func presenceHistoryContinuity(raw []byte, botID, sessionID string, anchor time.
 			}
 		}
 	}
-	return previousInputs, lastDirect, reliable, nil
+	return previousInputs, reliable, nil
 }
 
 func (s *postgresPresenceClaims) Claim(ctx context.Context, ticket conversationpresence.Ticket) (bool, error) {

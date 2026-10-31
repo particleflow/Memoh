@@ -40,9 +40,9 @@ func presencePostgresFixture(t *testing.T) (*postgresPresenceClaims, context.Con
 
 func TestConversationPresencePostgresClaimPublishAndRestart(t *testing.T) {
 	claims, ctx, pool := presencePostgresFixture(t)
-	ticket, facts, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false)
-	if err != nil || !inserted || !facts.FirstDirectInput {
-		t.Fatalf("prepare: inserted=%v facts=%+v error=%v", inserted, facts, err)
+	ticket, facts, decision, inserted, err := claims.prepare(ctx, false)
+	if err != nil || !inserted || !facts.FirstDirectInput || decision.Reason != "first_direct_input" {
+		t.Fatalf("prepare: inserted=%v facts=%+v decision=%+v error=%v", inserted, facts, decision, err)
 	}
 	// Two independently constructed application owners share the durable receipt.
 	other := *claims
@@ -85,7 +85,7 @@ func TestConversationPresencePostgresClaimPublishAndRestart(t *testing.T) {
 	if err = other.Close(ctx, ticket, "formal_text"); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, again, e := other.prepare(ctx, conversationpresence.ContinuityPolicy{}, false); e != nil || again {
+	if _, _, _, again, e := other.prepare(ctx, false); e != nil || again {
 		t.Fatalf("restart replay: %v %v", again, e)
 	}
 	if ok, e := claims.Claim(ctx, ticket); e != nil || ok {
@@ -110,14 +110,14 @@ func TestConversationPresencePostgresCloseBeforePrepare(t *testing.T) {
 	if err := claims.Close(ctx, claims.baseTicket(), "formal_first"); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, inserted, e := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false); e != nil || inserted {
+	if _, _, _, inserted, e := claims.prepare(ctx, false); e != nil || inserted {
 		t.Fatalf("late prepare: %v %v", inserted, e)
 	}
 }
 
 func TestConversationPresencePostgresRejectsStaleAndRevoked(t *testing.T) {
 	claims, ctx, _ := presencePostgresFixture(t)
-	ticket, _, _, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false)
+	ticket, _, _, _, err := claims.prepare(ctx, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestConversationPresencePostgresRejectsStaleAndRevoked(t *testing.T) {
 
 func TestConversationPresencePostgresAbortRejectsPublication(t *testing.T) {
 	claims, ctx, pool := presencePostgresFixture(t)
-	ticket, _, _, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false)
+	ticket, _, _, _, err := claims.prepare(ctx, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -181,7 +181,7 @@ func TestConversationPresencePostgresRevocationStillClosesFeedback(t *testing.T)
 			ticket := claims.baseTicket()
 			if prepared {
 				var err error
-				ticket, _, _, err = claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false)
+				ticket, _, _, _, err = claims.prepare(ctx, false)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -220,7 +220,7 @@ func TestConversationPresencePostgresRevocationStillClosesFeedback(t *testing.T)
 					t.Fatalf("closed input reclaimed: %v %v", ok, err)
 				}
 			} else {
-				if _, _, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false); err != nil || inserted {
+				if _, _, _, inserted, err := claims.prepare(ctx, false); err != nil || inserted {
 					t.Fatalf("close-before-prepare lost: %v %v", inserted, err)
 				}
 			}
@@ -248,8 +248,8 @@ func TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory(t *te
 		{"wrong field type", inputsource.Schedule, "field_type", conversationpresence.Uncertain},
 		{"direct source without actor", inputsource.User, "actor", conversationpresence.Uncertain},
 		{"machine mixed with unknown", inputsource.Schedule, "mixed_unknown", conversationpresence.Uncertain},
-		{"machine mixed with direct input", inputsource.Result, "mixed_direct", conversationpresence.Hot},
-		{"direct user", inputsource.User, "", conversationpresence.Hot},
+		{"machine mixed with direct input", inputsource.Result, "mixed_direct", conversationpresence.Cold},
+		{"direct user", inputsource.User, "", conversationpresence.Cold},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			claims, ctx, pool := presencePostgresFixture(t)
@@ -292,15 +292,59 @@ func TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory(t *te
 					t.Fatal(err)
 				}
 			}
-			_, facts, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{IdleAfter: 15 * time.Minute, IdleStartsEpisode: true}, false)
+			_, facts, decision, inserted, err := claims.prepare(ctx, false)
 			if err != nil || !inserted {
 				t.Fatalf("prepare inserted=%v error=%v", inserted, err)
 			}
-			decision := conversationpresence.Classify(claims.source, claims.handle.BotID, claims.handle.SessionID, facts, conversationpresence.ContinuityPolicy{IdleAfter: 15 * time.Minute, IdleStartsEpisode: true})
 			if decision.Temperature != tc.want {
 				t.Fatalf("got %s/%s want %s facts=%+v", decision.Temperature, decision.Reason, tc.want, facts)
 			}
 		})
+	}
+}
+
+func TestConversationPresencePostgresSettledFollowUpBecomesCold(t *testing.T) {
+	first, ctx, pool := presencePostgresFixture(t)
+	firstTicket, firstFacts, firstDecision, inserted, err := first.prepare(ctx, false)
+	if err != nil || !inserted || !firstFacts.FirstDirectInput || firstDecision.Reason != "first_direct_input" {
+		t.Fatalf("first message: inserted=%v decision=%+v error=%v", inserted, firstDecision, err)
+	}
+	if ok, e := first.Claim(ctx, firstTicket); e != nil || !ok {
+		t.Fatalf("first claim: %v %v", ok, e)
+	}
+	piece := conversationpresence.Piece{Kind: "conversation_ack", Text: "收到。", Phase: conversationpresence.Thinking, InputSource: first.source}
+	if ok, e := first.Publish(ctx, firstTicket, piece); e != nil || !ok {
+		t.Fatalf("first publish: %v %v", ok, e)
+	}
+	// Settle the first turn: the follow-up arrives with no run left in flight.
+	if _, err = pool.Exec(ctx, `UPDATE session_runs SET state='completed', updated_at=now() WHERE run_id=$1`, first.handle.RunID); err != nil {
+		t.Fatal(err)
+	}
+
+	// The next user message in the same session arrives immediately after the
+	// running turn settled. No idle window has elapsed.
+	manager := sessionruntime.NewManager(sessionruntime.NewMemoryBackend(), sessionruntime.Options{OwnerID: "presence-followup-owner", StateTTL: time.Minute, OwnerLeaseTTL: time.Minute, Ledger: ledger.NewPostgres(sqlc.New(pool), pool), Fence: runtimefence.NewActivator(postgresstore.NewQueriesWithPool(pool, sqlc.New(pool)))})
+	t.Cleanup(func() { _ = manager.Close() })
+	admitted, err := manager.Admit(ctx, sessionruntime.AdmitInput{BotID: first.handle.BotID, SessionID: first.handle.SessionID, InvocationID: uuid.NewString(), Payload: []byte(`{"kind":"message","text":"follow-up"}`), Execution: sessionruntime.Execution{Admission: func(context.Context, sessionruntime.RunHandle) (sessionruntime.RunAdmissionView, error) {
+		return sessionruntime.RunAdmissionView{}, nil
+	}, Cancel: func() {}}})
+	if err != nil || !admitted.Started {
+		t.Fatalf("follow-up admission: %v", err)
+	}
+	followUp := &postgresPresenceClaims{queries: first.queries, handle: admitted.Handle, actor: first.actor, source: first.source, authorize: func(context.Context) (bool, error) { return true, nil }}
+	ticket, facts, decision, inserted, err := followUp.prepare(ctx, false)
+	if err != nil || !inserted {
+		t.Fatalf("follow-up prepare: inserted=%v error=%v", inserted, err)
+	}
+	if facts.FirstDirectInput {
+		t.Fatalf("follow-up treated as the first direct input: %+v", facts)
+	}
+	if !facts.PreviousSettled || decision.Temperature != conversationpresence.Cold || decision.Reason != "settled_followup" {
+		t.Fatalf("settled follow-up not cold: facts=%+v decision=%+v", facts, decision)
+	}
+	// Cold is what authorizes an acknowledgement; hot rows can never be claimed.
+	if ok, e := followUp.Claim(ctx, ticket); e != nil || !ok {
+		t.Fatalf("settled follow-up claim: %v %v", ok, e)
 	}
 }
 
@@ -321,9 +365,9 @@ func TestConversationPresenceUnknownHistoryNeedsTrustedAnchor(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			count, last, reliable, err := presenceHistoryContinuity(raw, "fixture-bot", "fixture-session", tc.receipt)
-			if err != nil || count != 1 || !last.IsZero() || reliable != tc.reliable {
-				t.Fatalf("unknown history: count=%d last=%s reliable=%v error=%v", count, last, reliable, err)
+			count, reliable, err := presenceHistoryContinuity(raw, "fixture-bot", "fixture-session", tc.receipt)
+			if err != nil || count != 1 || reliable != tc.reliable {
+				t.Fatalf("unknown history: count=%d reliable=%v error=%v", count, reliable, err)
 			}
 		})
 	}

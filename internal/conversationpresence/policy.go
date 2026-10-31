@@ -5,7 +5,6 @@ package conversationpresence
 
 import (
 	"slices"
-	"time"
 
 	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/reasoning"
@@ -20,33 +19,17 @@ const (
 	Ineligible Temperature = "ineligible"
 )
 
-// Facts are host-resolved state, not values decoded from a user message.
-// ExplicitRestart refers to a trusted conversation/topic boundary signal;
-// this package deliberately has no magic words or topic-name special cases.
+// Facts are host-resolved state, not values decoded from a user message. This
+// package deliberately has no magic words or topic-name special cases.
 type Facts struct {
 	Admitted          bool
 	Duplicate         bool
 	Replacement       bool
 	FirstDirectInput  bool
-	ExplicitRestart   bool
 	PendingUserInput  bool
 	ReplyContinuation bool
-	InFlightFollowUp  bool
-	RecentExchange    bool
 	HistoryAvailable  bool
 	PreviousSettled   bool
-	LastDirectInput   time.Time
-	Now               time.Time
-}
-
-type ContinuityPolicy struct {
-	// IdleAfter is optional supporting evidence, never the sole boundary.
-	// Zero disables idle inference. Only trusted direct-user activity counts.
-	IdleAfter time.Duration
-	// IdleStartsEpisode additionally requires settled history and absence of
-	// pending/reply/follow-up evidence. The host configures this product policy.
-	IdleStartsEpisode bool
-	UncertainIsCold   bool
 }
 
 type Decision struct {
@@ -54,7 +37,10 @@ type Decision struct {
 	Reason      string
 }
 
-func Classify(source inputsource.Source, botID, sessionID string, f Facts, p ContinuityPolicy) Decision {
+// Classify reads only host-resolved Facts. Each rule removes a distinct case,
+// so the final rule covers exactly "a trusted direct message whose previous
+// exchange has settled": the user is now waiting for this turn to answer.
+func Classify(source inputsource.Source, botID, sessionID string, f Facts) Decision {
 	if !f.Admitted || f.Duplicate || f.Replacement || source.Scoped(botID, sessionID).Kind != inputsource.User {
 		return Decision{Ineligible, "not_new_direct_admission"}
 	}
@@ -63,31 +49,15 @@ func Classify(source inputsource.Source, botID, sessionID string, f Facts, p Con
 		return Decision{Hot, "pending_user_input"}
 	case f.ReplyContinuation:
 		return Decision{Hot, "reply_continuation"}
-	case f.InFlightFollowUp:
+	case !f.PreviousSettled:
 		return Decision{Hot, "inflight_followup"}
 	case f.FirstDirectInput:
 		return Decision{Cold, "first_direct_input"}
-	case f.ExplicitRestart:
-		return Decision{Cold, "explicit_restart"}
 	case !f.HistoryAvailable:
-		return uncertain("history_unavailable", p)
-	case f.RecentExchange:
-		return Decision{Hot, "recent_exchange"}
-	case p.IdleAfter > 0 && !f.LastDirectInput.IsZero() && !f.Now.Before(f.LastDirectInput) && f.Now.Sub(f.LastDirectInput) >= p.IdleAfter:
-		if p.IdleStartsEpisode && f.PreviousSettled {
-			return Decision{Cold, "idle_settled_without_continuation"}
-		}
-		return uncertain("idle_without_continuation", p)
+		return Decision{Uncertain, "history_unavailable"}
 	default:
-		return uncertain("continuity_unresolved", p)
+		return Decision{Cold, "settled_followup"}
 	}
-}
-
-func uncertain(reason string, p ContinuityPolicy) Decision {
-	if p.UncertainIsCold {
-		return Decision{Cold, reason}
-	}
-	return Decision{Uncertain, reason}
 }
 
 type ThinkingChoice struct {

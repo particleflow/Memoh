@@ -30,12 +30,12 @@ func TestIndependentPresenceMachineHistoryFollowup(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			count, last, reliable, err := presenceHistoryContinuity(raw, bot, session, time.Time{})
+			count, reliable, err := presenceHistoryContinuity(raw, bot, session, time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
-			facts := conversationpresence.Facts{Admitted: true, FirstDirectInput: count == 0, HistoryAvailable: reliable, PreviousSettled: true, LastDirectInput: last, Now: now}
-			got := conversationpresence.Classify(direct, bot, session, facts, conversationpresence.ContinuityPolicy{IdleAfter: time.Minute, IdleStartsEpisode: true})
+			facts := conversationpresence.Facts{Admitted: true, FirstDirectInput: count == 0, HistoryAvailable: reliable, PreviousSettled: true}
+			got := conversationpresence.Classify(direct, bot, session, facts)
 			if got.Temperature != tc.want {
 				t.Fatalf("temperature=%s want=%s facts=%+v", got.Temperature, tc.want, facts)
 			}

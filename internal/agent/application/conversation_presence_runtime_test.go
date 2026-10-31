@@ -83,7 +83,7 @@ func TestConversationPresenceRuntimeSameModelParallelAndFormalFirst(t *testing.T
 				}
 			}()
 			service := &Service{queries: claims.queries, botPermissions: presenceChatPermission{}, logger: slog.New(slog.DiscardHandler)}
-			service.SetConversationPresence(ConversationPresenceOptions{Policy: conversationpresence.Policy{Continuity: conversationpresence.ContinuityPolicy{}, Limits: conversationpresence.Limits{Deadline: 4 * time.Second, MaxInputRunes: 100, MaxOutputTokens: 100, MaxTextRunes: 100}}, MaxConcurrentPerProvider: 1})
+			service.SetConversationPresence(ConversationPresenceOptions{Policy: conversationpresence.Policy{Limits: conversationpresence.Limits{Deadline: 4 * time.Second, MaxInputRunes: 100, MaxOutputTokens: 100, MaxTextRunes: 100}}, MaxConcurrentPerProvider: 1})
 			req := ChatRequest{BotID: claims.handle.BotID, ThreadID: claims.handle.SessionID, RunHandle: claims.handle, UserID: claims.actor, CurrentChannel: "local", RawQuery: "Can you explain this?"}
 			selected := models.GetResponse{ID: "fixture-model-uuid", ModelID: "same-fixture-model", Model: models.Model{ProviderID: "fixture-provider", ModelID: "same-fixture-model", Config: models.ModelConfig{ThinkingMode: reasoning.ModeToggle, ReasoningEfforts: []string{"low", "high"}, ReasoningOffSupport: reasoning.OffSupportRejected}}}
 			provider := sqlc.Provider{ClientType: string(models.ClientTypeOpenAICompletions)}
