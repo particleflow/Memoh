@@ -168,7 +168,7 @@ describe.each(['web', 'native'])('computer observation in %s host', host => {
     expect(dialog.textContent).not.toContain('w-observed')
     observation.value = { ...observation.value, data: undefined, error: { status: 404, code: 'http.not_found' } }
     await nextTick()
-    expect(dialog.textContent).toContain(en.chat.tasks.observation.unsupported)
+    expect(dialog.textContent).toContain(en.errors.http.not_found)
     expect(dialog.textContent).not.toContain('w-observed')
     const refresh = [...dialog.querySelectorAll('button')].find(button => button.textContent?.includes(en.chat.tasks.observation.refresh))!
     refresh.click(); expect(observation.value.refresh).toHaveBeenCalledOnce()

@@ -6,7 +6,6 @@ import { useI18n } from 'vue-i18n'
 import { Button, CalloutBanner, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { BotdelegationView } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
-import { delegationAPIUnsupported } from '../composables/useBotDelegations'
 import type { BotDelegationDownloadAction } from '../composables/useBotDelegationDownload'
 import type { BotDelegationDeliveryAction } from '../composables/useBotDelegationDelivery'
 
@@ -30,7 +29,6 @@ const emit = defineEmits<{
 }>()
 const { t } = useI18n()
 const errorMessage = computed(() => {
-  if (delegationAPIUnsupported(props.error)) return t('chat.delegations.unsupported')
   if (isApiErrorCode(props.error, 'session.not_found')) return t('chat.delegations.inaccessible')
   return resolveApiErrorMessage(props.error, t('chat.delegations.loadFailed'))
 })

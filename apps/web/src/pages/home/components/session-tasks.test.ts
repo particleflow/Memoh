@@ -181,7 +181,7 @@ describe('task detail identity and rendering boundary', () => {
   })
 
   it.each([
-    { status: 404, code: 'http.not_found', expected: en.chat.tasks.files.unsupported },
+    { status: 404, code: 'http.not_found', expected: en.errors.http.not_found },
     { status: 404, code: 'session.not_found', expected: en.chat.tasks.inaccessible },
     { status: 403, code: 'http.forbidden', expected: en.errors.http.forbidden },
   ])('keeps task summary but distinguishes file observation failure: $code', async ({ status, code, expected }) => {
@@ -222,7 +222,7 @@ describe('task detail identity and rendering boundary', () => {
   })
 
   it.each([
-    { error: { status: 404, code: 'http.not_found' }, expected: en.chat.tasks.unsupported },
+    { error: { status: 404, code: 'http.not_found' }, expected: en.errors.http.not_found },
     { error: { status: 404, code: 'session.not_found' }, expected: en.chat.tasks.inaccessible },
     { error: { status: 403, code: 'http.forbidden' }, expected: en.errors.http.forbidden },
     { error: { status: 401, code: 'http.unauthorized' }, expected: en.errors.http.unauthorized },

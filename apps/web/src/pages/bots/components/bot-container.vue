@@ -449,7 +449,7 @@ async function handleCreateContainer() {
   try {
     const gpuDevices = parseCDIDevices(createGPUDevices.value)
     if (createGPUEnabled.value && gpuDevices.length === 0) {
-      throw new UserFacingError(t('bots.container.gpuDevicesRequired'))
+      throw new UserFacingError('')
     }
 
     const body: HandlersCreateContainerRequest = {
@@ -625,7 +625,6 @@ const sampledAtText = computed(() =>
 const runtimeMetricCards = computed(() => buildRuntimeMetricCards(containerMetrics.value, t))
 
 const runtimeMetricsNote = computed(() => {
-  if (metricsBackendUnsupported.value) return t('bots.container.metricsUnsupported')
   if (metricsTaskRunning.value === false) return t('bots.container.metricsStopped')
   if (!hasAnyMetric.value) return t('bots.container.metricsUnavailable')
   return ''

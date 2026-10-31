@@ -30,9 +30,6 @@
               :description="catalog.checked_at"
             />
             <SettingsRow
-              :label="$t('provider.mediaCatalog.transcription')"
-            />
-            <SettingsRow
               v-if="catalog.models.length === 0"
               :label="$t('provider.mediaCatalog.empty')"
             />

@@ -44,7 +44,6 @@ describe('read-only media catalog', () => {
       url: '/providers/{id}/media-catalog', path: { id: 'saved-provider-id' }, query: { protocol: 'magpie' }, throwOnError: true,
     })
     expect(host.textContent).toContain('synthetic/video')
-    expect(host.textContent).toContain('provider.mediaCatalog.unverified')
   })
   it('distinguishes a valid empty catalog from an error, and clears previous facts', async () => {
     mocks.get.mockResolvedValueOnce({ data: catalog }).mockRejectedValueOnce({ code: 'agent.provider_permission_denied' }).mockResolvedValueOnce({ data: { ...catalog, models: [] } })

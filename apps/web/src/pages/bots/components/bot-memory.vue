@@ -324,7 +324,6 @@
             <Textarea
               id="memory-content"
               v-model="dialogContent"
-              :placeholder="$t('bots.memory.contentPlaceholder')"
               rows="3"
               class="min-h-[4.5rem] resize-y"
             />
