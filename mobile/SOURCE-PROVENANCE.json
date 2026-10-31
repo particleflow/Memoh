@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "5f25e69ceadf840cac465a1e0144411c48d4c2f903e1cff1dde70e3c1f04ccca",
+      "sha256": "aad631a801c68f40ed9b4a677d4a20bfc35733dc5933ef581198d718cfaab96f",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -878,7 +878,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "d37a3476d9ba5772f4b241c306341a1de690d457347265331cb6c9f8709065c4",
+      "sha256": "1828a2a6fd9e3164beca0f54ecfb64bfcef8e382bd1cbdeacf9512bd4d3ca981",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
@@ -888,7 +888,8 @@
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked."
       ]
     },
     {
@@ -1981,13 +1982,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "a415edf2502188c887d0b2a006f15947f111398a9fdd28e3dbee0493862f88c1",
+      "sha256": "c2a5a5668aab5152b245d38b64d0c3c76776702901e29c3b824824905b02efe0",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Same-path post-override application after sharedHomeAdmissionFinal (paired959 and transfer lifetime) on the harmony platform; per-file baseSHA256 anchors the prior phone-side hash and sha256 the new source bytes, both computed by the build tool chain.",
         "Eligibility rework, explicit capability decision tree, protocol frame split and typing decoupling per the reviewed read-aloud streaming design; no silent fallback remains.",
-        "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up)."
+        "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up).",
+        "HAP39 field-fix round 2 (PR review): ack (conversation_ack) status line reads ahead of body text through the same incremental task; edit-resend and retry stop the reply being read; phone streaming projection holds an unstructured marker only within a bounded code-point window of the source tail (literal | or unclosed [ no longer stall the feed past the provider input-gap limit) with bounded spoken-cursor realignment when a released marker later closes."
       ]
     }
   ],

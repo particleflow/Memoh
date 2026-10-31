@@ -590,9 +590,9 @@
   "sharedReadAloudStreaming": {
     "sourceChanges": {
       "local": "shared-read-aloud-streaming.json",
-      "sha256": "a415edf2502188c887d0b2a006f15947f111398a9fdd28e3dbee0493862f88c1"
+      "sha256": "c2a5a5668aab5152b245d38b64d0c3c76776702901e29c3b824824905b02efe0"
     },
-    "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test.",
+    "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test. Round 2 (PR review): ack status line reading, resend stop for edit/retry, and bounded-hold streaming projection with cursor realignment.",
     "upstreamCommitPendingWebLinePR": true
   }
 }
