@@ -583,6 +583,7 @@
     "workspace_snapshot_rollback_request_invalid": "The rollback request is invalid.",
     "workspace_snapshot_version_invalid": "The snapshot version is invalid.",
     "workspace_snapshots_load_failed": "Failed to load snapshots. Please try again.",
+    "workspace_snapshots_unsupported": "Snapshots are not supported by this workspace runtime.",
     "workspace_snapshotter_mismatch": "The snapshotter does not match the workspace runtime.",
     "workspace_start_failed": "Failed to start the workspace. Please try again.",
     "workspace_stop_failed": "Failed to stop the workspace. Please try again.",

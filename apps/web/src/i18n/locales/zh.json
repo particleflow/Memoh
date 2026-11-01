@@ -583,6 +583,7 @@
     "workspace_snapshot_rollback_request_invalid": "回滚请求无效。",
     "workspace_snapshot_version_invalid": "快照版本无效。",
     "workspace_snapshots_load_failed": "加载快照失败，请重试。",
+    "workspace_snapshots_unsupported": "当前工作区运行后端不支持快照。",
     "workspace_snapshotter_mismatch": "快照器与工作区运行后端不匹配。",
     "workspace_start_failed": "启动工作区失败，请重试。",
     "workspace_stop_failed": "停止工作区失败，请重试。",
