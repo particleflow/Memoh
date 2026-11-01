@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -26,7 +27,7 @@ type presenceSQL interface {
 	ClaimConversationPresence(context.Context, sqlc.ClaimConversationPresenceParams) (int64, error)
 	PublishConversationPresence(context.Context, sqlc.PublishConversationPresenceParams) (int64, error)
 	CloseConversationPresenceRun(context.Context, sqlc.CloseConversationPresenceRunParams) (int64, error)
-	FinalizeConversationPresenceTemperature(context.Context, sqlc.FinalizeConversationPresenceTemperatureParams) (int64, error)
+	FinalizeConversationPresenceTemperature(context.Context, sqlc.FinalizeConversationPresenceTemperatureParams) (pgtype.UUID, error)
 	InsertConversationPresenceDecision(context.Context, sqlc.InsertConversationPresenceDecisionParams) error
 }
 
@@ -199,8 +200,10 @@ func (s *postgresPresenceClaims) prepareStep1(ctx context.Context, reply bool) (
 // finalizePresenceDecision is prepare-step2 (short transaction, design v3
 // §6.1/§6.3): update the receipt decision (uncertain → cold/hot, skipped when
 // the mux already closed the row) and insert the decision accounting row with
-// outcome NULL for the finish write point.
-func (s *postgresPresenceClaims) finalizePresenceDecision(ctx context.Context, ticket conversationpresence.Ticket, result *presenceJevResult, totalMs int64) error {
+// outcome NULL for the finish write point. The finalized episode is written
+// back into the ticket because the cold update re-points the receipt to
+// run_id; Claim and Publish match on that same value (incident E1).
+func (s *postgresPresenceClaims) finalizePresenceDecision(ctx context.Context, ticket *conversationpresence.Ticket, result *presenceJevResult, totalMs int64) error {
 	detail, err := json.Marshal(result.Detail)
 	if err != nil {
 		return err
@@ -213,9 +216,19 @@ func (s *postgresPresenceClaims) finalizePresenceDecision(ctx context.Context, t
 	if err != nil {
 		return err
 	}
-	return s.transaction(ctx, ticket, false, func(q presenceSQL, run sqlc.SessionRun) error {
-		if _, err := q.FinalizeConversationPresenceTemperature(ctx, sqlc.FinalizeConversationPresenceTemperatureParams{Temperature: string(result.Temperature), SessionID: run.SessionID, InvocationID: run.InvocationID}); err != nil {
+	var finalizedEpisode string
+	err = s.transaction(ctx, *ticket, false, func(q presenceSQL, run sqlc.SessionRun) error {
+		episode, err := q.FinalizeConversationPresenceTemperature(ctx, sqlc.FinalizeConversationPresenceTemperatureParams{Temperature: string(result.Temperature), SessionID: run.SessionID, InvocationID: run.InvocationID})
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
+			// A closed receipt keeps its merged episode; the decision row still
+			// records the terminal choice.
+		case err != nil:
 			return err
+		case !episode.Valid:
+			return conversationpresence.ErrInvalidContract
+		default:
+			finalizedEpisode = uuid.UUID(episode.Bytes).String()
 		}
 		return q.InsertConversationPresenceDecision(ctx, sqlc.InsertConversationPresenceDecisionParams{
 			SessionID:      sessionID,
@@ -231,6 +244,14 @@ func (s *postgresPresenceClaims) finalizePresenceDecision(ctx context.Context, t
 			Detail:         detail,
 		})
 	})
+	if err != nil {
+		return err
+	}
+	// Only a committed step2 may change the ticket: Claim reads this value.
+	if finalizedEpisode != "" {
+		ticket.EpisodeID = finalizedEpisode
+	}
+	return nil
 }
 
 // recordPresenceOutcome is the fail-open finish write point (design v3
