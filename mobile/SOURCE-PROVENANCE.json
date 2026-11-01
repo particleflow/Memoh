@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "117ff764bf1ce410fc96b3eca03903653f7feb11685b56ac0e2ae8e7e452961c",
+      "sha256": "0845a9af4625a502e2417b30be80f80718cc8f7fbccc4dd23f981ecd23897dcc",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -48,7 +48,8 @@
         "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
         "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP.",
-        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence."
+        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -726,18 +727,19 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
-      "sha256": "238b36821757ae38f1cbc2b5678964f23a692b1c7813d2dd2a7310d9380b01ff",
+      "sha256": "d0c28c4297ad7b26592bfede31b8cc77c6fb3581dd4420327d2e015b7e84435a",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
       "archiveCheckpointSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
       "preparationChanges": [
-        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "a97c3c2493be3b36c7219f8d3e87ecb7ab0a66d801eada924d3bf78683a924c9",
+      "sha256": "f087150fa95f73ae2d0609045c17d5eb5b603f0481280eec4904538d78ce01b2",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
@@ -748,7 +750,8 @@
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ],
       "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },
@@ -866,7 +869,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
-      "sha256": "d8d7201df07a20f1f387b8f2553aaa4bb75160a1227863fa6a5dbd3a705b6653",
+      "sha256": "8b695603a418e703f440319edfdb1d4c6b9f9572d33814752a07b56bff01f755",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
@@ -874,7 +877,8 @@
       "preparationChanges": [
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ]
     },
     {
@@ -1974,16 +1978,17 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_diagnostics_journal.cjs",
-      "sha256": "98d6a3e6675675dfd744dd8725a451cdf1cc618536fc7ff43b9e484786e09e2f",
+      "sha256": "426913186da533be3538795c97f9d0220c86460ad0734b2f7decb1e14cd9cc37",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
       "licenseReview": "Project source and focused tests; no private configuration or SDK binary.",
       "preparationChanges": [
-        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ]
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "4a021fee51718e344be619953edc4a61e474dfe237c07e80c1d1911598eca1e0",
+      "sha256": "d883191391e65623879e9fd642e3858ef8bc6eebe385a312acdb8a9956d46a9d",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -1994,7 +1999,8 @@
         "HAP39 field-fix round 3 (PR review): ack reading is position-independent under the runtime projection (status block last: ack then body, including same-frame arrival and settled body frames, so long acks never silence the body), and a streaming reclassification rolls the spoken cursor back to the code-point common-prefix boundary and rereads, so a released long bracketed label closing into a link can no longer silence the rest of the reply.",
         "HAP39 field-fix round 4 (PR review): the spoken cursor treats the ack as an ephemeral prefix — the runtime projection drops the conversation_ack status block on the terminal frame, so the body cursor survives without the ack (no reread, no silence; ack+body, ack+single-sentence and long-ack terminal frames all read through), and a settled frame flushes whole instead of holding its last sentence behind the completed-sentence boundary; every ack and terminal-frame fixture is derived from the real projectRuntimeTranscript/markRuntimeTurn chain.",
         "HAP39 field-fix round 5 (PR review): the ack peel also drops the blank join segment a leading whitespace-only text block leaves in the frame text, so the settled terminal frame continues the body cursor instead of rereading the whole body (review round 4 P2-1).",
-        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence."
+        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence.",
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
       ]
     }
   ],
