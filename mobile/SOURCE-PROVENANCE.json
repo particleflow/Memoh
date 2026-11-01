@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "23a5c5c02da4942b7b2ecb22940726d8ff9abebca55839e3b61f5548a8e4b3ab",
+      "sha256": "a839264dc40329d8dc208c6fac55f442d1cf536bd66da3e11b815b6c74ba4348",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -878,7 +878,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "d37a3476d9ba5772f4b241c306341a1de690d457347265331cb6c9f8709065c4",
+      "sha256": "1828a2a6fd9e3164beca0f54ecfb64bfcef8e382bd1cbdeacf9512bd4d3ca981",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
@@ -888,7 +888,8 @@
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked."
       ]
     },
     {
@@ -1981,13 +1982,17 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "cb2c3465654c9bbed11f180dd462d58a719f1477d9eeaeadcc32aac77994d201",
+      "sha256": "ce798a604a73021cb71d8e16f74e23226706637ab215cea413268f56bdbef203",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Same-path post-override application after sharedHomeAdmissionFinal (paired959 and transfer lifetime) on the harmony platform; per-file baseSHA256 anchors the prior phone-side hash and sha256 the new source bytes, both computed by the build tool chain.",
         "Eligibility rework, explicit capability decision tree, protocol frame split and typing decoupling per the reviewed read-aloud streaming design; no silent fallback remains.",
-        "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up)."
+        "Retires the legacy composition test and rewrites the real-SDK integration seam to the native-input contract (review follow-up).",
+        "HAP39 field-fix round 2 (PR review): ack (conversation_ack) status line reads ahead of body text through the same incremental task; edit-resend and retry stop the reply being read; phone streaming projection holds an unstructured marker only within a bounded code-point window of the source tail (literal | or unclosed [ no longer stall the feed past the provider input-gap limit) with bounded spoken-cursor realignment when a released marker later closes.",
+        "HAP39 field-fix round 3 (PR review): ack reading is position-independent under the runtime projection (status block last: ack then body, including same-frame arrival and settled body frames, so long acks never silence the body), and a streaming reclassification rolls the spoken cursor back to the code-point common-prefix boundary and rereads, so a released long bracketed label closing into a link can no longer silence the rest of the reply.",
+        "HAP39 field-fix round 4 (PR review): the spoken cursor treats the ack as an ephemeral prefix — the runtime projection drops the conversation_ack status block on the terminal frame, so the body cursor survives without the ack (no reread, no silence; ack+body, ack+single-sentence and long-ack terminal frames all read through), and a settled frame flushes whole instead of holding its last sentence behind the completed-sentence boundary; every ack and terminal-frame fixture is derived from the real projectRuntimeTranscript/markRuntimeTurn chain.",
+        "HAP39 field-fix round 5 (PR review): the ack peel also drops the blank join segment a leading whitespace-only text block leaves in the frame text, so the settled terminal frame continues the body cursor instead of rereading the whole body (review round 4 P2-1)."
       ]
     }
   ],

@@ -401,6 +401,9 @@ struct SharedChat {
         .darkMode(WebDarkMode.Auto).forceDarkAccess(false)
         .backgroundColor(this.surfaceColor)
         .javaScriptAccess(true).domStorageAccess(true).databaseAccess(true)
+        // Read-aloud speech starts without a user gesture; ArkWeb's default
+        // gesture requirement for audible media would keep it blocked.
+        .mediaPlayGestureAccess(false)
         .fileAccess(false).mixedMode(MixedMode.All).multiWindowAccess(true).allowWindowOpenMethod(false)
         .onContextMenuShow((event: OnContextMenuShowEvent) => {
           if (!this.active || !this.chatReady || this.webSource !== WEB_START ||
