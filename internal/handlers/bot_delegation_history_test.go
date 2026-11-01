@@ -33,7 +33,7 @@ func TestBotDelegationHistoryJWTDoesNotTransferExecutionBinding(t *testing.T) {
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
 	e.Use(auth.JWTMiddleware("synthetic-history", func(echo.Context) bool { return false }))
 	h.Register(e)
-	token, _, err := auth.GenerateToken(taskUser, "synthetic-history", time.Minute)
+	token, _, err := auth.GenerateInternalToken(taskUser, "synthetic-history", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

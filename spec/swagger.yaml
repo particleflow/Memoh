@@ -4589,6 +4589,13 @@ definitions:
     type: object
   handlers.LoginRequest:
     properties:
+      device_id:
+        description: |-
+          DeviceID is a stable identifier the client generates for itself. A login
+          with a device_id replaces that device's live session.
+        type: string
+      device_name:
+        type: string
       password:
         type: string
       username:
@@ -4602,6 +4609,10 @@ definitions:
         type: string
       expires_at:
         type: string
+      refresh_expires_at:
+        type: string
+      refresh_token:
+        type: string
       role:
         type: string
       timezone:
@@ -4611,6 +4622,11 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  handlers.LogoutRequest:
+    properties:
+      refresh_token:
         type: string
     type: object
   handlers.MCPStdioRequest:
@@ -4833,11 +4849,20 @@ definitions:
       session_id:
         type: string
     type: object
+  handlers.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
   handlers.RefreshResponse:
     properties:
       access_token:
         type: string
       expires_at:
+        type: string
+      refresh_expires_at:
+        type: string
+      refresh_token:
         type: string
       token_type:
         type: string
@@ -9128,7 +9153,8 @@ paths:
       - agent-authorizations
   /auth/login:
     post:
-      description: Validate user credentials and issue a JWT
+      description: Validate user credentials, start a device session and issue a JWT
+        with its refresh token
       parameters:
       - description: Login request
         in: body
@@ -9153,17 +9179,62 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
       summary: Login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Revoke the device session of a refresh token. An unknown, mismatched
+        or already revoked refresh token also answers 204.
+      parameters:
+      - description: Logout request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LogoutRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Logout
       tags:
       - auth
   /auth/refresh:
     post:
-      description: Issue a new JWT using the existing claims with updated expiration
+      description: Exchange a device session refresh token for a new access token.
+        The refresh token is returned unchanged and its session expiry slides forward.
+      parameters:
+      - description: Refresh request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshRequest'
       responses:
         "200":
           description: OK
           schema:
             $ref: '#/definitions/handlers.RefreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
         "401":
           description: Unauthorized
           schema:
@@ -9172,8 +9243,10 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/server.Problem'
-      security:
-      - BearerAuth: []
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
       summary: Refresh Token
       tags:
       - auth

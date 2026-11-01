@@ -45,7 +45,7 @@ func TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite(t *testing.T) {
 				store := &storageAccountStore{}
 				svc := userruntime.NewService(store, nil)
 				svc.SetWorkspaceStorage(t.TempDir(), `\\synthetic-nas\existing-share`)
-				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(context.Context, string) error {
+				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(context.Context, string, string) error {
 					if mode == "revoked" {
 						return errors.New("synthetic revoked session")
 					}
@@ -55,7 +55,7 @@ func TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite(t *testing.T) {
 				if mode == "other_owner" {
 					user = "33333333-3333-4333-8333-333333333333"
 				}
-				token, _, err := auth.GenerateToken(user, secret, time.Minute)
+				token, _, err := auth.GenerateInternalToken(user, secret, time.Minute)
 				if mode == "chat" {
 					token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: "bot", ChatID: "chat", RouteID: "route", UserID: owner}, secret, time.Minute)
 				}

@@ -135,7 +135,7 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 		t.Helper()
 		req := httptest.NewRequest(method, path, nil)
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "test-secret", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -224,7 +224,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	// Match the production order: JWT is installed globally before handlers
 	// register. Neither missing/invalid JWTs nor revoked accounts reach them.
-	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(_ context.Context, user string) error {
+	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(_ context.Context, user, _ string) error {
 		if user == taskUser {
 			return errors.New("SECRET revoked account")
 		}
@@ -284,7 +284,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 		c.Response().Header().Set(echo.HeaderCacheControl, "private, max-age=60")
 		return c.NoContent(200)
 	})
-	token, _, err := auth.GenerateToken(taskOwner, "test-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken(taskOwner, "test-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -359,7 +359,7 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		t.Helper()
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "test-secret", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

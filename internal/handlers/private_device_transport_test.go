@@ -19,6 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -102,7 +103,7 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{botHandler, NewUserRuntimeHandler(nil, userruntime.NewService(store, nil))}}
 	// Use the real global JWT/session validator, CORS and Problem/error chain,
 	// with actual TCP HTTP. The device stores are synthetic and never execute.
-	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(_ context.Context, user string) error {
+	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(_ context.Context, user, _ string) error {
 		if user == revoked {
 			return errors.New("SECRET revoked account diagnostic")
 		}
@@ -112,7 +113,17 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 	t.Cleanup(transport.Close)
 	sign := func(user, key string, ttl time.Duration) string {
 		t.Helper()
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": user, "user_id": user, "exp": time.Now().Add(ttl).Unix()}).SignedString([]byte(key))
+		if ttl <= 0 {
+			// The minters refuse a non-positive lifetime; an already-expired
+			// internal token is signed directly.
+			claims := jwt.MapClaims{"sub": user, "user_id": user, "typ": "internal", "iat": time.Now().Add(2 * ttl).Unix(), "exp": time.Now().Add(ttl).Unix()}
+			token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(key))
+			if err != nil {
+				t.Fatal(err)
+			}
+			return token
+		}
+		token, _, err := auth.GenerateInternalToken(user, key, ttl)
 		if err != nil {
 			t.Fatal(err)
 		}

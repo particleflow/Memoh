@@ -164,8 +164,8 @@ func testBotPlaybackAccountBoundary(t *testing.T, metadata bool, native ...strin
 					h.inputSessions.entries = map[string]*playbackInputSession{invocationTestOwnerID + ":" + target + ":" + inputID: {session: &boundaryInputSession{}, identity: "opaque-test-identity", modelID: "existing-configured-model", cancel: func() {}}}
 				}
 				h.SetPlaybackAccess(bots.NewService(nil, q), accountService)
-				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, accountService.ValidateSession, h)
-				token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
+				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(ctx context.Context, user, _ string) error { return accountService.ValidateSession(ctx, user) }, h)
+				token, _, err := auth.GenerateInternalToken(invocationTestOwnerID, secret, time.Minute)
 				switch tc.kind {
 				case "chat":
 					token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: invocationTestBotID, ChatID: invocationTestSessionA, RouteID: "synthetic-route", UserID: invocationTestOwnerID}, secret, time.Minute)

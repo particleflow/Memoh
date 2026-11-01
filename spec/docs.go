@@ -286,7 +286,7 @@ const docTemplate = `{
         },
         "/auth/login": {
             "post": {
-                "description": "Validate user credentials and issue a JWT",
+                "description": "Validate user credentials, start a device session and issue a JWT with its refresh token",
                 "tags": [
                     "auth"
                 ],
@@ -326,22 +326,88 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "Revoke the device session of a refresh token. An unknown, mismatched or already revoked refresh token also answers 204.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout",
+                "parameters": [
+                    {
+                        "description": "Logout request",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
                     }
                 }
             }
         },
         "/auth/refresh": {
             "post": {
-                "description": "Issue a new JWT using the existing claims with updated expiration",
+                "description": "Exchange a device session refresh token for a new access token. The refresh token is returned unchanged and its session expiry slides forward.",
                 "tags": [
                     "auth"
                 ],
                 "summary": "Refresh Token",
+                "parameters": [
+                    {
+                        "description": "Refresh request",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RefreshRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.RefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
                         }
                     },
                     "401": {
@@ -355,13 +421,14 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
                     }
-                },
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/bots": {
@@ -27796,6 +27863,13 @@ const docTemplate = `{
         "handlers.LoginRequest": {
             "type": "object",
             "properties": {
+                "device_id": {
+                    "description": "DeviceID is a stable identifier the client generates for itself. A login\nwith a device_id replaces that device's live session.",
+                    "type": "string"
+                },
+                "device_name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -27816,6 +27890,12 @@ const docTemplate = `{
                 "expires_at": {
                     "type": "string"
                 },
+                "refresh_expires_at": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -27829,6 +27909,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LogoutRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
                     "type": "string"
                 }
             }
@@ -28160,6 +28248,14 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.RefreshRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.RefreshResponse": {
             "type": "object",
             "properties": {
@@ -28167,6 +28263,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_at": {
+                    "type": "string"
+                },
+                "refresh_expires_at": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 },
                 "token_type": {

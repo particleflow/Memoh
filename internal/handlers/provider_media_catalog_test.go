@@ -77,7 +77,7 @@ func TestProviderMediaCatalogBoundary(t *testing.T) {
 			}
 			e := echo.New()
 			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
-			e.Use(auth.JWTMiddleware("synthetic-test-signing-secret", nil, func(context.Context, string) error {
+			e.Use(auth.JWTMiddleware("synthetic-test-signing-secret", nil, func(context.Context, string, string) error {
 				if mode == "revoked" {
 					return pgx.ErrNoRows
 				}
@@ -93,7 +93,7 @@ func TestProviderMediaCatalogBoundary(t *testing.T) {
 			}
 			req := httptest.NewRequest(http.MethodGet, path, nil)
 			if mode != "anonymous" {
-				token, _, err := auth.GenerateToken("synthetic-user", "synthetic-test-signing-secret", time.Minute)
+				token, _, err := auth.GenerateInternalToken("synthetic-user", "synthetic-test-signing-secret", time.Minute)
 				if err != nil {
 					t.Fatal(err)
 				}

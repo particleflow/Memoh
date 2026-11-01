@@ -73,7 +73,7 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 			svc := userruntime.NewService(nil, nil)
 			svc.SetAgenvoService(agenvo.NewService(store, nil, nil))
 			log := slog.New(slog.DiscardHandler)
-			srv := server.NewServerWithSessionValidator(log, "", secret, func(context.Context, string) error {
+			srv := server.NewServerWithSessionValidator(log, "", secret, func(context.Context, string, string) error {
 				if scenario == "revoked" {
 					return errors.New("revoked")
 				}
@@ -83,7 +83,7 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 			if scenario == "foreign_owner" {
 				user = "55555555-5555-4555-8555-555555555555"
 			}
-			token, _, err := auth.GenerateToken(user, secret, time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, secret, time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

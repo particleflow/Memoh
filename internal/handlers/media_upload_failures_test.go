@@ -130,7 +130,7 @@ func TestUploadFailureAuthenticatedHTTPMetadataOnly(t *testing.T) {
 	request(http.MethodPut, path, f.token, []byte(strings.Repeat("x", 4096)), 400)
 	request(http.MethodGet, path, "", nil, 401)
 	request(http.MethodGet, path, "bad-token", nil, 401)
-	other, _, err := auth.GenerateToken("44444444-4444-4444-8444-444444444444", "synthetic-http-secret", time.Hour)
+	other, _, err := auth.GenerateInternalToken("44444444-4444-4444-8444-444444444444", "synthetic-http-secret", time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}

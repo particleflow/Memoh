@@ -86,11 +86,11 @@ func inputLifecycleServer(t *testing.T) (*httptest.Server, *lifecycleInputAudio,
 	h := &BotAudioHandler{audioService: audio, settingsService: &playbackBoundarySettings{}}
 	h.SetPlaybackAccess(bots.NewService(nil, q), account)
 	const secret = "synthetic-native-input-loopback-boundary"
-	token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
+	token, _, err := auth.GenerateInternalToken(invocationTestOwnerID, secret, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
-	httpServer := httptest.NewServer(server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, account.ValidateSession, h))
+	httpServer := httptest.NewServer(server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(ctx context.Context, user, _ string) error { return account.ValidateSession(ctx, user) }, h))
 	t.Cleanup(httpServer.Close)
 	return httpServer, audio, commands, token
 }

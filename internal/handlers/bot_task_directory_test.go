@@ -57,7 +57,7 @@ func TestBotTaskDirectoryHTTPAccountRevocationAndNoStore(t *testing.T) {
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
 	h.Register(e)
-	account, _, err := auth.GenerateToken(taskUser, "test-secret", time.Minute)
+	account, _, err := auth.GenerateInternalToken(taskUser, "test-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess(t *testing.T) {
 			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 			e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
 			h.Register(e)
-			token, _, err := auth.GenerateToken(taskUser, "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken(taskUser, "test-secret", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

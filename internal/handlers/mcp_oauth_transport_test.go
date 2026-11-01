@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/mcp"
@@ -71,7 +72,7 @@ func TestMCPOAuthNoStoreThroughServerMiddleware(t *testing.T) {
 	capture := &captureOAuthHandler{handler: h}
 	// Construct the real server: its global JWT/session validator, CORS, error
 	// handler and request-ID middleware all run before the registered handlers.
-	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(_ context.Context, user string) error {
+	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(_ context.Context, user, _ string) error {
 		if user == revoked {
 			return errors.New("SECRET revoked account diagnostic")
 		}
@@ -81,7 +82,17 @@ func TestMCPOAuthNoStoreThroughServerMiddleware(t *testing.T) {
 	t.Cleanup(transport.Close)
 	sign := func(user, key string, ttl time.Duration) string {
 		t.Helper()
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": user, "user_id": user, "exp": time.Now().Add(ttl).Unix()}).SignedString([]byte(key))
+		if ttl <= 0 {
+			// The minters refuse a non-positive lifetime; an already-expired
+			// internal token is signed directly.
+			claims := jwt.MapClaims{"sub": user, "user_id": user, "typ": "internal", "iat": time.Now().Add(2 * ttl).Unix(), "exp": time.Now().Add(ttl).Unix()}
+			token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(key))
+			if err != nil {
+				t.Fatal(err)
+			}
+			return token
+		}
+		token, _, err := auth.GenerateInternalToken(user, key, ttl)
 		if err != nil {
 			t.Fatal(err)
 		}

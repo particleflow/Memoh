@@ -199,7 +199,7 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 		req := httptest.NewRequest(method, path, strings.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "synthetic", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -263,7 +263,7 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 		req.Header.Set("Range", value)
 		req.Header.Set("If-Range", ifRange)
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "synthetic", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

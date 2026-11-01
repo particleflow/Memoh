@@ -28,11 +28,13 @@ import (
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/apperror"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/channel"
 	"github.com/felinics/memoh/internal/channel/route"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/command"
+	"github.com/felinics/memoh/internal/config"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
@@ -406,10 +408,46 @@ func TestLocalChannelHandlerIssueRuntimeOwnerBearerToken(t *testing.T) {
 	if gotSub := claims["sub"]; gotSub != "runtime-owner" {
 		t.Fatalf("runtime token subject = %v, want runtime-owner", gotSub)
 	}
+	if gotType := claims["typ"]; gotType != "internal" {
+		t.Fatalf("runtime token typ = %v, want internal", gotType)
+	}
 
 	handler.SetAuthTokenConfig("", time.Hour)
 	if fallback := handler.issueRuntimeOwnerBearerToken("runtime-owner", "Bearer caller-token"); fallback != "Bearer caller-token" {
 		t.Fatalf("fallback token = %q, want original bearer", fallback)
+	}
+}
+
+// The runtime callback token lives as long as internal_token_ttl, not
+// jwt_expires_in: an external-agent run longer than a short access token keeps
+// a valid callback token.
+func TestLocalChannelRuntimeTokenUsesInternalTokenTTL(t *testing.T) {
+	t.Parallel()
+
+	const secret = "local-ws-runtime-secret" //nolint:gosec // G101 false positive: test fixture, not a real credential.
+	rc, err := boot.ProvideRuntimeConfig(config.Config{
+		Auth:      config.AuthConfig{JWTSecret: secret, JWTExpiresIn: "1h"},
+		Container: config.ContainerConfig{Backend: "docker"},
+		Timezone:  config.DefaultTimezone,
+	})
+	if err != nil {
+		t.Fatalf("runtime config: %v", err)
+	}
+	if rc.InternalTokenTTL != 24*time.Hour || rc.JwtExpiresIn != time.Hour {
+		t.Fatalf("ttl = internal %v / access %v, want 24h / 1h", rc.InternalTokenTTL, rc.JwtExpiresIn)
+	}
+	handler := &LocalChannelHandler{logger: slog.Default()}
+	handler.SetAuthTokenConfig(rc.JwtSecret, rc.InternalTokenTTL)
+
+	raw := strings.TrimPrefix(handler.issueRuntimeOwnerBearerToken("runtime-owner", ""), "Bearer ")
+	parsed, err := jwt.Parse(raw, func(*jwt.Token) (interface{}, error) { return []byte(secret), nil })
+	if err != nil || !parsed.Valid {
+		t.Fatalf("parse runtime token: %v", err)
+	}
+	claims := parsed.Claims.(jwt.MapClaims)
+	lifetime := time.Duration(claims["exp"].(float64)-claims["iat"].(float64)) * time.Second
+	if lifetime != 24*time.Hour {
+		t.Fatalf("runtime token lifetime = %v, want 24h", lifetime)
 	}
 }
 
