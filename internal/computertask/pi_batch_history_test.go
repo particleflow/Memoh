@@ -70,6 +70,10 @@ func (unavailableHistoryStore) PreviousComputerPiOperation(context.Context, dbst
 	return dbstore.ComputerOperationRecord{}, errors.New("PRIVATE query error")
 }
 
+func (unavailableHistoryStore) LatestStartedPiOperation(context.Context, dbstore.ComputerOperationRecord, string) (dbstore.ComputerOperationRecord, error) {
+	return dbstore.ComputerOperationRecord{}, errors.New("PRIVATE query error")
+}
+
 func TestBatchHistoryReadFailureAndLatestEvidence(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	source.service.store = unavailableHistoryStore{store}

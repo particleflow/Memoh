@@ -55,15 +55,26 @@ func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.Compute
 		return h, nil
 	}
 	b := old.Batch
+	// Session-level evidence shared by both relaxations below: "this one
+	// operation never started" is not "this Pi session never started". A proven
+	// start may have had external side effects even after its history files
+	// were lost, so one started invocation anywhere in the Pi session keeps the
+	// session unconfirmed. ErrNotFound is the only proof the gate relaxes on;
+	// any other read error also fails closed.
+	neverStarted := false
+	if _, startedErr := reader.LatestStartedPiOperation(ctx, r, p.PiSessionID); errors.Is(startedErr, db.ErrNotFound) {
+		neverStarted = true
+	}
 	if b.Receipt == nil {
 		// An admission-blocked prior (incident E3: rejected at the continuity
 		// gate before any native mutation — the same pre-dispatch shape
 		// resumeInputPreparation eligibility recognizes) proves nothing was
-		// ever dispatched. It must not strand every later request at
-		// pi_continuity_unconfirmed; the Pi session never saw an invocation,
-		// so a first invocation is the accurate expectation. Anything that
-		// might have dispatched keeps its receipt and stays guarded below.
-		if prior.State == "not_started" && b.Progress.Phase == "" && b.Progress.WorkspaceID == "" && b.Progress.PaneID == "" && b.Progress.RequestID == "" && b.Result == nil {
+		// ever dispatched for that operation. It must not strand every later
+		// request at pi_continuity_unconfirmed when the whole Pi session is
+		// proven start-free; a first invocation is the accurate expectation.
+		// Anything that might have dispatched keeps its receipt and stays
+		// guarded below.
+		if neverStarted && prior.State == "not_started" && b.Progress.Phase == "" && b.Progress.WorkspaceID == "" && b.Progress.PaneID == "" && b.Progress.RequestID == "" && b.Result == nil {
 			h.Mode = "first"
 		}
 		return h, nil
@@ -71,10 +82,11 @@ func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.Compute
 	if prior.TargetFingerprint != r.TargetFingerprint {
 		// A target profile change (incident E3: adding the explicit agent PATH)
 		// must not strand the conversation. When the latest prior operation
-		// proves Pi never started, the Pi session holds no live history, and a
-		// first invocation is the accurate expectation. Anything less proven
-		// stays unconfirmed.
-		if b.Progress.PiSessionID == p.PiSessionID && b.Receipt.Validate(b.Progress) == nil && !b.Receipt.Started {
+		// proves Pi never started and no earlier operation of this Pi session
+		// ever started either, the session holds no live history, and a first
+		// invocation is the accurate expectation. Anything less proven stays
+		// unconfirmed.
+		if neverStarted && b.Progress.PiSessionID == p.PiSessionID && b.Receipt.Validate(b.Progress) == nil && !b.Receipt.Started {
 			h.Mode = "first"
 		}
 		return h, nil

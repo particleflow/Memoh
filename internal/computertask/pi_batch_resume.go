@@ -43,6 +43,10 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		switch {
 		case r.State == "completed" && d.Batch != nil && d.Batch.Receipt != nil && !d.Batch.Receipt.Started:
 			out.ResumeReason = "completed_pi_not_started"
+		case r.State == "dispatching":
+			// result() surfaces dispatching as state=unknown; name the same
+			// surfaced state, not the internal one.
+			out.ResumeReason = "state_unknown"
 		default:
 			out.ResumeReason = "state_" + r.State
 		}

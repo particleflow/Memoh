@@ -3,8 +3,10 @@ package computertask
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -59,32 +61,52 @@ func TestBatchTargetChangeWithProvenNoInvocationDispatchesFirst(t *testing.T) {
 	}
 }
 
-// TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests covers the production
-// sequence after the agent PATH config fix: one request was rejected at the
-// continuity gate (no receipt, no native mutation, state not_started — the
-// persisted shape of operation 31e8c398), and the user's next real request on
-// the same default work_dir must still dispatch.
-func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
-	source, store, f, _ := setupBatch(t)
-	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
-	batchResultUntilReady(t, c, first.ID)
-	prior := store.records[first.ID]
+// seedBlockedOperation appends the admission-blocked shape of incident
+// operation 31e8c398 above an existing record of the same Pi session: matching
+// identity and fingerprint, no receipt, no native mutation, state not_started.
+func seedBlockedOperation(t *testing.T, store *fixtureStore, below dbstore.ComputerOperationRecord) {
+	t.Helper()
 	var d Details
-	if err := json.Unmarshal(prior.Details, &d); err != nil {
-		t.Fatal(err)
+	if err := json.Unmarshal(below.Details, &d); err != nil || d.Batch == nil {
+		t.Fatalf("seed source unreadable: %v", err)
 	}
-	// Rewrite the latest prior into the admission-blocked shape: matching
-	// fingerprint, no receipt, nothing ever dispatched.
 	d.Phase = "pi_continuity_unconfirmed"
 	d.Batch.Receipt = nil
 	d.Batch.Result = nil
 	d.Batch.Files = nil
+	d.InputPreparation = ""
 	d.Batch.Progress.Phase = ""
 	d.Batch.Progress.WorkspaceID, d.Batch.Progress.PaneID, d.Batch.Progress.RequestID = "", "", ""
-	prior.Details, _ = json.Marshal(d)
-	prior.State = "not_started"
-	store.records[first.ID] = prior
+	blocked := below
+	blocked.ID = "blocked-prior-" + below.ID[:8]
+	blocked.State = "not_started"
+	blocked.CreatedAt = below.CreatedAt.Add(time.Minute)
+	blocked.UpdatedAt = blocked.CreatedAt
+	blocked.Details, _ = json.Marshal(d)
+	store.records[blocked.ID] = blocked
+}
+
+// TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests covers the production
+// sequence after the agent PATH config fix over a Pi session that provably
+// never started (the incident conversation's own history shape): an earlier
+// never-started receipt, then one request rejected at the continuity gate (no
+// receipt, no native mutation, state not_started — the persisted shape of
+// operation 31e8c398), then the user's next real request on the same default
+// work_dir, which must still dispatch.
+func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	c := standardClient(t, source, "pc-a", false)
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	f.receipt.Started = false
+	f.receipt.ExitCode = 125
+	f.receipt.Preflight = "preflight_pi_missing"
+	f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	f.receipt.Completion = nil
+	notStarted := batchResultUntilReady(t, c, first.ID)
+	if notStarted.PiResult == nil || notStarted.PiResult.Outcome != "not_started" {
+		t.Fatalf("earlier prior must be a proven no-invocation receipt: %+v", notStarted.PiResult)
+	}
+	seedBlockedOperation(t, store, store.records[first.ID])
 	f.runs = 0
 	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-b"}
@@ -105,6 +127,95 @@ func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
 	var d2 Details
 	if err := json.Unmarshal(store.records[next.ID].Details, &d2); err != nil || d2.Batch == nil || d2.Batch.Progress.History == nil || d2.Batch.Progress.History.Mode != "first" {
 		t.Fatalf("admission-blocked prior must dispatch as first: %+v %v", d2.Batch, err)
+	}
+}
+
+// TestBatchOnceStartedSessionStaysUnconfirmedOverBlockedPrior is the review
+// counterexample for the admission-blocked relaxation: an earlier operation of
+// the same Pi session did start Pi (its history files are gone — a valid
+// started receipt with after=missing), a later request was blocked at
+// admission, and a new request must NOT dispatch as first: a proven start may
+// have had external side effects regardless of lost history.
+func TestBatchOnceStartedSessionStaysUnconfirmedOverBlockedPrior(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	c := standardClient(t, source, "pc-a", false)
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	f.receipt.Started = true
+	f.receipt.History = &agenvo.BatchHistoryReport{Before: "new", After: "missing"}
+	batchResultUntilReady(t, c, first.ID)
+	seedBlockedOperation(t, store, store.records[first.ID])
+	f.runs = 0
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-c"}
+	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next.State != "not_started" || next.Phase != "pi_continuity_unconfirmed" {
+		t.Fatalf("once-started Pi session redispatched over a blocked prior: %+v", next)
+	}
+	if f.runs != 0 {
+		t.Fatalf("expected no dispatch, got %d", f.runs)
+	}
+}
+
+// TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange is the review
+// counterexample for the target-change relaxation: the Pi session started once
+// (earlier operation with a started receipt), the latest prior above it is a
+// proven no-invocation receipt under an already-changed target fingerprint
+// (the failed-resume shape). A new request must stay unconfirmed instead of
+// dispatching as first.
+func TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	c := standardClient(t, source, "pc-a", false)
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	// op1 keeps its default started receipt with valid history evidence.
+	batchResultUntilReady(t, c, first.ID)
+	// Seed the failed-resume prior surgically above the completed started op:
+	// receipt proves no invocation, target fingerprint already changed. This
+	// avoids the shared transport receipt so the started evidence below stays
+	// byte-stable.
+	started := store.records[first.ID]
+	var d Details
+	if err := json.Unmarshal(started.Details, &d); err != nil || d.Batch == nil || d.Batch.Receipt == nil || !d.Batch.Receipt.Started {
+		t.Fatalf("started evidence unreadable: %v %+v", err, d.Batch)
+	}
+	failedResume := started
+	failedResume.ID = "failed-resume-prior-" + started.ID[:8]
+	failedResume.State = "completed"
+	failedResume.CreatedAt = started.CreatedAt.Add(time.Minute)
+	failedResume.UpdatedAt = failedResume.CreatedAt
+	failedResume.TargetFingerprint = "changed-by-agent-path"
+	d.Phase = "pi_not_started"
+	d.Batch.Result = &agenvo.PiJSONResult{Outcome: "not_started", Preflight: "preflight_pi_missing"}
+	d.Batch.Receipt.Started = false
+	d.Batch.Receipt.ExitCode = 125
+	d.Batch.Receipt.Preflight = "preflight_pi_missing"
+	d.Batch.Receipt.Completion = nil
+	d.Batch.Receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	d.Batch.Progress.History = &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "first"}
+	failedResume.Details, _ = json.Marshal(d)
+	store.records[failedResume.ID] = failedResume
+	f.runs = 0
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-d"}
+	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic third"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next.State != "not_started" || next.Phase != "pi_continuity_unconfirmed" {
+		t.Fatalf("once-started Pi session redispatched after target change: %+v", next)
+	}
+	if f.runs != 0 {
+		t.Fatalf("expected no dispatch, got %d", f.runs)
 	}
 }
 

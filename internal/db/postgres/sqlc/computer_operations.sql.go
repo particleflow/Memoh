@@ -201,6 +201,59 @@ func (q *Queries) GetOwnedNativeHerdrRuntime(ctx context.Context, arg GetOwnedNa
 	return i, err
 }
 
+const latestStartedPiOperation = `-- name: LatestStartedPiOperation :one
+SELECT id, team_id, bot_id, session_id, user_id, target_id, run_id, fingerprint, target_fingerprint, state, details, cancel_requested, revision, created_at, updated_at FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND bot_id=$1
+AND session_id=$2 AND user_id=$3
+AND target_id=$4 AND id<>$5
+AND details->'batch'->'progress'->>'pi_session_id'=$6::text
+AND details->'batch'->'receipt'->>'started'='true'
+ORDER BY created_at DESC, id DESC LIMIT 1
+`
+
+type LatestStartedPiOperationParams struct {
+	BotID       pgtype.UUID `json:"bot_id"`
+	SessionID   pgtype.UUID `json:"session_id"`
+	UserID      pgtype.UUID `json:"user_id"`
+	TargetID    pgtype.UUID `json:"target_id"`
+	ID          pgtype.UUID `json:"id"`
+	PiSessionID string      `json:"pi_session_id"`
+}
+
+// Session-level invocation evidence for one Pi session: the newest operation
+// whose stored receipt proves Pi actually ran. Absence is the only "this Pi
+// session never started" proof the continuity gate may relax on; the query
+// never searches past a proven start.
+func (q *Queries) LatestStartedPiOperation(ctx context.Context, arg LatestStartedPiOperationParams) (ComputerOperation, error) {
+	row := q.db.QueryRow(ctx, latestStartedPiOperation,
+		arg.BotID,
+		arg.SessionID,
+		arg.UserID,
+		arg.TargetID,
+		arg.ID,
+		arg.PiSessionID,
+	)
+	var i ComputerOperation
+	err := row.Scan(
+		&i.ID,
+		&i.TeamID,
+		&i.BotID,
+		&i.SessionID,
+		&i.UserID,
+		&i.TargetID,
+		&i.RunID,
+		&i.Fingerprint,
+		&i.TargetFingerprint,
+		&i.State,
+		&i.Details,
+		&i.CancelRequested,
+		&i.Revision,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listComputerConnectionEndpoints = `-- name: ListComputerConnectionEndpoints :many
 SELECT candidate.config AS candidate_config, registered.config AS registered_config,
        (user_runtimes.provider_config->>'connection_id'=$1::text) AS direct

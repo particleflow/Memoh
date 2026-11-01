@@ -110,11 +110,13 @@ func TestBatchEnvelopePreflightReasonCodes(t *testing.T) {
 		name, code, agentPath string
 		loginPi, loginNode    bool
 		precreateLock         bool
+		cwdMissing            bool
 	}{
-		{"explicit_path_starts_pi", "", `C:\Synthetic\agent`, false, false, false},
-		{"pi_missing", batchPreflightPi, "", false, false, false},
-		{"node_missing", batchPreflightNode, "", true, false, false},
-		{"lock_failed", batchPreflightLock, "", true, true, true},
+		{"explicit_path_starts_pi", "", `C:\Synthetic\agent`, false, false, false, false},
+		{"pi_missing", batchPreflightPi, "", false, false, false, false},
+		{"node_missing", batchPreflightNode, "", true, false, false, false},
+		{"lock_failed", batchPreflightLock, "", true, true, true, false},
+		{"cwd_failed", batchPreflightCwd, "", true, true, false, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			dir := t.TempDir()
@@ -183,6 +185,11 @@ func TestBatchEnvelopePreflightReasonCodes(t *testing.T) {
 				}
 			}
 			target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic-model", Path: tc.agentPath}}
+			if tc.cwdMissing {
+				// The cygpath shim passes unmatched paths through, so cd fails
+				// on the missing directory before any tool resolution.
+				target.WorkDir = `C:\Synthetic\missing`
+			}
 			script := batchFixtureScript(t, p, target, target.WorkDir, "task data")
 			//nolint:gosec // Actual fixed production envelope with only synthetic executables.
 			cmd := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)

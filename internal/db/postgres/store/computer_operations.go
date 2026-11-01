@@ -193,6 +193,19 @@ func (s *Store) PreviousComputerPiOperation(ctx context.Context, r dbstore.Compu
 	return operationRecord(row), mapQueryErr(err)
 }
 
+// LatestStartedPiOperation returns the newest proven-started operation of this
+// Pi session. It is session-level evidence for the continuity gate: a started
+// invocation may have had external side effects even if its history files are
+// gone, so its presence must keep the session unconfirmed.
+func (s *Store) LatestStartedPiOperation(ctx context.Context, r dbstore.ComputerOperationRecord, session string) (dbstore.ComputerOperationRecord, error) {
+	ids, err := computerIDs(r)
+	if err != nil {
+		return dbstore.ComputerOperationRecord{}, err
+	}
+	row, err := s.queries.LatestStartedPiOperation(ctx, dbsqlc.LatestStartedPiOperationParams{ID: ids[0], BotID: ids[1], SessionID: ids[2], UserID: ids[3], TargetID: ids[4], PiSessionID: session})
+	return operationRecord(row), mapQueryErr(err)
+}
+
 // OwnedNativeHerdrRuntime returns only an activated native runtime owned by this
 // account. Herdr profile validation belongs to the computer service.
 func (s *Store) OwnedNativeHerdrRuntime(ctx context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
