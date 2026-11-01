@@ -42,7 +42,7 @@ func TestConversationPresencePostgresDecisionAccounting(t *testing.T) {
 			Usage:  &presenceJevUsage{InputTokens: 574, OutputTokens: 12},
 		},
 	}
-	if err := claims.finalizePresenceDecision(ctx, ticket, result, 845); err != nil {
+	if err := claims.finalizePresenceDecision(ctx, &ticket, result, 845); err != nil {
 		t.Fatalf("step2: %v", err)
 	}
 	var state, finalTemperature, episode string
@@ -105,7 +105,7 @@ func TestConversationPresencePostgresDecisionRowSurvivesClose(t *testing.T) {
 		t.Fatal(err)
 	}
 	result := &presenceJevResult{Mode: presenceModeNoFastReply, Temperature: conversationpresence.Hot, Reason: "jev_no_fast_reply", Phase: conversationpresence.Thinking}
-	if err := claims.finalizePresenceDecision(ctx, ticket, result, 320); err != nil {
+	if err := claims.finalizePresenceDecision(ctx, &ticket, result, 320); err != nil {
 		t.Fatalf("step2 after close: %v", err)
 	}
 	var temperature, state string

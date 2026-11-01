@@ -103,7 +103,7 @@ func (q *Queries) FinalizeConversationPresenceDecisionOutcome(ctx context.Contex
 	return result.RowsAffected(), nil
 }
 
-const finalizeConversationPresenceTemperature = `-- name: FinalizeConversationPresenceTemperature :execrows
+const finalizeConversationPresenceTemperature = `-- name: FinalizeConversationPresenceTemperature :one
 
 UPDATE conversation_presence p
 SET temperature = $1,
@@ -113,6 +113,7 @@ WHERE p.team_id = public.memoh_current_team_id()
   AND p.session_id = $2
   AND p.invocation_id = $3
   AND p.temperature = 'uncertain' AND p.state = 'eligible'
+RETURNING p.episode_id
 `
 
 type FinalizeConversationPresenceTemperatureParams struct {
@@ -122,12 +123,11 @@ type FinalizeConversationPresenceTemperatureParams struct {
 }
 
 // ===== Fast-reply v3 (Jev two-stage selection): decision accounting and pull sources =====
-func (q *Queries) FinalizeConversationPresenceTemperature(ctx context.Context, arg FinalizeConversationPresenceTemperatureParams) (int64, error) {
-	result, err := q.db.Exec(ctx, finalizeConversationPresenceTemperature, arg.Temperature, arg.SessionID, arg.InvocationID)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
+func (q *Queries) FinalizeConversationPresenceTemperature(ctx context.Context, arg FinalizeConversationPresenceTemperatureParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, finalizeConversationPresenceTemperature, arg.Temperature, arg.SessionID, arg.InvocationID)
+	var episode_id pgtype.UUID
+	err := row.Scan(&episode_id)
+	return episode_id, err
 }
 
 const insertConversationPresence = `-- name: InsertConversationPresence :one

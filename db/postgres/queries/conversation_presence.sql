@@ -41,7 +41,7 @@ WHERE conversation_presence.actor_id = EXCLUDED.actor_id AND conversation_presen
 
 -- ===== Fast-reply v3 (Jev two-stage selection): decision accounting and pull sources =====
 
--- name: FinalizeConversationPresenceTemperature :execrows
+-- name: FinalizeConversationPresenceTemperature :one
 UPDATE conversation_presence p
 SET temperature = sqlc.arg(temperature),
     episode_id = CASE WHEN sqlc.arg(temperature) = 'cold' THEN p.run_id ELSE p.episode_id END,
@@ -49,7 +49,8 @@ SET temperature = sqlc.arg(temperature),
 WHERE p.team_id = public.memoh_current_team_id()
   AND p.session_id = sqlc.arg(session_id)
   AND p.invocation_id = sqlc.arg(invocation_id)
-  AND p.temperature = 'uncertain' AND p.state = 'eligible';
+  AND p.temperature = 'uncertain' AND p.state = 'eligible'
+RETURNING p.episode_id;
 
 -- name: InsertConversationPresenceDecision :exec
 INSERT INTO conversation_presence_decisions (session_id, run_id, invocation_id, actor_id, final_mode, direction, urgency, fallback_reason, pulls, total_ms, detail)

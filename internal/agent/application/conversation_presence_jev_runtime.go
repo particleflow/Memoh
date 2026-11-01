@@ -100,7 +100,10 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 	if freezeFallbackSilent(sideCtx, result) {
 		logStage("fallback_silent", slog.String("fallback_reason", "budget_exhausted"))
 	}
-	if finishErr := claims.finalizePresenceDecision(sideCtx, ticket, result, time.Since(decisionStart).Milliseconds()); finishErr != nil && s.logger != nil {
+	// step2 also refreshes ticket.EpisodeID with the finalized receipt episode:
+	// a cold decision re-points the row to run_id, and Claim/Publish match on
+	// that row value (incident E1).
+	if finishErr := claims.finalizePresenceDecision(sideCtx, &ticket, result, time.Since(decisionStart).Milliseconds()); finishErr != nil && s.logger != nil {
 		s.logger.WarnContext(ctx, "conversation_presence_step2_failed", slog.String("error", finishErr.Error()))
 	}
 	recordOutcome := func(status string) {
