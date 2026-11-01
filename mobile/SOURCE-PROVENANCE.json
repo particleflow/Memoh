@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "cb743913403058e07bfb084a425d0e0f9602be88e92ae36731d6b3622e0200cf",
+      "sha256": "117ff764bf1ce410fc96b3eca03903653f7feb11685b56ac0e2ae8e7e452961c",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -47,7 +47,8 @@
         "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
         "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
-        "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP."
+        "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP.",
+        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -1982,7 +1983,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "ce798a604a73021cb71d8e16f74e23226706637ab215cea413268f56bdbef203",
+      "sha256": "4a021fee51718e344be619953edc4a61e474dfe237c07e80c1d1911598eca1e0",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -1992,7 +1993,8 @@
         "HAP39 field-fix round 2 (PR review): ack (conversation_ack) status line reads ahead of body text through the same incremental task; edit-resend and retry stop the reply being read; phone streaming projection holds an unstructured marker only within a bounded code-point window of the source tail (literal | or unclosed [ no longer stall the feed past the provider input-gap limit) with bounded spoken-cursor realignment when a released marker later closes.",
         "HAP39 field-fix round 3 (PR review): ack reading is position-independent under the runtime projection (status block last: ack then body, including same-frame arrival and settled body frames, so long acks never silence the body), and a streaming reclassification rolls the spoken cursor back to the code-point common-prefix boundary and rereads, so a released long bracketed label closing into a link can no longer silence the rest of the reply.",
         "HAP39 field-fix round 4 (PR review): the spoken cursor treats the ack as an ephemeral prefix — the runtime projection drops the conversation_ack status block on the terminal frame, so the body cursor survives without the ack (no reread, no silence; ack+body, ack+single-sentence and long-ack terminal frames all read through), and a settled frame flushes whole instead of holding its last sentence behind the completed-sentence boundary; every ack and terminal-frame fixture is derived from the real projectRuntimeTranscript/markRuntimeTurn chain.",
-        "HAP39 field-fix round 5 (PR review): the ack peel also drops the blank join segment a leading whitespace-only text block leaves in the frame text, so the settled terminal frame continues the body cursor instead of rereading the whole body (review round 4 P2-1)."
+        "HAP39 field-fix round 5 (PR review): the ack peel also drops the blank join segment a leading whitespace-only text block leaves in the frame text, so the settled terminal frame continues the body cursor instead of rereading the whole body (review round 4 P2-1).",
+        "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence."
       ]
     }
   ],
