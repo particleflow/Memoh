@@ -38,7 +38,7 @@ func (q *resumeSaveQueries) SaveSessionRunResumeContext(_ context.Context, arg s
 
 func TestResumeContextPreservesDeadlineAndScopesWithoutCredentials(t *testing.T) {
 	secret := "resume-test-secret"
-	bearer, _, err := auth.GenerateToken("account", secret, time.Hour)
+	bearer, _, err := auth.GenerateInternalToken("account", secret, time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestDiscussAdmissionResumeContextIsRetired(t *testing.T) {
 
 func TestResumeRejectsInvalidCredentialAndForeignBotScope(t *testing.T) {
 	s := &Service{resumeSecret: "resume-secret"}
-	token, _, err := auth.GenerateToken("account", "other-secret", time.Hour)
+	token, _, err := auth.GenerateInternalToken("account", "other-secret", time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}

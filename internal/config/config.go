@@ -34,6 +34,8 @@ const (
 	DefaultCNIBinaryDir          = "/opt/cni/bin"
 	DefaultCNIConfigDir          = "/etc/cni/net.d"
 	DefaultJWTExpiresIn          = "24h"
+	DefaultRefreshTokenIdleTTL   = "8760h"
+	DefaultInternalTokenTTL      = "24h"
 	DefaultDatabaseDriver        = "postgres"
 	DefaultPGHost                = "127.0.0.1"
 	DefaultPGPort                = 5432
@@ -382,8 +384,15 @@ type AdminConfig struct {
 }
 
 type AuthConfig struct {
-	JWTSecret                     string `toml:"jwt_secret"                       json:"-"`
-	JWTExpiresIn                  string `toml:"jwt_expires_in"`
+	JWTSecret    string `toml:"jwt_secret"     json:"-"`
+	JWTExpiresIn string `toml:"jwt_expires_in"`
+	// RefreshTokenIdleTTL is how long a device session stays usable without a
+	// refresh; every successful refresh slides it forward by this much.
+	RefreshTokenIdleTTL string `toml:"refresh_token_idle_ttl"`
+	// InternalTokenTTL is the lifetime of the internal account tokens a local
+	// channel runtime uses to call back into the server, independent of
+	// jwt_expires_in.
+	InternalTokenTTL              string `toml:"internal_token_ttl"`
 	AgentCredentialsEncryptionKey string `toml:"agent_credentials_encryption_key" json:"-"`
 }
 
@@ -907,7 +916,9 @@ func Load(path string) (Config, error) {
 			Email:    "you@example.com",
 		},
 		Auth: AuthConfig{
-			JWTExpiresIn: DefaultJWTExpiresIn,
+			JWTExpiresIn:        DefaultJWTExpiresIn,
+			RefreshTokenIdleTTL: DefaultRefreshTokenIdleTTL,
+			InternalTokenTTL:    DefaultInternalTokenTTL,
 		},
 		Agent: AgentConfig{
 			ToolOutputMaxBytes:  DefaultAgentToolOutputBytes,

@@ -2,6 +2,7 @@ package boot
 
 import (
 	"testing"
+	"time"
 
 	"github.com/felinics/memoh/internal/config"
 )
@@ -111,5 +112,49 @@ func TestProvideRuntimeConfigBackendIgnoresEnvOverride(t *testing.T) {
 	}
 	if rc.ContainerBackend != "docker" {
 		t.Fatalf("ContainerBackend = %q, want docker", rc.ContainerBackend)
+	}
+}
+
+func TestProvideRuntimeConfigTokenTTLDefaults(t *testing.T) {
+	cfg := config.Config{
+		Auth: config.AuthConfig{
+			JWTSecret:    "secret",
+			JWTExpiresIn: "1h",
+		},
+		Timezone:  config.DefaultTimezone,
+		Container: config.ContainerConfig{Backend: "docker"},
+	}
+	rc, err := ProvideRuntimeConfig(cfg)
+	if err != nil {
+		t.Fatalf("ProvideRuntimeConfig returned error: %v", err)
+	}
+	if rc.RefreshTokenIdleTTL != 8760*time.Hour {
+		t.Fatalf("RefreshTokenIdleTTL = %v, want 8760h", rc.RefreshTokenIdleTTL)
+	}
+	if rc.InternalTokenTTL != 24*time.Hour {
+		t.Fatalf("InternalTokenTTL = %v, want 24h", rc.InternalTokenTTL)
+	}
+	if rc.JwtExpiresIn != time.Hour {
+		t.Fatalf("JwtExpiresIn = %v, want 1h", rc.JwtExpiresIn)
+	}
+
+	cfg.Auth.RefreshTokenIdleTTL = "48h"
+	cfg.Auth.InternalTokenTTL = "72h"
+	rc, err = ProvideRuntimeConfig(cfg)
+	if err != nil {
+		t.Fatalf("ProvideRuntimeConfig returned error: %v", err)
+	}
+	if rc.RefreshTokenIdleTTL != 48*time.Hour || rc.InternalTokenTTL != 72*time.Hour {
+		t.Fatalf("configured ttl = %v / %v, want 48h / 72h", rc.RefreshTokenIdleTTL, rc.InternalTokenTTL)
+	}
+
+	cfg.Auth.RefreshTokenIdleTTL = "-1h"
+	if _, err := ProvideRuntimeConfig(cfg); err == nil {
+		t.Fatal("expected negative refresh idle ttl to fail")
+	}
+	cfg.Auth.RefreshTokenIdleTTL = "48h"
+	cfg.Auth.InternalTokenTTL = "not-a-duration"
+	if _, err := ProvideRuntimeConfig(cfg); err == nil {
+		t.Fatal("expected invalid internal token ttl to fail")
 	}
 }

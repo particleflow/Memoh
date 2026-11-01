@@ -96,7 +96,7 @@ func serveBoundary(t *testing.T, handlerErr error, req *http.Request) boundaryRe
 	otel.SetTracerProvider(sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder)))
 	t.Cleanup(func() { otel.SetTracerProvider(previous) })
 
-	token, _, err := auth.GenerateToken("boundary-user", boundaryTestSecret, time.Minute)
+	token, _, err := auth.GenerateInternalToken("boundary-user", boundaryTestSecret, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -300,9 +300,9 @@ func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
 				h := handlers.NewSessionTaskHandler(sessiontask.NewService(f, authority, nil, relay, "synthetic-secret"), bots.NewService(nil, resumeHTTPBotQueries{queries}), account, source)
 				echoServer := echo.New()
 				echoServer.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
-				echoServer.Use(auth.JWTMiddleware("synthetic-secret", func(echo.Context) bool { return false }, account.ValidateSession))
+				echoServer.Use(auth.JWTMiddleware("synthetic-secret", func(echo.Context) bool { return false }, func(ctx context.Context, user, _ string) error { return account.ValidateSession(ctx, user) }))
 				h.Register(echoServer)
-				token, _, e := auth.GenerateToken(imageSpawnUser, "synthetic-secret", time.Minute)
+				token, _, e := auth.GenerateInternalToken(imageSpawnUser, "synthetic-secret", time.Minute)
 				if e != nil {
 					t.Fatal(e)
 				}

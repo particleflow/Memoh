@@ -96,7 +96,7 @@ func TestBotActivityPostgresUnopenedRunsScopeAndReadOnly(t *testing.T) {
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("synthetic-activity-secret", func(echo.Context) bool { return false }))
 	handlers.NewSessionTaskHandler(service, bots.NewService(nil, postgresstore.NewQueries(dbsqlc.New(conn))), accounts.NewService(nil, store), nil).Register(e)
-	token, _, err := auth.GenerateToken(user, "synthetic-activity-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken(user, "synthetic-activity-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

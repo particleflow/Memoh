@@ -166,12 +166,14 @@ func exerciseCredentialHTTP(ctx context.Context, t *testing.T, store *postgresst
 	t.Helper()
 	log := slog.New(slog.DiscardHandler)
 	credentials := userruntime.NewTransferCredentials(store, true)
-	api := server.NewServerWithSessionValidator(log, ":0", "isolated-setup-secret", accounts.NewService(log, store).ValidateSession, handlers.NewRuntimeTransferCredentialHandler(credentials)) //nolint:contextcheck // The server handles independent HTTP contexts.
+	api := server.NewServerWithSessionValidator(log, ":0", "isolated-setup-secret", func(ctx context.Context, user, _ string) error {
+		return accounts.NewService(log, store).ValidateSession(ctx, user)
+	}, handlers.NewRuntimeTransferCredentialHandler(credentials)) //nolint:contextcheck // The server handles independent HTTP contexts.
 	https := httptest.NewTLSServer(api)
 	defer https.Close()
 	request := func(user, method, body, query string, want int) []byte {
 		t.Helper()
-		token, _, err := auth.GenerateToken(user, "isolated-setup-secret", time.Hour)
+		token, _, err := auth.GenerateInternalToken(user, "isolated-setup-secret", time.Hour)
 		if err != nil {
 			t.Fatal(err)
 		}

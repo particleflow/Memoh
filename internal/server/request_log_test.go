@@ -26,7 +26,7 @@ func (h requestLogTestHandler) Register(e *echo.Echo) {
 }
 
 func TestServerRequestLogOmitsQuery(t *testing.T) {
-	token, _, err := auth.GenerateToken("request-log-user", "test-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken("request-log-user", "test-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func TestServerRequestLogAttributesAnErrorReturnedAfterTheResponse(t *testing.T)
 			var logs bytes.Buffer
 			srv := NewServer(logger.New(&logs, "info", "json"), ":0", "test-secret", committedLogTestHandler{err: tc.err})
 			rec := httptest.NewRecorder()
-			token, _, err := auth.GenerateToken("request-log-user", "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken("request-log-user", "test-secret", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

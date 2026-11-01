@@ -68,8 +68,8 @@ func provideMemoryHandler(log *slog.Logger, botService *bots.Service, accountSer
 	return h
 }
 
-func provideAuthHandler(log *slog.Logger, accountService *accounts.Service, rc *boot.RuntimeConfig) *handlers.AuthHandler {
-	return handlers.NewAuthHandler(log, accountService, rc.JwtSecret, rc.JwtExpiresIn)
+func provideAuthHandler(log *slog.Logger, accountService *accounts.Service, sessions dbstore.AuthSessionStore, rc *boot.RuntimeConfig) *handlers.AuthHandler {
+	return handlers.NewAuthHandler(log, accountService, sessions, rc.JwtSecret, rc.JwtExpiresIn, rc.RefreshTokenIdleTTL)
 }
 
 func provideSessionQueueHandler(queries dbstore.Queries, agentService *application.Service, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, sessionService *sessionpkg.Service) *handlers.SessionQueueHandler {
@@ -165,7 +165,7 @@ func provideWebHandler(channelManager *channel.Manager, channelStore *channel.St
 	h.SetWorkdirService(workdirService)
 	h.SetCommandHandler(commandHandler)
 	h.SetRuntimeSkillResolver(containerdHandler)
-	h.SetAuthTokenConfig(rc.JwtSecret, rc.JwtExpiresIn)
+	h.SetAuthTokenConfig(rc.JwtSecret, rc.InternalTokenTTL)
 	h.SetMediaService(mediaService)
 	h.SetSpeechService(audioService, &webSpeechModelResolver{settings: settingsService})
 	return h
@@ -178,6 +178,7 @@ type serverParams struct {
 	RuntimeConfig     *boot.RuntimeConfig
 	Config            config.Config
 	AccountService    *accounts.Service
+	AuthSessions      dbstore.AuthSessionStore
 	ServerHandlers    []server.Handler `group:"server_handlers"`
 	ContainerdHandler *handlers.ContainerdHandler
 }
@@ -190,7 +191,7 @@ func provideServer(params serverParams) *server.Server {
 		params.Logger,
 		params.RuntimeConfig.ServerAddr,
 		params.Config.Auth.JWTSecret,
-		params.AccountService.ValidateSession,
+		handlers.AccountSessionValidator(params.AccountService, params.AuthSessions),
 		allHandlers...,
 	)
 }

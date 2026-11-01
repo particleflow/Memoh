@@ -241,6 +241,13 @@ func provideAccountStore(postgresStore *postgresstore.Store) (dbstore.AccountSto
 	return postgresStore, nil
 }
 
+func provideAuthSessionStore(postgresStore *postgresstore.Store) (dbstore.AuthSessionStore, error) {
+	if postgresStore == nil {
+		return nil, errors.New("postgres auth session store not configured")
+	}
+	return postgresStore, nil
+}
+
 func provideUserRuntimeStore(postgresStore *postgresstore.Store) (dbstore.UserRuntimeStore, error) {
 	if postgresStore == nil {
 		return nil, errors.New("postgres user runtime store not configured")
