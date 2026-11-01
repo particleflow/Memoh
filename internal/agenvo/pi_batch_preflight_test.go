@@ -2,6 +2,7 @@ package agenvo
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"os"
 	"os/exec"
@@ -39,11 +40,18 @@ func TestBatchScriptExplicitPathIsDataAndOptional(t *testing.T) {
 			t.Fatal("preflight chain or receipt field missing")
 		}
 	}
-	if strings.Contains(plain, "cygpath -p -u") {
-		t.Fatal("empty agent PATH still rewrites PATH")
-	}
-	if !strings.Contains(fixed, `if [ -n "$memoh_path" ]; then memoh_path="$(cygpath -p -u "$memoh_path")"; PATH="$memoh_path:$PATH"; export PATH; fi`) {
+	// The guarded export line exists in both envelopes; only the configured
+	// value differs (empty stays inert behind -n).
+	exportLine := `if [ -n "$memoh_path" ]; then memoh_path="$(cygpath -p -u "$memoh_path")"; PATH="$memoh_path:$PATH"; export PATH; fi`
+	if !strings.Contains(plain, exportLine) || !strings.Contains(fixed, exportLine) {
 		t.Fatal("explicit agent PATH export missing")
+	}
+	encoded := base64.StdEncoding.EncodeToString([]byte(withPath.Agent.Path))
+	if !strings.Contains(fixed, encoded) {
+		t.Fatal("configured agent PATH value absent from the envelope")
+	}
+	if strings.Contains(plain, encoded) {
+		t.Fatal("empty agent PATH carried a value")
 	}
 	// The configured PATH value itself must only enter the script as base64
 	// data, never as shell source (it is owner configuration).
@@ -57,10 +65,12 @@ func TestBatchScriptExplicitPathIsDataAndOptional(t *testing.T) {
 // existed.
 func TestBatchReceiptPreflightValidation(t *testing.T) {
 	p := batchFixtureProgress()
-	base := BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash,
+	base := BatchReceipt{
+		Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash,
 		PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID,
 		Exited: true, Started: false, ExitCode: 125,
-		Stdout: preflightBatchFile("stdout.jsonl", nil), Stderr: preflightBatchFile("stderr.txt", nil)}
+		Stdout: preflightBatchFile("stdout.jsonl", nil), Stderr: preflightBatchFile("stderr.txt", nil),
+	}
 	for _, tc := range []struct {
 		name      string
 		preflight string
