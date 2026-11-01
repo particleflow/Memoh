@@ -102,6 +102,10 @@ func (*resumeHTTPStore) PreviousComputerPiOperation(context.Context, dbstore.Com
 	return dbstore.ComputerOperationRecord{}, db.ErrNotFound
 }
 
+func (*resumeHTTPStore) LatestStartedPiOperation(context.Context, dbstore.ComputerOperationRecord, string) (dbstore.ComputerOperationRecord, error) {
+	return dbstore.ComputerOperationRecord{}, db.ErrNotFound
+}
+
 func (f *resumeHTTPStore) ListSessionTaskCandidates(context.Context, dbstore.SessionTaskFilter) ([]dbstore.SessionTaskCandidate, error) {
 	return []dbstore.SessionTaskCandidate{{Type: "computer_operation", ID: f.op.ID, SessionID: f.op.SessionID, CreatedAt: f.op.CreatedAt}}, nil
 }

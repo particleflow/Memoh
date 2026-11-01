@@ -185,12 +185,14 @@ func TestBatchEnvelopePreflightReasonCodes(t *testing.T) {
 				}
 			}
 			target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic-model", Path: tc.agentPath}}
+			// The root stays mapped to the synthetic dir so attempt files land
+			// in a real location; only the task cwd points at a directory that
+			// does not exist (the shim passes unmatched paths through).
+			cwd := target.WorkDir
 			if tc.cwdMissing {
-				// The cygpath shim passes unmatched paths through, so cd fails
-				// on the missing directory before any tool resolution.
-				target.WorkDir = `C:\Synthetic\missing`
+				cwd = `C:\Synthetic\no-such-dir`
 			}
-			script := batchFixtureScript(t, p, target, target.WorkDir, "task data")
+			script := batchFixtureScript(t, p, target, cwd, "task data")
 			//nolint:gosec // Actual fixed production envelope with only synthetic executables.
 			cmd := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)
 			// The login PATH deliberately cannot see pi/node: only the explicit
