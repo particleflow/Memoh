@@ -51,7 +51,19 @@ func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.Compute
 		return h, agenvo.ErrUnknown
 	}
 	var old Details
-	if prior.BotID != r.BotID || prior.SessionID != r.SessionID || prior.UserID != r.UserID || prior.TargetID != r.TargetID || prior.TargetFingerprint != r.TargetFingerprint || json.Unmarshal(prior.Details, &old) != nil || old.Batch == nil {
+	if prior.BotID != r.BotID || prior.SessionID != r.SessionID || prior.UserID != r.UserID || prior.TargetID != r.TargetID || json.Unmarshal(prior.Details, &old) != nil || old.Batch == nil {
+		return h, nil
+	}
+	if prior.TargetFingerprint != r.TargetFingerprint {
+		// A target profile change (incident E3: adding the explicit agent PATH)
+		// must not strand the conversation. When the latest prior operation
+		// proves Pi never started, the Pi session holds no live history, and a
+		// first invocation is the accurate expectation. Anything less proven
+		// stays unconfirmed.
+		b := old.Batch
+		if b.Progress.PiSessionID == p.PiSessionID && b.Receipt != nil && b.Receipt.Validate(b.Progress) == nil && !b.Receipt.Started {
+			h.Mode = "first"
+		}
 		return h, nil
 	}
 	b := old.Batch

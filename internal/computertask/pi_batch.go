@@ -242,7 +242,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			return result(r, d), nil
 		}
 		if !batch.Receipt.Started {
-			batch.Result = &agenvo.PiJSONResult{Outcome: "not_started"}
+			batch.Result = &agenvo.PiJSONResult{Outcome: "not_started", Preflight: batch.Receipt.Preflight}
 		} else {
 			meta := batch.Receipt.Completion
 			if meta == nil {
@@ -366,6 +366,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	_ = reader.Close()
 	if !batch.Receipt.Started {
 		parsed.Outcome = "not_started"
+		parsed.Preflight = batch.Receipt.Preflight
 	}
 	batch.Result = &parsed
 	d.Output = parsed.Output

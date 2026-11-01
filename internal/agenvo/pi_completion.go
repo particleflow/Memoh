@@ -108,7 +108,7 @@ func completionScriptParts(p BatchProgress, target Target) (prepare, preflight, 
 	prepare = fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/result-reader.cjs"
 printf '%%s' '%s' | base64 --decode > "$memoh_attempt/result-context.json"
 `, base64.StdEncoding.EncodeToString([]byte(completionAdapterProgram())), base64.StdEncoding.EncodeToString(context))
-	preflight = ` && command -v node >/dev/null`
+	preflight = batchPreflightNodeElif
 	project = `memoh_result_ready=false
 if [ "$memoh_started" = true ] && node "$memoh_attempt/result-reader.cjs" "$memoh_exit"; then
   memoh_result_hash="$(sha256sum "$memoh_attempt/result.json")"; memoh_result_hash="${memoh_result_hash%% *}"

@@ -57,7 +57,28 @@ type BatchReceipt struct {
 	Stdout      BatchFile           `json:"stdout"`
 	Stderr      BatchFile           `json:"stderr"`
 	Completion  *BatchFile          `json:"completion,omitempty"`
+	// Preflight names the first failed preflight check when Pi never started.
+	// Empty on receipts written before this field existed; "ok" when every
+	// check passed. Without it a silent 125 exit is indistinguishable from any
+	// other launch failure (incident E3).
+	Preflight string `json:"preflight,omitempty"`
 }
+
+// Fixed preflight reason codes, written to stderr.txt and the receipt so a
+// never-started batch is diagnosable without pane snapshots.
+const (
+	batchPreflightOK   = "ok"
+	batchPreflightCwd  = "preflight_cwd_failed"
+	batchPreflightPi   = "preflight_pi_missing"
+	batchPreflightNode = "preflight_node_missing"
+	batchPreflightLock = "preflight_lock_failed"
+)
+
+// batchPreflightNodeElif is the optional Node check of the preflight chain in
+// elif form. Node is an explicit preflight requirement when the compact result
+// or history adapters must run; missing Node cannot launch Pi.
+const batchPreflightNodeElif = `elif ! command -v node >/dev/null; then memoh_preflight=preflight_node_missing
+`
 
 var (
 	batchHex = regexp.MustCompile(`^[a-f0-9]{64}$`)
@@ -71,6 +92,14 @@ func (p BatchProgress) valid() bool {
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
 	if !p.valid() || !r.History.valid(p, r.Started) || r.Version != 1 || r.Attempt != p.Attempt || r.Generation != p.Generation || r.RequestHash != p.RequestHash || r.PiSessionID != p.PiSessionID || r.WorkspaceID != p.WorkspaceID || r.PaneID != p.PaneID || r.TerminalID != p.TerminalID || !r.Exited || r.ExitCode < 0 || r.ExitCode > 255 {
+		return ErrUnknown
+	}
+	switch r.Preflight {
+	case "", batchPreflightOK, batchPreflightCwd, batchPreflightPi, batchPreflightNode, batchPreflightLock:
+	default:
+		return ErrUnknown
+	}
+	if r.Started && r.Preflight != "" && r.Preflight != batchPreflightOK {
 		return ErrUnknown
 	}
 	for i, f := range []BatchFile{r.Stdout, r.Stderr} {
@@ -122,7 +151,7 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	historyPrepare, historyBefore, historyAfter, historyReceipt := historyScriptParts(p)
 	prepare += historyPrepare
 	if p.History != nil && preflight == "" {
-		preflight = ` && command -v node >/dev/null`
+		preflight = batchPreflightNodeElif
 	}
 	completion += historyReceipt
 	sessionPrepare := `mkdir -p "$memoh_session"`
@@ -135,8 +164,10 @@ case "$(uname -s)" in MINGW*_NT-*|MSYS_NT-*) ;; *) exit 125 ;; esac
 for t in base64 cygpath sha256sum wc mkdir mv rm rmdir; do command -v "$t" >/dev/null || exit 125; done
 memoh_root=%s; memoh_root="${memoh_root%%.}"
 memoh_cwd=%s; memoh_cwd="${memoh_cwd%%.}"
+memoh_path=%s; memoh_path="${memoh_path%%.}"
 memoh_root="$(cygpath -u "$memoh_root")"
 memoh_cwd="$(cygpath -u "$memoh_cwd")"
+if [ -n "$memoh_path" ]; then memoh_path="$(cygpath -p -u "$memoh_path")"; PATH="$memoh_path:$PATH"; export PATH; fi
 memoh_attempt="$memoh_root/%s"
 memoh_session="$memoh_root/%s"
 mkdir -p "$memoh_root/%s"
@@ -149,7 +180,12 @@ printf '%%s' '%s' | base64 --decode > "$memoh_attempt/prompt.txt"
 memoh_started=false
 memoh_exit=125
 memoh_locked=false
-if cd "$memoh_cwd" && command -v pi >/dev/null%s && mkdir "$memoh_session/lock" 2>/dev/null; then
+memoh_preflight=ok
+if ! cd "$memoh_cwd"; then memoh_preflight=preflight_cwd_failed
+elif ! command -v pi >/dev/null; then memoh_preflight=preflight_pi_missing
+%selif ! mkdir "$memoh_session/lock" 2>/dev/null; then memoh_preflight=preflight_lock_failed
+fi
+if [ "$memoh_preflight" = ok ]; then
   memoh_locked=true
   printf '%%s' '%s' > "$memoh_session/lock/owner"
   memoh_provider=%s; memoh_provider="${memoh_provider%%.}"
@@ -161,6 +197,9 @@ if cd "$memoh_cwd" && command -v pi >/dev/null%s && mkdir "$memoh_session/lock" 
   memoh_exit=$?
   set -e
 %sfi
+if [ "$memoh_preflight" != ok ]; then
+  printf '%%s\n' "$memoh_preflight" >> "$memoh_attempt/stderr.txt"
+fi
 memoh_out_hash="$(sha256sum "$memoh_attempt/stdout.jsonl")"; memoh_out_hash="${memoh_out_hash%%%% *}"
 memoh_err_hash="$(sha256sum "$memoh_attempt/stderr.txt")"; memoh_err_hash="${memoh_err_hash%%%% *}"
 memoh_out_size="$(wc -c < "$memoh_attempt/stdout.jsonl")"
@@ -168,7 +207,7 @@ memoh_err_size="$(wc -c < "$memoh_attempt/stderr.txt")"
 %s
 {
   printf '%%s' '%s' | base64 --decode
-  printf ',"started":%%s,"exit_code":%%d,"stdout":{"name":"stdout.jsonl","sha256":"%%s","size":%%d},"stderr":{"name":"stderr.txt","sha256":"%%s","size":%%d}' "$memoh_started" "$memoh_exit" "$memoh_out_hash" "$memoh_out_size" "$memoh_err_hash" "$memoh_err_size"
+  printf ',"started":%%s,"exit_code":%%d,"stdout":{"name":"stdout.jsonl","sha256":"%%s","size":%%d},"stderr":{"name":"stderr.txt","sha256":"%%s","size":%%d},"preflight":"%%s"' "$memoh_started" "$memoh_exit" "$memoh_out_hash" "$memoh_out_size" "$memoh_err_hash" "$memoh_err_size" "$memoh_preflight"
 %s  printf '}'
 } > "$memoh_attempt/receipt.tmp"
 mv "$memoh_attempt/receipt.tmp" "$memoh_attempt/receipt.json"
@@ -181,7 +220,7 @@ fi
 printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
-`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
+`, shellData(target.WorkDir), shellData(cwd), shellData(target.Agent.Path), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
 	script, err = producerEnvelope(script, p, target)
 	if err != nil {
 		return "", err
