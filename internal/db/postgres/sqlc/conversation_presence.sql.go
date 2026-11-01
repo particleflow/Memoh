@@ -80,6 +80,56 @@ func (q *Queries) CloseConversationPresenceRun(ctx context.Context, arg CloseCon
 	return result.RowsAffected(), nil
 }
 
+const finalizeConversationPresenceDecisionOutcome = `-- name: FinalizeConversationPresenceDecisionOutcome :execrows
+UPDATE conversation_presence_decisions d
+SET detail = d.detail || $1::jsonb
+WHERE d.team_id = public.memoh_current_team_id()
+  AND d.session_id = $2
+  AND d.invocation_id = $3
+  AND NOT jsonb_exists(d.detail, 'outcome')
+`
+
+type FinalizeConversationPresenceDecisionOutcomeParams struct {
+	OutcomePatch []byte      `json:"outcome_patch"`
+	SessionID    pgtype.UUID `json:"session_id"`
+	InvocationID string      `json:"invocation_id"`
+}
+
+func (q *Queries) FinalizeConversationPresenceDecisionOutcome(ctx context.Context, arg FinalizeConversationPresenceDecisionOutcomeParams) (int64, error) {
+	result, err := q.db.Exec(ctx, finalizeConversationPresenceDecisionOutcome, arg.OutcomePatch, arg.SessionID, arg.InvocationID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const finalizeConversationPresenceTemperature = `-- name: FinalizeConversationPresenceTemperature :execrows
+
+UPDATE conversation_presence p
+SET temperature = $1,
+    episode_id = CASE WHEN $1 = 'cold' THEN p.run_id ELSE p.episode_id END,
+    updated_at = now()
+WHERE p.team_id = public.memoh_current_team_id()
+  AND p.session_id = $2
+  AND p.invocation_id = $3
+  AND p.temperature = 'uncertain' AND p.state = 'eligible'
+`
+
+type FinalizeConversationPresenceTemperatureParams struct {
+	Temperature  string      `json:"temperature"`
+	SessionID    pgtype.UUID `json:"session_id"`
+	InvocationID string      `json:"invocation_id"`
+}
+
+// ===== Fast-reply v3 (Jev two-stage selection): decision accounting and pull sources =====
+func (q *Queries) FinalizeConversationPresenceTemperature(ctx context.Context, arg FinalizeConversationPresenceTemperatureParams) (int64, error) {
+	result, err := q.db.Exec(ctx, finalizeConversationPresenceTemperature, arg.Temperature, arg.SessionID, arg.InvocationID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const insertConversationPresence = `-- name: InsertConversationPresence :one
 INSERT INTO conversation_presence (bot_id, session_id, run_id, invocation_id, actor_id, episode_id, generation, live_generation, fencing_token, temperature, created_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::timestamptz)
@@ -136,6 +186,43 @@ func (q *Queries) InsertConversationPresence(ctx context.Context, arg InsertConv
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const insertConversationPresenceDecision = `-- name: InsertConversationPresenceDecision :exec
+INSERT INTO conversation_presence_decisions (session_id, run_id, invocation_id, actor_id, final_mode, direction, urgency, fallback_reason, pulls, total_ms, detail)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+ON CONFLICT (team_id, session_id, invocation_id) DO NOTHING
+`
+
+type InsertConversationPresenceDecisionParams struct {
+	SessionID      pgtype.UUID `json:"session_id"`
+	RunID          pgtype.UUID `json:"run_id"`
+	InvocationID   string      `json:"invocation_id"`
+	ActorID        string      `json:"actor_id"`
+	FinalMode      string      `json:"final_mode"`
+	Direction      pgtype.Text `json:"direction"`
+	Urgency        pgtype.Int4 `json:"urgency"`
+	FallbackReason pgtype.Text `json:"fallback_reason"`
+	Pulls          int32       `json:"pulls"`
+	TotalMs        int32       `json:"total_ms"`
+	Detail         []byte      `json:"detail"`
+}
+
+func (q *Queries) InsertConversationPresenceDecision(ctx context.Context, arg InsertConversationPresenceDecisionParams) error {
+	_, err := q.db.Exec(ctx, insertConversationPresenceDecision,
+		arg.SessionID,
+		arg.RunID,
+		arg.InvocationID,
+		arg.ActorID,
+		arg.FinalMode,
+		arg.Direction,
+		arg.Urgency,
+		arg.FallbackReason,
+		arg.Pulls,
+		arg.TotalMs,
+		arg.Detail,
+	)
+	return err
 }
 
 const latestConversationPresence = `-- name: LatestConversationPresence :one
@@ -236,5 +323,204 @@ func (q *Queries) ReadConversationPresenceFacts(ctx context.Context, arg ReadCon
 	row := q.db.QueryRow(ctx, readConversationPresenceFacts, arg.SessionID, arg.TurnID, arg.RunID)
 	var i ReadConversationPresenceFactsRow
 	err := row.Scan(&i.PreviousSources, &i.PendingInput, &i.PreviousSettled)
+	return i, err
+}
+
+const readPresenceDecisionContext = `-- name: ReadPresenceDecisionContext :one
+SELECT
+  (SELECT count(*) FROM bot_history_messages h
+    WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+      AND h.role IN ('user','assistant') AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid) AS turn_messages,
+  (SELECT count(*) FROM bot_history_messages h
+    WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+      AND h.role = 'assistant' AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid) AS assistant_messages,
+  (SELECT COALESCE(sum(length(COALESCE(NULLIF(h.display_text, ''), h.content->>'content', ''))), 0) FROM bot_history_messages h
+    WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+      AND h.role IN ('user','assistant') AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid) AS history_chars,
+  COALESCE((SELECT r.state FROM session_runs r
+    WHERE r.team_id = public.memoh_current_team_id() AND r.session_id = $1
+      AND r.run_id <> $3::uuid AND r.state IN ('accepted','running','waiting_decision','finishing')
+    ORDER BY r.created_at DESC LIMIT 1), '') AS active_run_state,
+  COALESCE((SELECT GREATEST(0, floor(extract(epoch FROM (clock_timestamp() - r.created_at)))::bigint) FROM session_runs r
+    WHERE r.team_id = public.memoh_current_team_id() AND r.session_id = $1
+      AND r.run_id <> $3::uuid AND r.state IN ('accepted','running','waiting_decision','finishing')
+    ORDER BY r.created_at DESC LIMIT 1), -1) AS active_run_age_seconds,
+  COALESCE((SELECT (h.metadata->>'stop_reason') IN ('length','max_tokens') FROM bot_history_messages h
+    WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+      AND h.role = 'assistant' AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid
+    ORDER BY h.created_at DESC, h.id DESC LIMIT 1), false) AS last_reply_truncated,
+  (SELECT count(*) FROM conversation_presence p
+    WHERE p.team_id = public.memoh_current_team_id() AND p.session_id = $1
+      AND p.run_id <> $3::uuid) AS prior_presence_rows,
+  (SELECT count(*) FROM bot_history_message_assets ma
+    JOIN bot_history_messages h ON h.team_id = public.memoh_current_team_id() AND h.id = ma.message_id
+      AND h.session_id = $1) AS file_count,
+  COALESCE((SELECT jsonb_agg(x.text ORDER BY x.created_at DESC) FROM (
+      SELECT p2.piece->>'text' AS text, p2.created_at FROM conversation_presence p2
+      WHERE p2.team_id = public.memoh_current_team_id() AND p2.session_id = $1
+        AND p2.run_id <> $3::uuid AND p2.state = 'published' AND p2.piece IS NOT NULL
+      ORDER BY p2.created_at DESC LIMIT 2) x), '[]'::jsonb) AS recent_ack_texts
+`
+
+type ReadPresenceDecisionContextParams struct {
+	SessionID pgtype.UUID `json:"session_id"`
+	TurnID    pgtype.UUID `json:"turn_id"`
+	RunID     pgtype.UUID `json:"run_id"`
+}
+
+type ReadPresenceDecisionContextRow struct {
+	TurnMessages        int64       `json:"turn_messages"`
+	AssistantMessages   int64       `json:"assistant_messages"`
+	HistoryChars        interface{} `json:"history_chars"`
+	ActiveRunState      interface{} `json:"active_run_state"`
+	ActiveRunAgeSeconds interface{} `json:"active_run_age_seconds"`
+	LastReplyTruncated  interface{} `json:"last_reply_truncated"`
+	PriorPresenceRows   int64       `json:"prior_presence_rows"`
+	FileCount           int64       `json:"file_count"`
+	RecentAckTexts      interface{} `json:"recent_ack_texts"`
+}
+
+func (q *Queries) ReadPresenceDecisionContext(ctx context.Context, arg ReadPresenceDecisionContextParams) (ReadPresenceDecisionContextRow, error) {
+	row := q.db.QueryRow(ctx, readPresenceDecisionContext, arg.SessionID, arg.TurnID, arg.RunID)
+	var i ReadPresenceDecisionContextRow
+	err := row.Scan(
+		&i.TurnMessages,
+		&i.AssistantMessages,
+		&i.HistoryChars,
+		&i.ActiveRunState,
+		&i.ActiveRunAgeSeconds,
+		&i.LastReplyTruncated,
+		&i.PriorPresenceRows,
+		&i.FileCount,
+		&i.RecentAckTexts,
+	)
+	return i, err
+}
+
+const readPresenceFileList = `-- name: ReadPresenceFileList :one
+SELECT COALESCE((SELECT jsonb_agg(f.entry ORDER BY f.created_at DESC) FROM (
+    SELECT jsonb_build_object('name', ma.name, 'type', ma.mime) AS entry, ma.created_at
+    FROM bot_history_message_assets ma
+    JOIN bot_history_messages h ON h.team_id = public.memoh_current_team_id() AND h.id = ma.message_id AND h.session_id = $1
+    ORDER BY ma.created_at DESC LIMIT 12) f), '[]'::jsonb) AS assets
+`
+
+func (q *Queries) ReadPresenceFileList(ctx context.Context, sessionID pgtype.UUID) (interface{}, error) {
+	row := q.db.QueryRow(ctx, readPresenceFileList, sessionID)
+	var assets interface{}
+	err := row.Scan(&assets)
+	return assets, err
+}
+
+const readPresenceLastReply = `-- name: ReadPresenceLastReply :one
+SELECT COALESCE(NULLIF(h.display_text, ''), h.content->>'content', '') AS text
+FROM bot_history_messages h
+WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+  AND h.role = 'assistant' AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid
+  AND COALESCE(NULLIF(h.display_text, ''), h.content->>'content', '') <> ''
+ORDER BY h.created_at DESC, h.id DESC
+LIMIT 1
+`
+
+type ReadPresenceLastReplyParams struct {
+	SessionID pgtype.UUID `json:"session_id"`
+	TurnID    pgtype.UUID `json:"turn_id"`
+}
+
+func (q *Queries) ReadPresenceLastReply(ctx context.Context, arg ReadPresenceLastReplyParams) (interface{}, error) {
+	row := q.db.QueryRow(ctx, readPresenceLastReply, arg.SessionID, arg.TurnID)
+	var text interface{}
+	err := row.Scan(&text)
+	return text, err
+}
+
+const readPresenceRecentTurns = `-- name: ReadPresenceRecentTurns :many
+SELECT h.role AS role, COALESCE(NULLIF(h.display_text, ''), h.content->>'content', '') AS text, h.created_at AS created_at, h.id AS id
+FROM bot_history_messages h
+WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1
+  AND h.role IN ('user','assistant') AND h.turn_visible AND h.turn_id IS DISTINCT FROM $2::uuid
+  AND COALESCE(NULLIF(h.display_text, ''), h.content->>'content', '') <> ''
+  AND ($3 IS NULL OR (h.created_at, h.id) < ($3::timestamptz, $4::uuid))
+ORDER BY h.created_at DESC, h.id DESC
+LIMIT 6
+`
+
+type ReadPresenceRecentTurnsParams struct {
+	SessionID       pgtype.UUID `json:"session_id"`
+	TurnID          pgtype.UUID `json:"turn_id"`
+	CursorCreatedAt interface{} `json:"cursor_created_at"`
+	CursorID        pgtype.UUID `json:"cursor_id"`
+}
+
+type ReadPresenceRecentTurnsRow struct {
+	Role      string             `json:"role"`
+	Text      interface{}        `json:"text"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID        pgtype.UUID        `json:"id"`
+}
+
+func (q *Queries) ReadPresenceRecentTurns(ctx context.Context, arg ReadPresenceRecentTurnsParams) ([]ReadPresenceRecentTurnsRow, error) {
+	rows, err := q.db.Query(ctx, readPresenceRecentTurns,
+		arg.SessionID,
+		arg.TurnID,
+		arg.CursorCreatedAt,
+		arg.CursorID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ReadPresenceRecentTurnsRow
+	for rows.Next() {
+		var i ReadPresenceRecentTurnsRow
+		if err := rows.Scan(
+			&i.Role,
+			&i.Text,
+			&i.CreatedAt,
+			&i.ID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const readPresenceTaskState = `-- name: ReadPresenceTaskState :one
+SELECT
+  COALESCE((SELECT jsonb_agg(x.entry ORDER BY x.created_at DESC) FROM (
+      SELECT jsonb_build_object('state', r.state, 'age_seconds', GREATEST(0, floor(extract(epoch FROM (clock_timestamp() - r.created_at)))::bigint)) AS entry, r.created_at
+      FROM session_runs r
+      WHERE r.team_id = public.memoh_current_team_id() AND r.session_id = $1
+        AND r.run_id <> $2::uuid AND r.state IN ('accepted','running','waiting_decision','finishing')
+      ORDER BY r.created_at DESC LIMIT 3) x), '[]'::jsonb) AS runs,
+  COALESCE((SELECT jsonb_agg(u.tool_name ORDER BY u.created_at) FROM (
+      SELECT 'user_input' AS tool_name, u2.created_at FROM user_input_requests u2
+      WHERE u2.team_id = public.memoh_current_team_id() AND u2.session_id = $1 AND u2.status = 'pending'
+      LIMIT 5) u), '[]'::jsonb) AS pending_user_input,
+  COALESCE((SELECT jsonb_agg(a.tool_name ORDER BY a.created_at) FROM (
+      SELECT 'approval:' || a2.tool_name AS tool_name, a2.created_at FROM tool_approval_requests a2
+      WHERE a2.team_id = public.memoh_current_team_id() AND a2.session_id = $1 AND a2.status = 'pending'
+      LIMIT 5) a), '[]'::jsonb) AS pending_approvals
+`
+
+type ReadPresenceTaskStateParams struct {
+	SessionID pgtype.UUID `json:"session_id"`
+	RunID     pgtype.UUID `json:"run_id"`
+}
+
+type ReadPresenceTaskStateRow struct {
+	Runs             interface{} `json:"runs"`
+	PendingUserInput interface{} `json:"pending_user_input"`
+	PendingApprovals interface{} `json:"pending_approvals"`
+}
+
+func (q *Queries) ReadPresenceTaskState(ctx context.Context, arg ReadPresenceTaskStateParams) (ReadPresenceTaskStateRow, error) {
+	row := q.db.QueryRow(ctx, readPresenceTaskState, arg.SessionID, arg.RunID)
+	var i ReadPresenceTaskStateRow
+	err := row.Scan(&i.Runs, &i.PendingUserInput, &i.PendingApprovals)
 	return i, err
 }

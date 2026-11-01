@@ -21,6 +21,10 @@ import (
 type ConversationPresenceOptions struct {
 	Policy                   conversationpresence.Policy
 	MaxConcurrentPerProvider int
+	// Jev, when its endpoint is set, switches the sidecar to the fast-reply v3
+	// decision path (two-stage Jev selection, pulls, accounting, §7 fallback).
+	// A zero endpoint keeps the structural Classify fallback (issue #105).
+	Jev PresenceJevRuntimeOptions
 	// Verify can narrow a host's capability contract. By default use explicit
 	// declarations from the model/provider selected for this formal request.
 	// This is catalog evidence, not a claim that an opaque gateway obeyed it.
@@ -157,10 +161,14 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 	done := make(chan conversationpresence.Outcome, 1)
 	go func() {
 		defer close(done)
-		ticket, facts, inserted, err := claims.prepare(sideCtx, runtime.options.Policy.Continuity, req.SourceReplyToMessageID != "")
+		if runtime.options.Jev.Endpoint != "" {
+			s.runConversationPresenceJev(ctx, runtime, claims, req, model, rc, sideCtx, source, done)
+			return
+		}
+		ticket, facts, decision, inserted, err := claims.prepare(sideCtx, req.SourceReplyToMessageID != "")
 		if err != nil || !inserted {
 			if s.logger != nil {
-				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "prepare_skipped"), slog.Bool("store_error", err != nil))
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "prepare_skipped"), slog.Bool("store_error", err != nil), slog.String("temperature", string(decision.Temperature)), slog.String("reason", decision.Reason))
 			}
 			return
 		}
@@ -198,7 +206,7 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 		select {
 		case outcome := <-handle.Done:
 			if s.logger != nil {
-				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", outcome.Status), slog.String("temperature", string(outcome.Decision.Temperature)), slog.Bool("usage_known", outcome.Usage.Known), slog.Int("input_tokens", outcome.Usage.InputTokens), slog.Int("output_tokens", outcome.Usage.OutputTokens))
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", outcome.Status), slog.String("temperature", string(outcome.Decision.Temperature)), slog.String("reason", outcome.Decision.Reason), slog.Bool("usage_known", outcome.Usage.Known), slog.Int("input_tokens", outcome.Usage.InputTokens), slog.Int("output_tokens", outcome.Usage.OutputTokens))
 			}
 			select {
 			case done <- outcome:

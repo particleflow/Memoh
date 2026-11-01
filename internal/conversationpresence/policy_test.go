@@ -2,7 +2,6 @@ package conversationpresence
 
 import (
 	"testing"
-	"time"
 
 	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/reasoning"
@@ -12,36 +11,50 @@ func directSource() inputsource.Source {
 	return inputsource.Source{Kind: inputsource.User, BotID: "bot", SessionID: "thread", UserID: "actor"}
 }
 
-func TestContinuityUsesStateInsteadOfAClockAlone(t *testing.T) {
-	now := time.Unix(20000, 0)
-	policy := ContinuityPolicy{IdleAfter: 3 * time.Second, IdleStartsEpisode: true}
+func TestClassifyUsesOnlyHostResolvedState(t *testing.T) {
 	for _, tc := range []struct {
-		name  string
-		facts Facts
-		want  Temperature
+		name   string
+		facts  Facts
+		want   Temperature
+		reason string
 	}{
-		{"first", Facts{Admitted: true, FirstDirectInput: true}, Cold},
-		{"reply across idle", Facts{Admitted: true, PendingUserInput: true, Now: now, LastDirectInput: now.Add(-time.Hour)}, Hot},
-		{"short explicit new topic", Facts{Admitted: true, ExplicitRestart: true, RecentExchange: true}, Cold},
-		{"idle but unresolved", Facts{Admitted: true, HistoryAvailable: true, Now: now, LastDirectInput: now.Add(-time.Hour)}, Uncertain},
-		{"idle and settled", Facts{Admitted: true, HistoryAvailable: true, PreviousSettled: true, Now: now, LastDirectInput: now.Add(-time.Hour)}, Cold},
-		{"new page old run", Facts{Admitted: true, InFlightFollowUp: true}, Hot},
-		{"missing history", Facts{Admitted: true}, Uncertain},
-		{"duplicate", Facts{Admitted: true, FirstDirectInput: true, Duplicate: true}, Ineligible},
-		{"retry", Facts{Admitted: true, FirstDirectInput: true, Replacement: true}, Ineligible},
-		{"not accepted", Facts{FirstDirectInput: true}, Ineligible},
+		{"first", Facts{Admitted: true, FirstDirectInput: true, PreviousSettled: true, HistoryAvailable: true}, Cold, "first_direct_input"},
+		{"pending user input", Facts{Admitted: true, PendingUserInput: true, PreviousSettled: true, HistoryAvailable: true}, Hot, "pending_user_input"},
+		{"reply continuation", Facts{Admitted: true, ReplyContinuation: true, PreviousSettled: true, HistoryAvailable: true}, Hot, "reply_continuation"},
+		{"unsettled previous run", Facts{Admitted: true, HistoryAvailable: true}, Hot, "inflight_followup"},
+		{"settled follow-up after recent exchange", Facts{Admitted: true, PreviousSettled: true, HistoryAvailable: true}, Cold, "settled_followup"},
+		{"missing history", Facts{Admitted: true, PreviousSettled: true}, Uncertain, "history_unavailable"},
+		{"duplicate", Facts{Admitted: true, FirstDirectInput: true, Duplicate: true}, Ineligible, "not_new_direct_admission"},
+		{"retry", Facts{Admitted: true, FirstDirectInput: true, Replacement: true}, Ineligible, "not_new_direct_admission"},
+		{"not accepted", Facts{FirstDirectInput: true}, Ineligible, "not_new_direct_admission"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := Classify(directSource(), "bot", "thread", tc.facts, policy); got.Temperature != tc.want {
-				t.Fatalf("classification = %+v, want %s", got, tc.want)
+			got := Classify(directSource(), "bot", "thread", tc.facts)
+			if got.Temperature != tc.want || got.Reason != tc.reason {
+				t.Fatalf("classification = %+v, want %s/%s", got, tc.want, tc.reason)
 			}
 		})
 	}
-	for _, after := range []time.Duration{time.Second, time.Hour} {
-		facts := Facts{Admitted: true, HistoryAvailable: true, PreviousSettled: true, Now: now, LastDirectInput: now.Add(-time.Minute)}
-		got := Classify(directSource(), "bot", "thread", facts, ContinuityPolicy{IdleAfter: after, IdleStartsEpisode: true})
-		if (got.Temperature == Cold) != (after == time.Second) {
-			t.Fatalf("configured window ignored: after %s, %+v", after, got)
+}
+
+// The rule set must partition Facts: every accepted direct-input combination
+// reaches exactly one reason, and no rule is unreachable.
+func TestClassifyPartitionsEveryAcceptedDirectInput(t *testing.T) {
+	reasons := map[string]bool{}
+	for mask := 0; mask < 1<<5; mask++ {
+		facts := Facts{Admitted: true}
+		for bit, field := range []*bool{&facts.FirstDirectInput, &facts.PendingUserInput, &facts.ReplyContinuation, &facts.PreviousSettled, &facts.HistoryAvailable} {
+			*field = mask&(1<<bit) != 0
+		}
+		got := Classify(directSource(), "bot", "thread", facts)
+		if got.Reason == "" || got.Temperature == Ineligible {
+			t.Fatalf("facts %+v did not classify: %+v", facts, got)
+		}
+		reasons[got.Reason] = true
+	}
+	for _, reason := range []string{"first_direct_input", "pending_user_input", "reply_continuation", "inflight_followup", "history_unavailable", "settled_followup"} {
+		if !reasons[reason] {
+			t.Fatalf("reason %q is unreachable; reachable=%v", reason, reasons)
 		}
 	}
 }
@@ -53,7 +66,7 @@ func TestOnlyTrustedDirectSourceIsEligible(t *testing.T) {
 		{Kind: inputsource.User, BotID: "other", SessionID: "thread", UserID: "actor"},
 		{Kind: inputsource.User, BotID: "bot", SessionID: "thread"},
 	} {
-		got := Classify(source, "bot", "thread", Facts{Admitted: true, FirstDirectInput: true}, ContinuityPolicy{})
+		got := Classify(source, "bot", "thread", Facts{Admitted: true, FirstDirectInput: true})
 		if got.Temperature != Ineligible {
 			t.Fatalf("source %+v became eligible: %+v", source, got)
 		}

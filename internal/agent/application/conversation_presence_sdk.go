@@ -139,10 +139,35 @@ func (g *conversationPresenceSDKGenerator) Generate(ctx context.Context, input c
 	if err != nil {
 		return conversationpresence.Result{}, err
 	}
+	return g.generateJSON(ctx, presencePrompt, data, input.Phase, limits)
+}
+
+// generateDirected serves the fast-reply v3 path: the system prompt is the
+// shared skeleton plus the direction body, and the user message is the
+// variable slot payload (design v3 §5.2). extraSystem is appended after the
+// skeleton and direction body as a separate prompt segment — it never becomes
+// part of the direction key, so the direction body stays intact (the
+// lead-ban retry passes its ban here). The output contract is unchanged.
+func (g *conversationPresenceSDKGenerator) generateDirected(ctx context.Context, direction, extraSystem string, slots presenceSlots, phase conversationpresence.Phase, limits conversationpresence.Limits) (conversationpresence.Result, error) {
+	if g == nil || g.generate == nil || limits.MaxInputRunes <= 0 || limits.MaxOutputTokens <= 0 {
+		return conversationpresence.Result{}, conversationpresence.ErrInvalidContract
+	}
+	data, err := json.Marshal(slots)
+	if err != nil {
+		return conversationpresence.Result{}, err
+	}
+	system := presenceSystemPrompt(direction)
+	if extraSystem != "" {
+		system += "\n" + extraSystem
+	}
+	return g.generateJSON(ctx, system, data, phase, limits)
+}
+
+func (g *conversationPresenceSDKGenerator) generateJSON(ctx context.Context, system string, payload []byte, phase conversationpresence.Phase, limits conversationpresence.Limits) (conversationpresence.Result, error) {
 	maxTokens := limits.MaxOutputTokens
 	request := sdk.Request{
-		System:     presencePrompt,
-		Messages:   []sdk.Message{sdk.UserMessage(string(data))},
+		System:     system,
+		Messages:   []sdk.Message{sdk.UserMessage(string(payload))},
 		MaxTokens:  &maxTokens,
 		ToolChoice: sdk.ToolChoice{Mode: sdk.ToolChoiceNone},
 	}
@@ -168,7 +193,7 @@ func (g *conversationPresenceSDKGenerator) Generate(ctx context.Context, input c
 	// Reject a valid prefix followed by extra JSON or free text. Reasoning is
 	// never parsed, displayed, persisted or passed to another model.
 	var trailing any
-	if err := decoder.Decode(&trailing); err != io.EOF || response.Phase != input.Phase || strings.TrimSpace(response.Text) == "" {
+	if err := decoder.Decode(&trailing); err != io.EOF || response.Phase != phase || strings.TrimSpace(response.Text) == "" {
 		return out, errPresenceOutput
 	}
 	out.Text, out.Phase = response.Text, response.Phase

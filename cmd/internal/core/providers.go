@@ -840,7 +840,12 @@ func provideExternalAgentLoginHandler(log *slog.Logger, drivers external.Drivers
 func provideAgentService(log *slog.Logger, a *native.Agent, modelsService *models.Service, queries dbstore.Queries, msgService *message.DBService, settingsService *settings.Service, accountService *accounts.Service, botService *bots.Service, mediaService *media.Service, containerdHandler *handlers.ContainerdHandler, workspaceManager *workspace.Manager, memoryRegistry *memprovider.Registry, channelStore *channel.Store, _ *route.DBService, sessionService *sessionpkg.Service, eventHub *event.Hub, compactionService *compaction.Service, pipeline *timeline.Pipeline, rc *boot.RuntimeConfig, bgManager *background.Manager, toolApproval *toolapproval.Service, userInput *userinput.Service, acpPool *acpagent.SessionPool, directAgents external.Drivers, hookService *hookspkg.Service, sessionRuntime *sessionruntime.Manager, workdirService *workdir.Service, cfg config.Config) *application.Service {
 	service := application.NewService(log, modelsService, queries, msgService, settingsService, accountService, a, rc.TimezoneLocation, 120*time.Second)
 	if cfg.Agent.ConversationPresence.IsEnabled() {
-		service.SetConversationPresence(application.ConversationPresenceOptions{Policy: cfg.Agent.ConversationPresence.Policy(), MaxConcurrentPerProvider: cfg.Agent.ConversationPresence.ConcurrentLimit()})
+		options := application.ConversationPresenceOptions{Policy: cfg.Agent.ConversationPresence.Policy(), MaxConcurrentPerProvider: cfg.Agent.ConversationPresence.ConcurrentLimit()}
+		if jev := cfg.Agent.ConversationPresence.Jev; jev.Enabled() {
+			effective := jev.Effective()
+			options.Jev = application.PresenceJevRuntimeOptions{Endpoint: effective.Endpoint, APIKey: effective.APIKey, Model: effective.Model, Timeout: time.Duration(effective.TimeoutSeconds) * time.Second, PullMax: effective.PullMax, PullRunes: effective.PullRunes, StateMaxRunes: effective.StateMaxRunes, Directions: effective.Directions}
+		}
+		service.SetConversationPresence(options)
 	}
 	service.SetResumeSecret(rc.JwtSecret)
 	service.SetResumeReadiness(func(ctx context.Context, botID, targetID string) error {

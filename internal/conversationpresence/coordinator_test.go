@@ -84,7 +84,7 @@ func (f fixtureGenerator) Generate(ctx context.Context, in Input, limits Limits)
 func fixtureInput() Input {
 	return Input{
 		Ticket: Ticket{Scope: Scope{ActorID: "actor", BotID: "bot", SessionID: "thread"}, InvocationID: "invocation", EpisodeID: "episode", Generation: "generation", Fence: 1},
-		Source: directSource(), Facts: Facts{Admitted: true, FirstDirectInput: true}, Phase: Accepted,
+		Source: directSource(), Facts: Facts{Admitted: true, FirstDirectInput: true, HistoryAvailable: true, PreviousSettled: true}, Phase: Accepted,
 		Identity: Identity{ModelUUID: "selected", ModelID: "catalog-model", ProviderID: "provider", ClientType: "openai-completions"},
 		Choice:   ThinkingChoice{Usable: true}, Text: "Please examine this problem.",
 	}
