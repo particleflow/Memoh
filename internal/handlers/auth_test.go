@@ -391,7 +391,7 @@ func TestLoginConflictMapsToUnavailable(t *testing.T) {
 	assert.Equal(t, http.StatusServiceUnavailable, rec.Code)
 }
 
-func (f *authFixture) loginOn(t *testing.T, e *echo.Echo, deviceID string) (*httptest.ResponseRecorder, map[string]any) {
+func (*authFixture) loginOn(t *testing.T, e *echo.Echo, deviceID string) (*httptest.ResponseRecorder, map[string]any) {
 	t.Helper()
 	body := map[string]any{"username": "alice", "password": authTestPassword}
 	if deviceID != "" {
