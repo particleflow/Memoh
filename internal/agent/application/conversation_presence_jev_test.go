@@ -16,6 +16,7 @@ import (
 
 	"github.com/felinics/memoh/internal/conversationpresence"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/jev"
 )
 
@@ -692,5 +693,84 @@ func TestPresenceDirectedGeneratorLeadBanIsSeparatePromptField(t *testing.T) {
 	}
 	if strings.Contains(systems[1], "【方向：安抚 soothe】") {
 		t.Fatalf("retry drifted to the soothe body:\n%s", systems[1])
+	}
+}
+
+// probeClaims counts the Coordinator's claim and publish calls.
+type probeClaims struct{ claims, publishes atomic.Int32 }
+
+func (c *probeClaims) Claim(context.Context, conversationpresence.Ticket) (bool, error) {
+	c.claims.Add(1)
+	return true, nil
+}
+
+func (*probeClaims) Close(context.Context, conversationpresence.Ticket, string) error { return nil }
+
+func (c *probeClaims) Publish(context.Context, conversationpresence.Ticket, conversationpresence.Piece) (bool, error) {
+	c.publishes.Add(1)
+	return true, nil
+}
+
+// TestPresenceJevFallbackSilentNeverPublishes fixes the P1-5 review probe as
+// a regression test (design v3 §7): with less than the 1.5s publish grace
+// left on the sidecar context, the ack-shaped structural fallback freezes to
+// fallback_silent + budget_exhausted and the real Coordinator.Start path must
+// close it as not_cold without a claim or a publish.
+func TestPresenceJevFallbackSilentNeverPublishes(t *testing.T) {
+	facts := conversationpresence.Facts{PreviousSettled: true, HistoryAvailable: true}
+	engine := &presenceJevEngine{
+		settings: PresenceJevRuntimeOptions{Timeout: 10 * time.Second, PullMax: 4, PullRunes: 500, StateMaxRunes: 3200, Directions: []string{"soothe"}},
+		in:       presenceJevInput{Text: strings.Repeat("还在吗，帮我看一下上次那个任务的结论", 3), Facts: facts, AdmittedAt: time.Now()},
+	}
+	result := engine.structuralFallback("budget_exhausted", presenceDecisionDetail{})
+	if result.Mode != presenceModeFallbackACK || result.Temperature != conversationpresence.Cold {
+		t.Fatalf("precondition: settled long follow-up must be the ack shape, got %s/%s", result.Mode, result.Temperature)
+	}
+	// 1.2s left is below the grace: the runtime freezes the silent final state
+	// before step2.
+	sideCtx, cancel := context.WithTimeout(context.Background(), 1200*time.Millisecond)
+	defer cancel()
+	if !freezeFallbackSilent(sideCtx, result) {
+		t.Fatal("grace must be unaffordable with 1.2s left")
+	}
+	if result.Mode != presenceModeFallbackNoop || result.FallbackReason != "budget_exhausted" || result.Temperature != conversationpresence.Hot {
+		t.Fatalf("frozen state mode=%s reason=%s temperature=%s", result.Mode, result.FallbackReason, result.Temperature)
+	}
+
+	input := conversationpresence.Input{
+		Ticket: conversationpresence.Ticket{Scope: conversationpresence.Scope{ActorID: "actor", BotID: "bot", SessionID: "session"}, RunID: "run", InvocationID: "invocation", EpisodeID: "episode", Generation: "g1", Fence: 1},
+		Source: inputsource.Source{Kind: inputsource.User, BotID: "bot", SessionID: "session", UserID: "actor"},
+		Facts:  facts,
+		Choice: conversationpresence.ThinkingChoice{Usable: true},
+		Phase:  conversationpresence.Thinking,
+	}
+	run := func(precomputed conversationpresence.Decision) (conversationpresence.Outcome, *probeClaims) {
+		claims := &probeClaims{}
+		// The runtime's !Publishable() branch hands over the constant generator
+		// with no grace at all: only the cold gate stands between it and a
+		// publish.
+		coordinator := conversationpresence.Coordinator{
+			Claims:    claims,
+			Capacity:  &presenceCapacity{limit: 1, active: map[string]int{}},
+			Generator: presenceFallbackGenerator{text: presenceFallbackText, notBefore: time.Now()},
+			Policy:    conversationpresence.Policy{Limits: conversationpresence.Limits{Deadline: 2 * time.Second, MaxInputRunes: 100, MaxOutputTokens: 100, MaxTextRunes: 160}},
+		}
+		in := input
+		in.Precomputed = &precomputed
+		handle, err := coordinator.Start(sideCtx, in)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return <-handle.Done, claims
+	}
+	outcome, claims := run(conversationpresence.Decision{Temperature: result.Temperature, Reason: result.Reason})
+	if outcome.Status != "not_cold" || claims.claims.Load() != 0 || claims.publishes.Load() != 0 {
+		t.Fatalf("silent fallback must stop at the cold gate: status=%s claims=%d published=%d", outcome.Status, claims.claims.Load(), claims.publishes.Load())
+	}
+	// Control, the probe's pre-fix observation: the Cold temperature the ack
+	// shape carried claims and publishes the constant text through this path.
+	outcome, claims = run(conversationpresence.Decision{Temperature: conversationpresence.Cold, Reason: result.Reason})
+	if outcome.Status != "published" || claims.publishes.Load() != 1 {
+		t.Fatalf("control: a cold decision must publish through this path: status=%s published=%d", outcome.Status, claims.publishes.Load())
 	}
 }

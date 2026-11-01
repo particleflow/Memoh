@@ -97,10 +97,8 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 	// records fallback_silent + budget_exhausted, not a post-step2 mode
 	// change): a constant ack the sidecar context can no longer cover with
 	// the 1.5s publish grace stays silent.
-	if result.Mode == presenceModeFallbackACK && !sideCtxAffordsGrace(sideCtx) {
+	if freezeFallbackSilent(sideCtx, result) {
 		logStage("fallback_silent", slog.String("fallback_reason", "budget_exhausted"))
-		result.Mode = presenceModeFallbackNoop
-		result.FallbackReason = "budget_exhausted"
 	}
 	if finishErr := claims.finalizePresenceDecision(sideCtx, ticket, result, time.Since(decisionStart).Milliseconds()); finishErr != nil && s.logger != nil {
 		s.logger.WarnContext(ctx, "conversation_presence_step2_failed", slog.String("error", finishErr.Error()))
@@ -214,6 +212,23 @@ func sideCtxAffordsGrace(ctx context.Context) bool {
 	if deadline, ok := ctx.Deadline(); ok {
 		return time.Until(deadline) >= presenceFallbackGrace
 	}
+	return true
+}
+
+// freezeFallbackSilent turns an ack-shaped structural fallback into
+// fallback_silent + budget_exhausted when the sidecar context cannot afford
+// the §7 publish grace. The temperature flips to Hot together with the mode:
+// Publishable() only reads the mode while the Coordinator only reads the
+// precomputed temperature, so a Cold silent decision would still be claimed
+// and published. Hot closes the row through the Coordinator's not_cold
+// terminal like every other silent turn.
+func freezeFallbackSilent(sideCtx context.Context, result *presenceJevResult) bool {
+	if result.Mode != presenceModeFallbackACK || sideCtxAffordsGrace(sideCtx) {
+		return false
+	}
+	result.Mode = presenceModeFallbackNoop
+	result.Temperature = conversationpresence.Hot
+	result.FallbackReason = "budget_exhausted"
 	return true
 }
 
