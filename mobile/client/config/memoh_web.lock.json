@@ -590,9 +590,9 @@
   "sharedReadAloudStreaming": {
     "sourceChanges": {
       "local": "shared-read-aloud-streaming.json",
-      "sha256": "6a5db5d28d111a55895b7cb89fb16ec09bfa1d2ce032eb81bdd14dc986e2dd9c"
+      "sha256": "810e7d2f4d9453b07d0d6c71b10568370dc7952f7e5b5d6b2e11a508e52c972a"
     },
-    "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test. Round 2 (PR review): ack status line reading, resend stop for edit/retry, and bounded-hold streaming projection with cursor realignment. Round 3 (PR review): the spoken cursor no longer depends on the status block position (the ack reads ahead of the body under the projected [text..., status] order, in the same frame, and across settled body frames), and a reclassified construct rolls the spoken cursor back to the code-point common prefix and rereads instead of leaving the tail silent and consumed.",
+    "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test. The conversation_ack status block is ephemeral: the runtime projection keeps it only while the run is active and drops it on the terminal frame, so the spoken cursor tracks the body independently of the ack and settled frames flush whole.",
     "upstreamCommitPendingWebLinePR": true
   }
 }
