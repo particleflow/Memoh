@@ -59,6 +59,55 @@ func TestBatchTargetChangeWithProvenNoInvocationDispatchesFirst(t *testing.T) {
 	}
 }
 
+// TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests covers the production
+// sequence after the agent PATH config fix: one request was rejected at the
+// continuity gate (no receipt, no native mutation, state not_started — the
+// persisted shape of operation 31e8c398), and the user's next real request on
+// the same default work_dir must still dispatch.
+func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	c := standardClient(t, source, "pc-a", false)
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	batchResultUntilReady(t, c, first.ID)
+	prior := store.records[first.ID]
+	var d Details
+	if err := json.Unmarshal(prior.Details, &d); err != nil {
+		t.Fatal(err)
+	}
+	// Rewrite the latest prior into the admission-blocked shape: matching
+	// fingerprint, no receipt, nothing ever dispatched.
+	d.Phase = "pi_continuity_unconfirmed"
+	d.Batch.Receipt = nil
+	d.Batch.Result = nil
+	d.Batch.Files = nil
+	d.Batch.Progress.Phase = ""
+	d.Batch.Progress.WorkspaceID, d.Batch.Progress.PaneID, d.Batch.Progress.RequestID = "", "", ""
+	prior.Details, _ = json.Marshal(d)
+	prior.State = "not_started"
+	store.records[first.ID] = prior
+	f.runs = 0
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-b"}
+	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next.State == "not_started" && next.Phase == "pi_continuity_unconfirmed" {
+		t.Fatalf("admission-blocked prior stranded a new request: %+v", next)
+	}
+	if f.runs != 1 {
+		t.Fatalf("expected one dispatch, got %d", f.runs)
+	}
+	var d2 Details
+	if err := json.Unmarshal(store.records[next.ID].Details, &d2); err != nil || d2.Batch == nil || d2.Batch.Progress.History == nil || d2.Batch.Progress.History.Mode != "first" {
+		t.Fatalf("admission-blocked prior must dispatch as first: %+v %v", d2.Batch, err)
+	}
+}
+
 // TestResumeCompletedNotStartedReportsUnresumable pins the incident E3 resume
 // no-op: a completed operation whose Pi never started is not re-executed, and
 // the receipt says so explicitly instead of reading like a retry.
