@@ -89,7 +89,7 @@ func (s *testAccountStore) IsValidTitleModel(context.Context, string) (bool, err
 	return s.validTitleModel, s.titleModelErr
 }
 
-func (*testAccountStore) UpdatePassword(context.Context, dbstore.UpdateAccountPasswordInput) error {
+func (*testAccountStore) UpdatePasswordAndRevokeSessions(context.Context, dbstore.UpdateAccountPasswordInput) error {
 	return errors.New("not implemented")
 }
 

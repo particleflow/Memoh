@@ -81,6 +81,19 @@ type AgentSessionPublication struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type AuthSession struct {
+	ID           pgtype.UUID        `json:"id"`
+	UserID       pgtype.UUID        `json:"user_id"`
+	DeviceID     string             `json:"device_id"`
+	DeviceName   string             `json:"device_name"`
+	RefreshHash  string             `json:"refresh_hash"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	LastUsedAt   pgtype.Timestamptz `json:"last_used_at"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	RevokedAt    pgtype.Timestamptz `json:"revoked_at"`
+	RevokeReason pgtype.Text        `json:"revoke_reason"`
+}
+
 type Bot struct {
 	ID                      pgtype.UUID        `json:"id"`
 	OwnerUserID             pgtype.UUID        `json:"owner_user_id"`
