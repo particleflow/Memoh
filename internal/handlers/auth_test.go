@@ -43,6 +43,9 @@ type memAuthSessions struct {
 	next     int
 	getErr   error
 	touchErr error
+	// touchZero makes the touch predicate match no row, as happens when the
+	// session is revoked or expires between the read and the UPDATE.
+	touchZero bool
 }
 
 func newMemAuthSessions() *memAuthSessions {
@@ -120,6 +123,9 @@ func (s *memAuthSessions) TouchAuthSession(_ context.Context, sessionID string, 
 	if s.touchErr != nil {
 		return 0, s.touchErr
 	}
+	if s.touchZero {
+		return 0, nil
+	}
 	row, ok := s.rows[sessionID]
 	if !ok || !row.RevokedAt.IsZero() || !row.ExpiresAt.After(time.Now()) {
 		return 0, nil
@@ -128,6 +134,18 @@ func (s *memAuthSessions) TouchAuthSession(_ context.Context, sessionID string, 
 	row.ExpiresAt = expiresAt
 	s.rows[sessionID] = row
 	return 1, nil
+}
+
+// rewindExpiry moves a stored expiry into the past by d and returns the new
+// value. A later touch then produces a slide that is observable regardless of
+// the wall clock granularity (about 15.6ms on Windows).
+func (s *memAuthSessions) rewindExpiry(sessionID string, d time.Duration) time.Time {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	row := s.rows[sessionID]
+	row.ExpiresAt = row.ExpiresAt.Add(-d)
+	s.rows[sessionID] = row
+	return row.ExpiresAt
 }
 
 func (s *memAuthSessions) RevokeAuthSession(_ context.Context, sessionID, userID, _ string) (int64, error) {
@@ -420,13 +438,17 @@ func (*conflictSessions) CreateAuthSession(context.Context, dbstore.CreateAuthSe
 }
 
 func TestRefreshReturnsTokensAndSlidesExpiry(t *testing.T) {
-	f := newAuthFixture(t, 24*time.Hour)
+	const idleTTL = 24 * time.Hour
+	f := newAuthFixture(t, idleTTL)
 	login := f.login(t, "device-1")
 	refreshToken := login["refresh_token"].(string)
 	sessionID, _, ok := auth.ParseRefreshToken(refreshToken)
 	require.True(t, ok)
-	row, _ := f.sessions.row(sessionID)
-	before := row.ExpiresAt
+	// Age the stored expiry by an hour: the login and the refresh can land on
+	// the same wall clock tick, so comparing now()+ttl with now()+ttl is not a
+	// slide. After the rewind a refresh must bring the expiry back to
+	// now()+ttl, a full hour ahead of what is stored.
+	before := f.sessions.rewindExpiry(sessionID, time.Hour)
 
 	rec, response := f.do(t, http.MethodPost, "/auth/refresh", map[string]string{"refresh_token": refreshToken}, "")
 	require.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
@@ -437,8 +459,12 @@ func TestRefreshReturnsTokensAndSlidesExpiry(t *testing.T) {
 	claims := accessClaims(t, response["access_token"].(string))
 	assert.Equal(t, sessionID, claims["sid"])
 
-	row, _ = f.sessions.row(sessionID)
+	row, _ := f.sessions.row(sessionID)
 	assert.True(t, row.ExpiresAt.After(before), "expiry should slide forward")
+	assert.WithinDuration(t, time.Now().Add(idleTTL), row.ExpiresAt, time.Minute, "expiry must be the server now()+idle ttl")
+	reported, err := time.Parse(time.RFC3339, response["refresh_expires_at"].(string))
+	require.NoError(t, err)
+	assert.WithinDuration(t, reported, row.ExpiresAt, time.Second, "the response must report the stored expiry")
 	assert.False(t, row.LastUsedAt.IsZero())
 
 	// The same refresh token can be used again.
@@ -537,6 +563,91 @@ func TestRefreshInfrastructureFailureAnswersUnavailable(t *testing.T) {
 
 	rec, _ = f.do(t, http.MethodPost, "/auth/refresh", map[string]string{"refresh_token": refreshToken}, "")
 	assert.Equal(t, http.StatusOK, rec.Code, "the session must still refresh after the outage")
+}
+
+// Between the read and the touch a concurrent logout or expiry can make the
+// touch predicate (revoked_at IS NULL AND expires_at > now()) match no row.
+// That refresh answers 401, mints no access token, and leaves the row alone:
+// it is the writer that revoked the session, not the refresh.
+func TestRefreshTouchZeroRowsAnswersUnauthorized(t *testing.T) {
+	f := newAuthFixture(t, 24*time.Hour)
+	login := f.login(t, "device-1")
+	refreshToken := login["refresh_token"].(string)
+	sessionID, _, ok := auth.ParseRefreshToken(refreshToken)
+	require.True(t, ok)
+	row, found := f.sessions.row(sessionID)
+	require.True(t, found)
+	before := row.ExpiresAt
+
+	f.sessions.mu.Lock()
+	f.sessions.touchZero = true
+	f.sessions.mu.Unlock()
+	rec, response := f.do(t, http.MethodPost, "/auth/refresh", map[string]string{"refresh_token": refreshToken}, "")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code, rec.Body.String())
+	assert.NotContains(t, response, "access_token", "a touch that matched no row must not mint an access token")
+	assert.NotContains(t, response, "refresh_token")
+
+	f.sessions.mu.Lock()
+	f.sessions.touchZero = false
+	f.sessions.mu.Unlock()
+	row, found = f.sessions.row(sessionID)
+	require.True(t, found)
+	assert.True(t, row.RevokedAt.IsZero(), "the zero-row path must not revoke the session")
+	assert.Equal(t, before, row.ExpiresAt, "the zero-row path must not slide the expiry")
+	assert.True(t, row.LastUsedAt.IsZero(), "the zero-row path must not record a use")
+
+	// The row itself is still live, so once the predicate matches again the
+	// same token refreshes normally.
+	rec, _ = f.do(t, http.MethodPost, "/auth/refresh", map[string]string{"refresh_token": refreshToken}, "")
+	assert.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
+}
+
+// The refresh token is static: two requests that race with the same token
+// both succeed, both get the token back unchanged, and the expiry slides.
+// Neither may see a conflict (503) or a rejection (401).
+func TestRefreshConcurrentSameTokenBothSucceed(t *testing.T) {
+	const idleTTL = 24 * time.Hour
+	f := newAuthFixture(t, idleTTL)
+	login := f.login(t, "device-1")
+	refreshToken := login["refresh_token"].(string)
+	sessionID, _, ok := auth.ParseRefreshToken(refreshToken)
+	require.True(t, ok)
+	before := f.sessions.rewindExpiry(sessionID, time.Hour)
+
+	const callers = 2
+	codes := make([]int, callers)
+	returned := make([]any, callers)
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	for i := range callers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			raw, _ := json.Marshal(map[string]string{"refresh_token": refreshToken})
+			req := httptest.NewRequest(http.MethodPost, "/auth/refresh", strings.NewReader(string(raw)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			f.e.ServeHTTP(rec, req)
+			codes[i] = rec.Code
+			var payload map[string]any
+			_ = json.Unmarshal(rec.Body.Bytes(), &payload)
+			returned[i] = payload["refresh_token"]
+		}()
+	}
+	close(start)
+	wg.Wait()
+
+	for i := range callers {
+		assert.Equal(t, http.StatusOK, codes[i], "concurrent refresh %d must succeed, never 401 or 503", i)
+		assert.Equal(t, refreshToken, returned[i], "concurrent refresh %d must return the token unchanged", i)
+	}
+	row, found := f.sessions.row(sessionID)
+	require.True(t, found)
+	assert.True(t, row.RevokedAt.IsZero())
+	assert.True(t, row.ExpiresAt.After(before), "expiry should slide forward")
+	assert.WithinDuration(t, time.Now().Add(idleTTL), row.ExpiresAt, time.Minute, "expiry must be the server now()+idle ttl")
+	assert.False(t, row.LastUsedAt.IsZero())
 }
 
 func TestLogoutIsIdempotent(t *testing.T) {
