@@ -43,7 +43,7 @@ func presenceAdmitRun(t *testing.T, ctx context.Context, pool *pgxpool.Pool, bot
 	t.Helper()
 	queries := postgresstore.NewQueriesWithPool(pool, sqlc.New(pool))
 	manager := sessionruntime.NewManager(sessionruntime.NewMemoryBackend(), sessionruntime.Options{OwnerID: "presence-episode-owner", StateTTL: time.Minute, OwnerLeaseTTL: time.Minute, Ledger: ledger.NewPostgres(sqlc.New(pool), pool), Fence: runtimefence.NewActivator(queries)})
-	t.Cleanup(func() { _ = manager.Close() })
+	t.Cleanup(func() { _ = manager.CloseContext(ctx) })
 	admitted, err := manager.Admit(ctx, sessionruntime.AdmitInput{BotID: botID, SessionID: sessionID, InvocationID: uuid.NewString(), Payload: []byte(`{"kind":"message","text":"follow-up"}`), Execution: sessionruntime.Execution{Admission: func(context.Context, sessionruntime.RunHandle) (sessionruntime.RunAdmissionView, error) {
 		return sessionruntime.RunAdmissionView{}, nil
 	}, Cancel: func() {}}})
