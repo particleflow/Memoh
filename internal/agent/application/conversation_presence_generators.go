@@ -34,23 +34,30 @@ type presenceDirectedGenerator struct {
 
 func (g *presenceDirectedGenerator) Generate(ctx context.Context, input conversationpresence.Input, limits conversationpresence.Limits) (conversationpresence.Result, error) {
 	slots := buildPresenceSlots(g.botName, g.locale, g.userMessage, g.points, input.Phase, g.imagePresent, g.urgency, g.etaBand, g.recentACKs)
-	result, err := g.base.generateDirected(ctx, g.direction, slots, input.Phase, limits)
+	result, err := g.base.generateDirected(ctx, g.direction, "", slots, input.Phase, limits)
 	if err != nil {
 		return result, err
 	}
 	text := result.Text
 	if lead, matched := presenceLeadMatches(text, g.recentACKs); matched {
 		if g.windowAffords(ctx) {
-			retrySlots := slots
-			retried, retryErr := g.base.generateDirected(ctx, g.direction+presenceBannedLeadSuffix(lead), retrySlots, input.Phase, limits)
+			// The ban is a separate prompt segment appended after the
+			// direction body (design v3 §5.2 gate 1), never part of the
+			// direction key, so the direction stays intact on retry.
+			retried, retryErr := g.base.generateDirected(ctx, g.direction, presenceBannedLeadSuffix(lead), slots, input.Phase, limits)
 			if retryErr == nil {
-				text = retried.Text
+				// One retry only: keep it when it actually clears the gate;
+				// a retry that still collides adds nothing over the first
+				// version, so keep the first.
+				if _, still := presenceLeadMatches(retried.Text, g.recentACKs); !still {
+					text = retried.Text
+				}
 			}
 		}
 	}
 	if g.direction == "eta" && g.etaBand != "" && !presenceETABandAllows(text, g.etaBand) {
 		if g.windowAffords(ctx) {
-			if retried, retryErr := g.base.generateDirected(ctx, g.direction, slots, input.Phase, limits); retryErr == nil && presenceETABandAllows(retried.Text, g.etaBand) {
+			if retried, retryErr := g.base.generateDirected(ctx, g.direction, "", slots, input.Phase, limits); retryErr == nil && presenceETABandAllows(retried.Text, g.etaBand) {
 				text = retried.Text
 			} else {
 				text = "估计" + g.etaBand + "。"

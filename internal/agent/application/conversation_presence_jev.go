@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -257,9 +258,16 @@ func (e *presenceJevEngine) decide(ctx context.Context) presenceJevOutcome {
 	if deadline, ok := ctx.Deadline(); ok && deadline.Before(windowEnd) {
 		windowEnd = deadline
 	}
+	// The 10s window is a real deadline on every call, not just a guard
+	// input (design v3 §4.4: the per-call context deadline is the segment's
+	// remaining budget). The sidecar context keeps propagating cancellation;
+	// a window that expires mid-call classifies as jev_timeout while a dead
+	// sidecar context stays the superseded path.
+	jevCtx, cancelWindow := context.WithDeadline(ctx, windowEnd)
+	defer cancelWindow()
 	detail := presenceDecisionDetail{}
 	assembleStart := time.Now()
-	signals, err := e.readSignals(ctx)
+	signals, err := e.readSignals(jevCtx)
 	if err != nil {
 		if ctx.Err() != nil {
 			return presenceJevOutcome{Superseded: true}
@@ -273,6 +281,7 @@ func (e *presenceJevEngine) decide(ctx context.Context) presenceJevOutcome {
 	loop := &presenceJevLoop{
 		eng:       e,
 		ctx:       ctx,
+		jevCtx:    jevCtx,
 		windowEnd: windowEnd,
 		signals:   signals,
 		detail:    &detail,
@@ -288,8 +297,12 @@ func (e *presenceJevEngine) decide(ctx context.Context) presenceJevOutcome {
 
 // presenceJevLoop is one window's mutable loop state.
 type presenceJevLoop struct {
-	eng       *presenceJevEngine
-	ctx       context.Context
+	eng *presenceJevEngine
+	// ctx is the sidecar context: only its cancellation is superseded.
+	ctx context.Context
+	// jevCtx carries the 10s window deadline derived in decide; every Jev
+	// call and pull runs inside it (design v3 §4.4).
+	jevCtx    context.Context
 	windowEnd time.Time
 	signals   presenceJevSignals
 	detail    *presenceDecisionDetail
@@ -328,7 +341,7 @@ func (l *presenceJevLoop) run() *presenceJevResult {
 		if !l.canAfford(presenceJevGuardLoopSeconds) {
 			return l.forcedFinal()
 		}
-		response, err := l.eng.client.Ask(l.ctx, l.buildState(false), jevStageOneQuestions(l.offeredSources()))
+		response, err := l.eng.client.Ask(l.jevCtx, l.buildState(false), jevStageOneQuestions(l.offeredSources()))
 		if err != nil {
 			return l.fallback(err)
 		}
@@ -367,7 +380,7 @@ func (l *presenceJevLoop) run() *presenceJevResult {
 			if l.pullCount >= l.eng.settings.PullMax || !l.canAfford(presenceJevGuardPullSeconds) {
 				return l.forcedFinal()
 			}
-			l.pull(l.ctx, next)
+			l.pull(l.jevCtx, next)
 		default:
 			return l.fallback(&jev.Error{Kind: jev.ReasonInvalidResponse, Err: fmt.Errorf("reply_mode choice %q not offered", choice)})
 		}
@@ -398,6 +411,7 @@ func (l *presenceJevLoop) pull(ctx context.Context, source string) {
 	pullCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	text, truncated := l.fetchSource(pullCtx, source)
+	text = presenceStateLine(text)
 	record := presencePullRecord{Source: source, Chars: runeLen(text), LatencyMs: time.Since(pullStart).Milliseconds(), Truncated: truncated, Empty: text == ""}
 	l.detail.Pulls = append(l.detail.Pulls, record)
 	l.detail.Timings.PullMs += record.LatencyMs
@@ -496,7 +510,7 @@ func (l *presenceJevLoop) stageTwo() *presenceJevResult {
 		return l.fallbackBudget()
 	}
 	callStart := time.Now()
-	response, err := l.eng.client.Ask(l.ctx, l.buildState(false), jevStageTwoQuestions(l.eng.settings.Directions))
+	response, err := l.eng.client.Ask(l.jevCtx, l.buildState(false), jevStageTwoQuestions(l.eng.settings.Directions))
 	if err != nil {
 		return l.fallback(err)
 	}
@@ -505,6 +519,12 @@ func (l *presenceJevLoop) stageTwo() *presenceJevResult {
 	direction, answer, ok := response.Choice(jevQDirection)
 	if !ok {
 		return l.fallback(&jev.Error{Kind: jev.ReasonInvalidResponse, Err: errors.New("direction answer missing or invalid")})
+	}
+	if !l.directionOffered(direction) {
+		// Q3 answer outside the offered option set (design v3 §6.5): the §7
+		// structural fallback, never an accounting insert that would trip
+		// the migration's direction CHECK and roll back step2.
+		return l.fallback(&jev.Error{Kind: jev.ReasonInvalidResponse, Err: fmt.Errorf("direction choice %q not offered", direction)})
 	}
 	rawUrgency, _, urgencyOK := response.Score(jevQUrgency)
 	urgency := clampUrgency(rawUrgency, urgencyOK)
@@ -583,7 +603,7 @@ func (l *presenceJevLoop) forcedFinal() *presenceJevResult {
 	if !l.canAfford(presenceJevGuardForcedSeconds) {
 		return l.fallbackBudget()
 	}
-	response, err := l.eng.client.Ask(l.ctx, l.buildState(true), map[string]jev.Question{jevQReplyMode: jevForcedQuestion()})
+	response, err := l.eng.client.Ask(l.jevCtx, l.buildState(true), map[string]jev.Question{jevQReplyMode: jevForcedQuestion()})
 	if err != nil {
 		return l.fallback(err)
 	}
@@ -594,10 +614,27 @@ func (l *presenceJevLoop) forcedFinal() *presenceJevResult {
 		return l.fallback(&jev.Error{Kind: jev.ReasonInvalidResponse, Err: errors.New("forced reply_mode answer missing or invalid")})
 	}
 	l.detail.Stage1 = append(l.detail.Stage1, presenceStage1Attempt{Attempt: l.detail.Q1Attempts, Choice: choice, Probability: confidence(answer), LatencyMs: response.Latency.Milliseconds()})
-	if choice == "fast_reply" {
+	switch choice {
+	case "fast_reply":
 		return l.stageTwo()
+	case "no_fast_reply":
+		return l.terminalNoFast()
+	default:
+		// Q1b is a two-option question (design v3 §3.1): an answer outside
+		// {no_fast_reply, fast_reply} is invalid and takes the conservative
+		// §7 fallback, not a silent no_fast_reply.
+		return l.fallback(&jev.Error{Kind: jev.ReasonInvalidResponse, Err: fmt.Errorf("forced reply_mode choice %q not offered", choice)})
 	}
-	return l.terminalNoFast()
+}
+
+// directionOffered reports whether the direction is one of the options this
+// run actually offered in Q3 (the configured directions that have a body).
+func (l *presenceJevLoop) directionOffered(direction string) bool {
+	if !slices.Contains(l.eng.settings.Directions, direction) {
+		return false
+	}
+	_, described := jevDirectionDescriptions()[direction]
+	return described
 }
 
 func (*presenceJevLoop) terminalNoFast() *presenceJevResult {
@@ -692,7 +729,7 @@ func (l *presenceJevLoop) renderState(input string, truncatedInput bool, tokenEs
 	if len(l.segments) > 0 {
 		pulled = strings.Join(l.segments, " ")
 	}
-	return "【输入】" + input +
+	return "【输入】" + presenceStateLine(input) +
 		"\n【信号】上一轮已结算=" + yesNo(facts.PreviousSettled) +
 		"；进行中任务=" + activeTask +
 		"；pending提问=" + hasNo(facts.PendingUserInput) +
@@ -837,6 +874,20 @@ func yesNo(b bool) string {
 		return "是"
 	}
 	return "否"
+}
+
+// presenceStateLine flattens text that goes into the decision state: every
+// line-break rune collapses to a space, one for one. User-controlled content
+// (the 【输入】 segment and pulled turns) then cannot start a forged
+// 【信号】/【约束】 line — the state format is line-oriented and those headers
+// only matter at line starts (review P2-13).
+func presenceStateLine(text string) string {
+	return strings.Map(func(r rune) rune {
+		if strings.ContainsRune("\n\r\v\f\u0085\u2028\u2029", r) {
+			return ' '
+		}
+		return r
+	}, text)
 }
 
 func hasNo(b bool) string {

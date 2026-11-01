@@ -93,6 +93,15 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		return
 	}
 	result := outcome.Result
+	// Freeze the fallback final state before step2 (design v3 §7: accounting
+	// records fallback_silent + budget_exhausted, not a post-step2 mode
+	// change): a constant ack the sidecar context can no longer cover with
+	// the 1.5s publish grace stays silent.
+	if result.Mode == presenceModeFallbackACK && !sideCtxAffordsGrace(sideCtx) {
+		logStage("fallback_silent", slog.String("fallback_reason", "budget_exhausted"))
+		result.Mode = presenceModeFallbackNoop
+		result.FallbackReason = "budget_exhausted"
+	}
 	if finishErr := claims.finalizePresenceDecision(sideCtx, ticket, result, time.Since(decisionStart).Milliseconds()); finishErr != nil && s.logger != nil {
 		s.logger.WarnContext(ctx, "conversation_presence_step2_failed", slog.String("error", finishErr.Error()))
 	}
@@ -125,15 +134,8 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		// terminal so the accounting row closes like every other turn.
 		generatorForRun = presenceFallbackGenerator{text: presenceFallbackText, notBefore: time.Now()}
 	case result.Mode == presenceModeFallbackACK:
-		// §7 grace: publish only when the sidecar context still covers
-		// mainWritten+1.5s with no formal text; otherwise stay silent.
-		if !sideCtxAffordsGrace(sideCtx) {
-			logStage("fallback_silent", slog.String("fallback_reason", "budget_exhausted"))
-			result.Mode = presenceModeFallbackNoop
-			result.FallbackReason = "budget_exhausted"
-			generatorForRun = presenceFallbackGenerator{text: presenceFallbackText, notBefore: time.Now()}
-			break
-		}
+		// §7 grace: publish only after mainWritten+1.5s with no formal text.
+		// The silent variant was already frozen before step2 above.
 		generatorForRun = presenceFallbackGenerator{text: presenceFallbackText, notBefore: mainWritten.Add(presenceFallbackGrace)}
 	default:
 		// Generation entry guard (§4.4): below 3.3s the window cannot afford
@@ -161,7 +163,23 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		}
 	}
 	coordinator.Generator = generatorForRun
-	handle, err := coordinator.Start(sideCtx, input)
+	// Generation ctx deadline = the 10s window end (design v3 §4.4): the
+	// generated fast-reply path runs inside the window, effective window =
+	// min(sideCtx, decisionStart+Timeout). The Coordinator's own policy
+	// deadline still stacks on top. The constant fallback paths keep the
+	// sidecar context (§7: the publish grace consumes sideCtx remainder,
+	// outside the Jev window).
+	runCtx := sideCtx
+	if result.Mode == presenceModeFastReply {
+		generateDeadline := decisionStart.Add(settings.Timeout)
+		if deadline, ok := sideCtx.Deadline(); ok && deadline.Before(generateDeadline) {
+			generateDeadline = deadline
+		}
+		generateCtx, cancelGenerate := context.WithDeadline(sideCtx, generateDeadline)
+		defer cancelGenerate()
+		runCtx = generateCtx
+	}
+	handle, err := coordinator.Start(runCtx, input)
 	if err != nil {
 		return
 	}
@@ -180,9 +198,16 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 }
 
 // presenceJevHTTPClient is the shared Jev gateway client: no redirects, no
-// cookies, keep-alives only. NAS loopback traffic never needs more.
+// cookies, keep-alives only. NAS loopback traffic never needs more. Redirects
+// are refused at the client level: a 307/308 would replay the POST body to a
+// new location, a second request the single-call contract forbids.
 func presenceJevHTTPClient() *http.Client {
-	return &http.Client{Transport: &http.Transport{DisableKeepAlives: false}}
+	return &http.Client{
+		Transport: &http.Transport{DisableKeepAlives: false},
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 func sideCtxAffordsGrace(ctx context.Context) bool {

@@ -741,7 +741,7 @@ func (h *ContainerdHandler) observeWorkspace(ctx context.Context, botID string) 
 // @Router /bots/{bot_id}/container/snapshots [post].
 func (h *ContainerdHandler) CreateSnapshot(c echo.Context) error {
 	if h.containerBackend == "apple" {
-		return apperror.New(apperror.CodeWorkspaceSnapshotsUnsupported, nil)
+		return apperror.New(apperror.CodeHTTPNotImplemented, nil)
 	}
 	botID, err := h.requireBotAccess(c)
 	if err != nil {
@@ -782,7 +782,7 @@ func (h *ContainerdHandler) CreateSnapshot(c echo.Context) error {
 // @Router /bots/{bot_id}/container/snapshots [get].
 func (h *ContainerdHandler) ListSnapshots(c echo.Context) error {
 	if h.containerBackend == "apple" {
-		return apperror.New(apperror.CodeWorkspaceSnapshotsUnsupported, nil)
+		return apperror.New(apperror.CodeHTTPNotImplemented, nil)
 	}
 	botID, err := h.requireBotAccess(c)
 	if err != nil {

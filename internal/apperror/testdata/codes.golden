@@ -339,7 +339,6 @@ workspace_snapshot_rollback_failed	500
 workspace_snapshot_rollback_request_invalid	400
 workspace_snapshot_version_invalid	400
 workspace_snapshots_load_failed	500
-workspace_snapshots_unsupported	501
 workspace_snapshotter_mismatch	400
 workspace_start_failed	500
 workspace_stop_failed	500

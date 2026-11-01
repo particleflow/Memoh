@@ -580,7 +580,6 @@
     "workspace_snapshot_rollback_request_invalid": "ロールバックのリクエストが無効です。",
     "workspace_snapshot_version_invalid": "スナップショットのバージョンが無効です。",
     "workspace_snapshots_load_failed": "スナップショットを読み込めませんでした。もう一度お試しください。",
-    "workspace_snapshots_unsupported": "この Workspace のランタイムはスナップショットをサポートしていません。",
     "workspace_snapshotter_mismatch": "スナップショッターが Workspace のランタイムと一致しません。",
     "workspace_start_failed": "Workspace を起動できませんでした。もう一度お試しください。",
     "workspace_stop_failed": "Workspace を停止できませんでした。もう一度お試しください。",

@@ -144,8 +144,11 @@ func (g *conversationPresenceSDKGenerator) Generate(ctx context.Context, input c
 
 // generateDirected serves the fast-reply v3 path: the system prompt is the
 // shared skeleton plus the direction body, and the user message is the
-// variable slot payload (design v3 §5.2). The output contract is unchanged.
-func (g *conversationPresenceSDKGenerator) generateDirected(ctx context.Context, direction string, slots presenceSlots, phase conversationpresence.Phase, limits conversationpresence.Limits) (conversationpresence.Result, error) {
+// variable slot payload (design v3 §5.2). extraSystem is appended after the
+// skeleton and direction body as a separate prompt segment — it never becomes
+// part of the direction key, so the direction body stays intact (the
+// lead-ban retry passes its ban here). The output contract is unchanged.
+func (g *conversationPresenceSDKGenerator) generateDirected(ctx context.Context, direction, extraSystem string, slots presenceSlots, phase conversationpresence.Phase, limits conversationpresence.Limits) (conversationpresence.Result, error) {
 	if g == nil || g.generate == nil || limits.MaxInputRunes <= 0 || limits.MaxOutputTokens <= 0 {
 		return conversationpresence.Result{}, conversationpresence.ErrInvalidContract
 	}
@@ -153,7 +156,11 @@ func (g *conversationPresenceSDKGenerator) generateDirected(ctx context.Context,
 	if err != nil {
 		return conversationpresence.Result{}, err
 	}
-	return g.generateJSON(ctx, presenceSystemPrompt(direction), data, phase, limits)
+	system := presenceSystemPrompt(direction)
+	if extraSystem != "" {
+		system += "\n" + extraSystem
+	}
+	return g.generateJSON(ctx, system, data, phase, limits)
 }
 
 func (g *conversationPresenceSDKGenerator) generateJSON(ctx context.Context, system string, payload []byte, phase conversationpresence.Phase, limits conversationpresence.Limits) (conversationpresence.Result, error) {

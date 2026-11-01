@@ -137,8 +137,7 @@ SELECT
 
 -- name: ReadPresenceFileList :one
 SELECT COALESCE((SELECT jsonb_agg(f.entry ORDER BY f.created_at DESC) FROM (
-    SELECT jsonb_build_object('name', COALESCE(m.original_name, ''), 'type', m.media_type) AS entry, ma.created_at
+    SELECT jsonb_build_object('name', ma.name, 'type', ma.mime) AS entry, ma.created_at
     FROM bot_history_message_assets ma
     JOIN bot_history_messages h ON h.team_id = public.memoh_current_team_id() AND h.id = ma.message_id AND h.session_id = sqlc.arg(session_id)
-    JOIN media_assets m ON m.id = ma.asset_id
     ORDER BY ma.created_at DESC LIMIT 12) f), '[]'::jsonb) AS assets;
