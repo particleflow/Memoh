@@ -658,6 +658,22 @@ type ConversationPresence struct {
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
+type ConversationPresenceDecision struct {
+	TeamID         pgtype.UUID        `json:"team_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	InvocationID   string             `json:"invocation_id"`
+	RunID          pgtype.UUID        `json:"run_id"`
+	ActorID        string             `json:"actor_id"`
+	FinalMode      string             `json:"final_mode"`
+	Direction      pgtype.Text        `json:"direction"`
+	Urgency        pgtype.Int4        `json:"urgency"`
+	FallbackReason pgtype.Text        `json:"fallback_reason"`
+	Pulls          int32              `json:"pulls"`
+	TotalMs        int32              `json:"total_ms"`
+	Detail         []byte             `json:"detail"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
 type FetchProvider struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`

@@ -58,9 +58,17 @@ const (
 	Accepted Phase = "accepted"
 	Queued   Phase = "queued"
 	Thinking Phase = "thinking"
+	// WaitingUser and Finishing extend the phase vocabulary for fast-reply v3
+	// progress/eta directions (design v3 §5.2): waiting_decision runs are
+	// waiting on the user, finishing runs are wrapping up. They map only from
+	// real run state; the legacy three-value contract is unchanged for them.
+	WaitingUser Phase = "waiting_user"
+	Finishing   Phase = "finishing"
 )
 
-func (p Phase) valid() bool { return p == Accepted || p == Queued || p == Thinking }
+func (p Phase) valid() bool {
+	return p == Accepted || p == Queued || p == Thinking || p == WaitingUser || p == Finishing
+}
 
 type Input struct {
 	Ticket       Ticket
@@ -73,6 +81,10 @@ type Input struct {
 	Locale       string
 	Text         string
 	ImagePresent bool
+	// Precomputed, when set, replaces the structural Classify decision inside
+	// the coordinator run (fast-reply v3: the Jev decision window happens in
+	// the sidecar before Start; nil keeps the structural fallback path).
+	Precomputed *Decision
 }
 
 // Piece is typed progress, not an assistant turn. Hosts must exclude it from
@@ -192,6 +204,9 @@ func (c Coordinator) Start(parent context.Context, in Input) (*Handle, error) {
 
 func (c Coordinator) run(ctx context.Context, in Input) Outcome {
 	d := Classify(in.Source, in.Ticket.Scope.BotID, in.Ticket.Scope.SessionID, in.Facts)
+	if in.Precomputed != nil {
+		d = *in.Precomputed
+	}
 	out := Outcome{Decision: d, Status: "not_cold"}
 	if d.Temperature != Cold {
 		return out
