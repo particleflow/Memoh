@@ -16,9 +16,13 @@ interface QueueState { pending: Map<string, DiagnosticBatch>; acked: Set<string>
 export class ClientDiagnostics {
   private static context?: common.Context;
   private static foregroundHook?: () => void;
+  private static lifecycleHook?: (state: string) => void;
   static bind(context: common.Context): void { ClientDiagnostics.context = context; }
   static onForeground(hook?: () => void): void { ClientDiagnostics.foregroundHook = hook; }
   static foreground(): void { try { ClientDiagnostics.foregroundHook?.(); } catch { hilog.error(0xB001, 'BegoniaClient', 'Diagnostic foreground callback failed'); } }
+  // Ability foreground/background for the Web layer: read-aloud parks at its spoken cursor in the background and resumes on return.
+  static onLifecycle(hook?: (state: string) => void): void { ClientDiagnostics.lifecycleHook = hook; }
+  static lifecycle(state: string): void { try { ClientDiagnostics.lifecycleHook?.(state); } catch { hilog.error(0xB001, 'BegoniaClient', 'Lifecycle callback failed'); } }
   private static shape(value: Object, fields: string[]): boolean { return Object.keys(value).every((key: string): boolean => fields.includes(key)); }
   private static number(value: number): boolean { return typeof value === 'number' && Number.isFinite(value) && value >= 0; }
   private static scope(value: string): void { if (!/^[a-f0-9]{64}$/.test(value)) { throw new Error('DIAGNOSTIC_SCOPE'); } }

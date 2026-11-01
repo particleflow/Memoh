@@ -76,11 +76,20 @@ async function main(){
  class Stub{close(){}prepare(){}}
  const owner={uploads:{releasePreviews(){}},attach:()=>1,current:()=>true,detach(){},generation:()=>0,check(){},async ready(){},revoke(){}}
  const {NativeClient}=load('NativeClient',{'./NativeTransferOwner':{nativeTransferOwner:()=>owner},'./ClientDiagnostics':{ClientDiagnostics:D},'./NativeVoice':{NativeVoice:Stub},'./NativeMediaDownload':{NativeMediaDownload:Stub},'./NativeResumableUpload':{NativeResumableUpload:Stub},'./MemohClientConfig':{MEMOH_ORIGIN:'https://example.test/api',resetMemohOrigin(){}}})
- const controller={registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=> 'begonia-client://app/index.html',runJavaScript:async()=>'',deleteJavaScriptRegister(){}}
+ const scripts=[]
+ const controller={registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=> 'begonia-client://app/index.html',runJavaScript:async script=>{scripts.push(script);return ''},deleteJavaScriptRegister(){}}
  const client=new NativeClient(controller,()=>{},async()=>{},{});client.register()
  const call=async value=>JSON.parse(await client.request(JSON.stringify({version:1,...value})))
  assert.equal((await call({command:'diagnostic.pending',scope})).ok,false)
+ // Ability lifecycle reaches the Web layer only once the page is ready, as a garnet:lifecycle event with detail.state.
+ D.lifecycle('background');assert.equal(scripts.length,0)
  await call({command:'client.state',state:'ready'});assert.deepEqual((await call({command:'diagnostic.pending',scope})).data,[])
+ D.lifecycle('background');assert.equal(scripts.length,1);assert.match(scripts[0],/new CustomEvent\('garnet:lifecycle', \{ detail: \{ state: 'background' \} \}\)/)
+ D.lifecycle('foreground');assert.equal(scripts.length,2);assert.match(scripts[1],/garnet:lifecycle.*state: 'foreground'/)
+ D.foreground();assert.equal(scripts.length,3);assert.match(scripts[2],/garnet:diagnostic-resume/)
+ D.lifecycle('other');assert.equal(scripts.length,3)
+ const ability=fs.readFileSync(path.join(root,'mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets'),'utf8')
+ assert.match(ability,/onForeground\(\): void \{[^\n]*ClientDiagnostics\.lifecycle\('foreground'\)/);assert.match(ability,/onBackground\(\): void \{[^\n]*ClientDiagnostics\.lifecycle\('background'\)/)
  assert.equal((await call({command:'diagnostic.pending',scope,filename:'forbidden'})).ok,false)
  const five=batch(5)
  assert.equal((await call({command:'diagnostic.put',scope,batch:five})).data,true)
@@ -89,6 +98,7 @@ async function main(){
  assert.equal((await call({command:'diagnostic.put',scope,batch:{...five,writeAttempted:'invalid'}})).ok,false)
  await call({command:'diagnostic.ack',scope,hash:five.id,verifiedHash:five.id,verifiedSize:Buffer.byteLength(five.body)})
  frame='https://example.test/';assert.equal((await call({command:'diagnostic.pending',scope})).error,'NATIVE_FRAME_DENIED');client.close()
- console.log(JSON.stringify({actualNativeJournal:true,realUTF8Files:true,tornPutDoesNotAdvanceCursor:true,strictFsyncFailure:true,restartSameJournal:true,tornAckRetainsPending:true,ackHashAndSizeRequired:true,otherScopeCannotAck:true,rotationAcrossOriginalTwoFiles:true,retainedAckSuppressesOldPut:true,noRawJournalExport:true,actualReadyAndFrameGuard:true,attemptMarkerTornWrite:true,attemptMarkerStickyAfterRestart:true,fsyncUnknownAttemptRetained:true,atomicConcurrentClaim:true,device:false}))
+ D.lifecycle('background');assert.equal(scripts.length,3)
+ console.log(JSON.stringify({actualNativeJournal:true,realUTF8Files:true,tornPutDoesNotAdvanceCursor:true,strictFsyncFailure:true,restartSameJournal:true,tornAckRetainsPending:true,ackHashAndSizeRequired:true,otherScopeCannotAck:true,rotationAcrossOriginalTwoFiles:true,retainedAckSuppressesOldPut:true,noRawJournalExport:true,actualReadyAndFrameGuard:true,attemptMarkerTornWrite:true,attemptMarkerStickyAfterRestart:true,fsyncUnknownAttemptRetained:true,atomicConcurrentClaim:true,lifecycleEventToWeb:true,device:false}))
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

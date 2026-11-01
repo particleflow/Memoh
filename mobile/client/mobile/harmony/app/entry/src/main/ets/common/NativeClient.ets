@@ -44,6 +44,12 @@ export class NativeClient {
         if (!this.active || !this.ready || !this.owner.current(this.view) || this.controller.getUrl().split('#')[0] !== 'begonia-client://app/index.html') { return; }
         void this.controller.runJavaScript("window.dispatchEvent(new Event('garnet:diagnostic-resume'))").catch(() => {});
       });
+      // Same guard and channel: the Web layer parks read-aloud in the background and resumes it on return.
+      ClientDiagnostics.onLifecycle((state: string): void => {
+        if (state !== 'foreground' && state !== 'background') { return; }
+        if (!this.active || !this.ready || !this.owner.current(this.view) || this.controller.getUrl().split('#')[0] !== 'begonia-client://app/index.html') { return; }
+        void this.controller.runJavaScript("window.dispatchEvent(new CustomEvent('garnet:lifecycle', { detail: { state: '" + state + "' } }))").catch(() => {});
+      });
       return true;
     } catch { return false; }
   }
@@ -51,6 +57,7 @@ export class NativeClient {
   close(): void {
     this.active = false;
     ClientDiagnostics.onForeground(undefined);
+    ClientDiagnostics.onLifecycle(undefined);
     this.ready = false; this.resetNetwork(); this.voice.close(); this.owner.detach(this.view);
     try { this.controller.deleteJavaScriptRegister('begoniaNative'); } catch { /* Already detached. */ }
   }
