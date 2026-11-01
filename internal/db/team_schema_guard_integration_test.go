@@ -11,11 +11,13 @@ import (
 )
 
 // nonTeamPublicTables are the public tables that are NOT team business
-// tables: tooling metadata and the teams root (whose own id IS the team id).
+// tables: tooling metadata, the teams root (whose own id IS the team id), and
+// account-level tables keyed by the global user.
 var nonTeamPublicTables = map[string]bool{
 	"schema_migrations": true,
 	"teams":             true,
 	"users":             true,
+	"auth_sessions":     true,
 }
 
 // TestTeamViewGuard verifies that views over team tables do not bypass RLS.
