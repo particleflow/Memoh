@@ -138,6 +138,11 @@ type Result struct {
 	WorkspaceID        string                   `json:"workspace_id,omitempty"`
 	PaneID             string                   `json:"pane_id,omitempty"`
 	RequestID          string                   `json:"request_id,omitempty"`
+	// Resumable is set (false) only where resume_operation_id is a documented
+	// no-op, with ResumeReason naming why, so a caller never mistakes the
+	// unchanged receipt of a completed operation for a re-execution.
+	Resumable    *bool  `json:"resumable,omitempty"`
+	ResumeReason string `json:"resume_reason,omitempty"`
 }
 
 func fingerprint(value any) string {

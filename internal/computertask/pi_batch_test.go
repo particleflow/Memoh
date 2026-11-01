@@ -892,3 +892,20 @@ func (s *fixtureStore) PreviousComputerPiOperation(_ context.Context, r dbstore.
 	}
 	return found, nil
 }
+
+func (s *fixtureStore) LatestStartedPiOperation(_ context.Context, r dbstore.ComputerOperationRecord, session string) (dbstore.ComputerOperationRecord, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var found dbstore.ComputerOperationRecord
+	for _, old := range s.records {
+		var d Details
+		_ = json.Unmarshal(old.Details, &d)
+		if old.ID != r.ID && old.BotID == r.BotID && old.SessionID == r.SessionID && old.UserID == r.UserID && old.TargetID == r.TargetID && d.Batch != nil && d.Batch.Progress.PiSessionID == session && d.Batch.Receipt != nil && d.Batch.Receipt.Started && (found.ID == "" || old.CreatedAt.After(found.CreatedAt) || old.CreatedAt.Equal(found.CreatedAt) && old.ID > found.ID) {
+			found = old
+		}
+	}
+	if found.ID == "" {
+		return found, db.ErrNotFound
+	}
+	return found, nil
+}

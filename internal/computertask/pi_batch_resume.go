@@ -34,8 +34,23 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 	}
 	if r.State != "unknown" {
 		// A concurrent continuation or a known submission is an observation,
-		// not permission to execute any of its stages again.
-		return result(r, d), nil
+		// not permission to execute any of its stages again. Say so instead of
+		// returning an unchanged receipt that reads like a retry (incident E3:
+		// a completed batch whose Pi never started was resumed as a no-op).
+		out := result(r, d)
+		notResumable := false
+		out.Resumable = &notResumable
+		switch {
+		case r.State == "completed" && d.Batch != nil && d.Batch.Receipt != nil && !d.Batch.Receipt.Started:
+			out.ResumeReason = "completed_pi_not_started"
+		case r.State == "dispatching":
+			// result() surfaces dispatching as state=unknown; name the same
+			// surfaced state, not the internal one.
+			out.ResumeReason = "state_unknown"
+		default:
+			out.ResumeReason = "state_" + r.State
+		}
+		return out, nil
 	}
 	if r.CancelRequested || d.Agent != (agenvo.AgentProgress{}) || d.Batch.Receipt != nil || d.Batch.Result != nil || len(d.Batch.Files) != 0 || d.Batch.Progress.RequestID != "" {
 		return result(r, d), agenvo.ErrUnknown

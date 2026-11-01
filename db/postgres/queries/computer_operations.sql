@@ -58,6 +58,19 @@ AND target_id=sqlc.arg(target_id) AND id<>sqlc.arg(id)
 AND details->'batch'->'progress'->>'pi_session_id'=sqlc.arg(pi_session_id)::text
 ORDER BY created_at DESC, id DESC LIMIT 1;
 
+-- name: LatestStartedPiOperation :one
+-- Session-level invocation evidence for one Pi session: the newest operation
+-- whose stored receipt proves Pi actually ran. Absence is the only "this Pi
+-- session never started" proof the continuity gate may relax on; the query
+-- never searches past a proven start.
+SELECT * FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND bot_id=sqlc.arg(bot_id)
+AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
+AND target_id=sqlc.arg(target_id) AND id<>sqlc.arg(id)
+AND details->'batch'->'progress'->>'pi_session_id'=sqlc.arg(pi_session_id)::text
+AND details->'batch'->'receipt'->>'started'='true'
+ORDER BY created_at DESC, id DESC LIMIT 1;
+
 -- name: GetOwnedNativeHerdrRuntime :one
 SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
 AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id) AND provider='memoh' AND revoked_at IS NULL

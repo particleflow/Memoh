@@ -152,6 +152,10 @@ func (*executionContractRegistry) PreviousComputerPiOperation(context.Context, d
 	return dbstore.ComputerOperationRecord{}, db.ErrNotFound
 }
 
+func (*executionContractRegistry) LatestStartedPiOperation(context.Context, dbstore.ComputerOperationRecord, string) (dbstore.ComputerOperationRecord, error) {
+	return dbstore.ComputerOperationRecord{}, db.ErrNotFound
+}
+
 type executionContractPermission struct{}
 
 func (executionContractPermission) HasBotPermission(context.Context, string, string, string) (bool, error) {

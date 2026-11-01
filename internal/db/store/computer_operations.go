@@ -52,4 +52,8 @@ type ComputerDeliveryStore interface {
 // already claimed computer slot. Implementations must retain unproven records.
 type ComputerPiHistoryStore interface {
 	PreviousComputerPiOperation(context.Context, ComputerOperationRecord, string) (ComputerOperationRecord, error)
+	// LatestStartedPiOperation proves whether this Pi session ever started an
+	// invocation, across all its operations. ErrNotFound is the only "never
+	// started" evidence; any other error fails closed.
+	LatestStartedPiOperation(context.Context, ComputerOperationRecord, string) (ComputerOperationRecord, error)
 }

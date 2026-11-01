@@ -20,6 +20,9 @@ type PiJSONResult struct {
 	Output     string `json:"output,omitempty"`
 	Truncated  bool   `json:"truncated"`
 	Records    int    `json:"records"`
+	// Preflight mirrors the receipt's never-started reason code for the
+	// outcome "not_started" (empty before this field existed).
+	Preflight string `json:"preflight,omitempty"`
 }
 
 // VerifyPiJSON consumes the complete, hash-verified stdout file. A terminal
