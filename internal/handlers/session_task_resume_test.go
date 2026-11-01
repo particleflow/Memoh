@@ -64,7 +64,7 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	activeAccount := true
-	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(context.Context, string) error {
+	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(context.Context, string, string) error {
 		if !activeAccount {
 			return errors.New("inactive synthetic account")
 		}
@@ -80,7 +80,7 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 		req.Header.Set("X-Memoh-Run-Id", "forged-run")
 		req.Header.Set("X-Memoh-Session-Id", "forged-session")
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "test-secret", time.Minute)
 			if chatRouteToken {
 				token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: taskBot, UserID: user, ChatID: "synthetic-chat", RouteID: "synthetic-route"}, "test-secret", time.Minute)
 			}

@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/userruntime"
 )
@@ -32,10 +32,10 @@ func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 		return agenvo.Receipt{}, agenvo.ErrUnknown
 	}))
 	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUsersHandler(nil, newTestAdminAccountService("admin"), nil, nil, nil, nil, nil, nil), NewUserRuntimeHandler(nil, service)}}
-	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string) error { return nil }, capture)
+	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string, string) error { return nil }, capture)
 	sign := func(user string) string {
 		t.Helper()
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": user, "user_id": user, "exp": time.Now().Add(time.Minute).Unix()}).SignedString([]byte(secret))
+		token, _, err := auth.GenerateInternalToken(user, secret, time.Minute)
 		if err != nil {
 			t.Fatal(err)
 		}

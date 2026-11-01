@@ -1181,7 +1181,7 @@ func (h *LocalChannelHandler) issueRuntimeOwnerBearerToken(runtimeOwnerAccountID
 	if h == nil || strings.TrimSpace(h.jwtSecret) == "" || runtimeOwnerAccountID == "" || h.tokenTTL <= 0 {
 		return fallbackBearerToken
 	}
-	signed, _, err := auth.GenerateToken(runtimeOwnerAccountID, h.jwtSecret, h.tokenTTL)
+	signed, _, err := auth.GenerateInternalToken(runtimeOwnerAccountID, h.jwtSecret, h.tokenTTL)
 	if err != nil {
 		if h.logger != nil {
 			h.logger.Warn("issue external-agent runtime token failed", slog.Any("error", err))

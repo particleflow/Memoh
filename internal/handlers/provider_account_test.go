@@ -100,7 +100,7 @@ func newProviderBoundary(t *testing.T) (*echo.Echo, *providerBoundaryStore, *int
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log)
 	e.Use(auth.JWTMiddleware(providerBoundarySecret, func(c echo.Context) bool {
 		return c.Request().URL.Path == "/auth/callback" || c.Request().URL.Path == "/providers/oauth/callback"
-	}, func(_ context.Context, user string) error {
+	}, func(_ context.Context, user, _ string) error {
 		validated++
 		if user != "active-account" {
 			return errors.New("inactive synthetic account")
@@ -137,9 +137,9 @@ func providerBoundaryToken(t *testing.T, kind string) string {
 		}
 		token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: "synthetic-bot", ChatID: "synthetic-chat", RouteID: "synthetic-route", UserID: user}, providerBoundarySecret, time.Minute)
 	case "expired":
-		token, _, err = auth.GenerateToken("active-account", providerBoundarySecret, time.Nanosecond)
+		token, _, err = auth.GenerateInternalToken("active-account", providerBoundarySecret, time.Nanosecond)
 	default:
-		token, _, err = auth.GenerateToken(kind, providerBoundarySecret, time.Minute)
+		token, _, err = auth.GenerateInternalToken(kind, providerBoundarySecret, time.Minute)
 	}
 	require.NoError(t, err)
 	return token
@@ -326,7 +326,7 @@ func authorizeProviderTestRequest(t *testing.T, e *echo.Echo, req *http.Request)
 	if !strings.HasPrefix(req.URL.Path, "/providers") {
 		return
 	}
-	e.Use(auth.JWTMiddleware(providerBoundarySecret, nil, func(_ context.Context, user string) error {
+	e.Use(auth.JWTMiddleware(providerBoundarySecret, nil, func(_ context.Context, user, _ string) error {
 		if user != "active-account" {
 			return errors.New("inactive synthetic account")
 		}

@@ -80,7 +80,7 @@ func newUploadHTTPFixture(t *testing.T) *uploadHTTPFixture {
 	_ = server.NewServer(slog.New(slog.DiscardHandler), ":0", "synthetic-http-secret", capture)
 	transport := httptest.NewServer(capture.echo)
 	t.Cleanup(transport.Close)
-	token, _, err := auth.GenerateToken(invocationTestOtherUser, "synthetic-http-secret", time.Hour)
+	token, _, err := auth.GenerateInternalToken(invocationTestOtherUser, "synthetic-http-secret", time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -56,14 +56,14 @@ func TestNativeHerdrConfigurationRequiresAccountSession(t *testing.T) {
 			const secret = "synthetic-native-account-boundary-signing-secret"
 			validated := 0
 			log := slog.New(slog.DiscardHandler)
-			srv := server.NewServerWithSessionValidator(log, "", secret, func(context.Context, string) error {
+			srv := server.NewServerWithSessionValidator(log, "", secret, func(context.Context, string, string) error {
 				validated++
 				if tc.revoked {
 					return errors.New("synthetic revoked account")
 				}
 				return nil
 			}, NewUserRuntimeHandler(log, svc))
-			token, _, err := auth.GenerateToken(owner, secret, time.Minute)
+			token, _, err := auth.GenerateInternalToken(owner, secret, time.Minute)
 			if tc.chat {
 				token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: "synthetic-bot", ChatID: "synthetic-chat", RouteID: "synthetic-route", UserID: owner}, secret, time.Minute)
 			}

@@ -43,6 +43,21 @@ func TestShouldSkipJWT_ChannelWebhookPaths(t *testing.T) {
 	}
 }
 
+func TestShouldSkipJWT_AuthTokenExchangePaths(t *testing.T) {
+	t.Parallel()
+
+	for _, path := range []string{"/auth/login", "/auth/refresh", "/auth/logout"} {
+		if !shouldSkipJWT(path) {
+			t.Fatalf("path=%q should skip jwt", path)
+		}
+	}
+	for _, path := range []string{"/auth/sessions", "/authx/login", "/api/auth/login"} {
+		if shouldSkipJWT(path) {
+			t.Fatalf("path=%q must not skip jwt", path)
+		}
+	}
+}
+
 func TestShouldLimitPublicRequestBody(t *testing.T) {
 	t.Parallel()
 

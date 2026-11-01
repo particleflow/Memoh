@@ -81,11 +81,11 @@ func TestWorkspaceStoragePostgresHTTPPreservesRegistration(t *testing.T) {
 		t.Fatal(err)
 	}
 	const secret = "synthetic-workspace-storage-test-jwt"
-	token, _, err := auth.GenerateToken(f.owner, secret, time.Minute)
+	token, _, err := auth.GenerateInternalToken(f.owner, secret, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
-	app := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(context.Context, string) error { return nil }, handlers.NewUserRuntimeHandler(nil, svc))
+	app := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, func(context.Context, string, string) error { return nil }, handlers.NewUserRuntimeHandler(nil, svc))
 	httpServer := httptest.NewServer(app)
 	defer httpServer.Close()
 	call := func(method, suffix, body string) (int, []byte) {

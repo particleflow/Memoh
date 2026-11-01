@@ -149,16 +149,24 @@ func (s *Store) IsValidTitleModel(ctx context.Context, modelID string) (bool, er
 	return model.Type == "chat", nil
 }
 
-func (s *Store) UpdatePassword(ctx context.Context, input dbstore.UpdateAccountPasswordInput) error {
+func (s *Store) UpdatePasswordAndRevokeSessions(ctx context.Context, input dbstore.UpdateAccountPasswordInput) error {
 	userID, err := db.ParseUUID(input.UserID)
 	if err != nil {
 		return err
 	}
-	_, err = s.queries.UpdateAccountPassword(ctx, dbsqlc.UpdateAccountPasswordParams{
-		PasswordHash: text(input.PasswordHash),
-		UserID:       userID,
+	return s.inTx(ctx, func(queries *dbsqlc.Queries) error {
+		if _, err := queries.UpdateAccountPassword(ctx, dbsqlc.UpdateAccountPasswordParams{
+			PasswordHash: text(input.PasswordHash),
+			UserID:       userID,
+		}); err != nil {
+			return mapQueryErr(err)
+		}
+		_, err := queries.RevokeAuthSessionsForUser(ctx, dbsqlc.RevokeAuthSessionsForUserParams{
+			RevokeReason: text(authSessionRevokePasswordChanged),
+			UserID:       userID,
+		})
+		return err
 	})
-	return mapQueryErr(err)
 }
 
 func (s *Store) RemoveMember(ctx context.Context, userID string) error {

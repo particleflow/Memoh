@@ -47,7 +47,7 @@ func (upgradeLogTestHandler) Register(e *echo.Echo) {
 // connect. A successful upgrade logged as 200 is indistinguishable from a
 // handler that answered the request without upgrading.
 func TestServerRequestLogReportsTheWebSocketHandshakeStatus(t *testing.T) {
-	token, _, err := auth.GenerateToken("upgrade-log-user", "test-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken("upgrade-log-user", "test-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -55,7 +55,7 @@ func TestSavedResultRecoveryHTTPBoundary(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(raw))
 		req.Header.Set("Content-Type", "application/json")
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "synthetic", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

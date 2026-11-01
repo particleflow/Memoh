@@ -4004,7 +4004,7 @@ func (p *ChannelInboundProcessor) issueChannelBearerToken(ctx context.Context, i
 		}
 	}
 	if tokenUserID != "" {
-		signed, _, err := auth.GenerateToken(tokenUserID, p.jwtSecret, p.tokenTTL)
+		signed, _, err := auth.GenerateInternalToken(tokenUserID, p.jwtSecret, p.tokenTTL)
 		if err != nil {
 			if p.logger != nil {
 				p.logger.WarnContext(ctx, "issue channel token failed", slog.Any("error", err))
@@ -4038,7 +4038,7 @@ func (p *ChannelInboundProcessor) issueRuntimeBearerToken(ctx context.Context, i
 		tokenUserID = strings.TrimSpace(identity.UserID)
 	}
 	if tokenUserID != "" {
-		signed, _, err := auth.GenerateToken(tokenUserID, p.jwtSecret, p.tokenTTL)
+		signed, _, err := auth.GenerateInternalToken(tokenUserID, p.jwtSecret, p.tokenTTL)
 		if err != nil {
 			if p.logger != nil {
 				p.logger.WarnContext(ctx, "issue ACP runtime token failed", slog.Any("error", err))

@@ -110,7 +110,7 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func shouldSkipJWT(path string) bool {
-	if path == "/" || path == "/ping" || path == "/health" || path == "/ready" || path == "/api/swagger.json" || path == "/auth/login" || path == "/runtimes/connect" {
+	if path == "/" || path == "/ping" || path == "/health" || path == "/ready" || path == "/api/swagger.json" || path == "/auth/login" || path == "/auth/refresh" || path == "/auth/logout" || path == "/runtimes/connect" {
 		return true
 	}
 	// This namespace authenticates a separate device credential in every route.

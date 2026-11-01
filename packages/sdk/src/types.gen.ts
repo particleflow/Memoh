@@ -2593,6 +2593,12 @@ export type HandlersLocalChannelMessageRequest = {
 };
 
 export type HandlersLoginRequest = {
+    /**
+     * DeviceID is a stable identifier the client generates for itself. A login
+     * with a device_id replaces that device's live session.
+     */
+    device_id?: string;
+    device_name?: string;
     password?: string;
     username?: string;
 };
@@ -2601,11 +2607,17 @@ export type HandlersLoginResponse = {
     access_token?: string;
     display_name?: string;
     expires_at?: string;
+    refresh_expires_at?: string;
+    refresh_token?: string;
     role?: string;
     timezone?: string;
     token_type?: string;
     user_id?: string;
     username?: string;
+};
+
+export type HandlersLogoutRequest = {
+    refresh_token?: string;
 };
 
 export type HandlersMcpStdioRequest = {
@@ -2716,9 +2728,15 @@ export type HandlersQuickActionExecuteRequest = {
     session_id?: string;
 };
 
+export type HandlersRefreshRequest = {
+    refresh_token?: string;
+};
+
 export type HandlersRefreshResponse = {
     access_token?: string;
     expires_at?: string;
+    refresh_expires_at?: string;
+    refresh_token?: string;
     token_type?: string;
 };
 
@@ -5405,6 +5423,10 @@ export type PostAuthLoginErrors = {
      * Internal Server Error
      */
     500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
 };
 
 export type PostAuthLoginError = PostAuthLoginErrors[keyof PostAuthLoginErrors];
@@ -5418,14 +5440,55 @@ export type PostAuthLoginResponses = {
 
 export type PostAuthLoginResponse = PostAuthLoginResponses[keyof PostAuthLoginResponses];
 
+export type PostAuthLogoutData = {
+    /**
+     * Logout request
+     */
+    body: HandlersLogoutRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/logout';
+};
+
+export type PostAuthLogoutErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostAuthLogoutError = PostAuthLogoutErrors[keyof PostAuthLogoutErrors];
+
+export type PostAuthLogoutResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
+
 export type PostAuthRefreshData = {
-    body?: never;
+    /**
+     * Refresh request
+     */
+    body: HandlersRefreshRequest;
     path?: never;
     query?: never;
     url: '/auth/refresh';
 };
 
 export type PostAuthRefreshErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
     /**
      * Unauthorized
      */
@@ -5434,6 +5497,10 @@ export type PostAuthRefreshErrors = {
      * Internal Server Error
      */
     500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
 };
 
 export type PostAuthRefreshError = PostAuthRefreshErrors[keyof PostAuthRefreshErrors];

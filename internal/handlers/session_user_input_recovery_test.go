@@ -46,14 +46,14 @@ func TestAcceptedUserInputRecoveryHTTPUsesAccountAndOwnedSession(t *testing.T) {
 			h.SetAgentRuntimeService(service)
 			e := echo.New()
 			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
-			e.Use(auth.JWTMiddleware(secret, nil, func(context.Context, string) error {
+			e.Use(auth.JWTMiddleware(secret, nil, func(context.Context, string, string) error {
 				if scenario == "revoked_account" {
 					return errors.New("synthetic account revoked")
 				}
 				return nil
 			}))
 			h.Register(e)
-			token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
+			token, _, err := auth.GenerateInternalToken(invocationTestOwnerID, secret, time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

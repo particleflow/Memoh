@@ -9,27 +9,39 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 // UserSessionValidator revalidates an account-backed JWT against current
-// server-side account state before the request reaches a handler.
-type UserSessionValidator func(ctx context.Context, userID string) error
+// server-side state before the request reaches a handler. sessionID is the
+// device session the token is bound to; it is empty for an internal token,
+// which is checked against the account alone.
+type UserSessionValidator func(ctx context.Context, userID, sessionID string) error
 
 const (
 	claimSubject           = "sub"
 	claimUserID            = "user_id"
 	claimChannelIdentityID = "channel_identity_id"
 	claimType              = "typ"
+	claimSessionID         = "sid"
 	claimBotID             = "bot_id"
 	claimChatID            = "chat_id"
 	claimRouteID           = "route_id"
 	chatTokenType          = "chat_route"
+	internalTokenType      = "internal"
 )
 
 // JWTMiddleware returns a JWT auth middleware configured for HS256 tokens.
+//
+// With a validator, an account token passes only as one of two kinds: a token
+// with a sid claim is a device session token, revalidated with that session;
+// a token without one must carry typ=internal and is revalidated against the
+// account alone. A sid that is empty or not a UUID is rejected and never read
+// as an internal token. Any other account token is rejected. Chat route
+// tokens keep their own scope and are not revalidated as accounts.
 func JWTMiddleware(secret string, skipper middleware.Skipper, validators ...UserSessionValidator) echo.MiddlewareFunc {
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
 		SigningKey:    []byte(secret),
@@ -56,7 +68,11 @@ func JWTMiddleware(secret string, skipper middleware.Skipper, validators ...User
 			if err != nil {
 				return err
 			}
-			if err := validateSession(c.Request().Context(), userID); err != nil {
+			sessionID, err := accountTokenSession(c)
+			if err != nil {
+				return err
+			}
+			if err := validateSession(c.Request().Context(), userID, sessionID); err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "user session is no longer active")
 			}
 			return next(c)
@@ -65,13 +81,56 @@ func JWTMiddleware(secret string, skipper middleware.Skipper, validators ...User
 	}
 }
 
+// accountTokenSession returns the device session an account token is bound
+// to, or "" for an internal token. It rejects every other token.
+func accountTokenSession(c echo.Context) (string, error) {
+	if sessionID, present := SessionIDFromContext(c); present {
+		if sessionID == "" {
+			return "", echo.NewHTTPError(http.StatusUnauthorized, "token session is empty")
+		}
+		if _, err := uuid.Parse(sessionID); err != nil {
+			return "", echo.NewHTTPError(http.StatusUnauthorized, "token session is invalid")
+		}
+		return sessionID, nil
+	}
+	if InternalTokenFromContext(c) {
+		return "", nil
+	}
+	return "", echo.NewHTTPError(http.StatusUnauthorized, "token has no session")
+}
+
 func isChatRouteToken(c echo.Context) bool {
+	claims, ok := validClaims(c)
+	return ok && claimString(claims, claimType) == chatTokenType
+}
+
+// SessionIDFromContext returns the trimmed sid claim of the validated token and
+// whether the token carries a sid claim at all.
+func SessionIDFromContext(c echo.Context) (string, bool) {
+	claims, ok := validClaims(c)
+	if !ok {
+		return "", false
+	}
+	if _, present := claims[claimSessionID]; !present {
+		return "", false
+	}
+	return strings.TrimSpace(claimString(claims, claimSessionID)), true
+}
+
+// InternalTokenFromContext reports whether the validated token is an internal
+// token minted by GenerateInternalToken.
+func InternalTokenFromContext(c echo.Context) bool {
+	claims, ok := validClaims(c)
+	return ok && claimString(claims, claimType) == internalTokenType
+}
+
+func validClaims(c echo.Context) (jwt.MapClaims, bool) {
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok || token == nil || !token.Valid {
-		return false
+		return nil, false
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
-	return ok && claimString(claims, claimType) == chatTokenType
+	return claims, ok
 }
 
 // UserIDFromContext extracts the user id from JWT claims.
@@ -104,8 +163,24 @@ func RawTokenFromContext(c echo.Context) string {
 	return token.Raw
 }
 
-// GenerateToken creates a signed JWT for the user.
-func GenerateToken(userID, secret string, expiresIn time.Duration) (string, time.Time, error) {
+// GenerateInternalToken creates a signed account JWT for a server-side caller
+// (channel replies, local channel runtimes, schedule triggers). It carries
+// typ=internal and no device session, so it is revalidated against the account
+// alone.
+func GenerateInternalToken(userID, secret string, expiresIn time.Duration) (string, time.Time, error) {
+	return generateAccountToken(userID, secret, expiresIn, claimType, internalTokenType)
+}
+
+// GenerateSessionToken creates a signed account JWT bound to a device session.
+// It carries the session id in sid and no typ.
+func GenerateSessionToken(userID, sessionID, secret string, expiresIn time.Duration) (string, time.Time, error) {
+	if strings.TrimSpace(sessionID) == "" {
+		return "", time.Time{}, errors.New("session id is required")
+	}
+	return generateAccountToken(userID, secret, expiresIn, claimSessionID, sessionID)
+}
+
+func generateAccountToken(userID, secret string, expiresIn time.Duration, kindClaim, kindValue string) (string, time.Time, error) {
 	if strings.TrimSpace(userID) == "" {
 		return "", time.Time{}, errors.New("user id is required")
 	}
@@ -121,6 +196,7 @@ func GenerateToken(userID, secret string, expiresIn time.Duration) (string, time
 	claims := jwt.MapClaims{
 		claimSubject: userID,
 		claimUserID:  userID,
+		kindClaim:    kindValue,
 		"iat":        now.Unix(),
 		"exp":        expiresAt.Unix(),
 	}
@@ -206,50 +282,6 @@ func ChatTokenFromContext(c echo.Context) (ChatToken, error) {
 		info.UserID = strings.TrimSpace(info.ChannelIdentityID)
 	}
 	return info, nil
-}
-
-// RefreshTokenFromContext extracts the current token from context and issues a new one
-// with the same claims but a renewed expiration time.
-func RefreshTokenFromContext(c echo.Context, secret string, defaultExpiresIn time.Duration) (string, time.Time, error) {
-	token, ok := c.Get("user").(*jwt.Token)
-	if !ok || token == nil || !token.Valid {
-		return "", time.Time{}, echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", time.Time{}, echo.NewHTTPError(http.StatusUnauthorized, "invalid token claims")
-	}
-
-	// Calculate original duration if possible
-	expiresIn := defaultExpiresIn
-	if expRaw, ok := claims["exp"].(float64); ok {
-		if iatRaw, ok := claims["iat"].(float64); ok {
-			duration := time.Duration(expRaw-iatRaw) * time.Second
-			if duration > 0 {
-				expiresIn = duration
-			}
-		}
-	}
-
-	now := time.Now().UTC()
-	expiresAt := now.Add(expiresIn)
-
-	// Create new claims, copying over existing ones but updating time bounds
-	newClaims := jwt.MapClaims{}
-	for k, v := range claims {
-		newClaims[k] = v
-	}
-	newClaims["iat"] = now.Unix()
-	newClaims["exp"] = expiresAt.Unix()
-
-	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
-	signed, err := newToken.SignedString([]byte(secret))
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	return signed, expiresAt, nil
 }
 
 func claimString(claims jwt.MapClaims, key string) string {

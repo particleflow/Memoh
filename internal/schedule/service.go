@@ -789,7 +789,7 @@ func (s *Service) generateTriggerToken(userID string, durations ...time.Duration
 	if len(durations) > 0 && durations[0] > ttl {
 		ttl = durations[0]
 	}
-	signed, _, err := auth.GenerateToken(userID, s.jwtSecret, ttl)
+	signed, _, err := auth.GenerateInternalToken(userID, s.jwtSecret, ttl)
 	if err != nil {
 		return "", err
 	}

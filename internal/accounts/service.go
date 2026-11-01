@@ -314,7 +314,8 @@ func (s *Service) UpdateProfile(ctx context.Context, userID string, req UpdatePr
 	return toAccount(row), nil
 }
 
-// UpdatePassword changes the password after verifying the current one.
+// UpdatePassword changes the password after verifying the current one and
+// revokes every device session of the user in the same transaction.
 func (s *Service) UpdatePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
 	if s.store == nil {
 		return errors.New("account store not configured")
@@ -339,7 +340,7 @@ func (s *Service) UpdatePassword(ctx context.Context, userID, currentPassword, n
 	if err != nil {
 		return err
 	}
-	return s.store.UpdatePassword(ctx, dbstore.UpdateAccountPasswordInput{
+	return s.store.UpdatePasswordAndRevokeSessions(ctx, dbstore.UpdateAccountPasswordInput{
 		UserID:       userID,
 		PasswordHash: string(hashed),
 	})

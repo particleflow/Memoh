@@ -70,7 +70,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, path+"?target_id=foreign-pc&pane_id=forged", nil)
 		req.Header.Set("X-Session-ID", "foreign-session")
 		if user != "" {
-			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			token, _, err := auth.GenerateInternalToken(user, "test-secret", time.Minute)
 			if err != nil {
 				t.Fatal(err)
 			}

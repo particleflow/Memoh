@@ -60,7 +60,7 @@ func TestProviderMediaCatalogAccountScope(t *testing.T) {
 			const secret = "synthetic-catalog-scope-signing-secret"
 			log := slog.New(slog.DiscardHandler)
 			validated := 0
-			srv := server.NewServerWithSessionValidator(log, "", secret, func(_ context.Context, user string) error {
+			srv := server.NewServerWithSessionValidator(log, "", secret, func(_ context.Context, user, _ string) error {
 				validated++
 				if user != tc.user {
 					t.Error("wrong account reached validator")
@@ -70,7 +70,7 @@ func TestProviderMediaCatalogAccountScope(t *testing.T) {
 				}
 				return nil
 			}, NewProvidersHandler(log, providers.NewService(log, queries, ""), nil))
-			token, _, err := auth.GenerateToken(tc.user, secret, time.Minute)
+			token, _, err := auth.GenerateInternalToken(tc.user, secret, time.Minute)
 			if tc.chat {
 				token, _, err = auth.GenerateChatToken(auth.ChatToken{
 					BotID: "synthetic-bot", ChatID: "synthetic-chat", RouteID: "synthetic-route", UserID: tc.user,

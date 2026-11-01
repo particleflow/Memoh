@@ -203,8 +203,53 @@ type AccountStore interface {
 	UpdateAdmin(ctx context.Context, input UpdateAccountAdminInput) (AccountRecord, error)
 	UpdateProfile(ctx context.Context, input UpdateAccountProfileInput) (AccountRecord, error)
 	IsValidTitleModel(ctx context.Context, modelID string) (bool, error)
-	UpdatePassword(ctx context.Context, input UpdateAccountPasswordInput) error
+	// UpdatePasswordAndRevokeSessions changes the password and revokes every
+	// device session of the user in one transaction: if the revocation fails,
+	// the password change is rolled back with it.
+	UpdatePasswordAndRevokeSessions(ctx context.Context, input UpdateAccountPasswordInput) error
 	RemoveMember(ctx context.Context, userID string) error
+}
+
+// AuthSessionRecord is one device session: the device, the hash of its static
+// refresh credential and its revocation state. RevokedAt and LastUsedAt are
+// zero when unset.
+type AuthSessionRecord struct {
+	ID          string
+	UserID      string
+	DeviceID    string
+	DeviceName  string
+	RefreshHash string
+	CreatedAt   time.Time
+	LastUsedAt  time.Time
+	ExpiresAt   time.Time
+	RevokedAt   time.Time
+}
+
+type CreateAuthSessionInput struct {
+	UserID      string
+	DeviceID    string
+	DeviceName  string
+	RefreshHash string
+	ExpiresAt   time.Time
+}
+
+// AuthSessionStore persists device sessions. Lookups by id return
+// db.ErrNotFound when no row matches.
+type AuthSessionStore interface {
+	// CreateAuthSession revokes the user's live session on the same non-empty
+	// device and inserts the new session in one transaction. A unique conflict
+	// with a concurrent login on that device retries the whole transaction
+	// once; a second conflict returns db.ErrAuthSessionConflict.
+	CreateAuthSession(ctx context.Context, input CreateAuthSessionInput) (AuthSessionRecord, error)
+	GetAuthSessionByID(ctx context.Context, sessionID string) (AuthSessionRecord, error)
+	// GetActiveAuthSession returns db.ErrNotFound unless the session belongs to
+	// the user, is not revoked and has not expired.
+	GetActiveAuthSession(ctx context.Context, sessionID, userID string) error
+	// TouchAuthSession slides a live session's expiry and reports the rows it
+	// changed: zero when the session was revoked or had expired.
+	TouchAuthSession(ctx context.Context, sessionID string, expiresAt time.Time) (int64, error)
+	RevokeAuthSession(ctx context.Context, sessionID, userID, reason string) (int64, error)
+	DeleteStaleAuthSessions(ctx context.Context) (int64, error)
 }
 
 type BotStore interface {

@@ -74,7 +74,7 @@ func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
 	h.Register(e)
 	path := "/bots/" + taskBot + "/sessions/" + taskRoot + "/tasks/computer_operation/" + taskOp
-	token, _, err := auth.GenerateToken(taskUser, "test-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken(taskUser, "test-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

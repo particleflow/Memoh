@@ -175,7 +175,7 @@ func TestTaskTransferHTTPNoAccountFallbackAndScope(t *testing.T) {
 			credential, status := "Memoh-Transfer one", 403
 			switch mode {
 			case "disabled", "account-jwt":
-				token, _, err := auth.GenerateToken(f.id.Binding.UserID, "synthetic-account-secret", time.Hour)
+				token, _, err := auth.GenerateInternalToken(f.id.Binding.UserID, "synthetic-account-secret", time.Hour)
 				if err != nil {
 					t.Fatal(err)
 				}

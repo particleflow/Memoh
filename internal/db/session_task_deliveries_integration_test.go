@@ -42,7 +42,7 @@ func exerciseSessionDeliveryHTTP(ctx context.Context, t *testing.T, store *postg
 	tasks := sessiontask.NewService(store, thread.NewService(log, queries, nil), workdir.NewService(store, nil), targets, "synthetic-account-secret")
 	handler := handlers.NewSessionTaskHandler(tasks, botService, accountService, nil)
 	app := server.NewServer(log, ":0", "synthetic-account-secret", handler) //nolint:contextcheck // Real server middleware handles request context.
-	token, _, err := auth.GenerateToken(id.Binding.UserID, "synthetic-account-secret", time.Minute)
+	token, _, err := auth.GenerateInternalToken(id.Binding.UserID, "synthetic-account-secret", time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
