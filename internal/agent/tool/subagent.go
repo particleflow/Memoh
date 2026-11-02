@@ -289,6 +289,7 @@ type SpawnProvider struct {
 	modelResolver  subagentModelResolver
 	coord          *agentCoordinator
 	logger         *slog.Logger
+	effortTiering  bool
 }
 
 func NewSpawnProvider(
@@ -329,6 +330,14 @@ func (p *SpawnProvider) SetSystemPromptFunc(fn func(sessionType string) string) 
 
 func (p *SpawnProvider) SetHookService(h *hooks.Service) {
 	p.hookService = h
+}
+
+// SetEffortTiering arms or disarms per-turn effort tiering for subagent
+// spawns. Unarmed (the zero value on a bare struct), spawns keep the ordinary
+// resolution; the server wires this from the same agent config as the chat
+// path.
+func (p *SpawnProvider) SetEffortTiering(enabled bool) {
+	p.effortTiering = enabled
 }
 
 // Usage frames how the available agent-control tools are meant to be used.
@@ -1982,13 +1991,37 @@ func (p *SpawnProvider) resolveSubagentReasoning(
 			stored = botSettings.ReasoningEffort
 		}
 	}
-	return reasoning.ResolveConfig(
+	resolved := reasoning.ResolveConfig(
 		modelInfo.ResolveThinkingMode(),
 		modelInfo.Config.ReasoningEfforts,
 		modelInfo.ReasoningOptions(clientType),
 		stored,
 		requested,
-	), nil
+	)
+	// Per-turn effort tiering: a subagent is an unattended worker, so its
+	// turns run at low tier (bounded by the resolved effort) unless the spawn
+	// carried an explicit requested tier. Decided once here; the subagent's
+	// whole run carries it.
+	if p.effortTiering && resolved != nil && strings.TrimSpace(requested) == "" {
+		applyEffortTieringForSubagent(resolved, modelInfo.Config.ReasoningEfforts)
+	}
+	return resolved, nil
+}
+
+// applyEffortTieringForSubagent is the spawn-path slice of the turn-type
+// tiering table: subagent turns always select low. The clamp never raises the
+// resolved effort, and models that cannot express a weaker tier are untouched.
+func applyEffortTieringForSubagent(resolved *reasoning.Config, advertised []string) {
+	if resolved == nil || !resolved.Active {
+		return
+	}
+	cap := strings.TrimSpace(resolved.Effort)
+	if cap == "" {
+		return
+	}
+	if sent, ok := reasoning.DownshiftTier(reasoning.EffortLow, cap, advertised); ok {
+		resolved.Effort = sent
+	}
 }
 
 type spawnAgentArgs struct {

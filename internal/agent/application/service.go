@@ -160,6 +160,7 @@ type Service struct {
 	memorySearchTimeout               time.Duration
 	contextAbsoluteCapTokens          int
 	syncCompactionMode                string
+	effortTieringMode                 string
 	clockLocation                     *time.Location
 	logger                            *slog.Logger
 	allowedTeam                       string
@@ -286,10 +287,27 @@ const (
 	syncCompactionModeOff    = "off"
 )
 
+// effortTieringModeOff is the only non-active wire value for effort tiering;
+// the application keeps its own constant so the domain layer does not import
+// the config package (same pattern as the sync compaction modes above).
+const effortTieringModeOff = "off"
+
 // SetSyncCompactionMode sets the rollout mode for the pre-turn synchronous
 // compaction backstop on the discuss and pipeline-chat paths.
 func (s *Service) SetSyncCompactionMode(mode string) {
 	s.syncCompactionMode = mode
+}
+
+// SetEffortTiering arms or disarms the per-turn reasoning effort tiering.
+// Anything other than the active mode leaves the ordinary resolution chain
+// untouched.
+func (s *Service) SetEffortTiering(mode string) {
+	s.effortTieringMode = mode
+}
+
+// effortTieringEnabled resolves the rollout mode; the default (unset) is on.
+func (s *Service) effortTieringEnabled() bool {
+	return s.effortTieringMode != effortTieringModeOff
 }
 
 // effectiveSyncCompactionMode normalizes the configured mode; anything
@@ -522,6 +540,8 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 		Provider:           req.Provider,
 		ReasoningEffort:    req.ReasoningEffort,
 		HTTPClient:         modelHTTPClient,
+		TurnInputText:      modelQuery,
+		TurnAttachments:    len(req.Attachments),
 	})
 	if err != nil {
 		s.logger.ErrorContext(ctx, "resolve: buildBaseRunConfig failed",
@@ -885,8 +905,9 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 	} else {
 		roundMessages := prependTurnUserMessage(storeReq, outputMessages)
 		if err := s.storeRoundWithOptions(ctx, storeReq, roundMessages, rc.model.ID, storeRoundOptions{
-			SkipMemory:       storeReq.SkipMemoryExtraction,
-			ContextLifecycle: cfg.ContextLifecycle,
+			SkipMemory:          storeReq.SkipMemoryExtraction,
+			ContextLifecycle:    cfg.ContextLifecycle,
+			ReasoningEffortTier: cfg.ReasoningTierDecision,
 		}); err != nil {
 			lifecycleCause = err
 			return ChatResponse{}, err
@@ -931,6 +952,11 @@ type baseRunConfigParams struct {
 	Provider           string
 	ReasoningEffort    string // caller-provided override (empty = use bot default)
 	HTTPClient         *http.Client
+	// TurnInputText and TurnAttachments describe the current turn's inbound
+	// user input. They drive per-turn effort tiering; zero values (resumed
+	// turns without new input) fall to the interactive default tier.
+	TurnInputText   string
+	TurnAttachments int
 }
 
 // buildBaseRunConfig creates a RunConfig with model, credentials, skills,
@@ -973,6 +999,25 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 	)
 
 	reasoningConfig := resolveRunReasoningConfig(chatModel, botSettings, p, provider.ClientType)
+
+	// Per-turn effort tiering: decided here, once per run config, after the
+	// ordinary chain has resolved the tier (which becomes the ceiling) and
+	// before the SDK model captures the config. Explicit user choices — this
+	// message's request or the session's remembered pair — are never touched.
+	sessionEffortApplies := strings.TrimSpace(p.SessionPrefEffort) != "" &&
+		strings.EqualFold(strings.TrimSpace(chatModel.ID), strings.TrimSpace(p.SessionPrefModelID))
+	sessionEffort := ""
+	if sessionEffortApplies {
+		sessionEffort = p.SessionPrefEffort
+	}
+	tierDecision := applyEffortTiering(reasoningConfig, chatModel.Config.ReasoningEfforts, effortTierInputs{
+		Enabled:         s.effortTieringEnabled(),
+		SessionType:     p.SessionType,
+		InputText:       p.TurnInputText,
+		Attachments:     p.TurnAttachments,
+		RequestedEffort: p.ReasoningEffort,
+		SessionEffort:   sessionEffort,
+	})
 
 	modelHTTPClient := p.HTTPClient
 	if modelHTTPClient == nil {
@@ -1026,6 +1071,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		ReasoningConfig:          reasoningConfig,
 		ReasoningStoredEffort:    strings.TrimSpace(botSettings.ReasoningEffort),
 		ReasoningRequestedEffort: strings.TrimSpace(p.ReasoningEffort),
+		ReasoningTierDecision:    tierDecision,
 		ChatCompletionsCompat:    chatCompletionsCompat,
 		PromptCacheTTL:           providers.ProviderConfigString(provider, "prompt_cache_ttl"),
 		SessionType:              p.SessionType,
