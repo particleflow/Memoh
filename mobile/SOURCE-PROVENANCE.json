@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "056b0e8d659737cc82c87ddd100f22b5c6611ba9f9a14dbf1ff83aea21e76f29",
+      "sha256": "908faa90785d943b0d0023dbc76f133bfbc2fb6b8e4426447939fd6c13b09530",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -2012,7 +2012,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "58cc2e52bb65a5f0b7ee06827a32324dd7046a8f3775281e416bccd2cf9bb9bf",
+      "sha256": "906852beaa922240424874ade3753715bf8b92f8de92dd052e341be11bc993dc",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2026,7 +2026,8 @@
         "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
-        "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)"
+        "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)",
+        "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client."
       ]
     }
   ],
