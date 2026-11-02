@@ -62,8 +62,9 @@ func (s *sharedAttachmentStore) OpenShared(ctx context.Context, botID, contentHa
 }
 
 // grant resolves the delegation that authorizes botID to read contentHash in
-// this conversation. Both lookups answer "no grant" with a not-found error, so
-// a caller that has no grant looks exactly like a caller whose hash is gone.
+// this conversation. Both "no conversation" and "no delegation names this hash"
+// answer not-found, so a caller without a grant looks exactly like a caller
+// whose hash is gone.
 func (s *sharedAttachmentStore) grant(ctx context.Context, botID, contentHash string) (*botdelegation.AttachmentSet, bool, error) {
 	if s == nil || s.loader == nil {
 		return nil, false, media.ErrAssetNotFound
@@ -72,7 +73,16 @@ func (s *sharedAttachmentStore) grant(ctx context.Context, botID, contentHash st
 	if !ok || identity.BotID != botID {
 		return nil, false, media.ErrAssetNotFound
 	}
-	return s.loader.sharedForConversation(ctx, delegationMediaIdentity{bot: identity.BotID, user: identity.UserID, session: identity.SessionID}, contentHash)
+	set, result, err := s.loader.sharedForConversation(ctx, delegationMediaIdentity{bot: identity.BotID, user: identity.UserID, session: identity.SessionID}, contentHash)
+	if err != nil {
+		return nil, false, err
+	}
+	if set == nil {
+		// No delegation in this conversation names the hash. It is not this
+		// Bot's to send.
+		return nil, false, media.ErrAssetNotFound
+	}
+	return set, result, nil
 }
 
 // injectSharedOutboundAttachments lets channel delivery send a hash a Bot may
