@@ -80,6 +80,15 @@
       "windowsInjectionBaseSHA256": "f2f5df416982d5aebd6051392e64fb5ecba51bb5fff85c00d9c023f1a2391868"
     },
     {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AppNetBinding.ets",
+      "sha256": "b75c572967e780e1b970dbfc21fdcacd215dd8c1e497a25e1378e0ab05189c29",
+      "origin": "Project-authored shell network binding manager for the N1 IPv6 field issue; not recovered historical source.",
+      "licenseReview": "Derived Memoh source under the retained repository license; public Network Kit APIs only, no SDK binary or private configuration.",
+      "preparationChanges": [
+        "Bind the whole app with connection.setAppNet to a Wi-Fi network whose IPv6 link is valid, else to a cellular network activated through a NetSpecifier request and validated the same way, else keep the system default; a lost bound network is released before any re-decision and the decision/facts stay visible on the existing journal and dump surfaces. No web overlay, interception, proxy or permission change."
+      ]
+    },
+    {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
       "sha256": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
       "origin": "project client addition developed during cloud alignment",
@@ -103,7 +112,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "66776b53f1b3331b2fb0554cac9b19d43a2588f7415e8a29dacb90bf12db56c4",
+      "sha256": "bfe96fc33e8356ba6d1a97e85f92dcca7b943c997bb64e387a83dc73791b1871",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -111,7 +120,8 @@
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "Hash-only refresh: this entry had drifted since e73239b4a (32-hex upload snapshot handles) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
       ]
     },
     {
@@ -244,6 +254,15 @@
       "windowsInjectionBaseSHA256": "1128fde08fafc2a0239de9907cf8d9cb34973ff802106f722c6bdfb69c93a820"
     },
     {
+      "path": "mobile/client/tests/stage2/harmony_app_net_binding.cjs",
+      "sha256": "6cf0c970dcc6cd1a47dd4a676185b62e8c0c02f3e6f003ae06952f4be4af23b8",
+      "origin": "Project-authored stage2 decision-table adapter for the N1 IPv6 app-net binding; mocked Network Kit seams only.",
+      "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
+      "preparationChanges": [
+        "Decision table (Wi-Fi IPv6 preferred, cellular activated by request as fallback, no-IPv6 or no-network keeps default) plus lifecycle checks: bound-net loss releases first, Wi-Fi regaining IPv6 rebinds and drops the cellular request, stop unbinds and unregisters, failed binds retry, and SDK error text never reaches the journal."
+      ]
+    },
+    {
       "path": "mobile/client/tests/stage2/harmony_auth_persistence.py",
       "sha256": "479e30d679b079339ae9d7afabd69c967c23b4cdc491bd2aa8e8a79ff9d5875d",
       "origin": "project client addition developed during cloud alignment",
@@ -347,7 +366,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "c078862aa4b0080eec37b7972a1ff764ebca8c932dc07dfde01a79729a6f9e61",
+      "sha256": "e84b8271aee2e61a7c10f970f0b055d8a9bbf1a6d2c640e013cd1911c2a93112",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -355,7 +374,8 @@
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "Hash-only refresh: this entry had drifted since 43ce9b8e0 (uuid stub device-faithful) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
       ]
     },
     {
@@ -504,7 +524,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "37854f940c37463ca7f9965eb107cf74fd3c2aa0979098e361c11aa88b9c6f26",
+      "sha256": "ba7308430800ff7c1ead637da804a6f67d86fb920481d2e66f6741084f7bdcde",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -535,7 +555,8 @@
         "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
         "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Hash-only refresh: this entry had drifted since 08738497b (streaming read-aloud v2 overlay) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -549,7 +570,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "83b1661904d30b06b3e269174884fac61d47c13717e7fec4cc7cbd55e8963e02",
+      "sha256": "6e2aea271cccc04f1debf52f3e896e562bb41891abf55d96bc8dd2e30ef55126",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -568,7 +589,8 @@
         "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change.",
         "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
         "Release1.0.31/1000031 from qualified e256f9f5; application identity and all product implementation unchanged.",
-        "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values."
+        "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values.",
+        "Hash-only refresh: this entry had drifted since deeef54c4 (version 1.0.41) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
@@ -870,7 +892,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
-      "sha256": "8b695603a418e703f440319edfdb1d4c6b9f9572d33814752a07b56bff01f755",
+      "sha256": "303a75ecf5d5829abf59ef1fd59847113216b1b786cee6d7404e17264fa916ec",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
@@ -879,7 +901,8 @@
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
+        "N1 IPv6 network binding: AppNetBinding starts on ability create, stops on destroy, and its read-only binding snapshot line joins the existing onDump surface."
       ]
     },
     {
