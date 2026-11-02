@@ -16,7 +16,9 @@ entries = manifest['entries']
 # One scoped RCP endpoint regression extends the prior179 inputs.
 # Four ownership, four background and two general routing sources extend180.
 # Three scoped diagnostic journal/SDK test sources extend the prior190.
-assert len(entries) == 193
+# The 112 streaming overlay added one entry (194) without this count; kept as history.
+# Two N1 IPv6 app-net binding sources (shell manager + stage2 decision table) extend194.
+assert len(entries) == 196
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
