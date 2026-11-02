@@ -107,6 +107,46 @@ const text = async () => (await page.eval('document.body.innerText')) ?? ''
 const speech = async () => (await control('/__control/speech', null, 'GET')).entries
 const speechStates = async () => (await page.eval("[...document.querySelectorAll('[data-speech-state]')].map(n => n.getAttribute('data-speech-state'))")) ?? []
 const playing = async () => (await speechStates()).includes('playing')
+const visibility = async () => (await page.eval('document.visibilityState')) ?? 'unknown'
+// The ability's window is named after the bundle's last segment plus an index
+// (`workassistant0`), so the bundle's tail identifies it without hardcoding.
+const windowTag = BUNDLE.split('.').pop()
+const focusedWindow = () => {
+  const dump = hdc('shell', "hidumper -s WindowManagerService -a '-a'")
+  const win = (/Focus window: (\d+)/.exec(dump) || [])[1] || '?'
+  const line = dump.split('\n').find(candidate => new RegExp(`\\s${win}\\s`).test(candidate)) || ''
+  return { id: win, name: line.trim().split(/\s+/)[0] || '?' }
+}
+
+// ArkWeb stops running the page's render/observers while the document reports
+// `visibilityState: hidden`, and read-aloud never starts in that state. On this
+// image a freshly started app is *not* always the focused window: the IME's
+// first-run guide (privacy notice + keyboard layout picker) is a full-screen
+// window and takes window focus every time the login form's input is focused.
+// A hidden page then renders no reply text and issues no speech request, which
+// is exactly the flip this harness used to record. Neither the data wipe nor a
+// restart clears it, because the guide belongs to the IME's own data.
+//
+// So every scenario waits for the app to actually own window focus and the
+// document to report `visible` before injecting, and gives focus back if the
+// IME (or anything else) has taken it.
+async function ensureVisible(label, timeout = 40000) {
+  const started = Date.now()
+  while (Date.now() - started < timeout) {
+    const state = await visibility()
+    const owner = focusedWindow()
+    if (state === 'visible' && owner.name.startsWith(windowTag)) return { state, owner: `${owner.id}:${owner.name}` }
+    // Home parks whatever took focus, and the explicit start brings the ability
+    // back to the front without restarting the process (so the document and its
+    // stream cursor survive).
+    hdc('shell', 'uitest uiInput keyEvent Home')
+    await sleep(700)
+    hdc('shell', `aa start -a EntryAbility -b ${BUNDLE}`)
+    await sleep(1200)
+  }
+  const owner = focusedWindow()
+  throw new Error(`page did not become visible (${label}): state=${await visibility()} focus=${owner.id}:${owner.name}`)
+}
 
 // The devtools socket carries the renderer pid, so it changes on every app
 // restart. Each distinct socket gets its own local port: hdc keeps a binding
@@ -153,6 +193,10 @@ async function coldStart({ seedHistory = false } = {}) {
   // boot() appends the service-settings button only after main and the router
   // are live; before that the login form is inert and a click is lost.
   await page.wait('!!document.querySelector("#harmony-service-settings") && !!document.querySelector("#password")', 30000, 'login form')
+  // Filling the form focuses an input, which raises the IME. If this is the
+  // image's first run of it, the full-screen first-run guide takes focus and the
+  // page goes hidden -- before sign-in, so waiting afterwards is not enough.
+  await ensureVisible('login form')
   await page.eval(`(() => {
     const set = (selector, value) => {
       const input = document.querySelector(selector)
@@ -164,6 +208,7 @@ async function coldStart({ seedHistory = false } = {}) {
   })()`)
   // The form validates the bound values asynchronously; submit after they land.
   await sleep(500)
+  await ensureVisible('before submit')
   await page.eval(`document.querySelector('#password').form.querySelector('button[type=submit]').click(), true`)
   await waitFor(async () => (await control('/__control/requests', null, 'GET')).items.some(item => item.path === '/auth/login'),
     10000, 200, 'POST /auth/login from the packaged form')
@@ -180,23 +225,33 @@ async function coldStart({ seedHistory = false } = {}) {
     const last = log.items.length ? Math.max(...log.items.map(item => Date.parse(item.at))) : 0
     return Date.now() - last >= 1200
   }, 20000, 300, 'service quiet')
+  // A hidden document neither renders the stream nor starts read-aloud, so the
+  // scenario must start from a visible page or its red would be meaningless.
+  const visibilityState = await ensureVisible('before injection')
+  return visibilityState
 }
 
 async function typeAndSend(value, { submit = true } = {}) {
-  await page.eval(`(() => {
+  const typedAt = await page.eval(`(() => {
     const area = document.querySelector('textarea')
-    if (!area) return false
+    if (!area) return null
     area.focus()
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(area, ${JSON.stringify(value)})
     area.dispatchEvent(new Event('input', { bubbles: true }))
     return true
   })()`)
-  if (!submit) return
+  if (!typedAt || !submit) return null
   await control('/__control/mark', {})
+  // The stream's first frame can only be timed against the instant the send
+  // left, so the send itself is the timestamp the caller measures from.
+  const sentAt = Date.now()
   await page.eval(`(() => {
     const area = document.querySelector('textarea')
     area.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }))
   })()`)
+  const visibilityState = await ensureVisible('after injection')
+  if (visibilityState.state !== 'visible') throw new Error('page went hidden during injection')
+  return sentAt
 }
 
 async function main() {
@@ -215,19 +270,26 @@ async function main() {
 
     // ---------- E1 + G1 + G5 + V2 on one live reply ----------
     await coldStart()
-    await typeAndSend('请朗读这段回复')
-    const sentAt = Date.now()
-    const log = await control('/__control/frames', null, 'GET')
-    const ackFrameAt = Math.max(0, ...log.items.filter(f => f.seq === 1).map(f => f.at))
+    const sentAt = await typeAndSend('请朗读这段回复')
     let ackAt = -1
     for (let waited = 0; waited <= ACK_WINDOW_MS + 8000; waited += 100) {
       if ((await text()).includes(ACK)) { ackAt = Date.now() - sentAt; break }
       await sleep(100)
     }
-    const fromStream = ackFrameAt ? ackAt - (ackFrameAt - sentAt) : -1
+    // The frame log is cumulative across scenarios (the scripted service is one
+    // process, and `seq` restarts at the scenario boundary), so only a frame
+    // stamped at or after this send belongs to this reply. Taking the newest
+    // `seq === 1` without that filter silently measured a previous scenario's
+    // frame.
+    const log = await control('/__control/frames', null, 'GET')
+    const ackFrameAt = log.items
+      .filter(frame => frame.seq === 1 && frame.at >= sentAt)
+      .map(frame => frame.at)
+      .sort((left, right) => left - right)[0] ?? 0
+    const fromStream = ackFrameAt && ackAt >= 0 ? ackAt - (ackFrameAt - sentAt) : -1
     pass('E1 acknowledgement reaches the real app UI', ackAt >= 0 && fromStream <= ACK_FROM_STREAM_MS,
       ackAt >= 0 ? `ack visible ${ackAt}ms after send, ${fromStream}ms after the ack frame (window ${ACK_FROM_STREAM_MS}ms)` : `ack not visible within ${ACK_WINDOW_MS}ms`,
-      { ackAfterSendMs: ackAt, ackAfterFrameMs: fromStream })
+      { ackAfterSendMs: ackAt, ackAfterFrameMs: fromStream, ackFrameOffsetMs: ackFrameAt ? ackFrameAt - sentAt : null })
 
     // Read-aloud start is proven by the app's own synthesis request; the visible
     // speech state is corroboration, because a short reply can finish playing

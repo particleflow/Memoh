@@ -98,9 +98,10 @@ node mobile/client/tools/acceptance/emulator.mjs       # 终端 2
 
 `aa force-stop` → 等进程真正退出 → `bm clean -n <bundle> -d -c` → `aa start` →
 **显式等该场景自己的 `runtime_subscribe`**（不靠固定 sleep）→ 等服务 quiet →
-经 CDP 种状态 → 注入事件。
+经 CDP 种状态 → 注入事件 → 复检页面可见且本应用持有窗口焦点。
 
 这些步骤全部在 `coldStart()` 里；未订阅直接抛错（fail-fast，不空等）。
+可见性判据见下文「稳定性」。
 
 ## 已解卡点（2026-11-02）：「配置 + token 同时存在」停在配置页
 
@@ -142,28 +143,44 @@ hdc -t 127.0.0.1:5555 install -r F:/NAS-Assistant/tmp/emu/out/acceptance-signed.
 
 ## 当前红绿（2026-11-02，Mate 90 Pro 模拟器实测）
 
-报告：`acceptance-emulator-1793622137052.json` / `1793622806507.json` /
-`1793623255608.json`（三次全量 9 场景运行），外加单流程探针。
+报告：`acceptance-emulator-*.json`（每次全量 9 场景落一份）。
 
 | 场景 | 结果 | 证据与说明 |
 | --- | --- | --- |
-| E1 快回 ack | 红（harness 内） | harness 内 11s 窗口未见 ack；**同样的单流程探针稳定绿**：发送后 ~6.5s ack 与末句均可见（stub 帧时序正常） |
-| G1 首句开读 | 红 | 完成帧后首个 POST 实测 ~30s（>4000ms 窗口）；一次运行录得真实 POST/PUT（`x-speech-playback-identity`） |
-| G5 全段按序 | 红 | 依赖 G1；录得的一次 POST 覆盖全段四句、顺序正确 |
-| V2 思考默认折叠 | 红（**预期红**，#118 未合并） | 打包 bundle 无思考折叠控件 → uncovered |
-| V3b 打字不停读 | 红 | 运行间结果翻转（见下「稳定性」） |
-| V3c 气泡点击停读 | 绿（一次运行） | playing=true → 点击后 idle；另两次运行 playing 未起 |
-| V3d 提交停读 | 绿（一次运行） | playing=true → 提交后 idle，含真实 speech POST×2 |
-| G7 历史不朗读 | 绿（一次运行） | 历史渲染且 speech=0；单流程探针稳定绿 |
-| G8 后台/前台 | 红 | 一次运行录得真实 speech POST，但回前台恢复未观察到 |
+| E1 快回 ack | 绿 | ack 在发送后 ~0.9s 可见，距 ack 帧 ~100ms |
+| G1 首句开读 | 绿 | 首句完成后 ~2.9s 出现首个 speech POST |
+| G5 全段按序 | 绿 | 单个 POST 覆盖全段四句、顺序正确 |
+| V2 思考默认折叠 | 红（**预期红**，#118 未合并） | 打包 bundle 的「已思考」按钮无 `aria-expanded`，无折叠控件标记 |
+| V3b 打字不停读 | 绿 | playing=true → 打字后仍 playing |
+| V3c 气泡点击停读 | 绿 | playing=true → 点击后 idle |
+| V3d 提交停读 | 绿 | playing=true → 提交后 idle |
+| G7 历史不朗读 | 绿 | 历史渲染且 speech=0 |
+| G8 后台/前台 | 绿 | playing → 后台 paused → 回前台 playing |
 
-**稳定性（如实说明）**：harness 每次都能完整跑完 9 场景并落报告，但活动回复类
-场景（E1/V3b/V3c/V3d/G8）在连续多场景运行中结果翻转：同一场景某次绿、某次红，
-而逐场景单独驱动（同 coldStart 流程的探针）稳定绿。翻红时消息确实到达 stub、
-帧确实下发，但页面不再渲染流式文本——指向 harness 的会话衔接（CDP attach /
-renderer 复用）而非产品缺陷。已排除：stale devtools socket 选择（已按
-「仅接受本次冷启动后新出现的 socket」修正，未消除翻转）。**在本项修稳之前，
-活动回复类场景的红不能当作产品红使用**；V2 为 #118 未合并的预期红。
+**稳定性（已修，2026-11-02）**：此前活动回复类场景（E1/V3b/V3c/V3d/G8）在连续
+全量运行间结果翻转，而逐场景单流程探针稳定绿。**根因不是会话衔接，是页面可见性**：
+
+- ArkWeb 在 `document.visibilityState !== 'visible'` 时停止页面的渲染与观察者回调。
+  该状态下 stub 的帧照常到达（服务端日志齐全），但 `innerText` 不回流、自动朗读
+  不发起——正是「帧到了、页面不动」的外观。
+- 该镜像上小艺输入法**首次运行**弹出全屏向导（隐私声明 + 「请选择中文键盘布局」），
+  是独立窗口且抢走窗口焦点（`hidumper -s WindowManagerService -a '-a'` 的
+  `Focus window` 指向 `inputmethod0`）。登录页 `INPUT#username` 一填表就拉起输入法，
+  向导随后盖住应用，页面转入 hidden。向导数据属于输入法自身，`bm clean -d/-c`
+  清不到，`aa force-stop` 重启也带着，所以每一场景都会重现，且取决于触发时机
+  而时有时无——这就是翻转。
+- 判据：`ensureVisible()` 同时要求 `document.visibilityState === 'visible'` 与
+  `Focus window` 属于本应用的窗口（`workassistant0`）。未满足时发
+  `uitest uiInput keyEvent Home` + `aa start`（不重启进程，文档与流 cursor 保活），
+  最多等 40s，超时即 fail-fast 抛错，不空跑。`coldStart()` 在填表后、提交前、
+  quiet 后各校验一次；`typeAndSend()` 在 Enter 之后复检一次。任何一次不满足都抛
+  harness 错误，不会落成产品红。
+- 附带修掉一处计时错误：E1 原先取「最新 `seq===1` 帧」做基准，而帧日志跨场景累积
+  （stub 是同一进程、`seq` 每场景从 0 重来），于是量到上一场景的帧（实测
+  `ackAfterFrameMs=274368`）。现在只取 `frame.at >= sentAt` 的最早一帧。
+
+复跑判据：**同一提交连跑 5 次全量，非预期红场景必须 5/5 一致绿**；V2 为 #118
+未合并的预期红，不计入翻转。
 
 ## 验收构建的偏差（只在副本，生产零改动）
 
