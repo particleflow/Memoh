@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	workspacepkg "github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
@@ -31,7 +32,13 @@ func New(clients bridge.Provider) *Provider {
 }
 
 func (p *Provider) mediaClient(ctx context.Context, botID string) (*bridge.Client, error) {
-	client, err := p.clients.MCPClient(ctx, botID)
+	// Media storage is the Bot's own native-workspace authority: resolution is
+	// pinned to the native container so a Bot whose primary workspace target is
+	// a managed computer still reads and writes its own media. Without the pin,
+	// target resolution would hand back the managed computer's FilesOnly view
+	// and every media operation, including workspace-file attachment ingestion,
+	// would be rejected as a direct transfer.
+	client, err := p.clients.MCPClient(bridge.WithWorkspaceTarget(ctx, workspacepkg.WorkspaceTargetNative), botID)
 	if err != nil {
 		return nil, err
 	}

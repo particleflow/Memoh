@@ -2958,7 +2958,7 @@ func (h *LocalChannelHandler) persistSingleAttachment(ctx context.Context, botID
 	if bundle.Path != "" {
 		asset, err := h.mediaService.IngestContainerFile(ctx, botID, bundle.Path)
 		if err != nil {
-			return attachmentpkg.Bundle{}, err
+			return attachmentpkg.Bundle{}, apperror.Wrap(apperror.CodeMediaIngestFailed, err, nil)
 		}
 		return bundle.WithAsset(botID, asset), nil
 	}
@@ -2969,17 +2969,17 @@ func (h *LocalChannelHandler) persistSingleAttachment(ctx context.Context, botID
 		}
 		decoded, err := attachmentpkg.DecodeBase64(bundle.Base64, media.MaxAssetBytes)
 		if err != nil {
-			return attachmentpkg.Bundle{}, err
+			return attachmentpkg.Bundle{}, apperror.Wrap(apperror.CodeMediaIngestFailed, err, nil)
 		}
 		asset, err := h.mediaService.Ingest(ctx, media.IngestInput{
 			BotID: botID, Mime: mimeType, Reader: decoded, MaxBytes: media.MaxAssetBytes,
 		})
 		if err != nil {
-			return attachmentpkg.Bundle{}, err
+			return attachmentpkg.Bundle{}, apperror.Wrap(apperror.CodeMediaIngestFailed, err, nil)
 		}
 		return bundle.WithAsset(botID, asset), nil
 	}
-	return attachmentpkg.Bundle{}, errors.New("attachment has no persistable content")
+	return attachmentpkg.Bundle{}, apperror.Wrap(apperror.CodeMediaIngestFailed, errors.New("attachment has no persistable content"), nil)
 }
 
 // wsSynthesizeSpeech handles speech_delta events by synthesizing audio and

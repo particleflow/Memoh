@@ -329,7 +329,8 @@
       "oauth_not_discovered": "Run OAuth discovery for this connection first."
     },
     "media": {
-      "asset_not_found": "This file no longer exists. Upload it again if you still need it."
+      "asset_not_found": "This file no longer exists. Upload it again if you still need it.",
+      "ingest_failed": "The file could not be stored as an attachment. Check that it still exists and try again."
     },
     "memory": {
       "compact_unsupported": "The selected memory provider does not support memory compaction. Choose a provider that supports it in the bot's memory settings."

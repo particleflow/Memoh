@@ -86,7 +86,7 @@ func (p *MessageProvider) Tools(_ context.Context, session SessionContext) ([]to
 					"reply_to": map[string]any{"type": "string", "description": "Message ID to reply to. The reply will reference this message on the platform."},
 					"attachments": map[string]any{
 						"type":        "array",
-						"description": "File paths, URLs, data URLs, or attachment objects to attach.",
+						"description": "File paths, URLs, data URLs, or attachment objects to attach. A file path resolves inside this bot's own workspace; a file on a managed computer must be delivered as a task artifact before it can be attached.",
 						"items":       sendAttachmentItemSchema(),
 					},
 					"message": sendMessageObjectSchema(),
@@ -145,7 +145,7 @@ func sendMessageObjectSchema() map[string]any {
 			},
 			"attachments": map[string]any{
 				"type":        "array",
-				"description": "File paths, URLs, data URLs, or attachment objects to attach.",
+				"description": "File paths, URLs, data URLs, or attachment objects to attach. A file path resolves inside this bot's own workspace; a file on a managed computer must be delivered as a task artifact before it can be attached.",
 				"items":       sendAttachmentItemSchema(),
 			},
 			"actions": map[string]any{
