@@ -151,6 +151,20 @@ func containsAnyFold(text string, markers []string) bool {
 	return false
 }
 
+// reasoningConfigForWriteBack reconstructs the pre-tiering decision for the
+// session preference write-back. The remembered (model, effort) pair must hold
+// what the ordinary chain resolved — the user's picked model with its default
+// or the bot's stored tier — never a tier an input's shape happened to select,
+// or one short turn would pin the session to low.
+func reasoningConfigForWriteBack(cfg *models.ReasoningConfig, decision *reasoning.TierDecision) *models.ReasoningConfig {
+	if cfg == nil || decision == nil {
+		return cfg
+	}
+	pre := *cfg
+	pre.Effort = decision.Cap
+	return &pre
+}
+
 // withReasoningEffortMetadata stamps the tiering decision on the assistant rows
 // of the round so the tier a turn actually ran at is queryable from history
 // (acceptance for the latency work reads it next to reasoning_timing). A nil

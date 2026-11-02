@@ -186,6 +186,36 @@ func TestApplyEffortTieringUnadvertisedLow(t *testing.T) {
 	}
 }
 
+// The session preference write-back must see the pre-tiering tier, so a short
+// turn under a newly picked model cannot pin the session to low.
+func TestReasoningConfigForWriteBackKeepsPreTierEffort(t *testing.T) {
+	cfg := activeConfig(t, reasoning.EffortMedium)
+	decision := applyEffortTiering(cfg, []string{reasoning.EffortLow, reasoning.EffortMedium, reasoning.EffortHigh}, effortTierInputs{
+		Enabled: true, SessionType: "chat", InputText: "好的",
+	})
+	if decision == nil {
+		t.Fatal("want a tiering decision")
+	}
+	if cfg.Effort != reasoning.EffortLow {
+		t.Fatalf("run effort = %q, want low", cfg.Effort)
+	}
+	writeBack := reasoningConfigForWriteBack(cfg, decision)
+	if writeBack == cfg {
+		t.Fatal("write-back config must be a copy, not the run config")
+	}
+	if writeBack.Effort != reasoning.EffortMedium {
+		t.Fatalf("write-back effort = %q, want the pre-tier medium", writeBack.Effort)
+	}
+	// No decision: pass through unchanged.
+	same := activeConfig(t, reasoning.EffortXHigh)
+	if got := reasoningConfigForWriteBack(same, nil); got != same || got.Effort != reasoning.EffortXHigh {
+		t.Fatalf("nil decision changed the config: %+v", got)
+	}
+	if got := reasoningConfigForWriteBack(nil, decision); got != nil {
+		t.Fatalf("nil config must stay nil, got %+v", got)
+	}
+}
+
 // The applied tier must reach the persisted assistant rows so acceptance can
 // be measured from history alone.
 func TestStoreRoundOptionsReasoningEffortMetadata(t *testing.T) {

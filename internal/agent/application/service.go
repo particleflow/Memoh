@@ -558,8 +558,11 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 
 	// Persist explicit selections before generation and advance the revision
 	// even for matching values. Schedule payloads describe the scheduled turn,
-	// not a session preference, and must never enter this write path.
-	s.writeBackSessionModelPreference(ctx, req.ThreadID, requestCarriesPair && pairMemoryApplies, chatModel, runCfg.ReasoningConfig)
+	// not a session preference, and must never enter this write path. The
+	// remembered pair holds what the ordinary chain resolved, not the tier
+	// this turn's shape selected: a model picked without an effort must keep
+	// its default tier in memory even on a short turn.
+	s.writeBackSessionModelPreference(ctx, req.ThreadID, requestCarriesPair && pairMemoryApplies, chatModel, reasoningConfigForWriteBack(runCfg.ReasoningConfig, tierDecision))
 	if req.OnModelPreferenceSettled != nil {
 		req.OnModelPreferenceSettled()
 	}
