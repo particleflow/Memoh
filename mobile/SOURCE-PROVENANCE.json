@@ -2067,6 +2067,15 @@
       "preparationChanges": [
         "Slow-replay monotonic ring fill to completion, injected failure state, no-status-copy assertion on the composed card, speed formatting unit checks."
       ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/attachment_transfer_evidence.cjs",
+      "sha256": "7be42141f7a309cbbb3274b033dae426ce5b8f90cdef6a85c942ad6846c817cd",
+      "origin": "Workspace-authored stage2 evidence-page generator for the E8 transfer visuals.",
+      "licenseReview": "Test only; no runtime dependency.",
+      "preparationChanges": [
+        "Regenerates the visual evidence page from the committed HarmonyTransferRing.vue and harmony-transfer-progress.ts sources; page output stays outside the repository."
+      ]
     }
   ],
   "excludedSourcePaths": [],

@@ -19,7 +19,8 @@ entries = manifest['entries']
 # The 112 streaming overlay added one entry (194) without this count; kept as history.
 # Two N1 IPv6 app-net binding sources (shell manager + stage2 decision table) extend194.
 # Four attachment transfer-progress sources (registry, ring, overlay, checks) extend196.
-assert len(entries) == 200
+# The visual-evidence page generator extends200.
+assert len(entries) == 201
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
