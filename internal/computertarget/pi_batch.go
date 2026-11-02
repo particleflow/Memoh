@@ -33,6 +33,10 @@ type BatchProgress struct {
 	RequestID         string                   `json:"request_id,omitempty"`
 	ControlPane       string                   `json:"control_pane"`
 	ControlTerminal   string                   `json:"control_terminal"`
+	// Model is the capability snapshot the live catalog stated for this
+	// invocation. It is durable so a resume derives the same per-task Pi
+	// configuration. Absent means unknown, never zero capability.
+	Model *BatchModel `json:"model,omitempty"`
 }
 
 type BatchFile struct {
@@ -133,15 +137,25 @@ func validBatchModel(model string) error {
 // batchScript is a finite envelope around the unchanged Pi CLI. User task text
 // is a file connected to stdin, never shell source or a command-line option.
 // model is this one invocation's Pi model id; it is data for the existing
-// --model channel, never a persisted profile value. Directory creation is
-// exclusive; neither duplicate delivery nor a stale session lock can start Pi
-// twice. Crashed locks are deliberately not stolen.
+// --model channel, never a persisted profile value. p.Model is the selected
+// model's advertised capability; when present this invocation runs Pi against
+// a per-task configuration directory instead of the shared deployment one.
+// Directory creation is exclusive; neither duplicate delivery nor a stale
+// session lock can start Pi twice. Crashed locks are deliberately not stolen.
 func batchScript(p BatchProgress, target Target, cwd, task, model string) (string, error) {
 	layout, err := resolveBatchLayout(p)
 	if err != nil {
 		return "", err
 	}
 	if err := validBatchModel(model); err != nil {
+		return "", err
+	}
+	var caps BatchModel
+	if p.Model != nil {
+		caps = *p.Model
+	}
+	modelPrepare, err := modelConfigScriptParts(target, model, caps)
+	if err != nil {
 		return "", err
 	}
 	if p.Inputs != nil {
@@ -164,7 +178,7 @@ func batchScript(p BatchProgress, target Target, cwd, task, model string) (strin
 	prefix := strings.TrimSuffix(string(encoded), "}")
 	prepare, preflight, project, completion := completionScriptParts(p, target, model)
 	historyPrepare, historyBefore, historyAfter, historyReceipt := historyScriptParts(p)
-	prepare += historyPrepare
+	prepare += historyPrepare + modelPrepare
 	if p.History != nil && preflight == "" {
 		preflight = batchPreflightNodeElif
 	}

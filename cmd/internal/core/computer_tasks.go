@@ -85,7 +85,9 @@ func magpieModelList(providerService *providers.Service) computertask.PiModelLis
 		}
 		models := make([]computertask.PiModel, 0, len(catalog.Models))
 		for _, m := range catalog.Models {
-			models = append(models, computertask.PiModel{ID: m.ID, Kind: m.Kind, Input: m.Input, Output: m.Output})
+			// ContextWindow/MaxOutput travel only to the dispatch-time Pi
+			// configuration; they are excluded from every caller-visible face.
+			models = append(models, computertask.PiModel{ID: m.ID, Kind: m.Kind, Input: m.Input, Output: m.Output, ContextWindow: m.ContextWindow, MaxOutput: m.MaxOutputTokens})
 		}
 		return models, nil
 	}

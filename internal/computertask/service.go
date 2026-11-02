@@ -47,12 +47,17 @@ type Authorize func(context.Context, toolcontext.ComputerBinding, string, string
 type DefaultWorkDir func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (string, error)
 
 // PiModel is one id from the live Magpie catalog response, as returned at read
-// time. No subset, ordering guarantee or default is attached to it.
+// time. No subset, ordering guarantee or default is attached to it. The
+// capability fields are internal dispatch data: they are not part of the model
+// listing or the selection error face, so the caller-visible catalog is
+// unchanged.
 type PiModel struct {
-	ID     string   `json:"id"`
-	Kind   string   `json:"kind,omitempty"`
-	Input  []string `json:"input,omitempty"`
-	Output []string `json:"output,omitempty"`
+	ID            string   `json:"id"`
+	Kind          string   `json:"kind,omitempty"`
+	Input         []string `json:"input,omitempty"`
+	Output        []string `json:"output,omitempty"`
+	ContextWindow *int     `json:"-"`
+	MaxOutput     *int     `json:"-"`
 }
 
 // PiModelList reads the live Magpie model catalog (the provider gateway's
@@ -354,8 +359,10 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	// The Pi model is a per-request choice checked against the live Magpie
 	// catalog before any durable claim. No default and no substitution exist.
+	var selected PiModel
 	if in.Kind == "herdr_pi_task" {
-		if err := s.requirePiModel(ctx, in); err != nil {
+		var err error
+		if selected, err = s.requirePiModel(ctx, in); err != nil {
 			return Result{}, err
 		}
 	} else if in.Model != "" {
@@ -398,6 +405,10 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		if len(inputs) != 0 {
 			d.Batch.Progress.Inputs = &deliverymeta.InputPlan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}, Files: inputs}
 		}
+		// The chosen model's stated capability travels with the durable
+		// invocation so the endpoint starts Pi with this model's real window,
+		// output budget and input modalities instead of the anchor template.
+		d.Batch.Progress.Model = batchModelCapability(selected)
 
 		if in.Artifact != nil || in.Artifacts != nil {
 			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
