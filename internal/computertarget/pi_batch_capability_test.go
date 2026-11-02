@@ -92,13 +92,10 @@ func TestBatchScriptBuildsPerTaskModelsFile(t *testing.T) {
 	if raw, err := exec.CommandContext(t.Context(), node, program, shared, out, spec).CombinedOutput(); err != nil {
 		t.Fatalf("model configuration: %v %s", err, raw)
 	}
-	raw, err := os.ReadFile(filepath.Join(out, "models.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	raw := readBatchFixture(t, filepath.Join(out, "models.json"))
 	var cfg struct {
 		Providers map[string]struct {
-			APIKey string `json:"apiKey"`
+			APIKey string `json:"apiKey"` //nolint:gosec // G117: Pi models.json field read back by the test, not a stored credential.
 			Models []struct {
 				ID            string   `json:"id"`
 				Name          string   `json:"name"`
@@ -125,8 +122,8 @@ func TestBatchScriptBuildsPerTaskModelsFile(t *testing.T) {
 	if !strings.Contains(provider.APIKey, filepath.ToSlash(shared)) || strings.Contains(provider.APIKey, "PI_CODING_AGENT_DIR") {
 		t.Fatalf("credential command must point at the shared directory instead of being copied: %q", provider.APIKey)
 	}
-	if settings, err := os.ReadFile(filepath.Join(out, "settings.json")); err != nil || !strings.Contains(string(settings), "magpie") {
-		t.Fatalf("settings not carried: %v %q", err, settings)
+	if settings := readBatchFixture(t, filepath.Join(out, "settings.json")); !strings.Contains(string(settings), "magpie") {
+		t.Fatalf("settings not carried: %q", settings)
 	}
 	if _, err := os.Stat(filepath.Join(out, "private")); !os.IsNotExist(err) {
 		t.Fatal("credential directory must not be copied")
