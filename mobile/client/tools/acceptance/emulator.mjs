@@ -1,0 +1,312 @@
+// Drive and assert the packaged HAP on a DevEco emulator (acceptance level 3).
+//
+// This is the emulator-side counterpart of acceptance.mjs. It drives the same
+// packaged bundle, but through the real ArkUI shell + ArkWeb engine on a
+// HarmonyOS image, so the native seams (ability lifecycle, read-aloud media
+// playback, cross-origin fetch, resource interception) are in the loop.
+//
+// Every scenario runs in a device-level cold state: the process is stopped, the
+// app's data (storage, cache, cookies) is wiped with `bm clean -d/-c`, and the
+// app is started again. That mirrors level 2, which creates a fresh browser
+// context per scenario, and it is the only state isolation the phone offers:
+// the packaged document keeps its stream cursor in localStorage, so reusing
+// data lets one scenario's cursor suppress the next reply.
+//
+// Evidence is restricted to three kinds, as in acceptance.mjs: text visible in
+// the real app, requests the scripted service actually received, and the speech
+// state the packaged bundle exposes on its own nodes. Timeline instrumentation
+// is not injected: the app boots before this harness can attach, so an injected
+// hook would miss the boot-time calls and report a false negative.
+import { writeFileSync, mkdirSync } from 'node:fs'
+import { join, resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const HDC = process.env.ACCEPTANCE_HDC || 'C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains/hdc.exe'
+const SERIAL = process.env.ACCEPTANCE_SERIAL || '127.0.0.1:5555'
+const BUNDLE = process.env.ACCEPTANCE_BUNDLE || 'cloud.begonia.workassistant'
+const STUB_PORT = Number(process.env.STUB_PORT || 18081)
+// The device reaches the host stub through the emulator gateway; the harness
+// itself runs on the host, so control calls use loopback on the same port.
+const DEVICE_HOST = process.env.ACCEPTANCE_DEVICE_HOST || '10.0.2.2'
+const CONTROL = `http://127.0.0.1:${STUB_PORT}`
+const PORT_BASE = Number(process.env.ACCEPTANCE_CDP_PORT || 9300)
+const ACK_WINDOW_MS = 3000
+const FIRST_POST_WINDOW_MS = 4000
+const HISTORY_MARK = '这是历史回复，加载时不应朗读。'
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+let page = null
+const hdc = (...args) => execFileSync(HDC, ['-t', SERIAL, ...args], { encoding: 'utf8' })
+
+function ensureDevice() {
+  const targets = execFileSync(HDC, ['list', 'targets'], { encoding: 'utf8' }).trim()
+  if (targets.includes(SERIAL)) return
+  const connect = execFileSync(HDC, ['tconn', SERIAL], { encoding: 'utf8' }).trim()
+  if (!/Connect OK/i.test(connect)) throw new Error(`device not reachable: ${connect || 'no targets'}`)
+}
+
+async function waitFor(fn, timeout, interval = 200, label = 'condition') {
+  const start = Date.now()
+  let last
+  while (Date.now() - start < timeout) {
+    try { const value = await fn(); if (value) return value } catch (error) { last = error }
+    await sleep(interval)
+  }
+  throw new Error(`timeout waiting for ${label}${last ? ': ' + last.message : ''}`)
+}
+
+class Page {
+  constructor(socket) { this.socket = socket; this.id = 0; this.pending = new Map() }
+  static async attach(port) {
+    const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
+    const target = list.find(t => t.type === 'page')
+    if (!target) throw new Error('no ArkWeb page target; is the app running with web debugging on?')
+    const socket = new WebSocket(target.webSocketDebuggerUrl)
+    await new Promise((done, fail) => {
+      socket.addEventListener('open', done, { once: true })
+      socket.addEventListener('error', fail, { once: true })
+    })
+    const instance = new Page(socket)
+    socket.addEventListener('message', event => {
+      const message = JSON.parse(event.data)
+      const pending = instance.pending.get(message.id)
+      if (pending) { instance.pending.delete(message.id); pending(message) }
+    })
+    await instance.send('Runtime.enable')
+    return instance
+  }
+  send(method, params = {}) {
+    const id = ++this.id
+    return new Promise(resolve => {
+      this.pending.set(id, resolve)
+      this.socket.send(JSON.stringify({ id, method, params }))
+    })
+  }
+  async eval(expression) {
+    const result = await this.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true, userGesture: true })
+    if (result.result?.exceptionDetails) throw new Error(result.result.exceptionDetails.exception?.description || result.result.exceptionDetails.text)
+    return result.result?.result?.value
+  }
+  wait(expression, timeout = 15000, label = expression) {
+    return waitFor(() => this.eval(expression), timeout, 200, label)
+  }
+  close() { try { this.socket.close() } catch {} }
+}
+
+const control = (path, body, method = 'POST') =>
+  fetch(`${CONTROL}${path}`, method === 'GET' ? { method } : { method, body: JSON.stringify(body ?? {}) }).then(r => r.json())
+
+const text = async () => (await page.eval('document.body.innerText')) ?? ''
+const speech = async () => (await control('/__control/speech', null, 'GET')).entries
+const speechStates = async () => (await page.eval("[...document.querySelectorAll('[data-speech-state]')].map(n => n.getAttribute('data-speech-state'))")) ?? []
+const playing = async () => (await speechStates()).includes('playing')
+
+// The devtools socket carries the renderer pid, so it changes on every app
+// restart. Each distinct socket gets its own local port: hdc keeps a binding
+// for a local port, and a second rule on the same port silently keeps routing
+// to the first (dead) renderer.
+const forwardBySocket = new Map()
+let nextForwardPort = PORT_BASE
+async function attachFresh() {
+  page = await waitFor(async () => {
+    const socket = hdc('shell', 'cat /proc/net/unix | grep webview_devtools_remote | tail -1')
+      .trim().split(/\s+/).pop().replace(/^@/, '')
+    if (!socket) return null
+    if (!forwardBySocket.has(socket)) {
+      const port = nextForwardPort++
+      const result = hdc('fport', `tcp:${port}`, `localabstract:${socket}`).trim()
+      if (!/OK/i.test(result)) return null
+      forwardBySocket.set(socket, port)
+    }
+    try { return await Page.attach(forwardBySocket.get(socket)) } catch { return null }
+  }, 60000, 500, 'ArkWeb target')
+}
+
+// One scenario, one device-level cold app: stopped, data wiped, started again.
+// The scenario's own runtime_subscribe is the readiness signal; a fixed sleep
+// would hide a boot that never reconnected.
+async function coldStart({ seedHistory = false } = {}) {
+  ensureDevice()
+  hdc('shell', `aa force-stop ${BUNDLE}`)
+  await waitFor(() => !hdc('shell', `pidof ${BUNDLE}`).trim(), 15000, 300, 'process exit')
+  hdc('shell', `bm clean -n ${BUNDLE} -d`)
+  hdc('shell', `bm clean -n ${BUNDLE} -c`)
+  await control('/__control/reset', {})
+  if (seedHistory) await control('/__control/history', {})
+  const startedAt = Date.now()
+  hdc('shell', `aa start -a EntryAbility -b ${BUNDLE}`)
+  const subscribed = await waitFor(async () => {
+    const log = await control('/__control/messages', null, 'GET')
+    return log.items.some(item => item.type === 'runtime_subscribe' && Date.parse(item.at) >= startedAt - 500)
+  }, 60000, 300, 'runtime subscribe').then(() => true, () => false)
+  if (!subscribed) throw new Error('app did not subscribe to the session stream after a cold start')
+  await attachFresh()
+  await page.wait('!!document.querySelector("textarea")', 30000, 'composer')
+  // The reply is absorbed while the initial history load is still open, so the
+  // service must be quiet before the harness sends.
+  await waitFor(async () => {
+    const log = await control('/__control/requests', null, 'GET')
+    const last = log.items.length ? Math.max(...log.items.map(item => Date.parse(item.at))) : 0
+    return Date.now() - last >= 1200
+  }, 20000, 300, 'service quiet')
+}
+
+async function typeAndSend(value, { submit = true } = {}) {
+  await page.eval(`(() => {
+    const area = document.querySelector('textarea')
+    if (!area) return false
+    area.focus()
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(area, ${JSON.stringify(value)})
+    area.dispatchEvent(new Event('input', { bubbles: true }))
+    return true
+  })()`)
+  if (!submit) return
+  await control('/__control/mark', {})
+  await page.eval(`(() => {
+    const area = document.querySelector('textarea')
+    area.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }))
+  })()`)
+}
+
+async function main() {
+  const reportDir = resolve(process.env.ACCEPTANCE_REPORT_DIR || join(here, 'reports'))
+  mkdirSync(reportDir, { recursive: true })
+  const report = []
+  const add = entry => { report.push(entry); console.log(`${entry.status.toUpperCase().padEnd(9)} ${entry.name}  ${entry.detail}`) }
+  const pass = (name, ok, detail, extra = {}) => add({ name, status: ok ? 'pass' : 'fail', detail, ...extra })
+  const uncovered = (name, detail) => add({ name, status: 'uncovered', detail })
+
+  const ACK = '收到，我来处理。'
+  const BODY = ['第一句已经说完了。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
+
+  try {
+    ensureDevice()
+
+    // ---------- E1 + G1 + G5 + V2 on one live reply ----------
+    await coldStart()
+    await typeAndSend('请朗读这段回复')
+    const sentAt = Date.now()
+    let ackAt = -1
+    for (let waited = 0; waited <= ACK_WINDOW_MS; waited += 100) {
+      if ((await text()).includes(ACK)) { ackAt = Date.now() - sentAt; break }
+      await sleep(100)
+    }
+    pass('E1 acknowledgement reaches the real app UI', ackAt >= 0 && ackAt <= ACK_WINDOW_MS,
+      ackAt >= 0 ? `ack visible ${ackAt}ms after send (window ${ACK_WINDOW_MS}ms)` : `ack not visible within ${ACK_WINDOW_MS}ms`)
+
+    // Read-aloud start is proven by the app's own synthesis request; the visible
+    // speech state is corroboration, because a short reply can finish playing
+    // before this harness polls again.
+    const first = await waitFor(async () => (await speech()).find(entry => entry.kind === 'post'), 30000, 250, 'first speech POST')
+      .then(entry => entry, () => undefined)
+    const sawPlaying = await waitFor(playing, 5000, 200, 'speech playing').then(() => true, () => false)
+    await page.wait(`document.body.innerText.includes(${JSON.stringify(BODY[3])})`, 25000, 'final sentence').catch(() => {})
+    const timing = await control('/__control/speech', null, 'GET')
+    const entries = timing.entries
+    const latency = first && timing.firstSentenceAt !== null ? first.ms - timing.firstSentenceAt : null
+    pass('G1 automatic read-aloud starts on the first sentence', !!first && latency !== null && latency <= FIRST_POST_WINDOW_MS,
+      first ? `first POST ${latency}ms after the first completed sentence, final=${first.final}, state played=${sawPlaying}`
+        : 'no speech POST during the reply',
+      { speechTiming: { firstSentenceAtMs: timing.firstSentenceAt, firstPostMs: first?.ms ?? null, latencyMs: latency } })
+    const spoken = [first?.text, ...entries.filter(e => e.kind === 'put').map(e => e.text)].filter(Boolean).join('')
+    const ordered = spoken.includes(BODY[0]) && spoken.includes(BODY[3]) && spoken.indexOf(BODY[0]) < spoken.indexOf(BODY[3])
+    pass('G5 whole body read in order without a dropped segment', ordered,
+      ordered ? `spoken order kept, ${spoken.length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`)
+
+    const disclosure = await page.eval(`(() => {
+      const marked = document.querySelector('[data-reasoning-disclosure]')
+      const fallback = [...document.querySelectorAll('button')].find(n => /思考|Thinking|已思考/.test(n.innerText || ''))
+      const node = marked || fallback
+      return node ? { expanded: node.getAttribute('aria-expanded'), marker: !!marked, label: (node.innerText || '').trim().slice(0, 24) } : null
+    })()`)
+    if (!disclosure) uncovered('V2 thinking collapsed by default', 'no reasoning disclosure control in the packaged bundle')
+    else pass('V2 thinking collapsed by default', disclosure.expanded === 'false',
+      `aria-expanded=${disclosure.expanded} marker=${disclosure.marker} label=${disclosure.label}`)
+
+    // ---------- V3c: clicking the reading bubble stops the audio ----------
+    await coldStart()
+    await typeAndSend('点击气泡测试')
+    const bubblePlaying = await waitFor(playing, 30000, 200, 'read-aloud playing').then(() => true, () => false)
+    const clicked = await page.eval(`(() => {
+      const nodes = [...document.querySelectorAll('[data-chat-content]')]
+      const target = nodes[nodes.length - 1]
+      if (!target) return false
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+      return true
+    })()`)
+    await sleep(1500)
+    const afterBubble = await speechStates()
+    pass('V3c bubble click stops reading', clicked && bubblePlaying && !afterBubble.includes('playing'),
+      clicked ? `playing before click=${bubblePlaying}; state after=${afterBubble.join(',') || 'none'}` : 'assistant bubble not found')
+
+    // ---------- V3b: typing must not interrupt ----------
+    await coldStart()
+    await typeAndSend('继续读')
+    const typingStarted = await waitFor(playing, 30000, 200, 'read-aloud playing').then(() => true, () => false)
+    await typeAndSend('正在打字的草稿', { submit: false })
+    await sleep(1200)
+    const afterTyping = await speechStates()
+    pass('V3b typing does not stop reading', typingStarted && afterTyping.includes('playing'),
+      `playing before typing=${typingStarted}; state after=${afterTyping.join(',') || 'none'}`)
+
+    // ---------- V3d: a new submit stops reading ----------
+    await coldStart()
+    await typeAndSend('新消息停止朗读')
+    const submitPlaying = await waitFor(playing, 30000, 200, 'read-aloud playing').then(() => true, () => false)
+    await typeAndSend('新问题')
+    await sleep(1500)
+    const afterSubmit = await speechStates()
+    pass('V3d new submit stops reading', submitPlaying && !afterSubmit.includes('playing'),
+      `playing before submit=${submitPlaying}; state after=${afterSubmit.join(',') || 'none'}`)
+
+    // ---------- G7: loading history must not read it aloud ----------
+    await coldStart({ seedHistory: true })
+    const historyVisible = await page.wait(`document.body.innerText.includes(${JSON.stringify(HISTORY_MARK)})`, 25000, 'history row')
+      .then(() => true, () => false)
+    await sleep(2000)
+    const historySpeech = await speech()
+    if (!historyVisible) uncovered('G7 history load does not read aloud', 'seeded history did not render in the packaged app on the emulator')
+    else pass('G7 history load does not read aloud', historySpeech.length === 0, `speech requests after history render = ${historySpeech.length}`)
+
+    // ---------- G8: background / foreground through the real ability ----------
+    await coldStart()
+    await typeAndSend('后台切换检查')
+    const backgroundPlaying = await waitFor(playing, 30000, 200, 'read-aloud playing').then(() => true, () => false)
+    hdc('shell', 'uitest uiInput keyEvent Home')
+    await sleep(2000)
+    const parked = await speechStates()
+    hdc('shell', `aa start -a EntryAbility -b ${BUNDLE}`)
+    await sleep(3000)
+    const resumed = await waitFor(playing, 20000, 200, 'read-aloud resumed').then(() => true, () => false)
+    pass('G8 background/foreground parks and resumes', backgroundPlaying && resumed,
+      `playing before background=${backgroundPlaying}; state while backgrounded=${parked.join(',') || 'none'}; playing after return=${resumed}`)
+
+    // ---------- native evidence ----------
+    for (const name of ['chat', 'history', 'background']) {
+      const remote = `/data/local/tmp/acceptance-${name}.png`
+      hdc('shell', `uitest screenCap -p ${remote}`)
+      hdc('file', 'recv', remote, join(reportDir, `acceptance-${name}.png`))
+    }
+  } catch (error) {
+    add({ name: 'harness', status: 'fail', detail: String((error && error.stack) || error) })
+  } finally {
+    let lifecycle = ''
+    try { lifecycle = hdc('shell', "hilog -x 2>/dev/null | grep -E 'lifecycle|client-ready|document-loaded' | tail -40") } catch {}
+    const reportPath = join(reportDir, `acceptance-emulator-${Date.now()}.json`)
+    writeFileSync(reportPath, JSON.stringify({
+      generator: 'mobile/client/tools/acceptance/emulator.mjs',
+      generatedAt: new Date().toISOString(), deviceHost: DEVICE_HOST, harness: 'desktop emulator',
+      isolation: 'aa force-stop + bm clean -d/-c per scenario',
+      scenarios: report, lifecycleLog: lifecycle.split('\n').slice(-40),
+      speechRequests: await speech().catch(() => []),
+      apiRequests: await control('/__control/requests', null, 'GET').then(r => r.items).catch(() => []),
+    }, null, 2))
+    console.log(`\nreport written to ${reportPath}`)
+    if (page) page.close()
+  }
+  process.exit(report.some(entry => entry.status !== 'pass') ? 1 : 0)
+}
+
+main().catch(error => { console.error(error); process.exit(2) })
