@@ -46,6 +46,20 @@ type Authorize func(context.Context, toolcontext.ComputerBinding, string, string
 
 type DefaultWorkDir func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (string, error)
 
+// PiModel is one id from the live Magpie catalog response, as returned at read
+// time. No subset, ordering guarantee or default is attached to it.
+type PiModel struct {
+	ID     string   `json:"id"`
+	Kind   string   `json:"kind,omitempty"`
+	Input  []string `json:"input,omitempty"`
+	Output []string `json:"output,omitempty"`
+}
+
+// PiModelList reads the live Magpie model catalog (the provider gateway's
+// GET /v1/models result at call time). It reuses the saved provider wiring;
+// no provider or credential configuration is owned here.
+type PiModelList func(ctx context.Context) ([]PiModel, error)
+
 type Service struct {
 	nativeObservationLimit int
 	store                  dbstore.ComputerOperationStore
@@ -57,6 +71,7 @@ type Service struct {
 	inputFiles             InputFileResolver
 	inputReference         InputReferenceOpener
 	terminalObservation    func(context.Context, dbstore.ComputerOperationRecord, Details)
+	piModelList            PiModelList
 }
 
 // WithDefaultWorkDir injects the existing owned directory selection. It is
@@ -92,6 +107,9 @@ type Target struct {
 	Capabilities  []string `json:"capabilities"`
 	Availability  string   `json:"availability"`
 	AgentProtocol string   `json:"agent_protocol,omitempty"`
+	// AvailableModels is the live model catalog read at listing time, present
+	// only on targets whose configured agent accepts agent tasks.
+	AvailableModels []PiModel `json:"available_models,omitempty"`
 }
 type Submit struct {
 	ResumeOperationID string                  `json:"resume_operation_id,omitempty"`
@@ -101,7 +119,10 @@ type Submit struct {
 	TargetID          string                  `json:"target_id,omitempty"`
 	Kind              string                  `json:"kind"`
 	Task              string                  `json:"task"`
-	WorkDir           string                  `json:"work_dir,omitempty"`
+	// Model is this request's Pi model id, one id from the Magpie catalog
+	// current at dispatch time. Required for herdr_pi_task; no default exists.
+	Model   string `json:"model,omitempty"`
+	WorkDir string `json:"work_dir,omitempty"`
 }
 type Details struct {
 	InputPreparationUntil time.Time                        `json:"input_preparation_until,omitzero"`
@@ -331,6 +352,15 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode != "pi-json-v1" {
 		return Result{}, computertarget.ErrUnsupported
 	}
+	// The Pi model is a per-request choice checked against the live Magpie
+	// catalog before any durable claim. No default and no substitution exist.
+	if in.Kind == "herdr_pi_task" {
+		if err := s.requirePiModel(ctx, in); err != nil {
+			return Result{}, err
+		}
+	} else if in.Model != "" {
+		return Result{}, ErrInvalid
+	}
 
 	if err := computertarget.ValidateWorkDir(target.WorkDir, in.WorkDir); err != nil {
 		return Result{}, err
@@ -378,7 +408,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 				d.Batch.Progress.Producer.Artifacts = append([]deliverymeta.Artifact(nil), in.Artifacts...)
 			}
 		}
-		if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+		if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task, in.Model); err != nil {
 			return Result{}, err
 		}
 	}

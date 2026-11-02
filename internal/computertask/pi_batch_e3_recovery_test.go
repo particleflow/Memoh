@@ -18,7 +18,7 @@ import (
 func TestBatchTargetChangeWithProvenNoInvocationDispatchesFirst(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
@@ -36,13 +36,13 @@ func TestBatchTargetChangeWithProvenNoInvocationDispatchesFirst(t *testing.T) {
 
 	// Reconstruct the service from the same durable records, with a new turn.
 	f.runs = 0
-	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize).WithPiModelList(testPiModelList)
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-b"}
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic followup"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func seedBlockedOperation(t *testing.T, store *fixtureStore, below dbstore.Compu
 func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
@@ -108,13 +108,13 @@ func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
 	}
 	seedBlockedOperation(t, store, store.records[first.ID])
 	f.runs = 0
-	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize).WithPiModelList(testPiModelList)
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-b"}
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic followup"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,19 +139,19 @@ func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
 func TestBatchOnceStartedSessionStaysUnconfirmedOverBlockedPrior(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 	f.receipt.Started = true
 	f.receipt.History = &computertarget.BatchHistoryReport{Before: "new", After: "missing"}
 	batchResultUntilReady(t, c, first.ID)
 	seedBlockedOperation(t, store, store.records[first.ID])
 	f.runs = 0
-	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize).WithPiModelList(testPiModelList)
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-c"}
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic followup"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +172,7 @@ func TestBatchOnceStartedSessionStaysUnconfirmedOverBlockedPrior(t *testing.T) {
 func TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 	// op1 keeps its default started receipt with valid history evidence.
 	batchResultUntilReady(t, c, first.ID)
 	// Seed the failed-resume prior surgically above the completed started op:
@@ -201,13 +201,13 @@ func TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange(t *testing.T) 
 	failedResume.Details, _ = json.Marshal(d)
 	store.records[failedResume.ID] = failedResume
 	f.runs = 0
-	service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+	service := NewService(store, store, source.service.relay, nil, source.service.authorize).WithPiModelList(testPiModelList)
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-d"}
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
 	}
-	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic third"})
+	next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic third"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +225,7 @@ func TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange(t *testing.T) 
 func TestResumeCompletedNotStartedReportsUnresumable(t *testing.T) {
 	source, _, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
@@ -233,7 +233,7 @@ func TestResumeCompletedNotStartedReportsUnresumable(t *testing.T) {
 	f.receipt.Completion = nil
 	batchResultUntilReady(t, c, first.ID)
 	f.runs = 0
-	resumed := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first", "resume_operation_id": first.ID}, false))
+	resumed := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first", "resume_operation_id": first.ID}, false))
 	if resumed.ID != first.ID || resumed.Resumable == nil || *resumed.Resumable || resumed.ResumeReason != "completed_pi_not_started" {
 		t.Fatalf("resume of a completed never-started batch not annotated: %+v", resumed)
 	}

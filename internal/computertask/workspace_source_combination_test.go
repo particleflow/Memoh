@@ -46,7 +46,7 @@ func TestWorkspaceSourceCombinationKeepsArtifactRoot(t *testing.T) {
 				return computertarget.Receipt{}, computertarget.ErrUnknown
 			})
 			result, err := service.submit(ctx, f.binding, Submit{
-				Kind: "herdr_pi_task", Task: "synthetic root-bound artifact", WorkDir: test.requested,
+				Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic root-bound artifact", WorkDir: test.requested,
 				Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"},
 			})
 			if !test.allowed {

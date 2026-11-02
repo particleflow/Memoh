@@ -59,7 +59,7 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 
 func (f *nativeTaskFixture) service() *Service {
 	relay := computertarget.NewService(f.store, f, f.invoke)
-	return NewService(f.store, f.store, relay, f.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
+	return NewService(f.store, f.store, relay, f.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil }).WithPiModelList(testPiModelList)
 }
 
 // invoke checks the selected Runtime and forwards fixed native operations to
@@ -94,7 +94,7 @@ func (f *nativeTaskFixture) restart() *Service {
 func TestNativeRuntimeTaskUnknownReopensSameOperationWithoutBusinessReplay(t *testing.T) {
 	f, service, ctx := newNativeTaskFixture(t)
 	f.batch.lost, f.batch.missing = true, true
-	in := Submit{Kind: "herdr_pi_task", Task: "compute synthetic 42"}
+	in := Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "compute synthetic 42"}
 	first, err := service.submit(ctx, f.binding, in)
 	if !errors.Is(err, computertarget.ErrUnknown) || first.State != "unknown" || first.ID == "" || f.batch.runs != 1 || first.ProcessStopped || first.PiResult != nil {
 		t.Fatalf("lost native dispatch: %+v %v runs=%d", first, err, f.batch.runs)
@@ -143,7 +143,7 @@ func TestNativeRuntimeAcceptedCLIRequiresMatchingPiCompletion(t *testing.T) {
 			if mode == "exit_zero_error" {
 				f.batch.reason = "error"
 			}
-			first, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "synthetic completion boundary"})
+			first, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic completion boundary"})
 			if err != nil || first.State != "submitted" || first.PiResult != nil || first.ProcessStopped {
 				t.Fatalf("accepted CLI manufactured completion: %+v %v", first, err)
 			}
@@ -185,7 +185,7 @@ func TestNativeRuntimeTaskRechecksSelectedPCPermissionAndFingerprint(t *testing.
 	for _, mode := range []string{"other_selected_pc", "permission_revoked", "runtime_revoked", "owner_changed", "runtime_replaced", "profile_changed"} {
 		t.Run(mode, func(t *testing.T) {
 			f, service, ctx := newNativeTaskFixture(t)
-			first, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "synthetic scoped task"})
+			first, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic scoped task"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -232,7 +232,7 @@ func TestNativeRuntimeArtifactRequiresProducerLocatorBeforeClaim(t *testing.T) {
 	mount := f.store.mounts[f.binding.TargetID]
 	mount.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": f.profile})
 	f.store.mounts[f.binding.TargetID] = mount
-	_, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "write result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+	_, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
 	if !errors.Is(err, computertarget.ErrUnsupported) || len(f.store.records) != 0 || len(f.batch.calls) != 0 {
 		t.Fatal("missing producer location claimed or dispatched work", err)
 	}
@@ -243,7 +243,7 @@ func TestNativeRuntimeBusinessCompletionDoesNotBypassProducerDelivery(t *testing
 	// No HostFS/media importer is supplied. The compact result can complete,
 	// but a file is deliverable only from the original producer's NAS ledger.
 	service.assets = nil
-	in := Submit{Kind: "herdr_pi_task", Task: "write declared synthetic output", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
+	in := Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write declared synthetic output", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
 	first, err := service.submit(ctx, f.binding, in)
 	if err != nil {
 		t.Fatal(err)

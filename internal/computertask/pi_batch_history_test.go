@@ -17,7 +17,7 @@ func TestBatchHistoryApplicationRestartAndLegacy(t *testing.T) {
 		t.Run(mode, func(t *testing.T) {
 			source, store, f, _ := setupBatch(t)
 			c := standardClient(t, source, "pc-a", false)
-			first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
+			first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic first"}, false))
 			got := batchResultUntilReady(t, c, first.ID)
 			if got.Continuity == nil || got.Continuity.Status != "unconfirmed" || got.Continuity.LastInvocation.After != "created" {
 				t.Fatalf("history projection: %+v", got)
@@ -39,13 +39,13 @@ func TestBatchHistoryApplicationRestartAndLegacy(t *testing.T) {
 			old.Details, _ = json.Marshal(d)
 			store.records[first.ID] = old
 			// Reconstruct application from the same durable records, with a new turn.
-			service := NewService(store, store, source.service.relay, nil, source.service.authorize)
+			service := NewService(store, store, source.service.relay, nil, source.service.authorize).WithPiModelList(testPiModelList)
 			binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-b"}
 			ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+			next, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic followup"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -56,7 +56,7 @@ func TestBatchHistoryApplicationRestartAndLegacy(t *testing.T) {
 			} else if f.runs != 1 || next.State != "not_started" || next.Phase != "pi_continuity_unconfirmed" {
 				t.Fatalf("unproven history dispatched: %+v runs=%d", next, f.runs)
 			}
-			repeated, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "synthetic followup"})
+			repeated, err := service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic followup"})
 			if err != nil || repeated.ID != next.ID || f.runs > 2 {
 				t.Fatal("duplicate or blocked request replayed")
 			}
@@ -78,7 +78,7 @@ func TestBatchHistoryReadFailureAndLatestEvidence(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	source.service.store = unavailableHistoryStore{store}
 	c := standardClient(t, source, "pc-a", false)
-	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic"}, true)
+	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic"}, true)
 	if f.runs != 0 || len(f.calls) != 0 || len(store.records) != 1 {
 		t.Fatal("failed DB read dispatched or lost reservation")
 	}
@@ -92,7 +92,7 @@ func TestBatchHistoryReadFailureAndLatestEvidence(t *testing.T) {
 func TestBatchHistoryLatestUnprovenNeverSearchesPastIt(t *testing.T) {
 	source, store, _, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic"}, false))
+	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic"}, false))
 	batchResultUntilReady(t, c, first.ID)
 	prior := store.records[first.ID]
 	var d Details

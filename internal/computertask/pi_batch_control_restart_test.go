@@ -16,7 +16,7 @@ func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 		t.Run(stage, func(t *testing.T) {
 			source, store, remote, assets := setupBatch(t)
 			client := standardClient(t, source, "pc-a", false)
-			input := map[string]any{"kind": "herdr_pi_task", "task": "synthetic completed invocation"}
+			input := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic completed invocation"}
 			original := parseResult(t, invoke(t, client, "computer_task_submit", input, false))
 			remote.projectCompletion()
 			if remote.receipt.Validate(remote.progress) != nil || !remote.receipt.Exited || remote.receipt.ExitCode != 0 || remote.receipt.Completion == nil {
@@ -67,7 +67,7 @@ func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 			remote.changedPane, remote.hiddenFrame = true, true
 			remote.control, remote.pending = "", ""
 			reader := installRecoveryTransport(source, remote, original.ID)
-			restarted := NewSource(NewService(store, store, source.service.relay, assets, source.service.authorize))
+			restarted := NewSource(NewService(store, store, source.service.relay, assets, source.service.authorize).WithPiModelList(testPiModelList))
 			resumed := standardClient(t, restarted, "pc-a", false)
 			got := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": original.ID}, false))
 			if got.ID != original.ID || got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {

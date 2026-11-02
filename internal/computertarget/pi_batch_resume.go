@@ -110,7 +110,8 @@ func (s *Service) AdoptBatchWorkspace(ctx context.Context, scope Scope, workDir 
 // each pre-dispatch phase. It never creates a workspace or retries a write.
 // A callback or transport failure retains the pre-dispatch phase, which cannot
 // reenter this method. Observed native references do not authorize replay.
-func (s *Service) ContinueBatch(ctx context.Context, scope Scope, task, workDir string, p BatchProgress, save func(BatchProgress) error) (BatchProgress, error) {
+// model is the original request's Pi model id, replayed unchanged.
+func (s *Service) ContinueBatch(ctx context.Context, scope Scope, task, workDir, model string, p BatchProgress, save func(BatchProgress) error) (BatchProgress, error) {
 	if !p.valid() || save == nil || (p.Phase != "batch_workspace_adopted" && p.Phase != "batch_tab_adopted") || !batchReaderID(p.WorkspaceID) || !batchReaderID(p.ControlPane) || !batchReaderID(p.ControlTerminal) {
 		return p, ErrUnsupported
 	}
@@ -125,7 +126,7 @@ func (s *Service) ContinueBatch(ctx context.Context, scope Scope, task, workDir 
 	if err != nil {
 		return p, err
 	}
-	if target.NativeRuntimeID == "" || target.Agent.ExecutionMode != "pi-json-v1" || target.Agent.Validate() != nil || ValidateBatchRequest(p, target, workDir, task) != nil {
+	if target.NativeRuntimeID == "" || target.Agent.ExecutionMode != "pi-json-v1" || target.Agent.Validate() != nil || validBatchModel(model) != nil || ValidateBatchRequest(p, target, workDir, task, model) != nil {
 		return p, ErrUnsupported
 	}
 	cwd, err := resolveWorkDir(target.WorkDir, workDir)
@@ -174,7 +175,7 @@ func (s *Service) ContinueBatch(ctx context.Context, scope Scope, task, workDir 
 			return p, err
 		}
 	}
-	script, err := batchScript(p, target, cwd, task)
+	script, err := batchScript(p, target, cwd, task, model)
 	if err != nil {
 		return p, err
 	}

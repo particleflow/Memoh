@@ -31,7 +31,7 @@ func TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown(t *testing.T) {
 		}
 		return f.invoke(ctx, scope, target, method, params)
 	})
-	in := Submit{Kind: "herdr_pi_task", WorkDir: ".", Task: strings.Repeat("雪", 1145), Artifact: &deliverymeta.Artifact{SourceRef: strings.Repeat("r", 23), Mime: "text/plain"}}
+	in := Submit{Kind: "herdr_pi_task", Model: "synthetic-model", WorkDir: ".", Task: strings.Repeat("雪", 1145), Artifact: &deliverymeta.Artifact{SourceRef: strings.Repeat("r", 23), Mime: "text/plain"}}
 	invalid := in
 	invalid.WorkDir = "synthetic_child"
 	if _, err := service.submit(ctx, f.binding, invalid); !errors.Is(err, ErrInvalid) || len(f.store.records) != 0 || len(f.batch.calls) != 0 {

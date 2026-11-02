@@ -15,7 +15,7 @@ func TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate(t *testing.T) {
 	t.Run("batch", func(t *testing.T) {
 		source, store, transport, _ := setupBatch(t)
 		client := standardClient(t, source, "pc-a", false)
-		initial := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic combined history check"}, false))
+		initial := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic combined history check"}, false))
 		got := batchResultUntilReady(t, client, initial.ID)
 		if got.Continuity == nil || got.Continuity.Status != "unconfirmed" || got.Continuity.LastInvocation == nil || got.Continuity.LastInvocation.After != "created" || got.PiResult == nil {
 			t.Fatalf("batch result lost its historical evidence: %+v", got)
@@ -48,7 +48,7 @@ func TestIntegratedComputerToolCatalogPreservesBothBoundaries(t *testing.T) {
 	for name, fragment := range map[string]string{
 		"computer_task_followup": "Accepted means prompt delivery, not business completion",
 		"computer_task_get":      "follow-up history",
-		"computer_task_result":   "not current history availability or retention of all old messages",
+		"computer_task_result":   "不是对用户目标本身的独立验收",
 		"computer_task_recover":  "never restored history",
 	} {
 		if !strings.Contains(descriptions[name], fragment) {

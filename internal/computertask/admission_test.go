@@ -31,7 +31,7 @@ func TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation(t *test
 			client := standardClient(t, source, "pc-a", false)
 			for _, name := range []string{"computer_task_submit"} {
 				t.Run(name, func(t *testing.T) {
-					args := map[string]any{"kind": "herdr_pi_task", "task": "synthetic new task"}
+					args := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic new task"}
 					wire := invoke(t, client, name, args, true)
 					var response map[string]any
 					if err := json.Unmarshal(wire, &response); err != nil {

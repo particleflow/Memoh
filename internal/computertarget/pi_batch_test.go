@@ -102,7 +102,7 @@ func testBatchEnvelopeAndReadback(t *testing.T, root string, version, completion
 		t.Fatal("task became shell source")
 	}
 	args := readBatchFixture(t, filepath.Join(dir, "args"))
-	if !strings.Contains(string(args), "--mode\njson\n--provider\nsynthetic\n") || !strings.Contains(string(args), "--session-id\n"+p.PiSessionID) || strings.Contains(string(args), "--continue") {
+	if !strings.Contains(string(args), "--mode\njson\n--provider\nsynthetic\n") || !strings.Contains(string(args), "--model\n"+target.Agent.Model+"\n") || !strings.Contains(string(args), "--session-id\n"+p.PiSessionID) || strings.Contains(string(args), "--continue") {
 		t.Fatalf("wrong CLI contract: %s", args)
 	}
 	if !strings.Contains(string(args), "--session-dir\n"+filepath.Join(dir, ".memoh-computer", "sessions", p.PiSessionID)+"\n") {
@@ -204,7 +204,7 @@ func testBatchEnvelopeAndReadback(t *testing.T, root string, version, completion
 
 func batchFixtureScript(t *testing.T, p BatchProgress, target Target, cwd, task string) string {
 	t.Helper()
-	script, err := batchScript(p, target, cwd, task)
+	script, err := batchScript(p, target, cwd, task, target.Agent.Model)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func TestBatchLayoutRejectsUnsupportedVersionAndPaths(t *testing.T) {
 		if p.valid() {
 			t.Fatal("invalid layout accepted")
 		}
-		if _, err := batchScript(p, Target{}, ".", "must not start"); !errors.Is(err, ErrUnsupported) {
+		if _, err := batchScript(p, Target{}, ".", "must not start", "synthetic-model"); !errors.Is(err, ErrUnsupported) {
 			t.Fatalf("writer accepted unsupported layout: %v", err)
 		}
 		if _, err := batchReadScript(p, Target{}, "receipt.json", 0, batchReceiptBytes, strings.Repeat("1", 32)); !errors.Is(err, ErrUnsupported) {

@@ -179,7 +179,7 @@ func TestNativeEvidenceRetainsSamplesExportsAndRestart(t *testing.T) {
 	if err := json.Unmarshal(before, &restored.records); err != nil {
 		t.Fatal(err)
 	}
-	restarted := NewSource(NewService(restored, restored, computertarget.NewService(restored, permissionChecker{}, f.call), a, source.service.authorize))
+	restarted := NewSource(NewService(restored, restored, computertarget.NewService(restored, permissionChecker{}, f.call), a, source.service.authorize).WithPiModelList(testPiModelList))
 	client = standardClient(t, restarted, "pc-a", false)
 	calls := slices.Clone(f.base.methods)
 	saved := parseResult(t, invoke(t, client, "computer_task_get", args, false))

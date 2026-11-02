@@ -265,6 +265,8 @@ func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
 						return nil, computertask.ErrDeliveryAsset
 					}
 					return f, nil
+				}).WithPiModelList(func(context.Context) ([]computertask.PiModel, error) {
+					return []computertask.PiModel{{ID: "synthetic-model"}}, nil
 				})
 				source := computertask.NewSource(service)
 				source.SetResumeContext(computerTaskResumeContext(host.service))
@@ -277,7 +279,7 @@ func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
 				if e != nil {
 					t.Fatal(e)
 				}
-				request := map[string]any{"kind": "herdr_pi_task", "task": "original synthetic image input", "work_dir": ".", "target_id": targetID, "inputs": []string{asset.ContentHash}}
+				request := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "original synthetic image input", "work_dir": ".", "target_id": targetID, "inputs": []string{asset.ContentHash}}
 				first, e := source.CallTool(ctx, mcp.ToolSessionContext{BotID: binding.BotID, UserID: binding.UserID, SessionID: binding.SessionID, RunID: binding.RunID, RunContext: ctx}, "computer_task_submit", request)
 				if e != nil || first["isError"] != true || f.op.ID == "" || f.runs != 0 || f.writes != 0 {
 					t.Fatalf("interrupted input fixture: err=%v operation=%s", e, f.op.ID)

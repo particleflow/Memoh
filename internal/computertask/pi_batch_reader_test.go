@@ -108,7 +108,7 @@ func batchReaderFixture(t *testing.T) (*Source, *fixtureStore, *recoveryTranspor
 	t.Helper()
 	source, store, remote, _ := setupBatch(t)
 	client := standardClient(t, source, "pc-a", false)
-	original := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic recovery"}, false))
+	original := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic recovery"}, false))
 	remote.changedPane, remote.hiddenFrame = true, true
 	return source, store, installRecoveryTransport(source, remote, original.ID), original
 }
@@ -143,7 +143,7 @@ func TestBatchReaderUnknownCreationNeverRecreates(t *testing.T) {
 			client := standardClient(t, source, "pc-a", false)
 			invoke(t, client, "computer_task_result", map[string]any{"operation_id": original.ID}, true)
 			// A new coordinator has no in-memory lease to justify retrying.
-			restarted := NewSource(NewService(store, store, source.service.relay, source.service.assets, source.service.authorize))
+			restarted := NewSource(NewService(store, store, source.service.relay, source.service.assets, source.service.authorize).WithPiModelList(testPiModelList))
 			client = standardClient(t, restarted, "pc-a", false)
 			invoke(t, client, "computer_task_result", map[string]any{"operation_id": original.ID}, true)
 			want := 1
@@ -300,7 +300,7 @@ func TestBatchReaderPageRereadDoesNotDuplicateCommittedChunks(t *testing.T) {
 		t.Fatal("failed CAS advanced a file")
 	}
 	store.failRevision = nil
-	restarted := NewSource(NewService(store, store, source.service.relay, source.service.assets, source.service.authorize))
+	restarted := NewSource(NewService(store, store, source.service.relay, source.service.assets, source.service.authorize).WithPiModelList(testPiModelList))
 	client = standardClient(t, restarted, "pc-a", false)
 	ready := batchLogsUntilReady(t, client, original.ID)
 	if ready.StdoutHash != remote.base.receipt.Stdout.Hash || ready.StderrHash != remote.base.receipt.Stderr.Hash {
