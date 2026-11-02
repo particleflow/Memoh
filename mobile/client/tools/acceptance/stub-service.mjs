@@ -42,6 +42,29 @@ const HISTORY_BODY = '这是历史回复，加载时不应朗读。'
 
 export function nowIso() { return new Date().toISOString() }
 
+// Extract the single file part of a multipart/form-data body. Returns the raw
+// bytes and the client-declared mime type; falls back to the whole body when
+// the framing is unexpected, which the hash check downstream will reject.
+function multipartFile(body, contentType) {
+  const match = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType)
+  if (!match) return { bytes: body, mime: contentType || '' }
+  const boundary = Buffer.from('--' + (match[1] ?? match[2]).trim())
+  let at = body.indexOf(boundary)
+  while (at !== -1) {
+    const start = body.indexOf(Buffer.from('\r\n\r\n'), at)
+    const next = body.indexOf(boundary, start)
+    if (start === -1 || next === -1) break
+    const header = body.subarray(at, start).toString('utf8')
+    if (/filename=/i.test(header)) {
+      const mime = /content-type:\s*([^\r\n]+)/i.exec(header)?.[1]?.trim()
+      const from = start + 4
+      return { bytes: body.subarray(from, next - 2), mime: mime || '' }
+    }
+    at = next
+  }
+  return { bytes: body, mime: '' }
+}
+
 function silentMp3(seconds = 30) {
   const dir = join(tmpdir(), 'memoh-acceptance-audio')
   const file = join(dir, `silence-${seconds}.mp3`)
@@ -181,6 +204,19 @@ export class StubService {
       this.json(res, 200, { ok: true })
       return
     }
+    if (path === '/__control/upload-config') {
+      const body = JSON.parse(await this.readBody(req) || '{}')
+      if (body.chunkDelayMs !== undefined) this.uploadChunkDelayMs = body.chunkDelayMs
+      if (body.downloadChunkDelayMs !== undefined) this.downloadChunkDelayMs = body.downloadChunkDelayMs
+      if (body.fail !== undefined) this.mediaFail = body.fail
+      this.uploadEvents = []
+      this.json(res, 200, { ok: true })
+      return
+    }
+    if (path === '/__control/uploads') {
+      this.json(res, 200, { events: this.uploadEvents ?? [] })
+      return
+    }
     if (path.startsWith('/api/')) return this.api(req, res, path.slice(4), url)
     // The packaged build derives its base URL from the deployment origin, so
     // SDK calls arrive without an /api prefix. Anything that is not a bundle
@@ -307,6 +343,52 @@ export class StubService {
       res.end()
       return
     }
+    // E8 upload wire: the browser path confirms the upload limit, probes by
+    // content hash (404 for a new original), POSTs the multipart body through
+    // the XHR seam whose wire bytes drive the transfer ring, then re-reads the
+    // stored original over a paced body so the streamed read - and the ring it
+    // feeds - stays observable. Only the file part of the multipart body is the
+    // original; the rest is transport framing.
+    if (path === `/bots/${BOT_ID}/media/limits` && req.method === 'GET') {
+      this.json(res, 200, { max_upload_bytes: 1024 * 1024 * 1024 })
+      return
+    }
+    const mediaMatch = new RegExp(`^/bots/${BOT_ID}/media/([0-9a-f]{64})$`).exec(path)
+    if (mediaMatch && req.method === 'GET') {
+      const stored = this.mediaFiles?.get(mediaMatch[1])
+      if (!stored) { this.json(res, 404, { title: 'not found' }); return }
+      res.writeHead(200, { 'content-type': stored.mime, 'content-length': String(stored.bytes.length), 'cache-control': 'no-store', 'access-control-allow-origin': '*' })
+      if (!this.downloadChunkDelayMs) { res.end(stored.bytes); return }
+      const step = Math.max(1, Math.ceil(stored.bytes.length / 64))
+      for (let at = 0; at < stored.bytes.length; at += step) {
+        res.write(stored.bytes.subarray(at, at + step))
+        await new Promise(resolve => setTimeout(resolve, this.downloadChunkDelayMs))
+      }
+      res.end()
+      return
+    }
+    if (path === `/bots/${BOT_ID}/media` && req.method === 'POST') {
+      ;(this.uploadEvents ??= []).push({ at: nowIso(), bytes: 0, done: false })
+      const event = this.uploadEvents[this.uploadEvents.length - 1]
+      if (this.mediaFail) {
+        this.json(res, 503, { title: 'upload rejected' })
+        return
+      }
+      const chunks = []
+      let received = 0
+      for await (const chunk of req) {
+        chunks.push(chunk)
+        received += chunk.length
+        event.bytes = received
+        if (this.uploadChunkDelayMs) await new Promise(resolve => setTimeout(resolve, this.uploadChunkDelayMs))
+      }
+      event.done = true
+      const file = multipartFile(Buffer.concat(chunks), req.headers['content-type'] || '')
+      const hash = createHash('sha256').update(file.bytes).digest('hex')
+      ;(this.mediaFiles ??= new Map()).set(hash, { mime: file.mime || 'application/octet-stream', bytes: file.bytes })
+      this.json(res, 201, { content_hash: hash, size_bytes: file.bytes.length, mime: file.mime || 'application/octet-stream' })
+      return
+    }
     this.json(res, 200, { items: [] })
   }
 
@@ -347,7 +429,7 @@ export class StubService {
   }
 
   onClientMessage(message, socket) {
-    this.clientMessages.push({ type: message.type, at: nowIso(), payload: JSON.stringify(message).slice(0, 400) })
+    this.clientMessages.push({ type: message.type, at: nowIso(), payload: JSON.stringify(message).slice(0, 2000) })
     if (message.type === 'runtime_subscribe') {
       const state = this.runtimeFor(message.session_id)
       this.send(socket, {

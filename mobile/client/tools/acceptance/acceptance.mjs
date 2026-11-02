@@ -97,7 +97,9 @@ async function main() {
   await service.start()
   const origin = `http://stub.test:${service.port}`
 
-  const chrome = await launchChrome({ executable: CHROME })
+  // The packaged bundle hashes attachments with crypto.subtle, which Chromium
+  // exposes only in secure contexts; the harness origin is http on loopback.
+  const chrome = await launchChrome({ executable: CHROME, args: [`--unsafely-treat-insecure-origin-as-secure=${origin}`] })
   const cdp = await CDP.connect(chrome.wsUrl)
   // One isolated browser context per scenario: storage, page-memory caches and
   // the socket are torn down with the page, so scenarios cannot leak into each
@@ -429,6 +431,190 @@ async function main() {
     const resumed = await plays()
     add(result('G8 background/foreground parks and resumes', resumed >= 2,
       `play events=${resumed} (expect >=2: initial + resumed)`))
+
+    // ---------- E8: attachment transfer ring, no status copy, formatted speed.
+    // A real original is staged through the composer file input and sent; the
+    // stub answers the upload wire and then serves the verifying read over a
+    // paced body, so the ring's byte share grows over seconds and every probe
+    // below samples the live transfer window instead of its aftermath.
+    async function stageComposerFile(sizeBytes) {
+      const filePath = join(reportDir, `e8-upload-${runIndex}-${Date.now()}.bin`)
+      writeFileSync(filePath, Buffer.alloc(sizeBytes, 7))
+      const { root } = await cdp.send('DOM.getDocument', {}, page.sessionId)
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: 'input[type=file]:not([accept])' }, page.sessionId)
+      if (!nodeId) throw new Error('composer file input not found')
+      await cdp.send('DOM.setFileInputFiles', { files: [filePath], nodeId }, page.sessionId)
+      return filePath
+    }
+    const liveProbe = `(() => ({
+      rings: [...document.querySelectorAll('svg circle[stroke-dasharray]')].map(c => ({
+        dasharray: c.getAttribute('stroke-dasharray'),
+        dashoffset: c.getAttribute('stroke-dashoffset'),
+      })),
+      speeds: [...document.querySelectorAll('span.text-caption.tabular-nums')].map(n => n.textContent || '').filter(Boolean),
+      cards: [...document.querySelectorAll('.group\\\\/att')].map(n => n.innerText || ''),
+      badges: [...document.querySelectorAll('.group\\\\/att [class*=bottom-1]')].map(n => ({
+        title: n.getAttribute('title'), aria: n.getAttribute('aria-label'), text: n.innerText || '',
+      })),
+    }))()`
+    const BANNED_CARD_COPY = ['上传附件中', '正在上传', '上传中', '正在完整校验', '校验中', '准备中', '传输中', '失败', '等待中']
+    async function watchTransfer(timeoutMs) {
+      const samples = []
+      const deadline = Date.now() + timeoutMs
+      let quiet = 0
+      while (Date.now() < deadline) {
+        const probe = await page.eval(liveProbe).catch(() => ({ rings: [], speeds: [], cards: [], badges: [] }))
+        samples.push(probe)
+        if (probe.rings.length === 0) { quiet += 1; if (quiet >= 3) break } else quiet = 0
+        await sleep(110)
+      }
+      return samples
+    }
+    function ringSeries(samples) {
+      // Track the dashoffset of every filled arc keyed by its dasharray so two
+      // concurrent rings never interleave into one series.
+      const series = new Map()
+      for (const probe of samples) {
+        for (const ring of probe.rings) {
+          if (ring.dashoffset == null) continue
+          const key = ring.dasharray + '|' + ring.dashoffset.length
+          if (!series.has(key)) series.set(key, [])
+          series.get(key).push(Number(ring.dashoffset))
+        }
+      }
+      return [...series.values()]
+    }
+    function monotonicFill(series) {
+      return series.some(values => {
+        const distinct = [...new Set(values.map(v => Math.round(v * 1000) / 1000))]
+        if (distinct.length < 3) return false
+        for (let i = 1; i < values.length; i++) if (values[i] > values[i - 1] + 1e-9) return false
+        return distinct[distinct.length - 1] <= distinct[0] * 0.15
+      })
+    }
+
+    await scenario('stream', 700)
+    await service.control('/__control/upload-config', { chunkDelayMs: 60, downloadChunkDelayMs: 45, fail: false })
+    await stageComposerFile(3 * 1024 * 1024)
+    const stagedProbe = await page.eval(liveProbe).catch(error => ({ error: String(error) }))
+    await submit('发送这个附件')
+    const samples = await watchTransfer(30000)
+    const series = ringSeries(samples)
+    const ringsSeen = samples.some(probe => probe.rings.length > 0)
+    const midCopy = [...new Set(samples.flatMap(probe => probe.cards))].join('\n')
+    const midSpeeds = [...new Set(samples.flatMap(probe => probe.speeds))]
+    const badgeTitles = samples.flatMap(probe => probe.badges).map(b => b.title || b.aria).filter(Boolean)
+    const readyBadge = await wait('!!document.querySelector(".group\\\\/att [class*=text-emerald] svg")', 15000).catch(() => false)
+    add(result('attachment-transfer-ring-monotonic', ringsSeen && monotonicFill(series) && (readyBadge || samples.length > 0),
+      `ringsSeen=${ringsSeen} series=${JSON.stringify(series.map(v => v.length))} monotonicFill=${monotonicFill(series)} readyBadge=${readyBadge}`,
+      { stagedProbe, bodyHead: ringsSeen ? undefined : await page.eval('(document.body.innerText || "").slice(0, 400)').catch(() => null),
+        uploadEvents: (await service.control('/__control/uploads', null, 'GET')).events }))
+
+    const bannedHits = BANNED_CARD_COPY.filter(word => midCopy.includes(word))
+    const percentage = /(^|\s)\d+(\.\d+)?\s?%/.test(midCopy)
+    add(result('attachment-card-no-status-copy', bannedHits.length === 0 && !percentage && badgeTitles.length === 0,
+      `bannedCopy=${JSON.stringify(bannedHits)} percentage=${percentage} badgeTitles=${JSON.stringify(badgeTitles)}`,
+      { cardText: midCopy.slice(0, 300) }))
+
+    const speedMatches = midSpeeds.map(text => ({ text, ok: /^\d+(\.\d+)? (B|KB|MB)\/s$/.test(text) }))
+    add(result('transfer-speed-format', midSpeeds.length > 0 && speedMatches.every(entry => entry.ok),
+      `speedLabels=${JSON.stringify(midSpeeds)} allMatch=${speedMatches.every(entry => entry.ok)}`))
+
+    // ---------- E8: an injected upload failure marks the card failed, no copy.
+    await scenario('stream', 700)
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, downloadChunkDelayMs: 0, fail: true })
+    await stageComposerFile(256 * 1024)
+    await submit('上传会失败的附件')
+    let failedBadge = false
+    let failedBorder = false
+    let failedCopy = ''
+    for (let waited = 0; waited < 20000 && !failedBadge; waited += 150) {
+      const probe = await page.eval(`(() => ({
+        badge: !!document.querySelector('.group\\\\/att [class*=text-destructive] svg'),
+        border: !!document.querySelector('.group\\\\/att [class*="border-destructive"]'),
+        cards: [...document.querySelectorAll('.group\\\\/att')].map(n => n.innerText || '').join('\\n'),
+      }))()`).catch(() => ({ badge: false, border: false, cards: '' }))
+      failedBadge = probe.badge
+      failedBorder = probe.border
+      failedCopy = probe.cards
+      await sleep(150)
+    }
+    const failedRingGone = (await page.eval(liveProbe).catch(() => ({ rings: [] }))).rings.length === 0
+    const failedBanned = BANNED_CARD_COPY.filter(word => failedCopy.includes(word))
+    add(result('attachment-transfer-failure', failedBadge && failedBorder && failedRingGone && failedBanned.length === 0,
+      `failedBadge=${failedBadge} border=${failedBorder} ringGone=${failedRingGone} bannedCopy=${JSON.stringify(failedBanned)}`,
+      { cardText: failedCopy.slice(0, 300) }))
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, downloadChunkDelayMs: 0, fail: false })
+
+    // ---------- TF-17: quote-reply entries and the reply_to wire field.
+    await scenario('stream', 700)
+    await submit('引用这条回复试试')
+    await waitBodyReading(BODY[0], 30000)
+    await waitSettled(15000)
+    await waitBody(BODY[BODY.length - 1], 10000)
+    const quotedId = await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      return rows.length ? rows[rows.length - 1].getAttribute('data-message-id') : null
+    })()`)
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-chat-content]')]
+      rows[rows.length - 1].dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+    })()`)
+    const menuSeen = await wait('document.querySelectorAll(\'[role=menuitem]\').length >= 2', 8000).catch(() => false)
+    const menuItems = menuSeen ? await page.eval(`[...document.querySelectorAll('[role=menuitem]')].map(n => (n.innerText || '').trim())`) : []
+    const readAloudFirst = menuItems.length > 0 && /朗读|read aloud/i.test(menuItems[0])
+    const quoteSecond = menuItems.length > 1 && /^(引用|quote)$/i.test(menuItems[1])
+    const quoteCount = menuItems.filter(t => /^(引用|quote)$/i.test(t)).length
+    add(result('quote-reply-menu-order', menuSeen && readAloudFirst && quoteSecond && quoteCount === 1,
+      `menu=${JSON.stringify(menuItems)} readAloudFirst=${readAloudFirst} quoteSecond=${quoteSecond}`))
+
+    await page.eval(`document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))`).catch(() => {})
+    await sleep(300)
+    const quoteButton = await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const buttons = row ? [...row.querySelectorAll('button[aria-label]')] : []
+      const quote = buttons.filter(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      return { count: quote.length, iconOnly: quote.map(b => (b.innerText || '').trim() === ''), trailing: quote.length ? buttons[buttons.length - 1] === quote[quote.length - 1] : false }
+    })()`)
+    add(result('quote-reply-action-row-icon', quoteButton.count >= 1 && quoteButton.iconOnly.every(Boolean) && quoteButton.trailing,
+      `count=${quoteButton.count} iconOnly=${quoteButton.iconOnly} trailing=${quoteButton.trailing}`))
+
+    const chipCancelProbe = `[...document.querySelectorAll('button[aria-label]')].some(b => /^(取消引用|cancel quote)$/i.test(b.getAttribute('aria-label') || ''))`
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const button = row && [...row.querySelectorAll('button[aria-label]')].find(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      if (button) button.click()
+    })()`)
+    const chipCancelSeen = await wait(chipCancelProbe, 8000).catch(() => false)
+    await page.eval(`[...document.querySelectorAll('button[aria-label]')].find(b => /^(取消引用|cancel quote)$/i.test(b.getAttribute('aria-label') || ''))?.click()`)
+    await sleep(400)
+    const chipGoneAfterCancel = !(await page.eval(chipCancelProbe))
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const button = row && [...row.querySelectorAll('button[aria-label]')].find(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      if (button) button.click()
+    })()`)
+    await wait(chipCancelProbe, 8000).catch(() => {})
+    await submit('这条带引用')
+    await sleep(600)
+    const chipGoneAfterSend = !(await page.eval(chipCancelProbe))
+    add(result('quote-reply-composer-roundtrip', chipCancelSeen && chipGoneAfterCancel && chipGoneAfterSend,
+      `chip=${chipCancelSeen} clearedOnCancel=${chipGoneAfterCancel} clearedOnSend=${chipGoneAfterSend}`))
+
+    await waitSettled(15000)
+    await waitBodyReading(BODY[0], 30000)
+    await waitSettled(15000)
+    const messagesAfterQuote = (await service.control('/__control/messages', null, 'GET')).items
+    const quotedSend = [...messagesAfterQuote].reverse().find(item => item.type === 'message' && (item.payload || '').includes('这条带引用'))
+    const plainSend = [...messagesAfterQuote].reverse().find(item => item.type === 'message' && (item.payload || '').includes('引用这条回复试试'))
+    const replyToMatch = quotedSend ? /"reply_to"\s*:\s*"([^"]+)"/.exec(quotedSend.payload || '') : null
+    const plainHasReplyTo = plainSend ? /"reply_to"\s*:/.test(plainSend.payload || '') : null
+    add(result('quote-reply-payload-reply-to', !!replyToMatch && replyToMatch[1] === quotedId && plainHasReplyTo === false,
+      `replyTo=${replyToMatch ? replyToMatch[1] : null} quotedRow=${quotedId} plainSendCarriesReplyTo=${plainHasReplyTo}`,
+      { quotedPayload: (quotedSend?.payload || '').slice(0, 400) }))
   } catch (error) {
     add(result('harness', false, String((error && error.message) || error)))
   } finally {
