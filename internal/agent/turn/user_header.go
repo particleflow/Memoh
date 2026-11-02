@@ -1,6 +1,7 @@
 package turn
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
@@ -18,6 +19,18 @@ type UserMessageMeta struct {
 	Time              string   `json:"time"`
 	Timezone          string   `json:"timezone,omitempty"`
 	AttachmentPaths   []string `json:"attachments"`
+	// ReplyTo names the message this input quotes. It renders as the
+	// envelope's <in-reply-to> child — the same shape the timeline renderer
+	// emits — so the model sees a truncated pointer, never the full quote.
+	ReplyTo *UserMessageReplyRef `json:"reply-to,omitempty"`
+}
+
+// UserMessageReplyRef is the quoted-message reference carried by a user
+// message header: the target's id, its sender, and a truncated preview.
+type UserMessageReplyRef struct {
+	MessageID string
+	Sender    string
+	Preview   string
 }
 
 // UserMessageHeaderInput is the unified input for building user message headers.
@@ -34,6 +47,7 @@ type UserMessageHeaderInput struct {
 	AttachmentPaths   []string
 	Time              time.Time
 	Timezone          string
+	ReplyTo           *UserMessageReplyRef
 }
 
 // BuildUserMessageMetaFromInput constructs metadata from one cohesive input.
@@ -53,6 +67,7 @@ func BuildUserMessageMetaFromInput(input UserMessageHeaderInput) UserMessageMeta
 		Time:              time.Now().UTC().Format(time.RFC3339),
 		Timezone:          strings.TrimSpace(input.Timezone),
 		AttachmentPaths:   attachmentPaths,
+		ReplyTo:           input.ReplyTo,
 	}
 	if !input.Time.IsZero() {
 		meta.Time = input.Time.Format(time.RFC3339)
@@ -139,6 +154,18 @@ func FormatUserHeaderFromMeta(meta UserMessageMeta, query string) string {
 	}
 	sb.WriteString(">\n")
 
+	if meta.ReplyTo != nil && strings.TrimSpace(meta.ReplyTo.MessageID) != "" {
+		replyAttrs := []string{fmt.Sprintf("id=%q", escapeXMLAttr(strings.TrimSpace(meta.ReplyTo.MessageID)))}
+		if sender := strings.TrimSpace(meta.ReplyTo.Sender); sender != "" {
+			replyAttrs = append(replyAttrs, fmt.Sprintf("sender=%q", escapeXMLAttr(sender)))
+		}
+		sb.WriteString("<in-reply-to ")
+		sb.WriteString(strings.Join(replyAttrs, " "))
+		sb.WriteString(">")
+		sb.WriteString(escapeXMLText(strings.TrimSpace(meta.ReplyTo.Preview)))
+		sb.WriteString("</in-reply-to>\n")
+	}
+
 	if len(meta.AttachmentPaths) > 0 {
 		for _, p := range meta.AttachmentPaths {
 			sb.WriteString("<attachment path=\"")
@@ -208,6 +235,16 @@ func escapeXMLAttr(s string) string {
 		"<", "&lt;",
 		">", "&gt;",
 		"\"", "&quot;",
+	)
+	return r.Replace(s)
+}
+
+// escapeXMLText escapes a string for use as XML element text.
+func escapeXMLText(s string) string {
+	r := strings.NewReplacer(
+		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
 	)
 	return r.Replace(s)
 }

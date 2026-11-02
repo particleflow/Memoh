@@ -724,6 +724,16 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 		Time:              time.Now().In(tz),
 		Timezone:          runCfg.Identity.Timezone,
 	}
+	// A validated quote rides the current turn's envelope as the same
+	// <in-reply-to> child the timeline renderer emits: id, sender and a
+	// truncated preview — the full quoted body stays out of the prompt.
+	if v := strings.TrimSpace(req.SourceReplyToMessageID); v != "" {
+		headerInput.ReplyTo = &turnpkg.UserMessageReplyRef{
+			MessageID: v,
+			Sender:    strings.TrimSpace(req.ReplySender),
+			Preview:   strings.TrimSpace(req.ReplyPreview),
+		}
+	}
 	headerifiedQuery := ""
 	if userQueryNeedsHeader(req, len(mergedAttachments)) {
 		headerifiedQuery = turnpkg.FormatUserHeader(headerInput, req.Query)

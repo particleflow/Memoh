@@ -902,6 +902,11 @@ type wsClientMessage struct {
 	// session's workdir binding is immutable, so on an existing session it is
 	// ignored rather than treated as a request to rebind.
 	WorkdirID string `json:"workdir_id,omitempty"`
+	// ReplyTo names the message this send quotes: the id of a stored message
+	// of the same session. It is validated against that session; an id that
+	// does not resolve there is dropped (with a log line) and the turn itself
+	// proceeds unchanged.
+	ReplyTo string `json:"reply_to,omitempty"`
 	// Cursor is the subscriber's last observed position. It is carried here
 	// rather than in a separate message type because runtime_subscribe shares
 	// this envelope with every other inbound message.
@@ -2382,6 +2387,31 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 			if runtimeInfo.RequiresWorkspaceExec {
 				streamToken = h.issueRuntimeOwnerBearerToken(runtimeInfo.RuntimeOwnerAccountID, bearerToken)
 			}
+			// A quote names a stored message of this session. Validation only
+			// resolves its display pieces; an id that names nothing here (or a
+			// message of another session) is dropped with a log line — the send
+			// itself is never rejected over its quote target.
+			replyToID, replySender, replyPreview := "", "", ""
+			if rawReplyTo := strings.TrimSpace(msg.ReplyTo); rawReplyTo != "" {
+				role, sender, preview, ok := h.agentService.ResolveQuoteReplyTarget(streamBaseCtx, sessionID, rawReplyTo)
+				if ok {
+					replyToID = rawReplyTo
+					replySender = sender
+					if role == "assistant" && replySender == "" {
+						if bot, botErr := h.botService.Get(streamBaseCtx, botID); botErr == nil {
+							replySender = strings.TrimSpace(bot.DisplayName)
+							if replySender == "" {
+								replySender = strings.TrimSpace(bot.Name)
+							}
+						}
+					}
+					replyPreview = preview
+				} else {
+					h.logger.WarnContext(streamBaseCtx, "ws.message reply_to ignored: no such message in session",
+						slog.String("bot_id", botID),
+						slog.String("session_id", sessionID))
+				}
+			}
 			var ingestedActivationAttachments []turn.Attachment
 			userMessagePersisted := false
 			persistedUserMessageID := ""
@@ -2414,6 +2444,9 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 					SkillActivation:         skillActivation,
 					CurrentChannel:          h.channelType.String(),
 					ReplyTarget:             botID,
+					SourceReplyToMessageID:  replyToID,
+					ReplySender:             replySender,
+					ReplyPreview:            replyPreview,
 					Attachments:             ingestedActivationAttachments,
 					RequestedSkills:         requestedSkillContexts,
 					WorkspaceTargetID:       workspaceTargetID,
@@ -2487,6 +2520,9 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 						ChatToken:               bearerToken,
 						CurrentChannel:          h.channelType.String(),
 						ReplyTarget:             botID,
+						SourceReplyToMessageID:  replyToID,
+						ReplySender:             replySender,
+						ReplyPreview:            replyPreview,
 						Channels:                []string{h.channelType.String()},
 						Attachments:             messageAdmission.preparedAttachments(),
 						RequestedSkills:         requestedSkillContexts,
