@@ -199,6 +199,59 @@ func TestResumableHTTPStalledBodyDeadlineReleasesLock(t *testing.T) {
 	f.request(t, http.MethodPost, path+"/complete", nil, http.StatusOK)
 }
 
+func TestResumableHTTPSlowButProgressingBodyIsNotCut(t *testing.T) {
+	f := newUploadHTTPFixture(t)
+	u := f.create(t)
+	path := f.base + "/" + u.ID
+	endpoint, err := url.Parse(f.server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conn, err := (&net.Dialer{}).DialContext(t.Context(), "tcp", endpoint.Host)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = conn.Close() }()
+	if err := conn.SetDeadline(time.Now().Add(20 * time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	_, err = fmt.Fprintf(conn, "PATCH %s HTTP/1.1\r\nHost: %s\r\nAuthorization: Bearer %s\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\nUpload-Offset: 0\r\nUpload-Length: %d\r\nUpload-SHA256: %s\r\n\r\n",
+		path, endpoint.Host, f.token, len(f.payload), len(f.payload), f.hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Every gap stays well inside the 250 ms stall budget while the whole body
+	// takes several times that. Prolonged silence is the failure the deadline
+	// must catch, not a link that keeps delivering bytes.
+	started := time.Now()
+	for _, octet := range f.payload {
+		if _, err := conn.Write([]byte{octet}); err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if elapsed := time.Since(started); elapsed <= f.handler.uploadReadTimeout {
+		t.Fatalf("test body must outlast the stall budget: %v", elapsed)
+	}
+	response, err := http.ReadResponse(bufio.NewReader(conn), nil)
+	if err != nil {
+		t.Fatal("a progressing request was cut", err)
+	}
+	body, _ := io.ReadAll(response.Body)
+	_ = response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatal(response.StatusCode, string(body))
+	}
+	var status media.Upload
+	if err := json.Unmarshal(f.request(t, http.MethodGet, path, nil, http.StatusOK), &status); err != nil {
+		t.Fatal(err)
+	}
+	if status.Offset != int64(len(f.payload)) {
+		t.Fatal(status)
+	}
+	f.request(t, http.MethodPost, path+"/complete", nil, http.StatusOK)
+}
+
 func TestResumableHTTPUnsupportedDeadlineFailsBeforeReading(t *testing.T) {
 	root := t.TempDir()
 	e, s := mediaTestHTTP(t, localfs.NewOriginals(root), 1024, "admin")

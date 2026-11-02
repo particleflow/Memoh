@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,6 +12,33 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/media"
 )
+
+// Append bodies are bounded by progress, not by a whole-request wall clock. The
+// read deadline is renewed on every delivered byte, so it bounds how long a
+// client may stay silent while holding the receipt lock. A fixed total budget
+// was a hidden throughput floor: the two-minute default demanded ~68 KiB/s for
+// an 8 MiB chunk (media.UploadChunkBytes), so a working weak link was cut
+// mid-body. Silence, not slowness, is the failure this deadline must catch.
+const uploadStallTimeout = 2 * time.Minute
+
+// uploadProgressReader renews the read deadline after each non-empty read.
+// A writer that cannot be re-armed keeps the deadline set before the request,
+// which is exactly the previous behaviour; that is not a read failure.
+type uploadProgressReader struct {
+	reader    io.Reader
+	renew     func() error
+	rewritten bool
+}
+
+func (r *uploadProgressReader) Read(p []byte) (int, error) {
+	n, err := r.reader.Read(p)
+	if n > 0 && r.rewritten {
+		// One re-arm failure stops further attempts; the last deadline still bounds
+		// the request, so a writer without deadline support cannot spin here.
+		r.rewritten = r.renew() == nil
+	}
+	return n, err
+}
 
 // MediaUploadStatusResponse adds only the current file routing snapshot to the
 // existing authenticated receipt GET. It never enters the upload journal.
@@ -167,17 +195,21 @@ func (h *MessageHandler) AppendMediaUpload(c echo.Context) error {
 	if err != nil {
 		return apperror.FieldInvalid("Upload-Length", err)
 	}
-	// Bound lock occupancy even if a client stops sending midway through a body.
+	// Bound lock occupancy by silence, not by total duration: a client that stops
+	// sending is cut after the stall budget exactly as before, while a client that
+	// keeps delivering is no longer cut merely because its link is slow.
 	controller := http.NewResponseController(c.Response().Writer)
-	timeout := h.uploadReadTimeout
-	if timeout <= 0 {
-		timeout = 2 * time.Minute
+	stall := h.uploadReadTimeout
+	if stall <= 0 {
+		stall = uploadStallTimeout
 	}
-	if err := controller.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+	if err := controller.SetReadDeadline(time.Now().Add(stall)); err != nil {
 		return apperror.Wrap(apperror.CodeHTTPServiceUnavailable, err, nil)
 	}
 	c.Request().Body = http.MaxBytesReader(c.Response(), c.Request().Body, media.UploadChunkBytes+1)
-	result, err := store.Append(c.Request().Context(), owner, bot, c.Param("upload_id"), offset, size, c.Request().Header.Get("Upload-SHA256"), c.Request().Body)
+	body := &uploadProgressReader{reader: c.Request().Body, rewritten: true,
+		renew: func() error { return controller.SetReadDeadline(time.Now().Add(stall)) }}
+	result, err := store.Append(c.Request().Context(), owner, bot, c.Param("upload_id"), offset, size, c.Request().Header.Get("Upload-SHA256"), body)
 	if err != nil {
 		// Keep the deadline on failure: net/http may drain an unread request body
 		// while writing the error. Clearing it here could stall that drain forever.
