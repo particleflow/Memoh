@@ -53,7 +53,7 @@ func (p *recordingMemoryProvider) Update(ctx context.Context, req memprovider.Up
 	return memprovider.MemoryItem{ID: req.MemoryID, Memory: req.Memory}, nil
 }
 
-func (p *recordingMemoryProvider) Delete(ctx context.Context, botID string, memoryID string) (memprovider.DeleteResponse, error) {
+func (p *recordingMemoryProvider) Delete(ctx context.Context, botID, memoryID string) (memprovider.DeleteResponse, error) {
 	p.deleted = append(p.deleted, memoryID)
 	p.conversation = append(p.conversation, storefs.IsConversationWrite(ctx))
 	p.deleteBots = append(p.deleteBots, botID)

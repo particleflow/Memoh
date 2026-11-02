@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/settings"
@@ -81,7 +81,7 @@ type UpdateWorkspaceTargetToolApprovalRequest struct {
 }
 
 type ResolvedWorkspaceTarget struct {
-	Execute  func(context.Context, agenvo.Request) (agenvo.Result, error)
+	Execute  func(context.Context, computertarget.Request) (computertarget.Result, error)
 	TargetID string
 	Kind     string
 	Name     string
@@ -139,9 +139,6 @@ func (s *RemoteWorkspaceService) ListMounts(ctx context.Context, botID string) (
 	}
 	targets := make([]WorkspaceTarget, 0, len(records))
 	for _, record := range records {
-		if record.RuntimeProvider == agenvo.Provider {
-			continue
-		}
 		targets = append(targets, s.target(ctx, record))
 	}
 	return targets, nil
@@ -285,9 +282,6 @@ func (s *RemoteWorkspaceService) ResolveMount(ctx context.Context, botID, target
 }
 
 func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbstore.BotRemoteRuntimeBindingRecord) (ResolvedWorkspaceTarget, error) {
-	if record.RuntimeProvider == agenvo.Provider {
-		return ResolvedWorkspaceTarget{}, agenvo.ErrLegacyRetired
-	}
 	client, connection, err := s.clientForRecord(record)
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, err
@@ -302,14 +296,14 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 			defaultWorkDir = selected
 		}
 	}
-	var execute func(context.Context, agenvo.Request) (agenvo.Result, error)
+	var execute func(context.Context, computertarget.Request) (computertarget.Result, error)
 	var providerConfig map[string]json.RawMessage
 	if json.Unmarshal(record.RuntimeProviderConfig, &providerConfig) == nil && len(providerConfig["herdr"]) > 0 {
 		// Once configured for durable computer tasks, raw exec cannot bypass
 		// unknown operations or paused admission. Reads/writes retain their
 		// existing permissions; artifact delivery still uses the producer ledger.
-		execute = func(context.Context, agenvo.Request) (agenvo.Result, error) {
-			return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
+		execute = func(context.Context, computertarget.Request) (computertarget.Result, error) {
+			return computertarget.Result{State: "not_started"}, computertarget.ErrComputerTaskRequired
 		}
 		// Hook commands and other bridge consumers do not use Execute. Keep
 		// their file access, but withhold Exec and network tunnels at the client.
@@ -379,7 +373,7 @@ func (s *RemoteWorkspaceService) getRecord(ctx context.Context, botID, targetID 
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrWorkspaceTargetNotFound
 	}
 	record, err := s.store.GetMount(ctx, botID, targetID)
-	if errors.Is(err, db.ErrNotFound) || err == nil && record.RuntimeProvider == agenvo.Provider {
+	if errors.Is(err, db.ErrNotFound) {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrWorkspaceTargetNotFound
 	}
 	return record, err
@@ -396,9 +390,6 @@ func (s *RemoteWorkspaceService) getPrimaryRecord(ctx context.Context, botID str
 	record, err := s.store.GetPrimaryMount(ctx, botID)
 	if errors.Is(err, db.ErrNotFound) {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrRemoteWorkspaceNotBound
-	}
-	if err == nil && record.RuntimeProvider == agenvo.Provider {
-		return record, agenvo.ErrLegacyRetired
 	}
 	return record, err
 }
@@ -445,8 +436,6 @@ func (s *RemoteWorkspaceService) target(_ context.Context, record dbstore.BotRem
 		target.RuntimeID = ""
 		target.Status = WorkspaceTargetStatusOwnerMismatch
 	case record.RuntimeRevoked:
-		target.Status = WorkspaceTargetStatusRevoked
-	case record.RuntimeProvider == agenvo.Provider:
 		target.Status = WorkspaceTargetStatusRevoked
 	case s.runtimes == nil:
 		target.Status = WorkspaceTargetStatusOffline

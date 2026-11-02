@@ -25,7 +25,7 @@ type capabilityTestConnections struct {
 
 func (*capabilityTestConnections) Delete(context.Context, string, string) error { return nil }
 
-func (f *capabilityTestConnections) UpdateProbeResult(_ context.Context, _, _ string, status string, tools []mcp.ToolDescriptor, _ string) error {
+func (f *capabilityTestConnections) UpdateProbeResult(_ context.Context, _, _, status string, tools []mcp.ToolDescriptor, _ string) error {
 	f.conn.Status = status
 	f.conn.ToolsCache = tools
 	return nil

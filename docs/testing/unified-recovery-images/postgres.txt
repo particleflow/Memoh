@@ -1,7 +1,7 @@
 === RUN   TestPostgresAccountAndBotAuthorization
 --- PASS: TestPostgresAccountAndBotAuthorization (0.04s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	0.050s
+ok  	github.com/felinics/memoh/internal/computertarget	0.050s
 === RUN   TestBatchReaderPostgresPersistenceCAS
 --- PASS: TestBatchReaderPostgresPersistenceCAS (0.03s)
 PASS

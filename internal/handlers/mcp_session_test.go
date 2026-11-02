@@ -21,7 +21,7 @@ import (
 // present to the client (stdin writer, stdout reader) plus the ends a test
 // server listens on. Production gets the same shape from the bridge exec
 // stream; tests skip the container entirely.
-func newStdioPipePair() (clientStdin io.WriteCloser, clientStdout io.ReadCloser, serverStdin io.ReadCloser, serverStdout io.WriteCloser) {
+func newStdioPipePair() (clientStdin io.WriteCloser, clientStdout, serverStdin io.ReadCloser, serverStdout io.WriteCloser) {
 	serverStdin, clientStdin = io.Pipe()
 	clientStdout, serverStdout = io.Pipe()
 	return clientStdin, clientStdout, serverStdin, serverStdout

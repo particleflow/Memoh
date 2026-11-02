@@ -7,7 +7,7 @@
 This candidate remains unregistered in production. It adds no credential issuer,
 device registration, daemon, listener, Agent change, filesystem root or security
 configuration. Its HTTP verifier is an injected port; tests provide synthetic
-verified principals. Account JWTs and outbound Agenvo/model credentials are not
+verified principals. Account JWTs and outbound legacy executor/model credentials are not
 execution identities.
 
 ## Implemented adapter

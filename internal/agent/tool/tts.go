@@ -24,7 +24,7 @@ type ttsSettings interface {
 }
 
 type ttsAudio interface {
-	Synthesize(ctx context.Context, modelID string, text string, overrideCfg map[string]any) ([]byte, string, error)
+	Synthesize(ctx context.Context, modelID, text string, overrideCfg map[string]any) ([]byte, string, error)
 }
 
 type TTSProvider struct {
@@ -115,7 +115,7 @@ func (p *TTSProvider) speakTools(session SessionContext) []toolexec.Tool {
 	}
 }
 
-func speakToolPromptMetadata(session SessionContext) (description string, platformDescription string, targetDescription string, required []string) {
+func speakToolPromptMetadata(session SessionContext) (description, platformDescription, targetDescription string, required []string) {
 	if session.CanOmitMessagingTarget() {
 		return "Send a voice message. When target is omitted, speaks in the current conversation. When target is specified, sends to that channel/person. Synthesizes text to speech and delivers as audio.",
 			"Channel platform name. Defaults to current session platform.",

@@ -1,7 +1,7 @@
 # Pi batch history continuity
 
 This host guard applies to new `pi-json-v1` computer operations. It does not
-change Pi, Herdr, Agenvo, or Memoh's Agent runtime. There is no new schema,
+change Pi, Herdr, legacy executor, or Memoh's Agent runtime. There is no new schema,
 executor, storage service, or automatic recovery/replay mechanism.
 
 ## Upstream contract
@@ -122,7 +122,7 @@ The implementation does not copy or replace native Agent per-turn tracing.
 
 ## Cloud validation record
 
-- `go test -race` passed for `internal/agenvo`, `internal/computertask`,
+- `go test -race` passed for `internal/computertarget`, `internal/computertask`,
   `internal/db/postgres/store`, and `internal/sessiontask`.
 - Isolated PostgreSQL integration passed for prior-history scope/latest-record
   selection and the existing concurrent durable-operation/CAS isolation test.

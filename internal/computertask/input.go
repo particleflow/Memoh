@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/media"
@@ -20,7 +20,7 @@ import (
 	pb "github.com/felinics/memoh/internal/workspace/bridgepb"
 )
 
-func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target agenvo.Target, r *dbstore.ComputerOperationRecord, d *Details, save func(string) error) (Result, error) {
+func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target computertarget.Target, r *dbstore.ComputerOperationRecord, d *Details, save func(string) error) (Result, error) {
 	if err := s.prepareInputs(ctx, b, in, target, *r, d, save); err != nil {
 		return result(*r, *d), err
 	}
@@ -40,7 +40,7 @@ func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBindi
 		}
 		return result(*r, *d), nil
 	}
-	if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 		d.Phase = "pi_continuity_unconfirmed"
 		if saveErr := save("not_started"); saveErr != nil {
 			return result(*r, *d), saveErr
@@ -50,7 +50,7 @@ func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBindi
 	if err := s.checkTaskInputAuthority(ctx, b, in, target, *r, d.Batch.Progress.Inputs); err != nil {
 		return result(*r, *d), err
 	}
-	p, runErr := s.relay.SubmitBatch(ctx, scope(b, r.TargetID), in.Task, in.WorkDir, d.Batch.Progress, func(p agenvo.BatchProgress) error {
+	p, runErr := s.relay.SubmitBatch(ctx, scope(b, r.TargetID), in.Task, in.WorkDir, d.Batch.Progress, func(p computertarget.BatchProgress) error {
 		if err := s.checkTaskInputAuthority(ctx, b, in, target, *r, p.Inputs); err != nil {
 			return err
 		}
@@ -71,23 +71,23 @@ func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBindi
 // Only an explicit unchanged request can resume input preparation. No native
 // workspace/pane/Pi input has existed at this boundary; all later phases retain
 // the original unknown/no-replay rules. The existing admission CAS owns the win.
-func (s *Service) resumeInputPreparation(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target agenvo.Target, r dbstore.ComputerOperationRecord, d Details) (Result, error) {
+func (s *Service) resumeInputPreparation(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target computertarget.Target, r dbstore.ComputerOperationRecord, d Details) (Result, error) {
 	p := d.Batch.Progress
 	admitted, ok := s.store.(dbstore.ComputerOperationAdmissionStore)
 	if !ok || r.CancelRequested || p.Phase != "" || p.WorkspaceID != "" || p.PaneID != "" || p.RequestID != "" || d.Batch.Receipt != nil || d.Batch.Result != nil || s.authorize == nil || (r.State != "unknown" && r.State != "dispatching" && r.State != "not_started") {
-		return result(r, d), agenvo.ErrUnknown
+		return result(r, d), computertarget.ErrUnknown
 	}
 	// A live bounded preparation owns its file writes. CAS alone would allow
 	// a later caller to read its new revision and start a second writer. A
 	// crashed preparer can be retried only after its persisted work deadline
 	// and the existing 3-second persistence tail, never by a concurrent call.
 	if d.InputPreparation == "preparing" && (d.InputPreparationUntil.IsZero() || time.Now().Before(d.InputPreparationUntil.Add(3*time.Second))) {
-		return result(r, d), agenvo.ErrUnknown
+		return result(r, d), computertarget.ErrUnknown
 	}
 	if err := s.authorize(ctx, b, r.TargetID, in.Kind, in.Task); err != nil {
 		return result(r, d), err
 	}
-	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
+	pinned := computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	work, cancel := context.WithTimeout(pinned, 35*time.Second)
 	defer cancel()
 	first := true
@@ -96,7 +96,7 @@ func (s *Service) resumeInputPreparation(ctx context.Context, b toolcontext.Comp
 		var detailsErr error
 		r.Details, detailsErr = preparedInputDetails(r.Details, d)
 		if detailsErr != nil {
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		persist, stop := context.WithTimeout(context.WithoutCancel(work), 3*time.Second)
 		defer stop()
@@ -112,7 +112,7 @@ func (s *Service) resumeInputPreparation(ctx context.Context, b toolcontext.Comp
 			if admissionBlocked(err) {
 				return err
 			}
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		r = next
 		return nil
@@ -122,7 +122,7 @@ func (s *Service) resumeInputPreparation(ctx context.Context, b toolcontext.Comp
 
 // Cached PC bytes are not a grant. Check the original NAS reference again at
 // every native dispatch boundary, including later workspace-only continuation.
-func (s *Service) checkTaskInputAuthority(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target agenvo.Target, r dbstore.ComputerOperationRecord, p *deliverymeta.InputPlan) error {
+func (s *Service) checkTaskInputAuthority(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target computertarget.Target, r dbstore.ComputerOperationRecord, p *deliverymeta.InputPlan) error {
 	if p == nil {
 		return nil
 	}
@@ -133,7 +133,7 @@ func (s *Service) checkTaskInputAuthority(ctx context.Context, b toolcontext.Com
 		return ErrDeliveryAsset
 	}
 	current, err := s.relay.ResolveTarget(ctx, scope(b, r.TargetID))
-	if err != nil || agenvo.TargetFingerprint(current) != r.TargetFingerprint {
+	if err != nil || computertarget.TargetFingerprint(current) != r.TargetFingerprint {
 		return ErrDeliveryAsset
 	}
 	for _, file := range p.Files {
@@ -154,7 +154,7 @@ func (s *Service) checkTaskInputAuthority(ctx context.Context, b toolcontext.Com
 // decoding them through interface{} would also round large numeric identities.
 func preparedInputDetails(raw dbstore.JSON, d Details) (dbstore.JSON, error) {
 	if d.Batch == nil || d.Batch.Progress.Inputs == nil {
-		return nil, agenvo.ErrUnknown
+		return nil, computertarget.ErrUnknown
 	}
 	updated, err := resumedBatchDetails(raw, d.Batch.Progress)
 	if err != nil {
@@ -162,13 +162,13 @@ func preparedInputDetails(raw dbstore.JSON, d Details) (dbstore.JSON, error) {
 	}
 	var details, batch, progress map[string]json.RawMessage
 	if json.Unmarshal(updated, &details) != nil || json.Unmarshal(details["batch"], &batch) != nil || json.Unmarshal(batch["progress"], &progress) != nil {
-		return nil, agenvo.ErrUnknown
+		return nil, computertarget.ErrUnknown
 	}
 	if d.Batch.Progress.History != nil {
 		var history map[string]json.RawMessage
 		if prior := progress["history"]; len(prior) != 0 && string(prior) != "null" {
 			if json.Unmarshal(prior, &history) != nil {
-				return nil, agenvo.ErrUnknown
+				return nil, computertarget.ErrUnknown
 			}
 		}
 		if history == nil {
@@ -177,7 +177,7 @@ func preparedInputDetails(raw dbstore.JSON, d Details) (dbstore.JSON, error) {
 		encoded, _ := json.Marshal(d.Batch.Progress.History)
 		var current map[string]json.RawMessage
 		if json.Unmarshal(encoded, &current) != nil {
-			return nil, agenvo.ErrUnknown
+			return nil, computertarget.ErrUnknown
 		}
 		for key, value := range current {
 			history[key] = value
@@ -202,7 +202,7 @@ type InputFileSystem interface {
 	ListDir(context.Context, string, bool, int32, int32, int32) (*bridge.ListDirResult, error)
 }
 
-type InputFileResolver func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (InputFileSystem, error)
+type InputFileResolver func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (InputFileSystem, error)
 
 type InputFileResult struct {
 	deliverymeta.Input
@@ -289,7 +289,7 @@ func (s *Service) openTaskInput(ctx context.Context, b toolcontext.ComputerBindi
 	return reader, file, nil
 }
 
-func (s *Service) inputReferences(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target agenvo.Target) ([]deliverymeta.Input, error) {
+func (s *Service) inputReferences(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target computertarget.Target) ([]deliverymeta.Input, error) {
 	if len(in.Inputs) == 0 {
 		return nil, nil
 	}
@@ -316,7 +316,7 @@ func (s *Service) inputReferences(ctx context.Context, b toolcontext.ComputerBin
 	return files, nil
 }
 
-func (s *Service) prepareInputs(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target agenvo.Target, r dbstore.ComputerOperationRecord, d *Details, save func(string) error) error {
+func (s *Service) prepareInputs(ctx context.Context, b toolcontext.ComputerBinding, in Submit, target computertarget.Target, r dbstore.ComputerOperationRecord, d *Details, save func(string) error) error {
 	if d.Batch == nil || d.Batch.Progress.Inputs == nil {
 		return nil
 	}
@@ -345,9 +345,9 @@ func (s *Service) prepareInputs(ctx context.Context, b toolcontext.ComputerBindi
 	return save("dispatching")
 }
 
-func (s *Service) materializeInputs(ctx context.Context, b toolcontext.ComputerBinding, target agenvo.Target, fingerprint string, plan deliverymeta.InputPlan, authorize func() error) error {
-	directory, err := agenvo.TaskInputDirectory(target, plan)
-	if err != nil || fingerprint != agenvo.TargetFingerprint(target) {
+func (s *Service) materializeInputs(ctx context.Context, b toolcontext.ComputerBinding, target computertarget.Target, fingerprint string, plan deliverymeta.InputPlan, authorize func() error) error {
+	directory, err := computertarget.TaskInputDirectory(target, plan)
+	if err != nil || fingerprint != computertarget.TargetFingerprint(target) {
 		return ErrDeliveryAsset
 	}
 	check := func(file deliverymeta.Input) error {
@@ -355,7 +355,7 @@ func (s *Service) materializeInputs(ctx context.Context, b toolcontext.ComputerB
 			return ErrDenied
 		}
 		current, err := s.relay.ResolveTarget(ctx, scope(b, plan.Task.TargetID))
-		if err != nil || agenvo.TargetFingerprint(current) != fingerprint || ctx.Err() != nil {
+		if err != nil || computertarget.TargetFingerprint(current) != fingerprint || ctx.Err() != nil {
 			return ErrDenied
 		}
 		reader, currentFile, err := s.openTaskInput(ctx, b, file.ContentHash)

@@ -56,7 +56,7 @@ func (s *stubMessageService) ListBeforeBySession(_ context.Context, sid string, 
 	return s.before(sid, before, int(limit)), nil
 }
 
-func (s *stubMessageService) ListBeforeMessageBySession(_ context.Context, sid string, beforeMessageID string, limit int32) ([]messagepkg.Message, error) {
+func (s *stubMessageService) ListBeforeMessageBySession(_ context.Context, sid, beforeMessageID string, limit int32) ([]messagepkg.Message, error) {
 	for _, m := range s.bySession[sid] {
 		if m.ID == beforeMessageID {
 			return s.before(sid, m.CreatedAt, int(limit)), nil

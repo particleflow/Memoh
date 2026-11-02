@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -28,7 +28,7 @@ type deliveryHTTPFixture struct {
 	dbstore.ComputerOperationStore
 	r       dbstore.ComputerOperationRecord
 	id      computertask.DeliveryIdentity
-	target  agenvo.Target
+	target  computertarget.Target
 	ref     computertask.DeliveryRequest
 	trusted bool
 	revoked bool
@@ -58,9 +58,9 @@ func deliveryHTTPServer(t *testing.T) (*deliveryHTTPFixture, *echo.Echo) {
 	f := &deliveryHTTPFixture{trusted: true}
 	b := toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture-run"}
 	f.id = computertask.DeliveryIdentity{Binding: b, OperationID: uuid.NewString(), DeviceID: "fixture-device", InstanceID: "fixture-instance", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
-	f.target = agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1"}}
-	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}})
-	f.r = dbstore.ComputerOperationRecord{ID: f.id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, TargetID: b.TargetID, RunID: b.RunID, TargetFingerprint: agenvo.TargetFingerprint(f.target), State: "submitted", Revision: 1, Details: details}
+	f.target = computertarget.Target{ConnectionID: uuid.NewString(), DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1"}}
+	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: computertarget.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}})
+	f.r = dbstore.ComputerOperationRecord{ID: f.id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, TargetID: b.TargetID, RunID: b.RunID, TargetFingerprint: computertarget.TargetFingerprint(f.target), State: "submitted", Revision: 1, Details: details}
 	assets := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
 	assets.SetRequirePersistence(true)
 	asset, err := assets.Ingest(t.Context(), media.IngestInput{BotID: b.BotID, Mime: "text/plain", Reader: strings.NewReader("fixture"), MaxBytes: 1024})
@@ -73,7 +73,9 @@ func deliveryHTTPServer(t *testing.T) (*deliveryHTTPFixture, *echo.Echo) {
 		if f.revoked {
 			return computertask.ErrDenied
 		}
-		if err := fn(computertask.DeliveryTransaction{Store: f, Authorize: func(context.Context, computertask.DeliveryIdentity) (agenvo.Target, error) { return f.target, nil }}); err != nil {
+		if err := fn(computertask.DeliveryTransaction{Store: f, Authorize: func(context.Context, computertask.DeliveryIdentity) (computertarget.Target, error) {
+			return f.target, nil
+		}}); err != nil {
 			return err
 		}
 		err := f.lost

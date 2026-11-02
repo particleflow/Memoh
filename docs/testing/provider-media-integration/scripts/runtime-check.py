@@ -44,7 +44,7 @@ peer = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
 threading.Thread(target=peer.serve_forever, daemon=True).start()
 original_operations = snapshot('computer_operations')
 registration = json.loads(Path('/tmp/computer-admission/private-registration.json').read_text())
-owner_path = '/users/me/runtimes/' + registration['runtime_id'] + '/agenvo-endpoint'
+owner_path = '/users/me/runtimes/' + registration['runtime_id'] + '/legacy-executor-endpoint'
 owner_before = call(owner_path)
 assert owner_before[0] == 200
 provider_id = None

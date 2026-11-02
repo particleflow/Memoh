@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -26,7 +26,7 @@ type nativeTaskFixture struct {
 	batch   *batchTransport
 	assets  *batchAssets
 	binding toolcontext.ComputerBinding
-	profile agenvo.NativeHerdrProfile
+	profile computertarget.NativeHerdrProfile
 	denied  bool
 }
 
@@ -40,9 +40,9 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 	f := &nativeTaskFixture{
 		t: t, store: &nativeTaskStore{fixtureStore: store}, batch: batch, assets: assets,
 		binding: toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "native-first-run"},
-		profile: agenvo.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}},
+		profile: computertarget.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}},
 	}
-	f.profile.Producer = agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
+	f.profile.Producer = computertarget.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
 	raw, err := json.Marshal(map[string]any{"herdr": f.profile})
 	if err != nil {
 		t.Fatal(err)
@@ -58,13 +58,13 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 }
 
 func (f *nativeTaskFixture) service() *Service {
-	relay := agenvo.NewService(f.store, f, f.invoke)
+	relay := computertarget.NewService(f.store, f, f.invoke)
 	return NewService(f.store, f.store, relay, f.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
 }
 
 // invoke checks the selected Runtime and forwards fixed native operations to
 // the synthetic CLI fixture. nativeherdr separately tests the Exec transport.
-func (f *nativeTaskFixture) invoke(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *nativeTaskFixture) invoke(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.t.Helper()
 	mount := f.store.mounts[f.binding.TargetID]
 	if scope.BotID != f.binding.BotID || scope.UserID != f.binding.UserID || scope.TargetID != f.binding.TargetID || target.NativeRuntimeID != mount.RuntimeID || target.ConnectionID != mount.RuntimeID || target.DeviceID != mount.RuntimeID || target.InstanceID != f.profile.InstanceID {
@@ -96,7 +96,7 @@ func TestNativeRuntimeTaskUnknownReopensSameOperationWithoutBusinessReplay(t *te
 	f.batch.lost, f.batch.missing = true, true
 	in := Submit{Kind: "herdr_pi_task", Task: "compute synthetic 42"}
 	first, err := service.submit(ctx, f.binding, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || first.State != "unknown" || first.ID == "" || f.batch.runs != 1 || first.ProcessStopped || first.PiResult != nil {
+	if !errors.Is(err, computertarget.ErrUnknown) || first.State != "unknown" || first.ID == "" || f.batch.runs != 1 || first.ProcessStopped || first.PiResult != nil {
 		t.Fatalf("lost native dispatch: %+v %v runs=%d", first, err, f.batch.runs)
 	}
 	before := f.store.records[first.ID]
@@ -228,12 +228,12 @@ func TestNativeRuntimeTaskRechecksSelectedPCPermissionAndFingerprint(t *testing.
 
 func TestNativeRuntimeArtifactRequiresProducerLocatorBeforeClaim(t *testing.T) {
 	f, service, ctx := newNativeTaskFixture(t)
-	f.profile.Producer = agenvo.ProducerLocator{}
+	f.profile.Producer = computertarget.ProducerLocator{}
 	mount := f.store.mounts[f.binding.TargetID]
 	mount.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": f.profile})
 	f.store.mounts[f.binding.TargetID] = mount
 	_, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "write result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
-	if !errors.Is(err, agenvo.ErrUnsupported) || len(f.store.records) != 0 || len(f.batch.calls) != 0 {
+	if !errors.Is(err, computertarget.ErrUnsupported) || len(f.store.records) != 0 || len(f.batch.calls) != 0 {
 		t.Fatal("missing producer location claimed or dispatched work", err)
 	}
 }
@@ -284,15 +284,15 @@ func TestNativeRuntimeDeliveryRequiresVerifiedDeviceAndOriginalRegistration(t *t
 		t.Run(mode, func(t *testing.T) {
 			f, service, _, ref := newDeliveryFixture(t)
 			runtimeID := uuid.NewString()
-			profile := agenvo.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}}
+			profile := computertarget.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}}
 			config, _ := json.Marshal(map[string]any{"herdr": profile})
 			var err error
-			f.target, err = agenvo.DecodeNativeTarget(runtimeID, config)
+			f.target, err = computertarget.DecodeNativeTarget(runtimeID, config)
 			if err != nil {
 				t.Fatal(err)
 			}
 			f.id.DeviceID, f.id.InstanceID = f.target.DeviceID, f.target.InstanceID
-			f.record.TargetFingerprint = agenvo.TargetFingerprint(f.target)
+			f.record.TargetFingerprint = computertarget.TargetFingerprint(f.target)
 			now := time.Now()
 			p := VerifiedTransfer{Identity: f.id, DeliveryID: "native-file", Reference: ref, Audience: TransferAudience, CredentialID: "synthetic-device-grant", IssuedAt: now.Add(-time.Minute), ExpiresAt: now.Add(time.Minute), Device: VerifiedTransferDevice{CredentialID: "synthetic-device-grant", ConnectionID: runtimeID, DeviceID: runtimeID, InstanceID: profile.InstanceID}}
 			if mode == "host_binding_only" {

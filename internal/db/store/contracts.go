@@ -68,8 +68,8 @@ type BotRemoteRuntimeBindingRecord struct {
 	UpdatedAt             time.Time
 }
 
-// AgenvoRuntimeStore reads existing Bot mounts for the shared native task ledger.
-type AgenvoRuntimeStore interface {
+// ComputerTargetStore reads existing Bot mounts for the shared native task ledger.
+type ComputerTargetStore interface {
 	GetMount(ctx context.Context, botID, targetID string) (BotRemoteRuntimeBindingRecord, error)
 }
 
@@ -257,7 +257,7 @@ type BotStore interface {
 	GetByID(ctx context.Context, botID ID) (Record, error)
 	ListByOwner(ctx context.Context, ownerUserID ID) ([]Record, error)
 	UpdateProfile(ctx context.Context, botID ID, input Patch) (Record, error)
-	UpdateOwner(ctx context.Context, botID ID, ownerUserID ID) (Record, error)
+	UpdateOwner(ctx context.Context, botID, ownerUserID ID) (Record, error)
 	UpdateStatus(ctx context.Context, botID ID, status string) (Record, error)
 	TouchActivity(ctx context.Context, botID ID) error
 	Delete(ctx context.Context, botID ID) error
@@ -305,11 +305,11 @@ type ProviderOAuthStore interface {
 }
 
 type UserProviderOAuthStore interface {
-	GetTokenByProvider(ctx context.Context, userID ID, providerID ID) (Record, error)
+	GetTokenByProvider(ctx context.Context, userID, providerID ID) (Record, error)
 	GetTokenByState(ctx context.Context, state string) (Record, error)
-	UpdateOAuthState(ctx context.Context, userID ID, providerID ID, state string) error
+	UpdateOAuthState(ctx context.Context, userID, providerID ID, state string) error
 	UpsertToken(ctx context.Context, input Input) (Record, error)
-	DeleteToken(ctx context.Context, userID ID, providerID ID) error
+	DeleteToken(ctx context.Context, userID, providerID ID) error
 }
 
 type ProviderCredentialsReader interface {
@@ -394,7 +394,7 @@ type ChannelIdentityRepository interface {
 
 type ChannelRouteRepository interface {
 	Create(ctx context.Context, input Input) (Record, error)
-	Find(ctx context.Context, botID ID, platform string, conversationID string, threadID string) (Record, error)
+	Find(ctx context.Context, botID ID, platform, conversationID, threadID string) (Record, error)
 	ResolveConversation(ctx context.Context, input Input) (Record, error)
 	GetByID(ctx context.Context, routeID ID) (Record, error)
 	List(ctx context.Context, filter Filter) ([]Record, error)

@@ -9,9 +9,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -90,7 +90,7 @@ func (h *SessionTaskHandler) Resume(c echo.Context) error {
 	if err := h.recheckNative(c, b); err != nil {
 		return err
 	}
-	if errors.Is(callErr, computertask.ErrDenied) || errors.Is(callErr, agenvo.ErrTargetChanged) || errors.Is(callErr, computertask.ErrApproval) || errors.Is(callErr, computertask.ErrInvalid) {
+	if errors.Is(callErr, computertask.ErrDenied) || errors.Is(callErr, computertarget.ErrTargetChanged) || errors.Is(callErr, computertask.ErrApproval) || errors.Is(callErr, computertask.ErrInvalid) {
 		return nativeTaskError(callErr)
 	}
 	if errors.Is(callErr, computertask.ErrConflict) {
@@ -106,9 +106,9 @@ func (h *SessionTaskHandler) Resume(c echo.Context) error {
 		if out.State == "submitted" && out.Phase == "batch_submitted" {
 			response.Outcome = "submitted"
 		}
-	case errors.Is(callErr, agenvo.ErrUnavailable), errors.Is(callErr, agenvo.ErrNativeUnavailable), errors.Is(callErr, agenvo.ErrAuthenticationUnavailable), errors.Is(callErr, computertask.ErrPreflightUnavailable):
+	case errors.Is(callErr, computertarget.ErrUnavailable), errors.Is(callErr, computertarget.ErrNativeUnavailable), errors.Is(callErr, computertarget.ErrAuthenticationUnavailable), errors.Is(callErr, computertask.ErrPreflightUnavailable):
 		response.Outcome = "unavailable"
-	case errors.Is(callErr, db.ErrComputerAdmissionPaused), errors.Is(callErr, db.ErrComputerAdmissionScope), errors.Is(callErr, agenvo.ErrUnsupported):
+	case errors.Is(callErr, db.ErrComputerAdmissionPaused), errors.Is(callErr, db.ErrComputerAdmissionScope), errors.Is(callErr, computertarget.ErrUnsupported):
 		response.Outcome = "blocked"
 	}
 	return c.JSON(http.StatusOK, response)

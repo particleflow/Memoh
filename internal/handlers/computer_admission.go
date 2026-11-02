@@ -9,9 +9,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 // ReadAdmission godoc
@@ -20,7 +20,7 @@ import (
 // @Tags user-runtimes
 // @Produce json
 // @Param id path string true "Existing owner runtime ID"
-// @Success 200 {object} agenvo.Admission
+// @Success 200 {object} computertarget.Admission
 // @Failure 403 {object} server.Problem
 // @Failure 409 {object} server.Problem
 // @Router /users/me/runtimes/{id}/admission [get].
@@ -46,8 +46,8 @@ func (h *UserRuntimeHandler) ReadAdmission(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Existing owner runtime ID"
-// @Param request body agenvo.ChangeAdmission true "Compare-and-swap admission request"
-// @Success 200 {object} agenvo.Admission
+// @Param request body computertarget.ChangeAdmission true "Compare-and-swap admission request"
+// @Success 200 {object} computertarget.Admission
 // @Failure 400 {object} server.Problem
 // @Failure 403 {object} server.Problem
 // @Failure 409 {object} server.Problem
@@ -58,7 +58,7 @@ func (h *UserRuntimeHandler) SetAdmission(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var in agenvo.ChangeAdmission
+	var in computertarget.ChangeAdmission
 	decoder := json.NewDecoder(http.MaxBytesReader(c.Response(), c.Request().Body, 4096))
 	decoder.DisallowUnknownFields()
 	if err = decoder.Decode(&in); err != nil {

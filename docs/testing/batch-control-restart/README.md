@@ -4,7 +4,7 @@ Base: `893eb55b50d46e5fd4d64ffb4a2769c4e6b6f75e`. This is a test/evidence checkp
 
 ## Reproduced boundary
 
-`TestBatchCompletedControlRestartRecoveryBoundary` exercises the real standard MCP client → computer-task service → fixed Agenvo relay path with the existing synthetic Herdr/Pi transport. The fixture has already exited with a valid receipt and a parsed `succeeded` small result; file bytes, task identifiers and their hashes remain identical. It then removes old scrollback and changes only the reported control terminal incarnation while preserving pane/workspace IDs. It also reconstructs the Memoh service from the original store.
+`TestBatchCompletedControlRestartRecoveryBoundary` exercises the real standard MCP client → computer-task service → fixed legacy executor relay path with the existing synthetic Herdr/Pi transport. The fixture has already exited with a valid receipt and a parsed `succeeded` small result; file bytes, task identifiers and their hashes remain identical. It then removes old scrollback and changes only the reported control terminal incarnation while preserving pane/workspace IDs. It also reconstructs the Memoh service from the original store.
 
 | Durable stage before peer restart | Observed result |
 | --- | --- |
@@ -26,9 +26,9 @@ go test -count=1 -v ./internal/computertask \
 
 ## Why the current receipt is insufficient
 
-- `internal/agenvo/pi_batch.go`: `BatchReceipt.Validate` binds the original attempt, invocation nonce, request hash, Pi session and execution workspace/pane/terminal. File names, sizes, digests, semantic result and history remain validated. These are invocation/result evidence, not permission to send text into a replacement shell.
-- `internal/agenvo/pi_batch_service.go`: `ObserveBatch` falls back from evicted execution-pane scrollback to `receipt.json`; `ReadBatchPage` reads the fixed result/log files through `readBatchFile`. That helper must call `pane.run` on the dedicated control shell. Its `pane.get` projection contains only pane ID, workspace ID and terminal ID. A different terminal is rejected before input.
-- `internal/agenvo/pi_batch_producer.go`: the optional producer wake-up uses the same control-terminal guard. Current declared artifact manifests are not a generic authenticated reader for the invocation's receipt or compact result.
+- `internal/computertarget/pi_batch.go`: `BatchReceipt.Validate` binds the original attempt, invocation nonce, request hash, Pi session and execution workspace/pane/terminal. File names, sizes, digests, semantic result and history remain validated. These are invocation/result evidence, not permission to send text into a replacement shell.
+- `internal/computertarget/pi_batch_service.go`: `ObserveBatch` falls back from evicted execution-pane scrollback to `receipt.json`; `ReadBatchPage` reads the fixed result/log files through `readBatchFile`. That helper must call `pane.run` on the dedicated control shell. Its `pane.get` projection contains only pane ID, workspace ID and terminal ID. A different terminal is rejected before input.
+- `internal/computertarget/pi_batch_producer.go`: the optional producer wake-up uses the same control-terminal guard. Current declared artifact manifests are not a generic authenticated reader for the invocation's receipt or compact result.
 - `internal/computertask/pi_batch.go`: a persisted small result or complete diagnostic refs can be returned from NAS state. Uncollected data still requires the original read channel; no configuration switch establishes a replacement channel's ownership.
 
 Do not replace `ControlTerminal` with whatever `pane.get` returns, rewrite the original receipt, infer authority from an idle prompt or disable terminal matching. A valid receipt can establish which bytes to accept **after** reading, but it cannot establish that typing the read command into an unrelated/reused terminal is safe. The current invocation nonce is not an exposed Herdr server generation.

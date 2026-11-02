@@ -188,14 +188,14 @@ ok  	github.com/felinics/memoh/internal/imagecapability	1.193s
 --- PASS: TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation (0.00s)
 === RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
 --- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build (0.00s)
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/codex
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/codex (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/claude-code
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/claude-code (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/grok-build
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/grok-build (0.00s)
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess (0.00s)
 === RUN   TestHostPreservesUpstreamWorkspaceBehavior
 --- PASS: TestHostPreservesUpstreamWorkspaceBehavior (0.00s)
 === RUN   TestImageCapabilityActualSpawnAndParentSend

@@ -13,7 +13,7 @@
     --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/revision (0.00s)
     --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/missing_state (0.00s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	0.006s
+ok  	github.com/felinics/memoh/internal/computertarget	0.006s
 === RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation
 === RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused
 === RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused/computer_task_submit

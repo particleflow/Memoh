@@ -13,7 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
-func historicalNativeFixture(t *testing.T) (*Service, *nativeMountFixture, *hostFixture, Record) {
+func historicalNativeFixture(t *testing.T) (*Service, *authorityFixture, *hostFixture, Record) {
 	t.Helper()
 	a, f, b, _ := nativeFixture(t)
 	b.SourceSessionID, b.SourceRootID, b.SourceSelection = "root", "root", "native"

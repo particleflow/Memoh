@@ -18,7 +18,7 @@ Raw session paths/IDs and historical terminal text stay private in the operation
 record. Public history exposes a session-observed flag and relation to the
 original binding; it never rebinds the original Agent/session.
 
-This does not establish end-to-end uint64 precision. Official Agenvo
+This does not establish end-to-end uint64 precision. Official legacy executor
 `apps/herdr/src/herdr.ts` parses CLI stdout with `JSON.parse(stdout)`, so a
 sequence above JavaScript's safe integer range can already be rounded before
 Go receives it. The decimal string avoids additional numeric rounding at this
@@ -31,7 +31,7 @@ Herdr `agent.prompt` returns AgentInfo, not a per-input execution/result ID.
 `done` sample followed by `working`, several accepted inputs, or a larger
 sequence number cannot establish whose output was read or whether the user's
 objective succeeded. A backward/gapped sequence is retained as observed rather
-than reordered or repaired. No Agenvo event stream is consumed: there is no
+than reordered or repaired. No legacy executor event stream is consumed: there is no
 resume cursor, loss recovery or reconstruction of unobserved events.
 
 The session metadata comes from `agent.get`; terminal text comes from a later
@@ -152,8 +152,8 @@ Actions run was repeated for this correction.
 
 Historical local cloud checks:
 
-- `go test -race ./internal/agenvo ./internal/computertask ./internal/config ./cmd/internal/core -count=1`: agenvo/config/core passed; the catalog description contract initially failed, then `go test -race ./internal/computertask -count=1` passed after preserving the existing follow-up-history wording.
-- `go vet ./internal/agenvo ./internal/computertask ./internal/config ./cmd/internal/core`: passed.
+- `go test -race ./internal/computertarget ./internal/computertask ./internal/config ./cmd/internal/core -count=1`: legacy-executor/config/core passed; the catalog description contract initially failed, then `go test -race ./internal/computertask -count=1` passed after preserving the existing follow-up-history wording.
+- `go vet ./internal/computertarget ./internal/computertask ./internal/config ./cmd/internal/core`: passed.
 - `bash scripts/test-computer-operations-postgres.sh`: the required PostgreSQL test passed without skips against the isolated local development database.
 - `bash scripts/check-agent-core-boundary.sh`: runtime/contextview match official baseline `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`.
 

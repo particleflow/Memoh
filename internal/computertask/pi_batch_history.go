@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -13,9 +13,9 @@ import (
 // PiContinuity separates historical checks from current availability. Query and
 // recover never assert the original history still exists merely from a receipt.
 type PiContinuity struct {
-	Status         string                     `json:"status"`
-	Reason         string                     `json:"reason"`
-	LastInvocation *agenvo.BatchHistoryReport `json:"last_invocation,omitempty"`
+	Status         string                             `json:"status"`
+	Reason         string                             `json:"reason"`
+	LastInvocation *computertarget.BatchHistoryReport `json:"last_invocation,omitempty"`
 }
 
 func batchContinuity(batch *BatchDetails) *PiContinuity {
@@ -36,11 +36,11 @@ func batchContinuity(batch *BatchDetails) *PiContinuity {
 
 // The caller owns the DB unsettled slot before reading, and persists the chosen
 // expectation before any workspace/tab/pane mutation. No failed read means new.
-func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.ComputerOperationRecord, p agenvo.BatchProgress) (*agenvo.BatchHistoryExpectation, error) {
-	h := &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "unconfirmed"}
+func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.ComputerOperationRecord, p computertarget.BatchProgress) (*computertarget.BatchHistoryExpectation, error) {
+	h := &computertarget.BatchHistoryExpectation{Version: computertarget.BatchHistoryVersion, Mode: "unconfirmed"}
 	reader, ok := s.store.(dbstore.ComputerPiHistoryStore)
 	if !ok {
-		return h, agenvo.ErrUnknown
+		return h, computertarget.ErrUnknown
 	}
 	prior, err := reader.PreviousComputerPiOperation(ctx, r, p.PiSessionID)
 	if errors.Is(err, db.ErrNotFound) {
@@ -48,7 +48,7 @@ func (s *Service) batchHistoryExpectation(ctx context.Context, r dbstore.Compute
 		return h, nil
 	}
 	if err != nil {
-		return h, agenvo.ErrUnknown
+		return h, computertarget.ErrUnknown
 	}
 	var old Details
 	if prior.BotID != r.BotID || prior.SessionID != r.SessionID || prior.UserID != r.UserID || prior.TargetID != r.TargetID || json.Unmarshal(prior.Details, &old) != nil || old.Batch == nil {

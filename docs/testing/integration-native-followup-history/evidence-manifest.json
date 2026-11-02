@@ -9,15 +9,15 @@
       "<cloud-go>"
     ],
     [
-      "/tmp/agenvo-go-mod",
+      "/tmp/legacy-executor-go-mod",
       "<go-module-cache>"
     ]
   ],
   "private_originals": "retained locally; no private server log/config/env/seed SQL exported",
   "files": [
     {
-      "file": "evidence/agenvo-account-pg.result.json",
-      "source_basename": "agenvo-account-pg.result.json",
+      "file": "evidence/legacy-executor-account-pg.result.json",
+      "source_basename": "legacy-executor-account-pg.result.json",
       "source_bytes": 312,
       "source_sha256": "ef35a5ad0725b9073848fa31d1c0588b1391b8eabaf0d1326da4700564a9dfaf",
       "published_bytes": 312,
@@ -25,8 +25,8 @@
       "processing": "byte-identical"
     },
     {
-      "file": "evidence/agenvo-account-pg.log",
-      "source_basename": "agenvo-account-pg.log",
+      "file": "evidence/legacy-executor-account-pg.log",
+      "source_basename": "legacy-executor-account-pg.log",
       "source_bytes": 1345,
       "source_sha256": "b973f43bafadf5dbdb6e16f98be4c0919d8c68b9a2ad7cc1c9da46a930c71e62",
       "published_bytes": 1345,
@@ -34,15 +34,15 @@
       "processing": "byte-identical"
     },
     {
-      "file": "evidence/agenvo-account-pg.output.txt",
-      "derived_from": "evidence/agenvo-account-pg.log",
+      "file": "evidence/legacy-executor-account-pg.output.txt",
+      "derived_from": "evidence/legacy-executor-account-pg.log",
       "processing": "complete Output-field projection plus non-JSON gate lines; exact path substitutions",
       "published_bytes": 165,
       "published_sha256": "db989f57480dc7f70aa30db3106bedbc76e475d2e5c3f66dbbc6185486df4b93"
     },
     {
-      "file": "evidence/agenvo.result.json",
-      "source_basename": "agenvo.result.json",
+      "file": "evidence/legacy-executor.result.json",
+      "source_basename": "legacy-executor.result.json",
       "source_bytes": 270,
       "source_sha256": "d76f045e0dd1543a938c0cc283e1f94d308048496c3eb799192483684b5d9ee8",
       "published_bytes": 270,
@@ -50,8 +50,8 @@
       "processing": "byte-identical"
     },
     {
-      "file": "evidence/agenvo.log",
-      "source_basename": "agenvo.log",
+      "file": "evidence/legacy-executor.log",
+      "source_basename": "legacy-executor.log",
       "source_bytes": 174429,
       "source_sha256": "f6b69d8c95bfb7518dcafdd7ff9a58b76193e288e377d785a5891954d62eecb3",
       "published_bytes": 174429,
@@ -59,8 +59,8 @@
       "processing": "byte-identical"
     },
     {
-      "file": "evidence/agenvo.output.txt",
-      "derived_from": "evidence/agenvo.log",
+      "file": "evidence/legacy-executor.output.txt",
+      "derived_from": "evidence/legacy-executor.log",
       "processing": "complete Output-field projection plus non-JSON gate lines; exact path substitutions",
       "published_bytes": 27385,
       "published_sha256": "0452aada0bf4ccf9feead0a02a1bf3818dba5215c15032dd41cfe9420ab3dd49"

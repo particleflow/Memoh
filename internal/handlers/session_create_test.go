@@ -396,7 +396,7 @@ func TestCreateSessionToleratesFailedRuntimeBind(t *testing.T) {
 	}
 }
 
-func callCreateSession(handler *SessionHandler, botID string, body string) error {
+func callCreateSession(handler *SessionHandler, botID, body string) error {
 	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions", bytes.NewBufferString(body))
 	return callCreateSessionRequest(handler, botID, req)
 }

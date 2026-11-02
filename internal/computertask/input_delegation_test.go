@@ -12,9 +12,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -166,7 +166,7 @@ func TestTaskInputDelegationRejectsRevokedUnlinkedAndCorruptOriginal(t *testing.
 				authority.assets.corrupt = true
 			case "target-changed":
 				prior := f.service.inputFiles
-				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target agenvo.Target) (InputFileSystem, error) {
+				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target computertarget.Target) (InputFileSystem, error) {
 					files, err := prior(ctx, b, id, target)
 					f.base.denied = true
 					return files, err

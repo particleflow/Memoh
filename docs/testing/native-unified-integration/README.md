@@ -33,7 +33,7 @@ The first concurrent lint and Web build both ended with exit 137; the environmen
 
 | Executed check | Actual result |
 | --- | --- |
-| `go test -p=1 -count=1 -timeout=180s` for nativeherdr, agenvo, computertask, userruntime, workspace/bridge, workspace, storage/providers/containerfs, schedule | Exit 0, all eight packages; `combined-go.log` |
+| `go test -p=1 -count=1 -timeout=180s` for nativeherdr, legacy-executor, computertask, userruntime, workspace/bridge, workspace, storage/providers/containerfs, schedule | Exit 0, all eight packages; `combined-go.log` |
 | Selected `TestTriggerSchedule*`, `TestComputer*`, `TestHost*` in application/core | Exit 0; `assembly-schedule.log` contains the exact selected cases, not a full-suite claim |
 | New handler account boundary | Initial red assertion retained; six green cases in `native-account-green.log`; final full `go test ./internal/handlers` exit 0, 4.560s |
 | Isolated PG migration/admission/transfer/history | Exit 0, 15 top-level and eight subtest PASS, zero SKIP, 41.184s; exact selection in `postgres.log` |

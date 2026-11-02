@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -12,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -91,7 +90,7 @@ type batchResumeFixture struct {
 	lostMethod   string
 	tabCreated   bool
 	op           dbstore.ComputerOperationRecord
-	progress     agenvo.BatchProgress
+	progress     computertarget.BatchProgress
 	input        Submit
 	policyDenied atomic.Bool
 }
@@ -106,7 +105,7 @@ func newBatchResumeFixtureWithInput(t *testing.T, input Submit) (*batchResumeFix
 	base, _, ctx := newNativeTaskFixture(t)
 	f := &batchResumeFixture{t: t, base: base, store: &resumeOperationStore{nativeTaskStore: base.store}, calls: make(map[string]int), input: input}
 	first, err := f.service().submit(ctx, base.binding, f.input)
-	if !errors.Is(err, agenvo.ErrUnknown) || first.State != "unknown" || first.ID == "" {
+	if !errors.Is(err, computertarget.ErrUnknown) || first.State != "unknown" || first.ID == "" {
 		t.Fatalf("original lost create receipt: state=%s err=%v", first.State, err)
 	}
 	f.op, f.progress = f.record(first.ID)
@@ -117,7 +116,7 @@ func newBatchResumeFixtureWithInput(t *testing.T, input Submit) (*batchResumeFix
 }
 
 func (f *batchResumeFixture) service() *Service {
-	relay := agenvo.NewService(f.base.store, f.base, f.invoke)
+	relay := computertarget.NewService(f.base.store, f.base, f.invoke)
 	return NewService(f.store, f.base.store, relay, f.base.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error {
 		if f.policyDenied.Load() {
 			return ErrDenied
@@ -126,7 +125,7 @@ func (f *batchResumeFixture) service() *Service {
 	})
 }
 
-func (f *batchResumeFixture) record(id string) (dbstore.ComputerOperationRecord, agenvo.BatchProgress) {
+func (f *batchResumeFixture) record(id string) (dbstore.ComputerOperationRecord, computertarget.BatchProgress) {
 	f.t.Helper()
 	f.base.store.mu.Lock()
 	r := f.base.store.records[id]
@@ -156,13 +155,13 @@ func (f *batchResumeFixture) restart() *Service {
 	return f.service()
 }
 
-func (f *batchResumeFixture) invoke(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *batchResumeFixture) invoke(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.calls[method]++
 	if method == "workspace.create" {
 		f.label, _ = params["label"].(string)
-		return agenvo.Receipt{}, agenvo.ErrUnknown // The workspace exists; only its reply was lost.
+		return computertarget.Receipt{}, computertarget.ErrUnknown // The workspace exists; only its reply was lost.
 	}
 	count := 1
 	if f.tabCreated {
@@ -224,18 +223,18 @@ func (f *batchResumeFixture) invoke(ctx context.Context, scope agenvo.Scope, tar
 		// original persisted attempt/session and counts actual Pi submissions.
 		r, err := f.base.invoke(ctx, scope, target, method, params)
 		if f.lostMethod == method {
-			return agenvo.Receipt{}, agenvo.ErrUnknown
+			return computertarget.Receipt{}, computertarget.ErrUnknown
 		}
 		return r, err
 	default:
 		f.t.Errorf("unexpected resume method %s", method)
-		return agenvo.Receipt{}, agenvo.ErrUnsupported
+		return computertarget.Receipt{}, computertarget.ErrUnsupported
 	}
 	if f.lostMethod == method {
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}
 	raw, _ := json.Marshal(map[string]any{"session": target.Session, "result": body})
-	return agenvo.Receipt{Execution: "accepted", Result: raw}, nil
+	return computertarget.Receipt{Execution: "accepted", Result: raw}, nil
 }
 
 func (f *batchResumeFixture) resumeInput() Submit {
@@ -419,24 +418,6 @@ func TestNativeBatchExplicitResumeHonorsAdmission(t *testing.T) {
 		t.Error("paused admission allowed new native work", err)
 	}
 	f.assertIdentityAndCounts(t, 0, 0)
-}
-
-func TestNativeBatchExplicitResumeDoesNotApplyToLegacyAgenvo(t *testing.T) {
-	source, store, transport, _ := setupBatch(t)
-	row := store.mounts["pc-a"]
-	target := fixtureTarget(row)
-	target.NativeRuntimeID, target.HerdrCLI, target.HerdrConfigRoot = "", "", ""
-	row.RuntimeProvider = "agenvo"
-	row.RuntimeProviderConfig, _ = json.Marshal(target)
-	store.mounts["pc-a"] = row
-	before := observationSnapshot(t, store)
-	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "legacy-resume"}
-	if _, err := source.service.submit(t.Context(), binding, Submit{Kind: "herdr_pi_task", Task: "retired continuation", ResumeOperationID: "historical-operation"}); err == nil {
-		t.Fatal("legacy registration resumed")
-	}
-	if len(transport.calls) != 0 || !slices.Equal(before, observationSnapshot(t, store)) {
-		t.Fatal("legacy resume changed history or dispatched")
-	}
 }
 
 func TestNativeBatchExplicitResumeRechecksNewTabBeforeInput(t *testing.T) {

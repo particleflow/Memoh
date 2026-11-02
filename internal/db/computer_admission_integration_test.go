@@ -56,9 +56,9 @@ func (f admissionFixture) exec(t *testing.T, query string, args ...any) {
 
 func (f admissionFixture) registration(t *testing.T, connection, session string) (string, string, dbstore.JSON) {
 	t.Helper()
-	raw, _ := json.Marshal(map[string]string{"connection_id": connection, "device_id": "synthetic-device", "instance_id": "synthetic-herdr", "session": session})
+	raw, _ := json.Marshal(map[string]any{"herdr": map[string]string{"instance_id": "synthetic-herdr", "session": session}})
 	runtime := uuid.NewString()
-	f.exec(t, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'agenvo',$5,now(),NULL)", runtime, f.owner, uuid.NewString(), uuid.NewString(), raw)
+	f.exec(t, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'memoh',$5,now(),NULL)", runtime, f.owner, uuid.NewString(), uuid.NewString(), raw)
 	mount := uuid.NewString()
 	f.exec(t, "INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)", mount, f.bot, runtime)
 	return runtime, mount, raw
@@ -79,7 +79,6 @@ func (f admissionFixture) change(t *testing.T, request string, rev int64, paused
 
 func TestComputerAdmissionDurabilityCoverageAndReservations(t *testing.T) {
 	f := newAdmissionFixture(t)
-	_, alias, _ := f.registration(t, f.connection, "different-session-and-profile")
 	input := f.operation(f.mount)
 	op, won, err := f.store.ClaimComputerOperation(t.Context(), input)
 	if err != nil || !won {
@@ -94,10 +93,10 @@ func TestComputerAdmissionDurabilityCoverageAndReservations(t *testing.T) {
 		t.Fatal("lost acknowledgement created another pause", got)
 	}
 	restarted := postgresstore.NewWithQueries(dbsqlc.New(f.conn))
-	if got, err := restarted.ReadComputerAdmission(t.Context(), f.owner, f.connection, "synthetic-device", "synthetic-herdr"); err != nil || got != gate {
+	if got, err := restarted.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, "synthetic-herdr"); err != nil || got != gate {
 		t.Fatal("pause lost on restart", got, err)
 	}
-	for _, target := range []string{f.mount, alias} {
+	for _, target := range []string{f.mount} {
 		if _, won, err := f.store.ClaimComputerOperation(t.Context(), f.operation(target)); !errors.Is(err, memohdb.ErrComputerAdmissionPaused) || won {
 			t.Fatal("new input admitted", won, err)
 		}
@@ -133,14 +132,6 @@ func TestComputerAdmissionDurabilityCoverageAndReservations(t *testing.T) {
 	// A fresh pause may be taken only with a new intent and the current revision.
 	next := uuid.NewString()
 	f.change(t, next, gate.Revision, true)
-	_, alias, _ = f.registration(t, uuid.NewString(), "ambiguous-alias")
-	if _, won, err = f.store.ClaimComputerOperation(t.Context(), f.operation(alias)); won || !errors.Is(err, memohdb.ErrComputerAdmissionPaused) {
-		t.Fatal("new alias bypassed pause", won, err)
-	}
-	if _, err = f.store.ChangeComputerAdmission(t.Context(), f.owner, f.runtime, f.config, next, 3, false); !errors.Is(err, memohdb.ErrComputerAdmissionScope) {
-		t.Fatal("ambiguous alias attested", err)
-	}
-	f.exec(t, "UPDATE user_runtimes SET revoked_at=now() WHERE id=(SELECT runtime_id FROM bot_remote_runtime_bindings WHERE id=$1)", alias)
 	f.change(t, next, 3, false)
 }
 
@@ -313,7 +304,7 @@ func TestComputerAdmissionRLSAndUnknownMapping(t *testing.T) {
 	if _, err := c.Exec(t.Context(), "SELECT set_config('memoh.team_id',$1,false)", uuid.NewString()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := store.ReadComputerAdmission(t.Context(), f.owner, f.connection, "synthetic-device", "synthetic-herdr"); !errors.Is(err, memohdb.ErrNotFound) {
+	if _, err := store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, "synthetic-herdr"); !errors.Is(err, memohdb.ErrNotFound) {
 		t.Fatal("foreign team read pause", err)
 	}
 	if _, err := store.ChangeComputerAdmission(t.Context(), f.owner, f.runtime, f.config, request, 1, false); !errors.Is(err, memohdb.ErrComputerAdmissionScope) {

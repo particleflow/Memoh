@@ -24,13 +24,11 @@ export function workspaceTargetStatusLabel(target: WorkspaceWorkspaceTarget, t: 
 }
 
 export function workspaceTargetAvailable(target: WorkspaceWorkspaceTarget): boolean {
-  if (target.provider === 'agenvo') return false // Historical snapshots never authorize a new action.
   return target.kind === 'native'
     || (workspaceTargetStatus(target) === 'online' && target.online !== false)
 }
 
-// A failed Agenvo probe does not establish that the device is offline.
+// A failed probe does not establish that the device is offline.
 export function runtimeAvailability(runtime: Pick<UserruntimeRuntime, 'provider' | 'online' | 'availability'>): string {
-  if (runtime.provider === 'agenvo') return runtime.availability || (runtime.online ? 'online' : 'connection_unavailable')
   return runtime.online ? 'online' : 'offline'
 }

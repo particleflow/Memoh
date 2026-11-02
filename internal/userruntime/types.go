@@ -2,8 +2,6 @@ package userruntime
 
 import (
 	"time"
-
-	"github.com/felinics/memoh/internal/agenvo"
 )
 
 // Runtime is one registered client. Machine details only exist while its
@@ -38,9 +36,8 @@ type NativeHerdrIdentity struct {
 }
 
 type CreateRuntimeRequest struct {
-	Name     string         `json:"name"`
-	Provider string         `json:"provider,omitempty" enums:"memoh"`
-	Agenvo   *agenvo.Target `json:"agenvo,omitempty" swaggerignore:"true"`
+	Name     string `json:"name"`
+	Provider string `json:"provider,omitempty" enums:"memoh"`
 }
 
 type HandshakeInfo struct {

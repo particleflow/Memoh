@@ -500,7 +500,7 @@ func (m *Manager) safeStopTask(ctx context.Context, containerID string) error {
 	return nil
 }
 
-func (m *Manager) ensureDBRecords(ctx context.Context, botID, containerID, _ string, imageRef string) (pgtype.UUID, error) {
+func (m *Manager) ensureDBRecords(ctx context.Context, botID, containerID, _, imageRef string) (pgtype.UUID, error) {
 	botUUID, err := db.ParseUUID(botID)
 	if err != nil {
 		return pgtype.UUID{}, err

@@ -15,7 +15,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -32,7 +32,7 @@ type evidenceTransport struct {
 	afterRead      func()
 }
 
-func (f *evidenceTransport) call(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *evidenceTransport) call(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	raw, err := f.base.call(ctx, scope, target, method, params)
 	if err != nil {
 		return raw, err
@@ -52,7 +52,7 @@ func (f *evidenceTransport) call(ctx context.Context, scope agenvo.Scope, target
 			f.afterRead()
 		}
 		if f.readFailure {
-			return agenvo.Receipt{}, errors.New("PRIVATE lost read response")
+			return computertarget.Receipt{}, errors.New("PRIVATE lost read response")
 		}
 		return envelope(map[string]any{"session": "synthetic", "output": f.output}), nil
 	}
@@ -102,7 +102,7 @@ func evidenceFixture(t *testing.T) (*Source, *fixtureStore, *evidenceTransport, 
 	seq := uint64(5)
 	f := &evidenceTransport{base: base, status: "done", output: "old round output", seq: &seq}
 	a := &evidenceAssets{data: map[string]string{}}
-	source.service.relay = agenvo.NewService(store, permissionChecker{}, f.call)
+	source.service.relay = computertarget.NewService(store, permissionChecker{}, f.call)
 	source.service.assets = a
 	return source, store, f, a, initial
 }
@@ -146,7 +146,7 @@ func TestNativeEvidenceRetainsSamplesExportsAndRestart(t *testing.T) {
 	row := store.records[initial.ID]
 	var fields map[string]json.RawMessage
 	_ = json.Unmarshal(row.Details, &fields)
-	fields["followups"], _ = json.Marshal([]FollowupRecord{{RequestID: "historical-input-a", Progress: agenvo.AgentFollowupProgress{State: "accepted"}}, {RequestID: "historical-input-b", Progress: agenvo.AgentFollowupProgress{State: "accepted"}}})
+	fields["followups"], _ = json.Marshal([]FollowupRecord{{RequestID: "historical-input-a", Progress: computertarget.AgentFollowupProgress{State: "accepted"}}, {RequestID: "historical-input-b", Progress: computertarget.AgentFollowupProgress{State: "accepted"}}})
 	row.Details, _ = json.Marshal(fields)
 	store.records[row.ID] = row
 
@@ -179,7 +179,7 @@ func TestNativeEvidenceRetainsSamplesExportsAndRestart(t *testing.T) {
 	if err := json.Unmarshal(before, &restored.records); err != nil {
 		t.Fatal(err)
 	}
-	restarted := NewSource(NewService(restored, restored, agenvo.NewService(restored, permissionChecker{}, f.call), a, source.service.authorize))
+	restarted := NewSource(NewService(restored, restored, computertarget.NewService(restored, permissionChecker{}, f.call), a, source.service.authorize))
 	client = standardClient(t, restarted, "pc-a", false)
 	calls := slices.Clone(f.base.methods)
 	saved := parseResult(t, invoke(t, client, "computer_task_get", args, false))
@@ -209,7 +209,7 @@ func TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples(t *testin
 	// infer missing rounds, repair history, or assign any input's result.
 	// This synthetic Go transport supplies the integer directly. The decimal
 	// string preserves the received value without additional rounding here;
-	// it cannot recover rounding by Agenvo's upstream JSON.parse(stdout), nor
+	// it cannot recover rounding by the upstream JSON.parse(stdout), nor
 	// establish end-to-end uint64 precision above JavaScript's safe range.
 	for _, seq := range []uint64{5, 3, 9007199254740993} {
 		f.seq = &seq
@@ -297,7 +297,7 @@ func TestNativeEvidenceLegacyHashIsNotRelabeled(t *testing.T) {
 	var d Details
 	_ = json.Unmarshal(r.Details, &d)
 	d.Output = "surviving latest view"
-	d.Observation = &agenvo.AgentObservation{Output: d.Output, Status: "done"}
+	d.Observation = &computertarget.AgentObservation{Output: d.Output, Status: "done"}
 	d.ArtifactHash = strings.Repeat("a", 64)
 	r.Details, _ = json.Marshal(d)
 	store.records[r.ID] = r
@@ -473,7 +473,7 @@ func TestNativeEvidenceCompactPagesWithAllInputReceipts(t *testing.T) {
 	var d Details
 	_ = json.Unmarshal(r.Details, &d)
 	for range historicalInputReceiptLimit {
-		d.Followups = append(d.Followups, FollowupRecord{RequestID: uuid.NewString(), Progress: agenvo.AgentFollowupProgress{State: "accepted"}})
+		d.Followups = append(d.Followups, FollowupRecord{RequestID: uuid.NewString(), Progress: computertarget.AgentFollowupProgress{State: "accepted"}})
 	}
 	r.Details, _ = json.Marshal(d)
 	store.records[r.ID] = r

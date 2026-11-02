@@ -362,7 +362,7 @@ func (h *MessageHandler) LocateMessage(c echo.Context) error {
 	})
 }
 
-func parseBoundedInt32(raw string, fallback int32, minValue int32, maxValue int32) int32 {
+func parseBoundedInt32(raw string, fallback, minValue, maxValue int32) int32 {
 	value := fallback
 	if s := strings.TrimSpace(raw); s != "" {
 		if n, err := strconv.ParseInt(s, 10, 32); err == nil {

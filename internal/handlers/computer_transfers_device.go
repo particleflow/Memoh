@@ -19,7 +19,7 @@ var ErrTransferVerificationUnavailable = errors.New("device verification unavail
 
 // DeviceTransferVerifier authenticates a reusable device credential, independent
 // of any file or operation. The application uses the existing runtime registry.
-// ConnectionID belongs to the existing authorized Agenvo connection; its token
+// ConnectionID belongs to the existing authorized connection; its token
 // is NOT accepted as a Memoh credential. Revalidate must check current revocation.
 type DeviceTransferVerifier interface {
 	VerifyDevice(context.Context, string) (computertask.VerifiedTransferDevice, error)

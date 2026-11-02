@@ -1,6 +1,6 @@
 # Pi JSON invocation receipts (candidate, not deployed)
 
-> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+> Current routing: legacy legacy executor enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. legacy executor wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/computertarget` ledger remains in use by native Herdr/Pi. See [retirement audit](legacy-executor-retirement-audit.md).
 
 This independent change builds on the computer task MCP service. It does not
 modify Pi, Memoh's Agent runtime or context composition, install a hook, or add
@@ -64,7 +64,7 @@ limited to Bot grants. The same checks apply to result, cancellation and refs.
    exposing content refs. Persist only refs, offsets and a bounded text preview,
    never the complete JSONL in conversation/operation context. One observation
    imports at most 16 pages within its time budget; another observation resumes.
-   Agenvo 0.2.0 [pane.read schema](https://github.com/Xuanwo/agenvo/blob/v0.2.0/apps/herdr/src/herdr.ts#L67-L73)
+   legacy executor 0.2.0 [pane.read schema](https://github.com/Xuanwo/legacy-executor/blob/v0.2.0/apps/herdr/src/herdr.ts#L67-L73)
    permits only 1–500 rendered rows; `recent-unwrapped` does not change that
    unit. Start with eight rows and wait for this response's exact nonce end
    marker before expanding, so delayed responses do not expand into unrelated
@@ -137,7 +137,7 @@ The contract is based on official Pi **1.2.0**
 [CLI integration](https://github.com/earendil-works/pi/blob/v1.2.0/packages/coding-agent/docs/cli-integration.md),
 [print-mode lifecycle](https://github.com/earendil-works/pi/blob/v1.2.0/packages/coding-agent/src/modes/print-mode.ts),
 and [exact session selection](https://github.com/earendil-works/pi/blob/v1.2.0/packages/coding-agent/src/main.ts#L295-L418).
-Herdr operations retain the existing Agenvo 0.2.0 / Herdr 0.9.5 mapping.
+Herdr operations retain the existing legacy executor 0.2.0 / Herdr 0.9.5 mapping.
 
 Cloud tests use synthetic standard MCP clients, provider events and relay
 responses; the Bash envelope executes against synthetic local utilities.

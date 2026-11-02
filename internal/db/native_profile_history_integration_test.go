@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
@@ -29,16 +29,16 @@ func (p *profileHistoryPermission) HasBotPermission(_ context.Context, bot, user
 
 func TestNativeProfileCutoverPersistedHistoryScope(t *testing.T) {
 	f := newNativeHerdrFixture(t)
-	profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\old`}}
+	profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\old`}}
 	old, _ := json.Marshal(map[string]any{"herdr": profile})
 	f.exec(t, `UPDATE user_runtimes SET provider_config=$2 WHERE id=$1`, f.runtime, old)
 	f.config = old
-	target, err := agenvo.DecodeNativeTarget(f.runtime, old)
+	target, err := computertarget.DecodeNativeTarget(f.runtime, old)
 	if err != nil {
 		t.Fatal(err)
 	}
 	input := f.operation(f.mount)
-	input.TargetFingerprint = agenvo.TargetFingerprint(target)
+	input.TargetFingerprint = computertarget.TargetFingerprint(target)
 	input.Details, _ = json.Marshal(computertask.Details{Kind: "herdr_pi_task", TargetSnapshot: &target, Phase: "batch_submitted", NativeEvidence: &computertask.NativeEvidenceLedger{Version: 1, Observations: []computertask.NativeObservationRecord{{ID: "saved-observation", Origin: "native_read"}}}})
 	op, won, err := f.store.ClaimComputerOperation(t.Context(), input)
 	if err != nil || !won {
@@ -52,9 +52,9 @@ func TestNativeProfileCutoverPersistedHistoryScope(t *testing.T) {
 	before, _ := json.Marshal(op)
 	permission := &profileHistoryPermission{bot: f.bot, user: f.owner}
 	calls := 0
-	relay := agenvo.NewService(f.store, permission, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	relay := computertarget.NewService(f.store, permission, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		calls++
-		return agenvo.Receipt{}, errors.New("unexpected native call")
+		return computertarget.Receipt{}, errors.New("unexpected native call")
 	})
 	source := computertask.NewSource(computertask.NewService(f.store, f.store, relay, nil, nil))
 	binding := toolcontext.ComputerBinding{BotID: f.bot, UserID: f.owner, SessionID: f.session, TargetID: f.mount, RunID: op.RunID}
@@ -135,7 +135,7 @@ func TestNativeProfileCutoverPersistedHistoryScope(t *testing.T) {
 		t.Fatal(err)
 	}
 	fs := postgresstore.NewWithQueries(dbsqlc.New(foreign))
-	foreignSource := computertask.NewSource(computertask.NewService(fs, fs, agenvo.NewService(fs, permission, nil), nil, nil))
+	foreignSource := computertask.NewSource(computertask.NewService(fs, fs, computertarget.NewService(fs, permission, nil), nil, nil))
 	if _, err = foreignSource.CallTool(ctx, session, "computer_task_get", args); err == nil {
 		t.Fatal("foreign team read")
 	}

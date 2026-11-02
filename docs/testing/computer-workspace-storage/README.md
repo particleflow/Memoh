@@ -75,7 +75,7 @@ device execution is started by opening or saving this settings page.
 Saving NAS storage deliberately does **not** change Herdr `work_dir`, Runtime
 `sourceRoot`, an old session, receipt, queue identity or operation fingerprint.
 The existing validator accepts UNC roots but requires each requested directory
-to stay inside the configured target root (`internal/agenvo/workdir.go`). A NAS
+to stay inside the configured target root (`internal/computertarget/workdir.go`). A NAS
 selection is therefore not proof that an existing local-root Pi task now runs
 there. Fresh setup/profile configuration must consume the returned UNC reference
 through its existing supported configuration path. Old active/unknown tasks

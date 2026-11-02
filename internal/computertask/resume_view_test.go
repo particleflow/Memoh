@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -95,7 +95,7 @@ func TestResumeNativeHostDisconnectedPreservesOriginalOperation(t *testing.T) {
 	}
 	before, _ := json.Marshal(f.base.store.records)
 	out, err := NewSource(service).ResumeNative(ctx, b, f.op.ID, f.input)
-	if !errors.Is(err, agenvo.ErrUnavailable) || out.ID != f.op.ID || out.State != "unknown" {
+	if !errors.Is(err, computertarget.ErrUnavailable) || out.ID != f.op.ID || out.State != "unknown" {
 		t.Fatalf("disconnected state=%s err=%v", out.State, err)
 	}
 	after, _ := json.Marshal(f.base.store.records)
@@ -114,10 +114,10 @@ func TestResumeNativeHostUnknownNeverReplaysPrompt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := NewSource(f.service()).ResumeNative(ctx, b, f.op.ID, f.input); !errors.Is(err, agenvo.ErrUnknown) {
+	if _, err := NewSource(f.service()).ResumeNative(ctx, b, f.op.ID, f.input); !errors.Is(err, computertarget.ErrUnknown) {
 		t.Fatalf("lost prompt receipt=%v", err)
 	}
-	if _, err := NewSource(f.restart()).ResumeNative(ctx, b, f.op.ID, f.input); !errors.Is(err, agenvo.ErrUnknown) {
+	if _, err := NewSource(f.restart()).ResumeNative(ctx, b, f.op.ID, f.input); !errors.Is(err, computertarget.ErrUnknown) {
 		t.Fatalf("uncertain prompt fence=%v", err)
 	}
 	f.assertIdentityAndCounts(t, 1, 1)

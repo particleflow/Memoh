@@ -3,7 +3,7 @@ package computertask
 import (
 	"strconv"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
@@ -11,27 +11,27 @@ import (
 // operation owner. It neither pauses admission nor authorizes a host stop.
 // Revision is a string so standard tool clients do not round large CAS values.
 type OperationReconciliation struct {
-	Revision          string               `json:"revision"`
-	TargetFingerprint string               `json:"target_fingerprint"`
-	Generation        string               `json:"generation,omitempty"`
-	RequestHash       string               `json:"request_hash,omitempty"`
-	TerminalID        string               `json:"terminal_id,omitempty"`
-	ControlPaneID     string               `json:"control_pane_id,omitempty"`
-	ControlTerminalID string               `json:"control_terminal_id,omitempty"`
-	ReceiptState      string               `json:"receipt_state"`
-	Receipt           *agenvo.BatchReceipt `json:"receipt,omitempty"`
-	Files             []RecoveryFile       `json:"files"`
+	Revision          string                       `json:"revision"`
+	TargetFingerprint string                       `json:"target_fingerprint"`
+	Generation        string                       `json:"generation,omitempty"`
+	RequestHash       string                       `json:"request_hash,omitempty"`
+	TerminalID        string                       `json:"terminal_id,omitempty"`
+	ControlPaneID     string                       `json:"control_pane_id,omitempty"`
+	ControlTerminalID string                       `json:"control_terminal_id,omitempty"`
+	ReceiptState      string                       `json:"receipt_state"`
+	Receipt           *computertarget.BatchReceipt `json:"receipt,omitempty"`
+	Files             []RecoveryFile               `json:"files"`
 }
 
 // RecoveryFile describes a previously validated collection checkpoint, not
 // present media availability or delivery of declared business artifacts.
 // Offset is confirmed bytes, never permission to discard the original file.
 type RecoveryFile struct {
-	Meta                agenvo.BatchFile `json:"meta"`
-	Offset              int64            `json:"confirmed_offset"`
-	State               string           `json:"state"`
-	RecordedContentHash string           `json:"recorded_content_hash,omitempty"`
-	CurrentAvailability string           `json:"current_availability"`
+	Meta                computertarget.BatchFile `json:"meta"`
+	Offset              int64                    `json:"confirmed_offset"`
+	State               string                   `json:"state"`
+	RecordedContentHash string                   `json:"recorded_content_hash,omitempty"`
+	CurrentAvailability string                   `json:"current_availability"`
 }
 
 func operationReconciliation(r dbstore.ComputerOperationRecord, d Details) *OperationReconciliation {
@@ -56,7 +56,7 @@ func operationReconciliation(r dbstore.ComputerOperationRecord, d Details) *Oper
 		return out
 	}
 	out.ReceiptState, out.Receipt = "validated", b.Receipt
-	for _, meta := range []agenvo.BatchFile{b.Receipt.Stdout, b.Receipt.Stderr} {
+	for _, meta := range []computertarget.BatchFile{b.Receipt.Stdout, b.Receipt.Stderr} {
 		file := RecoveryFile{Meta: meta, State: "not_collected", CurrentAvailability: "not_rechecked"}
 		if meta.Size == 0 {
 			file.State = "empty" // No media object is created for empty files.

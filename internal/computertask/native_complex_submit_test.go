@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/nativeherdr"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -17,11 +17,11 @@ func TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown(t *testing.T) {
 	f, service, ctx := newNativeTaskFixture(t)
 	probeOnly := errors.New("synthetic Runtime preflight reached")
 	probes := 0
-	cli := nativeherdr.NewExecutor(func(context.Context, agenvo.Scope, agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
+	cli := nativeherdr.NewExecutor(func(context.Context, computertarget.Scope, computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		probes++
 		return nil, bridge.WorkspaceInfo{}, probeOnly
 	})
-	service.relay.SetNativeCaller(func(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+	service.relay.SetNativeCaller(func(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 		if method == "pane.run" && params["paneId"] == "job" {
 			// Invoke the actual production CLI argument encoder, stopping at its
 			// injected Runtime resolver. No Exec or real device is contacted.
@@ -39,7 +39,7 @@ func TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown(t *testing.T) {
 	}
 	f.batch.lost, f.batch.missing = true, true
 	first, err := service.submit(ctx, f.binding, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || first.ID == "" || first.State != "unknown" || probes != 1 || f.batch.runs != 1 {
+	if !errors.Is(err, computertarget.ErrUnknown) || first.ID == "" || first.State != "unknown" || probes != 1 || f.batch.runs != 1 {
 		t.Fatalf("complex native request did not reach one bounded dispatch: %+v %v probes=%d runs=%d", first, err, probes, f.batch.runs)
 	}
 	original := f.store.records[first.ID]

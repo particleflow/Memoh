@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	memohdb "github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/team"
 )
@@ -181,7 +181,7 @@ func TestNativeProfileCutoverMigrationRoundTrip(t *testing.T) {
 
 func TestPausedNativeProfileOwnerService(t *testing.T) {
 	f := newNativeHerdrFixture(t)
-	profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\old`}}
+	profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\old`}}
 	old, err := json.Marshal(map[string]any{"herdr": profile, "other": "retained"})
 	if err != nil {
 		t.Fatal(err)
@@ -194,27 +194,27 @@ func TestPausedNativeProfileOwnerService(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := agenvo.DecodeNativeTarget(f.runtime, row.ProviderConfig)
+	target, err := computertarget.DecodeNativeTarget(f.runtime, row.ProviderConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
-	digest, err := agenvo.NativeProfileConfigDigest(row.ProviderConfig)
+	digest, err := computertarget.NativeProfileConfigDigest(row.ProviderConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
-	in := agenvo.NativeProfileCutoverRequest{RuntimeID: f.runtime, TargetID: f.mount, InstanceID: target.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: agenvo.TargetFingerprint(target), PauseRequestID: request, ExpectedPauseRevision: "1", AgentConfigDir: `C:\Synthetic\new`}
-	service := agenvo.NewService(f.store, nil, nil)
-	if _, err = service.CutoverPausedNativeProfile(t.Context(), uuid.NewString(), f.runtime, in); !errors.Is(err, agenvo.ErrForbidden) {
+	in := computertarget.NativeProfileCutoverRequest{RuntimeID: f.runtime, TargetID: f.mount, InstanceID: target.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: computertarget.TargetFingerprint(target), PauseRequestID: request, ExpectedPauseRevision: "1", AgentConfigDir: `C:\Synthetic\new`}
+	service := computertarget.NewService(f.store, nil, nil)
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), uuid.NewString(), f.runtime, in); !errors.Is(err, computertarget.ErrForbidden) {
 		t.Fatalf("foreign owner: %v", err)
 	}
 	bad := in
 	bad.ExpectedPauseRevision = "2"
-	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrNativeProfileConflict) {
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, computertarget.ErrNativeProfileConflict) {
 		t.Fatalf("stale revision: %v", err)
 	}
 	bad = in
 	bad.TargetID = uuid.NewString()
-	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrForbidden) {
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, computertarget.ErrForbidden) {
 		t.Fatalf("foreign target: %v", err)
 	}
 	receipt, err := service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, in)

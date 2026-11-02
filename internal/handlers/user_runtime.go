@@ -9,9 +9,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/userruntime"
@@ -66,8 +66,8 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 // @Tags user-runtimes
 // @Accept json
 // @Param id path string true "Existing native Runtime ID"
-// @Param request body agenvo.NativeProfileCutoverRequest true "Cutover CAS facts"
-// @Success 200 {object} agenvo.Admission
+// @Param request body computertarget.NativeProfileCutoverRequest true "Cutover CAS facts"
+// @Success 200 {object} computertarget.Admission
 // @Failure 400,401,403,409,500 {object} server.Problem
 // @Router /users/me/runtimes/{id}/native-herdr/profile-cutover [put].
 func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
@@ -82,7 +82,7 @@ func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
 	if err != nil {
 		return apperror.FieldInvalid("body", err)
 	}
-	in, err := agenvo.DecodeNativeProfileCutover(body)
+	in, err := computertarget.DecodeNativeProfileCutover(body)
 	if err != nil {
 		return apperror.FieldInvalid("body", err)
 	}
@@ -100,7 +100,7 @@ func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Existing native Runtime ID"
-// @Param request body agenvo.NativeHerdrProfile true "Private deployment profile"
+// @Param request body computertarget.NativeHerdrProfile true "Private deployment profile"
 // @Success 200 {object} userruntime.Runtime
 // @Failure 400 {object} server.Problem
 // @Failure 403 {object} server.Problem
@@ -116,7 +116,7 @@ func (h *UserRuntimeHandler) ConfigureNativeHerdr(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var profile agenvo.NativeHerdrProfile
+	var profile computertarget.NativeHerdrProfile
 	if err = c.Bind(&profile); err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func runtimeHTTPError(err error) error {
 		return apperror.FieldInvalid("path", err)
 	case errors.Is(err, userruntime.ErrWorkspaceStorageConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
-	case errors.Is(err, agenvo.ErrNativeProfileConflict):
+	case errors.Is(err, computertarget.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)
@@ -216,13 +216,11 @@ func runtimeHTTPError(err error) error {
 		return apperror.Wrap(apperror.CodeComputerAdmissionConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionScope):
 		return apperror.Wrap(apperror.CodeComputerAdmissionScope, err, nil)
-	case errors.Is(err, agenvo.ErrLegacyRetired):
-		return apperror.FieldInvalid("provider", err)
-	case errors.Is(err, agenvo.ErrInvalidTarget):
+	case errors.Is(err, computertarget.ErrInvalidTarget):
 		return apperror.FieldInvalid("computer", err)
-	case errors.Is(err, agenvo.ErrForbidden):
+	case errors.Is(err, computertarget.ErrForbidden):
 		return echo.NewHTTPError(http.StatusForbidden).WithInternal(err)
-	case errors.Is(err, agenvo.ErrUnavailable), errors.Is(err, agenvo.ErrUnknown), errors.Is(err, agenvo.ErrRejected):
+	case errors.Is(err, computertarget.ErrUnavailable), errors.Is(err, computertarget.ErrUnknown), errors.Is(err, computertarget.ErrRejected):
 		return workspaceUnavailableError(err)
 	}
 	if errors.Is(err, db.ErrNotFound) {

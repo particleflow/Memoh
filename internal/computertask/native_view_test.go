@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -52,16 +52,16 @@ func TestNativeViewFollowupKeepsOriginalRunWithoutNewInput(t *testing.T) {
 	row := store.records[initial.ID]
 	var d Details
 	_ = json.Unmarshal(row.Details, &d)
-	d.Followups = []FollowupRecord{{RequestID: in.RequestID, Fingerprint: fingerprint(in), RunID: row.RunID, Progress: agenvo.AgentFollowupProgress{State: "unknown"}}}
+	d.Followups = []FollowupRecord{{RequestID: in.RequestID, Fingerprint: fingerprint(in), RunID: row.RunID, Progress: computertarget.AgentFollowupProgress{State: "unknown"}}}
 	row.Details, _ = json.Marshal(d)
 	store.records[row.ID] = row
 	before := observationSnapshot(t, store)
 	got, err := source.FollowupNative(t.Context(), b, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || got.Followup == nil || got.Followup.State != "unknown" {
+	if !errors.Is(err, computertarget.ErrUnknown) || got.Followup == nil || got.Followup.State != "unknown" {
 		t.Fatal(got, err)
 	}
 	in.RequestID = uuid.NewString()
-	if _, err := source.FollowupNative(t.Context(), b, in); !errors.Is(err, agenvo.ErrUnsupported) {
+	if _, err := source.FollowupNative(t.Context(), b, in); !errors.Is(err, computertarget.ErrUnsupported) {
 		t.Fatal("new retired input accepted", err)
 	}
 	if !bytes.Equal(before, observationSnapshot(t, store)) || len(transport.methods) != 0 {
@@ -89,7 +89,7 @@ func TestNativeContentBatchUnsupportedWithoutRemoteIO(t *testing.T) {
 		t.Fatalf("batch content: %+v %v", got, err)
 	}
 	_, err = source.FollowupNative(ctx, b, Followup{OperationID: initial.ID, RequestID: uuid.NewString(), Mode: "current_agent", Task: "synthetic"})
-	if !errors.Is(err, agenvo.ErrUnsupported) || len(transport.methods) != 0 {
+	if !errors.Is(err, computertarget.ErrUnsupported) || len(transport.methods) != 0 {
 		t.Fatalf("batch followup: %v", err)
 	}
 }

@@ -25,7 +25,7 @@ This source integration is available to the phone host; no Harmony source/packag
 
 ## Verification and evidence
 
-Current server binary + Vite ran on loopback against the existing isolated synthetic PostgreSQL database. Herdr was replaced by a loopback MCP fixture; no real PC, provider or model was called. The browser used the actual page, JWT middleware, task ownership/ancestry lookup, PostgreSQL operation CAS and existing Agenvo adapter. It was not a page-data mock.
+Current server binary + Vite ran on loopback against the existing isolated synthetic PostgreSQL database. Herdr was replaced by a loopback MCP fixture; no real PC, provider or model was called. The browser used the actual page, JWT middleware, task ownership/ancestry lookup, PostgreSQL operation CAS and existing legacy executor adapter. It was not a page-data mock.
 
 | Check | Result |
 | --- | --- |

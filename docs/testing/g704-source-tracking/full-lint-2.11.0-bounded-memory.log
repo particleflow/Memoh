@@ -97,10 +97,10 @@ internal/agent/tool/subagent_step_persist_test.go:401:38: G118: context cancella
 internal/agent/view/uimessage_background.go:24:21: G602: slice index out of range (gosec)
 			message := &turns[turnIdx].Messages[messageIdx]
 			                 ^
-internal/agenvo/pi_batch_history_test.go:123:23: G703: Path traversal via taint analysis (gosec)
+internal/computertarget/pi_batch_history_test.go:123:23: G703: Path traversal via taint analysis (gosec)
 			return os.WriteFile(file, b, 0o600)
 			                   ^
-internal/agenvo/pi_batch_history_test.go:152:23: G703: Path traversal via taint analysis (gosec)
+internal/computertarget/pi_batch_history_test.go:152:23: G703: Path traversal via taint analysis (gosec)
 			return os.WriteFile(filepath.Join(filepath.Dir(file), "duplicate.jsonl"), b, 0o600)
 			                   ^
 internal/apps/service_test.go:971:35: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)

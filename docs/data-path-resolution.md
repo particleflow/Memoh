@@ -27,7 +27,7 @@ different boundary; a Windows drive path is not a Server originals root on Linux
 
 ## Windows Pi attempts and sessions
 
-`internal/agenvo/pi_batch_paths.go` is the versioned root-relative layout entry
+`internal/computertarget/pi_batch_paths.go` is the versioned root-relative layout entry
 used by both the Bash envelope writer and the recovery reader. Version 1 keeps
 the existing directories under the registered target's `work_dir`:
 
@@ -75,7 +75,7 @@ a newly required product contract.
   TOML roots, relative environment overrides and home expansion. They pass with
   the shared normalization. Two different load-time working directories and a
   subsequent working-directory change are covered, as are absolute/empty roots.
-- `go test -race ./internal/config ./internal/agenvo ./internal/computertask`
+- `go test -race ./internal/config ./internal/computertarget ./internal/computertask`
   passed. A real Bash subprocess writes and reads synthetic attempt files for
   legacy and versioned operations, with both Windows separator forms passed
   through a synthetic `cygpath`. These are Linux-hosted fixtures, not a new
@@ -87,7 +87,7 @@ a newly required product contract.
   `bash scripts/check-agent-core-boundary.sh` passed. Runtime/contextview remain
   byte-identical to the recorded official baseline. No SQL migration was added.
 - The rebuilt Server and actual Vue application ran at loopback ports 18080 and
-  18082 with isolated PostgreSQL, synthetic provider and synthetic Agenvo.
+  18082 with isolated PostgreSQL, synthetic provider and synthetic legacy executor.
   `HEAD /health` returned 200. Web completed a Pi task; the durable record was
   `completed`, `layout_version=1`, with schema 170 clean. This is a real runtime
   and browser path using synthetic external endpoints, not real model routing.
@@ -108,11 +108,11 @@ this patch.
 
 Merged the actual PR #8 main `eeb1fdabf50ec94d48f08302c9da3f5b3811293e`
 into this branch without conflicts or history rewriting. The path implementation
-and tests in `internal/config`, `internal/agenvo` and `internal/computertask`
+and tests in `internal/config`, `internal/computertarget` and `internal/computertask`
 are unchanged from reviewed `65f5a2f28320e5656731996e2a89b67edddc0f8c`.
 The small Pi-completion adapter is separate work, not part of this integration.
 
-- Fresh `go test -race` passed for config, agenvo, computertask, media and localfs.
+- Fresh `go test -race` passed for config, legacy-executor, computertask, media and localfs.
   This includes relative roots, load-time cwd, legacy layouts, saved byte-offset
   restoration and unsupported layout rejection. The official core boundary
   check also passed on the integrated tree.
@@ -148,7 +148,7 @@ code and tests are unchanged from `e08579ca`; PR #12's compact-result adapter
 is not included. PR #9's task projection/authorization/no-store implementation
 and PR #8's resumable-upload implementation remain byte-for-byte equal to main.
 
-- Race regressions passed for config, agenvo, computertask, sessiontask, media
+- Race regressions passed for config, legacy-executor, computertask, sessiontask, media
   and `internal/storage/providers/localfs`. Targeted HTTP regressions covered
   task authorization/no-store and resumable-upload transport. An initial test
   command used an incorrect localfs package path; the real package was then

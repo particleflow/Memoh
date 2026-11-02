@@ -384,128 +384,6 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
-export type AgenvoAdmission = {
-    agent_config_dir?: string;
-    config_sha256?: string;
-    connection_id?: string;
-    device_id?: string;
-    instance_id?: string;
-    paused?: boolean;
-    request_id?: string;
-    revision?: string;
-    scope?: string;
-    target_fingerprint?: string;
-};
-
-export type AgenvoAgentObservation = {
-    completion_changed?: boolean;
-    completion_seq?: string;
-    interactive_ready?: boolean;
-    output?: string;
-    output_fidelity?: string;
-    session_relation?: string;
-    starting?: boolean;
-    status?: string;
-    /**
-     * No Herdr status, completion sequence or terminal text independently
-     * proves that the requested work succeeded. No lifecycle hook is assumed.
-     */
-    task_success_verified?: boolean;
-    truncated?: boolean;
-};
-
-export type AgenvoAgentProfile = {
-    config_dir?: string;
-    /**
-     * Empty is decoded only for historical profiles. Native configuration
-     * requires pi-json-v1; no protocol fallback occurs.
-     */
-    execution_mode?: string;
-    model?: string;
-    path?: string;
-    provider?: string;
-};
-
-export type AgenvoBatchFile = {
-    name?: string;
-    sha256?: string;
-    size?: number;
-};
-
-export type AgenvoBatchHistoryEvidence = {
-    file?: string;
-    sha256?: string;
-    size?: number;
-};
-
-export type AgenvoBatchHistoryReport = {
-    after?: string;
-    before?: string;
-    evidence?: AgenvoBatchHistoryEvidence;
-};
-
-export type AgenvoBatchReceipt = {
-    attempt?: string;
-    completion?: AgenvoBatchFile;
-    exit_code?: number;
-    exited?: boolean;
-    generation?: string;
-    history?: AgenvoBatchHistoryReport;
-    pane_id?: string;
-    pi_session_id?: string;
-    request_hash?: string;
-    started?: boolean;
-    stderr?: AgenvoBatchFile;
-    stdout?: AgenvoBatchFile;
-    terminal_id?: string;
-    version?: number;
-    workspace_id?: string;
-};
-
-export type AgenvoChangeAdmission = {
-    expected_revision?: string;
-    paused?: boolean;
-    request_id?: string;
-};
-
-export type AgenvoNativeHerdrProfile = {
-    agent?: AgenvoAgentProfile;
-    bash_path: string;
-    herdr_cli: string;
-    herdr_config_root: string;
-    instance_id: string;
-    producer?: AgenvoProducerLocator;
-    session: string;
-    work_dir: string;
-};
-
-export type AgenvoNativeProfileCutoverRequest = {
-    agent_config_dir?: string;
-    expected_config_sha256?: string;
-    expected_pause_revision?: string;
-    expected_target_fingerprint?: string;
-    instance_id?: string;
-    pause_request_id?: string;
-    runtime_id?: string;
-    target_id?: string;
-};
-
-export type AgenvoProducerLocator = {
-    config_dir: string;
-    program_path: string;
-    state_dir: string;
-};
-
-export type AgenvoReferenceObservation = {
-    agent_status?: string;
-    availability?: string;
-    control_pane?: string;
-    pane?: string;
-    reason?: string;
-    reference_match?: string;
-    workspace?: string;
-};
-
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
 
 export type ApplicationUserInputRecoveryResult = {
@@ -1274,6 +1152,135 @@ export type CompactionLog = {
     usage?: unknown;
 };
 
+export type ComputertargetAdmission = {
+    agent_config_dir?: string;
+    config_sha256?: string;
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    paused?: boolean;
+    request_id?: string;
+    revision?: string;
+    scope?: string;
+    target_fingerprint?: string;
+};
+
+export type ComputertargetAgentObservation = {
+    completion_changed?: boolean;
+    completion_seq?: string;
+    interactive_ready?: boolean;
+    output?: string;
+    output_fidelity?: string;
+    session_relation?: string;
+    starting?: boolean;
+    status?: string;
+    /**
+     * No Herdr status, completion sequence or terminal text independently
+     * proves that the requested work succeeded. No lifecycle hook is assumed.
+     */
+    task_success_verified?: boolean;
+    truncated?: boolean;
+};
+
+export type ComputertargetAgentProfile = {
+    config_dir?: string;
+    /**
+     * Empty is decoded only for historical profiles. Native configuration
+     * requires pi-json-v1; no protocol fallback occurs.
+     */
+    execution_mode?: string;
+    model?: string;
+    path?: string;
+    provider?: string;
+};
+
+export type ComputertargetBatchFile = {
+    name?: string;
+    sha256?: string;
+    size?: number;
+};
+
+export type ComputertargetBatchHistoryEvidence = {
+    file?: string;
+    sha256?: string;
+    size?: number;
+};
+
+export type ComputertargetBatchHistoryReport = {
+    after?: string;
+    before?: string;
+    evidence?: ComputertargetBatchHistoryEvidence;
+};
+
+export type ComputertargetBatchReceipt = {
+    attempt?: string;
+    completion?: ComputertargetBatchFile;
+    exit_code?: number;
+    exited?: boolean;
+    generation?: string;
+    history?: ComputertargetBatchHistoryReport;
+    pane_id?: string;
+    pi_session_id?: string;
+    /**
+     * Preflight names the first failed preflight check when Pi never started.
+     * Empty on receipts written before this field existed; "ok" when every
+     * check passed. Without it a silent 125 exit is indistinguishable from any
+     * other launch failure (incident E3).
+     */
+    preflight?: string;
+    request_hash?: string;
+    started?: boolean;
+    stderr?: ComputertargetBatchFile;
+    stdout?: ComputertargetBatchFile;
+    terminal_id?: string;
+    version?: number;
+    workspace_id?: string;
+};
+
+export type ComputertargetChangeAdmission = {
+    expected_revision?: string;
+    paused?: boolean;
+    request_id?: string;
+};
+
+export type ComputertargetNativeHerdrProfile = {
+    agent?: ComputertargetAgentProfile;
+    bash_path: string;
+    herdr_cli: string;
+    herdr_config_root: string;
+    instance_id: string;
+    producer?: ComputertargetProducerLocator;
+    session: string;
+    work_dir: string;
+};
+
+export type ComputertargetNativeProfileCutoverRequest = {
+    agent_config_dir?: string;
+    expected_config_sha256?: string;
+    expected_pause_revision?: string;
+    expected_target_fingerprint?: string;
+    instance_id?: string;
+    pause_request_id?: string;
+    runtime_id?: string;
+    target_id?: string;
+};
+
+export type ComputertargetProducerLocator = {
+    config_dir: string;
+    program_path: string;
+    state_dir: string;
+};
+
+export type ComputertargetReferenceObservation = {
+    agent_status?: string;
+    availability?: string;
+    control_pane?: string;
+    pane?: string;
+    reason?: string;
+    reference_match?: string;
+    workspace?: string;
+};
+
 export type ComputertaskDeliveryPage = {
     files?: Array<ComputertaskDeliveryPageFile>;
     has_more?: boolean;
@@ -1316,7 +1323,7 @@ export type ComputertaskNativeContent = {
     availability?: string;
     followup_available?: boolean;
     followups?: Array<ComputertaskFollowupResult>;
-    observation?: AgenvoAgentObservation;
+    observation?: ComputertargetAgentObservation;
     operation_id?: string;
     session_binding?: string;
     supported?: boolean;
@@ -1327,7 +1334,7 @@ export type ComputertaskOperationReconciliation = {
     control_terminal_id?: string;
     files?: Array<ComputertaskRecoveryFile>;
     generation?: string;
-    receipt?: AgenvoBatchReceipt;
+    receipt?: ComputertargetBatchReceipt;
     receipt_state?: string;
     request_hash?: string;
     revision?: string;
@@ -1336,7 +1343,7 @@ export type ComputertaskOperationReconciliation = {
 };
 
 export type ComputertaskPiContinuity = {
-    last_invocation?: AgenvoBatchHistoryReport;
+    last_invocation?: ComputertargetBatchHistoryReport;
     reason?: string;
     status?: string;
 };
@@ -1346,7 +1353,7 @@ export type ComputertaskRecovery = {
     business_outcome?: string;
     cancel_requested?: boolean;
     continuity?: ComputertaskPiContinuity;
-    native?: AgenvoReferenceObservation;
+    native?: ComputertargetReferenceObservation;
     operation_id?: string;
     pane_id?: string;
     pi_result?: string;
@@ -1363,7 +1370,7 @@ export type ComputertaskRecovery = {
 export type ComputertaskRecoveryFile = {
     confirmed_offset?: number;
     current_availability?: string;
-    meta?: AgenvoBatchFile;
+    meta?: ComputertargetBatchFile;
     recorded_content_hash?: string;
     state?: string;
 };
@@ -20898,7 +20905,7 @@ export type GetUsersMeRuntimesByIdAdmissionResponses = {
     /**
      * OK
      */
-    200: AgenvoAdmission;
+    200: ComputertargetAdmission;
 };
 
 export type GetUsersMeRuntimesByIdAdmissionResponse = GetUsersMeRuntimesByIdAdmissionResponses[keyof GetUsersMeRuntimesByIdAdmissionResponses];
@@ -20907,7 +20914,7 @@ export type PutUsersMeRuntimesByIdAdmissionData = {
     /**
      * Compare-and-swap admission request
      */
-    body: AgenvoChangeAdmission;
+    body: ComputertargetChangeAdmission;
     path: {
         /**
          * Existing owner runtime ID
@@ -20943,7 +20950,7 @@ export type PutUsersMeRuntimesByIdAdmissionResponses = {
     /**
      * OK
      */
-    200: AgenvoAdmission;
+    200: ComputertargetAdmission;
 };
 
 export type PutUsersMeRuntimesByIdAdmissionResponse = PutUsersMeRuntimesByIdAdmissionResponses[keyof PutUsersMeRuntimesByIdAdmissionResponses];
@@ -20952,7 +20959,7 @@ export type PutUsersMeRuntimesByIdNativeHerdrData = {
     /**
      * Private deployment profile
      */
-    body: AgenvoNativeHerdrProfile;
+    body: ComputertargetNativeHerdrProfile;
     path: {
         /**
          * Existing native Runtime ID
@@ -20993,7 +21000,7 @@ export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverData = {
     /**
      * Cutover CAS facts
      */
-    body: AgenvoNativeProfileCutoverRequest;
+    body: ComputertargetNativeProfileCutoverRequest;
     path: {
         /**
          * Existing native Runtime ID
@@ -21033,7 +21040,7 @@ export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses = {
     /**
      * OK
      */
-    200: AgenvoAdmission;
+    200: ComputertargetAdmission;
 };
 
 export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponse = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses];

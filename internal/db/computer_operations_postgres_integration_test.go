@@ -4,7 +4,6 @@ package db_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"sync"
 	"sync/atomic"
@@ -93,52 +92,6 @@ func TestComputerOperationsMigrationAndDurableIsolation(t *testing.T) {
 		}
 	}
 	store := postgresstore.NewWithQueries(dbsqlc.New(conn))
-	connection, alias, unrelated := uuid.NewString(), uuid.NewString(), uuid.NewString()
-	for _, item := range []struct{ id, url string }{{connection, "https://example.invalid/computer"}, {alias, "https://example.invalid/computer/"}, {unrelated, "https://example.invalid/other"}} {
-		config, _ := json.Marshal(map[string]string{"url": item.url})
-		if _, err = conn.Exec(ctx, "INSERT INTO mcp_connections(id,bot_id,name,type,config) VALUES($1,$2,$3,'http',$4)", item.id, bot, item.id, config); err != nil {
-			t.Fatal(err)
-		}
-	}
-	config, _ := json.Marshal(map[string]string{"connection_id": connection})
-	runtimeID := uuid.NewString()
-	if _, err = conn.Exec(ctx, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,'historical-fixture',$3,'agenvo',$4,now(),NULL)", runtimeID, user, uuid.NewString(), config); err != nil {
-		t.Fatal(err)
-	}
-	for _, id := range []string{connection, alias, unrelated} {
-		managed, e := store.IsManagedComputerConnection(ctx, id)
-		if e != nil || managed != (id != unrelated) {
-			t.Fatalf("managed alias check: %v %v", managed, e)
-		}
-	}
-	for _, endpoint := range []string{"https://EXAMPLE.invalid:443/computer#alias", "https://example.invalid:443/a/../computer", "https://example.invalid/%63omputer"} {
-		raw, _ := json.Marshal(map[string]string{"url": endpoint})
-		if _, e := conn.Exec(ctx, "UPDATE mcp_connections SET config=$1 WHERE id=$2", raw, alias); e != nil {
-			t.Fatal(e)
-		}
-		if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
-			t.Fatalf("semantic alias %s: %v %v", endpoint, managed, e)
-		}
-		if managed, e := store.IsManagedComputerEndpoint(ctx, unrelated, raw); e != nil || !managed {
-			t.Fatalf("redirect target %s: %v %v", endpoint, managed, e)
-		}
-	}
-	if _, err = conn.Exec(ctx, "UPDATE user_runtimes SET revoked_at=now() WHERE id=$1", runtimeID); err != nil {
-		t.Fatal(err)
-	}
-	if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
-		t.Fatal("revocation reopened raw transport")
-	}
-	// The managed credential identity remains reserved at another endpoint.
-	for _, id := range []string{connection, alias} {
-		raw, _ := json.Marshal(map[string]any{"url": "https://" + id + ".invalid/mcp", "headers": map[string]string{"aUtHoRiZaTiOn": "Bearer synthetic-computer-only"}})
-		if _, e := conn.Exec(ctx, "UPDATE mcp_connections SET config=$1 WHERE id=$2", raw, id); e != nil {
-			t.Fatal(e)
-		}
-	}
-	if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
-		t.Fatal("credential alias reopened raw route", e)
-	}
 	old := r
 	r.State = "unknown"
 	r, err = store.SaveComputerOperation(ctx, r)

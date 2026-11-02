@@ -145,7 +145,7 @@ func (r failureCharRun) runView(t *testing.T) [2]string {
 	return [2]string{view.Status, view.ErrorCode}
 }
 
-func assertFrames(t *testing.T, got []map[string]any, want []map[string]any) {
+func assertFrames(t *testing.T, got, want []map[string]any) {
 	t.Helper()
 	gotJSON, _ := json.Marshal(got)
 	wantJSON, _ := json.Marshal(want)

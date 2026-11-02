@@ -87,4 +87,4 @@ approved scoped Memoh credential provider; authenticated HTTPS reachable from
 PC with normal certificate validation; task/storage Commit/Resolve binding that
 reauthorizes and atomically fences cancel versus late association. Operation ID
 is correlation, not authority. Production IPv6 HTTP remains unencrypted; neither
-Agenvo OAuth nor a broad Bot token is substituted by this package.
+legacy executor OAuth nor a broad Bot token is substituted by this package.

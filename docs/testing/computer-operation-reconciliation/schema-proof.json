@@ -1,8 +1,8 @@
 {
   "same_api_operations": 364,
   "definitions_changed": [
-    "agenvo.BatchFile",
-    "agenvo.BatchReceipt",
+    "legacy-executor.BatchFile",
+    "legacy-executor.BatchReceipt",
     "computertask.OperationReconciliation",
     "computertask.Recovery",
     "computertask.RecoveryFile"

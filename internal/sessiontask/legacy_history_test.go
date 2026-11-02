@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
@@ -72,56 +72,6 @@ func TestRetiredComputerOperationHistorySurvivesDeletedBinding(t *testing.T) {
 	}
 }
 
-func (s *oldRegistration) GetMount(_ context.Context, bot, id string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
-	s.mountReads++
-	if s.denied || s.row.BotID != bot || s.row.ID != id {
-		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("revoked")
-	}
-	return s.row, nil
-}
-
-func (s *oldRegistration) OwnedHTTPMCPConnectionBot(_ context.Context, owner, connection string) (string, error) {
-	s.credentialReads++
-	if s.denied || owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" {
-		return "", errors.New("revoked")
-	}
-	return "owner-bot", nil
-}
-
-type oldPermission struct{ denied bool }
-
-func (p *oldPermission) HasBotPermission(_ context.Context, bot, user, permission string) (bool, error) {
-	return !p.denied && bot == "bot" && user == "user" && permission == "workspace_exec", nil
-}
-
-func TestOldIdentityTaskProjectionRequiresCurrentAuthorization(t *testing.T) {
-	f := newFixture()
-	target := agenvo.Target{ConnectionID: "11111111-1111-4111-8111-111111111111", DeviceID: "old-device", InstanceID: "old-instance", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}
-	raw, _ := json.Marshal(target)
-	old := &oldRegistration{row: dbstore.BotRemoteRuntimeBindingRecord{ID: "pc-a", BotID: "bot", RuntimeID: "old-runtime", RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: agenvo.Provider, RuntimeProviderConfig: raw}}
-	row := f.operations[f.op]
-	row.TargetFingerprint = agenvo.TargetFingerprint(target)
-	row.State = "unknown"
-	f.operations[f.op] = row
-	permission := &oldPermission{}
-	f.service = NewService(f, f, dirs{f}, agenvo.NewService(old, permission, nil), "synthetic-cursor-secret")
-	task, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op)
-	if err != nil || task.Status != "unknown" {
-		t.Fatalf("old task: %+v %v", task, err)
-	}
-	old.denied = true
-	if got, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op); err != nil || got.Status != "unknown" {
-		t.Fatal("retired registration hid retained history", err)
-	}
-	if old.mountReads != 0 || old.credentialReads != 0 {
-		t.Fatal("historical read resolved a live registration or credential")
-	}
-	permission.denied = true
-	if _, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op); !errors.Is(err, ErrUnavailable) {
-		t.Fatalf("Bot permission revocation: %v", err)
-	}
-}
-
 func TestNativeProfileChangedTaskProjectionPreservesHistory(t *testing.T) {
 	f := newFixture()
 	current := f.targets[f.operations[f.op].TargetID]
@@ -132,7 +82,7 @@ func TestNativeProfileChangedTaskProjectionPreservesHistory(t *testing.T) {
 	old.Agent.ConfigDir = `C:\Synthetic\original`
 	current.Agent.ConfigDir = `C:\Synthetic\changed`
 	r := f.operations[f.op]
-	r.TargetFingerprint = agenvo.TargetFingerprint(old)
+	r.TargetFingerprint = computertarget.TargetFingerprint(old)
 	r.State = "unknown"
 	r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": old})
 	f.operations[f.op] = r
@@ -184,7 +134,7 @@ func TestRetiredOperationHistoryStillChecksOriginalScopeAndSnapshot(t *testing.T
 			case "empty-fingerprint":
 				r.TargetFingerprint = ""
 			case "mismatched-snapshot":
-				r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": agenvo.Target{DeviceID: "another-device"}})
+				r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": computertarget.Target{DeviceID: "another-device"}})
 			case "empty-snapshot":
 				r.Details = []byte(`{"kind":"herdr_pi_task","target_snapshot":{}}`)
 			case "malformed-snapshot":

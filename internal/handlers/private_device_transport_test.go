@@ -18,7 +18,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -49,7 +48,7 @@ func (f *privateDeviceTargets) ListWorkspaceTargets(context.Context, string) ([]
 	f.reads.Add(1)
 	return []workspace.WorkspaceTarget{{
 		TargetID: "private-device-id", Name: "Synthetic private computer",
-		Provider: agenvo.Provider, Status: "authentication_unavailable", Online: false,
+		Provider: "memoh", Status: "authentication_unavailable", Online: false,
 	}}, nil
 }
 
@@ -67,8 +66,8 @@ func (f *privateDeviceStore) ListUserRuntimes(_ context.Context, user string) ([
 	f.reads.Add(1)
 	return []dbstore.UserRuntimeRecord{{
 		ID: "private-device-id", UserID: user, Name: "Synthetic private computer",
-		Provider: agenvo.Provider, ActivatedAt: time.Now(),
-		APIToken: "SECRET synthetic storage marker", //nolint:gosec // G101: fixture verifies Agenvo credentials are not projected.
+		Provider: "memoh", ActivatedAt: time.Time{},
+		APIToken: "SECRET synthetic storage marker", //nolint:gosec // G101: fixture verifies remote credentials are not projected.
 	}}, nil
 }
 
@@ -172,7 +171,7 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			request(t, http.MethodPut, account+"/private-device-id/admission", token, 401, "no-store")
-			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/agenvo/discover", account + "/private-device-id/agenvo-agent", account + "/private-device-id/admission"} {
+			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/legacy/discover", account + "/private-device-id/legacy-agent", account + "/private-device-id/admission"} {
 				request(t, http.MethodGet, path, token, 401, "no-store")
 			}
 		})

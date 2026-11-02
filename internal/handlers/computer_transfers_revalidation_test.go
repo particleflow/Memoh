@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/transferclient"
 )
@@ -21,7 +21,7 @@ func TestDeviceTransferRevalidationOutageResumesOriginalReceipt(t *testing.T) {
 	v := &deviceVerifierFixture{}
 	var creates, unexpected atomic.Int64
 	f, _, https, _ := taskTransferHTTPFixture(t, false, taskTransferFixtureOptions{
-		device: func(_ computertask.DeliveryIdentity, target agenvo.Target) DeviceTransferVerifier {
+		device: func(_ computertask.DeliveryIdentity, target computertarget.Target) DeviceTransferVerifier {
 			v.device = computertask.VerifiedTransferDevice{CredentialID: "stable-device", ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}
 			return v
 		},

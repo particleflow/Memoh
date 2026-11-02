@@ -455,12 +455,12 @@
 2026/10/22 22:56:37 Generating audio.TranscriptionWord
 2026/10/22 22:56:37 Generating workspace.WorkspaceTargetGrantsResponse
 2026/10/22 22:56:37 Generating workspace.WorkspaceTargetGrant
-2026/10/22 22:56:37 Generating agenvo.AgentProfile
+2026/10/22 22:56:37 Generating legacy-executor.AgentProfile
 2026/10/22 22:56:37 Generating userruntime.Runtime
-2026/10/22 22:56:37 Generating handlers.DiscoverAgenvoRequest
-2026/10/22 22:56:37 Generating agenvo.DiscoveredInstance
+2026/10/22 22:56:37 Generating handlers.Discoverlegacy executorRequest
+2026/10/22 22:56:37 Generating legacy-executor.DiscoveredInstance
 2026/10/22 22:56:37 Generating userruntime.CreateRuntimeRequest
-2026/10/22 22:56:37 Generating agenvo.Target
+2026/10/22 22:56:37 Generating legacy-executor.Target
 2026/10/22 22:56:37 Generating accounts.Account
 2026/10/22 22:56:37 Generating accounts.UpdateProfileRequest
 2026/10/22 22:56:37 Generating accounts.UpdateProfileMetadata

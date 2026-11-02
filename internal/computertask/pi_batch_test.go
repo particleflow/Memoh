@@ -22,7 +22,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
@@ -72,8 +72,8 @@ type batchTransport struct {
 	runs, reads                                      int
 	producerWakes                                    int
 	calls                                            []string
-	progress                                         agenvo.BatchProgress
-	receipt                                          agenvo.BatchReceipt
+	progress                                         computertarget.BatchProgress
+	receipt                                          computertarget.BatchReceipt
 	stdout, stderr                                   []byte
 	producerFeedback                                 []byte
 	control                                          string
@@ -98,9 +98,9 @@ func (f *batchTransport) projectCompletion() {
 		f.receipt.Completion = nil
 		return
 	}
-	parsed := agenvo.VerifyPiJSON(bytes.NewReader(f.stdout), f.progress.PiSessionID, "synthetic", "synthetic-model", f.receipt.ExitCode)
+	parsed := computertarget.VerifyPiJSON(bytes.NewReader(f.stdout), f.progress.PiSessionID, "synthetic", "synthetic-model", f.receipt.ExitCode)
 	if f.receipt.Stdout.Size > 64<<20 {
-		parsed = agenvo.PiJSONResult{Outcome: "output_limit"}
+		parsed = computertarget.PiJSONResult{Outcome: "output_limit"}
 	}
 	if parsed.Outcome == "invalid_protocol" {
 		parsed.Output, parsed.StopReason, parsed.Truncated = "", "", false
@@ -109,7 +109,7 @@ func (f *batchTransport) projectCompletion() {
 	if f.completionAttempt != "" {
 		p.Attempt = f.completionAttempt
 	}
-	f.completion, _ = json.Marshal(agenvo.BatchCompletion{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Stdout: f.receipt.Stdout, Result: parsed})
+	f.completion, _ = json.Marshal(computertarget.BatchCompletion{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Stdout: f.receipt.Stdout, Result: parsed})
 	meta := batchFile("result.json", f.completion)
 	f.receipt.Completion = &meta
 }
@@ -133,12 +133,12 @@ func syntheticPiStream(session, reason string) []byte {
 	return out.Bytes()
 }
 
-func batchFile(name string, raw []byte) agenvo.BatchFile {
+func batchFile(name string, raw []byte) computertarget.BatchFile {
 	h := sha256.Sum256(raw)
-	return agenvo.BatchFile{Name: name, Hash: hex.EncodeToString(h[:]), Size: int64(len(raw))}
+	return computertarget.BatchFile{Name: name, Hash: hex.EncodeToString(h[:]), Size: int64(len(raw))}
 }
 
-func adaptNativePaneRead(target agenvo.Target, params map[string]any) (map[string]any, error) {
+func adaptNativePaneRead(target computertarget.Target, params map[string]any) (map[string]any, error) {
 	if target.NativeRuntimeID == "" {
 		return params, nil
 	}
@@ -155,7 +155,7 @@ func adaptNativePaneRead(target agenvo.Target, params map[string]any) (map[strin
 }
 
 func TestNativeBatchSnapshotRequiresANSI(t *testing.T) {
-	target := agenvo.Target{NativeRuntimeID: "native"}
+	target := computertarget.Target{NativeRuntimeID: "native"}
 	for _, params := range []map[string]any{{}, {"format": "plain"}} {
 		if _, err := adaptNativePaneRead(target, params); err == nil {
 			t.Fatal("accepted missing or non-ANSI format")
@@ -171,7 +171,7 @@ func TestNativeBatchSnapshotRequiresANSI(t *testing.T) {
 	}
 }
 
-func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *batchTransport) call(_ context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.t.Helper()
 	mount := f.store.mounts[scope.TargetID]
 	if scope.BotID != mount.BotID || target.NativeRuntimeID != mount.RuntimeID || target.InstanceID != fixtureTarget(mount).InstanceID {
@@ -237,16 +237,16 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 			f.stdout = syntheticPiStream(p.PiSessionID, f.reason)
 			// More than one page and the old 64KiB relay limit, never in one call.
 			f.stderr = []byte(strings.Repeat("diagnostic 中文\n", 6000))
-			f.receipt = agenvo.BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true, Started: true, ExitCode: f.exit, Stdout: batchFile("stdout.jsonl", f.stdout), Stderr: batchFile("stderr.txt", f.stderr)}
+			f.receipt = computertarget.BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true, Started: true, ExitCode: f.exit, Stdout: batchFile("stdout.jsonl", f.stdout), Stderr: batchFile("stderr.txt", f.stderr)}
 			if p.History != nil {
 				before, after := "new", "created"
 				if p.History.Mode == "resume" {
 					before, after = "verified", "verified"
 				}
-				f.receipt.History = &agenvo.BatchHistoryReport{Before: before, After: after, Evidence: &agenvo.BatchHistoryEvidence{File: "synthetic.jsonl", Size: 1024, Hash: strings.Repeat("e", 64)}}
+				f.receipt.History = &computertarget.BatchHistoryReport{Before: before, After: after, Evidence: &computertarget.BatchHistoryEvidence{File: "synthetic.jsonl", Size: 1024, Hash: strings.Repeat("e", 64)}}
 			}
 			if f.lost {
-				return agenvo.Receipt{}, agenvo.ErrUnknown
+				return computertarget.Receipt{}, computertarget.ErrUnknown
 			}
 		case "control":
 			f.reads++
@@ -277,7 +277,7 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 					data = nil
 				}
 			}
-			limit := agenvo.BatchPageBytes
+			limit := computertarget.BatchPageBytes
 			if strings.Contains(script, "/receipt.json\"") {
 				limit = 4096 // Separate complete-receipt budget, not data-page size.
 			}
@@ -312,14 +312,14 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 		params, err = adaptNativePaneRead(target, params)
 		if err != nil {
 			f.t.Error(err)
-			return agenvo.Receipt{}, err
+			return computertarget.Receipt{}, err
 		}
 		if err := f.readSchema.Validate(params); err != nil {
-			f.t.Errorf("Agenvo v0.2.0 pane.read schema rejected params: %v", err)
-			return agenvo.Receipt{}, err
+			f.t.Errorf("pane.read v0.2.0 schema rejected params: %v", err)
+			return computertarget.Receipt{}, err
 		}
 		if strings.HasPrefix(params["paneId"].(string), "-") {
-			return agenvo.Receipt{}, errors.New("vendor pane ID refinement rejected leading dash")
+			return computertarget.Receipt{}, errors.New("vendor pane ID refinement rejected leading dash")
 		}
 		lines := int(params["lines"].(float64))
 		f.maxLines = max(f.maxLines, lines)
@@ -362,9 +362,9 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 	return envelope(map[string]any{"session": "synthetic", "result": body}), nil
 }
 
-func batchReadError(execution, code string) agenvo.Receipt {
+func batchReadError(execution, code string) computertarget.Receipt {
 	body, _ := json.Marshal(map[string]any{"execution": execution, "error": map[string]string{"code": code}})
-	var receipt agenvo.Receipt
+	var receipt computertarget.Receipt
 	_ = json.Unmarshal(body, &receipt)
 	return receipt
 }
@@ -388,11 +388,11 @@ func setupBatch(t *testing.T) (*Source, *fixtureStore, *batchTransport, *batchAs
 	source, store, _ := setup(t)
 	r := store.mounts["pc-a"]
 	target := fixtureTarget(r)
-	target.Producer = agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
-	target.Agent = agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}
+	target.Producer = computertarget.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
+	target.Agent = computertarget.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}
 	r.RuntimeProviderConfig = fixtureConfig(target)
 	store.mounts["pc-a"] = r
-	raw, err := os.ReadFile("testdata/agenvo-v0.2.0-pane-read.schema.json")
+	raw, err := os.ReadFile("testdata/pane-read-v0.2.0.schema.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -406,7 +406,7 @@ func setupBatch(t *testing.T) (*Source, *fixtureStore, *batchTransport, *batchAs
 	}
 	f := &batchTransport{t: t, store: store, reason: "stop", readSchema: resolved, columns: 80}
 	a := &batchAssets{data: map[string][]byte{}}
-	source.service.relay = agenvo.NewService(store, permissionChecker{}, f.call)
+	source.service.relay = computertarget.NewService(store, permissionChecker{}, f.call)
 	source.service.assets = a
 	return source, store, f, a
 }
@@ -453,8 +453,8 @@ func TestNativeBatchColoredFramesAndOtherControls(t *testing.T) {
 		t.Fatalf("saved batch: %+v %v", d.Batch, err)
 	}
 	beforeReads := f.reads
-	data, err := source.service.relay.ReadBatchPage(ctx, agenvo.Scope{BotID: "bot-a", UserID: "user-a", TargetID: "pc-a"}, d.Batch.Progress, *d.Batch.Receipt, d.Batch.Receipt.Stdout, 0)
-	if !errors.Is(err, agenvo.ErrUnknown) || len(data) != 0 || f.runs != 1 || f.reads != beforeReads+1 {
+	data, err := source.service.relay.ReadBatchPage(ctx, computertarget.Scope{BotID: "bot-a", UserID: "user-a", TargetID: "pc-a"}, d.Batch.Progress, *d.Batch.Receipt, d.Batch.Receipt.Stdout, 0)
+	if !errors.Is(err, computertarget.ErrUnknown) || len(data) != 0 || f.runs != 1 || f.reads != beforeReads+1 {
 		t.Fatalf("control-bearing frame accepted: bytes=%d err=%v runs=%d reads=%d before=%d", len(data), err, f.runs, f.reads, beforeReads)
 	}
 }
@@ -478,7 +478,7 @@ func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
 	if r.State != "submitted" || r.ProcessStopped || r.PiResult != nil || f.runs != 1 {
 		t.Fatalf("submission=%+v", r)
 	}
-	if f.progress.LayoutVersion != agenvo.BatchLayoutVersion {
+	if f.progress.LayoutVersion != computertarget.BatchLayoutVersion {
 		t.Fatal("new operation did not persist its layout before dispatch")
 	}
 	got := batchResultUntilReady(t, c, r.ID)
@@ -653,7 +653,7 @@ func TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs(t *testing.T) {
 			}
 			if mode == "not_started" {
 				f.receipt.Started = false
-				f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+				f.receipt.History = &computertarget.BatchHistoryReport{Before: "not_checked", After: "not_started"}
 				f.receipt.ExitCode = 125
 			}
 			got := batchResultUntilReady(t, c, r.ID)
@@ -706,7 +706,7 @@ func TestStandardMCPPiBatchDelayedFramesWithinVendorLimits(t *testing.T) {
 	}
 }
 
-func TestAgenvoV020PaneReadSchemaBounds(t *testing.T) {
+func TestPaneReadV020SchemaBounds(t *testing.T) {
 	_, _, f, _ := setupBatch(t)
 	for _, n := range []int{1, 8, 256, 500} {
 		if err := f.readSchema.Validate(map[string]any{"session": "synthetic", "paneId": "control", "lines": n, "source": "recent-unwrapped"}); err != nil {
@@ -803,7 +803,7 @@ func TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch(t *testing.T) {
 	record := store.records[r.ID]
 	var d Details
 	_ = json.Unmarshal(record.Details, &d)
-	d.Batch.Progress.LayoutVersion = agenvo.BatchLayoutVersion + 1
+	d.Batch.Progress.LayoutVersion = computertarget.BatchLayoutVersion + 1
 	record.Details, _ = json.Marshal(d)
 	store.records[r.ID] = record
 	store.mu.Unlock()

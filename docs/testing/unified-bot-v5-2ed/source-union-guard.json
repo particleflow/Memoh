@@ -17,7 +17,7 @@
   ],
   "all_other_reviewed_and_base_paths_preserved": true,
   "protected_paths_unchanged": [
-    "internal/agenvo/pi_batch_producer.go",
+    "internal/computertarget/pi_batch_producer.go",
     "internal/deliverymeta",
     "internal/transferclient",
     "internal/agent/runtime",

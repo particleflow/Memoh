@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/mcp"
@@ -30,7 +30,7 @@ func NewSource(service *Service) *Source { return &Source{service: service} }
 // SetLogger injects the existing host logger; no global logger or new sink.
 func (s *Source) SetLogger(log *slog.Logger) { s.logger = log }
 
-func (s *Source) logResultReadFailure(ctx context.Context, session mcp.ToolSessionContext, id string, started time.Time, trace *agenvo.BatchReadTrace) {
+func (s *Source) logResultReadFailure(ctx context.Context, session mcp.ToolSessionContext, id string, started time.Time, trace *computertarget.BatchReadTrace) {
 	s.logger.WarnContext(ctx, "computer task result read failed",
 		slog.String("operation_id", id), slog.String("operation_run_id", trace.OperationRunID), slog.String("run_id", session.RunID), slog.String("tool_call_id", session.ToolCallID),
 		slog.String("stage", trace.Stage), slog.String("read_stage", trace.ReadStage), slog.String("reason", trace.Reason),
@@ -181,8 +181,8 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		switch name {
 		case "computer_task_result":
 			if s.logger != nil {
-				trace := &agenvo.BatchReadTrace{ActualBytes: -1}
-				ctx = agenvo.WithBatchReadTrace(ctx, trace)
+				trace := &computertarget.BatchReadTrace{ActualBytes: -1}
+				ctx = computertarget.WithBatchReadTrace(ctx, trace)
 				started := time.Now()
 				defer func() {
 					if receipt, ok := value.(Result); err != nil && ok && receipt.ID != "" {

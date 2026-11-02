@@ -57,6 +57,7 @@ func cliFixtureSecurity() (*windows.SecurityAttributes, error) {
 	sa.Length = uint32(unsafe.Sizeof(*sa))
 	return sa, nil
 }
+
 func cliFixtureDir(path string) error {
 	sa, err := cliFixtureSecurity()
 	if err != nil {
@@ -68,6 +69,7 @@ func cliFixtureDir(path string) error {
 	}
 	return windows.CreateDirectory(name, sa)
 }
+
 func cliFixtureWrite(path string, data []byte) error {
 	sa, err := cliFixtureSecurity()
 	if err != nil {

@@ -21,7 +21,7 @@
     "internal/agent/runtime/grok/server.go": 1,
     "internal/agent/tool/subagent_step_persist_test.go": 1,
     "internal/agent/view/uimessage_background.go": 1,
-    "internal/agenvo/pi_batch_history_test.go": 2,
+    "internal/computertarget/pi_batch_history_test.go": 2,
     "internal/auth/jwt_test.go": 4,
     "internal/channel/adapters/line/inbound_error_test.go": 1,
     "internal/channel/adapters/line/inbound_test.go": 3,

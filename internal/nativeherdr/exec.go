@@ -15,7 +15,7 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 	pb "github.com/felinics/memoh/internal/workspace/bridgepb"
 )
@@ -30,7 +30,7 @@ const (
 // ResolveRuntime rechecks the Bot mount, permissions, pinned runtime identity,
 // revocation and current ready connection before every call. It must use the
 // selected mount, never the Bot's current default or the NAS native workspace.
-type ResolveRuntime func(context.Context, agenvo.Scope, agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error)
+type ResolveRuntime func(context.Context, computertarget.Scope, computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error)
 
 type Executor struct {
 	resolve ResolveRuntime
@@ -44,27 +44,27 @@ func NewExecutor(resolve ResolveRuntime) *Executor {
 // Invoke makes one CLI invocation, with no replay, including after cancellation
 // or reconnect. Only complete output plus an EXIT frame and clean EOF establish
 // a CLI receipt. That receipt is not evidence that an agent task has completed.
-func (e *Executor) Invoke(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (e *Executor) Invoke(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	if e == nil || e.resolve == nil || scope.BotID == "" || scope.TargetID == "" || target.NativeRuntimeID == "" || !validWindowsPath(target.HerdrCLI) || !strings.HasSuffix(strings.ToLower(target.HerdrCLI), ".exe") || !validHerdrRoot(target.HerdrConfigRoot) {
-		return agenvo.Receipt{}, agenvo.ErrInvalidTarget
+		return computertarget.Receipt{}, computertarget.ErrInvalidTarget
 	}
 	argv, err := buildCommand(method, params, target)
 	if err != nil {
-		return agenvo.Receipt{}, err
+		return computertarget.Receipt{}, err
 	}
 	input, err := cliInput(target, argv)
 	if err != nil {
-		return agenvo.Receipt{}, err
+		return computertarget.Receipt{}, err
 	}
 	client, info, err := e.resolve(ctx, scope, target)
 	if err != nil {
-		return agenvo.Receipt{}, err
+		return computertarget.Receipt{}, err
 	}
 	if client == nil || info.Backend != bridge.WorkspaceBackendRemote || (info.OS != "win32" && info.OS != "windows") {
-		return agenvo.Receipt{}, agenvo.ErrUnsupported
+		return computertarget.Receipt{}, computertarget.ErrUnsupported
 	}
 	if ctx.Err() != nil {
-		return agenvo.Receipt{}, agenvo.ErrUnavailable
+		return computertarget.Receipt{}, computertarget.ErrUnavailable
 	}
 	ctx, cancel := context.WithTimeout(ctx, e.timeout)
 	defer cancel()
@@ -75,18 +75,18 @@ func (e *Executor) Invoke(ctx context.Context, scope agenvo.Scope, target agenvo
 		UnsetEnv: []string{"HERDR_*", "MEMOH_*", "PI_*", "MAGPIE_*", "OPENAI_*", "ANTHROPIC_*", "AZURE_*", "AWS_*", "GOOGLE_*", "GEMINI_*", "NODE_OPTIONS", "BASH_ENV", "ENV"},
 	})
 	if err != nil {
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}
 	defer func() { _ = stream.Close() }()
 	if err := stream.SendStdin(input); err != nil && !errors.Is(err, io.EOF) {
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}
 	if err := stream.CloseSend(); err != nil && !errors.Is(err, io.EOF) {
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}
 	stdout, stderr, exit, err := collectCLI(stream)
 	if err != nil {
-		return agenvo.Receipt{}, err
+		return computertarget.Receipt{}, err
 	}
 	return parseReceipt(method, target, exit, stdout, stderr)
 }
@@ -101,23 +101,23 @@ type cliPayload struct {
 	Session       string `json:"session"`
 }
 
-func cliInput(target agenvo.Target, argv []string) ([]byte, error) {
+func cliInput(target computertarget.Target, argv []string) ([]byte, error) {
 	if !validHerdrRoot(target.HerdrConfigRoot) {
-		return nil, agenvo.ErrInvalidTarget
+		return nil, computertarget.ErrInvalidTarget
 	}
 	if len(argv) == 0 || len(argv) > 64 {
-		return nil, agenvo.ErrUnsupported
+		return nil, computertarget.ErrUnsupported
 	}
 	quoted := make([]string, len(argv))
 	for i, arg := range argv {
 		if strings.ContainsRune(arg, 0) || !utf8.ValidString(arg) {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		quoted[i] = quoteWindowsArg(arg)
 	}
 	args := strings.Join(quoted, " ")
 	if len(utf16.Encode([]rune(args))) > maxWindowsArguments {
-		return nil, agenvo.ErrUnsupported
+		return nil, computertarget.ErrUnsupported
 	}
 	root := strings.TrimRight(strings.ReplaceAll(target.HerdrConfigRoot, "/", "\\"), "\\")
 	parent := root[:strings.LastIndex(root, "\\")]
@@ -133,7 +133,7 @@ func cliInput(target agenvo.Target, argv []string) ([]byte, error) {
 		ConfigPath: root + `\config.toml`, SocketPath: socket, XDGConfigHome: parent, Session: target.Session,
 	})
 	if err != nil || len(input) > maxCLIInput {
-		return nil, agenvo.ErrUnsupported
+		return nil, computertarget.ErrUnsupported
 	}
 	return input, nil
 }
@@ -196,31 +196,31 @@ func collectCLI(stream outputReceiver) ([]byte, []byte, int, error) {
 		msg, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			if !sawExit {
-				return nil, nil, 0, agenvo.ErrUnknown
+				return nil, nil, 0, computertarget.ErrUnknown
 			}
 			return stdout.Bytes(), stderr.Bytes(), exit, nil
 		}
 		if err != nil || msg == nil || sawExit {
-			return nil, nil, 0, agenvo.ErrUnknown
+			return nil, nil, 0, computertarget.ErrUnknown
 		}
 		switch msg.GetStream() {
 		case pb.ExecOutput_STDOUT:
 			if len(msg.GetData()) > maxCLIOutput-stdout.Len() {
-				return nil, nil, 0, agenvo.ErrUnknown
+				return nil, nil, 0, computertarget.ErrUnknown
 			}
 			stdout.Write(msg.GetData())
 		case pb.ExecOutput_STDERR:
 			if len(msg.GetData()) > maxCLIStderr-stderr.Len() {
-				return nil, nil, 0, agenvo.ErrUnknown
+				return nil, nil, 0, computertarget.ErrUnknown
 			}
 			stderr.Write(msg.GetData())
 		case pb.ExecOutput_EXIT:
 			if len(msg.GetData()) != 0 {
-				return nil, nil, 0, agenvo.ErrUnknown
+				return nil, nil, 0, computertarget.ErrUnknown
 			}
 			exit, sawExit = int(msg.GetExitCode()), true
 		default:
-			return nil, nil, 0, agenvo.ErrUnknown
+			return nil, nil, 0, computertarget.ErrUnknown
 		}
 	}
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -52,13 +52,13 @@ func TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit(t *tes
 	profile := map[string]any{
 		"instance_id": "synthetic-native-instance", "session": "synthetic", "work_dir": `C:\Synthetic`,
 		"bash_path": `C:\Synthetic\Git\bin\bash.exe`, "herdr_cli": `C:\Synthetic\herdr.exe`, "herdr_config_root": `C:\Synthetic\herdr`,
-		"agent":    agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`},
+		"agent":    computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`},
 		"producer": map[string]string{"program_path": `C:\Synthetic\producer.exe`, "config_dir": `C:\Synthetic\native-config`, "state_dir": `C:\Synthetic\native-state`},
 	}
 	f.config, _ = json.Marshal(map[string]any{"herdr": profile})
 	f.exec(t, "UPDATE user_runtimes SET provider_config=$1 WHERE id=$2", []byte(f.config), f.runtime)
 	f.exec(t, "UPDATE bot_sessions SET created_by_user_id=$1 WHERE id=$2", f.owner, f.session)
-	target, err := agenvo.DecodeNativeTarget(f.runtime, f.config)
+	target, err := computertarget.DecodeNativeTarget(f.runtime, f.config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,13 +82,13 @@ func TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit(t *tes
 		}
 		return p
 	}
-	native, legacy := pair("native"), pair("legacy-agenvo")
+	native, legacy := pair("native"), pair("legacy-executor")
 	data := []byte("native producer content remains authoritative")
 	sum := sha256.Sum256(data)
 	closed := deliverymeta.Closed{Plan: deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: id.OperationID, BotID: f.bot, UserID: f.owner, SessionID: f.session, TargetID: f.mount, RunID: id.Binding.RunID, Attempt: id.Attempt, Generation: id.Generation, RootHash: deliverymeta.RootHash(native.source)}, Artifact: deliverymeta.Artifact{SourceRef: "native-result", Mime: "text/plain"}}, Closed: true, SHA256: hex.EncodeToString(sum[:]), SizeBytes: int64(len(data))}
-	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: id.Attempt, Generation: id.Generation, Producer: &closed.Plan}}, Phase: "execution-completed"})
+	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: computertarget.BatchProgress{Attempt: id.Attempt, Generation: id.Generation, Producer: &closed.Plan}}, Phase: "execution-completed"})
 	op := f.operation(f.mount)
-	op.ID, op.RunID, op.TargetFingerprint, op.Details = id.OperationID, id.Binding.RunID, agenvo.TargetFingerprint(target), details
+	op.ID, op.RunID, op.TargetFingerprint, op.Details = id.OperationID, id.Binding.RunID, computertarget.TargetFingerprint(target), details
 	op, won, err := f.store.ClaimComputerOperation(ctx, op)
 	if err != nil || !won {
 		t.Fatal("original native operation", won, err)

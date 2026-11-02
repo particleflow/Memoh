@@ -12,9 +12,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
@@ -30,10 +30,10 @@ func (f observationReaderFunc) Recover(ctx context.Context, b toolcontext.Comput
 
 func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
-	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: computertarget.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
+	relay := computertarget.NewService(f, f, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		t.Fatal("HTTP ownership lookup contacted relay")
-		return agenvo.Receipt{}, nil
+		return computertarget.Receipt{}, nil
 	})
 	calls := 0
 	revoke := false
@@ -57,7 +57,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		if changeInstance {
 			f.registration.InstanceID = "replacement-instance"
 		}
-		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: availability, AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
+		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: computertarget.ReferenceObservation{Availability: availability, AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
 	})
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), observer)
 	e := echo.New()

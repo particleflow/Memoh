@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -17,7 +17,7 @@ import (
 // never the ordinary duplicate-submit path or the read-only recovery API.
 // Original task text must hash to the saved request; it is not reconstructed
 // from native terminal content, a new conversation, or a model's summary.
-func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.ComputerBinding, id string, in Submit, target agenvo.Target) (Result, error) {
+func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.ComputerBinding, id string, in Submit, target computertarget.Target) (Result, error) {
 	parsed, err := uuid.Parse(id)
 	if err != nil || parsed.String() != id || in.Kind != "herdr_pi_task" || target.NativeRuntimeID == "" || target.Agent.ExecutionMode != "pi-json-v1" {
 		return Result{}, ErrInvalid
@@ -26,7 +26,7 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 	if err != nil {
 		return Result{}, err
 	}
-	if r.TargetID != in.TargetID || r.TargetFingerprint != agenvo.TargetFingerprint(target) || r.Fingerprint != fingerprint(in) || d.Kind != in.Kind || d.Batch == nil || d.Batch.Progress.RequestHash != r.Fingerprint {
+	if r.TargetID != in.TargetID || r.TargetFingerprint != computertarget.TargetFingerprint(target) || r.Fingerprint != fingerprint(in) || d.Kind != in.Kind || d.Batch == nil || d.Batch.Progress.RequestHash != r.Fingerprint {
 		return result(r, d), ErrConflict
 	}
 	if d.Batch.Progress.Inputs != nil && d.Batch.Progress.Phase == "" && (d.InputPreparation == "preparing" || d.InputPreparation == "unavailable" || d.InputPreparation == "verified") {
@@ -52,31 +52,31 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		}
 		return out, nil
 	}
-	if r.CancelRequested || d.Agent != (agenvo.AgentProgress{}) || d.Batch.Receipt != nil || d.Batch.Result != nil || len(d.Batch.Files) != 0 || d.Batch.Progress.RequestID != "" {
-		return result(r, d), agenvo.ErrUnknown
+	if r.CancelRequested || d.Agent != (computertarget.AgentProgress{}) || d.Batch.Receipt != nil || d.Batch.Result != nil || len(d.Batch.Files) != 0 || d.Batch.Progress.RequestID != "" {
+		return result(r, d), computertarget.ErrUnknown
 	}
 	switch d.Batch.Progress.Phase {
 	case "batch_creating_workspace", "batch_workspace_adopted", "batch_tab_adopted":
 	default:
-		return result(r, d), agenvo.ErrUnknown
+		return result(r, d), computertarget.ErrUnknown
 	}
 	admitted, ok := s.store.(dbstore.ComputerOperationAdmissionStore)
 	if !ok || s.authorize == nil {
 		return result(r, d), ErrDenied
 	}
-	if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 		return result(r, d), err
 	}
 	if err := s.authorize(ctx, b, r.TargetID, in.Kind, in.Task); err != nil {
 		if errors.Is(err, ErrPreflightUnavailable) {
-			return result(r, d), agenvo.ErrUnavailable
+			return result(r, d), computertarget.ErrUnavailable
 		}
 		return result(r, d), err
 	}
 	if err := s.checkTaskInputAuthority(ctx, b, in, target, r, d.Batch.Progress.Inputs); err != nil {
 		return result(r, d), err
 	}
-	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
+	pinned := computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	work, cancel := context.WithTimeout(pinned, time.Minute)
 	defer cancel()
 
@@ -92,19 +92,19 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		}
 		return result(current, details), cause
 	}
-	save := func(p agenvo.BatchProgress) error {
+	save := func(p computertarget.BatchProgress) error {
 		preDispatch := p.Phase == "batch_creating_tab" || p.Phase == "batch_submitting"
 		if preDispatch {
 			// Persistence may outlive cancellation, but admission to a new
 			// native input may not. Reuse the current complete target policy.
 			if work.Err() != nil {
 				persistenceFailed = true
-				return agenvo.ErrUnknown
+				return computertarget.ErrUnknown
 			}
 			if err := s.authorize(work, b, r.TargetID, in.Kind, in.Task); err != nil {
 				persistenceFailed = true
 				if errors.Is(err, ErrPreflightUnavailable) {
-					return agenvo.ErrUnavailable
+					return computertarget.ErrUnavailable
 				}
 				return err
 			}
@@ -118,7 +118,7 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		current, _, readErr := s.load(persistCtx, b, id)
 		if readErr != nil || current.Revision != r.Revision || current.CancelRequested {
 			persistenceFailed = true
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		d.Batch.Progress, d.Phase = p, p.Phase
 		next := r
@@ -131,7 +131,7 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		next.Details, readErr = resumedBatchDetails(r.Details, p)
 		if readErr != nil {
 			persistenceFailed = true
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		var saved dbstore.ComputerOperationRecord
 		var saveErr error
@@ -147,12 +147,12 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 			if admissionBlocked(saveErr) {
 				return saveErr
 			}
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		r = saved
 		if json.Unmarshal(r.Details, &d) != nil {
 			persistenceFailed = true
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		return nil
 	}
@@ -176,12 +176,12 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		r.State = "unknown"
 		r.Details, err = resumedBatchDetails(r.Details, p)
 		if err != nil {
-			return reload(agenvo.ErrUnknown)
+			return reload(computertarget.ErrUnknown)
 		}
 		persistCtx, stop := context.WithTimeout(context.WithoutCancel(pinned), 3*time.Second)
 		defer stop()
 		if _, saveErr := s.store.SaveComputerOperation(persistCtx, r); saveErr != nil {
-			return reload(agenvo.ErrUnknown)
+			return reload(computertarget.ErrUnknown)
 		}
 		return reload(runErr)
 	}
@@ -190,10 +190,10 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 
 // Change only the observed execution references and phase. Preserve unknown
 // historical fields as well as the original request, producer and file ledger.
-func resumedBatchDetails(raw dbstore.JSON, p agenvo.BatchProgress) (dbstore.JSON, error) {
+func resumedBatchDetails(raw dbstore.JSON, p computertarget.BatchProgress) (dbstore.JSON, error) {
 	var details, batch, progress map[string]json.RawMessage
 	if json.Unmarshal(raw, &details) != nil || json.Unmarshal(details["batch"], &batch) != nil || json.Unmarshal(batch["progress"], &progress) != nil || details == nil || batch == nil || progress == nil {
-		return nil, agenvo.ErrUnknown
+		return nil, computertarget.ErrUnknown
 	}
 	for key, value := range map[string]string{
 		"phase": p.Phase, "workspace_id": p.WorkspaceID,

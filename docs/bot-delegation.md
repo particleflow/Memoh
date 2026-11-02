@@ -112,7 +112,7 @@ New shared-device plans use existing activated `memoh` Runtime registrations and
 `DecodeRuntimeTarget`. Both Bots must mount the same Runtime and current target
 fingerprint; native registration is rechecked against the owner-scoped registry.
 Workspace permissions remain the intersection of both Bots' current grants.
-Historical Agenvo records remain readable under existing authorization, but new
+Historical legacy executor records remain readable under existing authorization, but new
 plans do not select legacy devices or restore legacy execution. See the
 [native delegation regression evidence](validation/native-bot-delegation/README.md)
 for differential checks and the outstanding live acceptance boundary.

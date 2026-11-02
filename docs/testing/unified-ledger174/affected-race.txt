@@ -881,8 +881,8 @@
 === RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1
 --- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384 (1.49s)
 --- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits (8.84s)
-=== RUN   TestAgenvoV020PaneReadSchemaBounds
---- PASS: TestAgenvoV020PaneReadSchemaBounds (0.00s)
+=== RUN   Testlegacy executorV020PaneReadSchemaBounds
+--- PASS: Testlegacy executorV020PaneReadSchemaBounds (0.00s)
 === RUN   TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation
 --- PASS: TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation (0.15s)
 === RUN   TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart
@@ -1523,14 +1523,14 @@ ok  	github.com/felinics/memoh/cmd/transferqueue	16.343s
 --- PASS: TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation (0.00s)
 === RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
 --- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code (0.00s)
-=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build (0.00s)
---- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/codex
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/codex (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/claude-code
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/claude-code (0.00s)
+=== RUN   TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/grok-build
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess/grok-build (0.00s)
+--- PASS: TestHostRejectslegacy executorBeforeDirectRuntimeClientAccess (0.00s)
 --- PASS: TestPersistedCompletionProjection/too_few_records (0.00s)
 === RUN   TestHostPreservesUpstreamWorkspaceBehavior
 --- PASS: TestHostPreservesUpstreamWorkspaceBehavior (0.00s)

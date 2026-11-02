@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -17,11 +17,11 @@ import (
 type followupTransport struct {
 	t       *testing.T
 	base    *transportFixture
-	session *agenvo.AgentSessionInfo
+	session *computertarget.AgentSessionInfo
 	methods []string
 }
 
-func (f *followupTransport) call(_ context.Context, _ agenvo.Scope, _ agenvo.Target, method string, _ map[string]any) (agenvo.Receipt, error) {
+func (f *followupTransport) call(_ context.Context, _ computertarget.Scope, _ computertarget.Target, method string, _ map[string]any) (computertarget.Receipt, error) {
 	f.methods = append(f.methods, method)
 	if method != "agent.get" && method != "agent.read" {
 		f.t.Fatalf("historical observation attempted mutation %s", method)
@@ -43,13 +43,13 @@ func followupFixture(t *testing.T, session bool) (*Source, *fixtureStore, *follo
 	if session {
 		f.session = syntheticAgentSession("original")
 	}
-	source.service.relay = agenvo.NewService(store, permissionChecker{}, f.call)
+	source.service.relay = computertarget.NewService(store, permissionChecker{}, f.call)
 	base.agentName = "historical-agent"
-	progress := agenvo.AgentProgress{Name: base.agentName, WorkspaceID: "w-synthetic", PaneID: "p-agent", TerminalID: "t-agent", Phase: "prompt_submitted", PromptSubmitted: true, AgentSession: f.session}
+	progress := computertarget.AgentProgress{Name: base.agentName, WorkspaceID: "w-synthetic", PaneID: "p-agent", TerminalID: "t-agent", Phase: "prompt_submitted", PromptSubmitted: true, AgentSession: f.session}
 	details := Details{Kind: "herdr_pi_task", Phase: progress.Phase, Agent: progress}
 	raw, _ := json.Marshal(details)
 	target := fixtureTarget(store.mounts["pc-a"])
-	row := dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: "bot-a", SessionID: "thread-a", UserID: "user-a", TargetID: "pc-a", RunID: "run-a", State: "unknown", TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw}
+	row := dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: "bot-a", SessionID: "thread-a", UserID: "user-a", TargetID: "pc-a", RunID: "run-a", State: "unknown", TargetFingerprint: computertarget.TargetFingerprint(target), Details: raw}
 	store.records[row.ID] = row
 	r := result(row, details)
 
@@ -70,7 +70,7 @@ func TestRetiredFollowupRetainsReceiptsWithoutWritingOrDispatch(t *testing.T) {
 			row := store.records[initial.ID]
 			var d Details
 			_ = json.Unmarshal(row.Details, &d)
-			d.Followups = []FollowupRecord{{RequestID: in.RequestID, Fingerprint: fingerprint(in), Mode: in.Mode, Progress: agenvo.AgentFollowupProgress{State: state, Reason: "original_receipt", SessionRelation: "observed_match"}}}
+			d.Followups = []FollowupRecord{{RequestID: in.RequestID, Fingerprint: fingerprint(in), Mode: in.Mode, Progress: computertarget.AgentFollowupProgress{State: state, Reason: "original_receipt", SessionRelation: "observed_match"}}}
 			row.Details, _ = json.Marshal(d)
 			store.records[row.ID] = row
 			before := observationSnapshot(t, store)
@@ -83,7 +83,7 @@ func TestRetiredFollowupRetainsReceiptsWithoutWritingOrDispatch(t *testing.T) {
 				t.Fatal("changed replay intent accepted", err)
 			}
 			in.RequestID = uuid.NewString()
-			if _, err := source.service.followup(t.Context(), b, in); !errors.Is(err, agenvo.ErrUnsupported) {
+			if _, err := source.service.followup(t.Context(), b, in); !errors.Is(err, computertarget.ErrUnsupported) {
 				t.Fatal("retired input accepted", err)
 			}
 			if !slices.Equal(before, observationSnapshot(t, store)) || len(transport.methods) != 0 {
@@ -93,8 +93,8 @@ func TestRetiredFollowupRetainsReceiptsWithoutWritingOrDispatch(t *testing.T) {
 	}
 }
 
-func syntheticAgentSession(value string) *agenvo.AgentSessionInfo {
-	return &agenvo.AgentSessionInfo{Source: "herdr:pi", Agent: "pi", Kind: "path", Value: `C:\Synthetic\PRIVATE\` + value + ".jsonl"}
+func syntheticAgentSession(value string) *computertarget.AgentSessionInfo {
+	return &computertarget.AgentSessionInfo{Source: "herdr:pi", Agent: "pi", Kind: "path", Value: `C:\Synthetic\PRIVATE\` + value + ".jsonl"}
 }
 
 type followupFaultStore struct {

@@ -48,7 +48,7 @@ func (s *recordingWorkspaceHookService) Run(_ context.Context, req hooks.Request
 	return hooks.Result{Decision: hooks.DecisionAllow}, nil
 }
 
-func (p *containerTestTargetProvider) ResolveWorkspaceTarget(ctx context.Context, _ string, targetID string) (workspacepkg.ResolvedWorkspaceTarget, error) {
+func (p *containerTestTargetProvider) ResolveWorkspaceTarget(ctx context.Context, _, targetID string) (workspacepkg.ResolvedWorkspaceTarget, error) {
 	p.resolvedInput = targetID
 	p.resolvedCtx = workspacepkg.WorkspaceTargetFromContext(ctx)
 	return p.resolved, p.resolveErr

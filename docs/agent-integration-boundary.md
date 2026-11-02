@@ -22,14 +22,14 @@ guarantee or security boundary. Historical evidence is
 
 PR #4's extra external-runtime rejection has moved out of the engine to
 `cmd/internal/core/container_runtime_bridge.go`, injected into the host's
-Codex, Claude Code and Grok driver constructors. It rejects an Agenvo backend
+Codex, Claude Code and Grok driver constructors. It rejects an legacy executor backend
 before exposing a bridge client. The original upstream check continues to
 reject ordinary remote workspaces. Container information is not relabeled and
 failure never selects another workspace. Restoring the engine therefore does
 not make an unsupported command-only target eligible to host a full runtime.
 
 This boundary does not claim the whole Memoh repository is unchanged. Host
-wiring, tools under `internal/agent/tool`, `internal/agenvo`, account grants and
+wiring, tools under `internal/agent/tool`, `internal/computertarget`, account grants and
 workspace integration are extension code. No Claude Code, Codex or Pi vendor
 source is patched. Official tool configuration/plugins are distinct from
 modifying an Agent executable or its reasoning loop.
@@ -48,8 +48,8 @@ Pi/provider configuration and enforces authorization before transport.
 
 A PC-selected conversation must see and use only that PC. A native/NAS-selected
 conversation may choose among its Bot grants; multiple genuinely suitable PCs
-require disambiguation. A target ID is a Memoh mount ID, never an Agenvo
-device ID. Raw Agenvo search/execute access must be closed at both discovery
+require disambiguation. A target ID is a Memoh mount ID, never an legacy executor
+device ID. Raw legacy executor search/execute access must be closed at both discovery
 and execution boundaries, including stale tool routes, before claiming this
 isolation works. No grant is expanded by a skill, default selection or model.
 

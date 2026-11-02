@@ -55,7 +55,7 @@ import (
 
 // localSpeechSynthesizer synthesizes text to speech audio.
 type localSpeechSynthesizer interface {
-	Synthesize(ctx context.Context, modelID string, text string, overrideCfg map[string]any) ([]byte, string, error)
+	Synthesize(ctx context.Context, modelID, text string, overrideCfg map[string]any) ([]byte, string, error)
 }
 
 // localSpeechModelResolver resolves speech model IDs for bots.

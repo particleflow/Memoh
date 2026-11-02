@@ -39,7 +39,7 @@ Login and authenticated Bot/provider/template queries passed through both
 `http://127.0.0.1:18080` and the UI proxy at `http://127.0.0.1:18082`.
 Only local synthetic data and a loopback native-service fixture were used.
 
-- Race suites passed for Agenvo, computer tasks, image jobs, media, background
+- Race suites passed for legacy executor, computer tasks, image jobs, media, background
   tasks, session tasks and server. Focused handler/tool race tests cover task
   permissions, workspace observation, image queues and private device/OAuth
   cache policy. Real production Server/JWT middleware tests cover anonymous,

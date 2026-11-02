@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -18,7 +18,7 @@ import (
 func TestProducerResultRequiresCommittedOriginalLedger(t *testing.T) {
 	r := dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture"}
 	p := &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: r.ID, BotID: r.BotID, UserID: r.UserID, SessionID: r.SessionID, TargetID: r.TargetID, RunID: r.RunID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RootHash: deliverymeta.RootHash(`C:\Fixture`)}, Artifact: deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
-	d := Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: agenvo.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}, Result: &agenvo.PiJSONResult{Outcome: "succeeded"}}}
+	d := Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}, Result: &computertarget.PiJSONResult{Outcome: "succeeded"}}}
 	entry := deliveryEntry{Reference: DeliveryRequest{Version: 1, Direction: "upload", ContentHash: strings.Repeat("c", 64), SizeBytes: 7, Mime: "text/plain"}, Scope: strings.Repeat("d", 64), At: time.Now(), Outcome: "pending", Lease: "lease", Until: time.Now().Add(time.Minute), Attempts: 1}
 	for _, outcome := range []string{"pending", "committed", "failed", "canceled"} {
 		entry.Outcome = outcome
@@ -61,7 +61,7 @@ func exerciseProducerWake(t *testing.T, multiple bool) {
 	mount.ID = binding.TargetID
 	mount.BotID = binding.BotID
 	store.mounts = map[string]dbstore.BotRemoteRuntimeBindingRecord{mount.ID: mount}
-	source.service.relay = agenvo.NewService(store, producerPermissions{}, transport.call)
+	source.service.relay = computertarget.NewService(store, producerPermissions{}, transport.call)
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +79,7 @@ func exerciseProducerWake(t *testing.T, multiple bool) {
 	if err != nil || second.ID != first.ID || transport.runs != 1 {
 		t.Fatal("duplicate business submission", err)
 	}
-	if transport.progress.CompletionVersion != agenvo.BatchCompletionVersion || transport.progress.Producer == nil || transport.progress.Producer.Task.OperationID != first.ID || transport.progress.Producer.Task.RunID != binding.RunID {
+	if transport.progress.CompletionVersion != computertarget.BatchCompletionVersion || transport.progress.Producer == nil || transport.progress.Producer.Task.OperationID != first.ID || transport.progress.Producer.Task.RunID != binding.RunID {
 		t.Fatal("original operation identity lost")
 	}
 	var current Result
@@ -119,7 +119,7 @@ func exerciseProducerWake(t *testing.T, multiple bool) {
 func TestProducerMultipleLedgerPartialAndCancellation(t *testing.T) {
 	r := dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture"}
 	p := &deliverymeta.Plan{Version: 2, Task: deliverymeta.Task{OperationID: r.ID, BotID: r.BotID, UserID: r.UserID, SessionID: r.SessionID, TargetID: r.TargetID, RunID: r.RunID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RootHash: deliverymeta.RootHash(`C:\Fixture`)}, Artifacts: []deliverymeta.Artifact{{SourceRef: "first", Mime: "text/plain"}, {SourceRef: "second", Mime: "text/plain"}, {SourceRef: "third", Mime: "text/plain"}}}
-	d := Details{Batch: &BatchDetails{Progress: agenvo.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}}}
+	d := Details{Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}}}
 	entries := map[string]deliveryEntry{}
 	read := func() *ProducerResult {
 		r.Details, _ = json.Marshal(map[string]any{"delivery_ledger": deliveryLedger{Version: 3, Entries: entries}})

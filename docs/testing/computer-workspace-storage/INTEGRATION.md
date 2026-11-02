@@ -26,11 +26,11 @@ go test -p=1 -ldflags='-s -w' ./cmd/internal/core \
 ```
 
 After the diagnostics merge, the following exact selection passed in
-`internal/agenvo` (0.008s) and `internal/computertask` (0.639s), including the
+`internal/computertarget` (0.008s) and `internal/computertask` (0.639s), including the
 logging-off/on comparison and all nine result-read cases:
 
 ```sh
-go test -p=1 -ldflags='-s -w' ./internal/agenvo ./internal/computertask ./cmd/internal/core \
+go test -p=1 -ldflags='-s -w' ./internal/computertarget ./internal/computertask ./cmd/internal/core \
   -run '^Test(BatchReadTracePreservesSentinelIdentity|ResultReadTracePreservesErrorsAndDispatch|ImageCapability|DelegatedImage|ComputerTask)' \
   -count=1 -v
 ```

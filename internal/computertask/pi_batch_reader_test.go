@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -36,7 +36,7 @@ func (f *recoveryTransport) record() (dbstore.ComputerOperationRecord, Details) 
 	return r, d
 }
 
-func (f *recoveryTransport) call(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *recoveryTransport) call(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if target.NativeRuntimeID == "" || target.InstanceID != "herdr-a" {
@@ -54,10 +54,10 @@ func (f *recoveryTransport) call(ctx context.Context, scope agenvo.Scope, target
 			f.onCreate()
 		}
 		if f.lost {
-			return agenvo.Receipt{}, errors.New("synthetic lost creation response")
+			return computertarget.Receipt{}, errors.New("synthetic lost creation response")
 		}
 		if f.timeout {
-			return agenvo.Receipt{}, context.DeadlineExceeded
+			return computertarget.Receipt{}, context.DeadlineExceeded
 		}
 		workspace := "w-reader"
 		if f.malformed {
@@ -100,7 +100,7 @@ func (f *recoveryTransport) call(ctx context.Context, scope agenvo.Scope, target
 
 func installRecoveryTransport(source *Source, remote *batchTransport, id string) *recoveryTransport {
 	f := &recoveryTransport{base: remote, id: id}
-	source.service.relay = agenvo.NewService(remote.store, permissionChecker{}, f.call)
+	source.service.relay = computertarget.NewService(remote.store, permissionChecker{}, f.call)
 	return f
 }
 
@@ -134,7 +134,7 @@ func TestBatchReaderUnknownCreationNeverRecreates(t *testing.T) {
 				remote.onCreate = func() { store.revoked = true }
 			case "left_creating":
 				_, d := remote.record()
-				d.Batch.RecoveryReader = &agenvo.BatchRecoveryReader{RequestID: "11111111-1111-4111-8111-111111111111", Phase: "creating"}
+				d.Batch.RecoveryReader = &computertarget.BatchRecoveryReader{RequestID: "11111111-1111-4111-8111-111111111111", Phase: "creating"}
 				before.Details, _ = json.Marshal(d)
 				if _, err := store.SaveComputerOperation(t.Context(), before); err != nil {
 					t.Fatal(err)
@@ -181,12 +181,12 @@ func TestBatchReaderOnlyCASWinnerCreates(t *testing.T) {
 	// Its CAS fails, so it cannot create even though its read sees the same
 	// replaced control pane. The transport create is released after this test
 	// of the store CAS to avoid serializing the contender on the fixture lock.
-	d.Batch.RecoveryReader = &agenvo.BatchRecoveryReader{RequestID: "22222222-2222-4222-8222-222222222222", Phase: "creating"}
+	d.Batch.RecoveryReader = &computertarget.BatchRecoveryReader{RequestID: "22222222-2222-4222-8222-222222222222", Phase: "creating"}
 	r.Details, _ = json.Marshal(d)
 	if _, err := store.SaveComputerOperation(ctx, r); err == nil {
 		t.Fatal("stale reservation overwrote CAS winner")
 	}
-	if _, err := source.service.observe(ctx, binding, original.ID, true); !errors.Is(err, agenvo.ErrUnknown) {
+	if _, err := source.service.observe(ctx, binding, original.ID, true); !errors.Is(err, computertarget.ErrUnknown) {
 		t.Fatalf("concurrent collector did not stop on creating: %v", err)
 	}
 	close(release)

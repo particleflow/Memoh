@@ -433,7 +433,7 @@ func TestShortProbeCannotReclaimLiveLongInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 	go func() {
-		_, err := Run(ctx, f.client, spec, LogFunc(func(_ string, line string) {
+		_, err := Run(ctx, f.client, spec, LogFunc(func(_, line string) {
 			if line == "ready" {
 				ready <- struct{}{}
 			}

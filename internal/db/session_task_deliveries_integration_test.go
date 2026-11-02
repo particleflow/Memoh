@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/felinics/memoh/internal/accounts"
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/handlers"
@@ -35,9 +35,9 @@ func exerciseSessionDeliveryHTTP(ctx context.Context, t *testing.T, store *postg
 	botService := bots.NewService(log, queries)
 	accountService := accounts.NewService(log, store)
 	calls := 0
-	targets := agenvo.NewService(store, sessionDeliveryPermissions{botService, accountService}, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	targets := computertarget.NewService(store, sessionDeliveryPermissions{botService, accountService}, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		calls++
-		return agenvo.Receipt{}, errors.New("unexpected device call")
+		return computertarget.Receipt{}, errors.New("unexpected device call")
 	})
 	tasks := sessiontask.NewService(store, thread.NewService(log, queries, nil), workdir.NewService(store, nil), targets, "synthetic-account-secret")
 	handler := handlers.NewSessionTaskHandler(tasks, botService, accountService, nil)

@@ -3,15 +3,15 @@ import { runtimeAvailability, workspaceTargetAvailable, workspaceTargetStatusLab
 
 describe('computer observation labels', () => {
   it('separates unavailable authentication and unknown connection from confirmed offline', () => {
-    expect(runtimeAvailability({ provider: 'agenvo', online: false })).toBe('connection_unavailable')
+    expect(runtimeAvailability({ online: false })).toBe('offline')
     for (const availability of ['authentication_unavailable', 'connection_unavailable', 'runtime_unavailable', 'offline']) {
-      expect(runtimeAvailability({ provider: 'agenvo', online: false, availability })).toBe(availability)
-      const target = { kind: 'remote', provider: 'agenvo', online: false, status: availability }
+      expect(runtimeAvailability({ online: false, availability })).toBe('offline')
+      const target = { kind: 'remote', provider: 'memoh', online: false, status: availability }
       expect(workspaceTargetAvailable(target)).toBe(false)
       expect(workspaceTargetStatusLabel(target, key => `translated:${key}`)).toBe(`translated:runtimes.status.${availability}`)
     }
-    expect(workspaceTargetAvailable({ kind: 'remote', provider: 'agenvo', online: false })).toBe(false)
-    expect(workspaceTargetAvailable({ kind: 'remote', provider: 'agenvo', online: true, status: 'online' })).toBe(false)
+    expect(workspaceTargetAvailable({ kind: 'remote', provider: 'memoh', online: false })).toBe(false)
+    expect(workspaceTargetAvailable({ kind: 'remote', provider: 'memoh', online: true, status: 'online' })).toBe(true)
     expect(runtimeAvailability({ online: false })).toBe('offline')
   })
 })

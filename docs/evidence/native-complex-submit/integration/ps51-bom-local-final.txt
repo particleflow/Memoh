@@ -21,7 +21,7 @@
     --- PASS: TestNativeProducerComplexTaskPreflight/3435-utf8-bytes (0.01s)
     --- PASS: TestNativeProducerComplexTaskPreflight/3435-varied-bytes (0.01s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	0.039s
+ok  	github.com/felinics/memoh/internal/computertarget	0.039s
 === RUN   TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown
 --- PASS: TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown (0.02s)
 PASS

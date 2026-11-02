@@ -32,7 +32,7 @@ type SessionLister interface {
 type HistoryMessageReader interface {
 	ListLatestBySession(ctx context.Context, sessionID string, limit int32) ([]messagepkg.Message, error)
 	ListBeforeBySession(ctx context.Context, sessionID string, before time.Time, limit int32) ([]messagepkg.Message, error)
-	GetByIDBySession(ctx context.Context, sessionID string, messageID string) (messagepkg.Message, error)
+	GetByIDBySession(ctx context.Context, sessionID, messageID string) (messagepkg.Message, error)
 }
 
 // HistoryProvider exposes list_sessions, get_messages, and search_messages tools.

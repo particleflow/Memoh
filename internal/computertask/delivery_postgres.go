@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/felinics/memoh/internal/accounts"
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/sessiontask"
@@ -39,30 +39,30 @@ func NewPostgresDeliveryService(store *postgresstore.Store, assets DeliveryAsset
 		txStore := postgresstore.NewWithQueries(q)
 		queries := postgresstore.NewQueries(q)
 		permissions := &deliveryPermissions{bots: bots.NewService(nil, queries), accounts: accounts.NewService(nil, txStore)}
-		targets := agenvo.NewService(txStore, permissions, nil)
+		targets := computertarget.NewService(txStore, permissions, nil)
 		// Get does not use cursor encryption or publish events. Both readers are
 		// backed by this transaction; no device or Agent call is made.
 		tasks := sessiontask.NewService(txStore, thread.NewService(nil, queries, nil), workdir.NewService(txStore, nil), targets, "")
-		authorize := func(ctx context.Context, id DeliveryIdentity) (agenvo.Target, error) {
+		authorize := func(ctx context.Context, id DeliveryIdentity) (computertarget.Target, error) {
 			b := id.Binding
 			for _, permission := range []string{bots.PermissionChat, bots.PermissionWorkspaceRead, bots.PermissionWorkspaceWrite, bots.PermissionWorkspaceExec} {
 				allowed, err := permissions.HasBotPermission(ctx, b.BotID, b.UserID, permission)
 				if err != nil {
-					return agenvo.Target{}, err
+					return computertarget.Target{}, err
 				}
 				if !allowed {
-					return agenvo.Target{}, ErrDenied
+					return computertarget.Target{}, ErrDenied
 				}
 			}
 			item, err := tasks.Get(ctx, b.BotID, b.UserID, b.SessionID, sessiontask.ComputerOperation, id.OperationID)
 			if err != nil || item.SessionID != b.SessionID || item.TargetID != b.TargetID {
-				return agenvo.Target{}, ErrDenied
+				return computertarget.Target{}, ErrDenied
 			}
 			// Historical task metadata can survive retirement, but delivery must
 			// still pass the live target gate and retain its public denial.
-			target, err := targets.ResolveTarget(ctx, agenvo.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: b.TargetID})
+			target, err := targets.ResolveTarget(ctx, computertarget.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: b.TargetID})
 			if err != nil {
-				return agenvo.Target{}, ErrDenied
+				return computertarget.Target{}, ErrDenied
 			}
 			return target, nil
 		}

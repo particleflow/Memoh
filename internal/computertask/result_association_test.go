@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -70,7 +70,7 @@ func TestCommittedResultAssociationVerifiesBytesAndLiveLedger(t *testing.T) {
 			mount := store.mounts["pc-a"]
 			mount.ID, mount.BotID = b.TargetID, b.BotID
 			store.mounts = map[string]dbstore.BotRemoteRuntimeBindingRecord{b.TargetID: mount}
-			source.service.relay = agenvo.NewService(store, producerPermissions{}, nil)
+			source.service.relay = computertarget.NewService(store, producerPermissions{}, nil)
 			ctx, err := toolcontext.WithComputerBinding(t.Context(), b)
 			if err != nil {
 				t.Fatal(err)
@@ -83,12 +83,12 @@ func TestCommittedResultAssociationVerifiesBytesAndLiveLedger(t *testing.T) {
 			}
 			ref := DeliveryRequest{Version: 1, Direction: "upload", ContentHash: asset.ContentHash, SizeBytes: int64(len(data)), Mime: asset.Mime}
 			target := fixtureTarget(store.mounts[b.TargetID])
-			r := dbstore.ComputerOperationRecord{ID: "operation", BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: b.TargetID, RunID: b.RunID, State: "completed", TargetFingerprint: agenvo.TargetFingerprint(target), Revision: 3}
+			r := dbstore.ComputerOperationRecord{ID: "operation", BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: b.TargetID, RunID: b.RunID, State: "completed", TargetFingerprint: computertarget.TargetFingerprint(target), Revision: 3}
 			p := &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: r.ID, BotID: r.BotID, UserID: r.UserID, SessionID: r.SessionID, TargetID: r.TargetID, RunID: r.RunID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RootHash: deliverymeta.RootHash(`C:\Fixture`)}, Artifact: deliverymeta.Artifact{SourceRef: "result", Mime: ref.Mime}}
 			// Operation IDs in the producer contract are UUIDs.
 			r.ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
 			p.Task.OperationID = r.ID
-			d := Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: agenvo.BatchProgress{CompletionVersion: agenvo.BatchCompletionVersion, Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}, Receipt: &agenvo.BatchReceipt{Started: true}, Result: &agenvo.PiJSONResult{Outcome: "succeeded"}}}
+			d := Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: computertarget.BatchProgress{CompletionVersion: computertarget.BatchCompletionVersion, Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}, Receipt: &computertarget.BatchReceipt{Started: true}, Result: &computertarget.PiJSONResult{Outcome: "succeeded"}}}
 			entry := deliveryEntry{Reference: ref, Scope: strings.Repeat("d", 64), At: time.Now(), Outcome: "committed"}
 			switch mode {
 			case "partial":

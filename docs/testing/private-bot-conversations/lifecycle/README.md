@@ -133,7 +133,7 @@ acceptance. No full Web/Harmony build or unchanged UI test matrix was repeated.
 ## Remaining boundaries
 
 The existing draft's navigation/legacy-contact adoption decisions and old task
-presentation still require separate product review. Agenvo-only specialist
+presentation still require separate product review. legacy executor-only specialist
 registration/planning is a separate known capability gap and remains untouched.
 There is no data migration or schema change. Preserve additive contact rows on
 application rollback; never run generic migrate-down or replay unknown work.

@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/team"
@@ -18,7 +18,7 @@ import (
 
 func TestNativeAdmissionSnapshotCutoverAndLostResponse(t *testing.T) {
 	f := newNativeHerdrFixture(t)
-	profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\A`}}
+	profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\A`}}
 	a, _ := json.Marshal(map[string]any{"herdr": profile, "private": "SYNTHETIC-PRIVATE"})
 	profile.Agent.ConfigDir = `C:\Synthetic\B`
 	b, _ := json.Marshal(map[string]any{"herdr": profile, "private": "SYNTHETIC-PRIVATE"})
@@ -26,8 +26,8 @@ func TestNativeAdmissionSnapshotCutoverAndLostResponse(t *testing.T) {
 	f.config = a
 	request := uuid.NewString()
 	gate := f.change(t, request, 0, true)
-	service := agenvo.NewService(f.store, nil, nil)
-	check := func(out agenvo.Admission) {
+	service := computertarget.NewService(f.store, nil, nil)
+	check := func(out computertarget.Admission) {
 		t.Helper()
 		var raw []byte
 		if out.Revision == "" || !out.Paused || out.RequestID != request || out.ConnectionID != f.runtime || out.InstanceID != gate.InstanceID {
@@ -48,9 +48,9 @@ func TestNativeAdmissionSnapshotCutoverAndLostResponse(t *testing.T) {
 				t.Fatalf("mixed B revision/profile: %+v", out)
 			}
 		}
-		digest, _ := agenvo.NativeProfileConfigDigest(raw)
-		target, err := agenvo.DecodeNativeTarget(f.runtime, raw)
-		if err != nil || out.ConfigSHA256 != digest || out.TargetFingerprint != agenvo.TargetFingerprint(target) {
+		digest, _ := computertarget.NativeProfileConfigDigest(raw)
+		target, err := computertarget.DecodeNativeTarget(f.runtime, raw)
+		if err != nil || out.ConfigSHA256 != digest || out.TargetFingerprint != computertarget.TargetFingerprint(target) {
 			t.Fatalf("mixed digest/fingerprint: %+v %v", out, err)
 		}
 	}
@@ -120,7 +120,7 @@ func TestNativeAdmissionSnapshotCutoverAndLostResponse(t *testing.T) {
 		t.Fatal(err)
 	}
 	fs := postgresstore.NewWithQueries(dbsqlc.New(foreign))
-	if _, err = agenvo.NewService(fs, nil, nil).ReadAdmission(t.Context(), f.owner, f.runtime); err == nil {
+	if _, err = computertarget.NewService(fs, nil, nil).ReadAdmission(t.Context(), f.owner, f.runtime); err == nil {
 		t.Fatal("foreign team read")
 	}
 	f.exec(t, `UPDATE team_members SET is_active=false WHERE user_id=$1`, f.owner)

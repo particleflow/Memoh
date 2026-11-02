@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -39,7 +39,7 @@ type delegationPlanFixture struct {
 
 func newDelegationPlanFixture(t *testing.T, selected string) (*delegationPlanFixture, *botdelegation.Authority, botdelegation.Identity) {
 	t.Helper()
-	raw, err := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`}})
+	raw, err := json.Marshal(map[string]any{"herdr": computertarget.NativeHerdrProfile{InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func newDelegationPlanFixture(t *testing.T, selected string) (*delegationPlanFix
 }
 func (*delegationPlanFixture) ValidateSession(context.Context, string) error   { return nil }
 func (*delegationPlanFixture) BotTeam(context.Context, string) (string, error) { return "team", nil }
-func (f *delegationPlanFixture) Allowed(_ context.Context, user, bot string, _ string) (bool, error) {
+func (f *delegationPlanFixture) Allowed(_ context.Context, user, bot, _ string) (bool, error) {
 	return !f.denied && user == "user" && (bot == planSourceBot || bot == planTargetBot), nil
 }
 
@@ -118,8 +118,8 @@ func TestNativeDelegationPlanUsesExistingDistinctMounts(t *testing.T) {
 				t.Fatalf("pairs=%+v target=%s err=%v", pairs, target, err)
 			}
 			p := pairs[0]
-			decoded, err := agenvo.DecodeRuntimeTarget("memoh", planRuntime, f.registration.ProviderConfig)
-			if err != nil || p.SourceMountID != planSourceMount || p.TargetMountID != planTargetMount || p.RuntimeID != planRuntime || p.Fingerprint != agenvo.TargetFingerprint(decoded) {
+			decoded, err := computertarget.DecodeRuntimeTarget("memoh", planRuntime, f.registration.ProviderConfig)
+			if err != nil || p.SourceMountID != planSourceMount || p.TargetMountID != planTargetMount || p.RuntimeID != planRuntime || p.Fingerprint != computertarget.TargetFingerprint(decoded) {
 				t.Fatalf("unbound native pair=%+v %v", p, err)
 			}
 		})
@@ -151,7 +151,7 @@ func TestNativeDelegationPlanFailsClosed(t *testing.T) {
 					f.registration.ActivatedAt = time.Time{}
 				case "legacy provider":
 					s := f.mounts[planSourceBot+"/"+planSourceMount]
-					s.RuntimeProvider = "agenvo"
+					s.RuntimeProvider = "other"
 					f.mounts[planSourceBot+"/"+planSourceMount] = s
 				case "chat revoked":
 					f.denied = true

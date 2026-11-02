@@ -438,8 +438,8 @@
 === RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384
 --- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384 (1.40s)
 --- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits (8.34s)
-=== RUN   TestAgenvoV020PaneReadSchemaBounds
---- PASS: TestAgenvoV020PaneReadSchemaBounds (0.00s)
+=== RUN   Testlegacy executorV020PaneReadSchemaBounds
+--- PASS: Testlegacy executorV020PaneReadSchemaBounds (0.00s)
 === RUN   TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation
 --- PASS: TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation (0.11s)
 === RUN   TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart

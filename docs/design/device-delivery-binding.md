@@ -8,7 +8,7 @@ is not proof of completion. No Agent core modification is required.
 
 `DeviceTransferVerifier` authenticates the configured credential to a stable
 connection/device/instance tuple and rechecks revocation. It does not accept an
-account JWT or an Agenvo OAuth/control token. The implementation remains an
+account JWT or an legacy executor OAuth/control token. The implementation remains an
 injected port, disabled when absent; this candidate supplies synthetic fixtures,
 not production credentials or a production credential database.
 

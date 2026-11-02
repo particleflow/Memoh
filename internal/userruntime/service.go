@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -30,20 +30,20 @@ type ConnectionCommitGuard func() error
 // in-memory reverse-RPC connections. Bot/session routing belongs outside this
 // package.
 type Service struct {
-	agenvo           *agenvo.Service
+	targets          *computertarget.Service
 	store            dbstore.UserRuntimeStore
 	hub              *Hub
 	lifecycleLocks   *runtimeLifecycleLocks
 	workspaceStorage *workspaceStorage
 }
 
-func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
+func (s *Service) SetComputerTargetService(provider *computertarget.Service) { s.targets = provider }
 
-func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, profile agenvo.NativeHerdrProfile) (Runtime, error) {
-	if s.agenvo == nil {
-		return Runtime{}, agenvo.ErrUnavailable
+func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, profile computertarget.NativeHerdrProfile) (Runtime, error) {
+	if s.targets == nil {
+		return Runtime{}, computertarget.ErrUnavailable
 	}
-	row, err := s.agenvo.ConfigureNativeHerdr(ctx, owner, id, profile)
+	row, err := s.targets.ConfigureNativeHerdr(ctx, owner, id, profile)
 	if err != nil {
 		return Runtime{}, err
 	}
@@ -53,25 +53,25 @@ func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, pr
 	return runtime, nil
 }
 
-func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in agenvo.NativeProfileCutoverRequest) (agenvo.Admission, error) {
-	if s.agenvo == nil {
-		return agenvo.Admission{}, agenvo.ErrUnavailable
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in computertarget.NativeProfileCutoverRequest) (computertarget.Admission, error) {
+	if s.targets == nil {
+		return computertarget.Admission{}, computertarget.ErrUnavailable
 	}
-	return s.agenvo.CutoverPausedNativeProfile(ctx, owner, id, in)
+	return s.targets.CutoverPausedNativeProfile(ctx, owner, id, in)
 }
 
-func (s *Service) ReadComputerAdmission(ctx context.Context, owner, runtime string) (agenvo.Admission, error) {
-	if s.agenvo == nil {
-		return agenvo.Admission{}, agenvo.ErrUnavailable
+func (s *Service) ReadComputerAdmission(ctx context.Context, owner, runtime string) (computertarget.Admission, error) {
+	if s.targets == nil {
+		return computertarget.Admission{}, computertarget.ErrUnavailable
 	}
-	return s.agenvo.ReadAdmission(ctx, owner, runtime)
+	return s.targets.ReadAdmission(ctx, owner, runtime)
 }
 
-func (s *Service) SetComputerAdmission(ctx context.Context, owner, runtime string, in agenvo.ChangeAdmission) (agenvo.Admission, error) {
-	if s.agenvo == nil {
-		return agenvo.Admission{}, agenvo.ErrUnavailable
+func (s *Service) SetComputerAdmission(ctx context.Context, owner, runtime string, in computertarget.ChangeAdmission) (computertarget.Admission, error) {
+	if s.targets == nil {
+		return computertarget.Admission{}, computertarget.ErrUnavailable
 	}
-	return s.agenvo.SetAdmission(ctx, owner, runtime, in)
+	return s.targets.SetAdmission(ctx, owner, runtime, in)
 }
 
 func NewService(store dbstore.UserRuntimeStore, hub *Hub) *Service {
@@ -106,11 +106,8 @@ func (s *Service) CreateRuntime(ctx context.Context, userID string, req CreateRu
 	if len(name) > maxRuntimeNameBytes || strings.ContainsRune(name, '\x00') || !utf8.ValidString(name) {
 		return Runtime{}, fmt.Errorf("%w: name must be valid UTF-8 of at most %d bytes", ErrInvalidName, maxRuntimeNameBytes)
 	}
-	if req.Provider == agenvo.Provider || req.Agenvo != nil {
-		return Runtime{}, agenvo.ErrLegacyRetired
-	}
 	if req.Provider != "" && req.Provider != "memoh" {
-		return Runtime{}, agenvo.ErrInvalidTarget
+		return Runtime{}, computertarget.ErrInvalidTarget
 	}
 	if err := s.store.ExpirePendingUserRuntimes(ctx, userID); err != nil {
 		return Runtime{}, err
@@ -149,9 +146,6 @@ func (s *Service) ListRuntimes(ctx context.Context, userID string) ([]Runtime, e
 	items := make([]Runtime, 0, len(rows))
 	for _, row := range rows {
 		runtime := runtimeFromRecord(row, s.connection(row.ID))
-		if row.Provider == agenvo.Provider {
-			continue // Historical rows remain stored, but are never selectable or probed.
-		}
 		// A credential becomes a manageable computer only after a ready
 		// connection consumes its short-lived pending state. Persisting that
 		// boundary keeps listing correct across restarts and browser failures.
@@ -331,26 +325,13 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 		ID: row.ID, TeamID: row.TeamID, Name: row.Name, Key: row.APIToken, CreatedAt: row.CreatedAt,
 	}
 	runtime.Provider = row.Provider
-	if row.Provider == agenvo.Provider {
-		runtime.Availability = "connection_unavailable"
-		runtime.Key = ""
-		runtime.OS = "windows"
-		runtime.Capabilities = []string{agenvo.CapabilityForegroundExec}
-		if target, err := agenvo.DecodeTarget(row.ProviderConfig); err == nil {
-			runtime.WorkspaceBase = target.WorkDir
-			if target.Agent != (agenvo.AgentProfile{}) {
-				runtime.Capabilities = append(runtime.Capabilities, "herdr_pi_task")
-			}
-		}
-		return runtime
-	}
-	target, targetErr := agenvo.DecodeRuntimeTarget(row.Provider, row.ID, row.ProviderConfig)
+	target, targetErr := computertarget.DecodeRuntimeTarget(row.Provider, row.ID, row.ProviderConfig)
 	if targetErr == nil && target.NativeRuntimeID != "" {
-		digest, _ := agenvo.NativeProfileConfigDigest(row.ProviderConfig)
+		digest, _ := computertarget.NativeProfileConfigDigest(row.ProviderConfig)
 		runtime.NativeHerdr = &NativeHerdrIdentity{
 			ConnectionID: target.ConnectionID, DeviceID: target.DeviceID,
 			InstanceID: target.InstanceID, Session: target.Session,
-			TargetFingerprint: agenvo.TargetFingerprint(target),
+			TargetFingerprint: computertarget.TargetFingerprint(target),
 			ConfigSHA256:      digest,
 		}
 	}
@@ -365,8 +346,8 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 	runtime.ClientVersion = connection.Info.ClientVersion
 	runtime.Capabilities = append([]string(nil), connection.Info.Capabilities...)
 	if runtime.NativeHerdr != nil {
-		runtime.Capabilities = append(runtime.Capabilities, agenvo.CapabilityForegroundExec)
-		if target.Agent != (agenvo.AgentProfile{}) {
+		runtime.Capabilities = append(runtime.Capabilities, computertarget.CapabilityForegroundExec)
+		if target.Agent != (computertarget.AgentProfile{}) {
 			runtime.Capabilities = append(runtime.Capabilities, "herdr_pi_task")
 		}
 	}

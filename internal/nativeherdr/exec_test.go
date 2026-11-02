@@ -21,13 +21,13 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 	pb "github.com/felinics/memoh/internal/workspace/bridgepb"
 )
 
-func syntheticTarget() agenvo.Target {
-	return agenvo.Target{
+func syntheticTarget() computertarget.Target {
+	return computertarget.Target{
 		NativeRuntimeID: "synthetic-runtime", HerdrCLI: `C:\Program Files\Herdr\herdr.exe`,
 		HerdrConfigRoot: `C:\Synthetic User\Herdr`, WorkDir: `C:\Synthetic`, Session: "synthetic-session",
 	}
@@ -77,7 +77,7 @@ func TestWindowsArgumentsRemainData(t *testing.T) {
 
 func TestCLIInputRejectsUnrepresentableArguments(t *testing.T) {
 	for _, argv := range [][]string{nil, {"a\x00b"}, {string([]byte{0xff})}, {strings.Repeat("🙂", maxWindowsArguments)}} {
-		if _, err := cliInput(syntheticTarget(), argv); !errors.Is(err, agenvo.ErrUnsupported) {
+		if _, err := cliInput(syntheticTarget(), argv); !errors.Is(err, computertarget.ErrUnsupported) {
 			t.Errorf("invalid arguments accepted: %v", err)
 		}
 	}
@@ -158,7 +158,7 @@ func TestCollectCLIRequiresCompleteBoundedOutput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, _, _, err := collectCLI(&syntheticOutput{frames: tt.frames, err: tt.err})
-			if !errors.Is(err, agenvo.ErrUnknown) || strings.Contains(err.Error(), "PRIVATE") {
+			if !errors.Is(err, computertarget.ErrUnknown) || strings.Contains(err.Error(), "PRIVATE") {
 				t.Fatalf("must fail unknown without private output: %v", err)
 			}
 		})
@@ -222,11 +222,11 @@ func runtimeClient(t *testing.T, runtime *recordingRuntime) *bridge.Client {
 
 func TestInvokeUsesNativeRuntimeWithoutReplay(t *testing.T) {
 	target := syntheticTarget()
-	scope := agenvo.Scope{BotID: "bot", TargetID: "mount", UserID: "user"}
+	scope := computertarget.Scope{BotID: "bot", TargetID: "mount", UserID: "user"}
 	runtime := &recordingRuntime{respond: func(s pb.ContainerService_ExecServer) error { return s.Send(exited(0)) }}
 	client := runtimeClient(t, runtime)
 	resolves := 0
-	executor := NewExecutor(func(_ context.Context, gotScope agenvo.Scope, gotTarget agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
+	executor := NewExecutor(func(_ context.Context, gotScope computertarget.Scope, gotTarget computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		resolves++
 		if gotScope != scope || gotTarget != target {
 			t.Fatal("identity changed before resolving mount")
@@ -250,7 +250,7 @@ func TestInvokeUsesNativeRuntimeWithoutReplay(t *testing.T) {
 
 func TestInvokeUnknownResolvesSameRuntimeOnExplicitRead(t *testing.T) {
 	target := syntheticTarget()
-	scope := agenvo.Scope{BotID: "bot", TargetID: "mount", UserID: "user"}
+	scope := computertarget.Scope{BotID: "bot", TargetID: "mount", UserID: "user"}
 	oldRuntime := &recordingRuntime{respond: func(pb.ContainerService_ExecServer) error {
 		return status.Error(codes.Unavailable, "PRIVATE lost acknowledgement")
 	}}
@@ -262,14 +262,14 @@ func TestInvokeUnknownResolvesSameRuntimeOnExplicitRead(t *testing.T) {
 	}}
 	current := runtimeClient(t, oldRuntime)
 	newClient := runtimeClient(t, newRuntime)
-	executor := NewExecutor(func(_ context.Context, gotScope agenvo.Scope, gotTarget agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
+	executor := NewExecutor(func(_ context.Context, gotScope computertarget.Scope, gotTarget computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		if gotScope != scope || gotTarget != target {
 			t.Fatal("reconnect changed pinned identity")
 		}
 		return current, bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, OS: "win32"}, nil
 	})
 	_, err := executor.Invoke(t.Context(), scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": "p1", "command": "synthetic write"})
-	if !errors.Is(err, agenvo.ErrUnknown) || strings.Contains(err.Error(), "PRIVATE") || oldRuntime.calls.Load() != 1 || newRuntime.calls.Load() != 0 {
+	if !errors.Is(err, computertarget.ErrUnknown) || strings.Contains(err.Error(), "PRIVATE") || oldRuntime.calls.Load() != 1 || newRuntime.calls.Load() != 0 {
 		t.Fatalf("unknown operation was replayed or exposed private cause: %v", err)
 	}
 	current = newClient
@@ -282,29 +282,29 @@ func TestInvokeUnknownResolvesSameRuntimeOnExplicitRead(t *testing.T) {
 func TestInvokeTimeoutIsUnknownWithoutReplay(t *testing.T) {
 	runtime := &recordingRuntime{respond: func(s pb.ContainerService_ExecServer) error { <-s.Context().Done(); return s.Context().Err() }}
 	client := runtimeClient(t, runtime)
-	executor := NewExecutor(func(context.Context, agenvo.Scope, agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
+	executor := NewExecutor(func(context.Context, computertarget.Scope, computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		return client, bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, OS: "win32"}, nil
 	})
 	executor.timeout = 100 * time.Millisecond
 	target := syntheticTarget()
-	_, err := executor.Invoke(t.Context(), agenvo.Scope{BotID: "bot", TargetID: "mount"}, target, "pane.run", map[string]any{"session": target.Session, "paneId": "p1", "command": "synthetic write"})
-	if !errors.Is(err, agenvo.ErrUnknown) || runtime.calls.Load() != 1 {
+	_, err := executor.Invoke(t.Context(), computertarget.Scope{BotID: "bot", TargetID: "mount"}, target, "pane.run", map[string]any{"session": target.Session, "paneId": "p1", "command": "synthetic write"})
+	if !errors.Is(err, computertarget.ErrUnknown) || runtime.calls.Load() != 1 {
 		t.Fatalf("timeout must remain unknown, one invocation: %v calls=%d", err, runtime.calls.Load())
 	}
 }
 
 func TestInvokeRejectsInvalidTargetAndUnavailableAuthority(t *testing.T) {
 	target := syntheticTarget()
-	scope := agenvo.Scope{BotID: "bot", TargetID: "mount"}
+	scope := computertarget.Scope{BotID: "bot", TargetID: "mount"}
 	resolves := 0
-	executor := NewExecutor(func(context.Context, agenvo.Scope, agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
+	executor := NewExecutor(func(context.Context, computertarget.Scope, computertarget.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		resolves++
-		return nil, bridge.WorkspaceInfo{}, agenvo.ErrTargetChanged
+		return nil, bridge.WorkspaceInfo{}, computertarget.ErrTargetChanged
 	})
 	for _, path := range []string{"herdr.exe", `C:\Herdr\herdr.cmd`, `C:\Herdr\herdr.bat`, `C:\Herdr\herdr.ps1`, "C:\\Herdr\\bad\n.exe"} {
 		bad := target
 		bad.HerdrCLI = path
-		if _, err := executor.Invoke(t.Context(), scope, bad, "workspace.list", map[string]any{"session": target.Session}); !errors.Is(err, agenvo.ErrInvalidTarget) {
+		if _, err := executor.Invoke(t.Context(), scope, bad, "workspace.list", map[string]any{"session": target.Session}); !errors.Is(err, computertarget.ErrInvalidTarget) {
 			t.Fatalf("invalid executable accepted: %v", err)
 		}
 	}
@@ -312,7 +312,7 @@ func TestInvokeRejectsInvalidTargetAndUnavailableAuthority(t *testing.T) {
 		t.Fatal("invalid deployment target reached resolver")
 	}
 	_, err := executor.Invoke(t.Context(), scope, target, "workspace.list", map[string]any{"session": target.Session})
-	if !errors.Is(err, agenvo.ErrTargetChanged) || resolves != 1 {
+	if !errors.Is(err, computertarget.ErrTargetChanged) || resolves != 1 {
 		t.Fatalf("authority failure lost: %v", err)
 	}
 }

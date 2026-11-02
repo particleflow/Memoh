@@ -11,9 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/accounts"
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/sessiontask"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -225,7 +225,7 @@ func (h *SessionTaskHandler) Observe(c echo.Context) error {
 		return apperror.New(apperror.CodeSessionNotFound, nil)
 	}
 	observation, err := h.computers.Recover(ctx, binding, id)
-	if errors.Is(err, computertask.ErrDenied) || errors.Is(err, agenvo.ErrTargetChanged) {
+	if errors.Is(err, computertask.ErrDenied) || errors.Is(err, computertarget.ErrTargetChanged) {
 		return apperror.New(apperror.CodeSessionNotFound, nil)
 	}
 	if err != nil {

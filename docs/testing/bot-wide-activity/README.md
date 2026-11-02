@@ -13,7 +13,7 @@ Local merge checkpoint `9253f2515370812a1bb0fccdf1f29e5e69de4ca7`, tree
 `23dd0813918a44061a959ff109805c44ab2de91f`, preserves both reviewed parents:
 
 - UI: `d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb`.
-- Agenvo retirement: `e2cb0767eb12a54abd670d754c72ab7b4b7798c8`.
+- legacy executor retirement: `e2cb0767eb12a54abd670d754c72ab7b4b7798c8`.
 
 The merge had no conflicts. d2b did not change locales; all three locale files
 retain e2cb exactly. Old queues/history and the native shared adapters are kept.

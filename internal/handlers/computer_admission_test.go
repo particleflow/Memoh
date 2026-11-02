@@ -12,8 +12,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
@@ -22,7 +22,7 @@ import (
 
 type admissionHTTPStore struct {
 	dbstore.UserRuntimeStore
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	owner, runtime string
 	config         dbstore.JSON
 	row            dbstore.ComputerAdmission
@@ -65,15 +65,15 @@ func (s *admissionHTTPStore) ChangeComputerAdmission(_ context.Context, _, _ str
 func TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection(t *testing.T) {
 	const secret = "synthetic-admission-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
 	owner, runtime := uuid.NewString(), uuid.NewString()
-	target := agenvo.Target{InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
-	raw, _ := json.Marshal(map[string]any{"private_fixture": "SYNTHETIC-PRIVATE-CONFIG", "herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}}})
+	target := computertarget.Target{InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
+	raw, _ := json.Marshal(map[string]any{"private_fixture": "SYNTHETIC-PRIVATE-CONFIG", "herdr": computertarget.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}}})
 	store := &admissionHTTPStore{owner: owner, runtime: runtime, config: raw, row: dbstore.ComputerAdmission{ConnectionID: runtime, DeviceID: runtime, InstanceID: target.InstanceID}}
 	service := userruntime.NewService(store, nil)
 	calls := 0
-	service.SetAgenvoService(agenvo.NewService(store, nil, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	service.SetComputerTargetService(computertarget.NewService(store, nil, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		calls++
 		t.Fatal("owner control or retired route dispatched native operation")
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}))
 	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUserRuntimeHandler(nil, service)}}
 	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string, string) error { return nil }, capture)

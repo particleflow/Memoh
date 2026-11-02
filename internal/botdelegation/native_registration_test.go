@@ -10,62 +10,20 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
-	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 const nativeRuntimeID = "11111111-1111-4111-8111-111111111111"
 
-type nativeMountFixture struct {
-	*authorityFixture
-	registration    dbstore.UserRuntimeRecord
-	registrationErr error
-	mcpCalls        int
-}
-
-func (f *nativeMountFixture) OwnedNativeHerdrRuntime(_ context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
-	if f.registrationErr != nil {
-		return dbstore.UserRuntimeRecord{}, f.registrationErr
-	}
-	if owner != f.registration.UserID || id != f.registration.ID {
-		return dbstore.UserRuntimeRecord{}, ErrDenied
-	}
-	return f.registration, nil
-}
-
-func (f *nativeMountFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	f.mcpCalls++
-	return "", errors.New("legacy MCP must not be used")
-}
-
-func nativeFixture(t *testing.T) (*Authority, *nativeMountFixture, Identity, DevicePair) {
+func nativeFixture(t *testing.T) (*Authority, *authorityFixture, Identity, DevicePair) {
 	t.Helper()
 	a, f, b, p := fixture()
-	raw, err := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{
-		InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`,
-		Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "fixture", ConfigDir: `C:\Synthetic\pi`},
-	}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for key, m := range f.mounts {
-		m.RuntimeProvider, m.RuntimeID, m.RuntimeProviderConfig = "memoh", nativeRuntimeID, raw
-		f.mounts[key] = m
-	}
-	target, err := agenvo.DecodeRuntimeTarget("memoh", nativeRuntimeID, raw)
-	if err != nil {
-		t.Fatal(err)
-	}
-	p.RuntimeID, p.Fingerprint = nativeRuntimeID, agenvo.TargetFingerprint(target)
 	root := f.sessions["root"]
 	root.Metadata = map[string]any{"workspace_target_id": p.SourceMountID}
 	f.sessions[root.ID] = root
 	b.SourceSelection = p.SourceMountID
-	nf := &nativeMountFixture{authorityFixture: f, registration: dbstore.UserRuntimeRecord{ID: nativeRuntimeID, UserID: "owner", Provider: "memoh", ActivatedAt: time.Now(), ProviderConfig: raw}}
-	a.Mounts = nf
-	return a, nf, b, p
+	return a, f, b, p
 }
 
 func TestNativeRegistrationBindsDistinctBotsAndReconstructsScope(t *testing.T) {
@@ -106,7 +64,7 @@ func TestNativeRegistrationRejectsLiveChangesAndForgedIdentity(t *testing.T) {
 			case "not activated":
 				f.registration.ActivatedAt = time.Time{}
 			case "registry provider":
-				f.registration.Provider = "agenvo"
+				f.registration.Provider = "retired"
 			case "registry owner":
 				f.registration.UserID = "other"
 			case "registry id":
@@ -274,19 +232,5 @@ func TestNativeTextAndOriginalReadsDoNotGrantExecution(t *testing.T) {
 	}
 	if _, err := a.PlanDevice(t.Context(), b, "other-source-mount", p.TargetMountID); !errors.Is(err, ErrDenied) {
 		t.Fatalf("source selection broadened: %v", err)
-	}
-}
-
-func TestLegacyRegistrationRemainsReadableButCannotPlanNewDevice(t *testing.T) {
-	a, f, b, p := fixture()
-	root := f.sessions["root"]
-	root.Metadata = map[string]any{"workspace_target_id": p.SourceMountID}
-	f.sessions[root.ID] = root
-	b.SourceSelection = p.SourceMountID
-	if _, err := a.Authorize(t.Context(), b); err != nil {
-		t.Fatalf("historical source: %v", err)
-	}
-	if _, err := a.PlanDevice(t.Context(), b, p.SourceMountID, p.TargetMountID); !errors.Is(err, ErrDenied) {
-		t.Fatalf("new legacy plan: %v", err)
 	}
 }

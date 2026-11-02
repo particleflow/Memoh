@@ -41,7 +41,7 @@
     "internal/agent/tool/subagent_admission_test.go": 1,
     "internal/agent/tool/subagent_step_persist_test.go": 1,
     "internal/agent/view/uimessage_background.go": 1,
-    "internal/agenvo/pi_batch_history_test.go": 2,
+    "internal/computertarget/pi_batch_history_test.go": 2,
     "internal/apps/service_test.go": 1,
     "internal/auth/jwt_test.go": 4,
     "internal/botworkspace/service.go": 1,

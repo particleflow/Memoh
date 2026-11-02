@@ -1,1 +1,0 @@
-ok  	github.com/felinics/memoh/internal/db	202.983s

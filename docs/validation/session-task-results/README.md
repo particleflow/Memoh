@@ -47,7 +47,7 @@ Mobile implementation is outside this PR.
 
 ## Initial checkpoint verification (2026-10-22 UTC, `20d91381`)
 
-- Go race: `internal/sessiontask`, `internal/handlers`, `internal/agenvo`,
+- Go race: `internal/sessiontask`, `internal/handlers`, `internal/computertarget`,
   `internal/computertask`, `internal/auth`, `internal/server`, `internal/apperror`.
 - Tests cover success/failure/abort/incomplete, no-start, empty/truncated output,
   protocol/output-limit failure, legacy/future version, mismatched/missing
@@ -103,7 +103,7 @@ Mobile implementation is outside this PR.
 - Rebuilt/restarted the combined native Server; direct/proxy authenticated
   readiness passed. Go race and affected Go lint passed for `cmd/internal/core`,
   `internal/computertask`, `internal/sessiontask`, `internal/handlers`, and
-  `internal/agenvo`, including preflight and real JWT/handler denial/no-store
+  `internal/computertarget`, including preflight and real JWT/handler denial/no-store
   regressions. PostgreSQL owned-tree/cursor integration passed again.
 - Repeated 17 actual HTTP scope/pagination/revocation checks with a displayable
   completion and 16 list/detail GETs across 8 outcomes. GETs did not change
@@ -134,7 +134,7 @@ Mobile implementation is outside this PR.
   from `7c6fa8a0`; its 162 passing tests and 442 full-typecheck errors remain the
   applicable frontend verification, not a claim that typecheck is green.
 - Repeated Go race tests for `cmd/internal/core`, `internal/computertask`,
-  `internal/sessiontask`, `internal/handlers`, `internal/agenvo` and
+  `internal/sessiontask`, `internal/handlers`, `internal/computertarget` and
   `internal/mcp`: all passed, including standard MCP structured preflight and
   safe OAuth category/transport/logger regressions. Task authorization,
   revocation, no-store and GET-no-dispatch tests passed on this combined tree.
@@ -172,7 +172,7 @@ Mobile implementation is outside this PR.
   prior **442 diagnostics**, compared after removing shifted line numbers.
   This corrects documentation/types, not authentication behavior, and does not
   make the full Web typecheck green.
-- Go race passed for core, computertask, sessiontask, handlers, agenvo, mcp,
+- Go race passed for core, computertask, sessiontask, handlers, legacy-executor, mcp,
   apperror and server. Affected Go lint passed. The combined frontend suite has
   **173 passing tests**, covering task identity/late-response behavior, OAuth
   transaction flow, API auth and API/SSE errors. ESLint has zero errors and 18

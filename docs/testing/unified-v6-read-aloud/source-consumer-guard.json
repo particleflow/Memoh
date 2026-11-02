@@ -82,7 +82,7 @@
     "conf",
     "internal/transferclient",
     "internal/deliverymeta",
-    "internal/agenvo/pi_batch_producer.go",
+    "internal/computertarget/pi_batch_producer.go",
     "internal/agent/runtime"
   ],
   "HAP27_contains_fixes": false,
