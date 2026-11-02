@@ -16,7 +16,7 @@ type fakeQuoteReplyMessages struct {
 	rows map[string]message.Message
 }
 
-func (f *fakeQuoteReplyMessages) GetByIDBySession(ctx context.Context, sessionID string, messageID string) (message.Message, error) {
+func (f *fakeQuoteReplyMessages) GetByIDBySession(_ context.Context, _ string, messageID string) (message.Message, error) {
 	row, ok := f.rows[messageID]
 	if !ok {
 		return message.Message{}, errors.New("not found")
@@ -41,9 +41,9 @@ func TestResolveQuoteReplyTargetTruncatesPreview(t *testing.T) {
 	}
 	service := quoteReplyService(map[string]message.Message{
 		"11111111-1111-1111-1111-111111111111": {
-			ID:               "11111111-1111-1111-1111-111111111111",
-			Role:             "assistant",
-			Content:          content,
+			ID:                "11111111-1111-1111-1111-111111111111",
+			Role:              "assistant",
+			Content:           content,
 			SenderDisplayName: "Research Bot",
 		},
 	})
@@ -89,10 +89,10 @@ func TestResolveQuoteReplyTargetUsesUserSender(t *testing.T) {
 	}
 	service := quoteReplyService(map[string]message.Message{
 		"44444444-4444-4444-4444-444444444444": {
-			ID:               "44444444-4444-4444-4444-444444444444",
-			Role:             "user",
-			Content:          content,
-			DisplayContent:   "earlier question",
+			ID:                "44444444-4444-4444-4444-444444444444",
+			Role:              "user",
+			Content:           content,
+			DisplayContent:    "earlier question",
 			SenderDisplayName: "Alice",
 		},
 	})
