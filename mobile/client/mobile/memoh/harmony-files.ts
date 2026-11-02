@@ -15,6 +15,7 @@ import { diagnosticTransfer, responseRequestTag } from './harmony-diagnostics'
 import { normalizeDelegationPath } from './harmony-service-url'
 import { saveNativeOriginal } from './harmony-download'
 import { nativeAttachmentCommand, stageNativeFile, forgetNativeFile, type NativeAttachment, type NativeUploadReceipt } from './harmony-resumable'
+import { noteUploadBytes, clearUploadBytes } from './harmony-transfer-progress'
 
 const digest = async (bytes: ArrayBuffer) => Array.from(
   new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
@@ -124,7 +125,8 @@ function uploadFetch(progress: ((value: UploadProgress) => void) | undefined, at
   }
 }
 
-export async function originalBlob(attachment: UIAttachment, signal?: AbortSignal): Promise<Blob> {
+export async function originalBlob(attachment: UIAttachment, signal?: AbortSignal,
+  progress?: { onProgress?: (loaded: number, total: number) => void }): Promise<Blob> {
   // Observability must never replace the original transfer/validation outcome.
   // Keep only fixed local failure phases, never the diagnostic Error or payload.
   const diagnosticFailure = (phase: 'INIT' | 'EVENT') => {
@@ -141,7 +143,7 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
   } catch { diagnosticFailure('INIT') }
   trace('send')
   try {
-    const blob = await readOriginalBlob(attachment, signal, trace)
+    const blob = await readOriginalBlob(attachment, signal, trace, progress)
     return blob
   } catch (error) {
     trace(signal?.aborted ? 'abort' : 'error')
@@ -150,7 +152,8 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
 }
 
 async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | undefined,
-  trace: ReturnType<typeof diagnosticTransfer>): Promise<Blob> {
+  trace: ReturnType<typeof diagnosticTransfer>,
+  progress?: { onProgress?: (loaded: number, total: number) => void }): Promise<Blob> {
   signal?.throwIfAborted()
   const timing = imageTimingHandle(attachment)
   const hash = String(attachment.content_hash ?? '')
@@ -160,6 +163,37 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
   }
   let bytes: unknown
   let response: Response
+  // Client-side progress only: the same verified response body is consumed once
+  // through its stream so byte counts come from the real wire read; the rebuilt
+  // Response hands the identical bytes to the existing SDK parse and checks.
+  const observeProgress = (source: typeof fetch): typeof fetch => {
+    // Bind the optional callback once: property narrowing cannot cross the
+    // async closure boundary, and the wire contract forbids mid-read swaps.
+    const onProgress = progress?.onProgress
+    if (!onProgress) return source
+    return async (input, init) => {
+      const result = await source(input, init)
+      if (!result.ok || !result.body) return result
+      const declared = Number(result.headers.get('content-length'))
+      const total = Number.isSafeInteger(declared) && declared > 0
+        ? declared
+        : (typeof attachment.size === 'number' && Number.isSafeInteger(attachment.size) && attachment.size > 0 ? attachment.size : 0)
+      const reader = result.body.getReader()
+      const chunks: Uint8Array[] = []
+      let loaded = 0
+      for (;;) {
+        const step = await reader.read()
+        if (step.done) break
+        chunks.push(step.value)
+        loaded += step.value.byteLength
+        onProgress(loaded, total)
+      }
+      const merged = new Uint8Array(loaded)
+      let at = 0
+      for (const chunk of chunks) { merged.set(chunk, at); at += chunk.byteLength }
+      return new Response(merged, { status: result.status, statusText: result.statusText, headers: result.headers })
+    }
+  }
   const observeHeaders = (source: typeof fetch): typeof fetch => {
     const originalFetch = imageTimingFetch(timing, source)
     return async (input, init) => {
@@ -175,7 +209,7 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
     const path = normalizeDelegationPath(scope as string, hash)
     const token = sdkAuthQuery().token
     if (!token) throw new Error('原件授权不可用')
-    response = await observeHeaders(createApiFetch())(sdkApiUrl({ url: path }), {
+    response = await observeHeaders(observeProgress(createApiFetch()))(sdkApiUrl({ url: path }), {
       method: 'GET', signal, redirect: 'error', headers: { authorization: 'Bearer ' + token },
     })
     if (response.status !== 200) throw new Error('委派原件访问失败')
@@ -183,7 +217,7 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
   } else {
     const result = await getBotsByBotIdMediaByContentHash({
       path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true,
-      fetch: observeHeaders(client.getConfig().fetch ?? globalThis.fetch) })
+      fetch: observeHeaders(observeProgress(client.getConfig().fetch ?? globalThis.fetch)) })
     bytes = result.data
     response = result.response
   }
@@ -404,6 +438,9 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
       for (const [index, file] of files.entries()) {
         ready.push(await prepareOriginal(botId, file, signal, value => {
           const local = attachments[index]
+          if (local && (value.loaded != null || value.phase === 'uploading')) {
+            noteUploadBytes(local, value.loaded ?? 0, value.total)
+          }
           if (local?.metadata) Object.assign(local.metadata, { harmony_transfer: value.phase,
             ...(value.loaded == null ? {} : { harmony_upload_wire_loaded: value.loaded }),
             ...(value.total == null ? {} : { harmony_upload_wire_total: value.total }) })
@@ -426,10 +463,20 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
             voice_duration_ms: voice.capture.durationMs, voice_peaks: voice.capture.peaks }
         }
       }
+      for (const local of attachments) clearUploadBytes(local)
       signal.throwIfAborted()
       completed = ready
       return ready
     })().catch(error => {
+      // Keep the failing cards visually failed (icon only, no copy): every
+      // attachment still in a transferring phase belongs to this attempt.
+      for (const local of attachments) {
+        clearUploadBytes(local)
+        const phase = String(local.metadata?.harmony_transfer ?? '')
+        if (['uploading', 'checking', 'verifying', 'finalizing'].includes(phase) && local.metadata) {
+          Object.assign(local.metadata, { harmony_transfer: 'failed' })
+        }
+      }
       if (error instanceof UnknownWrite) throw error
       if (signal.aborted) throw new Error('附件传输已取消')
       throw error

@@ -51,7 +51,9 @@ def inputs():
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts', 'mobile/memoh/harmony-transfer-lifetime.ts',
         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-back.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
-        'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts')]
+        'mobile/memoh/harmony-transfer-progress.ts', 'mobile/memoh/HarmonyTransferRing.vue',
+        'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts',
+        'tests/stage2/attachment_transfer_progress.cjs')]
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-session-activity.vue', 'shared-session-activity.test.ts', 'shared-useSessionActivity.ts'))
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useBotActivity.ts', 'shared-useBotActivity.test.ts', 'shared-activity-sdk.json'))
     files.extend(ROOT / 'mobile/memoh' / name for name in (
@@ -195,6 +197,37 @@ def apply_read_aloud_streaming(context, overlay, patches):
             target.addfile(entry, io.BytesIO(data))
             seen.add(name)
     assert seen == files.keys() and edited == edits.keys() and deleted == removed.keys(), 'Streaming source coverage drift'
+    temporary.replace(context)
+
+
+def apply_attachment_progress(context, overlay, patches):
+    """Apply the attachment transfer-progress visuals after every other overlay.
+
+    Same-byte-anchored form as the streaming post-override: card and bubble
+    edits anchor their replacement strings on the composed sources they replace
+    and record the adapted result; no file may silently miss the overlay."""
+    edits = overlay.get('existingFiles', {})
+    temporary = context.with_suffix('.attachment-progress.tar')
+    edited = set()
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        last = {item.name: item for item in source.getmembers()}
+        for member in source.getmembers():
+            data = source.extractfile(member).read() if member.isfile() else None
+            entry = copy.copy(member)
+            if member.name in edits and member is last[member.name]:
+                item = edits[member.name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Attachment progress anchor drift'
+                text = data.decode()
+                for before, after, expected in item['replacements']:
+                    assert text.count(before) == expected, 'Attachment progress replacement drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == item['adaptedSHA256'], 'Attachment progress output drift'
+                entry.size = len(data)
+                edited.add(member.name)
+                patches[member.name] = {'upstreamSHA256': item['baseSHA256'], 'adaptedSHA256': item['adaptedSHA256']}
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+    assert edited == edits.keys(), 'Attachment progress source coverage drift'
     temporary.replace(context)
 
 
@@ -1094,6 +1127,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     read_aloud_streaming = lock['sharedReadAloudStreaming']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / read_aloud_streaming['local']) == read_aloud_streaming['sha256'], 'Read-aloud streaming source drift'
     streaming_sources = json.loads((ROOT / 'mobile/memoh' / read_aloud_streaming['local']).read_text())
+    attachment_progress = lock['sharedAttachmentProgress']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / attachment_progress['local']) == attachment_progress['sha256'], 'Attachment progress overlay drift'
+    attachment_progress_sources = json.loads((ROOT / 'mobile/memoh' / attachment_progress['local']).read_text())
     for name, addition in fixed_contact_sources['sdkOverlays'].items():
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected task directory SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
@@ -1467,7 +1503,8 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             'harmony.ts', 'harmony-files.ts', 'harmony-diagnostics.ts', 'harmony-diagnostics-api.test.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
             'HarmonyAttachments.vue', 'harmony-resumable.ts', 'harmony-upload-failures.ts',
-            'harmony-download.ts', 'harmony-service-url.ts', 'harmony-transfer-lifetime.ts')}
+            'harmony-download.ts', 'harmony-service-url.ts', 'harmony-transfer-lifetime.ts',
+            'harmony-transfer-progress.ts', 'HarmonyTransferRing.vue')}
         if platform == 'harmony':
             for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
                 host_sources[name] = ROOT / 'mobile/memoh' / name
@@ -1513,6 +1550,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             apply_transfer_lifetime_context(context, home_admission_sources['paired959'], patches)
     if platform == 'harmony':
         apply_read_aloud_streaming(context, streaming_sources, patches)
+        apply_attachment_progress(context, attachment_progress_sources, patches)
     return context, patches
 
 

@@ -1,0 +1,78 @@
+{
+  "scope": "Attachment transfer-progress visuals: three-state attachment cards (ring while transferring, check when verified, alert icon on failure) with no status copy, and a progress ring plus formatted speed after the message bubble while attachments move. Post-override applied after the streaming read-aloud snapshot; harmony platform only.",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/chat-attachment-card.vue": {
+      "baseSHA256": "be144f97673b53ed671ad8da7b5a70294b1152c96a3b04360d121edc9c4327ac",
+      "adaptedSHA256": "9f7a1ab7dbfe5556d4a2edb02b235da7c369ff0734bc86139dae7e316f7907a0",
+      "replacements": [
+        [
+          "      :class=\"[\n        (interactive || clickable) ? 'transition-colors group-hover/att:border-foreground/20' : '',\n        clickable ? 'cursor-pointer' : '',\n      ]\"\n",
+          "      :class=\"[\n        (interactive || clickable) ? 'transition-colors group-hover/att:border-foreground/20' : '',\n        clickable ? 'cursor-pointer' : '',\n        transferActive ? 'border-primary/60' : '',\n        transfer === 'failed' ? 'border-destructive/70' : '',\n      ]\"\n",
+          1
+        ],
+        [
+          "    <span v-if=\"transfer\" class=\"absolute bottom-1 right-1 inline-flex min-w-4 items-center justify-center rounded-sm bg-surface-composer px-1 text-caption tabular-nums text-muted-foreground\"\n      :title=\"transferLabel\" :aria-label=\"transferLabel\">\n      <Check v-if=\"transfer === 'ready'\" class=\"size-4\" />\n      <span v-else-if=\"transfer === 'uploading' && wireTotal\">{{ Math.min(100, Math.floor((wireLoaded || 0) * 100 / wireTotal)) }}%</span>\n      <span v-else class=\"size-1.5 rounded-full bg-current\" />\n    </span>\n",
+          "    <HarmonyTransferRing v-if=\"transferActive\" class=\"absolute bottom-1 right-1 rounded-sm bg-surface-composer p-0.5 text-foreground\" :fraction=\"transferFraction\" />\n    <span v-else-if=\"transfer === 'ready'\" class=\"absolute bottom-1 right-1 inline-flex items-center justify-center rounded-sm bg-surface-composer p-0.5 text-emerald-600 dark:text-emerald-400\">\n      <Check class=\"size-4\" />\n    </span>\n    <span v-else-if=\"transfer === 'failed'\" class=\"absolute bottom-1 right-1 inline-flex items-center justify-center rounded-sm bg-surface-composer p-0.5 text-destructive\">\n      <CircleAlert class=\"size-4\" />\n    </span>\n",
+          1
+        ],
+        [
+          "import { Check, X, Image as ImageIcon, File as FileIcon } from 'lucide-vue-next'",
+          "import { Check, CircleAlert, X, Image as ImageIcon, File as FileIcon } from 'lucide-vue-next'\nimport HarmonyTransferRing from '@/lib/HarmonyTransferRing.vue'",
+          1
+        ],
+        [
+          "const transferLabel = computed(() => props.transfer === 'ready' ? 'NAS 原件已完整校验'\n  : props.transfer === 'uploading' && props.wireLoaded != null\n    ? `上传请求 ${props.wireLoaded}${props.wireTotal ? '/' + props.wireTotal : ''} B（含 multipart 封装）`\n    : props.transfer === 'verifying' ? '正在完整校验 NAS 原件' : '正在准备附件')\nconst emit = defineEmits",
+          "// Card transfer states stay visual-only: a filling ring while bytes flow, a\n// check once the original is verified, an alert icon on failure. No status copy.\nconst transferActive = computed(() => ['uploading', 'checking', 'verifying', 'finalizing', 'downloading'].includes(String(props.transfer)))\nconst transferFraction = computed(() => props.wireTotal ? Math.min(1, (props.wireLoaded ?? 0) / props.wireTotal) : null)\nconst emit = defineEmits",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/attachment-block.vue": {
+      "baseSHA256": "1867ca4f42603eb3e3a009340c37168b0e8a5170e1ea5190982d0720d66c0597",
+      "adaptedSHA256": "ccea39679e0b7b77cb12add55ebfcb990a522ad2eac58396aab39b3fde2f84f3",
+      "replacements": [
+        [
+          "function harmonyTransfer(att: AttachmentItem) {\n  return { transfer: typeof att.metadata?.harmony_transfer === 'string' ? att.metadata.harmony_transfer : undefined,\n    wireLoaded: typeof att.metadata?.harmony_upload_wire_loaded === 'number' ? att.metadata.harmony_upload_wire_loaded : undefined,\n    wireTotal: typeof att.metadata?.harmony_upload_wire_total === 'number' ? att.metadata.harmony_upload_wire_total : undefined }\n}\nimport ChatAttachmentCard from './chat-attachment-card.vue'",
+          "function harmonyTransfer(att: AttachmentItem) {\n  // Merge the measured view (wire/media bytes) with the local read outcome so a\n  // card gets exactly one state: failed read, active transfer with real bytes,\n  // or the plain metadata phase.\n  const view = attachmentTransferView(att)\n  const readFailed = isImage(att) && failedImages.has(imageReferenceKey(att))\n  const transfer = readFailed || view.phase === 'failed' ? 'failed'\n    : view.phase === 'transferring'\n      ? (typeof att.metadata?.harmony_transfer === 'string' && att.metadata.harmony_transfer ? att.metadata.harmony_transfer : 'downloading')\n      : view.phase === 'ready' ? 'ready' : undefined\n  return { transfer,\n    wireLoaded: view.bytes && view.bytes.total != null ? view.bytes.loaded : undefined,\n    wireTotal: view.bytes && view.bytes.total != null ? view.bytes.total : undefined }\n}\nimport ChatAttachmentCard from './chat-attachment-card.vue'",
+          1
+        ],
+        [
+          "import { originalBlob, saveOriginal } from '@/lib/harmony-files'",
+          "import { originalBlob, saveOriginal } from '@/lib/harmony-files'\nimport { attachmentTransferView, noteDownloadBytes, clearDownloadBytes } from '@/lib/harmony-transfer-progress'",
+          1
+        ],
+        [
+          "      imageTimingCard(att)\n      void originalBlob(att, controller.signal).then((blob) => {\n        if (controller.signal.aborted) return\n        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => { if (!controller.signal.aborted) failedImages.add(key) })",
+          "      imageTimingCard(att)\n      const hash = String(att.content_hash ?? '')\n      void originalBlob(att, controller.signal, hash\n        ? { onProgress: (loaded, total) => noteDownloadBytes(hash, loaded, total) }\n        : undefined).then((blob) => {\n        if (controller.signal.aborted) return\n        if (hash) clearDownloadBytes(hash)\n        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => {\n        if (hash) clearDownloadBytes(hash)\n        if (!controller.signal.aborted) failedImages.add(key)\n      })",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "90722c9409e6d40242a54c4ac69701ea0978e3504a567f21d0e30d661369c8a2",
+      "adaptedSHA256": "e0fe4b3c347da70574c6d18737a73aa73e3dfeed45fca6b1429199e429d7b5ce",
+      "replacements": [
+        [
+          "          <CollapsibleUserText\n            v-if=\"userBubbleText\"\n            :class=\"isSkillActivationMessage ? 'mt-2' : ''\"\n            :text=\"userBubbleText\"\n          />\n        </div>\n        <p\n          v-if=\"isGoalMessage\"\n",
+          "          <CollapsibleUserText\n            v-if=\"userBubbleText\"\n            :class=\"isSkillActivationMessage ? 'mt-2' : ''\"\n            :text=\"userBubbleText\"\n          />\n        </div>\n        <HarmonyTransferRing\n          v-if=\"userTransfer.active\"\n          class=\"text-muted-foreground\"\n          :fraction=\"userTransfer.fraction\"\n          :rate=\"userTransfer.rate\"\n        />\n        <p\n          v-if=\"isGoalMessage\"\n",
+          1
+        ],
+        [
+          "              <span\n                :key=\"message.id\"\n                class=\"inline-block whitespace-nowrap tool-shimmer-text cop-typewriter\"\n              >{{ t('chat.process.starting') }}</span>\n            </div>\n          </div>\n        </div>\n        <!-- Action bar hugs the answer",
+          "              <span\n                :key=\"message.id\"\n                class=\"inline-block whitespace-nowrap tool-shimmer-text cop-typewriter\"\n              >{{ t('chat.process.starting') }}</span>\n            </div>\n          </div>\n        </div>\n        <HarmonyTransferRing\n          v-if=\"assistantTransfer.active\"\n          class=\"mt-1 text-muted-foreground\"\n          :fraction=\"assistantTransfer.fraction\"\n          :rate=\"assistantTransfer.rate\"\n        />\n        <!-- Action bar hugs the answer",
+          1
+        ],
+        [
+          "import AttachmentBlock from './attachment-block.vue'",
+          "import AttachmentBlock from './attachment-block.vue'\nimport HarmonyTransferRing from '@/lib/HarmonyTransferRing.vue'\nimport { messageTransferView } from '@/lib/harmony-transfer-progress'",
+          1
+        ],
+        [
+          "const userAttachmentBlock = computed<AttachmentBlockType | null>(() => {",
+          "// One aggregate per message feeds the bubble-level ring: uploads through the\n// live attachment metadata/registry, verified media reads through the download\n// registry keyed by content hash.\nconst userTransfer = computed(() => props.message.role === 'user'\n  ? messageTransferView(props.message.attachments) : { active: false, fraction: null, rate: undefined })\nconst assistantTransfer = computed(() => props.message.role === 'assistant'\n  ? messageTransferView(props.message.messages.flatMap(block => block.type === 'attachments' ? block.attachments : []))\n  : { active: false, fraction: null, rate: undefined })\nconst userAttachmentBlock = computed<AttachmentBlockType | null>(() => {",
+          1
+        ]
+      ]
+    }
+  }
+}
