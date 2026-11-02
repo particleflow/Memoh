@@ -184,9 +184,11 @@ func TestComputerDeliveryHTTPDriftRefusalHeaderMapping(t *testing.T) {
 		err   error
 		code  int
 		token string
-	}{{"drift", computertask.ErrDeliveryTargetDrift, http.StatusForbidden, RefusalTokenTargetFingerprint},
+	}{
+		{"drift", computertask.ErrDeliveryTargetDrift, http.StatusForbidden, RefusalTokenTargetFingerprint},
 		{"credential", computertask.ErrDenied, http.StatusForbidden, ""},
-		{"binding", computertask.ErrDeliveryBinding, http.StatusForbidden, ""}} {
+		{"binding", computertask.ErrDeliveryBinding, http.StatusForbidden, ""},
+	} {
 		t.Run(tc.name, func(t *testing.T) {
 			e := echo.New()
 			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))

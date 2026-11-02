@@ -22,17 +22,17 @@ import (
 )
 
 var (
-	ErrDeliveryBinding  = errors.New("delivery requires a verified execution identity")
+	ErrDeliveryBinding     = errors.New("delivery requires a verified execution identity")
 	ErrDeliveryTargetDrift = errors.New("delivery target identity drifted from its recorded binding")
-	ErrDeliveryConflict = errors.New("delivery binding conflicts with its persisted outcome")
-	ErrDeliveryVersion  = errors.New("unsupported delivery ledger version")
-	ErrDeliveryLimit    = errors.New("operation delivery limit reached")
-	ErrDeliveryRetry    = errors.New("delivery transaction conflicted; resolve before retrying")
-	ErrDeliveryAsset    = errors.New("delivery asset is unavailable or does not match")
-	errVerifyDelivery   = errors.New("verify delivery outside the database transaction")
-	deliveryIDPattern   = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,128}$`)
-	deliveryHash        = regexp.MustCompile(`^[a-f0-9]{64}$`)
-	deliveryAttempt     = regexp.MustCompile(`^[a-f0-9]{32}$`)
+	ErrDeliveryConflict    = errors.New("delivery binding conflicts with its persisted outcome")
+	ErrDeliveryVersion     = errors.New("unsupported delivery ledger version")
+	ErrDeliveryLimit       = errors.New("operation delivery limit reached")
+	ErrDeliveryRetry       = errors.New("delivery transaction conflicted; resolve before retrying")
+	ErrDeliveryAsset       = errors.New("delivery asset is unavailable or does not match")
+	errVerifyDelivery      = errors.New("verify delivery outside the database transaction")
+	deliveryIDPattern      = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,128}$`)
+	deliveryHash           = regexp.MustCompile(`^[a-f0-9]{64}$`)
+	deliveryAttempt        = regexp.MustCompile(`^[a-f0-9]{32}$`)
 )
 
 // Legacy JSON readers remain bounded. Row storage has no cumulative entry cap.
@@ -415,9 +415,9 @@ func validStoredDeliveryEntry(id string, entry deliveryEntry, version int) bool 
 }
 
 type deliveryOperationDetails struct {
-	Kind   string                 `json:"kind"`
-	Batch  *BatchDetails          `json:"batch"`
-	Ledger json.RawMessage        `json:"delivery_ledger"`
+	Kind   string          `json:"kind"`
+	Batch  *BatchDetails   `json:"batch"`
+	Ledger json.RawMessage `json:"delivery_ledger"`
 	// TargetSnapshot is the claim-time registration snapshot already persisted
 	// by the task service (Details.TargetSnapshot). It carries no authority;
 	// authorizeDeliveryRecord only reads it to separate deployment drift from
