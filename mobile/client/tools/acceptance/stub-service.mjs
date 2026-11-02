@@ -102,12 +102,19 @@ export class StubService {
     this.generation = 0
     this.mode = 'stream'
     this.delay = 700
+    // Gap between the last sentence frame and the completed frame; null keeps
+    // the ordinary per-step delay. A long settle separates "read on the first
+    // sentence" from "read when the reply settles" by whole seconds.
+    this.settleDelay = null
     this.startDelay = 800
     this.t0 = 0
     this.mp3 = silentMp3(30)
     this.shortMp3 = silentMp3(1)
     this.postCount = 0
+    this.bodyPostCount = 0
     this.firstSentenceAt = null
+    this.lastSentenceAt = null
+    this.settledAt = null
     this.server = createServer((req, res) => this.handle(req, res).catch(error => {
       res.writeHead(500, { 'content-type': 'application/json' })
       res.end(JSON.stringify({ message: String(error && error.message || error) }))
@@ -133,7 +140,7 @@ export class StubService {
     return fetch(`http://127.0.0.1:${this.port}${path}`, method === 'GET' ? { method } : { method, body: JSON.stringify(body ?? {}) }).then(response => response.json())
   }
 
-  mark() { this.t0 = Date.now(); this.speech.length = 0; this.apiLog.length = 0; this.postCount = 0; this.firstSentenceAt = null }
+  mark() { this.t0 = Date.now(); this.speech.length = 0; this.apiLog.length = 0; this.postCount = 0; this.bodyPostCount = 0; this.firstSentenceAt = null; this.lastSentenceAt = null; this.settledAt = null }
 
   async handle(req, res) {
     const url = new URL(req.url, this.apiOrigin)
@@ -147,12 +154,13 @@ export class StubService {
       const body = JSON.parse(await this.readBody(req) || '{}')
       if (body.scenario) this.mode = body.scenario
       if (body.delay !== undefined) this.delay = body.delay
+      this.settleDelay = body.settleDelay ?? null
       this.mark()
       this.json(res, 200, { ok: true })
       return
     }
     if (path === '/__control/speech') {
-      this.json(res, 200, { t0: this.t0, firstSentenceAt: this.firstSentenceAt, entries: this.speech })
+      this.json(res, 200, { t0: this.t0, firstSentenceAt: this.firstSentenceAt, lastSentenceAt: this.lastSentenceAt, settledAt: this.settledAt, entries: this.speech })
       return
     }
     if (path === '/__control/mark') { this.mark(); this.json(res, 200, { ok: true }); return }
@@ -272,17 +280,24 @@ export class StubService {
     if (path === `/bots/${BOT_ID}/tts/playback/input` && req.method === 'POST') {
       const body = JSON.parse(await this.readBody(req) || '{}')
       this.postCount += 1
-      this.speech.push({ kind: 'post', id: body.id, sequence: body.sequence, offset: body.offset, text: body.text, final: body.final, ms: Date.now() - this.t0 })
-      // Scenario 2: the first task fails transport-style. The client must end
-      // only that task and read the remaining text through the next one.
-      if (this.mode === 'fail-task' && this.postCount === 1) {
+      // The ack line reads as its own short task ahead of the body (the client
+      // never caches it). Its audio is a short clip, as a real synthesized ack
+      // would be, so the body task is not parked behind a 30 s silence.
+      const ack = body.text === ACK_TEXT
+      if (!ack) this.bodyPostCount += 1
+      const entry = { kind: 'post', id: body.id, sequence: body.sequence, offset: body.offset, text: body.text, final: body.final, ms: Date.now() - this.t0, status: 200 }
+      this.speech.push(entry)
+      // Scenario 2: the first body task fails transport-style. The client must
+      // end only that task and read the remaining text through the next one.
+      if (this.mode === 'fail-task' && !ack && this.bodyPostCount === 1) {
+        entry.status = 503
         res.writeHead(503, { 'content-type': 'application/json', 'x-speech-playback-identity': SPEECH_IDENTITY })
         res.end(JSON.stringify({ title: 'provider unavailable' }))
         this.rejectedFirstPost?.resolve?.()
         return
       }
       res.writeHead(200, { 'content-type': 'audio/mpeg', 'x-speech-playback-identity': SPEECH_IDENTITY, 'cache-control': 'private, no-store' })
-      res.end(this.mode === 'early-ended' ? this.shortMp3 : this.mp3)
+      res.end(ack || this.mode === 'early-ended' ? this.shortMp3 : this.mp3)
       return
     }
     if (path === `/bots/${BOT_ID}/tts/playback/input` && req.method === 'PUT') {
@@ -411,17 +426,23 @@ export class StubService {
     }
     blocks.push(body)
     // Gate 2 replays the long body: the first task is rejected by the service
-    // and the client must roll its text back into the next task.
-    const sentences = this.mode === 'fail-task' ? FAIL_TASK_BODY : BODY
+    // and the client must roll its text back into the next task. Gate 1 replays
+    // the same long body so "read on the first sentence" is separated from
+    // "read when the reply settles" by several sentences and a long settle.
+    const sentences = this.mode === 'fail-task' || this.mode === 'long' ? FAIL_TASK_BODY : BODY
+    const settle = this.settleDelay ?? this.delay
     for (const [index, sentence] of sentences.entries()) {
       body.content += sentence
+      const last = index === sentences.length - 1
+      if (last) this.lastSentenceAt = Date.now() - this.t0
       if (index === 0) {
         this.firstSentenceAt = Date.now() - this.t0
-        await step({ message_upserts: [{ ...body }] })
-      } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] })
+        await step({ message_upserts: [{ ...body }] }, last ? settle : this.delay)
+      } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, last ? settle : this.delay)
     }
     // Settle: the persisted transcript replaces the live one on refresh.
     state.seq += 1
+    this.settledAt = Date.now() - this.t0
     const finalTurns = [
       { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-u` },
       {

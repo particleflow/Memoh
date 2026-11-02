@@ -32,8 +32,15 @@ const CHROME = process.env.ACCEPTANCE_CHROME
 
 const ACK_TEXT = '收到，我来处理。'
 const BODY = ['第一句已经说完。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
+// Gate 1 replays the six-sentence body with 800 ms between sentences and a
+// 3 s settle after the last one: "read on the first sentence" and "read when
+// the reply settles" are then seconds apart, so a settle-time read cannot pass
+// the first-sentence window the way the four short sentences let it (TF-18).
+const LONG_BODY = FAIL_TASK_BODY
+const LONG_DELAY_MS = 800
+const LONG_SETTLE_MS = 3000
 const ACK_WINDOW_MS = 3000
-const FIRST_POST_WINDOW_MS = 4000
+const FIRST_POST_WINDOW_MS = 1000
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
@@ -188,12 +195,12 @@ async function main() {
   // A scenario starts from a discarded browser context AND an empty service:
   // the previous case's transcript must not be fetched as this case's history
   // during boot, because that load is exactly the gate under test.
-  async function scenario(name, delay = 700, { seedHistory = false } = {}) {
+  async function scenario(name, delay = 700, { seedHistory = false, settleDelay = null } = {}) {
     await cdp.send('Target.disposeBrowserContext', { browserContextId }).catch(() => {})
     const created = await newPage()
     page = created.page
     browserContextId = created.browserContextId
-    await service.control('/__control/scenario', { scenario: name, delay })
+    await service.control('/__control/scenario', { scenario: name, delay, settleDelay })
     await service.control('/__control/reset', {})
     if (seedHistory) await service.control('/__control/history', {})
     const nonce = `run=${++runIndex}`
@@ -214,8 +221,28 @@ async function main() {
     await networkIdle(1000, 25000)
     return true
   }
-  async function waitAudioPlaying(timeout = 20000) {
-    return wait(`window.__acc.audio.some(event => event.kind === 'playing')`, timeout)
+  // The reply body is being read: a speech request that carries the sentence
+  // has really left and audio has really started after it. The ack line reads
+  // first as its own short task, so "some audio is playing" alone would
+  // resolve before the body (or even before the reasoning block) exists.
+  async function waitBodyReading(sentence, timeout = 30000) {
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const status = await service.control('/__control/speech', null, 'GET')
+      const carried = status.entries.find(entry => (entry.text || '').includes(sentence))
+      if (carried && (await audio()).some(event => event.kind === 'playing' && event.at >= status.t0 + carried.ms)) return true
+      await sleep(100)
+    }
+    return false
+  }
+  async function waitSettled(timeout = 15000) {
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const status = await service.control('/__control/speech', null, 'GET')
+      if (status.settledAt !== null) return status
+      await sleep(100)
+    }
+    return service.control('/__control/speech', null, 'GET')
   }
 
   try {
@@ -238,32 +265,40 @@ async function main() {
     // ---------- Gate 1 + 5: automatic start on the first sentence; ordered body.
     // The measured interval starts at the first *completed sentence* in the
     // frame sequence (the scripted model's "text_chunk_ready"), not at the
-    // keystroke: the contract is "first sentence -> speech POST", not
-    // "keystroke -> audio".
-    await scenario('stream', 700)
+    // keystroke: the contract is "first sentence -> speech request", not
+    // "keystroke -> audio". The long body with a long settle makes the two
+    // readings distinguishable: the request that carries the first sentence
+    // must leave within the window and before the last sentence is even
+    // streamed, so a read that only starts at settle cannot pass (TF-18).
+    await scenario('long', LONG_DELAY_MS, { settleDelay: LONG_SETTLE_MS })
     await submit('请朗读这段回复')
-    const started = await waitAudioPlaying(25000)
-    await waitBody(BODY[BODY.length - 1], 20000)
+    const started = await waitBodyReading(LONG_BODY[0], 30000)
+    await waitBody(LONG_BODY[LONG_BODY.length - 1], 30000)
+    const timing = await waitSettled(15000)
+    // Leave room for a settle-time request so a late read is recorded, not missed.
+    await sleep(1500)
     const firstSpeech = await speech()
-    const timing = await service.control('/__control/speech', null, 'GET')
-    const posts = firstSpeech.filter(entry => entry.kind === 'post')
-    const firstPost = posts[0]
-    const firstSentenceAt = timing.firstSentenceAt
-    const latencyMs = firstPost && firstSentenceAt !== null ? firstPost.ms - firstSentenceAt : null
+    const firstSentenceRequest = firstSpeech.find(entry => (entry.text || '').includes(LONG_BODY[0]))
+    const latencyMs = firstSentenceRequest && timing.firstSentenceAt !== null ? firstSentenceRequest.ms - timing.firstSentenceAt : null
+    const beforeLastSentence = !!firstSentenceRequest && timing.lastSentenceAt !== null && firstSentenceRequest.ms < timing.lastSentenceAt
+    const settleLeadMs = firstSentenceRequest && timing.settledAt !== null ? timing.settledAt - firstSentenceRequest.ms : null
+    const ackPosts = firstSpeech.filter(entry => entry.kind === 'post' && entry.text === ACK_TEXT).length
     const g1Diagnostics = await page.eval(`(() => ({
       speechStates: [...document.querySelectorAll('[data-speech-state]')].map(n => n.getAttribute('data-speech-state')),
       speechEnabled: [...document.querySelectorAll('[data-chat-content]')].map(n => (n.innerText || '').slice(0, 30)),
       ttsFetch: (window.__acc.fetch || []).filter(f => /tts/.test(f.url)).map(f => ({ method: f.method, status: f.status, error: f.error })),
       errors: (window.__acc.errors || []).slice(-3),
     }))()`).catch(() => null)
-    add(result('G1 automatic read-aloud starts on the first sentence', !!firstPost && latencyMs !== null && latencyMs <= FIRST_POST_WINDOW_MS,
-      firstPost ? `first POST ${latencyMs}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), final=${firstPost.final}` : 'no speech POST during the reply',
-      { speechTiming: { firstSentenceAtMs: firstSentenceAt, firstPostMs: firstPost?.ms ?? null, latencyMs, windowMs: FIRST_POST_WINDOW_MS, audioStarted: started }, diagnostics: g1Diagnostics }))
-    const spoken = [firstPost?.text, ...firstSpeech.filter(e => e.kind === 'put').map(e => e.text)].filter(Boolean).join('')
-    const ordered = spoken.includes(BODY[0]) && spoken.includes(BODY[BODY.length - 1])
-      && spoken.indexOf(BODY[0]) < spoken.indexOf(BODY[BODY.length - 1])
+    add(result('G1 automatic read-aloud starts on the first sentence', !!firstSentenceRequest && latencyMs !== null && latencyMs <= FIRST_POST_WINDOW_MS && beforeLastSentence,
+      firstSentenceRequest
+        ? `first-sentence ${firstSentenceRequest.kind.toUpperCase()} ${latencyMs}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), ${settleLeadMs}ms before settle, before the last sentence=${beforeLastSentence}, ack posts=${ackPosts}`
+        : 'no speech request carried the first sentence',
+      { speechTiming: { firstSentenceAtMs: timing.firstSentenceAt, lastSentenceAtMs: timing.lastSentenceAt, settledAtMs: timing.settledAt, firstSentenceRequestMs: firstSentenceRequest?.ms ?? null, firstSentenceRequestKind: firstSentenceRequest?.kind ?? null, latencyMs, settleLeadMs, windowMs: FIRST_POST_WINDOW_MS, beforeLastSentence, ackPosts, audioStarted: started }, diagnostics: g1Diagnostics }))
+    const spoken = firstSpeech.map(entry => entry.text).filter(Boolean).join('')
+    const ordered = spoken.includes(LONG_BODY[0]) && spoken.includes(LONG_BODY[LONG_BODY.length - 1])
+      && spoken.indexOf(LONG_BODY[0]) < spoken.indexOf(LONG_BODY[LONG_BODY.length - 1])
     add(result('G5 whole body read in order without a dropped segment', ordered,
-      ordered ? `spoken order kept, ${spoken.length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`))
+      ordered ? `spoken order kept, ${Array.from(spoken).length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`))
 
     // ---------- V2: thinking collapsed by default (PR #118 semantics).
     const disclosure = await reasoningDisclosure()
@@ -279,7 +314,7 @@ async function main() {
     // the audio must not make the next case unmeasurable.
     await scenario('stream', 700)
     await submit('继续说')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeToggle = await pauses()
     const toggled = await page.eval(`(() => {
       const marked = document.querySelector('[data-reasoning-disclosure]')
@@ -297,7 +332,7 @@ async function main() {
 
     await scenario('stream', 700)
     await submit('打字和点气泡')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeTyping = await pauses()
     await type('正在打字的草稿')
     await sleep(1200)
@@ -313,7 +348,7 @@ async function main() {
 
     await scenario('stream', 700)
     await submit('再读一段')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeSubmit = await pauses()
     await submit('新问题')
     await sleep(1500)
@@ -355,24 +390,25 @@ async function main() {
       `posts=${earlyPosts} tailSpoken=${earlyText.includes(BODY[BODY.length - 1])}`))
 
     // ---------- Gate 2: a task failure rolls back and the rest reads again.
-    // The service rejects the first speech task of the long reply. The client
-    // must end only that task: the text it had fed is rolled back and read
-    // again through the next task, and the reply still reads to its last
-    // sentence, in order (PR #121 "failure rollback rereads").
+    // The service rejects the first body task of the long reply (the ack's
+    // own short task is not the reply body). The client must end only that
+    // task: the text it had fed is rolled back and read again through the
+    // next task, and the reply still reads to its last sentence, in order
+    // (PR #121 "failure rollback rereads").
     await scenario('fail-task', 700)
     await submit('失败后继续朗读')
     await waitBody(FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1], 30000)
     await sleep(6000)
     const failureSpeech = await speech()
-    const failurePosts = failureSpeech.filter(entry => entry.kind === 'post')
-    const rejected = failurePosts[0]
+    const bodyPosts = failureSpeech.filter(entry => entry.kind === 'post' && entry.text !== ACK_TEXT)
+    const rejected = failureSpeech.find(entry => entry.kind === 'post' && entry.status === 503)
     const afterRejection = rejected ? failureSpeech.slice(failureSpeech.indexOf(rejected) + 1).map(entry => entry.text).filter(Boolean).join('') : ''
-    const rolledBack = !!rejected && failurePosts.length >= 2 && afterRejection.includes(rejected.text)
+    const rolledBack = !!rejected && bodyPosts.length >= 2 && afterRejection.includes(rejected.text)
     const lastSentence = FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1]
     const tailReread = afterRejection.includes(lastSentence)
       && afterRejection.indexOf(FAIL_TASK_BODY[0]) <= afterRejection.indexOf(lastSentence)
     add(result('G2 single task failure ends only that task (remaining text rereads)', rolledBack && tailReread,
-      `posts=${failurePosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
+      `bodyPosts=${bodyPosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
 
     // ---------- General: loading history must not read it aloud.
     await scenario('stream', 700, { seedHistory: true })
@@ -385,7 +421,7 @@ async function main() {
     // ---------- General: background/foreground parks instead of consuming.
     await scenario('stream', 700)
     await submit('后台切换检查')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     await page.eval(`window.dispatchEvent(new CustomEvent('garnet:lifecycle', { detail: { state: 'background' } }))`)
     await sleep(700)
     await page.eval(`window.dispatchEvent(new CustomEvent('garnet:lifecycle', { detail: { state: 'foreground' } }))`)

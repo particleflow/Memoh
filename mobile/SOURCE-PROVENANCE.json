@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "76d4e9ac0752f1f276b0f5e315e402fb0255294abd27584a0729fc2fe71b1969",
+      "sha256": "639e43cd22df04fad150b290306f0e1b83d13877f2b0358a672453c505094caf",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -50,7 +50,8 @@
         "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP.",
         "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
-        "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path."
+        "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
+        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -2012,7 +2013,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "e8bdaaea9d7b1c53d41ff67925b399540e97670d56e0d098e819ce28aa4ea5d7",
+      "sha256": "dc1e0c17fb55dcb58db9448e77d1d7de46d77eabbc8c36e56518fafb302af9e6",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2027,7 +2028,8 @@
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)",
-        "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client."
+        "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client.",
+        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged."
       ]
     }
   ],
