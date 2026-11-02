@@ -177,12 +177,16 @@ func newPlaybackReuseSession(
 		chunks: make(chan []byte, 8), errs: make(chan error, 1), frames: make(chan input.Frame, 32),
 	}
 	s.stream = sdk.NewSpeechStreamResult(s.chunks, contentType, s.errs)
-	go func() {
-		defer close(s.errs) // Err() blocks until this channel closes; a nil value is a clean end.
-		defer close(s.chunks)
-		s.pump()
-	}()
+	go s.run(sessionCtx)
 	return s
+}
+
+// run owns the response channels. Both are closed exactly once here: Err()
+// blocks until the error channel closes, and a nil close is a clean end.
+func (s *playbackReuseSession) run(ctx context.Context) {
+	defer close(s.errs)
+	defer close(s.chunks)
+	s.pump(ctx)
 }
 
 func (s *playbackReuseSession) Audio() *sdk.SpeechStreamResult { return s.stream }
@@ -197,7 +201,7 @@ func (s *playbackReuseSession) Append(ctx context.Context, frame input.Frame) er
 	select {
 	case s.frames <- frame:
 		return nil
-	case <-s.ctx.Done():
+	case <-ctx.Done():
 		return s.ctx.Err()
 	case <-ctx.Done():
 		return ctx.Err()
@@ -207,7 +211,7 @@ func (s *playbackReuseSession) Append(ctx context.Context, frame input.Frame) er
 // pump collects text until the client closes it or the stream pauses, then
 // either replays cached audio or synthesizes. It never returns without the
 // caller closing both channels.
-func (s *playbackReuseSession) pump() {
+func (s *playbackReuseSession) pump(ctx context.Context) {
 	accepted := make([]input.Frame, 0, 8)
 	var text []byte
 	var count, offset uint64
@@ -240,7 +244,7 @@ collect:
 		case <-idle.C:
 			// Input paused: this is a live reply, not a settled replay.
 			break collect
-		case <-s.ctx.Done():
+		case <-ctx.Done():
 			broken = true
 			break collect
 		}
@@ -251,24 +255,24 @@ collect:
 			return
 		}
 	}
-	if s.ctx.Err() != nil {
-		s.errs <- s.ctx.Err()
+	if ctx.Err() != nil {
+		s.errs <- ctx.Err()
 		return
 	}
-	s.synthesize(accepted)
+	s.synthesize(ctx, accepted)
 }
 
 // synthesize opens the provider, replays the accepted frames, and forwards its
 // audio. Later frames arrive through Append and go straight to the provider.
-func (s *playbackReuseSession) synthesize(accepted []input.Frame) {
-	provider, _, err := s.open(s.ctx)
+func (s *playbackReuseSession) synthesize(ctx context.Context, accepted []input.Frame) {
+	provider, _, err := s.open(ctx)
 	if err != nil {
 		s.errs <- err
 		return
 	}
 	defer provider.Cancel()
 	for _, frame := range accepted {
-		if err = provider.Append(s.ctx, frame); err != nil {
+		if err = provider.Append(ctx, frame); err != nil {
 			s.errs <- err
 			return
 		}
@@ -277,11 +281,11 @@ func (s *playbackReuseSession) synthesize(accepted []input.Frame) {
 	audio := provider.Audio()
 	for {
 		select {
-		case <-s.ctx.Done():
-			s.errs <- s.ctx.Err()
+		case <-ctx.Done():
+			s.errs <- ctx.Err()
 			return
 		case frame := <-s.frames:
-			if err = provider.Append(s.ctx, frame); err != nil {
+			if err = provider.Append(ctx, frame); err != nil {
 				s.errs <- err
 				return
 			}
@@ -294,7 +298,7 @@ func (s *playbackReuseSession) synthesize(accepted []input.Frame) {
 				}
 				// The request context ends with the response; register the
 				// utterance on a detached one so the next replay can hit.
-				writeCtx, cancelWrite := context.WithTimeout(context.WithoutCancel(s.ctx), playbackReuseWriteTimeout)
+				writeCtx, cancelWrite := context.WithTimeout(context.WithoutCancel(ctx), playbackReuseWriteTimeout)
 				s.recorder.commit(writeCtx, audio.ContentType)
 				cancelWrite()
 				return
@@ -305,8 +309,8 @@ func (s *playbackReuseSession) synthesize(accepted []input.Frame) {
 			s.recorder.recordAudio(chunk)
 			select {
 			case s.chunks <- chunk:
-			case <-s.ctx.Done():
-				s.errs <- s.ctx.Err()
+			case <-ctx.Done():
+				s.errs <- ctx.Err()
 				return
 			}
 		}

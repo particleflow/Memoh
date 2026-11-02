@@ -68,7 +68,7 @@ func TestPlaybackReuseMatchRequiresTheWholeUtterance(t *testing.T) {
 		t.Fatalf("exact utterance did not resolve: %v %q", ok, match.Audio)
 	}
 	// A reply that continues past the opening frame is not the cached one.
-	if _, ok = key.Match(firstSentence + "\u522b\u7684\u5185\u5bb9\u3002", cached); ok {
+	if _, ok = key.Match(firstSentence+"\u522b\u7684\u5185\u5bb9\u3002", cached); ok {
 		t.Fatal("a different utterance matched a shared opening frame")
 	}
 }

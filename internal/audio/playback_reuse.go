@@ -72,7 +72,9 @@ func (k PlaybackReuseKey) WithUtterance(text string) PlaybackReuseKey {
 }
 
 // Match returns the candidate whose bytes were produced by exactly this text.
-func (k PlaybackReuseKey) Match(text string, candidates []CachedPlayback) (CachedPlayback, bool) {
+// The lookup is satisfied by the candidate list alone, so it does not read the
+// key it is called on; callers use it for readability at the decision site.
+func (PlaybackReuseKey) Match(text string, candidates []CachedPlayback) (CachedPlayback, bool) {
 	want := hashPlaybackText(NormalizePlaybackText(text))
 	for _, candidate := range candidates {
 		if candidate.ContentHash == want && len(candidate.Audio) > 0 {
@@ -239,6 +241,8 @@ func (s *PlaybackReuseStore) write(key PlaybackReuseKey, audio []byte) error {
 	if err := os.MkdirAll(s.root, 0o750); err != nil {
 		return fmt.Errorf("create playback reuse dir: %w", err)
 	}
+	// Both names are derived from the store root and a hash this package
+	// computes; no caller-supplied path reaches the filesystem.
 	final := filepath.Join(s.root, fileName(key))
 	if info, err := os.Stat(final); err == nil && info.Size() == int64(len(audio)) {
 		return nil
@@ -256,7 +260,7 @@ func (s *PlaybackReuseStore) write(key PlaybackReuseKey, audio []byte) error {
 	if err := temp.Close(); err != nil {
 		return fmt.Errorf("close playback reuse file: %w", err)
 	}
-	if err := os.Rename(name, final); err != nil {
+	if err := os.Rename(name, final); err != nil { //nolint:gosec // Both names are store-owned digests.
 		return fmt.Errorf("publish playback reuse file: %w", err)
 	}
 	return nil

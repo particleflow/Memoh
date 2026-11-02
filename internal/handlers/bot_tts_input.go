@@ -147,7 +147,7 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 		open := func(openCtx context.Context) (input.Session, string, error) {
 			return service.OpenPlaybackInput(openCtx, settings.TtsModelID)
 		}
-		contentType, contentTypeErr := h.playbackContentType(c.Request().Context(), service, settings.TtsModelID)
+		contentType, contentTypeErr := playbackContentType(c.Request().Context(), service, settings.TtsModelID)
 		if contentTypeErr != nil {
 			return contentTypeErr
 		}
@@ -156,7 +156,7 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 			deferred.Cancel()
 			return err
 		}
-		session, identity = deferred, h.playbackIdentity(c.Request().Context(), service, settings.TtsModelID)
+		session, identity = deferred, playbackIdentity(c.Request().Context(), service, settings.TtsModelID)
 	}
 	defer session.Cancel()
 	h.inputSessions.Lock()
@@ -304,7 +304,7 @@ func playbackCandidates(ctx context.Context, store playbackReuseStore, info *aud
 }
 
 // playbackContentType reports the stream format without synthesizing.
-func (h *BotAudioHandler) playbackContentType(ctx context.Context, service playbackInputService, modelID string) (string, error) {
+func playbackContentType(ctx context.Context, service playbackInputService, modelID string) (string, error) {
 	_, contentType, err := service.PlaybackInputInfo(ctx, modelID)
 	if err != nil {
 		return "", err
@@ -318,7 +318,7 @@ func (h *BotAudioHandler) playbackContentType(ctx context.Context, service playb
 // playbackIdentity reports the configured identity without synthesizing. A
 // cached replay keeps advertising the same identity the client validates, so
 // the client's own ownership check stays meaningful.
-func (h *BotAudioHandler) playbackIdentity(ctx context.Context, service playbackInputService, modelID string) string {
+func playbackIdentity(ctx context.Context, service playbackInputService, modelID string) string {
 	identity, _, err := service.PlaybackInputInfo(ctx, modelID)
 	if err != nil {
 		return ""

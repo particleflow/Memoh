@@ -39,12 +39,25 @@ CREATE INDEX IF NOT EXISTS speech_playback_cache_expiry
   ON public.speech_playback_cache(team_id, expires_at);
 ALTER TABLE public.speech_playback_cache ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.speech_playback_cache FORCE ROW LEVEL SECURITY;
-CREATE POLICY speech_playback_cache_team_select ON public.speech_playback_cache
-  FOR SELECT USING (team_id = public.memoh_current_team_id());
-CREATE POLICY speech_playback_cache_team_insert ON public.speech_playback_cache
-  FOR INSERT WITH CHECK (team_id = public.memoh_current_team_id());
-CREATE POLICY speech_playback_cache_team_update ON public.speech_playback_cache
-  FOR UPDATE USING (team_id = public.memoh_current_team_id())
-  WITH CHECK (team_id = public.memoh_current_team_id());
-CREATE POLICY speech_playback_cache_team_delete ON public.speech_playback_cache
-  FOR DELETE USING (team_id = public.memoh_current_team_id());
+-- Policies are created idempotently: upgrade-path tests step the chain back to
+-- an earlier number and migrate up again, which replays this file over a table
+-- that already carries its policies.
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'speech_playback_cache' AND policyname = 'speech_playback_cache_team_select') THEN
+    CREATE POLICY speech_playback_cache_team_select ON public.speech_playback_cache
+      FOR SELECT USING (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'speech_playback_cache' AND policyname = 'speech_playback_cache_team_insert') THEN
+    CREATE POLICY speech_playback_cache_team_insert ON public.speech_playback_cache
+      FOR INSERT WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'speech_playback_cache' AND policyname = 'speech_playback_cache_team_update') THEN
+    CREATE POLICY speech_playback_cache_team_update ON public.speech_playback_cache
+      FOR UPDATE USING (team_id = public.memoh_current_team_id())
+      WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'speech_playback_cache' AND policyname = 'speech_playback_cache_team_delete') THEN
+    CREATE POLICY speech_playback_cache_team_delete ON public.speech_playback_cache
+      FOR DELETE USING (team_id = public.memoh_current_team_id());
+  END IF;
+END $$;
