@@ -114,6 +114,9 @@ func fail(j *Job, err error, now time.Time, save Save) error {
 		switch h.Status {
 		case http.StatusUnauthorized, http.StatusForbidden:
 			retry, code = false, "authorization"
+			if h.Status == http.StatusForbidden && h.Code == refusalCodeTargetFingerprintMismatch {
+				code = "target_drift"
+			}
 		case statusRequestCanceled:
 			retry, code = true, "connection"
 		case http.StatusNotFound:

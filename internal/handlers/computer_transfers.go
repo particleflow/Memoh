@@ -102,6 +102,7 @@ func (h *ComputerTransferHandler) Register(e *echo.Echo) {
 		}
 	})
 	g := e.Group(ComputerTransferPrefix + "/:task_operation_id/:task_delivery_id")
+	g.Use(markTransferRefusal)
 	// Inner routes retain the frozen file protocol and existing client paths.
 	file := "/bots/:bot_id/media"
 	g.GET(file+"/limits", h.guard("limits", func(c echo.Context) error { return h.files.MediaUploadLimits(c) }))

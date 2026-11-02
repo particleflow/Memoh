@@ -139,6 +139,10 @@ type HTTPError struct {
 	Status     int
 	RetryAfter time.Duration
 	RetryAt    time.Time // Exact server deadline, including dates beyond a Duration.
+	// Code is the machine-readable refusal token a server attached to a 401/403
+	// (Memoh-Transfer-Error header). Empty means the server named no cause; the
+	// status alone then classifies the refusal.
+	Code string
 }
 
 // Memoh's error catalog and HTTP boundary use 499 for caller cancellation.
@@ -213,10 +217,19 @@ func statusError(resp *http.Response) error {
 	return statusErrorAt(resp, time.Now())
 }
 
+// refusalCodeTargetFingerprintMismatch is the only defined refusal token: the
+// server-bound target identity drifted, which is not a rejected credential.
+const refusalCodeTargetFingerprintMismatch = "target_fingerprint_mismatch"
+
 func statusErrorAt(resp *http.Response, now time.Time) error {
 	h := &HTTPError{Status: resp.StatusCode}
 	// Permission refusals take precedence even over an invalid retry header.
 	if h.Status == http.StatusUnauthorized || h.Status == http.StatusForbidden {
+		// One known cause token, validated before use; anything else is ignored
+		// so an unknown server can never invent a local classification.
+		if token := strings.TrimSpace(resp.Header.Get("Memoh-Transfer-Error")); token == refusalCodeTargetFingerprintMismatch {
+			h.Code = token
+		}
 		return h
 	}
 	raw := strings.TrimSpace(resp.Header.Get("Retry-After"))

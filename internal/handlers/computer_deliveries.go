@@ -43,8 +43,28 @@ func (h *ComputerDeliveryHandler) Register(e *echo.Echo) {
 		}
 	})
 	g := e.Group(prefix + "/:operation_id/:delivery_id")
+	g.Use(markTransferRefusal)
 	g.POST("/commit", h.commit)
 	g.POST("/resolve", h.resolve)
+}
+
+// RefusalTokenTargetFingerprint marks a 403 whose cause is target identity
+// drift, not a rejected credential. Endpoint hosts read this header to keep the
+// transfer host running instead of failing closed; the body stays generic and
+// never carries cause details.
+const RefusalTokenTargetFingerprint = "target_fingerprint_mismatch"
+
+// markTransferRefusal reports a machine-readable refusal token for errors that
+// endpoint hosts must classify by cause. It changes only headers; the status
+// and Problem body come from the ordinary error path.
+func markTransferRefusal(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := next(c)
+		if err != nil && errors.Is(err, computertask.ErrDeliveryTargetDrift) {
+			c.Response().Header().Set("Memoh-Transfer-Error", RefusalTokenTargetFingerprint)
+		}
+		return err
+	}
 }
 
 func deliveryHTTPError(err error) error {
@@ -52,14 +72,15 @@ func deliveryHTTPError(err error) error {
 	switch {
 	case errors.Is(err, computertask.ErrInvalid):
 		status = http.StatusBadRequest
-	case errors.Is(err, computertask.ErrDeliveryBinding), errors.Is(err, computertask.ErrDenied):
+	case errors.Is(err, computertask.ErrDeliveryBinding), errors.Is(err, computertask.ErrDenied), errors.Is(err, computertask.ErrDeliveryTargetDrift):
 		status = http.StatusForbidden
 	case errors.Is(err, computertask.ErrDeliveryConflict), errors.Is(err, computertask.ErrDeliveryVersion), errors.Is(err, computertask.ErrDeliveryAsset):
 		status = http.StatusConflict
 	case errors.Is(err, computertask.ErrDeliveryLimit):
 		status = http.StatusTooManyRequests
 	}
-	return echo.NewHTTPError(status)
+	// Keep the cause on the chain so group middleware can classify refusals.
+	return echo.NewHTTPError(status).WithInternal(err)
 }
 
 func readDeliveryBody(c echo.Context, dest any) error {

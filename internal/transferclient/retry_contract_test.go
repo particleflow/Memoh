@@ -330,6 +330,48 @@ func TestRetryContractCounterAndHeaderRepresentation(t *testing.T) {
 	if !errors.Is(err, ErrProtocol) {
 		t.Fatal("deadline beyond journal representation accepted", err)
 	}
+}
+
+// The server's refusal token separates a drifted target binding from a rejected
+// credential. Only the one defined token is honored; no other header value can
+// invent a classification.
+func TestRefusalTokenClassifiesTargetDrift(t *testing.T) {
+	now := time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC)
+	resp := &http.Response{StatusCode: http.StatusForbidden, Header: http.Header{"Memoh-Transfer-Error": {"target_fingerprint_mismatch"}}}
+	var h *HTTPError
+	if err := statusErrorAt(resp, now); !errors.As(err, &h) || h.Code != "target_fingerprint_mismatch" || lifecycleErrorClass(err) != "target_drift" {
+		t.Fatal("named drift refusal not classified", err)
+	}
+	j := newJob([]byte("original"))
+	if err := fail(&j, statusErrorAt(resp, now), now, func(Job) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if j.Phase != "blocked" || j.ErrorCode != "target_drift" {
+		t.Fatal("drift refusal persisted as", j.Phase, j.ErrorCode)
+	}
+	if s := recordLifecycle(QueueStatus{Job: j}, "", now); s.State != "blocked" || s.ErrorClass != "target_drift" {
+		t.Fatal("drift record not projected", s)
+	}
+	for _, unknown := range []string{"", "unheard-of", " TARGET_FINGERPRINT_MISMATCH ", strings.Repeat("x", 256)} {
+		resp := &http.Response{StatusCode: http.StatusForbidden, Header: http.Header{"Memoh-Transfer-Error": {unknown}}}
+		err := statusErrorAt(resp, now)
+		if !errors.As(err, &h) || h.Code != "" || lifecycleErrorClass(err) != "authentication" {
+			t.Fatal("unknown token changed classification", unknown, err)
+		}
+	}
+	resp401 := &http.Response{StatusCode: http.StatusUnauthorized, Header: http.Header{"Memoh-Transfer-Error": {"target_fingerprint_mismatch"}}}
+	if err := statusErrorAt(resp401, now); !errors.As(err, &h) || lifecycleErrorClass(err) != "authentication" {
+		t.Fatal("401 must stay credential-class", err)
+	}
+	if transientAssociation(statusErrorAt(resp, now)) {
+		t.Fatal("drift refusal treated as transient")
+	}
+}
+
+// Representation limits stay diagnostic, never a retry budget (split out of
+// TestRetryContractCounterAndHeaderRepresentation).
+func TestRetryContractRepresentationLimitIsNotABudget(t *testing.T) {
+	now := time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC)
 	n := int(^uint(0) >> 1)
 	if incrementAttempts(n) != n || incrementAttempts(n-1) != n {
 		t.Fatal("diagnostic count overflow")

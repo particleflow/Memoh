@@ -202,7 +202,7 @@ func TestLifecycleEmptyBusyAndClassification(t *testing.T) {
 	for _, test := range []struct {
 		err   error
 		class string
-	}{{ErrAuthorization, "authentication"}, {&HTTPError{Status: 403}, "authentication"}, {ErrPermission, "permission"}, {ErrVersion, "configuration"}, {ErrCapacity, "capacity"}, {ErrTransport, "transient"}, {ErrStore, "unknown"}} {
+	}{{ErrAuthorization, "authentication"}, {&HTTPError{Status: 403}, "authentication"}, {&HTTPError{Status: 403, Code: "target_fingerprint_mismatch"}, "target_drift"}, {&HTTPError{Status: 401, Code: "target_fingerprint_mismatch"}, "authentication"}, {&HTTPError{Status: 403, Code: "unheard-of-token"}, "authentication"}, {ErrPermission, "permission"}, {ErrVersion, "configuration"}, {ErrCapacity, "capacity"}, {ErrTransport, "transient"}, {ErrStore, "unknown"}} {
 		if s := LifecycleFailure(test.err); s.ErrorClass != test.class {
 			t.Fatal(s)
 		}

@@ -142,6 +142,89 @@ func TestComputerDeliveryHTTPUnknownThenCancel(t *testing.T) {
 	}
 }
 
+// A target fingerprint refusal answers 403 with the machine-readable cause
+// token; a credential refusal answers 403 with no token. Both stay generic
+// Problems in the body.
+func TestComputerDeliveryHTTPTargetDriftHeader(t *testing.T) {
+	f, e := deliveryHTTPServer(t)
+	path := "/internal/computer-deliveries/" + f.id.OperationID + "/result/"
+	body, _ := json.Marshal(f.ref)
+	f.target.WorkDir = `C:\Synthetic\moved` // fingerprint drift, identity tuple intact
+	request := func() *httptest.ResponseRecorder {
+		r := httptest.NewRequest(http.MethodPost, path+"commit", strings.NewReader(string(body)))
+		r.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		e.ServeHTTP(rr, r)
+		return rr
+	}
+	rr := request()
+	if rr.Code != http.StatusForbidden || rr.Header().Get("Memoh-Transfer-Error") != RefusalTokenTargetFingerprint {
+		t.Fatalf("drift refusal: %d token=%q body=%s", rr.Code, rr.Header().Get("Memoh-Transfer-Error"), rr.Body.String())
+	}
+	if strings.Contains(rr.Body.String(), "fingerprint") || strings.Contains(rr.Body.String(), f.ref.ContentHash) {
+		t.Fatalf("drift refusal leaked cause details: %s", rr.Body.String())
+	}
+	f2, e2 := deliveryHTTPServer(t)
+	f2.revoked = true
+	body2, _ := json.Marshal(f2.ref)
+	r2 := httptest.NewRequest(http.MethodPost, "/internal/computer-deliveries/"+f2.id.OperationID+"/result/commit", strings.NewReader(string(body2)))
+	r2.Header.Set("Content-Type", "application/json")
+	rr2 := httptest.NewRecorder()
+	e2.ServeHTTP(rr2, r2)
+	if rr2.Code != http.StatusForbidden || rr2.Header().Get("Memoh-Transfer-Error") != "" {
+		t.Fatalf("credential refusal must carry no token: %d token=%q", rr2.Code, rr2.Header().Get("Memoh-Transfer-Error"))
+	}
+}
+
+// HTTP mapping of the drift refusal without the media store (the media-backed
+// fixture cannot run on hosts that deny drive-root directory sync).
+func TestComputerDeliveryHTTPDriftRefusalHeaderMapping(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		err   error
+		code  int
+		token string
+	}{{"drift", computertask.ErrDeliveryTargetDrift, http.StatusForbidden, RefusalTokenTargetFingerprint},
+		{"credential", computertask.ErrDenied, http.StatusForbidden, ""},
+		{"binding", computertask.ErrDeliveryBinding, http.StatusForbidden, ""}} {
+		t.Run(tc.name, func(t *testing.T) {
+			e := echo.New()
+			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
+			s := computertask.NewDeliveryService(func(context.Context, func(computertask.DeliveryTransaction) error) error {
+				return tc.err
+			}, nil)
+			NewComputerDeliveryHandler(s).Register(e)
+			b := toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture-run"}
+			id := computertask.DeliveryIdentity{Binding: b, OperationID: uuid.NewString(), DeviceID: "fixture-device", InstanceID: "fixture-instance", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
+			e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+				return func(c echo.Context) error {
+					ctx, err := toolcontext.WithComputerBinding(c.Request().Context(), b)
+					if err != nil {
+						return err
+					}
+					ctx, err = computertask.WithDeliveryIdentity(ctx, id)
+					if err != nil {
+						return err
+					}
+					c.SetRequest(c.Request().WithContext(ctx))
+					return next(c)
+				}
+			})
+			body, _ := json.Marshal(computertask.DeliveryRequest{Version: 1, Direction: "upload", ContentHash: strings.Repeat("c", 64), SizeBytes: 1, Mime: "text/plain"})
+			r := httptest.NewRequest(http.MethodPost, "/internal/computer-deliveries/"+id.OperationID+"/result/commit", strings.NewReader(string(body)))
+			r.Header.Set("Content-Type", "application/json")
+			rr := httptest.NewRecorder()
+			e.ServeHTTP(rr, r)
+			if rr.Code != tc.code || rr.Header().Get("Memoh-Transfer-Error") != tc.token {
+				t.Fatalf("%s: status=%d token=%q body=%s", tc.name, rr.Code, rr.Header().Get("Memoh-Transfer-Error"), rr.Body.String())
+			}
+			if strings.Contains(rr.Body.String(), "fingerprint") {
+				t.Fatalf("%s: body leaked cause: %s", tc.name, rr.Body.String())
+			}
+		})
+	}
+}
+
 func TestComputerDeliveryHTTPRejectsUntrustedAndMalformedRequests(t *testing.T) {
 	f, e := deliveryHTTPServer(t)
 	path := "/internal/computer-deliveries/" + f.id.OperationID + "/result/"
