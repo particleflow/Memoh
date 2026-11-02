@@ -167,7 +167,10 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
   // through its stream so byte counts come from the real wire read; the rebuilt
   // Response hands the identical bytes to the existing SDK parse and checks.
   const observeProgress = (source: typeof fetch): typeof fetch => {
-    if (!progress?.onProgress) return source
+    // Bind the optional callback once: property narrowing cannot cross the
+    // async closure boundary, and the wire contract forbids mid-read swaps.
+    const onProgress = progress?.onProgress
+    if (!onProgress) return source
     return async (input, init) => {
       const result = await source(input, init)
       if (!result.ok || !result.body) return result
@@ -183,7 +186,7 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
         if (step.done) break
         chunks.push(step.value)
         loaded += step.value.byteLength
-        progress.onProgress(loaded, total)
+        onProgress(loaded, total)
       }
       const merged = new Uint8Array(loaded)
       let at = 0

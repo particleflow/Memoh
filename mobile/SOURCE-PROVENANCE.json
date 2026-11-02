@@ -1132,7 +1132,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "817639b08d12bb83b1d7e7867e877ab8249ad1b32de0e21b986def79f6db826f",
+      "sha256": "a35142b604550d5298885eb7f95246e75ba68dc6cef9d0eb99437084810729e7",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
