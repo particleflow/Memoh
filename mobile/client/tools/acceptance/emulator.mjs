@@ -33,6 +33,11 @@ const DEVICE_HOST = process.env.ACCEPTANCE_DEVICE_HOST || '10.0.2.2'
 const CONTROL = `http://127.0.0.1:${STUB_PORT}`
 const PORT_BASE = Number(process.env.ACCEPTANCE_CDP_PORT || 9300)
 const ACK_WINDOW_MS = 3000
+// The stream start (run_accepted) is the earliest moment the ack block can be
+// sent, and the stub itself holds it back by startDelay + 1200ms after the
+// send. The emulator app adds ~2s of message pipeline over Chromium, so the
+// observable window is measured from the stream's ack, not from the send.
+const ACK_FROM_STREAM_MS = 2000
 const FIRST_POST_WINDOW_MS = 4000
 const HISTORY_MARK = '这是历史回复，加载时不应朗读。'
 const sleep = ms => new Promise(r => setTimeout(r, ms))
@@ -109,10 +114,14 @@ const playing = async () => (await speechStates()).includes('playing')
 // to the first (dead) renderer.
 const forwardBySocket = new Map()
 let nextForwardPort = PORT_BASE
-async function attachFresh() {
+const devtoolsSockets = () => hdc('shell', 'cat /proc/net/unix | grep webview_devtools_remote')
+  .trim().split('\n').map(line => line.trim().split(/\s+/).pop().replace(/^@/, '')).filter(Boolean)
+async function attachFresh(stale = new Set()) {
   page = await waitFor(async () => {
-    const socket = hdc('shell', 'cat /proc/net/unix | grep webview_devtools_remote | tail -1')
-      .trim().split(/\s+/).pop().replace(/^@/, '')
+    // /proc/net/unix is not ordered by creation; the previous instance's socket
+    // can still be listed here. Only a socket absent before this cold start
+    // belongs to the renderer this scenario drives.
+    const socket = devtoolsSockets().find(name => !stale.has(name))
     if (!socket) return null
     if (!forwardBySocket.has(socket)) {
       const port = nextForwardPort++
@@ -125,7 +134,9 @@ async function attachFresh() {
 }
 
 // One scenario, one device-level cold app: stopped, data wiped, started again.
-// The scenario's own runtime_subscribe is the readiness signal; a fixed sleep
+// Wiped data means no token, so every scenario signs in through the packaged
+// login form; the scripted service answers that POST /auth/login. The
+// scenario's own runtime_subscribe is the readiness signal; a fixed sleep
 // would hide a boot that never reconnected.
 async function coldStart({ seedHistory = false } = {}) {
   ensureDevice()
@@ -135,14 +146,32 @@ async function coldStart({ seedHistory = false } = {}) {
   hdc('shell', `bm clean -n ${BUNDLE} -c`)
   await control('/__control/reset', {})
   if (seedHistory) await control('/__control/history', {})
+  const staleSockets = new Set(devtoolsSockets())
   const startedAt = Date.now()
   hdc('shell', `aa start -a EntryAbility -b ${BUNDLE}`)
+  await attachFresh(staleSockets)
+  // boot() appends the service-settings button only after main and the router
+  // are live; before that the login form is inert and a click is lost.
+  await page.wait('!!document.querySelector("#harmony-service-settings") && !!document.querySelector("#password")', 30000, 'login form')
+  await page.eval(`(() => {
+    const set = (selector, value) => {
+      const input = document.querySelector(selector)
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, value)
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    }
+    set('#username', 'acceptance'); set('#password', 'acceptance')
+    return true
+  })()`)
+  // The form validates the bound values asynchronously; submit after they land.
+  await sleep(500)
+  await page.eval(`document.querySelector('#password').form.querySelector('button[type=submit]').click(), true`)
+  await waitFor(async () => (await control('/__control/requests', null, 'GET')).items.some(item => item.path === '/auth/login'),
+    10000, 200, 'POST /auth/login from the packaged form')
   const subscribed = await waitFor(async () => {
     const log = await control('/__control/messages', null, 'GET')
     return log.items.some(item => item.type === 'runtime_subscribe' && Date.parse(item.at) >= startedAt - 500)
   }, 60000, 300, 'runtime subscribe').then(() => true, () => false)
-  if (!subscribed) throw new Error('app did not subscribe to the session stream after a cold start')
-  await attachFresh()
+  if (!subscribed) throw new Error('app did not subscribe to the session stream after sign-in')
   await page.wait('!!document.querySelector("textarea")', 30000, 'composer')
   // The reply is absorbed while the initial history load is still open, so the
   // service must be quiet before the harness sends.
@@ -179,7 +208,7 @@ async function main() {
   const uncovered = (name, detail) => add({ name, status: 'uncovered', detail })
 
   const ACK = '收到，我来处理。'
-  const BODY = ['第一句已经说完了。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
+  const BODY = ['第一句已经说完。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
 
   try {
     ensureDevice()
@@ -188,13 +217,17 @@ async function main() {
     await coldStart()
     await typeAndSend('请朗读这段回复')
     const sentAt = Date.now()
+    const log = await control('/__control/frames', null, 'GET')
+    const ackFrameAt = Math.max(0, ...log.items.filter(f => f.seq === 1).map(f => f.at))
     let ackAt = -1
-    for (let waited = 0; waited <= ACK_WINDOW_MS; waited += 100) {
+    for (let waited = 0; waited <= ACK_WINDOW_MS + 8000; waited += 100) {
       if ((await text()).includes(ACK)) { ackAt = Date.now() - sentAt; break }
       await sleep(100)
     }
-    pass('E1 acknowledgement reaches the real app UI', ackAt >= 0 && ackAt <= ACK_WINDOW_MS,
-      ackAt >= 0 ? `ack visible ${ackAt}ms after send (window ${ACK_WINDOW_MS}ms)` : `ack not visible within ${ACK_WINDOW_MS}ms`)
+    const fromStream = ackFrameAt ? ackAt - (ackFrameAt - sentAt) : -1
+    pass('E1 acknowledgement reaches the real app UI', ackAt >= 0 && fromStream <= ACK_FROM_STREAM_MS,
+      ackAt >= 0 ? `ack visible ${ackAt}ms after send, ${fromStream}ms after the ack frame (window ${ACK_FROM_STREAM_MS}ms)` : `ack not visible within ${ACK_WINDOW_MS}ms`,
+      { ackAfterSendMs: ackAt, ackAfterFrameMs: fromStream })
 
     // Read-aloud start is proven by the app's own synthesis request; the visible
     // speech state is corroboration, because a short reply can finish playing
@@ -305,6 +338,7 @@ async function main() {
     }, null, 2))
     console.log(`\nreport written to ${reportPath}`)
     if (page) page.close()
+    for (const [socket, port] of forwardBySocket) { try { execFileSync(HDC, ['-t', SERIAL, 'fport', 'rm', `tcp:${port}`, `localabstract:${socket}`], { encoding: 'utf8' }) } catch {} }
   }
   process.exit(report.some(entry => entry.status !== 'pass') ? 1 : 0)
 }

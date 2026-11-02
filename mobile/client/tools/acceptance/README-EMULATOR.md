@@ -1,8 +1,6 @@
-# 模拟器验收（门禁第 ③ 级）— WIP
+# 模拟器验收（门禁第 ③ 级）
 
-**状态：harness 自身尚未跑完，本目录不构成可用门禁。** 见文末「确切卡点」。
-
-本目录是 `docs/PLAN.md` 模拟验收门禁的第 ③ 级执行工具：在 Windows 上由 DevEco
+本目录是模拟验收门禁的第 ③ 级执行工具：在 Windows 上由 DevEco
 模拟器运行完整 HAP（ArkUI 壳 + ArkWeb + 原生面），自动驱动并断言。第 ② 级是
 Chromium 打包产物 harness（PR #123），第 ④ 级是真机。
 
@@ -35,7 +33,9 @@ Chromium 打包产物 harness（PR #123），第 ④ 级是真机。
    手机上客户端跨重启保留 cursor，把重放的 seq 判为过期而**静默丢流**。真实服务端
    开新流换 epoch，包装层按场景边界推进 epoch。
 3. **登录**：第 ② 级直接往 localStorage 种 token。手机上 harness 无法在文档启动前
-   种存储，所以包装层应答打包登录表单实际发出的 `POST /auth/login`。
+   种存储，所以包装层应答打包登录表单实际发出的 `POST /auth/login`（响应体必须是
+   SDK `HandlersLoginResponse` 形状：`access_token` + `user_id`，`{user, token}` 会被
+   登录页判为「服务器返回异常」）。
 
 ## 一次性准备
 
@@ -102,50 +102,79 @@ node mobile/client/tools/acceptance/emulator.mjs       # 终端 2
 
 这些步骤全部在 `coldStart()` 里；未订阅直接抛错（fail-fast，不空等）。
 
-## 确切卡点（WIP 原因）
+## 已解卡点（2026-11-02）：「配置 + token 同时存在」停在配置页
 
-**阻塞点：冷启动后「配置 + token 同时存在」时，页面报“启动或本地配置读取失败”，
-停在配置页，后续所有场景无法开始。**
+原卡点收敛错误。真实原因链（三层，都已修复在本目录工具内）：
 
-已确认的事实（可复现）：
+1. **bundle 等长补丁语法错**（主因）。旧补丁把
+   `if(o=t===10||...,` 改写为 `if(o=(t===10||...)&&a!==\`10.0.2.2\`,`——按
+   Esprima 语义，函数表达式开头的 `(` 让后面的 `a!==...` 被解析为**函数调用实参**
+   （cover grammar），该函数返回模板串（callable 对象），运行时抛
+   `TypeError: not callable`。该 TypeError 正是 `boot()` 捕获后展示
+   「启动或本地配置读取失败」的来源：`readServiceConfig` 与规范化器从未拒绝
+   `http://10.0.2.2:18081`（`10.0.2.2` 不是 RFC1918 私网，无需豁免）。
+   现补丁把 IPv4 LAN 判定的首段常量 `t===10` 改为 `t===-1`（不可达常量，等长），
+   语义上更贴近「10/8 不再算 LAN」。
+2. **原生门与调试开关在 ABC 里**。分发包 `setWebDebuggingAccess(false)` 且
+   `ServiceUrl.ets` 的原生规范化器在 CDP attach 前就跑（写配置时）。现在的
+   `acceptance-hap.py` 用 `ark_disasm` 定位两处指令操作数做等长改写：
+   `ldfalse`→`ldtrue`（调试开关）与 `ldai 0xa`→`ldai 0xffffffff`（原生侧同一
+   `first===10` LAN 项），并重算 panda 头 adler32。不再要求重新编译工程，也
+   不再碰组合树。
+3. **登录两坑**。冷启动后 `boot()` 完成前登录表单是旧文档的（提交无效果）；
+   harness 现在等 `#harmony-service-settings`（boot() 成功后才追加）出现再填表。
+   另外旧 stub 应答 `{user, token}` 不是 `HandlersLoginResponse` 形状，登录页判
+   「服务器返回异常」。
 
-1. 打包 seed（`memoh_client.json` 的 `apiOrigin`）能自动写入配置——清空 storage
-   后 reload，`localStorage['memoh:harmony:service-config:v1']` 变成
-   `{"version":1,"apiOrigin":"http://10.0.2.2:18081",...}`，页面进入 `#/login`。
-2. 此时再写 `token` 并 reload，页面从 `#/login` 转到
-   “启动或本地配置读取失败”并停在配置页；`GET /users/me` 曾成功一次（200），
-   说明网络已通、token 被接受，失败点在 `readServiceConfig` 的本地校验。
-3. 同时写入配置与 token（不经 seed）同样失败。把 origin 换成公网
-   `http://example.test:81` 也失败——**与地址是否私网无关**，是读取路径本身。
-4. 原生侧已放开：`client.configure` 经 CDP 调用返回 `{"ok":true}`（ABC 内的
-   `ServiceUrl.ets` 补丁生效），说明卡在 bundle 侧的校验器。
-5. 第 ② 级之所以没有此问题：它直接种 `localStorage` 且**从未加载 seed 与配置同时
-   存在**的状态。
-
-未完成的定位：需要确认 `readServiceConfig` 抛出的具体错误码
-（`SERVICE_CONFIG_INVALID` / `DEPLOYMENT_CONFIG_INVALID` /
-`DEPLOYMENT_LEGACY_INVALID`），以及打包 bundle 的 URL 规范化器对我打入的等长补丁
-（IPv4 分支排除网关）返回的 `origin` 是否与写入值逐字节相等。
-
-### 复现步骤
+### 复现（当前版）
 
 ```bash
-hdc -t 127.0.0.1:5555 shell "aa force-stop cloud.begonia.workassistant; sleep 2; \
-  bm clean -n cloud.begonia.workassistant -d; aa start -a EntryAbility -b cloud.begonia.workassistant"
-# 取 webview_devtools socket → hdc fport → CDP attach
-# 1) localStorage.clear(); location.reload()  → 进入 #/login（seed 已生效）
-# 2) localStorage.setItem('token','acceptance-token'); location.reload()
-#    → 停在配置页，提示“启动或本地配置读取失败”
+Emulator.exe -start "Mate 90 Pro" -imageRoot F:/NAS-Assistant/validation/harmony/.build/emulator-images -bootMode coldboot
+hdc tconn 127.0.0.1:5555 && hdc -t 127.0.0.1:5555 shell bm get --udid
+python mobile/client/tools/acceptance/acceptance-hap.py <分发包原始 unsigned HAP> F:/NAS-Assistant/tmp/emu 18081 <UDID>
+hdc -t 127.0.0.1:5555 install -r F:/NAS-Assistant/tmp/emu/out/acceptance-signed.hap
+# 终端 1：ACCEPTANCE_CLIENT_WEB=<打包 client-web 目录> node stub-host.mjs
+# 终端 2：node emulator.mjs
 ```
 
-## 验收构建的三处偏差（只在副本，生产零改动）
+输入必须是分发包自己的原始 unsigned HAP（pristine anchor 会拒绝已打过补丁的
+副本）。
 
-1. `SharedWebPolicy.ets`：`setWebDebuggingAccess(false)` → `true`（CDP 驱动需要）。
-2. `ServiceUrl.ets`（原生）：TLS 门放行 `10.0.2.2`。
-3. 打包 bundle：IPv4 LAN 判定排除 `10.0.2.2`；`WebResourceManifest.ets` 必须与
-   实际字节**逐一同步**——差 1 字节原生资源门即拒载、页面全白。
+## 当前红绿（2026-11-02，Mate 90 Pro 模拟器实测）
 
-分发包不含以上任何一条。
+报告：`acceptance-emulator-1793622137052.json` / `1793622806507.json` /
+`1793623255608.json`（三次全量 9 场景运行），外加单流程探针。
+
+| 场景 | 结果 | 证据与说明 |
+| --- | --- | --- |
+| E1 快回 ack | 红（harness 内） | harness 内 11s 窗口未见 ack；**同样的单流程探针稳定绿**：发送后 ~6.5s ack 与末句均可见（stub 帧时序正常） |
+| G1 首句开读 | 红 | 完成帧后首个 POST 实测 ~30s（>4000ms 窗口）；一次运行录得真实 POST/PUT（`x-speech-playback-identity`） |
+| G5 全段按序 | 红 | 依赖 G1；录得的一次 POST 覆盖全段四句、顺序正确 |
+| V2 思考默认折叠 | 红（**预期红**，#118 未合并） | 打包 bundle 无思考折叠控件 → uncovered |
+| V3b 打字不停读 | 红 | 运行间结果翻转（见下「稳定性」） |
+| V3c 气泡点击停读 | 绿（一次运行） | playing=true → 点击后 idle；另两次运行 playing 未起 |
+| V3d 提交停读 | 绿（一次运行） | playing=true → 提交后 idle，含真实 speech POST×2 |
+| G7 历史不朗读 | 绿（一次运行） | 历史渲染且 speech=0；单流程探针稳定绿 |
+| G8 后台/前台 | 红 | 一次运行录得真实 speech POST，但回前台恢复未观察到 |
+
+**稳定性（如实说明）**：harness 每次都能完整跑完 9 场景并落报告，但活动回复类
+场景（E1/V3b/V3c/V3d/G8）在连续多场景运行中结果翻转：同一场景某次绿、某次红，
+而逐场景单独驱动（同 coldStart 流程的探针）稳定绿。翻红时消息确实到达 stub、
+帧确实下发，但页面不再渲染流式文本——指向 harness 的会话衔接（CDP attach /
+renderer 复用）而非产品缺陷。已排除：stale devtools socket 选择（已按
+「仅接受本次冷启动后新出现的 socket」修正，未消除翻转）。**在本项修稳之前，
+活动回复类场景的红不能当作产品红使用**；V2 为 #118 未合并的预期红。
+
+## 验收构建的偏差（只在副本，生产零改动）
+
+1. 打包 bundle：IPv4 LAN 判定首段 `t===10` → `t===-1`（等长，10/8 不再算 LAN）。
+2. `ets/modules.abc`（`ark_disasm` 定位、等长操作数 + adler32 重算）：
+   `setWebDebuggingAccess(false)` 的 `ldfalse`→`ldtrue`；原生 `ServiceUrl.ets`
+   同一 `first===10` 项的 `ldai 0xa`→`ldai 0xffffffff`。
+3. rawfile seed：`apiOrigin` 指向模拟器网关（槽位等长填充）。
+
+`WebResourceManifest.ets` 只登记 `{mime, bytes}`（长度，无哈希），三处补丁全部
+等长，原生资源门原样通过；分发包不含以上任何一条。
 
 ## 模拟器覆盖不到、必须真机首验
 

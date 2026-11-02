@@ -59,9 +59,12 @@ service.api = async (req, res, path, url) => {
   if (path === '/auth/login' && req.method === 'POST') {
     service.apiLog.push({ method: 'POST', path, at: new Date().toISOString() })
     await service.readBody(req)
+    // Shape of the SDK's HandlersLoginResponse; the login page requires
+    // access_token and user_id and reports anything else as a server error.
     service.json(res, 200, {
-      user: { id: 'user-stub', username: 'acceptance', display_name: 'Acceptance', role: 'admin' },
-      token: 'acceptance-token',
+      access_token: 'acceptance-token', token_type: 'Bearer',
+      expires_at: new Date(Date.now() + 86400000).toISOString(),
+      user_id: 'user-stub', username: 'acceptance', display_name: 'Acceptance', role: 'admin', timezone: 'UTC',
     })
     return
   }
