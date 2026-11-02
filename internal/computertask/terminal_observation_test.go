@@ -36,7 +36,7 @@ func TestTerminalObservationFiresOncePerOutcome(t *testing.T) {
 		defer mu.Unlock()
 		fired = append(fired, r.ID+"/"+d.Phase)
 	})
-	first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+	first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
 	if err != nil {
 		t.Fatal(err)
 	}
