@@ -11,7 +11,7 @@ const ReasoningEffortMetadataKey = "reasoning_effort"
 // ReasoningEffortFromMetadata decodes the tiering decision from a message
 // metadata map. JSON round-tripping keeps this tolerant of values loaded from
 // JSONB as map[string]any as well as typed values used in tests.
-func ReasoningEffortFromMetadata(metadata map[string]any) (applied, cap, source string, ok bool) {
+func ReasoningEffortFromMetadata(metadata map[string]any) (applied, ceiling, source string, ok bool) {
 	if len(metadata) == 0 {
 		return "", "", "", false
 	}

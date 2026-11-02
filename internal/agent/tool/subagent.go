@@ -2015,11 +2015,11 @@ func applyEffortTieringForSubagent(resolved *reasoning.Config, advertised []stri
 	if resolved == nil || !resolved.Active {
 		return
 	}
-	cap := strings.TrimSpace(resolved.Effort)
-	if cap == "" {
+	ceiling := strings.TrimSpace(resolved.Effort)
+	if ceiling == "" {
 		return
 	}
-	if sent, ok := reasoning.DownshiftTier(reasoning.EffortLow, cap, advertised); ok {
+	if sent, ok := reasoning.DownshiftTier(reasoning.EffortLow, ceiling, advertised); ok {
 		resolved.Effort = sent
 	}
 }

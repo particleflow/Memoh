@@ -99,22 +99,22 @@ func applyEffortTiering(cfg *models.ReasoningConfig, advertised []string, in eff
 	if strings.TrimSpace(in.RequestedEffort) != "" || strings.TrimSpace(in.SessionEffort) != "" {
 		return nil
 	}
-	cap := strings.TrimSpace(cfg.Effort)
-	if cap == "" {
+	ceiling := strings.TrimSpace(cfg.Effort)
+	if ceiling == "" {
 		return nil
 	}
 
-	desired, source := tierForTurn(in, cap)
-	sent, ok := reasoning.DownshiftTier(desired, cap, advertised)
+	desired, source := tierForTurn(in, ceiling)
+	sent, ok := reasoning.DownshiftTier(desired, ceiling, advertised)
 	if !ok {
 		return nil
 	}
 	cfg.Effort = sent
-	return &reasoning.TierDecision{Applied: sent, Cap: cap, Source: source}
+	return &reasoning.TierDecision{Applied: sent, Cap: ceiling, Source: source}
 }
 
 // tierForTurn maps the turn's shape to a desired tier. First match wins.
-func tierForTurn(in effortTierInputs, cap string) (string, string) {
+func tierForTurn(in effortTierInputs, ceiling string) (string, string) {
 	sessionType := strings.ToLower(strings.TrimSpace(in.SessionType))
 	if sessionType == sessionmode.Schedule || sessionType == sessionpkg.TypeSubagent {
 		return reasoning.EffortLow, tierSourceScheduleSubagent
@@ -122,7 +122,7 @@ func tierForTurn(in effortTierInputs, cap string) (string, string) {
 	text := strings.TrimSpace(in.InputText)
 	runes := utf8.RuneCountInString(text)
 	if complexityMarkerIn(text) || in.Attachments > 0 || runes >= longInputMinRunes {
-		return cap, tierSourceComplex
+		return ceiling, tierSourceComplex
 	}
 	if runes > 0 && runes <= shortInputMaxRunes && !toolIntentMarkerIn(text) {
 		return reasoning.EffortLow, tierSourceShortInput
