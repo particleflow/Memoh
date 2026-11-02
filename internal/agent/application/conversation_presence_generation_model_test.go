@@ -234,7 +234,6 @@ func TestResolvePresenceGenerationFallbacks(t *testing.T) {
 		{"provider_mismatch", ConversationPresenceOptions{GenerationModel: "fast-model"}, func(context.Context, string) (models.GetResponse, error) {
 			model := fastModel()
 			model.ProviderID = "other-provider"
-			model.Model.ProviderID = "other-provider"
 			return model, nil
 		}, false},
 		{"same_provider_override", ConversationPresenceOptions{GenerationModel: "fast-model"}, func(context.Context, string) (models.GetResponse, error) { return fastModel(), nil }, true},
