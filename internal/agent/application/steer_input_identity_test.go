@@ -6,10 +6,9 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/felinics/twilight/sdk"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-
-	sdk "github.com/felinics/twilight/sdk"
 
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
@@ -34,7 +33,7 @@ func (steerIdentityQueries) GetUserByID(_ context.Context, id pgtype.UUID) (sqlc
 	return sqlc.User{ID: id}, nil
 }
 
-func (steerIdentityQueries) GetChannelIdentityByID(_ context.Context, id pgtype.UUID) (sqlc.ChannelIdentity, error) {
+func (steerIdentityQueries) GetChannelIdentityByID(context.Context, pgtype.UUID) (sqlc.ChannelIdentity, error) {
 	return sqlc.ChannelIdentity{}, pgx.ErrNoRows
 }
 
