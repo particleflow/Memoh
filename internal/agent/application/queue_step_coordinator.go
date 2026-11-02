@@ -11,6 +11,7 @@ import (
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/step"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 // queueStepCoordinator orders queue consumption after history persistence.
@@ -30,6 +31,11 @@ type queueStepCoordinator struct {
 	// one at commit, so the name the client was shown at claim time is the name
 	// history ends up using.
 	pendingSteerTurn *messagepkg.TurnSlot
+	// pendingSteerIdentity is the attribution the claimed item recorded at
+	// ingress. The row that consumes the input is a real user message, so it
+	// carries the sender and input source an idle send would have, and the
+	// claim frame publishes the same identity before the row exists.
+	pendingSteerIdentity steerInputIdentity
 }
 
 type queueStepOutcome struct {
@@ -38,6 +44,7 @@ type queueStepOutcome struct {
 	appliedSteerItemID   string
 	claimedSteer         *sessionruntime.SteerItem
 	claimedSteerTurn     *messagepkg.TurnSlot
+	claimedSteerIdentity steerInputIdentity
 	replacementFinalized bool
 }
 
@@ -112,6 +119,7 @@ func (q *queueStepCoordinator) releaseSteerClaim(ctx context.Context) {
 	// The slot drawn for this input is spent. A later claim draws its own; the
 	// gap is harmless because positions are only ever compared.
 	q.pendingSteerTurn = nil
+	q.pendingSteerIdentity = steerInputIdentity{}
 }
 
 func (q *queueStepCoordinator) commit(
@@ -141,6 +149,7 @@ func (q *queueStepCoordinator) commit(
 		outcome.appliedSteerItemID = string(q.pendingSteer.ItemID)
 		q.pendingSteer = nil
 		q.pendingSteerTurn = nil
+		q.pendingSteerIdentity = steerInputIdentity{}
 	}
 	if kind == queueStepDeferredDecision {
 		// The loop parks after this step. A claim taken here would sit
@@ -167,12 +176,61 @@ func (q *queueStepCoordinator) commit(
 	if claimed {
 		q.pendingSteer = &claim
 		q.pendingSteerTurn = q.allocateSteerTurn(ctx)
+		q.pendingSteerIdentity = q.resolveSteerIdentity(ctx, item)
 		outcome.claimedSteer = &item
 		outcome.claimedSteerTurn = q.pendingSteerTurn
+		outcome.claimedSteerIdentity = q.pendingSteerIdentity
 	} else if q.req.TurnReplacement != nil && kind == queueStepFinal {
 		return q.finalizeReplacement(ctx, outcome, previouslyPersisted)
 	}
 	return outcome, nil
+}
+
+// resolveSteerIdentity reads the attribution the claimed item recorded at
+// ingress. The queue payload is the complete turn the ingress admitted, so its
+// sender and channel are the same facts an idle send would have carried. An
+// item without a command (written by an older release) has no recorded sender
+// and stays unattributed rather than borrowing the enclosing turn's actor.
+func (q *queueStepCoordinator) resolveSteerIdentity(ctx context.Context, item sessionruntime.SteerItem) steerInputIdentity {
+	identity := steerInputIdentity{}
+	cmd := decodeQueuePayload(item.Payload).Command
+	if cmd == nil || cmd.DelegationResultID != "" || cmd.TaskResultReceipt != "" {
+		identity.Source = inputsource.Unattributed(q.run.BotID, q.run.SessionID)
+		return identity
+	}
+	channelIdentityID, senderUserID := q.service.resolvePersistSenderIDs(ctx, ChatRequest{
+		BotID: q.run.BotID, ThreadID: q.run.SessionID,
+		UserID: strings.TrimSpace(cmd.UserID), SourceChannelIdentityID: strings.TrimSpace(cmd.SourceChannelIdentityID),
+		CurrentChannel: strings.TrimSpace(cmd.CurrentChannel),
+	})
+	if senderUserID == "" && channelIdentityID == "" {
+		// The recorded actor does not resolve to an account this deployment can
+		// name. The row stays unattributed rather than claiming a user it cannot
+		// identify: the client renders kind=user without a sender as a foreign,
+		// unknown author anyway.
+		identity.Source = inputsource.Unattributed(q.run.BotID, q.run.SessionID)
+		return identity
+	}
+	identity.SenderUserID = senderUserID
+	identity.SenderChannelIdentityID = channelIdentityID
+	identity.Source = (inputsource.Source{
+		Kind: inputsource.User, BotID: q.run.BotID, SessionID: q.run.SessionID,
+		UserID: strings.TrimSpace(cmd.UserID), ChannelIdentityID: strings.TrimSpace(cmd.SourceChannelIdentityID),
+		Channel: strings.TrimSpace(cmd.CurrentChannel),
+	}).Scoped(q.run.BotID, q.run.SessionID)
+	if identity.Source.Kind != inputsource.User {
+		// A recorded source that cannot be scoped to this conversation is not
+		// usable; the sender fields still describe the row we are writing.
+		identity.Source = inputsource.Unattributed(q.run.BotID, q.run.SessionID)
+	}
+	return identity
+}
+
+// steerInputIdentity is the attribution of one claimed queue input.
+type steerInputIdentity struct {
+	SenderUserID            string
+	SenderChannelIdentityID string
+	Source                  inputsource.Source
 }
 
 func (q *queueStepCoordinator) finalizeReplacement(ctx context.Context, outcome queueStepOutcome, previouslyPersisted []messagepkg.Message) (queueStepOutcome, error) {

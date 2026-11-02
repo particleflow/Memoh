@@ -216,11 +216,19 @@ func TestInputSourceUnattributedMidTurnInputDoesNotBorrowOriginalActor(t *testin
 	}
 	for i, in := range inputs {
 		source := inputsource.FromMetadata(in.Metadata, req.BotID, req.ThreadID)
-		if i < 2 && source.Kind != inputsource.User {
-			t.Fatal("original source was discarded")
+		if in.Role == "user" {
+			if i == 0 && source.Kind != inputsource.User {
+				t.Fatal("original source was discarded")
+			}
+			if i > 0 && (source.Kind != inputsource.Unknown || source.UserID != "") {
+				t.Fatalf("later input borrowed original actor: %+v", source)
+			}
+			continue
 		}
-		if i >= 2 && (source.Kind != inputsource.Unknown || source.UserID != "") {
-			t.Fatalf("later input borrowed original actor: %+v", source)
+		// Assistant rows belong to the admitted turn, not to a mid-turn input:
+		// a row-local attribution decision must not rewrite the turn's source.
+		if source.Kind != inputsource.User {
+			t.Fatalf("assistant row lost the turn source: %+v", source)
 		}
 	}
 }

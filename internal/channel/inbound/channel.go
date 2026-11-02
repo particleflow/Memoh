@@ -1498,6 +1498,7 @@ func (p *ChannelInboundProcessor) handleQueueCommand(
 		InvocationID:      invocationID,
 		UserID:            strings.TrimSpace(identity.UserID),
 		ChannelIdentityID: strings.TrimSpace(identity.ChannelIdentityID),
+		Channel:           msg.Channel.String(),
 		Text:              strings.TrimSpace(invocation.Rest),
 	}
 	var err error

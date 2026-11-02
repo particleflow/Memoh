@@ -18,6 +18,7 @@ import (
 	chatview "github.com/felinics/memoh/internal/agent/view"
 	"github.com/felinics/memoh/internal/apperror"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -334,13 +335,10 @@ func (c *agentStepCommitter) persist(ctx context.Context, stepIndex int, record 
 // native.TestQueuedSteerIsAppendedAfterEveryOtherPreparedMessage pins the
 // ordering this depends on.
 func (c *agentStepCommitter) stampSteerTurn(inputs []messagepkg.PersistInput) {
-	if c == nil || c.queueStep == nil {
+	if c == nil || c.queueStep == nil || c.queueStep.pendingSteer == nil {
 		return
 	}
 	slot := c.queueStep.steerTurnForStep()
-	if slot == nil || strings.TrimSpace(slot.TurnID) == "" {
-		return
-	}
 	for i := len(inputs) - 1; i >= 0; i-- {
 		if !strings.EqualFold(strings.TrimSpace(inputs[i].Role), "user") || messagepkg.IsInternalFeedback(inputs[i].Metadata) {
 			continue
@@ -348,11 +346,60 @@ func (c *agentStepCommitter) stampSteerTurn(inputs []messagepkg.PersistInput) {
 		if strings.TrimSpace(inputs[i].TurnID) != "" {
 			continue
 		}
-		position := slot.Position
-		inputs[i].TurnID = slot.TurnID
-		inputs[i].TurnPosition = &position
+		// The row's attribution comes from the claim itself, so it is stamped
+		// even when no slot could be drawn: an unnamed turn is recoverable, an
+		// unnamed author is not.
+		if slot != nil && strings.TrimSpace(slot.TurnID) != "" {
+			position := slot.Position
+			inputs[i].TurnID = slot.TurnID
+			inputs[i].TurnPosition = &position
+		}
+		c.stampSteerIdentity(&inputs[i])
 		return
 	}
+}
+
+// stampSteerIdentity gives the injected user row the attribution the queue item
+// recorded at ingress. buildPersistInputs cannot know it: the steer text is not
+// the turn's request, so that layer correctly refuses to borrow the turn's own
+// sender and would record an unknown author. The claimed item is the authority
+// here, exactly as it is for the turn slot above.
+func (c *agentStepCommitter) stampSteerIdentity(input *messagepkg.PersistInput) {
+	identity := c.queueStep.pendingSteerIdentity
+	input.SenderUserID = identity.SenderUserID
+	input.SenderChannelIdentityID = identity.SenderChannelIdentityID
+	input.Metadata = mergeMetadata(input.Metadata, map[string]any{inputsource.MetadataKey: identity.Source})
+}
+
+// claimedSteerTurn renders the claimed input as the user turn the client
+// applies attribution to. Its identity is the slot drawn for the claim, and its
+// author is the sender and input source the queue item recorded, so the live
+// bubble and the row the step later writes describe one input the same way.
+// A claim whose attribution could not be resolved is still published: the turn
+// carries an explicit unknown source rather than guessing an actor.
+func (c *agentStepCommitter) claimedSteerTurn(outcome queueStepOutcome) *chatview.UITurn {
+	if c == nil || c.queueStep == nil || outcome.claimedSteer == nil || outcome.claimedSteerTurn == nil {
+		return nil
+	}
+	turnID := strings.TrimSpace(outcome.claimedSteerTurn.TurnID)
+	if turnID == "" {
+		return nil
+	}
+	identity := outcome.claimedSteerIdentity
+	source := identity.Source
+	position := outcome.claimedSteerTurn.Position
+	turn := chatview.UITurn{
+		TurnID:       turnID,
+		TurnPosition: &position,
+		Role:         "user",
+		Text:         QueuePayloadText(outcome.claimedSteer.Payload),
+		Timestamp:    outcome.claimedSteer.CreatedAt,
+		InputSource:  &source,
+	}
+	if strings.TrimSpace(identity.SenderUserID) != "" {
+		turn.SenderUserID = identity.SenderUserID
+	}
+	return &turn
 }
 
 func (c *agentStepCommitter) publishQueueUserTurns(ctx context.Context, stepIndex int, outcome queueStepOutcome) {
@@ -384,6 +431,15 @@ func (c *agentStepCommitter) publishQueueUserTurns(ctx context.Context, stepInde
 		if outcome.claimedSteerTurn != nil {
 			update.ClaimedSteerTurnID = outcome.claimedSteerTurn.TurnID
 			update.ClaimedSteerTurnPosition = outcome.claimedSteerTurn.Position
+			// The claimed input is published as a user turn as well, under the
+			// slot drawn for it. That is the only frame shape the UI applies
+			// attribution to (a claimed steer row carries no sender of its own),
+			// so without it the live bubble is rendered as a foreign, unknown
+			// author until its history row lands. Same turn id, same sender, same
+			// input source as the row the step will write.
+			if claimed := c.claimedSteerTurn(outcome); claimed != nil {
+				update.PersistedTurns = append(update.PersistedTurns, *claimed)
+			}
 		}
 		// Anchor after the step that just committed. Its step_end marker was
 		// emitted by the native loop before the commit barrier ran, so the wait
