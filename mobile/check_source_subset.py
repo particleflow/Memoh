@@ -88,6 +88,16 @@ allowed = {item['path'] for item in entries} | expected_images | {
     'mobile/check_source_subset.py', 'mobile/.gitignore',
     'mobile/client/tests/unit/service-config.test.cjs',
     'mobile/SHARED-OBSERVATION.md', 'mobile/BUILD-REPRODUCTION.md',
+    # Acceptance harness tools (PRs #123/#126): they gate the packaged
+    # bundle and never enter the composed client source set.
+    'mobile/client/tools/acceptance/README.md',
+    'mobile/client/tools/acceptance/acceptance.mjs',
+    'mobile/client/tools/acceptance/cdp.mjs',
+    'mobile/client/tools/acceptance/stub-service.mjs',
+    'mobile/client/tools/acceptance/README-EMULATOR.md',
+    'mobile/client/tools/acceptance/acceptance-hap.py',
+    'mobile/client/tools/acceptance/emulator.mjs',
+    'mobile/client/tools/acceptance/stub-host.mjs',
 }
 # Check the publishable source set without traversing generated dependency trees.
 # Include untracked, non-ignored files so accidental source additions still fail.
