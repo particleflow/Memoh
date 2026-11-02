@@ -33,7 +33,7 @@ other linked proof, manifest and screenshot files remain separate evidence.
 
 | Check | Result |
 | --- | --- |
-| `go test -p=1 -count=1 -v -timeout=3m ./internal/nativeherdr ./internal/agenvo ./internal/computertask -run 'Test(PowerShellCLI\|AdoptBatchWorkspace\|ContinueBatch\|BatchResume\|NativeBatchExplicitResume)'` | Exit 0; 20 top-level PASS, 82 including subtests; one explicit Linux PowerShell SKIP. Raw log not published (`targeted-go.log`). |
+| `go test -p=1 -count=1 -v -timeout=3m ./internal/nativeherdr ./internal/legacy-exec ./internal/computertask -run 'Test(PowerShellCLI\|AdoptBatchWorkspace\|ContinueBatch\|BatchResume\|NativeBatchExplicitResume)'` | Exit 0; 20 top-level PASS, 82 including subtests; one explicit Linux PowerShell SKIP. Raw log not published (`targeted-go.log`). |
 | `bash scripts/test-computer-operations-postgres.sh` | Exit 1 before tests: race compilation exhausted the local temporary filesystem. The recorded log was truncated at 4096 bytes by that failure; `postgres-gate.log` was not published. This is not a PG pass; the exact merged-head remote gate is required. |
 | `go build -p=1 -o <EVIDENCE_ROOT>/server ./cmd/agent` | Exit 0. Recorded output was empty; `server-build.log` was not published. |
 | `bash scripts/check-agent-core-boundary.sh` | Exit 0, matches official `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`. Raw log not published (`core-boundary.log`). |

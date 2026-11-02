@@ -1,4 +1,4 @@
--- 0169_agenvo_execution_targets
+-- 0169_legacy_execution_targets
 -- Remove only this provider's registrations and columns. Native registrations remain.
 -- Preserve FORCE RLS and use the existing migration pattern of explicit team
 -- context. A database owner need not have CREATEROLE or BYPASSRLS privileges.
@@ -14,15 +14,15 @@ BEGIN
     PERFORM set_config('memoh.team_id', migration_team_id::text, true);
     DELETE FROM bot_remote_runtime_bindings
       WHERE team_id = migration_team_id
-        AND runtime_id IN (SELECT id FROM user_runtimes WHERE provider = 'agenvo');
+        AND runtime_id IN (SELECT id FROM user_runtimes WHERE provider = 'legacy');
     DELETE FROM user_runtimes
-      WHERE team_id = migration_team_id AND provider = 'agenvo';
+      WHERE team_id = migration_team_id AND provider = 'legacy';
   END LOOP;
   PERFORM set_config('memoh.team_id', COALESCE(previous_team_id, ''), true);
 END;
 $$;
 ALTER POLICY teams_self_select ON public.teams
   USING (id = public.memoh_current_team_id());
-DROP INDEX IF EXISTS idx_user_runtimes_agenvo_config;
+DROP INDEX IF EXISTS idx_user_runtimes_legacy_config;
 ALTER TABLE user_runtimes DROP COLUMN IF EXISTS provider_config;
 ALTER TABLE user_runtimes DROP COLUMN IF EXISTS provider;

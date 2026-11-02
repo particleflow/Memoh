@@ -10,7 +10,7 @@
       "argv": [
         "go",
         "test",
-        "./internal/agenvo",
+        "./internal/legacy-exec",
         "./internal/computertask",
         "./internal/nativeherdr",
         "-count=1",
@@ -23,7 +23,7 @@
       "argv": [
         "go",
         "vet",
-        "./internal/agenvo",
+        "./internal/legacy-exec",
         "./internal/computertask",
         "./internal/nativeherdr"
       ],
@@ -34,7 +34,7 @@
       "argv": [
         "golangci-lint",
         "run",
-        "./internal/agenvo/...",
+        "./internal/legacy-exec/...",
         "./internal/computertask/...",
         "./internal/nativeherdr/..."
       ],

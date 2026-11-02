@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS public.memoh_cutover_paused_native_profile(uuid,uuid,uui
 CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
 RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    IF OLD.provider IN ('agenvo','memoh') AND
+    IF OLD.provider IN ('legacy','memoh') AND
        (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
         PERFORM public.memoh_computer_admission_lock(OLD.user_id);
         IF EXISTS (SELECT 1 FROM public.computer_admission_gates

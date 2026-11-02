@@ -2,14 +2,14 @@
   "base": "4d23244c683aca4c436efec4db375921fdf60472",
   "product_files": [
     "cmd/internal/core/computer_tasks.go",
-    "internal/agenvo/batch_read_trace.go",
-    "internal/agenvo/pi_batch_service.go",
+    "internal/legacy-exec/batch_read_trace.go",
+    "internal/legacy-exec/pi_batch_service.go",
     "internal/computertask/pi_batch.go",
     "internal/computertask/pi_batch_reader.go",
     "internal/computertask/source.go"
   ],
   "regression": {
-    "command": "go test -json ./internal/computertask ./internal/agenvo -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity|BatchReader(UnknownCreation|OnlyCASWinner|ReadOnlyGet|DoesNotTreat|ChangedIdentity|ReceiptAndHash|PageReread)|StandardMCPPiBatch(DelayedFrames|ReadRejection|CompleteReceipt)|CompactResultIndependent)' -count=1",
+    "command": "go test -json ./internal/computertask ./internal/legacy-exec -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity|BatchReader(UnknownCreation|OnlyCASWinner|ReadOnlyGet|DoesNotTreat|ChangedIdentity|ReceiptAndHash|PageReread)|StandardMCPPiBatch(DelayedFrames|ReadRejection|CompleteReceipt)|CompactResultIndependent)' -count=1",
     "exit_code": 0,
     "passed_test_and_subtest_events": 41,
     "failed": 0,
@@ -18,11 +18,11 @@
   "new_read_scenarios": 9,
   "each_scenario_compares_logging_off_on": true,
   "race": {
-    "command": "go test -race ./internal/computertask ./internal/agenvo -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity)$' -count=1",
+    "command": "go test -race ./internal/computertask ./internal/legacy-exec -run '^Test(ResultReadTracePreservesErrorsAndDispatch|BatchReadTracePreservesSentinelIdentity)$' -count=1",
     "exit_code": 0
   },
   "vet": {
-    "command": "go vet ./internal/agenvo ./internal/computertask ./cmd/internal/core",
+    "command": "go vet ./internal/legacy-exec ./internal/computertask ./cmd/internal/core",
     "exit_code": 0
   },
   "core_di_compile": {
@@ -31,7 +31,7 @@
     "unrelated_core_tests_executed": false
   },
   "incremental_lint": {
-    "command": "golangci-lint run --new-from-merge-base=4d23244c683aca4c436efec4db375921fdf60472 ./internal/agenvo/... ./internal/computertask/... ./cmd/internal/core/...",
+    "command": "golangci-lint run --new-from-merge-base=4d23244c683aca4c436efec4db375921fdf60472 ./internal/legacy-exec/... ./internal/computertask/... ./cmd/internal/core/...",
     "exit_code": 0
   },
   "aggregate": {

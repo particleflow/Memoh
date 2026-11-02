@@ -9,7 +9,7 @@
     agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=<nil>
 --- PASS: TestAgentFollowupIdentityBoundary/reused_after_get (0.00s)
 === RUN   TestAgentFollowupIdentityBoundary/changed_after_get
-    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=agenvo operation outcome is unknown; do not repeat the operation
+    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=legacy-exec operation outcome is unknown; do not repeat the operation
 --- PASS: TestAgentFollowupIdentityBoundary/changed_after_get (0.00s)
 --- PASS: TestAgentFollowupIdentityBoundary (0.01s)
 === RUN   TestAgentFixedProcedureUsesConfiguredPiAndNeverInfersTaskSuccess
@@ -398,4 +398,4 @@
 --- PASS: TestResolveWorkDir/relative-root/child (0.00s)
 --- PASS: TestResolveWorkDir (0.00s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	11.524s
+ok  	github.com/felinics/memoh/internal/legacy-exec	11.524s

@@ -3,7 +3,7 @@
 CREATE OR REPLACE FUNCTION public.memoh_computer_admission_identity(p_provider TEXT, p_runtime UUID, p_config JSONB)
 RETURNS JSONB LANGUAGE SQL IMMUTABLE AS $$
     SELECT CASE
-        WHEN p_provider='agenvo' THEN p_config
+        WHEN p_provider='legacy' THEN p_config
         WHEN p_provider='memoh' AND jsonb_typeof(p_config->'herdr')='object' THEN
             jsonb_build_object('connection_id',p_runtime::text,'device_id',p_runtime::text,
                 'instance_id',p_config->'herdr'->>'instance_id')
@@ -25,7 +25,7 @@ BEGIN
     PERFORM public.memoh_computer_admission_lock(p_owner);
     SELECT public.memoh_computer_admission_identity(provider,id,provider_config) INTO registered FROM public.user_runtimes
     WHERE team_id=public.memoh_current_team_id() AND id=p_runtime AND user_id=p_owner
-      AND provider IN ('agenvo','memoh') AND revoked_at IS NULL AND activated_at IS NOT NULL
+      AND provider IN ('legacy','memoh') AND revoked_at IS NULL AND activated_at IS NOT NULL
       AND provider_config=p_config;
     IF NOT FOUND THEN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
@@ -38,10 +38,10 @@ BEGIN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
     END IF;
     -- Each native runtime is its own trust domain. Preserve fail-closed alias
-    -- coverage for Agenvo without guessing equivalence from names or URLs.
+    -- coverage for LegacyExec without guessing equivalence from names or URLs.
     IF EXISTS (SELECT 1 FROM public.user_runtimes r
         WHERE r.team_id=public.memoh_current_team_id() AND r.user_id=p_owner
-          AND r.provider IN ('agenvo','memoh') AND r.revoked_at IS NULL
+          AND r.provider IN ('legacy','memoh') AND r.revoked_at IS NULL
           AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'device_id'=device
           AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'instance_id'=instance
           AND lower(public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'connection_id') IS DISTINCT FROM conn::text) THEN
@@ -94,7 +94,7 @@ BEGIN
     FROM public.bot_remote_runtime_bindings b JOIN public.user_runtimes r
       ON r.team_id=b.team_id AND r.id=b.runtime_id
     WHERE b.team_id=public.memoh_current_team_id() AND b.bot_id=p_bot AND b.id=p_target
-      AND r.user_id=owner AND r.provider IN ('agenvo','memoh');
+      AND r.user_id=owner AND r.provider IN ('legacy','memoh');
     IF registered IS NULL OR nullif(registered->>'connection_id','') IS NULL
        OR nullif(registered->>'device_id','') IS NULL OR nullif(registered->>'instance_id','') IS NULL THEN
         -- Preserve legacy no-gate store behaviour. When the owner has a pause,
@@ -118,7 +118,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
 RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    IF OLD.provider IN ('agenvo','memoh') AND
+    IF OLD.provider IN ('legacy','memoh') AND
        (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
         PERFORM public.memoh_computer_admission_lock(OLD.user_id);
         IF EXISTS (SELECT 1 FROM public.computer_admission_gates
