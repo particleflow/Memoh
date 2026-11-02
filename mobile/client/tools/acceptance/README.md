@@ -28,7 +28,7 @@ node mobile/client/tools/acceptance/acceptance.mjs /path/to/rawfile/client-web
 | 编号 | 场景 | 时机 | 次数 | 顺序 |
 | --- | --- | --- | --- | --- |
 | E1 | 快回 ack 出现在 UI | 发送后 ≤ 3000ms | ack 行出现于流式期间 | 先于正文 |
-| G1 | 首句完成自动开读 | 首句帧后 ≤ 4000ms 出现 speech POST | 至少 1 个 task | 早于全段结束 |
+| G1 | 首句完成自动开读 | 首句帧后 ≤ 1000ms 出现携带首句的 speech 请求，且早于末句帧 | 至少 1 个 task | 早于全段结束，≪ settle |
 | G5 | 全段按序朗读 | — | 帧文本拼接覆盖首句与末句 | 首句索引 < 末句索引，无跳段 |
 | G3 | 终态帧不吞剩余文本 | 终态后 ≤ 4s | ≥1 个 task | 末句仍被读出 |
 | G4 | 音频提前 ended 不吞队列 | — | ≥1 个 task | 末句仍被读出 |
@@ -44,15 +44,17 @@ node mobile/client/tools/acceptance/acceptance.mjs /path/to/rawfile/client-web
 
 G1 的时机起算点是**首个完整句子的帧**（脚本化模型的 `text_chunk_ready`），不是按键时刻；口径与 PR #121 `speech-field-acceptance.test.ts` 六门一致，差別只在于本 harness 驱动打包 dist 而非组合树。
 
+G1 回放**长回复**（`FAIL_TASK_BODY`，6 句、句间 800ms、末句后 3s 才 settle），断言「携带首句的 speech 请求时刻 − 首句终止符到达时刻 ≤ 1000ms，且早于末句帧、≪ settle 时刻」：只会 settle 才开读的产物在 4 句短回复上可以把 2.8s 的 settle 时刻误算成首句时延（TF-18 坐实过），长回复把「首句即读」与「settle 才读」拉开到秒级可分辨。该口径与 #126 ③级（首句帧→首请求）一致，供 ③级复用。快回 ack 以其自己的短任务先读（stub 对 ack 行回放短音频），不计入首句时延的起算或终点。
+
 未驱动的断言（例如打包版本里找不到思考折叠控件）报告为 `uncovered`，**同样让门禁失败**——没有证据不等于通过。
 
 ## 已知红项与修复线
 
-当前（review/harmony-image-timing-20261026，含 #118 / #121 / #128）：14 个场景在打包产物上真实通过。
+当前（review/harmony-image-timing-20261026，含 #118 / #121 / #123 / #126 / #128 / #132 与 TF-18 修复）：14 个场景在打包产物上真实通过。TF-18 修复前，打包 bundle 上首个 speech 任务只在回复 settle 时才开（`run_accepted` 给乐观回复行盖 `runtimeRunId` 被误判为换 run，回复被移出 live 集合），G1 的 2.8s 恰等于 stub 的 settle 时刻——G1 绿只因回复短；加强后的长回复场景在旧包上真实变红（首句请求晚 7089ms、晚于 settle），修复后 30ms 内开读。
 
 场景之间必须真正隔离：stub 在 `/__control/reset` 后放弃上一场景仍在回放的脚本（不再发帧、不再写入该会话的持久化 transcript）。否则上一场景的回复会在下一场景的终态刷新里作为第二条同文回复出现，G6 的重读手势会落到这条页面从未合成过的行上，把「页内缓存未命中」误报成产品缺陷。
 
-G2 使用 stub 的长正文（`FAIL_TASK_BODY`，6 句）：第一个 speech POST 被 503 拒绝，断言被拒任务的正文在后续任务中整段重现，并且正文末句仍被按序读出。
+G2 使用 stub 的长正文（`FAIL_TASK_BODY`，6 句）：第一个**正文**任务被 503 拒绝（ack 的独立短任务不参与），断言被拒任务的正文在后续任务中整段重现，并且正文末句仍被按序读出。
 
 ## 边界
 
