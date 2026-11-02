@@ -25,10 +25,69 @@ type ConversationPresenceOptions struct {
 	// decision path (two-stage Jev selection, pulls, accounting, §7 fallback).
 	// A zero endpoint keeps the structural Classify fallback (issue #105).
 	Jev PresenceJevRuntimeOptions
+	// GenerationModel overrides the sidecar generation model ref. Resolution
+	// goes through GenerationModelResolver and is only honored inside the main
+	// selection's provider; any failure or mismatch keeps the main selection.
+	GenerationModel string
+	// GenerationModelResolver resolves a generation model ref from the live
+	// catalog. Host wiring supplies it; tests supply stubs. nil disables the
+	// override entirely.
+	GenerationModelResolver func(context.Context, string) (models.GetResponse, error)
 	// Verify can narrow a host's capability contract. By default use explicit
 	// declarations from the model/provider selected for this formal request.
 	// This is catalog evidence, not a claim that an opaque gateway obeyed it.
 	Verify func(models.GetResponse, sqlc.Provider) bool
+}
+
+// presenceGenerationSelection is the effective generation model for one
+// sidecar run.
+type presenceGenerationSelection struct {
+	model    models.GetResponse
+	provider sqlc.Provider
+	sdk      models.SDKModelConfig
+	override bool
+}
+
+// resolvePresenceGeneration picks the sidecar generation model. Default is the
+// main selection (design v3 §5.2). With a configured ref the override must
+// resolve to the same provider as main, so credentials, transport and the
+// per-provider capacity key all stay the main provider's — an infrastructure
+// channel for a faster acknowledgement model, never a new provider and never a
+// Bot-side surface. The 2026-11-02 08:05 incident showed the main model's
+// first-token floor (GLM-5.3 low: 4.8-6.8s observed regardless of the already
+// bounded ~1.5k-token ack input) can outrun the remaining 10s window.
+func (s *Service) resolvePresenceGeneration(ctx context.Context, runtime *conversationPresenceRuntime, main *presenceResolvedModel) presenceGenerationSelection {
+	selection := presenceGenerationSelection{model: main.model, provider: main.provider, sdk: main.sdk}
+	ref := strings.TrimSpace(runtime.options.GenerationModel)
+	if ref == "" || runtime.options.GenerationModelResolver == nil || ref == strings.TrimSpace(main.model.ModelID) {
+		return selection
+	}
+	auxModel, err := runtime.options.GenerationModelResolver(ctx, ref)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.WarnContext(ctx, "conversation_presence_generation_model_unavailable", slog.String("ref", ref), slog.String("error", err.Error()))
+		}
+		return selection
+	}
+	if auxModel.ProviderID != main.model.ProviderID {
+		if s.logger != nil {
+			s.logger.WarnContext(ctx, "conversation_presence_generation_model_provider_mismatch", slog.String("ref", ref), slog.String("main_provider", main.model.ProviderID), slog.String("model_provider", auxModel.ProviderID))
+		}
+		return selection
+	}
+	// Same provider: reuse the resolved SDK credentials and transport, swap
+	// only the wire model id.
+	auxSDK := main.sdk
+	auxSDK.ModelID = auxModel.ModelID
+	selection.model, selection.sdk, selection.override = auxModel, auxSDK, true
+	return selection
+}
+
+// ResolvePresenceGenerationModel is the host catalog resolver behind
+// ConversationPresenceOptions.GenerationModelResolver.
+func (s *Service) ResolvePresenceGenerationModel(ctx context.Context, ref string) (models.GetResponse, error) {
+	model, _, err := s.fetchChatModel(ctx, ref)
+	return model, err
 }
 
 func declaredPresenceCapabilities(model models.GetResponse, provider sqlc.Provider) bool {
@@ -172,12 +231,13 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 			}
 			return
 		}
-		identity := conversationpresence.Identity{ModelUUID: model.model.ID, ModelID: model.model.ModelID, ProviderID: model.model.ProviderID, ClientType: model.provider.ClientType, RuntimeType: "model"}
-		verified := declaredPresenceCapabilities(model.model, model.provider)
+		generation := s.resolvePresenceGeneration(ctx, runtime, model)
+		identity := conversationpresence.Identity{ModelUUID: generation.model.ID, ModelID: generation.model.ModelID, ProviderID: generation.model.ProviderID, ClientType: generation.provider.ClientType, RuntimeType: "model"}
+		verified := declaredPresenceCapabilities(generation.model, generation.provider)
 		if runtime.options.Verify != nil {
-			verified = verified && runtime.options.Verify(model.model, model.provider)
+			verified = verified && runtime.options.Verify(generation.model, generation.provider)
 		}
-		generator, choice, err := prepareConversationPresenceSDK(identity, model.model, model.sdk, verified)
+		generator, choice, err := prepareConversationPresenceSDK(identity, generation.model, generation.sdk, verified)
 		if err != nil || generator == nil {
 			if s.logger != nil {
 				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "capability_unavailable"), slog.String("reason", choice.Reason))

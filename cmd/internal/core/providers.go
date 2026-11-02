@@ -848,6 +848,10 @@ func provideAgentService(log *slog.Logger, a *native.Agent, modelsService *model
 	service := application.NewService(log, modelsService, queries, msgService, settingsService, accountService, a, rc.TimezoneLocation, 120*time.Second)
 	if cfg.Agent.ConversationPresence.IsEnabled() {
 		options := application.ConversationPresenceOptions{Policy: cfg.Agent.ConversationPresence.Policy(), MaxConcurrentPerProvider: cfg.Agent.ConversationPresence.ConcurrentLimit()}
+		if ref := strings.TrimSpace(cfg.Agent.ConversationPresence.GenerationModel); ref != "" {
+			options.GenerationModel = ref
+			options.GenerationModelResolver = service.ResolvePresenceGenerationModel
+		}
 		if jev := cfg.Agent.ConversationPresence.Jev; jev.Enabled() {
 			effective := jev.Effective()
 			options.Jev = application.PresenceJevRuntimeOptions{Endpoint: effective.Endpoint, APIKey: effective.APIKey, Model: effective.Model, Timeout: time.Duration(effective.TimeoutSeconds) * time.Second, PullMax: effective.PullMax, PullRunes: effective.PullRunes, StateMaxRunes: effective.StateMaxRunes, Directions: effective.Directions}

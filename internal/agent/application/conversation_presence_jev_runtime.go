@@ -35,12 +35,16 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		logStage("prepare_skipped", slog.Bool("store_error", err != nil))
 		return
 	}
-	identity := conversationpresence.Identity{ModelUUID: model.model.ID, ModelID: model.model.ModelID, ProviderID: model.model.ProviderID, ClientType: model.provider.ClientType, RuntimeType: "model"}
-	verified := declaredPresenceCapabilities(model.model, model.provider)
-	if runtime.options.Verify != nil {
-		verified = verified && runtime.options.Verify(model.model, model.provider)
+	generation := s.resolvePresenceGeneration(ctx, runtime, model)
+	if generation.override {
+		logStage("generation_model", slog.String("model", generation.model.ModelID))
 	}
-	generator, choice, err := prepareConversationPresenceSDK(identity, model.model, model.sdk, verified)
+	identity := conversationpresence.Identity{ModelUUID: generation.model.ID, ModelID: generation.model.ModelID, ProviderID: generation.model.ProviderID, ClientType: generation.provider.ClientType, RuntimeType: "model"}
+	verified := declaredPresenceCapabilities(generation.model, generation.provider)
+	if runtime.options.Verify != nil {
+		verified = verified && runtime.options.Verify(generation.model, generation.provider)
+	}
+	generator, choice, err := prepareConversationPresenceSDK(identity, generation.model, generation.sdk, verified)
 	if err != nil || generator == nil {
 		logStage("capability_unavailable", slog.String("reason", choice.Reason))
 		return
