@@ -22,9 +22,22 @@ export const BOT_ID = 'b0000000-0000-4000-8000-000000000001'
 export const SESSION_ID = 'a0000000-0000-4000-8000-000000000001'
 export const OTHER_SESSION_ID = 'a0000000-0000-4000-8000-000000000002'
 const SPEECH_IDENTITY = 'stub-speech-identity-v1'
+// Thrown inside a replay script when the harness has moved on to another
+// scenario; it is a cancellation, never a script error.
+const SCENARIO_RESET = Symbol('scenario-reset')
 const ACK_TEXT = '收到，我来处理。'
 const REASONING = ['先看一下附件，', '然后给出结论。']
 const BODY = ['第一句已经说完。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
+// Gate 2 body: long enough that the rolled-back text of a failed task and the
+// text that reads after it are both observable as distinct speech requests.
+export const FAIL_TASK_BODY = [
+  '第一段话详细说明了今天上午在路上遇到的全部情况。',
+  '第二段话完整列出了三个需要后续跟进的要点事项。',
+  '第三段话给出了目前可以确认的结论与处理意见。',
+  '第四段话是最后需要补充说明的风险与提醒内容。',
+  '第五段话重申了下一步的时间安排与负责人。',
+  '第六段话是整段回复最后的收尾与致谢。',
+]
 const HISTORY_BODY = '这是历史回复，加载时不应朗读。'
 
 export function nowIso() { return new Date().toISOString() }
@@ -333,7 +346,7 @@ export class StubService {
       return
     }
     if (message.type === 'message' || message.type === 'retry_message') this.runScript(message, socket).catch(error => {
-      this.scriptErrors.push(String((error && error.message) || error))
+      if (error !== SCENARIO_RESET) this.scriptErrors.push(String((error && error.message) || error))
     })
   }
 
@@ -343,10 +356,15 @@ export class StubService {
   }
 
   // One recorded event sequence per send:
-  //   run_accepted -> ack status -> reasoning -> four body sentences -> completed.
+  //   run_accepted -> ack status -> reasoning -> body sentences -> completed.
   // The timing of each step is scripted so the harness can measure
   // "first completed sentence -> first speech request" without guesswork.
+  // A scenario reset abandons the script at its next pause: a run started by
+  // the previous scenario must never settle into the next scenario's
+  // transcript, or that page shows a second reply it never read.
   async runScript(message, socket) {
+    const generation = this.generation
+    const pause = ms => new Promise(r => setTimeout(r, ms)).then(() => { if (this.generation !== generation) throw SCENARIO_RESET })
     const sessionId = message.session_id || SESSION_ID
     const invocation = message.invocation_id
     const runId = `run-${invocation}`
@@ -357,7 +375,7 @@ export class StubService {
     // model output exists. Scripting the wait keeps the case out of the
     // "reply arrived inside the initial load" absorption window, which is a
     // different (already covered) behaviour.
-    await new Promise(r => setTimeout(r, this.startDelay))
+    await pause(this.startDelay)
     this.send(socket, { type: 'run_accepted', invocation_id: invocation, run_id: runId, session_id: sessionId, turn_id: turnId, turn_position: 10, epoch: state.epoch, seq: state.seq })
 
     const userTurn = { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10 }
@@ -378,12 +396,12 @@ export class StubService {
       state.runView = { ...view, messages: view.messages.map(block => ({ ...block })) }
       const delta = typeof deltaFor === 'function' ? deltaFor() : deltaFor
       this.send(socket, { type: 'runtime_delta', session_id: sessionId, epoch: state.epoch, seq: state.seq, delta })
-      await new Promise(r => setTimeout(r, delay))
+      await pause(delay)
     }
     await step(() => ({ current_run_view: { ...view, messages: view.messages.map(block => ({ ...block })) } }))
     // The acknowledgement stays alone on screen long enough to be observed:
     // on the phone it is the only visible output until the first body text.
-    await new Promise(r => setTimeout(r, 1200))
+    await pause(1200)
     if (this.mode !== 'no-reasoning') {
       reasoning.content = REASONING[0]
       blocks.push(reasoning)
@@ -392,17 +410,15 @@ export class StubService {
       await step({ message_appends: [{ id: 1, type: 'reasoning', content: REASONING[1] }] })
     }
     blocks.push(body)
-    // The client batches short sentences until they reach the minimum spoken
-    // span, so the first task carries the first three sentences. In fail-task
-    // mode the remaining sentences arrive only after that task has been
-    // rejected, which is what makes "the rest still reads" observable.
-    const cadence = this.mode === 'fail-task' ? [500, 500, 4000, 700] : BODY.map(() => this.delay)
-    for (const [index, sentence] of BODY.entries()) {
+    // Gate 2 replays the long body: the first task is rejected by the service
+    // and the client must roll its text back into the next task.
+    const sentences = this.mode === 'fail-task' ? FAIL_TASK_BODY : BODY
+    for (const [index, sentence] of sentences.entries()) {
       body.content += sentence
       if (index === 0) {
         this.firstSentenceAt = Date.now() - this.t0
-        await step({ message_upserts: [{ ...body }] }, cadence[index])
-      } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, cadence[index])
+        await step({ message_upserts: [{ ...body }] })
+      } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] })
     }
     // Settle: the persisted transcript replaces the live one on refresh.
     state.seq += 1
@@ -412,7 +428,7 @@ export class StubService {
         turn_id: turnId, role: 'assistant', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-a`,
         messages: [
           ...(this.mode === 'no-reasoning' ? [] : [{ id: 1, type: 'reasoning', content: REASONING.join('') }]),
-          { id: 2, type: 'text', content: BODY.join('') },
+          { id: 2, type: 'text', content: sentences.join('') },
         ],
       },
     ]

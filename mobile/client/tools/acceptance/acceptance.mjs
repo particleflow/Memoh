@@ -20,7 +20,7 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
-import { StubService } from './stub-service.mjs'
+import { StubService, FAIL_TASK_BODY } from './stub-service.mjs'
 import { launchChrome, CDP, openPage } from './cdp.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -152,13 +152,19 @@ async function main() {
     })()`)
     return at
   }
-  async function clickAria(pattern) {
+  // The read-aloud control of the reply that was just read: searched inside
+  // the last assistant row first, so a transcript that shows more than one
+  // reply never redirects the gesture to a row this page never synthesized.
+  async function clickAriaOnLastReply(pattern) {
     return page.eval(`(() => {
       const regex = new RegExp(${JSON.stringify(pattern)})
-      const node = [...document.querySelectorAll('button, [role=button]')].find(n => regex.test(n.getAttribute('aria-label') || ''))
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const scoped = row ? [...row.querySelectorAll('button, [role=button]')].find(n => regex.test(n.getAttribute('aria-label') || '')) : null
+      const node = scoped || [...document.querySelectorAll('button, [role=button]')].find(n => regex.test(n.getAttribute('aria-label') || ''))
       if (!node) return false
       node.click()
-      return true
+      return scoped ? 'last-reply' : 'document'
     })()`)
   }
   async function clickLastAssistantBubble() {
@@ -321,11 +327,11 @@ async function main() {
     await waitBody(BODY[BODY.length - 1], 20000)
     await sleep(3000)
     const firstRead = (await speech()).length
-    const replayClicked = await clickAria('朗读|Read aloud')
+    const replayClicked = await clickAriaOnLastReply('朗读|Read aloud')
     await sleep(3000)
     const secondRead = (await speech()).length
-    add(result('G6 same-text replay issues zero new speech POST', replayClicked && secondRead === firstRead,
-      replayClicked ? `speech requests ${firstRead} -> ${secondRead}` : 'read-aloud action not found'))
+    add(result('G6 same-text replay issues zero new speech POST', !!replayClicked && secondRead === firstRead,
+      replayClicked ? `speech requests ${firstRead} -> ${secondRead} (control in ${replayClicked})` : 'read-aloud action not found'))
 
     // ---------- Gate 3: a settled run still reads the text it had not spoken.
     await scenario('stream', 700)
@@ -349,20 +355,24 @@ async function main() {
       `posts=${earlyPosts} tailSpoken=${earlyText.includes(BODY[BODY.length - 1])}`))
 
     // ---------- Gate 2: a task failure rolls back and the rest reads again.
-    // The packaged client batches every completed sentence into the first open
-    // task, so at this layer the scripted failure rejects the whole body and
-    // there is no "remaining text" left to observe. The failure-path matrix
-    // stays with PR #121's combination-tree gate; this harness reports it as
-    // uncovered rather than green.
+    // The service rejects the first speech task of the long reply. The client
+    // must end only that task: the text it had fed is rolled back and read
+    // again through the next task, and the reply still reads to its last
+    // sentence, in order (PR #121 "failure rollback rereads").
     await scenario('fail-task', 700)
     await submit('失败后继续朗读')
-    await waitBody(BODY[BODY.length - 1], 20000)
+    await waitBody(FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1], 30000)
     await sleep(6000)
     const failureSpeech = await speech()
-    const failurePosts = failureSpeech.filter(entry => entry.kind === 'post').length
-    const failureSpoken = failureSpeech.map(entry => entry.text).filter(Boolean).join('')
-    add(uncovered('G2 single task failure ends only that task (remaining text rereads)',
-      `packaged cadence put the whole body in the first task (posts=${failurePosts}, ${failureSpoken.length} code points); no later segment can be observed after rejection`))
+    const failurePosts = failureSpeech.filter(entry => entry.kind === 'post')
+    const rejected = failurePosts[0]
+    const afterRejection = rejected ? failureSpeech.slice(failureSpeech.indexOf(rejected) + 1).map(entry => entry.text).filter(Boolean).join('') : ''
+    const rolledBack = !!rejected && failurePosts.length >= 2 && afterRejection.includes(rejected.text)
+    const lastSentence = FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1]
+    const tailReread = afterRejection.includes(lastSentence)
+      && afterRejection.indexOf(FAIL_TASK_BODY[0]) <= afterRejection.indexOf(lastSentence)
+    add(result('G2 single task failure ends only that task (remaining text rereads)', rolledBack && tailReread,
+      `posts=${failurePosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
 
     // ---------- General: loading history must not read it aloud.
     await scenario('stream', 700, { seedHistory: true })
