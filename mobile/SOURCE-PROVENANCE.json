@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "908faa90785d943b0d0023dbc76f133bfbc2fb6b8e4426447939fd6c13b09530",
+      "sha256": "76d4e9ac0752f1f276b0f5e315e402fb0255294abd27584a0729fc2fe71b1969",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -475,7 +475,7 @@
     },
     {
       "path": "mobile/client/contracts/client_capabilities.json",
-      "sha256": "920cb09c442549981aafcac219f8e8dffdeaacd43ce8117276fb74cf76e1deb0",
+      "sha256": "bf9b911df71b21555db5f5a63f658cdcb1089c2a1d81a72b87da64a77cc2bac2",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "fb1c9dc3ec6d6063751b15d9d9aadb7a8795a32c306178787b996afcfbda428d",
@@ -524,7 +524,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "ba7308430800ff7c1ead637da804a6f67d86fb920481d2e66f6741084f7bdcde",
+      "sha256": "c444f67f8ffddb82a7b12e60d92060768dd0ee197a5ef8ff2715b0415822e5a0",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1797,7 +1797,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-native-profile-sdk.json",
-      "sha256": "9d5fe3759eca0aaa3e0d106cd946fa8e1ee48691d5d0e33a6b8c995dc4cf3a01",
+      "sha256": "d296ff90a6d856cc4e0711c7e2b18b3b4780b268b5ff28d14481d9bfcaffadde",
       "origin": "Exact generated SDK native profile surface feffaf66be4bc8999479fc76bd6a87be1a3b3789",
       "licenseReview": "Memoh upstream source license retained.",
       "preparationChanges": [
@@ -1880,7 +1880,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "403c1ecd97e52fce833ca12ef9a68d259c26e49dd890d420cbd5a56207d3f5c2",
+      "sha256": "b2083410780dd9c965db371b918707f5c1161613ca0f8722a5ada41aa129c3f7",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2012,7 +2012,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "906852beaa922240424874ade3753715bf8b92f8de92dd052e341be11bc993dc",
+      "sha256": "e8bdaaea9d7b1c53d41ff67925b399540e97670d56e0d098e819ce28aa4ea5d7",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
