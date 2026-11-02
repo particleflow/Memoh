@@ -257,6 +257,17 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 	return mcp.BuildToolSuccessResult(map[string]any{"computer": value}), nil
 }
 
+// Observe performs the same authorized refresh read as computer_task_result
+// for a trusted host caller that rebuilt the operation's owning conversation.
+// It is the pull the result scan uses when an endpoint delivery commit is the
+// only completion signal; it never creates or resubmits an operation.
+func (s *Source) Observe(ctx context.Context, b toolcontext.ComputerBinding, id string) (Result, error) {
+	if s.service == nil {
+		return Result{}, ErrDenied
+	}
+	return s.service.observe(ctx, b, id, true)
+}
+
 // Recover exposes the existing read-only task recovery to authenticated host
 // adapters. The binding must be resolved from persisted ownership by the host.
 func (s *Source) Recover(ctx context.Context, binding toolcontext.ComputerBinding, id string) (Recovery, error) {

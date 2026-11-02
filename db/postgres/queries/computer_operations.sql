@@ -18,8 +18,13 @@ AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc
 
 -- name: UpdateComputerOperation :one
 UPDATE computer_operations SET state=sqlc.arg(state),
-details=CASE WHEN details ? 'delivery_ledger'
-  THEN sqlc.arg(details)::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+details=CASE
+  WHEN details ? 'delivery_ledger' AND details ? 'result_delivery'
+    THEN sqlc.arg(details)::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger', 'result_delivery', details->'result_delivery')
+  WHEN details ? 'delivery_ledger'
+    THEN sqlc.arg(details)::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+  WHEN details ? 'result_delivery'
+    THEN sqlc.arg(details)::jsonb || jsonb_build_object('result_delivery', details->'result_delivery')
   ELSE sqlc.arg(details)::jsonb END,
 cancel_requested=sqlc.arg(cancel_requested),revision=revision+1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)

@@ -8,6 +8,24 @@ WHERE source.team_id=public.memoh_current_team_id()
  AND entry.task_data->>'result_delivery_version'='1'
  AND entry.task_data->>'state'<>'queued';
 
+-- Only pi-json batch operations can complete asynchronously; foreground and
+-- legacy agent operations finish inside their submitting turn.
+-- name: ListComputerResultTasks :many
+SELECT id,bot_id,session_id,user_id FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND details ? 'batch';
+
+-- Result delivery bookkeeping lives beside the operation receipt, CAS-guarded
+-- exactly like the native/delegation result envelopes.
+-- name: ReadComputerResultDelivery :one
+SELECT COALESCE(details->'result_delivery','{}'::jsonb)::jsonb AS delivery
+FROM computer_operations WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)::uuid;
+
+-- name: SaveComputerResultDelivery :one
+UPDATE computer_operations SET details=jsonb_set(details,'{result_delivery}',sqlc.arg(delivery)::jsonb)
+WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)::uuid
+ AND COALESCE(details->'result_delivery','{}'::jsonb)=sqlc.arg(expected)::jsonb
+RETURNING details->'result_delivery' AS delivery;
+
 -- name: ListDelegationResultTasks :many
 SELECT id,source_bot_id,source_session_id,user_id FROM bot_delegations
 WHERE team_id=public.memoh_current_team_id() AND payload->>'result_delivery_version'='1';

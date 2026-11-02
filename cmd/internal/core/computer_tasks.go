@@ -42,6 +42,14 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 	source := computertask.NewSource(service)
 	source.SetResumeContext(computerTaskResumeContext(delegations))
 	source.SetLogger(log)
+	// Reconnect the PC task lifecycle to the existing result delivery: terminal
+	// outcome saves feed the follow-up scan, and the scan reuses this source's
+	// authorized observation read when an endpoint delivery commit wakes it.
+	if host, ok := delegations.Host.(*delegationHost); ok && host != nil {
+		service.WithTerminalObservation(host.computerTerminalObserved)
+		host.computerSource = source
+		host.computerResume = computerTaskResumeContext(delegations)
+	}
 	return source
 }
 

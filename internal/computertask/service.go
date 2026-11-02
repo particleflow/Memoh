@@ -56,6 +56,7 @@ type Service struct {
 	defaultWorkDir         DefaultWorkDir
 	inputFiles             InputFileResolver
 	inputReference         InputReferenceOpener
+	terminalObservation    func(context.Context, dbstore.ComputerOperationRecord, Details)
 }
 
 // WithDefaultWorkDir injects the existing owned directory selection. It is
@@ -63,6 +64,22 @@ type Service struct {
 func (s *Service) WithDefaultWorkDir(resolve DefaultWorkDir) *Service {
 	s.defaultWorkDir = resolve
 	return s
+}
+
+// WithTerminalObservation registers a host callback for the save that first
+// persists a terminal Pi outcome. It runs after the receipt CAS committed and
+// must not retry the observation or mutate the operation.
+func (s *Service) WithTerminalObservation(observe func(context.Context, dbstore.ComputerOperationRecord, Details)) *Service {
+	s.terminalObservation = observe
+	return s
+}
+
+// reportTerminalOutcome is called only where an immutable parsed outcome is
+// saved for the first time; re-reading a saved outcome never re-fires it.
+func (s *Service) reportTerminalOutcome(ctx context.Context, b toolcontext.ComputerBinding, r dbstore.ComputerOperationRecord, d Details) {
+	if s.terminalObservation != nil {
+		s.terminalObservation(ctx, r, d)
+	}
 }
 
 func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *computertarget.Service, assets Assets, authorize Authorize) *Service {

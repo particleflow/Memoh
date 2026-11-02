@@ -357,14 +357,17 @@ jobs:
         run: |
           : "${MEMOH_NATIVE_QUEUE_TEST_DSN:?Saved-result recovery requires isolated PostgreSQL}"
           set -o pipefail
-          go test -json -race -count=1 -run '^TestSavedResultRecoveryPostgres$' ./cmd/internal/core | tee saved-result-recovery.jsonl
+          go test -json -race -count=1 -run '^Test(SavedResultRecoveryPostgres|ComputerTaskResultFollowUpPostgres)$' ./cmd/internal/core | tee saved-result-recovery.jsonl
           python3 - <<'PY'
           import json
           from pathlib import Path
           events = [json.loads(line) for line in Path('saved-result-recovery.jsonl').read_text().splitlines()]
-          assert any(e.get('Action') == 'pass' and e.get('Test') == 'TestSavedResultRecoveryPostgres' for e in events), 'required saved-result recovery did not PASS'
+          required = {'TestSavedResultRecoveryPostgres', 'TestComputerTaskResultFollowUpPostgres'}
+          passed = {e.get('Test') for e in events if e.get('Action') == 'pass'}
+          missing = required - passed
+          assert not missing, 'required saved-result recovery did not PASS: ' + ', '.join(sorted(missing))
           assert not any(e.get('Action') in ('skip', 'fail') for e in events), 'saved-result recovery skipped or failed a contract'
-          print('Verified saved-result recovery PostgreSQL CAS/history contracts without skips')
+          print('Verified saved-result recovery and computer follow-up PostgreSQL contracts without skips')
           PY
       # Additive gate: retain the other contract steps when merging stacked workflows.
       - name: Require computer operation CAS and RLS (no skips)

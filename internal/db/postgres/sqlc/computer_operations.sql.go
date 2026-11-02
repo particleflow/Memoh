@@ -354,8 +354,13 @@ func (q *Queries) UpdateComputerDelivery(ctx context.Context, arg UpdateComputer
 
 const updateComputerOperation = `-- name: UpdateComputerOperation :one
 UPDATE computer_operations SET state=$1,
-details=CASE WHEN details ? 'delivery_ledger'
-  THEN $2::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+details=CASE
+  WHEN details ? 'delivery_ledger' AND details ? 'result_delivery'
+    THEN $2::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger', 'result_delivery', details->'result_delivery')
+  WHEN details ? 'delivery_ledger'
+    THEN $2::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+  WHEN details ? 'result_delivery'
+    THEN $2::jsonb || jsonb_build_object('result_delivery', details->'result_delivery')
   ELSE $2::jsonb END,
 cancel_requested=$3,revision=revision+1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$4

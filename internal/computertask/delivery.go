@@ -124,8 +124,17 @@ type DeliveryTransaction struct {
 type DeliveryTransactions func(context.Context, func(DeliveryTransaction) error) error
 
 type DeliveryService struct {
-	transactions DeliveryTransactions
-	assets       DeliveryAssets
+	transactions   DeliveryTransactions
+	assets         DeliveryAssets
+	commitObserver func(context.Context, DeliveryIdentity)
+}
+
+// WithCommitObserver registers a host wake for the first endpoint-verified
+// delivery commit. The callback only signals; it never mutates the ledger,
+// and it must not block on task-result scanning.
+func (s *DeliveryService) WithCommitObserver(observe func(context.Context, DeliveryIdentity)) *DeliveryService {
+	s.commitObserver = observe
+	return s
 }
 
 func NewDeliveryService(transactions DeliveryTransactions, assets DeliveryAssets) *DeliveryService {

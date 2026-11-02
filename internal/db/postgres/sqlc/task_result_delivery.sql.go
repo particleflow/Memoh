@@ -11,6 +11,45 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const listComputerResultTasks = `-- name: ListComputerResultTasks :many
+SELECT id,bot_id,session_id,user_id FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND details ? 'batch'
+`
+
+type ListComputerResultTasksRow struct {
+	ID        pgtype.UUID `json:"id"`
+	BotID     pgtype.UUID `json:"bot_id"`
+	SessionID pgtype.UUID `json:"session_id"`
+	UserID    pgtype.UUID `json:"user_id"`
+}
+
+// Only pi-json batch operations can complete asynchronously; foreground and
+// legacy agent operations finish inside their submitting turn.
+func (q *Queries) ListComputerResultTasks(ctx context.Context) ([]ListComputerResultTasksRow, error) {
+	rows, err := q.db.Query(ctx, listComputerResultTasks)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListComputerResultTasksRow
+	for rows.Next() {
+		var i ListComputerResultTasksRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.BotID,
+			&i.SessionID,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDelegationResultTasks = `-- name: ListDelegationResultTasks :many
 SELECT id,source_bot_id,source_session_id,user_id FROM bot_delegations
 WHERE team_id=public.memoh_current_team_id() AND payload->>'result_delivery_version'='1'
@@ -79,6 +118,20 @@ func (q *Queries) ListNativeResultTasks(ctx context.Context) ([][]byte, error) {
 	return items, nil
 }
 
+const readComputerResultDelivery = `-- name: ReadComputerResultDelivery :one
+SELECT COALESCE(details->'result_delivery','{}'::jsonb)::jsonb AS delivery
+FROM computer_operations WHERE team_id=public.memoh_current_team_id() AND id=$1::uuid
+`
+
+// Result delivery bookkeeping lives beside the operation receipt, CAS-guarded
+// exactly like the native/delegation result envelopes.
+func (q *Queries) ReadComputerResultDelivery(ctx context.Context, id pgtype.UUID) ([]byte, error) {
+	row := q.db.QueryRow(ctx, readComputerResultDelivery, id)
+	var delivery []byte
+	err := row.Scan(&delivery)
+	return delivery, err
+}
+
 const readDelegationResultDelivery = `-- name: ReadDelegationResultDelivery :one
 SELECT COALESCE(result->'result_delivery','{}'::jsonb)::jsonb AS delivery
 FROM bot_delegations WHERE team_id=public.memoh_current_team_id() AND id=$1::uuid
@@ -87,6 +140,26 @@ FROM bot_delegations WHERE team_id=public.memoh_current_team_id() AND id=$1::uui
 func (q *Queries) ReadDelegationResultDelivery(ctx context.Context, id pgtype.UUID) ([]byte, error) {
 	row := q.db.QueryRow(ctx, readDelegationResultDelivery, id)
 	var delivery []byte
+	err := row.Scan(&delivery)
+	return delivery, err
+}
+
+const saveComputerResultDelivery = `-- name: SaveComputerResultDelivery :one
+UPDATE computer_operations SET details=jsonb_set(details,'{result_delivery}',$1::jsonb)
+WHERE team_id=public.memoh_current_team_id() AND id=$2::uuid
+ AND COALESCE(details->'result_delivery','{}'::jsonb)=$3::jsonb
+RETURNING details->'result_delivery' AS delivery
+`
+
+type SaveComputerResultDeliveryParams struct {
+	Delivery []byte      `json:"delivery"`
+	ID       pgtype.UUID `json:"id"`
+	Expected []byte      `json:"expected"`
+}
+
+func (q *Queries) SaveComputerResultDelivery(ctx context.Context, arg SaveComputerResultDeliveryParams) (interface{}, error) {
+	row := q.db.QueryRow(ctx, saveComputerResultDelivery, arg.Delivery, arg.ID, arg.Expected)
+	var delivery interface{}
 	err := row.Scan(&delivery)
 	return delivery, err
 }
