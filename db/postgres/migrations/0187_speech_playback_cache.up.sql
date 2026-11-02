@@ -1,4 +1,4 @@
--- 0186_speech_playback_cache
+-- 0187_speech_playback_cache
 -- E2d: reuse synthesized speech for unchanged content instead of opening a
 -- fresh provider synthesis on every read-aloud request. The row is the durable
 -- authority; the audio bytes live beside the data root (storage_key) and are
