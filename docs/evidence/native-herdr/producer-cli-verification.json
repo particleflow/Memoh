@@ -3,8 +3,8 @@
   "source_sha256": "8072a745e7181b88ea5f16cf128923e420eaf7f1270bdd138a514efa4b886898",
   "regression_source": "https://github.com/particleflow/Memoh/blob/ddb7872e71789cfb303429b7f6f5aa96240f37cf/docs/testing/native-transfer-producer-combination.md",
   "generated_completion": {
-    "command": "go test -race ./internal/agenvo -run '^(TestNativeGeneratedCompletionInvokesProductionCollector|TestNativeCompletionRegistersWithoutLegacyPlugin|TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound)$' -count=1 -v",
-    "output": "=== RUN   TestNativeGeneratedCompletionInvokesProductionCollector\n--- PASS: TestNativeGeneratedCompletionInvokesProductionCollector (0.59s)\n=== RUN   TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound\n--- PASS: TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound (0.00s)\n=== RUN   TestNativeCompletionRegistersWithoutLegacyPlugin\n--- PASS: TestNativeCompletionRegistersWithoutLegacyPlugin (0.06s)\nPASS\nok  \tgithub.com/felinics/memoh/internal/agenvo\t1.675s\n",
+    "command": "go test -race ./internal/legacy-exec -run '^(TestNativeGeneratedCompletionInvokesProductionCollector|TestNativeCompletionRegistersWithoutLegacyPlugin|TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound)$' -count=1 -v",
+    "output": "=== RUN   TestNativeGeneratedCompletionInvokesProductionCollector\n--- PASS: TestNativeGeneratedCompletionInvokesProductionCollector (0.59s)\n=== RUN   TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound\n--- PASS: TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound (0.00s)\n=== RUN   TestNativeCompletionRegistersWithoutLegacyPlugin\n--- PASS: TestNativeCompletionRegistersWithoutLegacyPlugin (0.06s)\nPASS\nok  \tgithub.com/felinics/memoh/internal/legacy-exec\t1.675s\n",
     "path": "generated batchScript -> synthetic Pi writes fresh file -> production closure -> built production CLI collect-result",
     "manual_new_manifest_or_enqueue": false,
     "legacy_hook_calls": 0,

@@ -3,7 +3,7 @@
 -- longer match a row) and replace the admission functions without the retired
 -- provider branch. user_runtimes.provider and provider_config stay: the native
 -- 'memoh' provider uses both columns. No table data is touched.
-DROP INDEX IF EXISTS idx_user_runtimes_agenvo_config;
+DROP INDEX IF EXISTS idx_user_runtimes_legacy_config;
 
 CREATE OR REPLACE FUNCTION public.memoh_computer_admission_identity(p_provider TEXT, p_runtime UUID, p_config JSONB)
 RETURNS JSONB LANGUAGE SQL IMMUTABLE AS $$

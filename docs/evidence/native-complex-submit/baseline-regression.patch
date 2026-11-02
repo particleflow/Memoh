@@ -1,10 +1,10 @@
-diff --git a/internal/agenvo/native_complex_preflight_test.go b/internal/agenvo/native_complex_preflight_test.go
+diff --git a/internal/legacy-exec/native_complex_preflight_test.go b/internal/legacy-exec/native_complex_preflight_test.go
 new file mode 100644
 index 00000000..858dc9db
 --- /dev/null
-+++ b/internal/agenvo/native_complex_preflight_test.go
++++ b/internal/legacy-exec/native_complex_preflight_test.go
 @@ -0,0 +1,37 @@
-+package agenvo
++package legacy-exec
 +
 +import (
 +	"strings"

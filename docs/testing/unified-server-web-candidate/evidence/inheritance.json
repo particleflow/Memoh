@@ -19,7 +19,7 @@
     "docs/computer-task-mcp.md",
     "docs/images-capability.md",
     "docs/native-agent-observation-history.md",
-    "internal/agenvo/agent.go",
+    "internal/legacy-exec/agent.go",
     "internal/computertask/native_evidence.go",
     "internal/computertask/native_evidence_test.go",
     "internal/computertask/service.go",
@@ -33,6 +33,6 @@
     "internal/imagecapability/provider.go",
     "internal/imagecapability/provider_test.go"
   ],
-  "prior_test_fixture_difference": "diff --git a/internal/handlers/computer_transfers_test.go b/internal/handlers/computer_transfers_test.go\nindex da40abe3..88bc92a5 100644\n--- a/internal/handlers/computer_transfers_test.go\n+++ b/internal/handlers/computer_transfers_test.go\n@@ -52,6 +52,7 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask\n }\n \n type taskTransferFixtureOptions struct {\n+\troot    string\n \tassets  func(*media.Service) computertask.DeliveryAssets\n \trequest func(*http.Request)\n \tdevice  func(computertask.DeliveryIdentity, agenvo.Target) DeviceTransferVerifier\n@@ -61,6 +62,9 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe\n \tt.Helper()\n \tf, _ := deliveryHTTPServer(t)\n \troot := t.TempDir()\n+\tif len(options) > 0 && options[0].root != \"\" {\n+\t\troot = options[0].root\n+\t}\n \tassets := media.NewService(nil, localfs.NewOriginals(root))\n \tassets.SetRequirePersistence(true)\n \tif err := assets.EnableUploads(root); err != nil {",
+  "prior_test_fixture_difference": "diff --git a/internal/handlers/computer_transfers_test.go b/internal/handlers/computer_transfers_test.go\nindex da40abe3..88bc92a5 100644\n--- a/internal/handlers/computer_transfers_test.go\n+++ b/internal/handlers/computer_transfers_test.go\n@@ -52,6 +52,7 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask\n }\n \n type taskTransferFixtureOptions struct {\n+\troot    string\n \tassets  func(*media.Service) computertask.DeliveryAssets\n \trequest func(*http.Request)\n \tdevice  func(computertask.DeliveryIdentity, legacy-exec.Target) DeviceTransferVerifier\n@@ -61,6 +62,9 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe\n \tt.Helper()\n \tf, _ := deliveryHTTPServer(t)\n \troot := t.TempDir()\n+\tif len(options) > 0 && options[0].root != \"\" {\n+\t\troot = options[0].root\n+\t}\n \tassets := media.NewService(nil, localfs.NewOriginals(root))\n \tassets.SetRequirePersistence(true)\n \tif err := assets.EnableUploads(root); err != nil {",
   "initial_preflight": "Exact test-file equality assertion failed because current base already includes optional root fixture support. No patch had applied. Preserve that support and apply only the selected If-Range diff."
 }

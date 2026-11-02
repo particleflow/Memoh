@@ -17,12 +17,12 @@ The two reviewed PR8 commits rebased without conflicts:
 `git range-diff` reports both patches identical. The integration's implementation
 commit is `2472cbbaea9308a458a6ee31ae4b7a8e9aa43a0f`; the subsequent evidence commit
 only updates documentation, logs and screenshots. Relative to the verified main,
-`internal/agent`, `internal/agenvo`, `internal/computertask` and `db/postgres` all
+`internal/agent`, `internal/legacy-exec`, `internal/computertask` and `db/postgres` all
 have zero diff. The official Agent runtime/contextview guard also passes against
 `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`.
 
 Swagger and SDK regeneration leave no tracked diff. All six frozen media paths,
-four media schema definitions and PR7's actual changed `agenvo.AgentProfile`
+four media schema definitions and PR7's actual changed `legacy-exec.AgentProfile`
 schema definition match their respective reviewed sources exactly. See
 [integration-contract.txt](integration-contract.txt). The phone 1.0.5 and Windows
 transfer work can continue using the frozen API without a protocol change.
@@ -61,8 +61,8 @@ by PR8. No production path, volume or permission was changed in this check.
 ## Checks executed after rebase
 
 ```sh
-go test -p 3 ./internal/media ./internal/handlers ./internal/server ./internal/storage/... ./cmd/internal/core ./internal/agenvo ./internal/computertask
-go test -race -p 3 ./internal/media ./internal/handlers ./internal/server ./internal/storage/providers/localfs ./internal/storage/providers/fallback ./internal/agenvo ./internal/computertask
+go test -p 3 ./internal/media ./internal/handlers ./internal/server ./internal/storage/... ./cmd/internal/core ./internal/legacy-exec ./internal/computertask
+go test -race -p 3 ./internal/media ./internal/handlers ./internal/server ./internal/storage/providers/localfs ./internal/storage/providers/fallback ./internal/legacy-exec ./internal/computertask
 go build -p 3 -o /workspace/.memoh-cloud/bin/memoh-server ./cmd/agent
 go generate ./internal/handlers
 pnpm run generate-sdk
@@ -71,7 +71,7 @@ bash scripts/check-agent-core-boundary.sh
 ```
 
 The ordinary and race suites passed, including both the file-module regressions
-and PR7's agenvo/computertask cases. Some unchanged ordinary packages used Go's
+and PR7's legacy-exec/computertask cases. Some unchanged ordinary packages used Go's
 test cache; the complete related-package race suite executed successfully.
 Logs: [ordinary tests](integration-go-tests.txt), [race](integration-race.txt).
 The PR records the final lint result and required CI run IDs for its exact head;

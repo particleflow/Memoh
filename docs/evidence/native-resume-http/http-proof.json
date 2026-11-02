@@ -18,7 +18,7 @@
     "code": "request.field_invalid"
   },
   {
-    "case": "old_agenvo_operation_cannot_resume",
+    "case": "old_legacy_exec_operation_cannot_resume",
     "status": 400,
     "cache_control": "no-store",
     "code": "http.bad_request"

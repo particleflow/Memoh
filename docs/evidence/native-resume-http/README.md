@@ -39,11 +39,11 @@ New adapter: `internal/computertask/resume_view.go`. New HTTP handler: `internal
 | Lost prompt receipt and repeated explicit continuation after restart | PASS in service fixture: one prompt only; uncertain phase cannot replay. Existing bounded recovery owns CAS. |
 | Actual Echo JWT chain and task binding | PASS: current account accepted, inactive account401, chat-route reply token403/zero continuation; anonymous, wrong owner/Bot/session, forged body identity, malformed/oversized JSON, late revocation, conflict and safe error/outcome responses. |
 | SDK/Web typecheck, affected Go lint, errors/server packages, core boundary | PASS, exit 0. |
-| Current compiled Server + existing synthetic PostgreSQL | PASS: same-owner synthetic chat-route token403/zero record mutation; new route rejects anonymous401, forged identity400, wrong kind400 and an old Agenvo operation400, all no-store. These are actual HTTP requests, not stubbed responses. |
+| Current compiled Server + existing synthetic PostgreSQL | PASS: same-owner synthetic chat-route token403/zero record mutation; new route rejects anonymous401, forged identity400, wrong kind400 and an old LegacyExec operation400, all no-store. These are actual HTTP requests, not stubbed responses. |
 | Current Web + same Server/PG | PASS: open original synthetic conversation → Tasks → unknown operation detail → reload → same ID/status/parent. No writes or device-observation/content calls; no page error. |
 | Durable-data preservation | All-row hashes unchanged for 9 operations, 18 sessions, 14 runs and 29 messages, before/after the HTTP/UI checks. |
 
-The isolated PG has legacy Agenvo synthetic operations, **not** a connected native Runtime fixture. Therefore successful continuation and disconnected Runtime behavior are demonstrated by the service/middleware fixtures, not claimed as a real PG/native-device execution. The browser screenshot shows persistence and absence of implicit native calls, not successful resume. All materials are synthetic; no production identifiers, task body, configuration, credentials or external endpoint are included.
+The isolated PG has legacy LegacyExec synthetic operations, **not** a connected native Runtime fixture. Therefore successful continuation and disconnected Runtime behavior are demonstrated by the service/middleware fixtures, not claimed as a real PG/native-device execution. The browser screenshot shows persistence and absence of implicit native calls, not successful resume. All materials are synthetic; no production identifiers, task body, configuration, credentials or external endpoint are included.
 
 Commands (local Go 1.25.7, golangci-lint 2.10.1):
 
