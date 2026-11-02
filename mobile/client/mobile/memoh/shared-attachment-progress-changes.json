@@ -1,5 +1,5 @@
 {
-  "scope": "Attachment transfer-progress visuals: three-state attachment cards (ring while transferring, check when verified, alert icon on failure) with no status copy, and a progress ring plus formatted speed after the message bubble while attachments move. Post-override applied after the streaming read-aloud snapshot; harmony platform only.",
+  "scope": "Attachment transfer progress visuals: three-state attachment cards (ring while transferring, check when verified, alert icon on failure) with no status copy, and a progress ring plus formatted speed after the message bubble while attachments move. A failed verified image read renders the E8 failed card instead of the pre-E8 text status. Post-override applied after the streaming read-aloud snapshot; harmony platform only.",
   "existingFiles": {
     "apps/web/src/pages/home/components/chat-attachment-card.vue": {
       "baseSHA256": "be144f97673b53ed671ad8da7b5a70294b1152c96a3b04360d121edc9c4327ac",
@@ -29,7 +29,7 @@
     },
     "apps/web/src/pages/home/components/attachment-block.vue": {
       "baseSHA256": "1867ca4f42603eb3e3a009340c37168b0e8a5170e1ea5190982d0720d66c0597",
-      "adaptedSHA256": "ccea39679e0b7b77cb12add55ebfcb990a522ad2eac58396aab39b3fde2f84f3",
+      "adaptedSHA256": "46aee0285009056a7f5b01b8e75a58889d2ed924a73758361788b9e9516583ff",
       "replacements": [
         [
           "function harmonyTransfer(att: AttachmentItem) {\n  return { transfer: typeof att.metadata?.harmony_transfer === 'string' ? att.metadata.harmony_transfer : undefined,\n    wireLoaded: typeof att.metadata?.harmony_upload_wire_loaded === 'number' ? att.metadata.harmony_upload_wire_loaded : undefined,\n    wireTotal: typeof att.metadata?.harmony_upload_wire_total === 'number' ? att.metadata.harmony_upload_wire_total : undefined }\n}\nimport ChatAttachmentCard from './chat-attachment-card.vue'",
@@ -44,6 +44,11 @@
         [
           "      imageTimingCard(att)\n      void originalBlob(att, controller.signal).then((blob) => {\n        if (controller.signal.aborted) return\n        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => { if (!controller.signal.aborted) failedImages.add(key) })",
           "      imageTimingCard(att)\n      const hash = String(att.content_hash ?? '')\n      void originalBlob(att, controller.signal, hash\n        ? { onProgress: (loaded, total) => noteDownloadBytes(hash, loaded, total) }\n        : undefined).then((blob) => {\n        if (controller.signal.aborted) return\n        if (hash) clearDownloadBytes(hash)\n        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => {\n        if (hash) clearDownloadBytes(hash)\n        if (!controller.signal.aborted) failedImages.add(key)\n      })",
+          1
+        ],
+        [
+          "      <div\n        v-if=\"failedImages.has(imageReferenceKey(att)) || unavailableSources.has(getUrl(att))\"\n        role=\"status\"\n        class=\"text-body text-muted-foreground\"\n      >\n        <span>{{ getDisplayName(att) }}</span>\n        <p>{{ t('chat.attachmentUnavailable') }}</p>\n      </div>\n",
+          "      <!-- A failed verified read is a transfer failure, so it takes the E8\n           failed card (alert badge + red border, no status copy); the\n           pre-E8 text status survives only for a source that turned\n           unavailable after a good read. -->\n      <ChatAttachmentCard\n        v-if=\"failedImages.has(imageReferenceKey(att))\"\n        v-bind=\"harmonyTransfer(att)\"\n        kind=\"file\"\n        :name=\"getDisplayName(att)\"\n        :ext=\"getExt(att)\"\n      />\n      <div\n        v-else-if=\"unavailableSources.has(getUrl(att))\"\n        role=\"status\"\n        class=\"text-body text-muted-foreground\"\n      >\n        <span>{{ getDisplayName(att) }}</span>\n        <p>{{ t('chat.attachmentUnavailable') }}</p>\n      </div>\n",
           1
         ]
       ]
@@ -70,6 +75,27 @@
         [
           "const userAttachmentBlock = computed<AttachmentBlockType | null>(() => {",
           "// One aggregate per message feeds the bubble-level ring: uploads through the\n// live attachment metadata/registry, verified media reads through the download\n// registry keyed by content hash.\nconst userTransfer = computed(() => props.message.role === 'user'\n  ? messageTransferView(props.message.attachments) : { active: false, fraction: null, rate: undefined })\nconst assistantTransfer = computed(() => props.message.role === 'assistant'\n  ? messageTransferView(props.message.messages.flatMap(block => block.type === 'attachments' ? block.attachments : []))\n  : { active: false, fraction: null, rate: undefined })\nconst userAttachmentBlock = computed<AttachmentBlockType | null>(() => {",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/harmony-inaccessible-attachment.test.ts": {
+      "baseSHA256": "aaf13e2a10b93e1d92b40d7b2396620eb626725222ca1bb77b9d430512999a3f",
+      "adaptedSHA256": "51f9752cc5f2a191a116317d43bab091c629faced06516276f65ef79960153b2",
+      "replacements": [
+        [
+          "shows one inaccessible state for a rejected",
+          "shows the E8 failed card for a rejected",
+          1
+        ],
+        [
+          "  expect(host.querySelector('[role=\"status\"]')?.textContent).toContain('chat.attachmentUnavailable')\n  expect(host.textContent).toContain('original.png'); expect(host.querySelector('img,button')).toBeNull()",
+          "  expect(host.querySelector('[role=\"status\"]')).toBeNull()\n  expect(host.querySelector('.group\\\\/att [class*=\"border-destructive\"]')).not.toBeNull()\n  expect(host.querySelector('.group\\\\/att [class*=\"text-destructive\"] svg')).not.toBeNull()\n  expect(host.textContent).toContain('original.png'); expect(host.querySelector('img,button')).toBeNull()",
+          1
+        ],
+        [
+          "  expect(host.querySelector('img,button')).toBeNull(); expect(host.querySelectorAll('[role=\"status\"]')).toHaveLength(1)",
+          "  expect(host.querySelector('.group\\\\/att [class*=\"text-destructive\"] svg')).not.toBeNull()",
           1
         ]
       ]

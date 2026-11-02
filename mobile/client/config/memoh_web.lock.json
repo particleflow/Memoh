@@ -598,7 +598,7 @@
   "sharedAttachmentProgress": {
     "sourceChanges": {
       "local": "shared-attachment-progress-changes.json",
-      "sha256": "5b06d494b03e317e039da88202a957000ebb5c09482d16833476ed0eeaa4230d"
+      "sha256": "59119497722b70bd191a8685f2411566d2243b7122532f72b8823901264226d4"
     },
     "scope": "Attachment transfer progress visuals (E8): three-state cards without status copy; bubble-level ring fill and formatted speed; client-measured bytes only (XHR upload wire bytes, streamed media reads). Native bridge transfers expose no byte events and stay indeterminate with no invented speed."
   },
