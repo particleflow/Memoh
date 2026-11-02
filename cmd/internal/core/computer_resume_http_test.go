@@ -18,10 +18,10 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/accounts"
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -60,7 +60,7 @@ func (resumeHTTPEmptyRows) Err() error { return nil }
 // session ownership, ResumeNative, delegation restoration and input checks are
 // the production path. No model, Windows process or external service runs.
 type resumeHTTPStore struct {
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	dbstore.SessionTaskReader
 	op                   dbstore.ComputerOperationRecord
 	mounts               map[string]dbstore.BotRemoteRuntimeBindingRecord
@@ -141,10 +141,6 @@ func (f *resumeHTTPStore) OwnedNativeHerdrRuntime(_ context.Context, user, id st
 	return dbstore.UserRuntimeRecord{}, db.ErrNotFound
 }
 
-func (*resumeHTTPStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	return "", db.ErrNotFound
-}
-
 func (f *resumeHTTPStore) HasBotPermission(_ context.Context, bot, user, _ string) (bool, error) {
 	return !f.revoked && bot == imageSpawnBot && user == imageSpawnUser, nil
 }
@@ -199,7 +195,7 @@ func (f *resumeHTTPStore) ListDir(ctx context.Context, parent string, _ bool, _,
 	return out, nil
 }
 
-func (f *resumeHTTPStore) native(_ context.Context, _ agenvo.Scope, target agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
+func (f *resumeHTTPStore) native(_ context.Context, _ computertarget.Scope, target computertarget.Target, method string, args map[string]any) (computertarget.Receipt, error) {
 	body := map[string]any{}
 	switch method {
 	case "workspace.create":
@@ -209,13 +205,13 @@ func (f *resumeHTTPStore) native(_ context.Context, _ agenvo.Scope, target agenv
 	case "pane.run":
 		f.runs++
 		if f.lost {
-			return agenvo.Receipt{}, agenvo.ErrUnknown
+			return computertarget.Receipt{}, computertarget.ErrUnknown
 		}
 	default:
-		return agenvo.Receipt{}, agenvo.ErrUnsupported
+		return computertarget.Receipt{}, computertarget.ErrUnsupported
 	}
 	raw, _ := json.Marshal(map[string]any{"session": target.Session, "result": body})
-	return agenvo.Receipt{Execution: "accepted", RequestID: uuid.NewString(), Result: raw}, nil
+	return computertarget.Receipt{Execution: "accepted", RequestID: uuid.NewString(), Result: raw}, nil
 }
 
 func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
@@ -229,19 +225,19 @@ func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
 				authority.sessions[session.ID] = session
 				record.Identity.TargetSessionID = session.ID
 				targetID, runtimeID := uuid.NewString(), uuid.NewString()
-				profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}}
+				profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}}
 				config, _ := json.Marshal(map[string]any{"herdr": profile})
 				f := &resumeHTTPStore{mounts: map[string]dbstore.BotRemoteRuntimeBindingRecord{}, files: map[string][]byte{}, dirs: map[string]bool{profile.WorkDir: true}}
 				sourceMount := uuid.NewString()
 				for bot, mount := range map[string]string{imageSpawnBot: targetID, imageSpawnOtherBot: sourceMount} {
 					f.mounts[bot+"/"+mount] = dbstore.BotRemoteRuntimeBindingRecord{ID: mount, BotID: bot, RuntimeID: runtimeID, RuntimeUserID: "synthetic-owner", BotOwnerUserID: "synthetic-owner", RuntimeProvider: "memoh", RuntimeProviderConfig: config}
 				}
-				target, err := agenvo.DecodeRuntimeTarget("memoh", runtimeID, config)
+				target, err := computertarget.DecodeRuntimeTarget("memoh", runtimeID, config)
 				if err != nil {
 					t.Fatal(err)
 				}
 				record.Payload.TargetSelection = targetID
-				record.Payload.Devices = []botdelegation.DevicePair{{SourceMountID: sourceMount, TargetMountID: targetID, RuntimeID: runtimeID, Fingerprint: agenvo.TargetFingerprint(target)}}
+				record.Payload.Devices = []botdelegation.DevicePair{{SourceMountID: sourceMount, TargetMountID: targetID, RuntimeID: runtimeID, Fingerprint: computertarget.TargetFingerprint(target)}}
 				host.service.Authority.Mounts = f
 				host.service.Ledger = delegatedImageLedger{record: record}
 				if owner == "own" {
@@ -261,10 +257,10 @@ func TestComputerInputResumeAccountHTTPRestoresOriginalContext(t *testing.T) {
 					host.store = postgresstore.NewWithQueries(sqlc.New(resumeHTTPNoOutputs{}))
 				}
 				loader := &delegationAssetLoader{host: host}
-				relay := agenvo.NewService(f, f, f.native)
+				relay := computertarget.NewService(f, f, f.native)
 				service := computertask.NewService(f, f, relay, host.media, func(ctx context.Context, b toolcontext.ComputerBinding, id, _, _ string) error {
 					return toolcontext.CheckDelegationTarget(ctx, b.BotID, id, bots.PermissionWorkspaceExec)
-				}).WithInputReferences(loader.openComputerInput).WithInputFiles(func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (computertask.InputFileSystem, error) {
+				}).WithInputReferences(loader.openComputerInput).WithInputFiles(func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (computertask.InputFileSystem, error) {
 					if !f.ready {
 						return nil, computertask.ErrDeliveryAsset
 					}

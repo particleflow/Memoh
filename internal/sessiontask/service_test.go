@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -22,7 +22,7 @@ import (
 type fixture struct {
 	sessions                    map[string]thread.Thread
 	workdirs                    map[string]workdir.Workdir
-	targets                     map[string]agenvo.Target
+	targets                     map[string]computertarget.Target
 	operations                  map[string]dbstore.ComputerOperationRecord
 	rows                        []dbstore.SessionTaskCandidate
 	service                     *Service
@@ -60,7 +60,7 @@ func (d dirs) Get(_ context.Context, bot, id string) (workdir.Workdir, error) {
 	return v, nil
 }
 
-func (f *fixture) AuthorizeOperationHistory(ctx context.Context, s agenvo.Scope) error {
+func (f *fixture) AuthorizeOperationHistory(ctx context.Context, s computertarget.Scope) error {
 	if f.historyDenied || s.BotID != "bot" || s.UserID != "user" || s.TargetID == "" {
 		return ErrUnavailable
 	}
@@ -70,14 +70,14 @@ func (f *fixture) AuthorizeOperationHistory(ctx context.Context, s agenvo.Scope)
 	return toolcontext.CheckComputerTarget(ctx, s.TargetID)
 }
 
-func (f *fixture) ResolveTarget(ctx context.Context, s agenvo.Scope) (agenvo.Target, error) {
+func (f *fixture) ResolveTarget(ctx context.Context, s computertarget.Scope) (computertarget.Target, error) {
 	f.liveReads++
 	if err := f.AuthorizeOperationHistory(ctx, s); err != nil {
-		return agenvo.Target{}, err
+		return computertarget.Target{}, err
 	}
 	target, ok := f.targets[s.TargetID]
 	if !ok {
-		return agenvo.Target{}, ErrUnavailable
+		return computertarget.Target{}, ErrUnavailable
 	}
 	return target, nil
 }
@@ -116,7 +116,7 @@ func (f *fixture) ListSessionTaskCandidates(_ context.Context, q dbstore.Session
 }
 
 func newFixture() *fixture {
-	f := &fixture{sessions: map[string]thread.Thread{}, workdirs: map[string]workdir.Workdir{}, targets: map[string]agenvo.Target{"pc-a": {DeviceID: "synthetic-a"}, "pc-b": {DeviceID: "synthetic-b"}}, operations: map[string]dbstore.ComputerOperationRecord{}}
+	f := &fixture{sessions: map[string]thread.Thread{}, workdirs: map[string]workdir.Workdir{}, targets: map[string]computertarget.Target{"pc-a": {DeviceID: "synthetic-a"}, "pc-b": {DeviceID: "synthetic-b"}}, operations: map[string]dbstore.ComputerOperationRecord{}}
 	f.root, f.child, f.grandchild = uuid.NewString(), uuid.NewString(), uuid.NewString()
 	now := time.Now().Add(-time.Minute).UTC()
 	for i, id := range []string{f.root, f.child, f.grandchild} {
@@ -141,7 +141,7 @@ func newFixture() *fixture {
 
 func (f *fixture) addOperation(session, target string, at time.Time) string {
 	id := uuid.NewString()
-	f.operations[id] = dbstore.ComputerOperationRecord{ID: id, BotID: "bot", UserID: "user", SessionID: session, TargetID: target, TargetFingerprint: agenvo.TargetFingerprint(f.targets[target]), State: "dispatching", CreatedAt: at, UpdatedAt: at, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET","observation":{"reasoning":"SECRET"},"pi_result":"succeeded"}`)}
+	f.operations[id] = dbstore.ComputerOperationRecord{ID: id, BotID: "bot", UserID: "user", SessionID: session, TargetID: target, TargetFingerprint: computertarget.TargetFingerprint(f.targets[target]), State: "dispatching", CreatedAt: at, UpdatedAt: at, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET","observation":{"reasoning":"SECRET"},"pi_result":"succeeded"}`)}
 	f.rows = append(f.rows, dbstore.SessionTaskCandidate{Type: ComputerOperation, ID: id, SessionID: session, CreatedAt: at})
 	return id
 }
@@ -195,7 +195,7 @@ func TestScopeAndRevocation(t *testing.T) {
 				f.workdirs["w"] = workdir.Workdir{ID: "w", BotID: "bot", WorkspaceTargetID: "pc-b"}
 				f.historyDenied = true
 			case "snapshot_mismatch":
-				r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": agenvo.Target{DeviceID: "changed"}})
+				r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": computertarget.Target{DeviceID: "changed"}})
 			case "child_broadens":
 				root.WorkdirID = "w"
 				child.WorkdirID = "native"

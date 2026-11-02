@@ -67,7 +67,7 @@ git diff --check
 ```
 
 - Frontend error tests: 2 files, 123 tests passed. The prior `1efb4a0b`
-  integration also passed the Agenvo/computer/media/localfs race suites and
+  integration also passed the legacy executor/computer/media/localfs race suites and
   broader Go lint, plus repository ESLint (0 errors, 18 existing warnings).
   This header-only correction changes no frontend, generated files or DB code;
   its rerun commands above target the HTTP/auth boundary and task regressions.
@@ -75,7 +75,7 @@ git diff --check
   ownership/deletion/cycles, inherited PC scope, target grant/source permission
   revocation, changed registration, malformed selection metadata, primary
   fallback and workdir priority. JWT HTTP tests use the actual middleware,
-  Problem renderer and Agenvo grant resolver, asserting **zero relay calls**.
+  Problem renderer and legacy executor grant resolver, asserting **zero relay calls**.
 - Cursor tests cover equal creation times, late state updates, later inserts,
   mismatched/tampered cursors, revocation during pagination and empty filtered
   continuation pages. Revision is tested beyond JavaScript's safe integer range.

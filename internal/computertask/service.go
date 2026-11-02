@@ -15,7 +15,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -44,13 +44,13 @@ type Assets interface {
 }
 type Authorize func(context.Context, toolcontext.ComputerBinding, string, string, string) error
 
-type DefaultWorkDir func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (string, error)
+type DefaultWorkDir func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (string, error)
 
 type Service struct {
 	nativeObservationLimit int
 	store                  dbstore.ComputerOperationStore
 	registry               Registry
-	relay                  *agenvo.Service
+	relay                  *computertarget.Service
 	assets                 Assets
 	authorize              Authorize
 	defaultWorkDir         DefaultWorkDir
@@ -65,7 +65,7 @@ func (s *Service) WithDefaultWorkDir(resolve DefaultWorkDir) *Service {
 	return s
 }
 
-func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *agenvo.Service, assets Assets, authorize Authorize) *Service {
+func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *computertarget.Service, assets Assets, authorize Authorize) *Service {
 	return &Service{store: store, registry: registry, relay: relay, assets: assets, authorize: authorize, nativeObservationLimit: 32}
 }
 
@@ -87,57 +87,57 @@ type Submit struct {
 	WorkDir           string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
-	InputPreparationUntil time.Time                `json:"input_preparation_until,omitzero"`
-	InputPreparation      string                   `json:"input_preparation,omitempty"`
-	TargetSnapshot        *agenvo.Target           `json:"target_snapshot,omitempty"`
-	DefaultWorkDir        string                   `json:"default_work_dir,omitempty"`
-	NativeEvidence        *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
-	Followups             []FollowupRecord         `json:"followups,omitempty"`
-	Batch                 *BatchDetails            `json:"batch,omitempty"`
-	Kind                  string                   `json:"kind"`
-	Agent                 agenvo.AgentProgress     `json:"agent"`
-	Output                string                   `json:"output,omitempty"`
-	ExitCode              *int                     `json:"exit_code,omitempty"`
-	Truncated             bool                     `json:"truncated"`
-	Observation           *agenvo.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash          string                   `json:"artifact_hash,omitempty"`
-	Phase                 string                   `json:"phase"`
-	Foreground            *agenvo.Result           `json:"foreground,omitempty"`
+	InputPreparationUntil time.Time                        `json:"input_preparation_until,omitzero"`
+	InputPreparation      string                           `json:"input_preparation,omitempty"`
+	TargetSnapshot        *computertarget.Target           `json:"target_snapshot,omitempty"`
+	DefaultWorkDir        string                           `json:"default_work_dir,omitempty"`
+	NativeEvidence        *NativeEvidenceLedger            `json:"native_evidence,omitempty"`
+	Followups             []FollowupRecord                 `json:"followups,omitempty"`
+	Batch                 *BatchDetails                    `json:"batch,omitempty"`
+	Kind                  string                           `json:"kind"`
+	Agent                 computertarget.AgentProgress     `json:"agent"`
+	Output                string                           `json:"output,omitempty"`
+	ExitCode              *int                             `json:"exit_code,omitempty"`
+	Truncated             bool                             `json:"truncated"`
+	Observation           *computertarget.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash          string                           `json:"artifact_hash,omitempty"`
+	Phase                 string                           `json:"phase"`
+	Foreground            *computertarget.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
-	Inputs             *InputResult             `json:"inputs,omitempty"`
-	NativeEvidence     *NativeEvidenceResult    `json:"native_evidence,omitempty"`
-	NativeAgentName    string                   `json:"native_agent_name,omitempty"`
-	SessionBinding     string                   `json:"session_binding,omitempty"`
-	Followups          []FollowupResult         `json:"followups,omitempty"`
-	Followup           *FollowupResult          `json:"followup,omitempty"`
-	BlockedByRequest   string                   `json:"blocked_by_request,omitempty"`
-	RequestConflict    bool                     `json:"request_conflict,omitempty"`
-	Continuity         *PiContinuity            `json:"continuity,omitempty"`
-	Delivery           *ProducerResult          `json:"delivery,omitempty"`
-	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
-	DiagnosticsState   string                   `json:"diagnostics_state,omitempty"`
-	StdoutHash         string                   `json:"stdout_hash,omitempty"`
-	StderrHash         string                   `json:"stderr_hash,omitempty"`
-	StdoutEmpty        bool                     `json:"stdout_empty,omitempty"`
-	StderrEmpty        bool                     `json:"stderr_empty,omitempty"`
-	ID                 string                   `json:"operation_id"`
-	TargetID           string                   `json:"target_id"`
-	State              string                   `json:"state"`
-	Phase              string                   `json:"phase"`
-	Kind               string                   `json:"kind"`
-	Output             string                   `json:"output,omitempty"`
-	ExitCode           *int                     `json:"exit_code,omitempty"`
-	Truncated          bool                     `json:"truncated"`
-	Observation        *agenvo.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash       string                   `json:"artifact_hash,omitempty"`
-	CancelRequested    bool                     `json:"cancel_requested"`
-	ProcessStopped     bool                     `json:"process_stopped"`
-	CleanupRequired    bool                     `json:"cleanup_required"`
-	BlockedByOperation string                   `json:"blocked_by_operation,omitempty"`
-	WorkspaceID        string                   `json:"workspace_id,omitempty"`
-	PaneID             string                   `json:"pane_id,omitempty"`
-	RequestID          string                   `json:"request_id,omitempty"`
+	Inputs             *InputResult                     `json:"inputs,omitempty"`
+	NativeEvidence     *NativeEvidenceResult            `json:"native_evidence,omitempty"`
+	NativeAgentName    string                           `json:"native_agent_name,omitempty"`
+	SessionBinding     string                           `json:"session_binding,omitempty"`
+	Followups          []FollowupResult                 `json:"followups,omitempty"`
+	Followup           *FollowupResult                  `json:"followup,omitempty"`
+	BlockedByRequest   string                           `json:"blocked_by_request,omitempty"`
+	RequestConflict    bool                             `json:"request_conflict,omitempty"`
+	Continuity         *PiContinuity                    `json:"continuity,omitempty"`
+	Delivery           *ProducerResult                  `json:"delivery,omitempty"`
+	PiResult           *computertarget.PiJSONResult     `json:"pi_result,omitempty"`
+	DiagnosticsState   string                           `json:"diagnostics_state,omitempty"`
+	StdoutHash         string                           `json:"stdout_hash,omitempty"`
+	StderrHash         string                           `json:"stderr_hash,omitempty"`
+	StdoutEmpty        bool                             `json:"stdout_empty,omitempty"`
+	StderrEmpty        bool                             `json:"stderr_empty,omitempty"`
+	ID                 string                           `json:"operation_id"`
+	TargetID           string                           `json:"target_id"`
+	State              string                           `json:"state"`
+	Phase              string                           `json:"phase"`
+	Kind               string                           `json:"kind"`
+	Output             string                           `json:"output,omitempty"`
+	ExitCode           *int                             `json:"exit_code,omitempty"`
+	Truncated          bool                             `json:"truncated"`
+	Observation        *computertarget.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash       string                           `json:"artifact_hash,omitempty"`
+	CancelRequested    bool                             `json:"cancel_requested"`
+	ProcessStopped     bool                             `json:"process_stopped"`
+	CleanupRequired    bool                             `json:"cleanup_required"`
+	BlockedByOperation string                           `json:"blocked_by_operation,omitempty"`
+	WorkspaceID        string                           `json:"workspace_id,omitempty"`
+	PaneID             string                           `json:"pane_id,omitempty"`
+	RequestID          string                           `json:"request_id,omitempty"`
 	// Resumable is set (false) only where resume_operation_id is a documented
 	// no-op, with ResumeReason naming why, so a caller never mistakes the
 	// unchanged receipt of a completed operation for a re-execution.
@@ -151,8 +151,8 @@ func fingerprint(value any) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func scope(b toolcontext.ComputerBinding, target string) agenvo.Scope {
-	return agenvo.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: target}
+func scope(b toolcontext.ComputerBinding, target string) computertarget.Scope {
+	return computertarget.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: target}
 }
 
 func result(r dbstore.ComputerOperationRecord, d Details) Result {
@@ -232,7 +232,7 @@ func (s *Service) targets(ctx context.Context, b toolcontext.ComputerBinding) ([
 			continue
 		}
 		caps := []string{"foreground_bash"}
-		if t.Agent != (agenvo.AgentProfile{}) {
+		if t.Agent != (computertarget.AgentProfile{}) {
 			caps = append(caps, "herdr_pi_task")
 		}
 		protocol := t.Agent.ExecutionMode
@@ -241,20 +241,20 @@ func (s *Service) targets(ctx context.Context, b toolcontext.ComputerBinding) ([
 	return items, nil
 }
 
-func (s *Service) choose(ctx context.Context, b toolcontext.ComputerBinding, requested, kind string) (string, agenvo.Target, error) {
+func (s *Service) choose(ctx context.Context, b toolcontext.ComputerBinding, requested, kind string) (string, computertarget.Target, error) {
 	if requested == "" && b.TargetID != "native" {
 		requested = b.TargetID
 	}
 	if requested == "" {
 		items, err := s.targets(ctx, b)
 		if err != nil {
-			return "", agenvo.Target{}, err
+			return "", computertarget.Target{}, err
 		}
 		for _, item := range items {
 			for _, cap := range item.Capabilities {
 				if cap == kind {
 					if requested != "" {
-						return "", agenvo.Target{}, ErrAmbiguous
+						return "", computertarget.Target{}, ErrAmbiguous
 					}
 					requested = item.ID
 				}
@@ -262,14 +262,14 @@ func (s *Service) choose(ctx context.Context, b toolcontext.ComputerBinding, req
 		}
 	}
 	if requested == "" {
-		return "", agenvo.Target{}, ErrDenied
+		return "", computertarget.Target{}, ErrDenied
 	}
 	if err := toolcontext.CheckComputerTarget(ctx, requested); err != nil {
-		return "", agenvo.Target{}, ErrDenied
+		return "", computertarget.Target{}, ErrDenied
 	}
 	t, err := s.relay.ResolveTarget(ctx, scope(b, requested))
 	if err != nil {
-		return "", agenvo.Target{}, ErrDenied
+		return "", computertarget.Target{}, ErrDenied
 	}
 	return requested, t, nil
 }
@@ -308,14 +308,14 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 			in.WorkDir = "."
 		}
 	}
-	if in.Kind == "herdr_pi_task" && target.Agent == (agenvo.AgentProfile{}) {
-		return Result{}, agenvo.ErrAgentNotConfigured
+	if in.Kind == "herdr_pi_task" && target.Agent == (computertarget.AgentProfile{}) {
+		return Result{}, computertarget.ErrAgentNotConfigured
 	}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode != "pi-json-v1" {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 
-	if err := agenvo.ValidateWorkDir(target.WorkDir, in.WorkDir); err != nil {
+	if err := computertarget.ValidateWorkDir(target.WorkDir, in.WorkDir); err != nil {
 		return Result{}, err
 	}
 	if in.ResumeOperationID != "" {
@@ -347,7 +347,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		d.DefaultWorkDir = in.WorkDir
 	}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
-		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{History: &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "unconfirmed"}, LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		d.Batch = &BatchDetails{Progress: computertarget.BatchProgress{History: &computertarget.BatchHistoryExpectation{Version: computertarget.BatchHistoryVersion, Mode: "unconfirmed"}, LayoutVersion: computertarget.BatchLayoutVersion, CompletionVersion: computertarget.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 		if len(inputs) != 0 {
 			d.Batch.Progress.Inputs = &deliverymeta.InputPlan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}, Files: inputs}
 		}
@@ -361,12 +361,12 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 				d.Batch.Progress.Producer.Artifacts = append([]deliverymeta.Artifact(nil), in.Artifacts...)
 			}
 		}
-		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+		if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 			return Result{}, err
 		}
 	}
 	raw, _ := json.Marshal(d)
-	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: operationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
+	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: operationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: computertarget.TargetFingerprint(target), Details: raw})
 	if err != nil {
 		if admissionBlocked(err) {
 			return Result{}, err
@@ -374,12 +374,12 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return Result{}, ErrDenied
 	}
 	if !created {
-		if r.TargetFingerprint != agenvo.TargetFingerprint(target) {
-			return Result{}, agenvo.ErrTargetChanged
+		if r.TargetFingerprint != computertarget.TargetFingerprint(target) {
+			return Result{}, computertarget.ErrTargetChanged
 		}
 		d = Details{} // absent legacy fields must not inherit a new request's defaults
 		if json.Unmarshal(r.Details, &d) != nil {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		if r.Fingerprint != fingerprint(in) {
 			blocked := result(r, d)
@@ -394,7 +394,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 			var err error
 			r.Details, err = preparedInputDetails(r.Details, d)
 			if err != nil {
-				return agenvo.ErrUnknown
+				return computertarget.ErrUnknown
 			}
 		} else {
 			r.Details, _ = json.Marshal(d)
@@ -405,19 +405,19 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		if err != nil {
 			r.State = "unknown"
 			d.ExitCode = nil
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		r = next
 		return nil
 	}
-	work, cancel := context.WithTimeout(agenvo.PinRegistration(ctx, scope(b, id), r.TargetFingerprint), 35*time.Second)
+	work, cancel := context.WithTimeout(computertarget.PinRegistration(ctx, scope(b, id), r.TargetFingerprint), 35*time.Second)
 	defer cancel()
 	if in.Kind == "foreground_bash" {
 		d.Phase = "foreground_dispatch"
 		if err := save("dispatching"); err != nil {
 			return result(r, d), err
 		}
-		out, runErr := s.relay.Execute(work, agenvo.Request{Scope: scope(b, id), Command: in.Task, WorkDir: in.WorkDir, Timeout: 30 * time.Second})
+		out, runErr := s.relay.Execute(work, computertarget.Request{Scope: scope(b, id), Command: in.Task, WorkDir: in.WorkDir, Timeout: 30 * time.Second})
 		d.Foreground = &out
 		d.Output, d.ExitCode, d.Truncated = out.Output, out.ExitCode, out.Truncated
 		state := out.State
@@ -436,7 +436,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if d.Batch != nil {
 		return s.dispatchBatch(work, b, in, target, &r, &d, save)
 	}
-	return result(r, d), agenvo.ErrUnsupported
+	return result(r, d), computertarget.ErrUnsupported
 }
 
 func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
@@ -452,7 +452,7 @@ func (s *Service) loadBoundHistory(ctx context.Context, b toolcontext.ComputerBi
 	return s.loadWithResolver(ctx, b, id, s.relay.ResolveHistoricalTarget, true)
 }
 
-func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBinding, id string, resolve func(context.Context, agenvo.Scope) (agenvo.Target, error), history bool) (dbstore.ComputerOperationRecord, Details, error) {
+func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBinding, id string, resolve func(context.Context, computertarget.Scope) (computertarget.Target, error), history bool) (dbstore.ComputerOperationRecord, Details, error) {
 	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
 	if err != nil || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID {
 		return r, Details{}, ErrDenied
@@ -460,7 +460,7 @@ func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBi
 	if err := toolcontext.CheckComputerTarget(ctx, r.TargetID); err != nil {
 		return r, Details{}, ErrDenied
 	}
-	var t agenvo.Target
+	var t computertarget.Target
 	if history && resolve == nil {
 		err = s.relay.AuthorizeOperationHistory(ctx, scope(b, r.TargetID))
 	} else {
@@ -471,16 +471,16 @@ func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBi
 	}
 	var d Details
 	if json.Unmarshal(r.Details, &d) != nil {
-		return r, d, agenvo.ErrUnknown
+		return r, d, computertarget.ErrUnknown
 	}
-	if history && resolve != nil && !agenvo.HistoricalTargetMatches(t, d.TargetSnapshot, r.TargetFingerprint) {
-		return r, d, agenvo.ErrTargetChanged
+	if history && resolve != nil && !computertarget.HistoricalTargetMatches(t, d.TargetSnapshot, r.TargetFingerprint) {
+		return r, d, computertarget.ErrTargetChanged
 	}
-	if !history && agenvo.TargetFingerprint(t) != r.TargetFingerprint {
-		return r, d, agenvo.ErrTargetChanged
+	if !history && computertarget.TargetFingerprint(t) != r.TargetFingerprint {
+		return r, d, computertarget.ErrTargetChanged
 	}
-	if r.TargetFingerprint == "" || d.TargetSnapshot != nil && agenvo.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
-		return r, d, agenvo.ErrUnknown
+	if r.TargetFingerprint == "" || d.TargetSnapshot != nil && computertarget.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
+		return r, d, computertarget.ErrUnknown
 	}
 	if d.NativeEvidence != nil {
 		d.NativeEvidence.Limit = s.nativeObservationLimit
@@ -535,7 +535,7 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 		r.CancelRequested = true
 		r, err = s.store.SaveComputerOperation(ctx, r)
 		if err != nil {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 	}
 	return result(r, d), nil // no atomic safe stop contract; never send kill/close/keys
@@ -554,12 +554,12 @@ func (s *Service) artifactForObservation(ctx context.Context, b toolcontext.Comp
 	}
 	if d.Batch != nil {
 		if d.Batch.Result == nil {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		return result(r, d), nil
 	}
 	if s.assets == nil || d.Output == "" {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	a, err := s.assets.Ingest(ctx, media.IngestInput{BotID: b.BotID, Mime: "text/plain", Reader: strings.NewReader(d.Output), MaxBytes: 16384, OriginalExt: ".txt"})
 	if err != nil {
@@ -572,7 +572,7 @@ func (s *Service) artifactForObservation(ctx context.Context, b toolcontext.Comp
 	defer func() { _ = reader.Close() }()
 	data, err := io.ReadAll(io.LimitReader(reader, 16385))
 	if err != nil || string(data) != d.Output || ready.ContentHash != a.ContentHash {
-		return Result{}, agenvo.ErrUnknown
+		return Result{}, computertarget.ErrUnknown
 	}
 	if _, _, err := s.load(ctx, b, id); err != nil {
 		return Result{}, err
@@ -582,7 +582,7 @@ func (s *Service) artifactForObservation(ctx context.Context, b toolcontext.Comp
 	r.Details, _ = json.Marshal(d)
 	r, err = s.store.SaveComputerOperation(ctx, r)
 	if err != nil {
-		return Result{}, agenvo.ErrUnknown
+		return Result{}, computertarget.ErrUnknown
 	}
 	return result(r, d), nil
 }
@@ -593,7 +593,7 @@ func (s *Service) diagnostics(ctx context.Context, b toolcontext.ComputerBinding
 		return Result{}, err
 	}
 	if d.Batch == nil {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	return s.readBatch(ctx, b, r, d, true)
 }

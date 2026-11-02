@@ -166,7 +166,7 @@
 2026/10/30 17:12:41 INFO migration log detail="166/u error_code_columns (89.378477ms)\n"
 2026/10/30 17:12:41 INFO migration log detail="167/u grok_build_runtime (78.111276ms)\n"
 2026/10/30 17:12:41 INFO migration log detail="168/u validate_grok_build_runtime (80.645799ms)\n"
-2026/10/30 17:12:41 INFO migration log detail="169/u agenvo_execution_targets (80.554151ms)\n"
+2026/10/30 17:12:41 INFO migration log detail="169/u legacy-executor_execution_targets (80.554151ms)\n"
 2026/10/30 17:12:41 INFO migration log detail="170/u computer_operations (82.886727ms)\n"
 2026/10/30 17:12:41 INFO migration log detail="171/u computer_delivery_guard (83.016312ms)\n"
 2026/10/30 17:12:41 INFO migration log detail="172/u runtime_transfer_credentials (80.445401ms)\n"

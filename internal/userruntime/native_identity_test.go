@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
 func TestNativeIdentitySurvivesOfflineAndRejectsInvalidProfile(t *testing.T) {
-	profile := agenvo.NativeHerdrProfile{
+	profile := computertarget.NativeHerdrProfile{
 		InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic\work`,
 		BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`,
 		HerdrConfigRoot: `C:\Synthetic\config\herdr`,
@@ -40,7 +40,7 @@ func TestNativeIdentitySurvivesOfflineAndRejectsInvalidProfile(t *testing.T) {
 	if changed.NativeHerdr == nil || changed.NativeHerdr.TargetFingerprint == binding.TargetFingerprint {
 		t.Fatal("profile replacement did not change observable fingerprint")
 	}
-	for _, provider := range []string{"memoh", "agenvo"} {
+	for _, provider := range []string{"memoh", "other"} {
 		row.Provider = provider
 		row.ProviderConfig = []byte(`{"herdr":null}`)
 		if runtimeFromRecord(row, nil).NativeHerdr != nil {

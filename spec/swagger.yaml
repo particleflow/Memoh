@@ -639,215 +639,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  agenvo.Admission:
-    properties:
-      agent_config_dir:
-        type: string
-      config_sha256:
-        type: string
-      connection_id:
-        type: string
-      device_id:
-        type: string
-      instance_id:
-        type: string
-      paused:
-        type: boolean
-      request_id:
-        type: string
-      revision:
-        type: string
-      scope:
-        type: string
-      target_fingerprint:
-        type: string
-    type: object
-  agenvo.AgentObservation:
-    properties:
-      completion_changed:
-        type: boolean
-      completion_seq:
-        type: string
-      interactive_ready:
-        type: boolean
-      output:
-        type: string
-      output_fidelity:
-        type: string
-      session_relation:
-        type: string
-      starting:
-        type: boolean
-      status:
-        type: string
-      task_success_verified:
-        description: |-
-          No Herdr status, completion sequence or terminal text independently
-          proves that the requested work succeeded. No lifecycle hook is assumed.
-        type: boolean
-      truncated:
-        type: boolean
-    type: object
-  agenvo.AgentProfile:
-    properties:
-      config_dir:
-        type: string
-      execution_mode:
-        description: |-
-          Empty is decoded only for historical profiles. Native configuration
-          requires pi-json-v1; no protocol fallback occurs.
-        type: string
-      model:
-        type: string
-      path:
-        type: string
-      provider:
-        type: string
-    type: object
-  agenvo.BatchFile:
-    properties:
-      name:
-        type: string
-      sha256:
-        type: string
-      size:
-        type: integer
-    type: object
-  agenvo.BatchHistoryEvidence:
-    properties:
-      file:
-        type: string
-      sha256:
-        type: string
-      size:
-        type: integer
-    type: object
-  agenvo.BatchHistoryReport:
-    properties:
-      after:
-        type: string
-      before:
-        type: string
-      evidence:
-        $ref: '#/definitions/agenvo.BatchHistoryEvidence'
-    type: object
-  agenvo.BatchReceipt:
-    properties:
-      attempt:
-        type: string
-      completion:
-        $ref: '#/definitions/agenvo.BatchFile'
-      exit_code:
-        type: integer
-      exited:
-        type: boolean
-      generation:
-        type: string
-      history:
-        $ref: '#/definitions/agenvo.BatchHistoryReport'
-      pane_id:
-        type: string
-      pi_session_id:
-        type: string
-      request_hash:
-        type: string
-      started:
-        type: boolean
-      stderr:
-        $ref: '#/definitions/agenvo.BatchFile'
-      stdout:
-        $ref: '#/definitions/agenvo.BatchFile'
-      terminal_id:
-        type: string
-      version:
-        type: integer
-      workspace_id:
-        type: string
-    type: object
-  agenvo.ChangeAdmission:
-    properties:
-      expected_revision:
-        type: string
-      paused:
-        type: boolean
-      request_id:
-        type: string
-    type: object
-  agenvo.NativeHerdrProfile:
-    properties:
-      agent:
-        $ref: '#/definitions/agenvo.AgentProfile'
-      bash_path:
-        type: string
-      herdr_cli:
-        type: string
-      herdr_config_root:
-        type: string
-      instance_id:
-        type: string
-      producer:
-        $ref: '#/definitions/agenvo.ProducerLocator'
-      session:
-        type: string
-      work_dir:
-        type: string
-    required:
-    - bash_path
-    - herdr_cli
-    - herdr_config_root
-    - instance_id
-    - session
-    - work_dir
-    type: object
-  agenvo.NativeProfileCutoverRequest:
-    properties:
-      agent_config_dir:
-        type: string
-      expected_config_sha256:
-        type: string
-      expected_pause_revision:
-        type: string
-      expected_target_fingerprint:
-        type: string
-      instance_id:
-        type: string
-      pause_request_id:
-        type: string
-      runtime_id:
-        type: string
-      target_id:
-        type: string
-    type: object
-  agenvo.ProducerLocator:
-    properties:
-      config_dir:
-        type: string
-      program_path:
-        type: string
-      state_dir:
-        type: string
-    required:
-    - config_dir
-    - program_path
-    - state_dir
-    type: object
-  agenvo.ReferenceObservation:
-    properties:
-      agent_status:
-        type: string
-      availability:
-        type: string
-      control_pane:
-        type: string
-      pane:
-        type: string
-      reason:
-        type: string
-      reference_match:
-        type: string
-      workspace:
-        type: string
-    type: object
   apperror.Fault:
     enum:
     - client
@@ -2229,6 +2020,222 @@ definitions:
         type: string
       usage: {}
     type: object
+  computertarget.Admission:
+    properties:
+      agent_config_dir:
+        type: string
+      config_sha256:
+        type: string
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      paused:
+        type: boolean
+      request_id:
+        type: string
+      revision:
+        type: string
+      scope:
+        type: string
+      target_fingerprint:
+        type: string
+    type: object
+  computertarget.AgentObservation:
+    properties:
+      completion_changed:
+        type: boolean
+      completion_seq:
+        type: string
+      interactive_ready:
+        type: boolean
+      output:
+        type: string
+      output_fidelity:
+        type: string
+      session_relation:
+        type: string
+      starting:
+        type: boolean
+      status:
+        type: string
+      task_success_verified:
+        description: |-
+          No Herdr status, completion sequence or terminal text independently
+          proves that the requested work succeeded. No lifecycle hook is assumed.
+        type: boolean
+      truncated:
+        type: boolean
+    type: object
+  computertarget.AgentProfile:
+    properties:
+      config_dir:
+        type: string
+      execution_mode:
+        description: |-
+          Empty is decoded only for historical profiles. Native configuration
+          requires pi-json-v1; no protocol fallback occurs.
+        type: string
+      model:
+        type: string
+      path:
+        type: string
+      provider:
+        type: string
+    type: object
+  computertarget.BatchFile:
+    properties:
+      name:
+        type: string
+      sha256:
+        type: string
+      size:
+        type: integer
+    type: object
+  computertarget.BatchHistoryEvidence:
+    properties:
+      file:
+        type: string
+      sha256:
+        type: string
+      size:
+        type: integer
+    type: object
+  computertarget.BatchHistoryReport:
+    properties:
+      after:
+        type: string
+      before:
+        type: string
+      evidence:
+        $ref: '#/definitions/computertarget.BatchHistoryEvidence'
+    type: object
+  computertarget.BatchReceipt:
+    properties:
+      attempt:
+        type: string
+      completion:
+        $ref: '#/definitions/computertarget.BatchFile'
+      exit_code:
+        type: integer
+      exited:
+        type: boolean
+      generation:
+        type: string
+      history:
+        $ref: '#/definitions/computertarget.BatchHistoryReport'
+      pane_id:
+        type: string
+      pi_session_id:
+        type: string
+      preflight:
+        description: |-
+          Preflight names the first failed preflight check when Pi never started.
+          Empty on receipts written before this field existed; "ok" when every
+          check passed. Without it a silent 125 exit is indistinguishable from any
+          other launch failure (incident E3).
+        type: string
+      request_hash:
+        type: string
+      started:
+        type: boolean
+      stderr:
+        $ref: '#/definitions/computertarget.BatchFile'
+      stdout:
+        $ref: '#/definitions/computertarget.BatchFile'
+      terminal_id:
+        type: string
+      version:
+        type: integer
+      workspace_id:
+        type: string
+    type: object
+  computertarget.ChangeAdmission:
+    properties:
+      expected_revision:
+        type: string
+      paused:
+        type: boolean
+      request_id:
+        type: string
+    type: object
+  computertarget.NativeHerdrProfile:
+    properties:
+      agent:
+        $ref: '#/definitions/computertarget.AgentProfile'
+      bash_path:
+        type: string
+      herdr_cli:
+        type: string
+      herdr_config_root:
+        type: string
+      instance_id:
+        type: string
+      producer:
+        $ref: '#/definitions/computertarget.ProducerLocator'
+      session:
+        type: string
+      work_dir:
+        type: string
+    required:
+    - bash_path
+    - herdr_cli
+    - herdr_config_root
+    - instance_id
+    - session
+    - work_dir
+    type: object
+  computertarget.NativeProfileCutoverRequest:
+    properties:
+      agent_config_dir:
+        type: string
+      expected_config_sha256:
+        type: string
+      expected_pause_revision:
+        type: string
+      expected_target_fingerprint:
+        type: string
+      instance_id:
+        type: string
+      pause_request_id:
+        type: string
+      runtime_id:
+        type: string
+      target_id:
+        type: string
+    type: object
+  computertarget.ProducerLocator:
+    properties:
+      config_dir:
+        type: string
+      program_path:
+        type: string
+      state_dir:
+        type: string
+    required:
+    - config_dir
+    - program_path
+    - state_dir
+    type: object
+  computertarget.ReferenceObservation:
+    properties:
+      agent_status:
+        type: string
+      availability:
+        type: string
+      control_pane:
+        type: string
+      pane:
+        type: string
+      reason:
+        type: string
+      reference_match:
+        type: string
+      workspace:
+        type: string
+    type: object
   computertask.DeliveryPage:
     properties:
       files:
@@ -2306,7 +2313,7 @@ definitions:
           $ref: '#/definitions/computertask.FollowupResult'
         type: array
       observation:
-        $ref: '#/definitions/agenvo.AgentObservation'
+        $ref: '#/definitions/computertarget.AgentObservation'
       operation_id:
         type: string
       session_binding:
@@ -2327,7 +2334,7 @@ definitions:
       generation:
         type: string
       receipt:
-        $ref: '#/definitions/agenvo.BatchReceipt'
+        $ref: '#/definitions/computertarget.BatchReceipt'
       receipt_state:
         type: string
       request_hash:
@@ -2342,7 +2349,7 @@ definitions:
   computertask.PiContinuity:
     properties:
       last_invocation:
-        $ref: '#/definitions/agenvo.BatchHistoryReport'
+        $ref: '#/definitions/computertarget.BatchHistoryReport'
       reason:
         type: string
       status:
@@ -2359,7 +2366,7 @@ definitions:
       continuity:
         $ref: '#/definitions/computertask.PiContinuity'
       native:
-        $ref: '#/definitions/agenvo.ReferenceObservation'
+        $ref: '#/definitions/computertarget.ReferenceObservation'
       operation_id:
         type: string
       pane_id:
@@ -2390,7 +2397,7 @@ definitions:
       current_availability:
         type: string
       meta:
-        $ref: '#/definitions/agenvo.BatchFile'
+        $ref: '#/definitions/computertarget.BatchFile'
       recorded_content_hash:
         type: string
       state:
@@ -22658,7 +22665,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/agenvo.Admission'
+            $ref: '#/definitions/computertarget.Admission'
         "403":
           description: Forbidden
           schema:
@@ -22689,14 +22696,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/agenvo.ChangeAdmission'
+          $ref: '#/definitions/computertarget.ChangeAdmission'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/agenvo.Admission'
+            $ref: '#/definitions/computertarget.Admission'
         "400":
           description: Bad Request
           schema:
@@ -22734,7 +22741,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/agenvo.NativeHerdrProfile'
+          $ref: '#/definitions/computertarget.NativeHerdrProfile'
       produces:
       - application/json
       responses:
@@ -22777,12 +22784,12 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/agenvo.NativeProfileCutoverRequest'
+          $ref: '#/definitions/computertarget.NativeProfileCutoverRequest'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/agenvo.Admission'
+            $ref: '#/definitions/computertarget.Admission'
         "400":
           description: Bad Request
           schema:

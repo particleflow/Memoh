@@ -10,7 +10,7 @@ runtime and contextview directories match official baseline
 The cloud development server was rebuilt from this change and served at
 `http://127.0.0.1:18080`; the actual Vue application ran at
 `http://127.0.0.1:18082/bot/acceptance-a`. PostgreSQL 18 reported migration 170
-clean. A synthetic model and Agenvo transport supplied controlled responses;
+clean. A synthetic model and legacy executor transport supplied controlled responses;
 no production credentials, PC, NAS or external provider were contacted.
 
 Chromium opened the authenticated Web application and created fresh chat
@@ -88,9 +88,8 @@ Herdr **v0.9.5** [agents.rs, lines 82–268](https://github.com/herdrdev/herdr/b
 returns `agent_not_found`, `agent_not_ready`, `agent_blocked` and
 `empty_agent_prompt` before sending or queuing terminal input. The second
 not-found check inside submit also precedes `try_send_bytes` and queueing.
-Agenvo **v0.2.0** [herdr.ts](https://github.com/Xuanwo/agenvo/blob/v0.2.0/apps/herdr/src/herdr.ts)
-invokes `agent.prompt` without `--wait`. This fixed-source review establishes
-these four pre-input cases; synthetic fixtures alone do not establish it.
+This fixed-source review establishes these four Herdr pre-input cases;
+synthetic fixtures alone do not establish it.
 
 Only the correctly associated response to the current prompt can mark that
 operation rejected. A later get/read error or a text substring cannot free
@@ -99,7 +98,7 @@ because input may already have occurred. No automatic retry is introduced.
 
 The first final CI run exposed one stale skill-text assertion still naming
 the old direct-exec capability. It was corrected to require `foreground_bash`,
-`computer_task_submit` and the explicit rejection of ordinary Agenvo `exec`;
+`computer_task_submit` and the explicit rejection of ordinary legacy executor `exec`;
 the full tool package was rerun. The corrected skill/route checks passed; seven
 existing image-download tests failed locally because the environment proxy
 resolves to an address rejected by their network guard. No proxy or security
@@ -115,9 +114,9 @@ in this correction.
 | Trusted binding | Public/forged headers, missing host binding, foreign identity and canceled owning run rejected. NAS ambiguity rejected before dispatch. |
 | Durable receipts | Unknown, lost response and persistence-failure receipts prevent redispatch; cancellation records intent without killing. Invalid paths fail before reservation/dispatch. |
 | Media snapshots | Only opened, byte/hash-verified terminal snapshots return ready references; missing storage and revoked grants rejected. This is not general PC file transfer. |
-| Authorization and raw routes | Read/write/exec and target approval matrix passed; raw registered Agenvo connections, same-URL aliases, cached routes and revoked registrations rejected. PC Connect-It catalog and stale calls rejected; NAS unrelated connectors preserved. |
+| Authorization and raw routes | Read/write/exec and target approval matrix passed; raw registered legacy executor connections, same-URL aliases, cached routes and revoked registrations rejected. PC Connect-It catalog and stale calls rejected; NAS unrelated connectors preserved. |
 | PostgreSQL 18 schema 170 | Fresh migration, isolated 170→169→170, eight concurrent claims, stale revision, reconstructed-store retry, identity isolation and non-superuser RLS passed. Canonical schema, composite keys, schema guard and RLS guard passed. |
-| Go packages | computertask, agenvo, toolcontext, mcp, federation, workspace, workdir, application, core and userruntime passed. Focused computer/capability/workdir tool tests passed. |
+| Go packages | computertask, legacy-executor, toolcontext, mcp, federation, workspace, workdir, application, core and userruntime passed. Focused computer/capability/workdir tool tests passed. |
 | Build and generated interfaces | Server build, Swagger generation, OpenAPI SDK generation and SDK TypeScript check passed. |
 | Static checks | Affected-package golangci-lint completed; its sole new core test style issue was corrected and that package passed again. Initial build-cache space exhaustion was recovered before the completed run. |
 

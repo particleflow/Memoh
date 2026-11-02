@@ -13,7 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
-func historicalNativeFixture(t *testing.T) (*Service, *nativeMountFixture, *hostFixture, Record) {
+func historicalNativeFixture(t *testing.T) (*Service, *authorityFixture, *hostFixture, Record) {
 	t.Helper()
 	a, f, b, _ := nativeFixture(t)
 	b.SourceSessionID, b.SourceRootID, b.SourceSelection = "root", "root", "native"
@@ -31,7 +31,7 @@ func historicalNativeFixture(t *testing.T) (*Service, *nativeMountFixture, *host
 }
 
 func TestHistoryListRetainsNativeReferenceAfterSelectionChange(t *testing.T) {
-	s, f, h, r := historicalNativeFixture(t)
+	s, _, h, r := historicalNativeFixture(t)
 	p, err := s.List(t.Context(), r.Identity.SourceBotID, r.Identity.UserID, r.Identity.SourceSessionID, 100, "")
 	if err != nil || len(p.Items) != 1 || p.Items[0].ID != r.ID || p.Items[0].TargetBotID != r.Identity.TargetBotID || p.Items[0].TargetSessionID != r.Identity.TargetSessionID || p.Items[0].TargetRunID != r.RunID || p.Items[0].TargetRunState != "completed" {
 		t.Fatalf("historical reference=%+v err=%v", p, err)
@@ -51,7 +51,7 @@ func TestHistoryListRetainsNativeReferenceAfterSelectionChange(t *testing.T) {
 	if _, err = s.RetryDelivery(t.Context(), r.Identity.SourceBotID, r.Identity.UserID, r.Identity.SourceSessionID, r.ID); !errors.Is(err, ErrDenied) {
 		t.Fatalf("delivery authority changed: %v", err)
 	}
-	if h.creates.Load()+h.runs.Load()+h.deliveries.Load() != 0 || f.mcpCalls != 0 {
+	if h.creates.Load()+h.runs.Load()+h.deliveries.Load() != 0 {
 		t.Fatal("history read invoked business execution")
 	}
 	if !reflect.DeepEqual(s.Ledger.(*memoryLedger).records[r.ID], r) {

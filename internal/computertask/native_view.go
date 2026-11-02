@@ -4,20 +4,20 @@ import (
 	"context"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 // NativeContent is a bounded terminal sample, not complete logs or verified
 // per-input output. Reads do not append to the durable evidence ledger.
 type NativeContent struct {
-	OperationID       string                   `json:"operation_id"`
-	Supported         bool                     `json:"supported"`
-	Availability      string                   `json:"availability"`
-	FollowupAvailable bool                     `json:"followup_available"`
-	SessionBinding    string                   `json:"session_binding"`
-	Observation       *agenvo.AgentObservation `json:"observation,omitempty"`
-	Followups         []FollowupResult         `json:"followups,omitempty"`
+	OperationID       string                           `json:"operation_id"`
+	Supported         bool                             `json:"supported"`
+	Availability      string                           `json:"availability"`
+	FollowupAvailable bool                             `json:"followup_available"`
+	SessionBinding    string                           `json:"session_binding"`
+	Observation       *computertarget.AgentObservation `json:"observation,omitempty"`
+	Followups         []FollowupResult                 `json:"followups,omitempty"`
 }
 
 func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBinding, id string) (NativeContent, error) {
@@ -33,7 +33,7 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 	out.Supported = true
 	saved := result(r, d)
 	out.SessionBinding, out.Followups = saved.SessionBinding, saved.Followups
-	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
+	pinned := computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	read, cancel := context.WithTimeout(pinned, 10*time.Second)
 	defer cancel()
 	obs, readErr := service.relay.ObserveAgent(read, scope(b, r.TargetID), d.Agent)
@@ -45,10 +45,10 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 		return NativeContent{}, err
 	}
 	if fingerprint(current.Agent) != fingerprint(d.Agent) {
-		return NativeContent{}, agenvo.ErrTargetChanged
+		return NativeContent{}, computertarget.ErrTargetChanged
 	}
 	out.Followups = result(r, current).Followups
-	out.Availability = agenvo.Availability(readErr)
+	out.Availability = computertarget.Availability(readErr)
 	if readErr == nil {
 		out.Observation = &obs
 	}
@@ -63,7 +63,7 @@ func (s *Source) FollowupNative(ctx context.Context, b toolcontext.ComputerBindi
 		return Result{}, err
 	}
 	if r.RunID == "" {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	b.RunID = r.RunID
 	return s.service.followup(ctx, b, in)

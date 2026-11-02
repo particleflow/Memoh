@@ -23,7 +23,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/sys/windows"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -66,8 +66,8 @@ func nativeDeliveryDatabase(t *testing.T) (*postgresstore.Store, computertask.De
 	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id) VALUES($1,$2,$3)", session, bot, user)
 	exec(`INSERT INTO bot_user_grants(bot_id,subject_type,user_id,permissions) VALUES($1,'user',$2,'["chat","workspace_read","workspace_write","workspace_exec"]')`, bot, user)
 	exec("INSERT INTO mcp_connections(id,bot_id,name,type) VALUES($1,$2,'native-fixture','http')", connection, bot)
-	target := agenvo.Target{ConnectionID: connection, DeviceID: connection, NativeRuntimeID: connection, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
-	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: target.HerdrCLI, HerdrConfigRoot: target.HerdrConfigRoot, Agent: target.Agent}})
+	target := computertarget.Target{ConnectionID: connection, DeviceID: connection, NativeRuntimeID: connection, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, InstanceID: "synthetic-instance", Session: "fixture", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
+	raw, _ := json.Marshal(map[string]any{"herdr": computertarget.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: target.HerdrCLI, HerdrConfigRoot: target.HerdrConfigRoot, Agent: target.Agent}})
 	exec("INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'memoh',$5,now(),NULL)", connection, owner, "native-fixture", "synthetic-"+uuid.NewString(), raw)
 	runtime, err := store.OwnedNativeHerdrRuntime(t.Context(), owner, connection)
 	if err != nil {
@@ -78,8 +78,8 @@ func nativeDeliveryDatabase(t *testing.T) (*postgresstore.Store, computertask.De
 		t.Fatal(err)
 	}
 	id := computertask.DeliveryIdentity{Binding: toolcontext.ComputerBinding{BotID: bot, UserID: user, SessionID: session, TargetID: mount.ID, RunID: "synthetic-native-run"}, OperationID: uuid.NewString(), DeviceID: target.DeviceID, InstanceID: target.InstanceID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
-	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
-	if _, claimed, err := store.ClaimComputerOperation(t.Context(), dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: bot, UserID: user, SessionID: session, TargetID: mount.ID, RunID: id.Binding.RunID, Fingerprint: "synthetic-native-fingerprint", TargetFingerprint: agenvo.TargetFingerprint(target), Details: details}); err != nil || !claimed {
+	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: computertarget.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
+	if _, claimed, err := store.ClaimComputerOperation(t.Context(), dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: bot, UserID: user, SessionID: session, TargetID: mount.ID, RunID: id.Binding.RunID, Fingerprint: "synthetic-native-fingerprint", TargetFingerprint: computertarget.TargetFingerprint(target), Details: details}); err != nil || !claimed {
 		t.Fatal("claim", claimed, err)
 	}
 	rls := rlsConn(t, pool, teamMigrationDSN(t))

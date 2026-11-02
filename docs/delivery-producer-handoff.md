@@ -1,7 +1,7 @@
 # Bounded producer handoff (candidate, disabled until setup)
 
 This increment connects an explicitly declared Pi JSON result to the existing
-file queue. It does not install Herdr, change Agent or Agenvo, issue per-file
+file queue. It does not install Herdr, change Agent or legacy executor, issue per-file
 credentials, enable transfers, or start a service. Device enrollment and HTTPS
 trust remain the separately approved setup in [device-transfer-setup.md](device-transfer-setup.md).
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/config"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -21,7 +21,7 @@ import (
 // The real source, authorizer and native workspace resolver share this
 // synthetic registry. No gateway, token or remote computer is contacted.
 type computerPreflightStore struct {
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	dbstore.BotRemoteRuntimeBindingStore
 	dbstore.ComputerOperationStore
 	mount     dbstore.BotRemoteRuntimeBindingRecord
@@ -81,8 +81,8 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			const bot = "11111111-1111-4111-8111-111111111111"
 			const owner = "33333333-3333-4333-8333-333333333333"
-			target := agenvo.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
-			raw, err := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent}})
+			target := computertarget.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
+			raw, err := json.Marshal(map[string]any{"herdr": computertarget.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent}})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -101,10 +101,10 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 			}
 			probes := 0
 			permissions := computerPermissions{denied: tc.denied}
-			relay := agenvo.NewService(store, permissions, nil)
-			relay.SetNativeCaller(func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+			relay := computertarget.NewService(store, permissions, nil)
+			relay.SetNativeCaller(func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 				probes++
-				return agenvo.Receipt{}, errors.New("unexpected native dispatch: SECRET")
+				return computertarget.Receipt{}, errors.New("unexpected native dispatch: SECRET")
 			})
 			remote := workspace.NewRemoteWorkspaceService(store, nil)
 			manager := workspace.NewManager(slog.New(slog.DiscardHandler), nil, nil, config.WorkspaceConfig{}, "", nil)

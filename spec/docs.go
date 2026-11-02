@@ -20091,7 +20091,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/agenvo.Admission"
+                            "$ref": "#/definitions/computertarget.Admission"
                         }
                     },
                     "403": {
@@ -20134,7 +20134,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/agenvo.ChangeAdmission"
+                            "$ref": "#/definitions/computertarget.ChangeAdmission"
                         }
                     }
                 ],
@@ -20142,7 +20142,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/agenvo.Admission"
+                            "$ref": "#/definitions/computertarget.Admission"
                         }
                     },
                     "400": {
@@ -20199,7 +20199,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/agenvo.NativeHerdrProfile"
+                            "$ref": "#/definitions/computertarget.NativeHerdrProfile"
                         }
                     }
                 ],
@@ -20255,7 +20255,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/agenvo.NativeProfileCutoverRequest"
+                            "$ref": "#/definitions/computertarget.NativeProfileCutoverRequest"
                         }
                     }
                 ],
@@ -20263,7 +20263,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/agenvo.Admission"
+                            "$ref": "#/definitions/computertarget.Admission"
                         }
                     },
                     "400": {
@@ -22136,315 +22136,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.Admission": {
-            "type": "object",
-            "properties": {
-                "agent_config_dir": {
-                    "type": "string"
-                },
-                "config_sha256": {
-                    "type": "string"
-                },
-                "connection_id": {
-                    "type": "string"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "paused": {
-                    "type": "boolean"
-                },
-                "request_id": {
-                    "type": "string"
-                },
-                "revision": {
-                    "type": "string"
-                },
-                "scope": {
-                    "type": "string"
-                },
-                "target_fingerprint": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.AgentObservation": {
-            "type": "object",
-            "properties": {
-                "completion_changed": {
-                    "type": "boolean"
-                },
-                "completion_seq": {
-                    "type": "string"
-                },
-                "interactive_ready": {
-                    "type": "boolean"
-                },
-                "output": {
-                    "type": "string"
-                },
-                "output_fidelity": {
-                    "type": "string"
-                },
-                "session_relation": {
-                    "type": "string"
-                },
-                "starting": {
-                    "type": "boolean"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "task_success_verified": {
-                    "description": "No Herdr status, completion sequence or terminal text independently\nproves that the requested work succeeded. No lifecycle hook is assumed.",
-                    "type": "boolean"
-                },
-                "truncated": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "agenvo.AgentProfile": {
-            "type": "object",
-            "properties": {
-                "config_dir": {
-                    "type": "string"
-                },
-                "execution_mode": {
-                    "description": "Empty is decoded only for historical profiles. Native configuration\nrequires pi-json-v1; no protocol fallback occurs.",
-                    "type": "string"
-                },
-                "model": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "provider": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.BatchFile": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "sha256": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                }
-            }
-        },
-        "agenvo.BatchHistoryEvidence": {
-            "type": "object",
-            "properties": {
-                "file": {
-                    "type": "string"
-                },
-                "sha256": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                }
-            }
-        },
-        "agenvo.BatchHistoryReport": {
-            "type": "object",
-            "properties": {
-                "after": {
-                    "type": "string"
-                },
-                "before": {
-                    "type": "string"
-                },
-                "evidence": {
-                    "$ref": "#/definitions/agenvo.BatchHistoryEvidence"
-                }
-            }
-        },
-        "agenvo.BatchReceipt": {
-            "type": "object",
-            "properties": {
-                "attempt": {
-                    "type": "string"
-                },
-                "completion": {
-                    "$ref": "#/definitions/agenvo.BatchFile"
-                },
-                "exit_code": {
-                    "type": "integer"
-                },
-                "exited": {
-                    "type": "boolean"
-                },
-                "generation": {
-                    "type": "string"
-                },
-                "history": {
-                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
-                },
-                "pane_id": {
-                    "type": "string"
-                },
-                "pi_session_id": {
-                    "type": "string"
-                },
-                "request_hash": {
-                    "type": "string"
-                },
-                "started": {
-                    "type": "boolean"
-                },
-                "stderr": {
-                    "$ref": "#/definitions/agenvo.BatchFile"
-                },
-                "stdout": {
-                    "$ref": "#/definitions/agenvo.BatchFile"
-                },
-                "terminal_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "integer"
-                },
-                "workspace_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.ChangeAdmission": {
-            "type": "object",
-            "properties": {
-                "expected_revision": {
-                    "type": "string"
-                },
-                "paused": {
-                    "type": "boolean"
-                },
-                "request_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.NativeHerdrProfile": {
-            "type": "object",
-            "required": [
-                "bash_path",
-                "herdr_cli",
-                "herdr_config_root",
-                "instance_id",
-                "session",
-                "work_dir"
-            ],
-            "properties": {
-                "agent": {
-                    "$ref": "#/definitions/agenvo.AgentProfile"
-                },
-                "bash_path": {
-                    "type": "string"
-                },
-                "herdr_cli": {
-                    "type": "string"
-                },
-                "herdr_config_root": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "producer": {
-                    "$ref": "#/definitions/agenvo.ProducerLocator"
-                },
-                "session": {
-                    "type": "string"
-                },
-                "work_dir": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.NativeProfileCutoverRequest": {
-            "type": "object",
-            "properties": {
-                "agent_config_dir": {
-                    "type": "string"
-                },
-                "expected_config_sha256": {
-                    "type": "string"
-                },
-                "expected_pause_revision": {
-                    "type": "string"
-                },
-                "expected_target_fingerprint": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "pause_request_id": {
-                    "type": "string"
-                },
-                "runtime_id": {
-                    "type": "string"
-                },
-                "target_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.ProducerLocator": {
-            "type": "object",
-            "required": [
-                "config_dir",
-                "program_path",
-                "state_dir"
-            ],
-            "properties": {
-                "config_dir": {
-                    "type": "string"
-                },
-                "program_path": {
-                    "type": "string"
-                },
-                "state_dir": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.ReferenceObservation": {
-            "type": "object",
-            "properties": {
-                "agent_status": {
-                    "type": "string"
-                },
-                "availability": {
-                    "type": "string"
-                },
-                "control_pane": {
-                    "type": "string"
-                },
-                "pane": {
-                    "type": "string"
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "reference_match": {
-                    "type": "string"
-                },
-                "workspace": {
                     "type": "string"
                 }
             }
@@ -24439,6 +24130,319 @@ const docTemplate = `{
                 "usage": {}
             }
         },
+        "computertarget.Admission": {
+            "type": "object",
+            "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "config_sha256": {
+                    "type": "string"
+                },
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.AgentObservation": {
+            "type": "object",
+            "properties": {
+                "completion_changed": {
+                    "type": "boolean"
+                },
+                "completion_seq": {
+                    "type": "string"
+                },
+                "interactive_ready": {
+                    "type": "boolean"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "output_fidelity": {
+                    "type": "string"
+                },
+                "session_relation": {
+                    "type": "string"
+                },
+                "starting": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_success_verified": {
+                    "description": "No Herdr status, completion sequence or terminal text independently\nproves that the requested work succeeded. No lifecycle hook is assumed.",
+                    "type": "boolean"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "computertarget.AgentProfile": {
+            "type": "object",
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "execution_mode": {
+                    "description": "Empty is decoded only for historical profiles. Native configuration\nrequires pi-json-v1; no protocol fallback occurs.",
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.BatchFile": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "computertarget.BatchHistoryEvidence": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "computertarget.BatchHistoryReport": {
+            "type": "object",
+            "properties": {
+                "after": {
+                    "type": "string"
+                },
+                "before": {
+                    "type": "string"
+                },
+                "evidence": {
+                    "$ref": "#/definitions/computertarget.BatchHistoryEvidence"
+                }
+            }
+        },
+        "computertarget.BatchReceipt": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "string"
+                },
+                "completion": {
+                    "$ref": "#/definitions/computertarget.BatchFile"
+                },
+                "exit_code": {
+                    "type": "integer"
+                },
+                "exited": {
+                    "type": "boolean"
+                },
+                "generation": {
+                    "type": "string"
+                },
+                "history": {
+                    "$ref": "#/definitions/computertarget.BatchHistoryReport"
+                },
+                "pane_id": {
+                    "type": "string"
+                },
+                "pi_session_id": {
+                    "type": "string"
+                },
+                "preflight": {
+                    "description": "Preflight names the first failed preflight check when Pi never started.\nEmpty on receipts written before this field existed; \"ok\" when every\ncheck passed. Without it a silent 125 exit is indistinguishable from any\nother launch failure (incident E3).",
+                    "type": "string"
+                },
+                "request_hash": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "boolean"
+                },
+                "stderr": {
+                    "$ref": "#/definitions/computertarget.BatchFile"
+                },
+                "stdout": {
+                    "$ref": "#/definitions/computertarget.BatchFile"
+                },
+                "terminal_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                },
+                "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.ChangeAdmission": {
+            "type": "object",
+            "properties": {
+                "expected_revision": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.NativeHerdrProfile": {
+            "type": "object",
+            "required": [
+                "bash_path",
+                "herdr_cli",
+                "herdr_config_root",
+                "instance_id",
+                "session",
+                "work_dir"
+            ],
+            "properties": {
+                "agent": {
+                    "$ref": "#/definitions/computertarget.AgentProfile"
+                },
+                "bash_path": {
+                    "type": "string"
+                },
+                "herdr_cli": {
+                    "type": "string"
+                },
+                "herdr_config_root": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "producer": {
+                    "$ref": "#/definitions/computertarget.ProducerLocator"
+                },
+                "session": {
+                    "type": "string"
+                },
+                "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.NativeProfileCutoverRequest": {
+            "type": "object",
+            "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "expected_config_sha256": {
+                    "type": "string"
+                },
+                "expected_pause_revision": {
+                    "type": "string"
+                },
+                "expected_target_fingerprint": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "pause_request_id": {
+                    "type": "string"
+                },
+                "runtime_id": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.ProducerLocator": {
+            "type": "object",
+            "required": [
+                "config_dir",
+                "program_path",
+                "state_dir"
+            ],
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "program_path": {
+                    "type": "string"
+                },
+                "state_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertarget.ReferenceObservation": {
+            "type": "object",
+            "properties": {
+                "agent_status": {
+                    "type": "string"
+                },
+                "availability": {
+                    "type": "string"
+                },
+                "control_pane": {
+                    "type": "string"
+                },
+                "pane": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "reference_match": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
         "computertask.DeliveryPage": {
             "type": "object",
             "properties": {
@@ -24556,7 +24560,7 @@ const docTemplate = `{
                     }
                 },
                 "observation": {
-                    "$ref": "#/definitions/agenvo.AgentObservation"
+                    "$ref": "#/definitions/computertarget.AgentObservation"
                 },
                 "operation_id": {
                     "type": "string"
@@ -24588,7 +24592,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "receipt": {
-                    "$ref": "#/definitions/agenvo.BatchReceipt"
+                    "$ref": "#/definitions/computertarget.BatchReceipt"
                 },
                 "receipt_state": {
                     "type": "string"
@@ -24611,7 +24615,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "last_invocation": {
-                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
+                    "$ref": "#/definitions/computertarget.BatchHistoryReport"
                 },
                 "reason": {
                     "type": "string"
@@ -24637,7 +24641,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/computertask.PiContinuity"
                 },
                 "native": {
-                    "$ref": "#/definitions/agenvo.ReferenceObservation"
+                    "$ref": "#/definitions/computertarget.ReferenceObservation"
                 },
                 "operation_id": {
                     "type": "string"
@@ -24684,7 +24688,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "meta": {
-                    "$ref": "#/definitions/agenvo.BatchFile"
+                    "$ref": "#/definitions/computertarget.BatchFile"
                 },
                 "recorded_content_hash": {
                     "type": "string"

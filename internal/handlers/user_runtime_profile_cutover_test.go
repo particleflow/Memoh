@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/userruntime"
 )
 
 type profileCutoverHTTPStore struct {
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	row    dbstore.UserRuntimeRecord
 	gate   dbstore.ComputerAdmission
 	target string
@@ -57,13 +57,13 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 	const mount = "33333333-3333-4333-8333-333333333333"
 	const pause = "44444444-4444-4444-8444-444444444444"
 	const secret = "synthetic-cutover-http-secret"
-	profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "fixture", Model: "fixture", ConfigDir: `C:\Synthetic\old`}}
+	profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "fixture", Model: "fixture", ConfigDir: `C:\Synthetic\old`}}
 	raw, _ := json.Marshal(map[string]any{"herdr": profile})
-	target, err := agenvo.DecodeNativeTarget(runtime, raw)
+	target, err := computertarget.DecodeNativeTarget(runtime, raw)
 	if err != nil {
 		t.Fatal(err)
 	}
-	digest, err := agenvo.NativeProfileConfigDigest(raw)
+	digest, err := computertarget.NativeProfileConfigDigest(raw)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 		t.Run(scenario, func(t *testing.T) {
 			store := &profileCutoverHTTPStore{row: dbstore.UserRuntimeRecord{ID: runtime, UserID: owner, Provider: "memoh", ProviderConfig: raw, ActivatedAt: time.Now()}, target: mount, gate: dbstore.ComputerAdmission{ConnectionID: runtime, DeviceID: runtime, InstanceID: profile.InstanceID, RequestID: pause, Revision: 1, Paused: true}}
 			svc := userruntime.NewService(nil, nil)
-			svc.SetAgenvoService(agenvo.NewService(store, nil, nil))
+			svc.SetComputerTargetService(computertarget.NewService(store, nil, nil))
 			log := slog.New(slog.DiscardHandler)
 			srv := server.NewServerWithSessionValidator(log, "", secret, func(context.Context, string, string) error {
 				if scenario == "revoked" {
@@ -93,7 +93,7 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			in := agenvo.NativeProfileCutoverRequest{RuntimeID: runtime, TargetID: mount, InstanceID: profile.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: agenvo.TargetFingerprint(target), PauseRequestID: pause, ExpectedPauseRevision: "1", AgentConfigDir: `C:\Synthetic\new`}
+			in := computertarget.NativeProfileCutoverRequest{RuntimeID: runtime, TargetID: mount, InstanceID: profile.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: computertarget.TargetFingerprint(target), PauseRequestID: pause, ExpectedPauseRevision: "1", AgentConfigDir: `C:\Synthetic\new`}
 			if scenario == "stale_revision" {
 				in.ExpectedPauseRevision = "2"
 			}
@@ -113,7 +113,7 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 				t.Fatalf("status=%d want=%d writes=%d", rec.Code, want, store.writes)
 			}
 			if scenario == "account" {
-				var receipt agenvo.Admission
+				var receipt computertarget.Admission
 				if err := json.Unmarshal(rec.Body.Bytes(), &receipt); err != nil || receipt.Revision != "2" || !receipt.Paused || receipt.RequestID != pause {
 					t.Fatalf("cutover receipt: %+v %v", receipt, err)
 				}

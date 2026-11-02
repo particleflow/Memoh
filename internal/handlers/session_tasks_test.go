@@ -18,10 +18,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -43,11 +43,11 @@ const (
 
 type taskHTTPFixture struct {
 	dbstore.Queries
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	chat, exec, source, grant bool
 	reads, relayCalls         int
 	mountReads                int
-	registration              agenvo.Target
+	registration              computertarget.Target
 	op                        dbstore.ComputerOperationRecord
 	pcScope                   bool
 	entries                   []dbstore.ComputerDeliveryEntry
@@ -109,7 +109,7 @@ func (f *taskHTTPFixture) GetMount(_ context.Context, bot, id string) (dbstore.B
 	if !f.grant || !f.source || bot != taskBot || id != taskTarget {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("SECRET")
 	}
-	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: f.registration.InstanceID, Session: f.registration.Session, WorkDir: f.registration.WorkDir, BashPath: f.registration.BashPath, HerdrCLI: f.registration.HerdrCLI, HerdrConfigRoot: f.registration.HerdrConfigRoot}})
+	raw, _ := json.Marshal(map[string]any{"herdr": computertarget.NativeHerdrProfile{InstanceID: f.registration.InstanceID, Session: f.registration.Session, WorkDir: f.registration.WorkDir, BashPath: f.registration.BashPath, HerdrCLI: f.registration.HerdrCLI, HerdrConfigRoot: f.registration.HerdrConfigRoot}})
 	return dbstore.BotRemoteRuntimeBindingRecord{ID: taskTarget, BotID: taskBot, RuntimeUserID: taskOwner, BotOwnerUserID: taskOwner, RuntimeID: taskTarget, RuntimeProvider: "memoh", RuntimeProviderConfig: raw}, nil
 }
 
@@ -119,10 +119,10 @@ func (f *taskHTTPFixture) HasBotPermission(_ context.Context, bot, user, permiss
 
 func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
-	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", CancelRequested: true, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: computertarget.TargetFingerprint(f.registration), State: "unknown", CancelRequested: true, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET"}`)}
+	relay := computertarget.NewService(f, f, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		f.relayCalls++
-		return agenvo.Receipt{}, errors.New("unexpected dispatch")
+		return computertarget.Receipt{}, errors.New("unexpected dispatch")
 	})
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
@@ -321,7 +321,7 @@ func (f *taskHTTPFixture) ListComputerDeliveryEntries(_ context.Context, r dbsto
 
 func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
-	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Revision: 42, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET"}`)}
+	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: computertarget.TargetFingerprint(f.registration), State: "unknown", Revision: 42, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET"}`)}
 	for i := range 35 {
 		outcome := "committed"
 		if i == 0 {
@@ -346,9 +346,9 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		}
 		f.entries = append(f.entries, dbstore.ComputerDeliveryEntry{DeliveryID: fmt.Sprintf("file_%d", i), Ordinal: int64(i + 1), Version: version, Data: data})
 	}
-	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	relay := computertarget.NewService(f, f, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		f.relayCalls++
-		return agenvo.Receipt{}, errors.New("unexpected dispatch")
+		return computertarget.Receipt{}, errors.New("unexpected dispatch")
 	})
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
@@ -431,10 +431,10 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	}
 }
 
-func taskHTTPNativeRegistration() agenvo.Target {
-	p := agenvo.NativeHerdrProfile{InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`}
+func taskHTTPNativeRegistration() computertarget.Target {
+	p := computertarget.NativeHerdrProfile{InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`}
 	raw, _ := json.Marshal(map[string]any{"herdr": p})
-	target, err := agenvo.DecodeNativeTarget(taskTarget, raw)
+	target, err := computertarget.DecodeNativeTarget(taskTarget, raw)
 	if err != nil {
 		panic(err)
 	}

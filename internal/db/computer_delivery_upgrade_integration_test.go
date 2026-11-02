@@ -37,7 +37,7 @@ func TestComputerDeliveryPostgresUpgradeFrom170(t *testing.T) {
 	exec("INSERT INTO team_members(user_id) VALUES($1)", owner)
 	exec("INSERT INTO bots(id,owner_user_id,name) VALUES($1,$2,'upgrade-fixture')", bot, owner)
 	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id) VALUES($1,$2,$3)", session, bot, owner)
-	exec(`INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,'upgrade-fixture','synthetic-control-token','agenvo','{"device_id":"fixture-device","instance_id":"fixture-instance"}',now(),NULL)`, runtime, owner)
+	exec(`INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,'upgrade-fixture','synthetic-control-token','memoh','{"herdr":{"instance_id":"fixture-instance"}}',now(),NULL)`, runtime, owner)
 	original := `{"phase":"fixture-original","batch":{"progress":{"attempt":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","generation":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}}`
 	exec(`INSERT INTO computer_operations(id,bot_id,session_id,user_id,target_id,run_id,fingerprint,target_fingerprint,state,details,cancel_requested,revision) VALUES($1,$2,$3,$4,$5,'upgrade-run','fingerprint','target-fingerprint','completed',$6,true,7)`, operation, bot, session, owner, runtime, original)
 	checkOriginal := func() {
@@ -46,7 +46,7 @@ func TestComputerDeliveryPostgresUpgradeFrom170(t *testing.T) {
 		if err := pool.QueryRow(t.Context(), `SELECT details=$2::jsonb AND revision=7 AND cancel_requested AND state='completed' FROM computer_operations WHERE id=$1`, operation, original).Scan(&ok); err != nil || !ok {
 			t.Fatal("existing operation changed", err)
 		}
-		if err := pool.QueryRow(t.Context(), `SELECT api_token='synthetic-control-token' AND provider='agenvo' AND provider_config='{"device_id":"fixture-device","instance_id":"fixture-instance"}'::jsonb AND activated_at IS NOT NULL AND pending_expires_at IS NULL FROM user_runtimes WHERE id=$1`, runtime).Scan(&ok); err != nil || !ok {
+		if err := pool.QueryRow(t.Context(), `SELECT api_token='synthetic-control-token' AND provider='memoh' AND provider_config='{"herdr":{"instance_id":"fixture-instance"}}'::jsonb AND activated_at IS NOT NULL AND pending_expires_at IS NULL FROM user_runtimes WHERE id=$1`, runtime).Scan(&ok); err != nil || !ok {
 			t.Fatal("existing device changed", err)
 		}
 	}

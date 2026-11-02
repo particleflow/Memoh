@@ -9,10 +9,10 @@ Runtime, grant, or MCP connection was created.
 Reviewed `dd7409e7157b440a5a62337b61bc4d6fac9cae76` and the exact release
 candidate `69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee`. There is no diff between
 these commits in `cmd/internal/core/bot_delegation.go`,
-`internal/botdelegation/authority.go`, or `internal/agenvo/native_profile.go`.
+`internal/botdelegation/authority.go`, or `internal/computertarget/native_profile.go`.
 
-At candidate lines 185 and 204, `delegationHost.Plan` filters both mounts to
-`agenvo.Provider` and decodes only `DecodeTarget`. At authority lines 287–295,
+At candidate lines 185 and 204, `delegationHost.Plan` filtered both mounts to the retired legacy provider
+constant and decoded only `DecodeTarget`. At authority lines 287–295,
 `registration` rejects every other provider and requires an owned HTTP MCP
 connection. Thus the native `memoh` Runtime registration cannot enter the shared
 device plan or authorize a selected native remote mount. This is separate from
@@ -32,7 +32,7 @@ Text and original-media reads do not acquire or require execution permission.
 New device plans include only native `memoh` runtimes. Source PC selection maps
 to the target Bot's own mount of the same Runtime; source NAS selection includes
 only the resource intersection. Invalid selected PC mappings fail closed.
-Historical Agenvo registration decoding/authorization remains readable under
+Historical legacy executor registration decoding/authorization remains readable under
 existing access checks. Production legacy execution remains blocked by the
 unchanged native-only computer service; there is no OAuth or execution fallback.
 Ledger, queue, receipt, result routing and history schemas are unchanged. The
@@ -51,7 +51,7 @@ Both temporary changes were restored before the final checks.
 Passed:
 
 ```sh
-go test -p 3 ./cmd/internal/core ./internal/botdelegation ./internal/agenvo -count=1
+go test -p 3 ./cmd/internal/core ./internal/botdelegation ./internal/computertarget -count=1
 go test -race -p 3 ./cmd/internal/core ./internal/botdelegation -count=1
 go vet -p 3 ./cmd/internal/core ./internal/botdelegation
 golangci-lint run --new-from-merge-base=69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee ./cmd/internal/core ./internal/botdelegation

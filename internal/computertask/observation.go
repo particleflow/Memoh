@@ -8,13 +8,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 type WorkspaceDiscovery struct {
 	TargetID string `json:"target_id"`
-	agenvo.WorkspaceObservations
+	computertarget.WorkspaceObservations
 }
 
 type RecoverySummary struct {
@@ -26,22 +26,22 @@ type RecoverySummary struct {
 // Recovery is a read model. It has no transfer, submission or store-write port.
 // Native presence is separate from durable process/Pi/business result facts.
 type Recovery struct {
-	Reconciliation  *OperationReconciliation    `json:"reconciliation,omitempty"`
-	Continuity      *PiContinuity               `json:"continuity,omitempty"`
-	OperationID     string                      `json:"operation_id"`
-	TargetID        string                      `json:"target_id"`
-	State           string                      `json:"state"`
-	ProcessState    string                      `json:"process_state"`
-	PiResult        string                      `json:"pi_result"`
-	BusinessOutcome string                      `json:"business_outcome"`
-	ResultReason    string                      `json:"result_reason"`
-	CancelRequested bool                        `json:"cancel_requested"`
-	Attempt         string                      `json:"attempt,omitempty"`
-	PiSessionID     string                      `json:"pi_session_id,omitempty"`
-	WorkspaceID     string                      `json:"workspace_id,omitempty"`
-	PaneID          string                      `json:"pane_id,omitempty"`
-	ResultSummary   *RecoverySummary            `json:"result_summary,omitempty"`
-	Native          agenvo.ReferenceObservation `json:"native"`
+	Reconciliation  *OperationReconciliation            `json:"reconciliation,omitempty"`
+	Continuity      *PiContinuity                       `json:"continuity,omitempty"`
+	OperationID     string                              `json:"operation_id"`
+	TargetID        string                              `json:"target_id"`
+	State           string                              `json:"state"`
+	ProcessState    string                              `json:"process_state"`
+	PiResult        string                              `json:"pi_result"`
+	BusinessOutcome string                              `json:"business_outcome"`
+	ResultReason    string                              `json:"result_reason"`
+	CancelRequested bool                                `json:"cancel_requested"`
+	Attempt         string                              `json:"attempt,omitempty"`
+	PiSessionID     string                              `json:"pi_session_id,omitempty"`
+	WorkspaceID     string                              `json:"workspace_id,omitempty"`
+	PaneID          string                              `json:"pane_id,omitempty"`
+	ResultSummary   *RecoverySummary                    `json:"result_summary,omitempty"`
+	Native          computertarget.ReferenceObservation `json:"native"`
 }
 
 func observationRef(value string) string {
@@ -62,7 +62,7 @@ func observationHexRef(value string, length int) string {
 }
 
 func observationDenied(err error) bool {
-	return errors.Is(err, agenvo.ErrForbidden) || errors.Is(err, agenvo.ErrTargetChanged) || errors.Is(err, toolcontext.ErrComputerScope) || errors.Is(err, toolcontext.ErrComputerBinding)
+	return errors.Is(err, computertarget.ErrForbidden) || errors.Is(err, computertarget.ErrTargetChanged) || errors.Is(err, toolcontext.ErrComputerScope) || errors.Is(err, toolcontext.ErrComputerBinding)
 }
 
 func (s *Service) workspaces(ctx context.Context, b toolcontext.ComputerBinding, requested string) (WorkspaceDiscovery, error) {
@@ -73,7 +73,7 @@ func (s *Service) workspaces(ctx context.Context, b toolcontext.ComputerBinding,
 	if err != nil {
 		return WorkspaceDiscovery{}, err
 	}
-	pinned := agenvo.PinRegistration(ctx, scope(b, id), agenvo.TargetFingerprint(target))
+	pinned := computertarget.PinRegistration(ctx, scope(b, id), computertarget.TargetFingerprint(target))
 	readCtx, cancel := context.WithTimeout(pinned, 10*time.Second)
 	defer cancel()
 	observation, err := s.relay.Workspaces(readCtx, scope(b, id))
@@ -84,9 +84,9 @@ func (s *Service) workspaces(ctx context.Context, b toolcontext.ComputerBinding,
 		return WorkspaceDiscovery{}, ErrDenied
 	}
 	if err != nil {
-		observation.Workspaces = []agenvo.WorkspaceObservation{}
+		observation.Workspaces = []computertarget.WorkspaceObservation{}
 		observation.Truncated = false
-		observation.Availability = agenvo.Availability(err)
+		observation.Availability = computertarget.Availability(err)
 	}
 	return WorkspaceDiscovery{TargetID: id, WorkspaceObservations: observation}, nil
 }
@@ -107,13 +107,13 @@ func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id
 		state = "unknown"
 	}
 	out := Recovery{OperationID: r.ID, TargetID: r.TargetID, State: state, ProcessState: "unknown", PiResult: "unknown", BusinessOutcome: "unknown", ResultReason: "receipt_missing", CancelRequested: r.CancelRequested, Reconciliation: operationReconciliation(r, d)}
-	refs := agenvo.OperationReferences{Workspace: d.Agent.WorkspaceID, Pane: d.Agent.PaneID, Terminal: d.Agent.TerminalID}
+	refs := computertarget.OperationReferences{Workspace: d.Agent.WorkspaceID, Pane: d.Agent.PaneID, Terminal: d.Agent.TerminalID}
 	if batch := d.Batch; batch != nil {
 		out.Continuity = batchContinuity(batch)
 		p := batch.Progress
-		refs = agenvo.OperationReferences{Workspace: p.WorkspaceID, Pane: p.PaneID, Terminal: p.TerminalID, ControlPane: p.ControlPane, ControlTerminal: p.ControlTerminal}
+		refs = computertarget.OperationReferences{Workspace: p.WorkspaceID, Pane: p.PaneID, Terminal: p.TerminalID, ControlPane: p.ControlPane, ControlTerminal: p.ControlTerminal}
 		out.Attempt, out.PiSessionID = observationHexRef(p.Attempt, 32), observationHexRef(p.PiSessionID, 64)
-		if p.CompletionVersion != agenvo.BatchCompletionVersion {
+		if p.CompletionVersion != computertarget.BatchCompletionVersion {
 			out.ResultReason = "legacy_result_protocol"
 		}
 		if batch.Receipt != nil {
@@ -124,12 +124,12 @@ func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id
 				switch {
 				case !batch.Receipt.Started:
 					out.ProcessState, out.PiResult, out.ResultReason = "not_started", "not_started", "verified_receipt"
-				case batch.Result != nil && agenvo.ValidateBatchCompletionResult(*batch.Result, p, *batch.Receipt) == nil:
+				case batch.Result != nil && computertarget.ValidateBatchCompletionResult(*batch.Result, p, *batch.Receipt) == nil:
 					out.PiResult, out.ResultReason = batch.Result.Outcome, "verified_persisted_result"
 					if batch.Result.Output != "" {
 						out.ResultSummary = &RecoverySummary{Text: batch.Result.Output, Truncated: batch.Result.Truncated, Source: "pi_final_assistant"}
 					}
-				case p.CompletionVersion == agenvo.BatchCompletionVersion:
+				case p.CompletionVersion == computertarget.BatchCompletionVersion:
 					out.ResultReason = "completion_result_unavailable"
 				}
 			}
@@ -138,7 +138,7 @@ func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id
 		out.ResultReason = "legacy_observation_only"
 	}
 	out.WorkspaceID, out.PaneID = observationRef(refs.Workspace), observationRef(refs.Pane)
-	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
+	pinned := computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	readCtx, cancel := context.WithTimeout(pinned, 10*time.Second)
 	defer cancel()
 	out.Native, err = s.relay.ObserveReferences(readCtx, scope(b, r.TargetID), refs)
@@ -154,7 +154,7 @@ func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id
 	if current.Revision != r.Revision {
 		// Do not combine a stale durable checkpoint with a later native read.
 		// Retrying this read does not submit or resume the operation.
-		return Recovery{}, agenvo.ErrUnknown
+		return Recovery{}, computertarget.ErrUnknown
 	}
 	return out, nil
 }

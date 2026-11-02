@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -15,24 +15,24 @@ func TestWorkspaceDefaultResumeKeepsOriginalDirectory(t *testing.T) {
 	f, service, ctx := newNativeTaskFixture(t)
 	selected := `C:\Synthetic\first`
 	defaults, creates := 0, 0
-	service.WithDefaultWorkDir(func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (string, error) {
+	service.WithDefaultWorkDir(func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (string, error) {
 		defaults++
 		return selected, nil
 	})
-	service.relay.SetNativeCaller(func(_ context.Context, _ agenvo.Scope, _ agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
+	service.relay.SetNativeCaller(func(_ context.Context, _ computertarget.Scope, _ computertarget.Target, method string, args map[string]any) (computertarget.Receipt, error) {
 		if method != "workspace.create" || args["cwd"] != selected {
 			t.Fatal("unexpected native input", method)
 		}
 		creates++
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	})
 	in := Submit{Kind: "herdr_pi_task", Task: "synthetic default directory"}
 	first, err := service.submit(ctx, f.binding, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || first.ID == "" || creates != 1 {
+	if !errors.Is(err, computertarget.ErrUnknown) || first.ID == "" || creates != 1 {
 		t.Fatalf("expected one uncertain create: %+v %v", first, err)
 	}
 	before, details, err := service.load(ctx, f.binding, first.ID)
-	if err != nil || details.DefaultWorkDir != selected || details.Batch.Progress.RequestHash != before.Fingerprint || details.TargetSnapshot == nil || agenvo.TargetFingerprint(*details.TargetSnapshot) != before.TargetFingerprint || details.TargetSnapshot.Producer != f.profile.Producer {
+	if err != nil || details.DefaultWorkDir != selected || details.Batch.Progress.RequestHash != before.Fingerprint || details.TargetSnapshot == nil || computertarget.TargetFingerprint(*details.TargetSnapshot) != before.TargetFingerprint || details.TargetSnapshot.Producer != f.profile.Producer {
 		t.Fatal("resolved directory was not retained with original request identity", err)
 	}
 	selected = `C:\Synthetic\later`
@@ -54,7 +54,7 @@ func TestWorkspaceDefaultResumeKeepsOriginalDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 	f.store.records[after.ID] = after // controlled corruption, never a real row
-	if _, _, err = service.load(ctx, f.binding, after.ID); !errors.Is(err, agenvo.ErrUnknown) {
+	if _, _, err = service.load(ctx, f.binding, after.ID); !errors.Is(err, computertarget.ErrUnknown) {
 		t.Fatal("changed root snapshot was accepted against original target fingerprint", err)
 	}
 }

@@ -1,5 +1,5 @@
-=== RUN   TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback
---- PASS: TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback (0.00s)
+=== RUN   Testlegacy executorTargetExecDoesNotUseBridgeOrNativeFallback
+--- PASS: Testlegacy executorTargetExecDoesNotUseBridgeOrNativeFallback (0.00s)
 === RUN   TestResolveToolTargetRejectsNativeReadback
 --- PASS: TestResolveToolTargetRejectsNativeReadback (0.00s)
 === RUN   TestNativeWorkdirSessionCanUseAuthorizedPCWithoutCarryingNativeDirectory

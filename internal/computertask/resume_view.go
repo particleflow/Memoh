@@ -3,7 +3,7 @@ package computertask
 import (
 	"context"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -26,7 +26,7 @@ func (s *Source) ResumeNative(ctx context.Context, b toolcontext.ComputerBinding
 		return Result{}, err
 	}
 	if r.RunID == "" {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	if b.RunID != "" && b.RunID != r.RunID {
 		return Result{}, ErrDenied

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/mcp"
 )
 
@@ -56,7 +56,7 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 	d.Phase = "pi_exited_result_pending"
 	record.State = "completed"
 	if mode == "reader_not_ready" {
-		d.Batch.RecoveryReader = &agenvo.BatchRecoveryReader{Phase: "creating"}
+		d.Batch.RecoveryReader = &computertarget.BatchRecoveryReader{Phase: "creating"}
 	}
 	if mode == "reader_save" {
 		f.batch.changedPane = true
@@ -67,11 +67,11 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 	f.store.records[record.ID] = record
 	f.batch.pageOffsets = nil
 	controlRuns := 0
-	service.relay.SetNativeCaller(func(callCtx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+	service.relay.SetNativeCaller(func(callCtx context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 		if method == "pane.run" && params["paneId"] == "control" {
 			controlRuns++
 			if mode == "native_first" || mode == "native_second" && controlRuns == 2 {
-				return agenvo.Receipt{}, agenvo.ErrUnknown
+				return computertarget.Receipt{}, computertarget.ErrUnknown
 			}
 		}
 		value, err := f.invoke(callCtx, scope, target, method, params)
@@ -124,7 +124,7 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 		if out.Error || !out.HasPiResult || out.Phase != "pi_succeeded" || controlRuns != 2 {
 			t.Fatalf("two-page result failed: %+v", out)
 		}
-	} else if !out.Error || out.HasPiResult || out.ErrorText != agenvo.ErrUnknown.Error() || out.Phase != "pi_exited_result_pending" {
+	} else if !out.Error || out.HasPiResult || out.ErrorText != computertarget.ErrUnknown.Error() || out.Phase != "pi_exited_result_pending" {
 		t.Fatalf("failure changed: %+v", out)
 	}
 	if f.batch.runs != 1 {

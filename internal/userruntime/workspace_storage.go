@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -67,7 +67,7 @@ func (s *Service) SetWorkspaceStorage(root, share string) {
 			return
 		}
 	}
-	if agenvo.ValidateWorkDir(share, ".") != nil {
+	if computertarget.ValidateWorkDir(share, ".") != nil {
 		return
 	}
 	s.workspaceStorage = &workspaceStorage{root: root, share: share}
@@ -138,7 +138,7 @@ func (s *Service) validateStoragePath(id, relative string) error {
 	if s.workspaceStorage == nil {
 		return ErrWorkspaceStorageDisabled
 	}
-	if agenvo.ValidateWorkDir(s.workspaceStorage.share, s.storageWindowsPath(id, relative)) != nil {
+	if computertarget.ValidateWorkDir(s.workspaceStorage.share, s.storageWindowsPath(id, relative)) != nil {
 		return ErrWorkspaceStoragePath
 	}
 	return nil

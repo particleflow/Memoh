@@ -45,7 +45,7 @@
       "action": "No confirmed out-of-bounds defect; retain as full-program analyzer finding rather than rewrite safe loops."
     },
     {
-      "file": "internal/agenvo/pi_batch_history_test.go",
+      "file": "internal/computertarget/pi_batch_history_test.go",
       "line": 123,
       "column": 23,
       "message": "G703: Path traversal via taint analysis",
@@ -59,7 +59,7 @@
       "action": "Do not change file transport or add path policy merely to silence fixture taint."
     },
     {
-      "file": "internal/agenvo/pi_batch_history_test.go",
+      "file": "internal/computertarget/pi_batch_history_test.go",
       "line": 152,
       "column": 23,
       "message": "G703: Path traversal via taint analysis",

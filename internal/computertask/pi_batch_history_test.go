@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -32,7 +32,7 @@ func TestBatchHistoryApplicationRestartAndLegacy(t *testing.T) {
 			case "receipt_missing":
 				d.Batch.Receipt = nil
 			case "post_loss":
-				d.Batch.Receipt.History = &agenvo.BatchHistoryReport{Before: "new", After: "missing"}
+				d.Batch.Receipt.History = &computertarget.BatchHistoryReport{Before: "new", After: "missing"}
 			case "target_changed":
 				old.TargetFingerprint = "changed"
 			}

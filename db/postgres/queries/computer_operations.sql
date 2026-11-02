@@ -38,16 +38,6 @@ WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) RETURNING *;
 
--- name: ListComputerConnectionEndpoints :many
-SELECT candidate.config AS candidate_config, registered.config AS registered_config,
-       (user_runtimes.provider_config->>'connection_id'=sqlc.arg(connection_id)::text) AS direct
-FROM user_runtimes
-JOIN mcp_connections registered ON registered.team_id=user_runtimes.team_id
- AND registered.id::text=user_runtimes.provider_config->>'connection_id'
-JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
- AND candidate.id::text=sqlc.arg(connection_id)::text
-WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo';
-
 -- name: PreviousComputerPiOperation :one
 -- Called only after owning the unsettled slot. A missing receipt in the latest
 -- operation is evidence of uncertainty, never permission to search past it.

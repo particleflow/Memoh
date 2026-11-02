@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -57,9 +57,9 @@ func TestLiveComputerBindingPreservesOriginalInstance(t *testing.T) {
 		t.Run(snapshot, func(t *testing.T) {
 			f := newFixture()
 			r := f.operations[f.op]
-			original := agenvo.Target{NativeRuntimeID: "synthetic-runtime", DeviceID: "synthetic-device", InstanceID: "original-instance", WorkDir: `C:\original`}
+			original := computertarget.Target{NativeRuntimeID: "synthetic-runtime", DeviceID: "synthetic-device", InstanceID: "original-instance", WorkDir: `C:\original`}
 			f.targets[r.TargetID] = original
-			r.TargetFingerprint = agenvo.TargetFingerprint(original)
+			r.TargetFingerprint = computertarget.TargetFingerprint(original)
 			facts := map[string]any{"kind": "herdr_pi_task"}
 			if snapshot == "snapshot" {
 				facts["target_snapshot"] = original

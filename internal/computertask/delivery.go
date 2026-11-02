@@ -14,7 +14,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
@@ -118,7 +118,7 @@ type DeliveryAssets interface {
 // records. Implementations must not return success before the DB commit.
 type DeliveryTransaction struct {
 	Store     dbstore.ComputerDeliveryStore
-	Authorize func(context.Context, DeliveryIdentity) (agenvo.Target, error)
+	Authorize func(context.Context, DeliveryIdentity) (computertarget.Target, error)
 }
 
 type DeliveryTransactions func(context.Context, func(DeliveryTransaction) error) error
@@ -431,7 +431,7 @@ func authorizeDeliveryRecord(ctx context.Context, tx DeliveryTransaction, id Del
 		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, err
 	}
 	if r.ID != id.OperationID || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID || r.TargetID != b.TargetID || r.RunID != b.RunID ||
-		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || r.TargetFingerprint != agenvo.TargetFingerprint(target) || target.Agent.ExecutionMode != "pi-json-v1" {
+		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || r.TargetFingerprint != computertarget.TargetFingerprint(target) || target.Agent.ExecutionMode != "pi-json-v1" {
 		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
 	}
 	var details deliveryOperationDetails

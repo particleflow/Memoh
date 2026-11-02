@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/userruntime"
 )
 
 type nativeAccountProbeStore struct {
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	writes int
 }
 
@@ -51,7 +51,7 @@ func TestNativeHerdrConfigurationRequiresAccountSession(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			store := &nativeAccountProbeStore{}
 			svc := userruntime.NewService(nil, nil)
-			svc.SetAgenvoService(agenvo.NewService(store, nil, nil))
+			svc.SetComputerTargetService(computertarget.NewService(store, nil, nil))
 			const owner = "22222222-2222-4222-8222-222222222222"
 			const secret = "synthetic-native-account-boundary-signing-secret"
 			validated := 0
@@ -70,7 +70,7 @@ func TestNativeHerdrConfigurationRequiresAccountSession(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-instance", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`}
+			profile := computertarget.NativeHerdrProfile{InstanceID: "synthetic-instance", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`}
 			body, err := json.Marshal(profile)
 			if err != nil {
 				t.Fatal(err)

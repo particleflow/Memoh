@@ -23,7 +23,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -46,7 +46,7 @@ func exerciseReceiptTurnover(ctx context.Context, t *testing.T, store *postgress
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := agenvo.DecodeRuntimeTarget(mount.RuntimeProvider, mount.RuntimeID, mount.RuntimeProviderConfig)
+	target, err := computertarget.DecodeRuntimeTarget(mount.RuntimeProvider, mount.RuntimeID, mount.RuntimeProviderConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,8 +107,8 @@ func exerciseReceiptTurnover(ctx context.Context, t *testing.T, store *postgress
 	for round := range rounds {
 		id := original
 		id.OperationID, id.Binding.RunID = uuid.NewString(), fmt.Sprintf("turnover-%d", round)
-		details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
-		operation, claimed, err := store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: id.Binding.BotID, UserID: id.Binding.UserID, SessionID: id.Binding.SessionID, TargetID: id.Binding.TargetID, RunID: id.Binding.RunID, Fingerprint: id.Binding.RunID, TargetFingerprint: agenvo.TargetFingerprint(target), Details: details})
+		details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: computertarget.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
+		operation, claimed, err := store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: id.Binding.BotID, UserID: id.Binding.UserID, SessionID: id.Binding.SessionID, TargetID: id.Binding.TargetID, RunID: id.Binding.RunID, Fingerprint: id.Binding.RunID, TargetFingerprint: computertarget.TargetFingerprint(target), Details: details})
 		if err != nil || !claimed {
 			t.Fatal("operation", claimed, err)
 		}

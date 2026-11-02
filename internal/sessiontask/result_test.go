@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 func TestPersistedCompletionProjection(t *testing.T) {
@@ -23,8 +23,8 @@ func TestPersistedCompletionProjection(t *testing.T) {
 		{"failed", "failed", "exited", true, func(b *persistedPiFacts) { b.Result.Outcome = "failed"; b.Result.StopReason = "error" }},
 		{"aborted", "aborted", "exited", true, func(b *persistedPiFacts) { b.Result.Outcome = "aborted" }},
 		{"incomplete", "incomplete", "exited", true, func(b *persistedPiFacts) { b.Result.Outcome = "incomplete"; b.Result.StopReason = "length" }},
-		{"invalid_protocol", "invalid_protocol", "exited", false, func(b *persistedPiFacts) { b.Result = &agenvo.PiJSONResult{Outcome: "invalid_protocol"} }},
-		{"output_limit", "output_limit", "exited", false, func(b *persistedPiFacts) { b.Result = &agenvo.PiJSONResult{Outcome: "output_limit"} }},
+		{"invalid_protocol", "invalid_protocol", "exited", false, func(b *persistedPiFacts) { b.Result = &computertarget.PiJSONResult{Outcome: "invalid_protocol"} }},
+		{"output_limit", "output_limit", "exited", false, func(b *persistedPiFacts) { b.Result = &computertarget.PiJSONResult{Outcome: "output_limit"} }},
 		{"not_started", "not_started", "not_started", false, func(b *persistedPiFacts) { b.Receipt.Started = false; b.Receipt.Completion = nil; b.Result = nil }},
 		{"empty_final", "succeeded", "exited", false, func(b *persistedPiFacts) { b.Result.Output = "" }},
 		{"truncated", "succeeded", "exited", true, func(b *persistedPiFacts) { b.Result.Truncated = true }},

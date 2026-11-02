@@ -45,7 +45,7 @@
     },
     {
       "file": "postgres.txt",
-      "command": "MEMOH_AGENVO_TEST_DATABASE_URL=<existing isolated test DB> go test -count=1 -v ./internal/agenvo ./internal/computertask -run '^Test(BatchReaderPostgresPersistenceCAS|PostgresAccountAndBotAuthorization)$'",
+      "command": "MEMOH_LEGACY_TEST_DATABASE_URL=<existing isolated test DB> go test -count=1 -v ./internal/computertarget ./internal/computertask -run '^Test(BatchReaderPostgresPersistenceCAS|PostgresAccountAndBotAuthorization)$'",
       "exit_code": 0,
       "original_sha256": "8b6c66edf59a19a953efb03d584ee13bc42b1ea35d508c1b3c9923c89c7e6837",
       "published_sha256": "8b6c66edf59a19a953efb03d584ee13bc42b1ea35d508c1b3c9923c89c7e6837",

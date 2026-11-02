@@ -1,6 +1,6 @@
 # Native workspace observation and operation recovery
 
-> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+> Current routing: legacy executor enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. The wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/computertarget` ledger remains in use by native Herdr/Pi.
 
 This increment starts from `4521d323050e27d12a0e496ff51f0bd9bea938f6`.
 It adds two tools to the existing authenticated computer-task MCP source.
@@ -10,8 +10,7 @@ The existing mobile 1.0.7 parent-task list/detail HTTP contract is unchanged.
 
 ## Native API sources
 
-The adapter uses the published Agenvo v0.2.0 methods in
-[`apps/herdr/src/herdr.ts`](https://github.com/Xuanwo/agenvo/blob/v0.2.0/apps/herdr/src/herdr.ts):
+The adapter uses the published producer CLI v0.2.0 pane and agent methods:
 
 | Method | Arguments | Use |
 | --- | --- | --- |
@@ -28,9 +27,9 @@ other service sessions. Herdr v0.9.5 response fields are defined in
 [`agents.rs`](https://github.com/herdrdev/herdr/blob/v0.9.5/src/api/schema/agents.rs).
 The native status enum is `idle | working | blocked | done | unknown`.
 
-The relay's explicit `device_offline` and `runtime_unavailable` failures come
-from [`packages/relay/src/core.ts`](https://github.com/Xuanwo/agenvo/blob/v0.2.0/packages/relay/src/core.ts).
-Transport error text is never used to classify these states.
+The relay's explicit `device_offline` and `runtime_unavailable` failures originate in the
+relay core (relay v0.2.0). Transport error text is never used to classify these
+states; only the explicit failure codes do.
 
 ## Tool contract
 

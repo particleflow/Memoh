@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -41,7 +41,7 @@ func TestRecoveryReconcilesPersistedBatchWithoutGrantingStop(t *testing.T) {
 			var d Details
 			_ = json.Unmarshal(r.Details, &d)
 			transport := &observationTransport{t: t, refs: d.Batch.Progress, fault: "mismatch"}
-			source.service.relay = agenvo.NewService(store, permissionChecker{}, transport.call)
+			source.service.relay = computertarget.NewService(store, permissionChecker{}, transport.call)
 			before := observationSnapshot(t, store)
 			assetsBefore, _ := json.Marshal(assets.data)
 			raw := invoke(t, client, "computer_task_recover", map[string]any{"operation_id": r.ID}, false)
@@ -112,7 +112,7 @@ func TestRecoveryRejectsConcurrentRevisionChange(t *testing.T) {
 	}
 	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "run-a"}
 	got, err := source.service.Recover(t.Context(), binding, id)
-	if !errors.Is(err, agenvo.ErrUnknown) || got.OperationID != "" || got.Reconciliation != nil {
+	if !errors.Is(err, computertarget.ErrUnknown) || got.OperationID != "" || got.Reconciliation != nil {
 		t.Fatal("stale revision was returned as current reconciliation")
 	}
 }

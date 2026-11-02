@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -23,11 +23,11 @@ type Followup struct {
 // revision CAS. Fingerprints are local deduplication, not a Herdr generation.
 // Prompt text and private session paths are never projected in the response.
 type FollowupRecord struct {
-	RequestID   string                       `json:"request_id"`
-	Fingerprint string                       `json:"fingerprint"`
-	RunID       string                       `json:"run_id"`
-	Mode        string                       `json:"mode"`
-	Progress    agenvo.AgentFollowupProgress `json:"progress"`
+	RequestID   string                               `json:"request_id"`
+	Fingerprint string                               `json:"fingerprint"`
+	RunID       string                               `json:"run_id"`
+	Mode        string                               `json:"mode"`
+	Progress    computertarget.AgentFollowupProgress `json:"progress"`
 }
 
 type FollowupResult struct {
@@ -70,9 +70,9 @@ func followupError(f FollowupRecord) error {
 	case "accepted":
 		return nil
 	case "rejected":
-		return agenvo.ErrRejected
+		return computertarget.ErrRejected
 	default:
-		return agenvo.ErrUnknown
+		return computertarget.ErrUnknown
 	}
 }
 
@@ -100,5 +100,5 @@ func (s *Service) followup(ctx context.Context, b toolcontext.ComputerBinding, i
 	}
 	// Existing input receipts remain queryable. Retired TUI input is never
 	// reserved, sent or retried, including for a previously unknown operation.
-	return result(r, d), agenvo.ErrUnsupported
+	return result(r, d), computertarget.ErrUnsupported
 }

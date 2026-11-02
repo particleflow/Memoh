@@ -30,7 +30,7 @@ func TestDirectoryMetadataUsesOriginalAuthorityAndNeverDispatches(t *testing.T) 
 		}
 		delete(f.denied, bot)
 	}
-	if !reflect.DeepEqual(r, ledger.records[r.ID]) || h.creates.Load()+h.runs.Load()+h.deliveries.Load() != 0 || f.mcpCalls != 0 {
+	if !reflect.DeepEqual(r, ledger.records[r.ID]) || h.creates.Load()+h.runs.Load()+h.deliveries.Load() != 0 {
 		t.Fatal("directory read mutated or dispatched")
 	}
 }

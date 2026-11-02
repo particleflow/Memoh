@@ -18,7 +18,7 @@ import (
 
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -109,7 +109,7 @@ type transportFixture struct {
 	cwd       string
 }
 
-func (f *transportFixture) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *transportFixture) call(_ context.Context, scope computertarget.Scope, target computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.t.Helper()
 	if scope.BotID != "bot-a" || target.NativeRuntimeID == "" || target.InstanceID != "herdr-a" {
 		f.t.Fatal("wrong native Runtime identity")
@@ -127,7 +127,7 @@ func (f *transportFixture) call(_ context.Context, scope agenvo.Scope, target ag
 	case "pane.run":
 		f.runs++
 		if f.lost {
-			return agenvo.Receipt{}, errors.New("synthetic lost response")
+			return computertarget.Receipt{}, errors.New("synthetic lost response")
 		}
 		command, _ := params["command"].(string)
 		encoded := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
@@ -150,20 +150,20 @@ func (f *transportFixture) call(_ context.Context, scope agenvo.Scope, target ag
 	return envelope(map[string]any{"result": body, "session": "synthetic"}), nil
 }
 
-func envelope(result any) agenvo.Receipt { return receipt("accepted", result) }
-func receipt(execution string, result any) agenvo.Receipt {
+func envelope(result any) computertarget.Receipt { return receipt("accepted", result) }
+func receipt(execution string, result any) computertarget.Receipt {
 	body, _ := json.Marshal(result)
-	return agenvo.Receipt{Execution: execution, RequestID: "synthetic-request", Result: body}
+	return computertarget.Receipt{Execution: execution, RequestID: "synthetic-request", Result: body}
 }
 
-func fixtureConfig(target agenvo.Target) []byte {
-	profile := agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent, Producer: target.Producer}
+func fixtureConfig(target computertarget.Target) []byte {
+	profile := computertarget.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent, Producer: target.Producer}
 	raw, _ := json.Marshal(map[string]any{"herdr": profile})
 	return raw
 }
 
-func fixtureTarget(record dbstore.BotRemoteRuntimeBindingRecord) agenvo.Target {
-	target, err := agenvo.DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
+func fixtureTarget(record dbstore.BotRemoteRuntimeBindingRecord) computertarget.Target {
+	target, err := computertarget.DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -174,12 +174,12 @@ func setup(t *testing.T) (*Source, *fixtureStore, *transportFixture) {
 	t.Helper()
 	store := &fixtureStore{records: map[string]dbstore.ComputerOperationRecord{}, mounts: map[string]dbstore.BotRemoteRuntimeBindingRecord{}}
 	for _, name := range []string{"a", "b"} {
-		target := agenvo.Target{ConnectionID: "11111111-1111-4111-8111-111111111111", DeviceID: "device-" + name, InstanceID: "herdr-" + name, Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}
+		target := computertarget.Target{ConnectionID: "11111111-1111-4111-8111-111111111111", DeviceID: "device-" + name, InstanceID: "herdr-" + name, Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}
 		raw := fixtureConfig(target)
 		store.mounts["pc-"+name] = dbstore.BotRemoteRuntimeBindingRecord{ID: "pc-" + name, BotID: "bot-a", RuntimeName: "PC-" + name, RuntimeID: "11111111-1111-4111-8111-111111111111", RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: "memoh", RuntimeProviderConfig: raw}
 	}
 	f := &transportFixture{t: t}
-	relay := agenvo.NewService(store, permissionChecker{}, f.call)
+	relay := computertarget.NewService(store, permissionChecker{}, f.call)
 	service := NewService(store, store, relay, nil, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
 	return NewSource(service), store, f
 }

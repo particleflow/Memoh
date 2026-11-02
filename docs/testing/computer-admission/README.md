@@ -1,4 +1,4 @@
-> Historical record: this describes an earlier Agenvo implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
+> Historical record: this describes an earlier legacy executor implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
 
 # Durable owner admission pause
 
@@ -37,7 +37,7 @@ The table uses forced team RLS. Changing services/processes does not reopen the 
 
 ## Windows integration order and remaining boundary
 
-Use the already established owner -> registered MCP -> approved Agenvo device/instance control direction. File-transfer credentials are not a control identity. No Windows -> NAS credential is introduced.
+Use the already established owner -> registered MCP -> approved legacy executor device/instance control direction. File-transfer credentials are not a control identity. No Windows -> NAS credential is introduced.
 
 1. The existing Memoh owner saves a pause request UUID, reads the gate, then requests pause. Preserve the returned identity/request/revision.
 2. Enumerate relevant owned registrations/mounts and original operations using the existing task/owner stores. Finish the existing bounded result/diagnostic/delivery collection required by the agreed preservation policy. `completed`, queue idle, process exit, a local receipt or a validated receipt alone is not sufficient. Unknown dispatch/follow-up/reader creation stays blocked, never replayed.
@@ -55,7 +55,7 @@ Executed locally on the current changes:
 
 | Check | Actual result |
 | --- | --- |
-| `go test ./internal/agenvo ./internal/computertask -run 'TestAdmission\|TestComputerAdmission' -count=1 -v` | Exit 0; [service/tool output](evidence/unit.log). No native dispatch on gate rejection. |
+| `go test ./internal/computertarget ./internal/computertask -run 'TestAdmission\|TestComputerAdmission' -count=1 -v` | Exit 0; [service/tool output](evidence/unit.log). No native dispatch on gate rejection. |
 | Real global HTTP/JWT middleware tests | Owner-only success, unknown JSON field rejection, anonymous/invalid/revoked authentication and no-store passed. The initial combined command failed only the new catalog golden registration, which was then registered normally; [initial output](evidence/http-and-initial-catalog.log). |
 | `go test ./internal/apperror -count=1` | Exit 0 after adding/sorting all three codes in both existing Web and IM locale catalogs; [output](evidence/catalog-complete.log). Earlier missing IM/ordering failures retained in [package output](evidence/packages-before-locale-fix.log). |
 | `scripts/test-computer-operations-postgres.sh` with the existing isolated PG identity | Exit 0, six top-level tests / ten named PASS / zero SKIP, race enabled, 18.841 seconds; [raw mixed command/JSON output](evidence/postgres-race-gate.log). The existing CAS/ownership/RLS test is still required, alongside admission tests. No workflow permission or timeout was changed. |

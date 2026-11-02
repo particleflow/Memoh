@@ -1733,5 +1733,5 @@ func (a *applicationBotPermissionChecker) HasBotPermission(ctx context.Context, 
 
 func provideFederationSource(log *slog.Logger, gateway *handlers.MCPFederationGateway, connections *mcp.ConnectionService, oauth *mcp.OAuthService, store *postgresstore.Store) *mcpfederation.Source {
 	gateway.SetOAuthService(oauth)
-	return mcpfederation.NewSource(log, gateway, connections, mcpfederation.WithReservedToolName(agenttools.IsBuiltInToolName), mcpfederation.WithConnectionCheck(computerConnectionCheck(store)))
+	return mcpfederation.NewSource(log, gateway, connections, mcpfederation.WithReservedToolName(agenttools.IsBuiltInToolName), mcpfederation.WithConnectionCheck(computerConnectionCheck()))
 }

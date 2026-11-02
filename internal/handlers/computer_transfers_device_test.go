@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/transferclient"
 )
@@ -41,7 +41,7 @@ func (v *deviceVerifierFixture) RevalidateDevice(ctx context.Context, d computer
 
 func TestDeviceTransferCredentialReuseAndRecovery(t *testing.T) {
 	v := &deviceVerifierFixture{}
-	f, _, https, _ := taskTransferHTTPFixture(t, false, taskTransferFixtureOptions{device: func(_ computertask.DeliveryIdentity, target agenvo.Target) DeviceTransferVerifier {
+	f, _, https, _ := taskTransferHTTPFixture(t, false, taskTransferFixtureOptions{device: func(_ computertask.DeliveryIdentity, target computertarget.Target) DeviceTransferVerifier {
 		v.device = computertask.VerifiedTransferDevice{CredentialID: "stable-device", ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}
 		return v
 	}})

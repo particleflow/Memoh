@@ -8,19 +8,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 type observationTransport struct {
 	t       *testing.T
-	refs    agenvo.BatchProgress
+	refs    computertarget.BatchProgress
 	methods []string
 	fault   string
 	after   func()
 }
 
-func (f *observationTransport) call(_ context.Context, _ agenvo.Scope, _ agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+func (f *observationTransport) call(_ context.Context, _ computertarget.Scope, _ computertarget.Target, method string, params map[string]any) (computertarget.Receipt, error) {
 	f.t.Helper()
 
 	f.methods = append(f.methods, method)
@@ -31,10 +31,10 @@ func (f *observationTransport) call(_ context.Context, _ agenvo.Scope, _ agenvo.
 		f.after()
 	}
 	if f.fault == "authentication" {
-		return agenvo.Receipt{}, errors.Join(agenvo.ErrAuthenticationUnavailable, errors.New("PRIVATE token"))
+		return computertarget.Receipt{}, errors.Join(computertarget.ErrAuthenticationUnavailable, errors.New("PRIVATE token"))
 	}
 	if f.fault == "connection" {
-		return agenvo.Receipt{}, errors.New("PRIVATE 401 device_offline")
+		return computertarget.Receipt{}, errors.New("PRIVATE 401 device_offline")
 	}
 	if f.fault == "offline" || f.fault == "runtime_unavailable" {
 		code := f.fault
@@ -42,13 +42,13 @@ func (f *observationTransport) call(_ context.Context, _ agenvo.Scope, _ agenvo.
 			code = "device_offline"
 		}
 		v, _ := json.Marshal(map[string]any{"execution": "not_started", "error": map[string]any{"code": code, "private": "SECRET"}})
-		var receipt agenvo.Receipt
+		var receipt computertarget.Receipt
 		_ = json.Unmarshal(v, &receipt)
-		err := agenvo.ErrNativeUnavailable
+		err := computertarget.ErrNativeUnavailable
 		if code == "device_offline" {
-			err = agenvo.ErrDeviceOffline
+			err = computertarget.ErrDeviceOffline
 		}
-		return receipt, errors.Join(agenvo.ErrRejected, err)
+		return receipt, errors.Join(computertarget.ErrRejected, err)
 	}
 	var body any
 	switch method {
@@ -102,7 +102,7 @@ func recoveryFixture(t *testing.T) (*Source, *fixtureStore, *observationTranspor
 		t.Fatal(err)
 	}
 	f := &observationTransport{t: t, refs: d.Batch.Progress}
-	source.service.relay = agenvo.NewService(store, permissionChecker{}, f.call)
+	source.service.relay = computertarget.NewService(store, permissionChecker{}, f.call)
 	return source, store, f, r.ID
 }
 

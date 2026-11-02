@@ -1,4 +1,4 @@
-ok  	github.com/felinics/memoh/internal/agenvo	10.129s
+ok  	github.com/felinics/memoh/internal/computertarget	10.129s
 ok  	github.com/felinics/memoh/internal/computertask	10.425s
 ok  	github.com/felinics/memoh/internal/handlers	4.149s
 ok  	github.com/felinics/memoh/internal/userruntime	0.029s

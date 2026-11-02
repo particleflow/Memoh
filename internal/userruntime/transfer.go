@@ -13,7 +13,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -191,7 +191,7 @@ func (s *TransferCredentials) device(ctx context.Context, id string) (TransferDe
 
 func (s *TransferCredentials) VerifyDevice(ctx context.Context, credential string) (TransferDevice, error) {
 	// Exact purpose/length/canonical format; neither account JWT nor upstream
-	// Agenvo/Remote Runtime credentials enter the lookup path.
+	// Remote Runtime credentials enter the lookup path.
 	if len(credential) != 4+36+1+64 || !strings.HasPrefix(credential, "mft_") {
 		return TransferDevice{}, ErrTransferCredential
 	}
@@ -229,14 +229,14 @@ func transferDigest(value string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func transferRuntimeTarget(r dbstore.RuntimeTransferRecord) (agenvo.Target, error) {
+func transferRuntimeTarget(r dbstore.RuntimeTransferRecord) (computertarget.Target, error) {
 	if r.Provider == "memoh" {
-		return agenvo.DecodeNativeTarget(r.RuntimeID, r.Config)
+		return computertarget.DecodeNativeTarget(r.RuntimeID, r.Config)
 	}
-	return agenvo.Target{}, ErrTransferCredential
+	return computertarget.Target{}, ErrTransferCredential
 }
 
-func transferIdentityDigest(t agenvo.Target) (string, error) {
+func transferIdentityDigest(t computertarget.Target) (string, error) {
 	raw, err := json.Marshal([3]string{t.ConnectionID, t.DeviceID, t.InstanceID})
 	if err != nil {
 		return "", err

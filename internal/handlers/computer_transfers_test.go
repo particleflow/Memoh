@@ -17,8 +17,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/server"
@@ -55,7 +55,7 @@ type taskTransferFixtureOptions struct {
 	root    string
 	assets  func(*media.Service) computertask.DeliveryAssets
 	request func(*http.Request)
-	device  func(computertask.DeliveryIdentity, agenvo.Target) DeviceTransferVerifier
+	device  func(computertask.DeliveryIdentity, computertarget.Target) DeviceTransferVerifier
 }
 
 func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransferFixtureOptions) (*deliveryHTTPFixture, *transferVerifierFixture, *httptest.Server, *transferclient.Client) {
@@ -85,7 +85,9 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe
 		defer mu.Unlock()
 		f.calls++
 		before := f.r
-		err := apply(computertask.DeliveryTransaction{Store: f, Authorize: func(context.Context, computertask.DeliveryIdentity) (agenvo.Target, error) { return f.target, nil }})
+		err := apply(computertask.DeliveryTransaction{Store: f, Authorize: func(context.Context, computertask.DeliveryIdentity) (computertarget.Target, error) {
+			return f.target, nil
+		}})
 		if err != nil {
 			f.r = before
 		}

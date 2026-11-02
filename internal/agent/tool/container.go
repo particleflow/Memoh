@@ -19,7 +19,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/hooks"
 	"github.com/felinics/memoh/internal/toolcontext"
 	workspacepkg "github.com/felinics/memoh/internal/workspace"
@@ -400,7 +400,7 @@ type toolWorkspace struct {
 }
 
 type resolvedToolTarget struct {
-	execute   func(context.Context, agenvo.Request) (agenvo.Result, error)
+	execute   func(context.Context, computertarget.Request) (computertarget.Result, error)
 	id        string
 	client    *bridge.Client
 	info      bridge.WorkspaceInfo
@@ -1154,13 +1154,13 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 
 	if target.execute != nil {
 		if args.RunInBackground || args.BackgroundMode != "" || args.MaxDurationSeconds != nil {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		if timeout > 300 {
 			timeout = 300
 		}
 		return p.execWithWorkspaceHooks(ctx, session, hookWorkspace, command, workDir, timeout, false, func() (any, error) {
-			result, err := target.execute(ctx, agenvo.Request{Scope: agenvo.Scope{UserID: session.UserID}, Command: command, WorkDir: workDir, Timeout: time.Duration(timeout) * time.Second})
+			result, err := target.execute(ctx, computertarget.Request{Scope: computertarget.Scope{UserID: session.UserID}, Command: command, WorkDir: workDir, Timeout: time.Duration(timeout) * time.Second})
 			if err != nil && result.State == "not_started" {
 				return nil, err
 			}

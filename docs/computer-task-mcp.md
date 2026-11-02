@@ -30,9 +30,9 @@ restricted host connection. This change creates no production token, OAuth
 grant or persistent credential and does not make a broad account token safe
 for several differently scoped conversations.
 
-An Agenvo command target cannot host the external Agent binary, its filesystem
+A legacy executor command target cannot host the external Agent binary, its filesystem
 or credentials. The original drivers' container requirement and the host's
-Agenvo rejection remain. The host bridge resolves the native workspace explicitly
+legacy executor rejection remain. The host bridge resolves the native workspace explicitly
 for an authenticated computer-bound turn; the same context retains the selected
 PC restriction for all task tools. Durable child-thread admission verifies the
 stored parent relationship and derives a child binding with exactly the parent
@@ -78,7 +78,7 @@ all enabled target policy modes. Task prose cannot match command bypass rules.
 Ask/deny policies fail before reservation/dispatch; this first interface does
 not yet implement a pending-approval continuation for computer tasks.
 
-Raw federation search/execute for registered Agenvo connections is hidden and
+Raw federation search/execute for registered legacy executor connections is hidden and
 rejected, including cached routes and revoked registry entries. Endpoint checks
 normalize host case, default ports, fragments and paths; actual HTTP requests
 (including redirects and SSE message endpoints) are checked before forwarding credentials or sending a request to that endpoint. Reuse of a stored Authorization/API-key header is also
@@ -96,7 +96,7 @@ confinement of arbitrary programs or unknown third-party tools.
 ## Existing registration and Pi configuration
 
 Registration and per-Bot grants reuse the existing account runtime tables.
-`PUT /users/me/runtimes/{id}/native-herdr` updates an existing owned native Runtime. Its `agent` field contains `{execution_mode: "pi-json-v1", provider, model, config_dir, path?}`. An empty Agent profile disables Pi tasks. Legacy Agenvo discovery/configuration routes are removed.
+`PUT /users/me/runtimes/{id}/native-herdr` updates an existing owned native Runtime. Its `agent` field contains `{execution_mode: "pi-json-v1", provider, model, config_dir, path?}`. An empty Agent profile disables Pi tasks. Legacy executor discovery/configuration routes are removed.
 Updates use owner checks and compare-and-swap; they do not create a duplicate
 connection, credentials, default target or grants. Actual paths and secrets
 belong only in private deployment configuration. The response advertises

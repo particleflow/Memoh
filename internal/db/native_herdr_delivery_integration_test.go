@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/media"
@@ -23,10 +23,10 @@ import (
 
 func TestNativeHerdrDeliveryUsesTransactionalRegistry(t *testing.T) {
 	f := newNativeHerdrFixture(t)
-	profile := agenvo.NativeHerdrProfile{
+	profile := computertarget.NativeHerdrProfile{
 		InstanceID: "synthetic-native-instance", Session: "synthetic-session", WorkDir: `C:\Synthetic`,
 		BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`,
-		Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`},
+		Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`},
 	}
 	raw, err := json.Marshal(map[string]any{"herdr": profile})
 	if err != nil {
@@ -36,7 +36,7 @@ func TestNativeHerdrDeliveryUsesTransactionalRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	f.config = raw
-	target, err := agenvo.DecodeNativeTarget(f.runtime, raw)
+	target, err := computertarget.DecodeNativeTarget(f.runtime, raw)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,8 +73,8 @@ func TestNativeHerdrDeliveryUsesTransactionalRegistry(t *testing.T) {
 	}
 	input := f.operation(f.mount)
 	id := computertask.DeliveryIdentity{Binding: toolcontext.ComputerBinding{BotID: f.bot, UserID: f.owner, SessionID: f.session, TargetID: f.mount, RunID: input.RunID}, OperationID: input.ID, DeviceID: target.DeviceID, InstanceID: target.InstanceID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
-	input.TargetFingerprint = agenvo.TargetFingerprint(target)
-	input.Details, _ = json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
+	input.TargetFingerprint = computertarget.TargetFingerprint(target)
+	input.Details, _ = json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: computertarget.BatchProgress{Attempt: id.Attempt, Generation: id.Generation}}, Phase: "submitted"})
 	if _, won, err := store.ClaimComputerOperation(t.Context(), input); err != nil || !won {
 		t.Fatal(won, err)
 	}

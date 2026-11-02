@@ -7,7 +7,7 @@ import (
 
 	tools "github.com/felinics/memoh/internal/agent/tool"
 	"github.com/felinics/memoh/internal/agent/toolexec"
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	workspacepkg "github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
@@ -28,10 +28,10 @@ func (*legacyTaskBridge) ListWorkspaceTargets(context.Context, string) ([]worksp
 	return nil, nil
 }
 
-func (p *legacyTaskBridge) ResolveWorkspaceTarget(_ context.Context, _ string, id string) (workspacepkg.ResolvedWorkspaceTarget, error) {
-	return workspacepkg.ResolvedWorkspaceTarget{TargetID: id, Kind: "remote", Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, OS: "windows", DefaultWorkDir: `C:\Synthetic`}, Execute: func(context.Context, agenvo.Request) (agenvo.Result, error) {
+func (p *legacyTaskBridge) ResolveWorkspaceTarget(_ context.Context, _, id string) (workspacepkg.ResolvedWorkspaceTarget, error) {
+	return workspacepkg.ResolvedWorkspaceTarget{TargetID: id, Kind: "remote", Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, OS: "windows", DefaultWorkDir: `C:\Synthetic`}, Execute: func(context.Context, computertarget.Request) (computertarget.Result, error) {
 		p.calls++
-		return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
+		return computertarget.Result{State: "not_started"}, computertarget.ErrComputerTaskRequired
 	}}, nil
 }
 
@@ -58,7 +58,7 @@ func TestStandardMCPUnknownCannotBeRetriedThroughLegacyExec(t *testing.T) {
 		}
 		found = true
 		_, err = tool.Execute(&toolexec.ToolExecContext{Context: t.Context()}, toolexec.ArgumentsFromValue(map[string]any{"target_id": "pc-a", "command": "printf 42", "work_dir": "."}))
-		if !errors.Is(err, agenvo.ErrComputerTaskRequired) {
+		if !errors.Is(err, computertarget.ErrComputerTaskRequired) {
 			t.Fatal("old exec bypassed ledger", err)
 		}
 	}

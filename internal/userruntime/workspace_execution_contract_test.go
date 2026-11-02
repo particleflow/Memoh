@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -38,7 +38,7 @@ const (
 )
 
 type executionContractRegistry struct {
-	dbstore.AgenvoRuntimeStore
+	dbstore.ComputerTargetStore
 	dbstore.UserRuntimeStore
 	dbstore.BotRemoteRuntimeBindingStore
 	raw       dbstore.JSON
@@ -177,12 +177,12 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 	if len(options) > 0 {
 		option = options[0]
 	}
-	profile := agenvo.NativeHerdrProfile{
+	profile := computertarget.NativeHerdrProfile{
 		InstanceID: "synthetic", Session: "synthetic", WorkDir: configuredRoot,
 		BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`,
 		HerdrConfigRoot: `C:\Synthetic\herdr`,
-		Agent:           agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`},
-		Producer:        agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\transferqueue.exe`, ConfigDir: `C:\Synthetic\transfer-config`, StateDir: `C:\Synthetic\transfer-state`},
+		Agent:           computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`},
+		Producer:        computertarget.ProducerLocator{ProgramPath: `C:\Synthetic\transferqueue.exe`, ConfigDir: `C:\Synthetic\transfer-config`, StateDir: `C:\Synthetic\transfer-state`},
 	}
 	var err error
 	store.raw, err = json.Marshal(map[string]any{"herdr": profile})
@@ -202,26 +202,26 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 		t.Fatal(err)
 	}
 	registry := store
-	relay := agenvo.NewService(registry, executionContractPermission{}, nil)
+	relay := computertarget.NewService(registry, executionContractPermission{}, nil)
 	calls, actualCWD := 0, ""
-	relay.SetNativeCaller(func(_ context.Context, _ agenvo.Scope, _ agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
+	relay.SetNativeCaller(func(_ context.Context, _ computertarget.Scope, _ computertarget.Target, method string, args map[string]any) (computertarget.Receipt, error) {
 		calls++
 		if method != "workspace.create" {
 			t.Fatal("unexpected native mutation", method)
 		}
 		actualCWD, _ = args["cwd"].(string)
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	})
 	manager := workspace.NewRemoteWorkspaceService(registry, svc)
-	taskService := computertask.NewService(registry, registry, relay, nil, func(ctx context.Context, _ toolcontext.ComputerBinding, _ string, _ string, _ string) error {
+	taskService := computertask.NewService(registry, registry, relay, nil, func(ctx context.Context, _ toolcontext.ComputerBinding, _, _, _ string) error {
 		_, err := manager.ResolveMount(ctx, executionBot, executionTarget)
 		return err
-	}).WithDefaultWorkDir(func(ctx context.Context, _ toolcontext.ComputerBinding, _ string, target agenvo.Target) (string, error) {
+	}).WithDefaultWorkDir(func(ctx context.Context, _ toolcontext.ComputerBinding, _ string, target computertarget.Target) (string, error) {
 		selected, err := svc.SelectedWorkspaceDirectory(ctx, "owner", serviceTestRuntimeID)
 		if err != nil || selected == "" {
 			return selected, err
 		}
-		return selected, agenvo.ValidateWorkDir(target.WorkDir, selected)
+		return selected, computertarget.ValidateWorkDir(target.WorkDir, selected)
 	})
 	binding := toolcontext.ComputerBinding{BotID: executionBot, UserID: "owner", SessionID: "synthetic-session", TargetID: executionTarget, RunID: "synthetic-run"}
 	ctx, bindErr := toolcontext.WithComputerBinding(t.Context(), binding)
@@ -245,14 +245,14 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 	}
 	err = nil
 	if response["isError"] == true {
-		err = agenvo.ErrUnknown
+		err = computertarget.ErrUnknown
 	}
 	if calls == 0 && response["isError"] == true {
 		raw, _ := json.Marshal(response)
 		if !strings.Contains(string(raw), "work_dir must stay within") {
 			t.Fatalf("unexpected pre-dispatch error: %s", raw)
 		}
-		err = agenvo.ErrUnsupported
+		err = computertarget.ErrUnsupported
 	}
 
 	explicitPath := option.sessionDirectory
@@ -268,7 +268,7 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 	}
 	if calls > 0 {
 		var details computertask.Details
-		if json.Unmarshal(registry.operation.Details, &details) != nil || details.TargetSnapshot == nil || details.TargetSnapshot.WorkDir != profile.WorkDir || details.TargetSnapshot.Producer != profile.Producer || agenvo.TargetFingerprint(*details.TargetSnapshot) != registry.operation.TargetFingerprint {
+		if json.Unmarshal(registry.operation.Details, &details) != nil || details.TargetSnapshot == nil || details.TargetSnapshot.WorkDir != profile.WorkDir || details.TargetSnapshot.Producer != profile.Producer || computertarget.TargetFingerprint(*details.TargetSnapshot) != registry.operation.TargetFingerprint {
 			t.Fatal("original root/producer directory pair was not pinned with target fingerprint")
 		}
 	}
@@ -295,7 +295,7 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 
 func TestNASDefaultUnalignedTargetDoesNotDispatch(t *testing.T) {
 	want, cwd, base, calls, err := selectedNASSubmission(t, `C:\Synthetic`, "")
-	if !errors.Is(err, agenvo.ErrUnsupported) || calls != 0 || cwd != "" {
+	if !errors.Is(err, computertarget.ErrUnsupported) || calls != 0 || cwd != "" {
 		t.Fatalf("unaligned new default crossed root guard: calls=%d err=%v", calls, err)
 	}
 	t.Logf("saved NAS=%q; unchanged local handshake=%q; no operation was dispatched", want, base)
@@ -305,21 +305,21 @@ func TestNASDefaultTaskSourceAndFileProjection(t *testing.T) {
 	t.Run("owner configured NAS root and relative child reaches original native boundary", func(t *testing.T) {
 		root := storageTestShare + `\` + serviceTestRuntimeID
 		want, cwd, base, calls, err := selectedNASSubmission(t, root, "")
-		if !errors.Is(err, agenvo.ErrUnknown) || calls != 1 || cwd != want || base != root {
+		if !errors.Is(err, computertarget.ErrUnknown) || calls != 1 || cwd != want || base != root {
 			t.Fatalf("existing UNC contract: cwd=%q want=%q base=%q calls=%d err=%v", cwd, want, base, calls, err)
 		}
 	})
 	t.Run("model period uses the saved NAS default", func(t *testing.T) {
 		root := storageTestShare + `\` + serviceTestRuntimeID
 		want, cwd, _, calls, err := selectedNASSubmission(t, root, ".")
-		if !errors.Is(err, agenvo.ErrUnknown) || calls != 1 || cwd != want {
+		if !errors.Is(err, computertarget.ErrUnknown) || calls != 1 || cwd != want {
 			t.Fatalf("period bypassed selected default: cwd=%q want=%q calls=%d err=%v", cwd, want, calls, err)
 		}
 	})
 	t.Run("NAS path cannot escape an existing local execution root", func(t *testing.T) {
 		requested := storageTestShare + `\` + serviceTestRuntimeID + `\project`
 		_, cwd, base, calls, err := selectedNASSubmission(t, `C:\Synthetic`, requested)
-		if !errors.Is(err, agenvo.ErrUnsupported) || calls != 0 || cwd != "" || base != `C:\Synthetic` {
+		if !errors.Is(err, computertarget.ErrUnsupported) || calls != 0 || cwd != "" || base != `C:\Synthetic` {
 			t.Fatalf("existing root guard: calls=%d err=%v", calls, err)
 		}
 	})
@@ -328,13 +328,13 @@ func TestNASDefaultTaskSourceAndFileProjection(t *testing.T) {
 func TestNASDefaultExplicitLocalAndUnavailable(t *testing.T) {
 	t.Run("explicit local request survives unrelated NAS disconnect", func(t *testing.T) {
 		_, cwd, _, calls, err := selectedNASSubmission(t, `C:\Synthetic`, `C:\Synthetic`, executionProbeOptions{offline: true})
-		if !errors.Is(err, agenvo.ErrUnknown) || calls != 1 || cwd != `C:\Synthetic` {
+		if !errors.Is(err, computertarget.ErrUnknown) || calls != 1 || cwd != `C:\Synthetic` {
 			t.Fatalf("explicit local cwd=%q calls=%d err=%v", cwd, calls, err)
 		}
 	})
 	t.Run("bound local session has precedence over account NAS choice", func(t *testing.T) {
 		_, cwd, _, calls, err := selectedNASSubmission(t, `C:\Synthetic`, "", executionProbeOptions{offline: true, sessionDirectory: `C:\Synthetic\local`})
-		if !errors.Is(err, agenvo.ErrUnknown) || calls != 1 || cwd != `C:\Synthetic\local` {
+		if !errors.Is(err, computertarget.ErrUnknown) || calls != 1 || cwd != `C:\Synthetic\local` {
 			t.Fatalf("bound local cwd=%q calls=%d err=%v", cwd, calls, err)
 		}
 	})

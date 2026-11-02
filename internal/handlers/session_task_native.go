@@ -9,8 +9,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -63,7 +63,7 @@ func (h *SessionTaskHandler) recheckNative(c echo.Context, b toolcontext.Compute
 
 func nativeTaskError(err error) error {
 	switch {
-	case errors.Is(err, computertask.ErrDenied), errors.Is(err, agenvo.ErrTargetChanged):
+	case errors.Is(err, computertask.ErrDenied), errors.Is(err, computertarget.ErrTargetChanged):
 		return apperror.New(apperror.CodeSessionNotFound, nil)
 	case errors.Is(err, computertask.ErrInvalid):
 		return apperror.New(apperror.CodeHTTPBadRequest, nil)
@@ -138,7 +138,7 @@ func (h *SessionTaskHandler) Followup(c echo.Context) error {
 	if err = h.recheckNative(c, b); err != nil {
 		return err
 	}
-	if errors.Is(callErr, computertask.ErrDenied) || errors.Is(callErr, agenvo.ErrTargetChanged) || errors.Is(callErr, computertask.ErrApproval) {
+	if errors.Is(callErr, computertask.ErrDenied) || errors.Is(callErr, computertarget.ErrTargetChanged) || errors.Is(callErr, computertask.ErrApproval) {
 		return nativeTaskError(callErr)
 	}
 	state := "unknown"
@@ -149,7 +149,7 @@ func (h *SessionTaskHandler) Followup(c echo.Context) error {
 		state = "blocked"
 	case out.Followup != nil:
 		state = out.Followup.State
-	case errors.Is(callErr, agenvo.ErrUnsupported):
+	case errors.Is(callErr, computertarget.ErrUnsupported):
 		state = "unsupported"
 	case errors.Is(callErr, computertask.ErrInvalid):
 		return nativeTaskError(callErr)

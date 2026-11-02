@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log/slog"
 
@@ -10,9 +9,9 @@ import (
 
 	"github.com/felinics/memoh/internal/accounts"
 	toolapproval "github.com/felinics/memoh/internal/agent/decision/approval"
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/config"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
@@ -24,14 +23,14 @@ import (
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, delegations *botdelegation.Service, cfg config.Config) *computertask.Source {
+func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *computertarget.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, delegations *botdelegation.Service, cfg config.Config) *computertask.Source {
 	permissions := &applicationBotPermissionChecker{bots: botService, accounts: accountService}
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
 	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit)
 	loader := &delegationAssetLoader{host: delegations.Host.(*delegationHost)}
 	service.WithInputReferences(loader.openComputerInput)
 	service.WithDefaultWorkDir(computerTaskWorkspaceDefault(store.GetMount, runtimes.SelectedWorkspaceDirectory))
-	service.WithInputFiles(func(ctx context.Context, binding toolcontext.ComputerBinding, targetID string, target agenvo.Target) (computertask.InputFileSystem, error) {
+	service.WithInputFiles(func(ctx context.Context, binding toolcontext.ComputerBinding, targetID string, target computertarget.Target) (computertask.InputFileSystem, error) {
 		// Resolve the same already-authorized native mount. Explicit root context
 		// suppresses account directory defaults; it never maps a NAS /data path.
 		resolved, err := manager.ResolveWorkspaceTarget(toolcontext.WithExplicitWorkdir(ctx, target.WorkDir), binding.BotID, targetID)
@@ -86,7 +85,7 @@ func (a *delegationAssetLoader) openComputerInput(ctx context.Context, b toolcon
 	return reader, attachment.Mime, err
 }
 
-func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(context.Context, string, string) (workspace.ResolvedWorkspaceTarget, error), evaluate func(context.Context, toolapproval.CreatePendingInput) (toolapproval.Evaluation, error)) computertask.Authorize {
+func computerTaskAuthorizer(permissions computertarget.PermissionChecker, resolve func(context.Context, string, string) (workspace.ResolvedWorkspaceTarget, error), evaluate func(context.Context, toolapproval.CreatePendingInput) (toolapproval.Evaluation, error)) computertask.Authorize {
 	return func(ctx context.Context, b toolcontext.ComputerBinding, target, kind, task string) error {
 		if kind == "herdr_pi_task" {
 			// A general Agent can read/write/run arbitrary commands. A task's
@@ -136,7 +135,7 @@ func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(c
 	}
 }
 
-func computerConnectionCheck(store *postgresstore.Store) func(context.Context, mcp.Connection) error {
+func computerConnectionCheck() func(context.Context, mcp.Connection) error {
 	return func(ctx context.Context, connection mcp.Connection) error {
 		if err := toolcontext.CheckDelegation(ctx); err != nil {
 			return err
@@ -144,17 +143,6 @@ func computerConnectionCheck(store *postgresstore.Store) func(context.Context, m
 		// Raw MCP has no trustworthy per-device scope. On a PC conversation
 		// only the constrained computer service may access remote devices.
 		if toolcontext.ComputerScope(ctx) != "" {
-			return mcp.ErrToolNotFound
-		}
-		config, err := json.Marshal(connection.Config)
-		if err != nil {
-			return computertask.ErrDenied
-		}
-		managed, err := store.IsManagedComputerEndpoint(ctx, connection.ID, config)
-		if err != nil {
-			return computertask.ErrDenied
-		}
-		if managed {
 			return mcp.ErrToolNotFound
 		}
 		return nil

@@ -92,7 +92,7 @@ older observers ignore the additive advisory and may continue harmless wakes.
 ## Validation boundaries
 
 Queue tests use isolated HTTPS NAS fixtures and actual private host storage.
-Observer tests use the real operation service with synthetic Agenvo/control-pane
+Observer tests use the real operation service with synthetic legacy executor/control-pane
 transport and CAS storage. They do not claim a deployed Herdr/PC/NAS route.
 Native Windows CI must execute the storage fixtures; Linux execution or Windows
 cross-compilation alone is not Windows acceptance. Real PC installation, initial

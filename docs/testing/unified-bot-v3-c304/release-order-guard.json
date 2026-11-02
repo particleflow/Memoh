@@ -6,7 +6,7 @@
     "contrib/herdr/memoh-delivery/README.md",
     "docs/delivery-producer-handoff.md",
     "docs/delivery-result-name-recovery.md",
-    "internal/agenvo/pi_result_filename_test.go",
+    "internal/computertarget/pi_result_filename_test.go",
     "internal/computertask/result_filename_test.go",
     "internal/computertask/source.go",
     "internal/deliverymeta/producer.go",

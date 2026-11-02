@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -22,7 +22,7 @@ func TestBatchTargetChangeWithProvenNoInvocationDispatchesFirst(t *testing.T) {
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
-	f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	f.receipt.History = &computertarget.BatchHistoryReport{Before: "not_checked", After: "not_started"}
 	f.receipt.Completion = nil
 	notStarted := batchResultUntilReady(t, c, first.ID)
 	if notStarted.PiResult == nil || notStarted.PiResult.Outcome != "not_started" || notStarted.PiResult.Preflight != "preflight_pi_missing" {
@@ -100,7 +100,7 @@ func TestBatchAdmissionBlockedPriorDoesNotStrandNewRequests(t *testing.T) {
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
-	f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	f.receipt.History = &computertarget.BatchHistoryReport{Before: "not_checked", After: "not_started"}
 	f.receipt.Completion = nil
 	notStarted := batchResultUntilReady(t, c, first.ID)
 	if notStarted.PiResult == nil || notStarted.PiResult.Outcome != "not_started" {
@@ -141,7 +141,7 @@ func TestBatchOnceStartedSessionStaysUnconfirmedOverBlockedPrior(t *testing.T) {
 	c := standardClient(t, source, "pc-a", false)
 	first := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic first"}, false))
 	f.receipt.Started = true
-	f.receipt.History = &agenvo.BatchHistoryReport{Before: "new", After: "missing"}
+	f.receipt.History = &computertarget.BatchHistoryReport{Before: "new", After: "missing"}
 	batchResultUntilReady(t, c, first.ID)
 	seedBlockedOperation(t, store, store.records[first.ID])
 	f.runs = 0
@@ -191,13 +191,13 @@ func TestBatchOnceStartedSessionStaysUnconfirmedAfterTargetChange(t *testing.T) 
 	failedResume.UpdatedAt = failedResume.CreatedAt
 	failedResume.TargetFingerprint = "changed-by-agent-path"
 	d.Phase = "pi_not_started"
-	d.Batch.Result = &agenvo.PiJSONResult{Outcome: "not_started", Preflight: "preflight_pi_missing"}
+	d.Batch.Result = &computertarget.PiJSONResult{Outcome: "not_started", Preflight: "preflight_pi_missing"}
 	d.Batch.Receipt.Started = false
 	d.Batch.Receipt.ExitCode = 125
 	d.Batch.Receipt.Preflight = "preflight_pi_missing"
 	d.Batch.Receipt.Completion = nil
-	d.Batch.Receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
-	d.Batch.Progress.History = &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "first"}
+	d.Batch.Receipt.History = &computertarget.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	d.Batch.Progress.History = &computertarget.BatchHistoryExpectation{Version: computertarget.BatchHistoryVersion, Mode: "first"}
 	failedResume.Details, _ = json.Marshal(d)
 	store.records[failedResume.ID] = failedResume
 	f.runs = 0
@@ -229,7 +229,7 @@ func TestResumeCompletedNotStartedReportsUnresumable(t *testing.T) {
 	f.receipt.Started = false
 	f.receipt.ExitCode = 125
 	f.receipt.Preflight = "preflight_pi_missing"
-	f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
+	f.receipt.History = &computertarget.BatchHistoryReport{Before: "not_checked", After: "not_started"}
 	f.receipt.Completion = nil
 	batchResultUntilReady(t, c, first.ID)
 	f.runs = 0

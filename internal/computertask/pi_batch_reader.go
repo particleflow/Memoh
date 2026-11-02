@@ -6,26 +6,26 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 // collectBatchRead is called only by explicit result/log collection. Read-only
 // status/observation handlers never reserve or create a reader. The original
 // Progress, receipt and file offsets are not replaced by this resource record.
-func (s *Service) collectBatchRead(ctx context.Context, scope agenvo.Scope, batch *BatchDetails, save func() error, read func(*agenvo.BatchRecoveryReader) error) error {
-	trace := agenvo.BatchReadTraceFromContext(ctx)
+func (s *Service) collectBatchRead(ctx context.Context, scope computertarget.Scope, batch *BatchDetails, save func() error, read func(*computertarget.BatchRecoveryReader) error) error {
+	trace := computertarget.BatchReadTraceFromContext(ctx)
 	if batch.RecoveryReader != nil && batch.RecoveryReader.Phase != "ready" {
 		if trace != nil {
 			trace.ReadStage = "reader"
 			trace.Reason = "reader_not_ready"
 		}
-		return agenvo.ErrUnknown // includes restart with creating: never create again
+		return computertarget.ErrUnknown // includes restart with creating: never create again
 	}
 	err := read(batch.RecoveryReader)
-	if batch.RecoveryReader != nil || !errors.Is(err, agenvo.ErrBatchControlChanged) {
+	if batch.RecoveryReader != nil || !errors.Is(err, computertarget.ErrBatchControlChanged) {
 		return err
 	}
-	reservation := &agenvo.BatchRecoveryReader{RequestID: uuid.NewString(), Phase: "creating"}
+	reservation := &computertarget.BatchRecoveryReader{RequestID: uuid.NewString(), Phase: "creating"}
 	batch.RecoveryReader = reservation
 	if trace != nil {
 		trace.SaveKind = "reader_reservation"
@@ -43,7 +43,7 @@ func (s *Service) collectBatchRead(ctx context.Context, scope agenvo.Scope, batc
 			trace.ReadStage = "reader"
 			trace.Reason = "reader_create_failed"
 		}
-		return agenvo.ErrUnknown // known/unknown failures both retain the one reservation
+		return computertarget.ErrUnknown // known/unknown failures both retain the one reservation
 	}
 	batch.RecoveryReader = &ready
 	if trace != nil {

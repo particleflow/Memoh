@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/mcp"
@@ -224,7 +224,7 @@ func newTaskInputFixture(t *testing.T) taskInputFixture {
 	t.Cleanup(func() { _ = conn.Close() })
 	files := taskInputPathView{client: bridge.NewClientFromConn(conn).FilesOnly(), root: pc, win: f.profile.WorkDir}
 	service.assets = assets
-	service.WithInputFiles(func(_ context.Context, b toolcontext.ComputerBinding, targetID string, target agenvo.Target) (InputFileSystem, error) {
+	service.WithInputFiles(func(_ context.Context, b toolcontext.ComputerBinding, targetID string, target computertarget.Target) (InputFileSystem, error) {
 		if b != f.binding || targetID != f.binding.TargetID || target.WorkDir != f.profile.WorkDir || target.Producer != f.profile.Producer {
 			t.Fatal("input resolver changed original target/root/config pair")
 		}
@@ -332,14 +332,14 @@ func TestTaskInputRejectsUnauthorizedCorruptAndConflictingBytes(t *testing.T) {
 				in.Inputs = append(in.Inputs, in.Inputs[0])
 			case "target-changed":
 				old := f.service.inputFiles
-				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target agenvo.Target) (InputFileSystem, error) {
+				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target computertarget.Target) (InputFileSystem, error) {
 					files, err := old(ctx, b, id, target)
 					f.base.denied = true
 					return files, err
 				}
 			case "conflicting-input":
 				old := f.service.inputFiles
-				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target agenvo.Target) (InputFileSystem, error) {
+				f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target computertarget.Target) (InputFileSystem, error) {
 					files, err := old(ctx, b, id, target)
 					for _, r := range f.base.store.records {
 						var d Details
@@ -433,7 +433,7 @@ fs.appendFileSync(process.env.SYNTH_PC_ROOT+'/pi-count','1');
 			t.Fatal(err)
 		}
 	}
-	f.service.relay.SetNativeCaller(func(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
+	f.service.relay.SetNativeCaller(func(ctx context.Context, scope computertarget.Scope, target computertarget.Target, method string, args map[string]any) (computertarget.Receipt, error) {
 		if method == "pane.run" && args["paneId"] == "job" {
 			script := unpackTaskInputScript(t, args["command"].(string))
 			cmd := exec.CommandContext(ctx, "/bin/bash", "--noprofile", "--norc", "-p") //nolint:gosec // Actual production generated envelope; isolated fixture peer, no production device/model.
@@ -468,7 +468,7 @@ fs.appendFileSync(process.env.SYNTH_PC_ROOT+'/pi-count','1');
 
 type taskInputProcessConfig struct {
 	Binding          toolcontext.ComputerBinding
-	Profile          agenvo.NativeHerdrProfile
+	Profile          computertarget.NativeHerdrProfile
 	Mounts           map[string]dbstore.BotRemoteRuntimeBindingRecord
 	Records          map[string]dbstore.ComputerOperationRecord
 	Request          Submit
@@ -511,10 +511,10 @@ func TestTaskInputProcessChild(t *testing.T) {
 	}
 	defer func() { _ = conn.Close() }()
 	files := taskInputPathView{client: bridge.NewClientFromConn(conn).FilesOnly(), root: config.PC, win: config.Profile.WorkDir}
-	relay := agenvo.NewService(f.store, f, f.invoke)
+	relay := computertarget.NewService(f.store, f, f.invoke)
 	store := &resumeOperationStore{nativeTaskStore: f.store}
 	s := NewService(store, f.store, relay, media.NewService(nil, localfs.New(config.NAS)), func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
-	s.WithInputFiles(func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (InputFileSystem, error) {
+	s.WithInputFiles(func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (InputFileSystem, error) {
 		return files, nil
 	})
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), f.binding)
@@ -687,7 +687,7 @@ func TestTaskInputActivePreparationCannotAcquireSecondWriter(t *testing.T) {
 	entered, release := make(chan struct{}), make(chan struct{})
 	var resolves atomic.Int32
 	resolve := f.service.inputFiles
-	f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target agenvo.Target) (InputFileSystem, error) {
+	f.service.inputFiles = func(ctx context.Context, b toolcontext.ComputerBinding, id string, target computertarget.Target) (InputFileSystem, error) {
 		if resolves.Add(1) == 1 {
 			close(entered)
 			select {
@@ -724,7 +724,7 @@ func TestTaskInputActivePreparationCannotAcquireSecondWriter(t *testing.T) {
 	_, resumeErr := f.service.submit(f.ctx, f.base.binding, in)
 	close(release)
 	first := <-finished
-	if !errors.Is(resumeErr, agenvo.ErrUnknown) || first.err != nil || first.result.State != "submitted" || resolves.Load() != 1 || f.peer.writes.Load() != 1 || f.base.batch.runs != 1 {
+	if !errors.Is(resumeErr, computertarget.ErrUnknown) || first.err != nil || first.result.State != "submitted" || resolves.Load() != 1 || f.peer.writes.Load() != 1 || f.base.batch.runs != 1 {
 		t.Fatal("live preparation acquired a second writer", resumeErr, first.err, resolves.Load(), f.peer.writes.Load(), f.base.batch.runs)
 	}
 }
@@ -764,7 +764,7 @@ func TestTaskInputDriveRootRemainsAbsolute(t *testing.T) {
 	mount.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": f.base.profile})
 	f.base.store.mounts[f.base.binding.TargetID] = mount
 	f.files.win = f.base.profile.WorkDir
-	f.service.WithInputFiles(func(_ context.Context, _ toolcontext.ComputerBinding, _ string, target agenvo.Target) (InputFileSystem, error) {
+	f.service.WithInputFiles(func(_ context.Context, _ toolcontext.ComputerBinding, _ string, target computertarget.Target) (InputFileSystem, error) {
 		if target.WorkDir != `C:\` {
 			t.Fatal("selected drive root changed")
 		}

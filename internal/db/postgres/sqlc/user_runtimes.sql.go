@@ -586,29 +586,6 @@ func (q *Queries) ListUserRuntimes(ctx context.Context, userID pgtype.UUID) ([]U
 	return items, nil
 }
 
-const ownedHTTPMCPConnectionBot = `-- name: OwnedHTTPMCPConnectionBot :one
-SELECT bot.id FROM mcp_connections connection
-JOIN bots bot ON bot.id = connection.bot_id AND bot.team_id = public.memoh_current_team_id()
-JOIN team_members membership ON membership.team_id = public.memoh_current_team_id() AND membership.user_id = bot.owner_user_id AND membership.is_active
-JOIN users owner ON owner.id = bot.owner_user_id AND owner.is_active
-WHERE connection.team_id = public.memoh_current_team_id()
-  AND connection.id = $1
-  AND bot.owner_user_id = $2
-  AND connection.is_active AND connection.type = 'http'
-`
-
-type OwnedHTTPMCPConnectionBotParams struct {
-	ConnectionID pgtype.UUID `json:"connection_id"`
-	OwnerID      pgtype.UUID `json:"owner_id"`
-}
-
-func (q *Queries) OwnedHTTPMCPConnectionBot(ctx context.Context, arg OwnedHTTPMCPConnectionBotParams) (pgtype.UUID, error) {
-	row := q.db.QueryRow(ctx, ownedHTTPMCPConnectionBot, arg.ConnectionID, arg.OwnerID)
-	var id pgtype.UUID
-	err := row.Scan(&id)
-	return id, err
-}
-
 const revokeUserRuntime = `-- name: RevokeUserRuntime :one
 UPDATE user_runtimes
 SET revoked_at = now(), updated_at = now()

@@ -1,10 +1,10 @@
-# Retired Agenvo records and native Runtime cutover
+# Retired legacy executor records and native Runtime cutover
 
 The production computer-task service uses the existing official Memoh Runtime
-Exec transport to Herdr/Pi. The legacy Agenvo create/discover/configuration
-routes are removed, `provider=agenvo` is rejected on create, and the owner,
+Exec transport to Herdr/Pi. The legacy executor create/discover/configuration
+routes are removed, `provider=legacy-executor` is rejected on create, and the owner,
 Bot-target and account-grant lists select only `provider=memoh`. An active old
-MCP connection does not make an Agenvo registration executable or selectable.
+MCP connection does not make a legacy executor registration executable or selectable.
 The shared resolver rejects an explicitly selected retired target before any
 MCP/OAuth call and never substitutes the current primary computer.
 
@@ -20,7 +20,7 @@ It cannot be replayed or copied to the native Runtime.
 
 The existing MCP Enabled switch can disable an exact retired connection after
 its source Bot and ID are identified. This is a reversible configuration action,
-not required to make retired computer-task routing reject Agenvo. General MCP
+not required to make retired computer-task routing reject legacy executor. General MCP
 management is a separate boundary: do not invoke Test, OAuth authorization or
 changed-endpoint saves to repair the retired computer path. Other OAuth clients
 must remain untouched. An already accepted request cannot be recalled by a flag.
@@ -37,7 +37,7 @@ Configure an already activated, owned native Runtime through
 [native Herdr contract](native-runtime-herdr.md). Reuse the installed official
 Pi/Herdr/Node/Git and the existing approved Magpie profile. No new provider or
 legacy OAuth transport is enabled. A native Runtime UUID remains distinct from
-old Agenvo connection/device IDs and their original file bindings.
+old legacy executor connection/device IDs and their original file bindings.
 
 For future work, use the existing Bot mount/grant and primary-target interfaces
 to select the verified native mount. The literal target ID `native` denotes the
@@ -60,10 +60,9 @@ report do not establish their completion.
 
 ## Source evidence
 
-`internal/db/native_runtime_cutover_integration_test.go` verifies native-only
-selection, retired registration/grant/transfer rejection, zero legacy transport,
-and preservation of original rows and unknown operations in isolated PostgreSQL.
-The source checkpoint is recorded in
-[evidence/agenvo-project-retirement/checks.md](evidence/agenvo-project-retirement/checks.md).
-Its results are historical evidence for that recorded commit, not a current
-PC/NAS, browser or schedule acceptance claim.
+`internal/db/native_runtime_cutover_integration_test.go` (since removed by the
+retirement cleanup) verified native-only selection, retired registration/grant/
+transfer rejection, zero legacy transport, and preservation of original rows and
+unknown operations in isolated PostgreSQL. Those results are historical evidence
+for the recorded source checkpoint, not a current PC/NAS, browser or schedule
+acceptance claim.

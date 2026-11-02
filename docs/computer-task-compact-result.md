@@ -1,6 +1,6 @@
 # Compact Pi completion results
 
-> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+> Current routing: legacy executor enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. The wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/computertarget` ledger remains in use by native Herdr/Pi.
 
 This is a separate, unshipped follow-up to the merged versioned path resolver in PR #11.
 It does not change Pi, Memoh's Agent runtime/contextview, the configured provider,
@@ -192,12 +192,12 @@ based on main and remains draft. Runtime/contextview still match the official
 
 Fresh integration checks passed:
 
-- Race tests for config, agenvo, computertask, sessiontask, media and localfs,
+- Race tests for config, legacy-executor, computertask, sessiontask, media and localfs,
   including long-line parsing, the bounded parser watchdog, interrupted atomic
   result writes, correlation failures and legacy saved-offset recovery.
 - Task authorization/no-store and upload/resumable HTTP regressions, plus the
   isolated PostgreSQL owned-tree/stable-cursor test.
-- A rebuilt cloud Server and the real Web UI with synthetic model/Agenvo
+- A rebuilt cloud Server and the real Web UI with synthetic model/legacy executor
   endpoints: one new synthetic batch dispatch, three scripted provider requests,
   only `result.json` recovered, a correlated `succeeded` result, no stdout/stderr
   references and `diagnostics_state=not_collected`. The mock transport executes

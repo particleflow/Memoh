@@ -12,7 +12,7 @@ performed. This is agent verification, not human QA.
 - Browser login, `/settings/runtimes`, and
   `/settings/bots/session-tasks-synthetic?tab=remote-runtime` used the actual
   application and actual HTTP responses. A temporary loopback MCP fixture
-  represented the native upstream, not a real Windows/Agenvo deployment.
+  represented the native upstream, not a real Windows/legacy executor deployment.
   The browser did not replace or mock Memoh API responses.
 - The fixture returned HTTP 401, explicit `device_offline`, or
   `runtime_unavailable`. Six actual runtime/target HTTP checks and three
@@ -30,7 +30,7 @@ performed. This is agent verification, not human QA.
 
 ## Automated and HTTP checks
 
-- Go race tests passed for `internal/agenvo`, `internal/computertask`,
+- Go race tests passed for `internal/computertarget`, `internal/computertask`,
   `internal/userruntime`, `internal/workspace`, `internal/handlers`,
   `internal/sessiontask`, `internal/server`, and `cmd/internal/core`.
   The final identity-projection change also passed focused race tests.

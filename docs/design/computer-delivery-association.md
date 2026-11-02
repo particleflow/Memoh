@@ -10,7 +10,7 @@ The host calls `DeliveryService.Commit` or `Resolve` with a process-local
 `DeliveryIdentity`. The identity extends the existing `HostComputerBinding`
 with operation, device, instance, attempt and generation. It must be supplied
 by an authenticated execution host, never reconstructed from request fields,
-an operation ID, an account-wide Bot token or Agenvo OAuth credentials.
+an operation ID, an account-wide Bot token or legacy executor OAuth credentials.
 
 The candidate HTTP adapter exposes POST
 `/internal/computer-deliveries/{operation_id}/{delivery_id}/commit` and

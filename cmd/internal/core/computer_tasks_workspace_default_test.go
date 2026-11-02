@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -20,7 +20,7 @@ func TestComputerTaskWorkspaceDefaultBindingAndRoots(t *testing.T) {
 		{name: "absent selection preserves local", targetRoot: `C:\Synthetic`},
 		{name: "selected root preserves dot artifact semantics", selected: root, targetRoot: root, want: "."},
 		{name: "selected child", selected: root + `\project`, targetRoot: root, want: root + `\project`},
-		{name: "local root not broadened", selected: root, targetRoot: `C:\Synthetic`, wantErr: agenvo.ErrUnsupported},
+		{name: "local root not broadened", selected: root, targetRoot: `C:\Synthetic`, wantErr: computertarget.ErrUnsupported},
 		{name: "different registered Runtime", targetRoot: root, mutate: "runtime", wantErr: computertask.ErrDenied},
 		{name: "different Bot", targetRoot: root, mutate: "bot", wantErr: computertask.ErrDenied},
 		{name: "different owner", targetRoot: root, mutate: "owner", wantErr: computertask.ErrDenied},
@@ -45,7 +45,7 @@ func TestComputerTaskWorkspaceDefaultBindingAndRoots(t *testing.T) {
 				}
 				return tc.selected, nil
 			})
-			got, err := resolve(t.Context(), toolcontext.ComputerBinding{BotID: "bot"}, "target", agenvo.Target{NativeRuntimeID: "runtime", WorkDir: tc.targetRoot})
+			got, err := resolve(t.Context(), toolcontext.ComputerBinding{BotID: "bot"}, "target", computertarget.Target{NativeRuntimeID: "runtime", WorkDir: tc.targetRoot})
 			if !errors.Is(err, tc.wantErr) || got != tc.want || tc.mutate != "" && lookups != 0 {
 				t.Fatalf("directory=%q err=%v lookups=%d", got, err, lookups)
 			}

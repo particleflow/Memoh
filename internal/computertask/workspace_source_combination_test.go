@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -34,16 +34,16 @@ func TestWorkspaceSourceCombinationKeepsArtifactRoot(t *testing.T) {
 				t.Fatal(err)
 			}
 			f.store.mounts[f.binding.TargetID] = mount
-			service.WithDefaultWorkDir(func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (string, error) {
+			service.WithDefaultWorkDir(func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (string, error) {
 				return test.selected, nil
 			})
 			creates := 0
-			service.relay.SetNativeCaller(func(_ context.Context, _ agenvo.Scope, target agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
+			service.relay.SetNativeCaller(func(_ context.Context, _ computertarget.Scope, target computertarget.Target, method string, args map[string]any) (computertarget.Receipt, error) {
 				if !test.allowed || method != "workspace.create" || args["cwd"] != root || target.WorkDir != root || target.Producer != f.profile.Producer {
 					t.Fatal("unexpected dispatch or changed task/producer root")
 				}
 				creates++
-				return agenvo.Receipt{}, agenvo.ErrUnknown
+				return computertarget.Receipt{}, computertarget.ErrUnknown
 			})
 			result, err := service.submit(ctx, f.binding, Submit{
 				Kind: "herdr_pi_task", Task: "synthetic root-bound artifact", WorkDir: test.requested,
@@ -55,7 +55,7 @@ func TestWorkspaceSourceCombinationKeepsArtifactRoot(t *testing.T) {
 				}
 				return
 			}
-			if !errors.Is(err, agenvo.ErrUnknown) || result.ID == "" || creates != 1 {
+			if !errors.Is(err, computertarget.ErrUnknown) || result.ID == "" || creates != 1 {
 				t.Fatal("expected one uncertain root workspace creation", err)
 			}
 			_, details, err := service.load(ctx, f.binding, result.ID)

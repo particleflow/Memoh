@@ -126,7 +126,7 @@ func (p *computerWorkflowProvider) Usage(ctx context.Context, session agenttools
 
 func (p *computerWorkflowProvider) Tools(ctx context.Context, session agenttools.SessionContext) ([]toolexec.Tool, error) {
 	list := toolexec.Tool{Name: "list_execution_locations", Description: "Discover authorized targets.", Parameters: toolexec.SchemaFromValue(map[string]any{"type": "object"}), Execute: func(*toolexec.ToolExecContext, sdk.ToolArguments) (sdk.ToolOutput, error) {
-		return toolexec.OutputFromValue(map[string]any{"locations": []any{map[string]any{"target_id": "synthetic-target", "provider": "agenvo", "capabilities": []string{"exec_foreground"}, "available": true}}}), nil
+		return toolexec.OutputFromValue(map[string]any{"locations": []any{map[string]any{"target_id": "synthetic-target", "provider": "legacy-executor", "capabilities": []string{"exec_foreground"}, "available": true}}}), nil
 	}}
 	if p.minimal {
 		return []toolexec.Tool{list}, nil

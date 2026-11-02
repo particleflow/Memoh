@@ -21,7 +21,7 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 //go:embed testdata/herdr-v0.9.5.json
@@ -394,7 +394,7 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 				t.Errorf("child exit lost: got %d, want %d", gotExit, wantExit)
 			}
 			if mode == "pinned-json" {
-				receipt, err := parseReceipt("workspace.create", agenvo.Target{Session: "synthetic"}, gotExit, stdout.Bytes(), stderr.Bytes())
+				receipt, err := parseReceipt("workspace.create", computertarget.Target{Session: "synthetic"}, gotExit, stdout.Bytes(), stderr.Bytes())
 				if err != nil || receipt.Execution != "accepted" {
 					t.Errorf("official create receipt lost across PowerShell and parser: execution=%s err=%v", receipt.Execution, err)
 				}

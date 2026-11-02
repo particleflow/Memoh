@@ -6,24 +6,27 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/workdir"
 )
 
 type authorityFixture struct {
-	sessions map[string]thread.Thread
-	teams    map[string]string
-	denied   map[string]bool
-	mounts   map[string]dbstore.BotRemoteRuntimeBindingRecord
-	targets  map[string]agenvo.Target
-	assets   map[string]bool
-	workdirs map[string]workdir.Workdir
-	active   bool
+	sessions        map[string]thread.Thread
+	teams           map[string]string
+	denied          map[string]bool
+	mounts          map[string]dbstore.BotRemoteRuntimeBindingRecord
+	targets         map[string]computertarget.Target
+	assets          map[string]bool
+	workdirs        map[string]workdir.Workdir
+	active          bool
+	registration    dbstore.UserRuntimeRecord
+	registrationErr error
 }
 
 func fixture() (*Authority, *authorityFixture, Identity, DevicePair) {
@@ -34,17 +37,27 @@ func fixture() (*Authority, *authorityFixture, Identity, DevicePair) {
 			"specialist-session": {ID: "specialist-session", TeamID: "team", BotID: "specialist", CreatedByUserID: "user", Type: thread.TypeChat},
 		},
 		teams: map[string]string{"manager": "team", "specialist": "team"}, denied: map[string]bool{},
-		mounts: map[string]dbstore.BotRemoteRuntimeBindingRecord{}, targets: map[string]agenvo.Target{},
+		mounts: map[string]dbstore.BotRemoteRuntimeBindingRecord{}, targets: map[string]computertarget.Target{},
 		assets: map[string]bool{}, workdirs: map[string]workdir.Workdir{}, active: true,
 	}
-	target := agenvo.Target{ConnectionID: "20000000-0000-4000-8000-000000000001", DeviceID: "synthetic-device", InstanceID: "synthetic-instance", Session: "synthetic-session", WorkDir: `C:\synthetic`, BashPath: `C:\synthetic\bin\bash.exe`}
+	raw, err := json.Marshal(map[string]any{"herdr": computertarget.NativeHerdrProfile{
+		InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic\work`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\config\herdr`,
+	}})
+	if err != nil {
+		panic(err)
+	}
+	target, err := computertarget.DecodeRuntimeTarget("memoh", nativeRuntimeID, raw)
+	if err != nil {
+		panic(err)
+	}
 	for _, side := range []struct{ bot, mount string }{{"manager", "manager-pc-a"}, {"specialist", "specialist-pc-a"}} {
-		f.mounts[side.bot+"/"+side.mount] = dbstore.BotRemoteRuntimeBindingRecord{ID: side.mount, BotID: side.bot, RuntimeID: "pc-a", RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: agenvo.Provider}
+		f.mounts[side.bot+"/"+side.mount] = dbstore.BotRemoteRuntimeBindingRecord{ID: side.mount, BotID: side.bot, RuntimeID: nativeRuntimeID, RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: "memoh", RuntimeProviderConfig: raw}
 		f.targets[side.bot+"/"+side.mount] = target
 	}
+	f.registration = dbstore.UserRuntimeRecord{ID: nativeRuntimeID, UserID: "owner", Provider: "memoh", ActivatedAt: time.Now(), ProviderConfig: raw}
 	a := &Authority{Permissions: f, Sessions: sessionFixture{f}, Workdirs: workdirFixture{f}, Mounts: f, Assets: f}
 	b := Identity{TeamID: "team", UserID: "user", SourceBotID: "manager", SourceSessionID: "child", SourceRootID: "root", TargetBotID: "specialist", TargetSessionID: "specialist-session"}
-	p := DevicePair{SourceMountID: "manager-pc-a", TargetMountID: "specialist-pc-a", RuntimeID: "pc-a", Fingerprint: agenvo.TargetFingerprint(target)}
+	p := DevicePair{SourceMountID: "manager-pc-a", TargetMountID: "specialist-pc-a", RuntimeID: nativeRuntimeID, Fingerprint: computertarget.TargetFingerprint(target)}
 	return a, f, b, p
 }
 
@@ -94,16 +107,18 @@ func (f *authorityFixture) GetMount(_ context.Context, bot, id string) (dbstore.
 	return m, nil
 }
 
-func (*authorityFixture) OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error) {
-	return dbstore.UserRuntimeRecord{}, db.ErrNotFound
+func (f *authorityFixture) OwnedNativeHerdrRuntime(_ context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
+	if f.registrationErr != nil {
+		return dbstore.UserRuntimeRecord{}, f.registrationErr
+	}
+	if owner != f.registration.UserID || id != f.registration.ID {
+		return dbstore.UserRuntimeRecord{}, ErrDenied
+	}
+	return f.registration, nil
 }
 
 func (*authorityFixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
-}
-
-func (*authorityFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	return "manager", nil
 }
 
 func (f *authorityFixture) SessionHasAsset(_ context.Context, bot, session, hash string) (bool, error) {
@@ -206,7 +221,7 @@ func TestHandoffComputerIntersectionAndRevocation(t *testing.T) {
 			s := f.sessions["root"]
 			s.Metadata = map[string]any{"workspace_target_id": "pc-b"}
 			f.sessions["root"] = s
-			f.targets["manager/pc-b"] = agenvo.Target{}
+			f.targets["manager/pc-b"] = computertarget.Target{}
 		}},
 		{"source revoked", func(f *authorityFixture, _ *DevicePair) { delete(f.mounts, "manager/manager-pc-a") }},
 		{"target revoked", func(f *authorityFixture, _ *DevicePair) { delete(f.mounts, "specialist/specialist-pc-a") }},
@@ -226,9 +241,9 @@ func TestHandoffComputerIntersectionAndRevocation(t *testing.T) {
 			f.mounts["specialist/specialist-pc-a"] = m
 		}},
 		{"registration changed", func(f *authorityFixture, _ *DevicePair) {
-			v := f.targets["specialist/specialist-pc-a"]
-			v.InstanceID = "other"
-			f.targets["specialist/specialist-pc-a"] = v
+			m := f.mounts["specialist/specialist-pc-a"]
+			m.RuntimeProviderConfig = []byte(`{"herdr":{"instance_id":"other"}}`)
+			f.mounts["specialist/specialist-pc-a"] = m
 		}},
 		{"source exec revoked", func(f *authorityFixture, _ *DevicePair) { f.denied["manager/workspace_exec"] = true }},
 		{"target exec revoked", func(f *authorityFixture, _ *DevicePair) { f.denied["specialist/workspace_exec"] = true }},

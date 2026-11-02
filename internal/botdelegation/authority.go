@@ -8,9 +8,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/workdir"
@@ -51,7 +51,6 @@ type Mounts interface {
 	GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error)
-	OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
 }
 
 type AssetLinks interface {
@@ -303,7 +302,7 @@ func (a *Authority) AuthorizeDevice(ctx context.Context, b Identity, pair Device
 			return ErrDenied
 		}
 		m, t, err := a.registration(ctx, side.bot, side.mount)
-		if err != nil || m.RuntimeID != pair.RuntimeID || agenvo.TargetFingerprint(t) != pair.Fingerprint {
+		if err != nil || m.RuntimeID != pair.RuntimeID || computertarget.TargetFingerprint(t) != pair.Fingerprint {
 			return ErrDenied
 		}
 	}
@@ -313,34 +312,28 @@ func (a *Authority) AuthorizeDevice(ctx context.Context, b Identity, pair Device
 // registration is a database-only boundary check. ResolveTarget is deliberately
 // not used: that execution resolver requires workspace_exec, which must not be
 // implied by chat, original-media reads, or read-only device authorization.
-func (a *Authority) registration(ctx context.Context, bot, mount string) (dbstore.BotRemoteRuntimeBindingRecord, agenvo.Target, error) {
+func (a *Authority) registration(ctx context.Context, bot, mount string) (dbstore.BotRemoteRuntimeBindingRecord, computertarget.Target, error) {
 	if a.Mounts == nil {
-		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		return dbstore.BotRemoteRuntimeBindingRecord{}, computertarget.Target{}, ErrDenied
 	}
 	m, err := a.Mounts.GetMount(ctx, bot, mount)
 	if err != nil || m.BotID != bot || m.ID != mount || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID {
-		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		return dbstore.BotRemoteRuntimeBindingRecord{}, computertarget.Target{}, ErrDenied
 	}
-	t, err := agenvo.DecodeRuntimeTarget(m.RuntimeProvider, m.RuntimeID, m.RuntimeProviderConfig)
+	t, err := computertarget.DecodeRuntimeTarget(m.RuntimeProvider, m.RuntimeID, m.RuntimeProviderConfig)
 	if err != nil {
-		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		return dbstore.BotRemoteRuntimeBindingRecord{}, computertarget.Target{}, ErrDenied
 	}
 	if t.NativeRuntimeID != "" {
 		// The mount alone does not establish activation. Reuse the existing
 		// owner-scoped registry query and reject a changed registration snapshot.
 		r, err := a.Mounts.OwnedNativeHerdrRuntime(ctx, m.RuntimeUserID, m.RuntimeID)
 		if err != nil || r.ID != m.RuntimeID || r.UserID != m.RuntimeUserID || r.Provider != m.RuntimeProvider || r.ActivatedAt.IsZero() {
-			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+			return dbstore.BotRemoteRuntimeBindingRecord{}, computertarget.Target{}, ErrDenied
 		}
-		current, err := agenvo.DecodeRuntimeTarget(r.Provider, r.ID, r.ProviderConfig)
-		if err != nil || agenvo.TargetFingerprint(current) != agenvo.TargetFingerprint(t) {
-			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
-		}
-	} else {
-		// Retain authorization of historical registrations for receipt reads;
-		// new plans exclude them and production execution keeps Agenvo retired.
-		if _, err = a.Mounts.OwnedHTTPMCPConnectionBot(ctx, m.RuntimeUserID, t.ConnectionID); err != nil {
-			return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+		current, err := computertarget.DecodeRuntimeTarget(r.Provider, r.ID, r.ProviderConfig)
+		if err != nil || computertarget.TargetFingerprint(current) != computertarget.TargetFingerprint(t) {
+			return dbstore.BotRemoteRuntimeBindingRecord{}, computertarget.Target{}, ErrDenied
 		}
 	}
 	return m, t, nil
@@ -358,10 +351,10 @@ func (a *Authority) PlanDevice(ctx context.Context, b Identity, source, target s
 		return DevicePair{}, ErrDenied
 	}
 	tm, tt, err := a.registration(ctx, b.TargetBotID, target)
-	if err != nil || tm.RuntimeProvider != "memoh" || tm.RuntimeID != m.RuntimeID || agenvo.TargetFingerprint(t) != agenvo.TargetFingerprint(tt) {
+	if err != nil || tm.RuntimeProvider != "memoh" || tm.RuntimeID != m.RuntimeID || computertarget.TargetFingerprint(t) != computertarget.TargetFingerprint(tt) {
 		return DevicePair{}, ErrDenied
 	}
-	return DevicePair{SourceMountID: m.ID, TargetMountID: tm.ID, RuntimeID: m.RuntimeID, Fingerprint: agenvo.TargetFingerprint(t)}, nil
+	return DevicePair{SourceMountID: m.ID, TargetMountID: tm.ID, RuntimeID: m.RuntimeID, Fingerprint: computertarget.TargetFingerprint(t)}, nil
 }
 
 // AuthorizeAsset accepts a content hash only when the original is linked to

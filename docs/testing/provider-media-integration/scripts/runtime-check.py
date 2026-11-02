@@ -43,10 +43,6 @@ class Handler(BaseHTTPRequestHandler):
 peer = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
 threading.Thread(target=peer.serve_forever, daemon=True).start()
 original_operations = snapshot('computer_operations')
-registration = json.loads(Path('/tmp/computer-admission/private-registration.json').read_text())
-owner_path = '/users/me/runtimes/' + registration['runtime_id'] + '/agenvo-endpoint'
-owner_before = call(owner_path)
-assert owner_before[0] == 200
 provider_id = None
 foreign = str(uuid.uuid4()); team = str(uuid.uuid4())
 created_foreign = False
@@ -71,8 +67,7 @@ try:
     assert len(calls) == 4 and all(c['method'] == 'GET' for c in calls), calls
     assert all(snapshot(table) == old for table, old in before.items())
     assert snapshot('computer_operations') == original_operations
-    assert call(owner_path) == owner_before
-    print('PASS combined actual Server/PG/Web: 4 catalog GET, 0 media POST; anonymous 401 and real foreign-team 404 made no upstream request; full provider/model/operation rows unchanged; owner locator response unchanged.')
+    print('PASS combined actual Server/PG/Web: 4 catalog GET, 0 media POST; anonymous 401 and real foreign-team 404 made no upstream request; full provider/model/operation rows unchanged.')
 finally:
     if created_foreign:
         sql('BEGIN; DELETE FROM providers WHERE id=' + literal(foreign) + '; DELETE FROM teams WHERE id=' + literal(team) + '; COMMIT;')

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -53,7 +53,7 @@ func pgDeviceIdentity(ctx context.Context, t *testing.T, store *postgresstore.St
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := agenvo.DecodeRuntimeTarget(mount.RuntimeProvider, mount.RuntimeID, mount.RuntimeProviderConfig)
+	target, err := computertarget.DecodeRuntimeTarget(mount.RuntimeProvider, mount.RuntimeID, mount.RuntimeProviderConfig)
 	if err != nil {
 		t.Fatal(err)
 	}

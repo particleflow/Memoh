@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
@@ -16,7 +16,7 @@ func TestNativeProfileHistorySurvivesCutoverWithoutExecution(t *testing.T) {
 	}
 	d := Details{Kind: "herdr_pi_task", TargetSnapshot: &target, Phase: "batch_submitted", NativeEvidence: &NativeEvidenceLedger{Version: 1, Observations: []NativeObservationRecord{{ID: "saved-observation", Origin: "native_read"}}}}
 	raw, _ := json.Marshal(d)
-	r := dbstore.ComputerOperationRecord{ID: "saved-operation", BotID: f.binding.BotID, SessionID: f.binding.SessionID, UserID: f.binding.UserID, TargetID: f.binding.TargetID, RunID: f.binding.RunID, State: "unknown", TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw, Revision: 7}
+	r := dbstore.ComputerOperationRecord{ID: "saved-operation", BotID: f.binding.BotID, SessionID: f.binding.SessionID, UserID: f.binding.UserID, TargetID: f.binding.TargetID, RunID: f.binding.RunID, State: "unknown", TargetFingerprint: computertarget.TargetFingerprint(target), Details: raw, Revision: 7}
 	f.store.records[r.ID] = r
 	before := observationSnapshot(t, f.store.fixtureStore)
 	check := func() {

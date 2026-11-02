@@ -1,7 +1,7 @@
 === RUN   TestBatchReadTracePreservesSentinelIdentity
 --- PASS: TestBatchReadTracePreservesSentinelIdentity (0.00s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	0.008s
+ok  	github.com/felinics/memoh/internal/computertarget	0.008s
 === RUN   TestResultReadTracePreservesErrorsAndDispatch
 === RUN   TestResultReadTracePreservesErrorsAndDispatch/success
 === RUN   TestResultReadTracePreservesErrorsAndDispatch/native_first

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 // The standard MCP/service/relay path is real; Herdr metadata and completed
@@ -22,7 +22,7 @@ func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 			if remote.receipt.Validate(remote.progress) != nil || !remote.receipt.Exited || remote.receipt.ExitCode != 0 || remote.receipt.Completion == nil {
 				t.Fatal("fixture must have an already-exited, correlated invocation")
 			}
-			if parsed, err := agenvo.ParseBatchCompletion(remote.completion, remote.progress, remote.receipt); err != nil || parsed.Outcome != "succeeded" {
+			if parsed, err := computertarget.ParseBatchCompletion(remote.completion, remote.progress, remote.receipt); err != nil || parsed.Outcome != "succeeded" {
 				t.Fatal("fixture must have a valid small semantic result before restart")
 			}
 			switch stage {

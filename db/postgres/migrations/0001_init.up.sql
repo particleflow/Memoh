@@ -3128,8 +3128,6 @@ CREATE POLICY bot_memory_usage_team_update ON public.bot_memory_usage
 CREATE POLICY bot_memory_usage_team_delete ON public.bot_memory_usage
   FOR DELETE USING (team_id = public.memoh_current_team_id());
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_user_runtimes_agenvo_config ON user_runtimes (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL;
-
 -- 0170_computer_operations
 -- Durable receipts for once-only external computer submissions; no scheduler.
 CREATE TABLE IF NOT EXISTS public.computer_operations (
@@ -3316,7 +3314,7 @@ CREATE POLICY computer_admission_team ON public.computer_admission_gates
     WITH CHECK (team_id = public.memoh_current_team_id());
 
 -- A short owner-scoped transaction lock also covers aliases registered under
--- other mount IDs. No lock is held while contacting Agenvo or executing work.
+-- other mount IDs. No lock is held while contacting the runtime or executing work.
 CREATE OR REPLACE FUNCTION public.memoh_computer_admission_lock(p_owner UUID)
 RETURNS VOID LANGUAGE SQL VOLATILE AS $$
     SELECT pg_advisory_xact_lock(hashtextextended(
@@ -3326,7 +3324,6 @@ $$;
 CREATE OR REPLACE FUNCTION public.memoh_computer_admission_identity(p_provider TEXT, p_runtime UUID, p_config JSONB)
 RETURNS JSONB LANGUAGE SQL IMMUTABLE AS $$
     SELECT CASE
-        WHEN p_provider='agenvo' THEN p_config
         WHEN p_provider='memoh' AND jsonb_typeof(p_config->'herdr')='object' THEN
             jsonb_build_object('connection_id',p_runtime::text,'device_id',p_runtime::text,
                 'instance_id',p_config->'herdr'->>'instance_id')
@@ -3348,7 +3345,7 @@ BEGIN
     PERFORM public.memoh_computer_admission_lock(p_owner);
     SELECT public.memoh_computer_admission_identity(provider,id,provider_config) INTO registered FROM public.user_runtimes
     WHERE team_id=public.memoh_current_team_id() AND id=p_runtime AND user_id=p_owner
-      AND provider IN ('agenvo','memoh') AND revoked_at IS NULL AND activated_at IS NOT NULL
+      AND provider='memoh' AND revoked_at IS NULL AND activated_at IS NOT NULL
       AND provider_config=p_config;
     IF NOT FOUND THEN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
@@ -3361,10 +3358,10 @@ BEGIN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
     END IF;
     -- Each native runtime is its own trust domain. Preserve fail-closed alias
-    -- coverage for Agenvo without guessing equivalence from names or URLs.
+    -- coverage without guessing equivalence from names or URLs.
     IF EXISTS (SELECT 1 FROM public.user_runtimes r
         WHERE r.team_id=public.memoh_current_team_id() AND r.user_id=p_owner
-          AND r.provider IN ('agenvo','memoh') AND r.revoked_at IS NULL
+          AND r.provider='memoh' AND r.revoked_at IS NULL
           AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'device_id'=device
           AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'instance_id'=instance
           AND lower(public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'connection_id') IS DISTINCT FROM conn::text) THEN
@@ -3417,7 +3414,7 @@ BEGIN
     FROM public.bot_remote_runtime_bindings b JOIN public.user_runtimes r
       ON r.team_id=b.team_id AND r.id=b.runtime_id
     WHERE b.team_id=public.memoh_current_team_id() AND b.bot_id=p_bot AND b.id=p_target
-      AND r.user_id=owner AND r.provider IN ('agenvo','memoh');
+      AND r.user_id=owner AND r.provider='memoh';
     IF registered IS NULL OR nullif(registered->>'connection_id','') IS NULL
        OR nullif(registered->>'device_id','') IS NULL OR nullif(registered->>'instance_id','') IS NULL THEN
         -- Preserve legacy no-gate store behaviour. When the owner has a pause,
@@ -3466,7 +3463,7 @@ CREATE TRIGGER computer_admission_followup BEFORE UPDATE OF details ON public.co
 CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
 RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    IF OLD.provider IN ('agenvo','memoh') AND
+    IF OLD.provider='memoh' AND
        (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
         PERFORM public.memoh_computer_admission_lock(OLD.user_id);
         IF EXISTS (SELECT 1 FROM public.computer_admission_gates
@@ -3531,7 +3528,7 @@ CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
 RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
 DECLARE permit public.native_profile_cutover_intents%ROWTYPE;
 BEGIN
-    IF OLD.provider IN ('agenvo','memoh') AND
+    IF OLD.provider='memoh' AND
        (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
         PERFORM public.memoh_computer_admission_lock(OLD.user_id);
         IF EXISTS (SELECT 1 FROM public.computer_admission_gates
@@ -3679,6 +3676,38 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- 0184_conversation_presence_decisions
+-- Fast-reply v3 decision accounting beside the conversation_presence receipt
+-- table (0182). Rows are written at prepare-step2 with outcome NULL; the
+-- coordinator finish write point fills the terminal outcome later (fail-open).
+CREATE TABLE IF NOT EXISTS public.conversation_presence_decisions (
+  team_id UUID NOT NULL DEFAULT public.memoh_current_team_id() REFERENCES public.teams(id),
+  session_id UUID NOT NULL,
+  invocation_id TEXT NOT NULL,
+  run_id UUID NOT NULL,
+  actor_id TEXT NOT NULL,
+  final_mode TEXT NOT NULL CHECK (final_mode IN ('no_fast_reply','fast_reply','fallback_ack','fallback_silent')),
+  direction TEXT CHECK (direction IN ('soothe','progress','eta','clarify','brief')),
+  urgency INT CHECK (urgency BETWEEN 1 AND 3),
+  fallback_reason TEXT CHECK (fallback_reason IN ('jev_timeout','gateway_unreachable','auth_error','bad_request','invalid_response','budget_exhausted') OR fallback_reason IS NULL),
+  pulls INT NOT NULL DEFAULT 0,
+  total_ms INT NOT NULL,
+  detail JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (team_id, session_id, invocation_id),
+  FOREIGN KEY (team_id, session_id, invocation_id)
+    REFERENCES public.conversation_presence(team_id, session_id, invocation_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS conversation_presence_decisions_session_recent
+  ON public.conversation_presence_decisions(team_id, session_id, actor_id, created_at DESC);
+ALTER TABLE public.conversation_presence_decisions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversation_presence_decisions FORCE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'conversation_presence_decisions' AND policyname = 'conversation_presence_decisions_team') THEN
+    CREATE POLICY conversation_presence_decisions_team ON public.conversation_presence_decisions
+      USING (team_id = public.memoh_current_team_id()) WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+END $$;
 -- Durable follow-up queue receipts (0183).
 -- 0183_session_follow_up_queue: retain durable input and receipt identities.
 -- Additive durable follow-up storage. Integration must confirm this migration number.

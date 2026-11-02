@@ -10,7 +10,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -23,41 +23,41 @@ type BatchChunk struct {
 	Size int64  `json:"size"`
 }
 type BatchTransfer struct {
-	Meta      agenvo.BatchFile `json:"meta"`
-	Chunks    []BatchChunk     `json:"chunks"`
-	Offset    int64            `json:"offset"`
-	ReadyHash string           `json:"ready_hash,omitempty"`
+	Meta      computertarget.BatchFile `json:"meta"`
+	Chunks    []BatchChunk             `json:"chunks"`
+	Offset    int64                    `json:"offset"`
+	ReadyHash string                   `json:"ready_hash,omitempty"`
 }
 type BatchDetails struct {
-	RecoveryReader *agenvo.BatchRecoveryReader `json:"recovery_reader,omitempty"`
-	Feedback       *deliverymeta.Feedback      `json:"delivery_feedback,omitempty"`
-	Progress       agenvo.BatchProgress        `json:"progress"`
-	Receipt        *agenvo.BatchReceipt        `json:"receipt,omitempty"`
-	Files          []BatchTransfer             `json:"files,omitempty"`
-	Result         *agenvo.PiJSONResult        `json:"result,omitempty"`
+	RecoveryReader *computertarget.BatchRecoveryReader `json:"recovery_reader,omitempty"`
+	Feedback       *deliverymeta.Feedback              `json:"delivery_feedback,omitempty"`
+	Progress       computertarget.BatchProgress        `json:"progress"`
+	Receipt        *computertarget.BatchReceipt        `json:"receipt,omitempty"`
+	Files          []BatchTransfer                     `json:"files,omitempty"`
+	Result         *computertarget.PiJSONResult        `json:"result,omitempty"`
 }
 
 // storeBatchBytes verifies content-addressed readiness before recording a ref.
 // Page bytes never enter conversation history or the operation JSON payload.
 func (s *Service) storeBatchBytes(ctx context.Context, bot string, raw []byte) (string, error) {
 	if s.assets == nil {
-		return "", agenvo.ErrUnavailable
+		return "", computertarget.ErrUnavailable
 	}
 	sum := sha256.Sum256(raw)
 	want := hex.EncodeToString(sum[:])
 	a, err := s.assets.Ingest(ctx, media.IngestInput{BotID: bot, Mime: "application/octet-stream", Reader: bytes.NewReader(raw), MaxBytes: int64(len(raw)) + 1, OriginalExt: ".bin"})
 	if err != nil {
-		return "", agenvo.ErrUnavailable
+		return "", computertarget.ErrUnavailable
 	}
 	r, asset, err := s.assets.Open(ctx, bot, a.ContentHash)
 	if err != nil {
-		return "", agenvo.ErrUnavailable
+		return "", computertarget.ErrUnavailable
 	}
 	defer func() { _ = r.Close() }()
 	h := sha256.New()
 	n, err := io.Copy(h, io.LimitReader(r, int64(len(raw))+1))
 	if err != nil || n != int64(len(raw)) || hex.EncodeToString(h.Sum(nil)) != want || asset.ContentHash != want || a.ContentHash != want {
-		return "", agenvo.ErrUnknown
+		return "", computertarget.ErrUnknown
 	}
 	return want, nil
 }
@@ -69,22 +69,22 @@ func (s *Service) finishBatchFile(ctx context.Context, bot string, f *BatchTrans
 	for _, chunk := range f.Chunks {
 		r, asset, err := s.assets.Open(ctx, bot, chunk.Hash)
 		if err != nil {
-			return agenvo.ErrUnavailable
+			return computertarget.ErrUnavailable
 		}
 		raw, readErr := io.ReadAll(io.LimitReader(r, chunk.Size+1))
 		_ = r.Close()
 		sum := sha256.Sum256(raw)
 		if readErr != nil || int64(len(raw)) != chunk.Size || asset.ContentHash != chunk.Hash || hex.EncodeToString(sum[:]) != chunk.Hash {
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		data.Write(raw)
 		if int64(data.Len()) > f.Meta.Size {
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 	}
 	sum := sha256.Sum256(data.Bytes())
 	if int64(data.Len()) != f.Meta.Size || hex.EncodeToString(sum[:]) != f.Meta.Hash {
-		return agenvo.ErrUnknown
+		return computertarget.ErrUnknown
 	}
 	hash, err := s.storeBatchBytes(ctx, bot, data.Bytes())
 	if err != nil {
@@ -103,10 +103,10 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	if batch == nil {
 		return Result{}, ErrInvalid
 	}
-	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
+	pinned := computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	readCtx, cancel := context.WithTimeout(pinned, 20*time.Second)
 	defer cancel()
-	trace := agenvo.BatchReadTraceFromContext(readCtx)
+	trace := computertarget.BatchReadTraceFromContext(readCtx)
 	if trace != nil {
 		trace.OperationRunID = r.RunID
 		started := time.Now()
@@ -145,17 +145,17 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 					trace.SaveErrorClass = "canceled"
 				}
 			}
-			return agenvo.ErrUnknown
+			return computertarget.ErrUnknown
 		}
 		r = next
 		return nil
 	}
-	collect := func(read func(*agenvo.BatchRecoveryReader) error) error {
+	collect := func(read func(*computertarget.BatchRecoveryReader) error) error {
 		return s.collectBatchRead(readCtx, scope(b, r.TargetID), batch, save, read)
 	}
-	readPage := func(file agenvo.BatchFile, offset int64) ([]byte, error) {
+	readPage := func(file computertarget.BatchFile, offset int64) ([]byte, error) {
 		var raw []byte
-		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+		err := collect(func(reader *computertarget.BatchRecoveryReader) error {
 			var err error
 			raw, err = s.relay.ReadBatchPageWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader, *batch.Receipt, file, offset)
 			return err
@@ -163,14 +163,14 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		return raw, err
 	}
 	if batch.Receipt == nil {
-		var receipt *agenvo.BatchReceipt
-		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+		var receipt *computertarget.BatchReceipt
+		err := collect(func(reader *computertarget.BatchRecoveryReader) error {
 			var err error
 			receipt, err = s.relay.ObserveBatchWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader)
 			return err
 		})
 		if err != nil {
-			if errors.Is(err, agenvo.ErrUnknown) {
+			if errors.Is(err, computertarget.ErrUnknown) {
 				return result(r, d), err
 			}
 			return Result{}, err
@@ -184,7 +184,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		// slot, including on failure, without claiming Pi/AI success or retrying.
 		r.State = "completed"
 		d.Phase = "pi_exited_output_pending"
-		if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion {
+		if batch.Progress.CompletionVersion == computertarget.BatchCompletionVersion {
 			d.Phase = "pi_exited_result_pending"
 		}
 		d.ExitCode = &receipt.ExitCode
@@ -237,12 +237,12 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			return result(current, currentDetails), nil
 		}
 	}
-	if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion && !diagnostics {
+	if batch.Progress.CompletionVersion == computertarget.BatchCompletionVersion && !diagnostics {
 		if batch.Result != nil {
 			return result(r, d), nil
 		}
 		if !batch.Receipt.Started {
-			batch.Result = &agenvo.PiJSONResult{Outcome: "not_started", Preflight: batch.Receipt.Preflight}
+			batch.Result = &computertarget.PiJSONResult{Outcome: "not_started", Preflight: batch.Receipt.Preflight}
 		} else {
 			meta := batch.Receipt.Completion
 			if meta == nil {
@@ -250,7 +250,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 					trace.Stage = "completion_metadata"
 					trace.Reason = "missing_descriptor"
 				}
-				return result(r, d), agenvo.ErrUnknown
+				return result(r, d), computertarget.ErrUnknown
 			}
 			// At most 8 KiB / four fixed pages. No log ingestion or model-driven
 			// continuation is needed; failed reads only retry this immutable file.
@@ -272,7 +272,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 				trace.Stage = "completion_parse"
 				trace.Reason = ""
 			}
-			parsed, err := agenvo.ParseBatchCompletion(raw, batch.Progress, *batch.Receipt)
+			parsed, err := computertarget.ParseBatchCompletion(raw, batch.Progress, *batch.Receipt)
 			if err != nil {
 				if trace != nil {
 					trace.Reason = "validation_failed"
@@ -292,9 +292,9 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	for _, f := range batch.Files {
 		if f.Meta.Size > 64<<20 {
 			if diagnostics {
-				return result(r, d), agenvo.ErrUnsupported // never overwrite a known Pi outcome
+				return result(r, d), computertarget.ErrUnsupported // never overwrite a known Pi outcome
 			}
-			batch.Result = &agenvo.PiJSONResult{Outcome: "output_limit"}
+			batch.Result = &computertarget.PiJSONResult{Outcome: "output_limit"}
 			d.Phase = "pi_output_limit"
 			if err := save(); err != nil {
 				return Result{}, err
@@ -306,7 +306,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		return result(r, d), nil
 	}
 	if s.assets == nil {
-		return result(r, d), agenvo.ErrUnavailable
+		return result(r, d), computertarget.ErrUnavailable
 	}
 	pages := 0
 	for i := range batch.Files {
@@ -317,7 +317,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			}
 			raw, err := readPage(f.Meta, f.Offset)
 			if err != nil {
-				if errors.Is(err, agenvo.ErrUnknown) {
+				if errors.Is(err, computertarget.ErrUnknown) {
 					return result(r, d), err
 				}
 				return Result{}, err
@@ -345,7 +345,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			}
 		}
 	}
-	if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion {
+	if batch.Progress.CompletionVersion == computertarget.BatchCompletionVersion {
 		return result(r, d), nil // optional logs cannot decide or change the Pi result
 	}
 	target, err := s.relay.ResolveTarget(pinned, scope(b, r.TargetID))
@@ -359,10 +359,10 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	if batch.Files[0].Meta.Size > 0 {
 		reader, _, err = s.assets.Open(ctx, b.BotID, batch.Files[0].ReadyHash)
 		if err != nil {
-			return Result{}, agenvo.ErrUnavailable
+			return Result{}, computertarget.ErrUnavailable
 		}
 	}
-	parsed := agenvo.VerifyPiJSON(reader, batch.Progress.PiSessionID, target.Agent.Provider, target.Agent.Model, batch.Receipt.ExitCode)
+	parsed := computertarget.VerifyPiJSON(reader, batch.Progress.PiSessionID, target.Agent.Provider, target.Agent.Model, batch.Receipt.ExitCode)
 	_ = reader.Close()
 	if !batch.Receipt.Started {
 		parsed.Outcome = "not_started"

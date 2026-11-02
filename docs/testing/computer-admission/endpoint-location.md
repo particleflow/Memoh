@@ -1,4 +1,4 @@
-> Historical record: this describes an earlier Agenvo implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
+> Historical record: this describes an earlier legacy executor implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
 
 # Owner endpoint location (configuration only)
 
@@ -8,9 +8,9 @@ control identity. The [admission gate](README.md) is still not a stop permit.
 
 ## Fixed owner API and persistence
 
-`GET /users/me/runtimes/{id}/agenvo-endpoint` uses the existing authenticated
-account owner and owned, unrevoked Agenvo registration/MCP connection. It makes
-no native call. Its fields are:
+The owner endpoint locator is a configuration-only read through the existing
+authenticated account owner and an owned, unrevoked registration/MCP connection.
+It makes no native call. Its fields are:
 
 - `connection_id`, `device_id`, `instance_id`: the current stored execution mapping.
 - `target_fingerprint`: the existing execution Target fingerprint.
@@ -80,7 +80,7 @@ The Windows investigation confirms only `status --root` and the original running
 host's stdin `status/stop` commands. A Herdr pane does not own that stdin handle;
 there is no official `host.stop`. Its execution envelope also does not convey a
 Memoh principal independently verifiable by that host. The caller's authorized
-Agenvo execution is not proof embedded in a local JSON request. Consequently the
+legacy executor execution is not proof embedded in a local JSON request. Consequently the
 automatic step from a paused/reconciled owner to authenticated host stop is not
 available under the present interfaces; `task_handoff_unverified` remains.
 
@@ -111,7 +111,7 @@ configuration is performed in this work.
 All checks use synthetic records in the existing isolated cloud environment; no
 production access, Windows process, paid model or new credential is involved.
 
-- `go test -race -v ./internal/agenvo -run 'TestEndpoint|TestAgentProfile' -count=1`:
+- `go test -race -v ./internal/computertarget -run 'TestEndpoint|TestAgentProfile' -count=1`:
   exit 0; [output](endpoint-evidence/unit-final.txt). Covers owner/connection access,
   invalid paths, unchanged old execution fingerprints, independent profile fields,
   exact large JSON integers, lost configuration acknowledgements and stale CAS.

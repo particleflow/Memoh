@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/config"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/userruntime"
@@ -147,7 +147,7 @@ func TestNativeHerdrWorkspaceEntryPointsCannotBypassTaskLedger(t *testing.T) {
 			if err != nil || target.Execute == nil {
 				t.Fatal("configured Runtime lost explicit computer-task gate", err)
 			}
-			if out, err := target.Execute(ctx, agenvo.Request{}); !errors.Is(err, agenvo.ErrComputerTaskRequired) || out.State != "not_started" {
+			if out, err := target.Execute(ctx, computertarget.Request{}); !errors.Is(err, computertarget.ErrComputerTaskRequired) || out.State != "not_started" {
 				t.Fatalf("Execute gate=%+v %v", out, err)
 			}
 			assertNativeHerdrExecBlocked(t, ctx, target.Client, recorder)

@@ -25,7 +25,7 @@
       "github.com/felinics/memoh/internal/computertask",
       "github.com/felinics/memoh/internal/userruntime",
       "github.com/felinics/memoh/internal/transferclient",
-      "github.com/felinics/memoh/internal/agenvo",
+      "github.com/felinics/memoh/internal/computertarget",
       "github.com/felinics/memoh/internal/agent/application"
     ],
     "failed_packages": [

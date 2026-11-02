@@ -4,7 +4,7 @@ This checkpoint merges source `03e4fb6220a4b9f13f2b642e8dd3acaca7545a48` into th
 
 ## Change and preserved contracts
 
-Native completion and bounded collection wakeups invoke the existing producer CLI with explicit `producer.program_path`, `producer.config_dir` and `producer.state_dir`. Agenvo keeps its original hook. The producer implementation, original queues, task/operation identities and official Agent/Runtime cores are unchanged. All 370 HTTP operations remain. Swagger/SDK regeneration has zero additional differences. Schema remains 176; this increment contains no SQL change or migration.
+Native completion and bounded collection wakeups invoke the existing producer CLI with explicit `producer.program_path`, `producer.config_dir` and `producer.state_dir`. legacy executor keeps its original hook. The producer implementation, original queues, task/operation identities and official Agent/Runtime cores are unchanged. All 370 HTTP operations remain. Swagger/SDK regeneration has zero additional differences. Schema remains 176; this increment contains no SQL change or migration.
 
 The new real CLI/PG regression was not selected by the existing operation gate. The integration adds only its exact name to that gate's selection and mandatory-PASS list. Existing race execution, 90-second limit, operation/CAS/RLS cases, no-skip enforcement and the separate Pi history gate are unchanged. This is not a CI timeout increase or a response to the source's earlier Windows timeout.
 
@@ -12,7 +12,7 @@ The new real CLI/PG regression was not selected by the existing operation gate. 
 
 | Check | Actual result |
 | --- | --- |
-| `go test -p=1 -count=1 -timeout=180s ./internal/agenvo ./internal/computertask ./internal/userruntime` | Exit 0, all three packages. This includes the generated completion script with synthetic Pi output and the production collector; it is not live Windows/Herdr acceptance. |
+| `go test -p=1 -count=1 -timeout=180s ./internal/computertarget ./internal/computertask ./internal/userruntime` | Exit 0, all three packages. This includes the generated completion script with synthetic Pi output and the production collector; it is not live Windows/Herdr acceptance. |
 | Existing isolated PG, selected native/admission/history tests plus `TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit` | Exit 0, 16 top-level and eight subtest PASS, zero SKIP, 50.899 seconds. Local execution is non-race; the final remote gate is race-enabled. |
 | New CLI/PG recovery contract | PASS in 3.50 seconds: committed upload with lost acknowledgement, repeated collector processes recover the original delivery, one Create/Commit/Resolve, original operation and legacy directory bytes retained. The test uses real production CLI processes and isolated synthetic TLS/PG/files. |
 | `TestNativeHerdrConfigurationRequiresAccountSession` | Exit 0. Normal account 200/one write; revoked account 401/zero writes; chat-route, revoked chat account and query chat token 403/zero writes; anonymous 401/zero writes; no-store retained. |

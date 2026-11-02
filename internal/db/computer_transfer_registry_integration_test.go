@@ -59,7 +59,7 @@ func exerciseDeviceRegistry(ctx context.Context, t *testing.T, store *postgresst
 	if wrongSecret == v.token {
 		wrongSecret = v.token[:len(v.token)-1] + "b"
 	}
-	for _, secret := range []string{"Bearer account-fixture", "agenvo_fixture", "mrk_" + strings.Repeat("a", 64), v.token + "x", wrongSecret} {
+	for _, secret := range []string{"Bearer account-fixture", "legacy_fixture", "mrk_" + strings.Repeat("a", 64), v.token + "x", wrongSecret} {
 		if _, err := v.VerifyDevice(ctx, secret); err == nil {
 			t.Fatal("wrong purpose/secret accepted")
 		}

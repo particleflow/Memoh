@@ -41,4 +41,4 @@
 === RUN   TestAgentProfileUpdatesExistingOwnerRegistrationWithoutCredentialsOrGrants
 --- PASS: TestAgentProfileUpdatesExistingOwnerRegistrationWithoutCredentialsOrGrants (0.00s)
 PASS
-ok  	github.com/felinics/memoh/internal/agenvo	1.038s
+ok  	github.com/felinics/memoh/internal/computertarget	1.038s

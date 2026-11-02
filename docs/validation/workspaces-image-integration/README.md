@@ -31,7 +31,7 @@ Later validation documentation and screenshots do not change application code.
   attachments. Task-detail attachments and cancel/retry controls remain absent.
 - `scripts/check-agent-core-boundary.sh` passes against official baseline
   `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046` for the complete Agent runtime and
-  contextview directories. No upstream Agenvo connector change is included.
+  contextview directories. No upstream legacy executor connector change is included.
 
 ## Combined verification
 
@@ -50,7 +50,7 @@ Later validation documentation and screenshots do not change application code.
   turn, ready-only stable hashes in the parent result, revoked/wrong-parent
   denial, and unknown result reads without another provider request. This is
   not production-model or browser end-to-end image-generation acceptance.
-- Race suites passed for agenvo, computertask, imagejob, media, background,
+- Race suites passed for legacy-executor, computertask, imagejob, media, background,
   application, handlers, sessiontask, server, userruntime, workspace and core.
   Focused computer/image tool and queued-background race tests also passed.
   Source tests cover

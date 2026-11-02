@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -20,7 +20,7 @@ func TestProducerFeedbackStopsUnchangedBlockedWake(t *testing.T) {
 	mount := store.mounts["pc-a"]
 	mount.ID, mount.BotID = binding.TargetID, binding.BotID
 	store.mounts = map[string]dbstore.BotRemoteRuntimeBindingRecord{mount.ID: mount}
-	source.service.relay = agenvo.NewService(store, producerPermissions{}, transport.call)
+	source.service.relay = computertarget.NewService(store, producerPermissions{}, transport.call)
 	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 	if err != nil {
 		t.Fatal(err)
@@ -112,7 +112,7 @@ func TestProducerFeedbackConcurrentCommitAndRevocation(t *testing.T) {
 			mount := store.mounts["pc-a"]
 			mount.ID, mount.BotID = binding.TargetID, binding.BotID
 			store.mounts = map[string]dbstore.BotRemoteRuntimeBindingRecord{mount.ID: mount}
-			source.service.relay = agenvo.NewService(store, producerPermissions{}, transport.call)
+			source.service.relay = computertarget.NewService(store, producerPermissions{}, transport.call)
 			ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
 			if err != nil {
 				t.Fatal(err)
@@ -184,7 +184,7 @@ func TestProducerFeedbackPerFileProgressAndUnknown(t *testing.T) {
 		}
 		f.Files[deniedPosition].State, f.Files[deniedPosition].Code, f.Files[deniedPosition].Retryable = "blocked", "authorization", false
 		f.Files[2].State, f.Files[2].Code, f.Files[2].Retryable = "unknown", "create_outcome_unknown", false
-		d := Details{Batch: &BatchDetails{Progress: agenvo.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: &p}, Feedback: f}}
+		d := Details{Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: &p}, Feedback: f}}
 		got := producerResult(r, d)
 		if got.Pending != 3 || !got.canAdvance(time.Now()) || !got.NeedsAction || got.Files[deniedPosition].Retryable || got.Files[2].Reference != nil {
 			t.Fatal("independent file progress lost")

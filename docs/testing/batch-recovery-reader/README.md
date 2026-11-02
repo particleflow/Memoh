@@ -30,7 +30,7 @@ All device calls below use the existing synthetic official-method transport. It 
 | Wrong receipt attempt / corrupted completion / corrupted diagnostics | No forged result or ready artifact; semantic result is not changed by failed optional logs |
 | Failed page CAS then same-page reread | Original offsets retained; no duplicate committed chunks; exact final hashes; cached reread performs no remote work |
 | Real isolated PG, transaction rolled back | Existing account/Bot authorization and new reader JSON/CAS round-trip passed; original execution state/identity retained; two PASS records, zero SKIP |
-| Affected packages | `agenvo` and `computertask` exit 0; 517 PASS records including subtests; one initial opt-in PG skip, subsequently run and passed separately |
+| Affected packages | `legacy-executor` and `computertask` exit 0; 517 PASS records including subtests; one initial opt-in PG skip, subsequently run and passed separately |
 | Targeted race | Initial suite: 23 PASS records, zero SKIP, exit 0; added timeout/identity/partial-offset checks: 24 PASS records, zero SKIP, exit 0 |
 | golangci-lint 2.10.1 | Both affected packages, all configured rules, no diff filter: exit 0 |
 | Official core boundary / diff whitespace | exit 0; no runtime/contextview/toolexec changes |
@@ -40,7 +40,7 @@ The second race command excludes the PostgreSQL test and the unchanged page-rere
 Commands:
 
 ```sh
-go test -count=1 -v ./internal/agenvo ./internal/computertask
+go test -count=1 -v ./internal/computertarget ./internal/computertask
 go test -count=1 -v ./internal/computertask \
   -run '^TestBatch(CompletedControlRestartRecoveryBoundary|Reader)'
 go test -race -count=1 -v ./internal/computertask \
@@ -48,9 +48,9 @@ go test -race -count=1 -v ./internal/computertask \
 go test -race -count=1 -v ./internal/computertask \
   -run '^TestBatch(CompletedControlRestartRecoveryBoundary|Reader[^P])'
 # Set the existing isolated test DSN privately; do not use a production DB.
-go test -count=1 -v ./internal/agenvo ./internal/computertask \
+go test -count=1 -v ./internal/computertarget ./internal/computertask \
   -run '^Test(BatchReaderPostgresPersistenceCAS|PostgresAccountAndBotAuthorization)$'
-golangci-lint run ./internal/agenvo/... ./internal/computertask/...
+golangci-lint run ./internal/computertarget/... ./internal/computertask/...
 bash scripts/check-agent-core-boundary.sh
 ```
 

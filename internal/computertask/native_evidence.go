@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -35,15 +35,15 @@ type SampledInputReceipt struct {
 // or result ID. Session and terminal output are private; public history only
 // projects metadata. Input receipts are sampled before polling, not ownership.
 type NativeObservationRecord struct {
-	ID              string                   `json:"id"`
-	Fingerprint     string                   `json:"fingerprint"`
-	Origin          string                   `json:"origin"`
-	ReadStartedAt   string                   `json:"read_started_at,omitempty"`
-	FirstObservedAt string                   `json:"first_observed_at,omitempty"`
-	RecordedAt      string                   `json:"recorded_at"`
-	Observation     agenvo.AgentObservation  `json:"observation"`
-	Session         *agenvo.AgentSessionInfo `json:"agent_session,omitempty"`
-	Inputs          []SampledInputReceipt    `json:"input_receipts_at_start,omitempty"`
+	ID              string                           `json:"id"`
+	Fingerprint     string                           `json:"fingerprint"`
+	Origin          string                           `json:"origin"`
+	ReadStartedAt   string                           `json:"read_started_at,omitempty"`
+	FirstObservedAt string                           `json:"first_observed_at,omitempty"`
+	RecordedAt      string                           `json:"recorded_at"`
+	Observation     computertarget.AgentObservation  `json:"observation"`
+	Session         *computertarget.AgentSessionInfo `json:"agent_session,omitempty"`
+	Inputs          []SampledInputReceipt            `json:"input_receipts_at_start,omitempty"`
 }
 
 type NativeExportRecord struct {
@@ -146,7 +146,7 @@ func nativeEvidencePage(ledger *NativeEvidenceLedger, offset int) *NativeEvidenc
 	return out
 }
 
-func newNativeObservation(operation string, obs agenvo.AgentObservation, origin, started string, inputs []SampledInputReceipt) NativeObservationRecord {
+func newNativeObservation(operation string, obs computertarget.AgentObservation, origin, started string, inputs []SampledInputReceipt) NativeObservationRecord {
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	obs.TaskSuccessVerified = false
 	r := NativeObservationRecord{Origin: origin, Observation: obs, Session: obs.AgentSession, Inputs: inputs, ReadStartedAt: started, RecordedAt: now}
@@ -155,8 +155,8 @@ func newNativeObservation(operation string, obs agenvo.AgentObservation, origin,
 	}
 	r.Fingerprint = fingerprint(struct {
 		Origin      string
-		Observation agenvo.AgentObservation
-		Session     *agenvo.AgentSessionInfo
+		Observation computertarget.AgentObservation
+		Session     *computertarget.AgentSessionInfo
 		Inputs      []SampledInputReceipt
 	}{origin, obs, obs.AgentSession, inputs})
 	// A local content-derived record ID is solely for lookup/deduplication.
@@ -178,7 +178,7 @@ func evidenceResponse(r dbstore.ComputerOperationRecord, d Details, state string
 func (s *Service) saveNativeEvidence(ctx context.Context, r dbstore.ComputerOperationRecord, d Details, view, exported bool) (dbstore.ComputerOperationRecord, error) {
 	var object map[string]json.RawMessage
 	if json.Unmarshal(r.Details, &object) != nil || object == nil {
-		return r, agenvo.ErrUnknown
+		return r, computertarget.ErrUnknown
 	}
 	updates := map[string]any{"native_evidence": d.NativeEvidence}
 	if view {
@@ -191,13 +191,13 @@ func (s *Service) saveNativeEvidence(ctx context.Context, r dbstore.ComputerOper
 	for key, value := range updates {
 		raw, err := json.Marshal(value)
 		if err != nil {
-			return r, agenvo.ErrUnknown
+			return r, computertarget.ErrUnknown
 		}
 		object[key] = raw
 	}
 	raw, err := json.Marshal(object)
 	if err != nil {
-		return r, agenvo.ErrUnknown
+		return r, computertarget.ErrUnknown
 	}
 	r.Details = raw
 	return s.store.SaveComputerOperation(ctx, r)
@@ -212,28 +212,28 @@ func (s *Service) ensureNativeEvidence(ctx context.Context, b toolcontext.Comput
 			return r, d, err
 		}
 		if d.Batch != nil || d.Kind != "herdr_pi_task" || d.Agent.Name == "" {
-			return r, d, agenvo.ErrUnsupported
+			return r, d, computertarget.ErrUnsupported
 		}
 		if d.NativeEvidence != nil {
 			if d.NativeEvidence.Version != 1 {
-				return r, d, agenvo.ErrUnknown
+				return r, d, computertarget.ErrUnknown
 			}
 			return r, d, nil
 		}
 		ledger := &NativeEvidenceLedger{Version: 1, Limit: s.nativeObservationLimit, Observations: []NativeObservationRecord{}}
 		if d.Observation != nil || d.Output != "" {
-			o := agenvo.AgentObservation{Status: "unknown", Output: d.Output, Truncated: d.Truncated, OutputFidelity: "legacy_snapshot_unverified", SessionRelation: "unavailable"}
+			o := computertarget.AgentObservation{Status: "unknown", Output: d.Output, Truncated: d.Truncated, OutputFidelity: "legacy_snapshot_unverified", SessionRelation: "unavailable"}
 			if d.Observation != nil {
 				o = *d.Observation
 				if o.Output != d.Output {
-					return r, d, agenvo.ErrUnknown
+					return r, d, computertarget.ErrUnknown
 				}
 			}
 			if o.SessionRelation == "" {
 				o.SessionRelation = "unavailable"
 			}
 			if len(o.Output) > 16384 {
-				return r, d, agenvo.ErrUnknown
+				return r, d, computertarget.ErrUnknown
 			}
 			old := newNativeObservation(id, o, "legacy_latest_view", "", nil)
 			ledger.Observations, ledger.LatestObservationID = append(ledger.Observations, old), old.ID
@@ -247,7 +247,7 @@ func (s *Service) ensureNativeEvidence(ctx context.Context, b toolcontext.Comput
 		}
 		// A lost/conflicting save is resolved by reading, never another RPC.
 	}
-	return dbstore.ComputerOperationRecord{}, Details{}, agenvo.ErrUnknown
+	return dbstore.ComputerOperationRecord{}, Details{}, computertarget.ErrUnknown
 }
 
 func (s *Service) observeNative(ctx context.Context, b toolcontext.ComputerBinding, id string) (Result, error) {
@@ -260,7 +260,7 @@ func (s *Service) observeNative(ctx context.Context, b toolcontext.ComputerBindi
 		inputs = append(inputs, SampledInputReceipt{RequestID: f.RequestID, State: f.Progress.State})
 	}
 	started := time.Now().UTC().Format(time.RFC3339Nano)
-	obs, observeErr := s.relay.ObserveAgent(agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), scope(b, r.TargetID), d.Agent)
+	obs, observeErr := s.relay.ObserveAgent(computertarget.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), scope(b, r.TargetID), d.Agent)
 	candidate := newNativeObservation(r.ID, obs, "native_read", started, inputs)
 	binding := fingerprint(d.Agent)
 	for range 3 {
@@ -272,7 +272,7 @@ func (s *Service) observeNative(ctx context.Context, b toolcontext.ComputerBindi
 			return evidenceResponse(current, details, "observation_unavailable"), observeErr
 		}
 		if fingerprint(details.Agent) != binding || details.NativeEvidence == nil || details.NativeEvidence.Version != 1 {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		ledger := details.NativeEvidence
 		state, found := "recorded", false
@@ -300,7 +300,7 @@ func (s *Service) observeNative(ctx context.Context, b toolcontext.ComputerBindi
 			return evidenceResponse(latest, saved, state), nil
 		}
 	}
-	return Result{}, agenvo.ErrUnknown
+	return Result{}, computertarget.ErrUnknown
 }
 
 func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBinding, id, selected string) (Result, error) {
@@ -322,7 +322,7 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 		return Result{}, ErrInvalid
 	}
 	if sample.Observation.Output == "" {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	sum := sha256.Sum256([]byte(sample.Observation.Output))
 	hash := hex.EncodeToString(sum[:])
@@ -335,28 +335,28 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 	}
 	if exported.BytesVerifiedAt == "" {
 		if s.assets == nil {
-			return Result{}, agenvo.ErrUnsupported
+			return Result{}, computertarget.ErrUnsupported
 		}
 		a, err := s.assets.Ingest(ctx, media.IngestInput{BotID: b.BotID, Mime: "text/plain", Reader: strings.NewReader(sample.Observation.Output), MaxBytes: 16384, OriginalExt: ".txt"})
 		if err != nil {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		// Use the existing media interface only. No legacy storage traversal,
 		// file lookup, remote file reading or original deletion is added here.
 		if a.ContentHash != hash {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		if _, _, err := s.load(ctx, b, r.ID); err != nil {
 			return Result{}, err
 		}
 		reader, ready, err := s.assets.Open(ctx, b.BotID, a.ContentHash)
 		if err != nil {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		data, readErr := io.ReadAll(io.LimitReader(reader, 16385))
 		_ = reader.Close()
 		if readErr != nil || string(data) != sample.Observation.Output || ready.ContentHash != hash {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		exported.BytesVerifiedAt = time.Now().UTC().Format(time.RFC3339Nano)
 	}
@@ -366,7 +366,7 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 			return Result{}, err
 		}
 		if details.NativeEvidence == nil || details.NativeEvidence.Version != 1 {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		ledger := details.NativeEvidence
 		present := false
@@ -377,13 +377,13 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 			}
 		}
 		if !present {
-			return Result{}, agenvo.ErrUnknown
+			return Result{}, computertarget.ErrUnknown
 		}
 		found := false
 		for _, old := range ledger.Exports {
 			if old.ObservationID == selected {
 				if old.ArtifactHash != hash {
-					return Result{}, agenvo.ErrUnknown
+					return Result{}, computertarget.ErrUnknown
 				}
 				found = true
 				break
@@ -407,7 +407,7 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 			return exportEvidenceResponse(latest, saved, state, selected), nil
 		}
 	}
-	return Result{}, agenvo.ErrUnknown
+	return Result{}, computertarget.ErrUnknown
 }
 
 // Read a compact page through the same operation, conversation and target
@@ -418,7 +418,7 @@ func (s *Service) nativeHistory(ctx context.Context, b toolcontext.ComputerBindi
 		return Result{}, err
 	}
 	if d.Batch != nil || d.Kind != "herdr_pi_task" || d.NativeEvidence == nil || d.NativeEvidence.Version != 1 {
-		return Result{}, agenvo.ErrUnsupported
+		return Result{}, computertarget.ErrUnsupported
 	}
 	if offset < 0 || offset >= len(d.NativeEvidence.Observations) && offset != 0 {
 		return Result{}, ErrInvalid

@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -16,7 +16,7 @@ func nativeAgentBoundaryFixture(t *testing.T) (*Source, *fixtureStore, *transpor
 	source, store, transport := setup(t)
 	r := store.mounts["pc-a"]
 	target := fixtureTarget(r)
-	target.Agent = agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}
+	target.Agent = computertarget.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}
 	r.RuntimeProviderConfig = fixtureConfig(target)
 	store.mounts["pc-a"] = r
 	return source, store, transport
@@ -30,8 +30,8 @@ func TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant(t *testing.T) {
 			if err := json.Unmarshal(store.records[initial.ID].Details, &d); err != nil {
 				t.Fatal(err)
 			}
-			read := &observationTransport{t: t, refs: agenvo.BatchProgress{WorkspaceID: d.Agent.WorkspaceID, PaneID: d.Agent.PaneID, TerminalID: d.Agent.TerminalID}}
-			source.service.relay = agenvo.NewService(store, permissionChecker{}, read.call)
+			read := &observationTransport{t: t, refs: computertarget.BatchProgress{WorkspaceID: d.Agent.WorkspaceID, PaneID: d.Agent.PaneID, TerminalID: d.Agent.TerminalID}}
+			source.service.relay = computertarget.NewService(store, permissionChecker{}, read.call)
 			b := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "later-run"}
 			switch change {
 			case "nas":

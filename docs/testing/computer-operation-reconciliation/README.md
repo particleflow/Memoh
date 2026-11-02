@@ -27,7 +27,7 @@ An operation revision change during native observation now returns the existing 
 Source inspection establishes a real gap, rather than a missing native configuration:
 
 - `internal/handlers/user_runtime.go` exposes account-owned registration, listing, revocation, discovery and Agent profile configuration. It has no admission-pause/drain operation.
-- `internal/agenvo/service.go` fingerprints the complete registered Target and rechecks live mount, permission and registration for reads. Disabling the Agent profile changes that fingerprint; revocation/unmount removes access. Neither safely pauses new work while preserving collection of old work.
+- `internal/computertarget/service.go` fingerprints the complete registered Target and rechecks live mount, permission and registration for reads. Disabling the Agent profile changes that fingerprint; revocation/unmount removes access. Neither safely pauses new work while preserving collection of old work.
 - `internal/computertask/service.go` claims new operations through `ComputerOperationStore`; `followup.go` reserves native prompts using the original operation CAS. No durable target admission check is shared by these boundaries.
 - `db/postgres/queries/user_runtimes.sql` deduplicates exact provider configurations, not every registration pointing at the same physical Herdr instance. A Bot mount ID is not a device-wide pause key. Account-level `ListGrantsByRuntimeOwner` can enumerate mounts, but is not itself a gate or stop lease.
 - `ec501` recovery-reader reservation remains unchanged. Its `creating` ambiguity cannot be reconciled by label search or by creating another reader.

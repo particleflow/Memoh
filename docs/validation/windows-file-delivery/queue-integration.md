@@ -134,7 +134,7 @@ not cold-disk throughput, end-to-end RSS, TLS transport or NAS/NIC speed.
 4. **Approved encrypted origin/identity delivery are not demonstrated.** Current
    user-described IPv6 HTTP is not encrypted. The client still requires trusted
    HTTPS and matching hostname/IP SAN, rejects redirects/insecure verification,
-   and never treats Agenvo OAuth or a broad Bot/account token as PC authority.
+   and never treats legacy executor OAuth or a broad Bot/account token as PC authority.
    Proposed short-lived revocable capabilities must bind owner/Bot/session/
    target/operation/direction/hash/size/receipt/expiry and preserve receipt owner
    identity across refresh. No keys, certificates, tokens, port openings or

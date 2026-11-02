@@ -4,7 +4,7 @@ exit_code=0
 $ git diff --exit-code be6862497a58a01ef8c6f4168f02d5624cd44061 -- internal/agent/runtime internal/contextview packages/runtime db/postgres/migrations spec packages/sdk apps/web
 
 exit_code=0
-$ git diff --exit-code 3ed68ea25bd33172676e55e16073a0a85e4d83f1 -- .github/workflows internal/computertask internal/sessiontask internal/agenvo internal/db db/postgres scripts/test-computer-operations-postgres.sh scripts/test-pi-batch-history-postgres.sh
+$ git diff --exit-code 3ed68ea25bd33172676e55e16073a0a85e4d83f1 -- .github/workflows internal/computertask internal/sessiontask internal/computertarget internal/db db/postgres scripts/test-computer-operations-postgres.sh scripts/test-pi-batch-history-postgres.sh
 
 exit_code=0
 $ git merge-base --is-ancestor be6862497a58a01ef8c6f4168f02d5624cd44061 HEAD

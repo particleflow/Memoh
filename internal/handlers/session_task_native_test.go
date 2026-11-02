@@ -11,9 +11,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/computertask"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
@@ -37,10 +37,10 @@ func (f nativeHTTPFixture) FollowupNative(ctx context.Context, b toolcontext.Com
 
 func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
-	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: computertarget.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
+	relay := computertarget.NewService(f, f, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		t.Fatal("ownership lookup called native")
-		return agenvo.Receipt{}, nil
+		return computertarget.Receipt{}, nil
 	})
 	calls := 0
 	late := false
@@ -61,11 +61,11 @@ func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 	native := nativeHTTPFixture{
 		read: func(_ context.Context, b toolcontext.ComputerBinding, id string) (computertask.NativeContent, error) {
 			check(b, id)
-			return computertask.NativeContent{OperationID: id, Supported: true, Observation: &agenvo.AgentObservation{Output: "synthetic terminal", OutputFidelity: "terminal_snapshot_unverified"}}, nil
+			return computertask.NativeContent{OperationID: id, Supported: true, Observation: &computertarget.AgentObservation{Output: "synthetic terminal", OutputFidelity: "terminal_snapshot_unverified"}}, nil
 		},
 		follow: func(_ context.Context, b toolcontext.ComputerBinding, in computertask.Followup) (computertask.Result, error) {
 			check(b, in.OperationID)
-			return computertask.Result{ID: in.OperationID, Followup: &computertask.FollowupResult{RequestID: in.RequestID, State: "unknown", BusinessOutcome: "unknown"}}, agenvo.ErrUnknown
+			return computertask.Result{ID: in.OperationID, Followup: &computertask.FollowupResult{RequestID: in.RequestID, State: "unknown", BusinessOutcome: "unknown"}}, computertarget.ErrUnknown
 		},
 	}
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), native)

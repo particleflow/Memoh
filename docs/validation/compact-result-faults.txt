@@ -6,7 +6,7 @@ Cloud Linux synthetic-only regression; not Windows/vendor acceptance.
 --- PASS: TestCompactCompletionLongLineHasLinearReadAndCopyCost (0.50s)
 --- PASS: TestCompactCompletionWatchdogStopsBlockedParser (0.54s)
 --- PASS: TestCompactCompletionWireBudgetAndCorrelation (0.07s)
-ok  	github.com/felinics/memoh/internal/agenvo	3.869s
+ok  	github.com/felinics/memoh/internal/computertarget	3.869s
 --- PASS: TestStandardMCPPiBatchFailureBoundaries (0.44s)
 --- PASS: TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart (0.37s)
 ok  	github.com/felinics/memoh/internal/computertask	11.613s

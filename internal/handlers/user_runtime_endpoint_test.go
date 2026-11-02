@@ -12,8 +12,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/userruntime"
 )
@@ -21,15 +21,15 @@ import (
 func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	const secret = "synthetic-endpoint-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
 	owner, runtime := uuid.NewString(), uuid.NewString()
-	target := agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
+	target := computertarget.Target{ConnectionID: uuid.NewString(), DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
 	raw, _ := json.Marshal(target)
 	store := &admissionHTTPStore{owner: owner, runtime: runtime, config: raw}
 	service := userruntime.NewService(store, nil)
 	calls := 0
-	service.SetAgenvoService(agenvo.NewService(store, nil, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
+	service.SetComputerTargetService(computertarget.NewService(store, nil, func(context.Context, computertarget.Scope, computertarget.Target, string, map[string]any) (computertarget.Receipt, error) {
 		calls++
 		t.Fatal("owner control or retired route dispatched native operation")
-		return agenvo.Receipt{}, agenvo.ErrUnknown
+		return computertarget.Receipt{}, computertarget.ErrUnknown
 	}))
 	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUsersHandler(nil, newTestAdminAccountService("admin"), nil, nil, nil, nil, nil, nil), NewUserRuntimeHandler(nil, service)}}
 	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string, string) error { return nil }, capture)
@@ -43,7 +43,7 @@ func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	}
 	request := func(method, token, body string, status int) []byte {
 		t.Helper()
-		req := httptest.NewRequest(method, "/users/me/runtimes/"+runtime+"/agenvo-endpoint", strings.NewReader(body))
+		req := httptest.NewRequest(method, "/users/me/runtimes/"+runtime+"/legacy-endpoint", strings.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		if token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
@@ -65,8 +65,8 @@ func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	request(http.MethodGet, token, "", 404)
 	request(http.MethodPut, token, `{}`, 404)
 	for _, retired := range []struct{ method, path string }{
-		{http.MethodPost, "/users/me/runtimes/agenvo/discover"},
-		{http.MethodPut, "/users/me/runtimes/" + runtime + "/agenvo-agent"},
+		{http.MethodPost, "/users/me/runtimes/legacy/discover"},
+		{http.MethodPut, "/users/me/runtimes/" + runtime + "/legacy-agent"},
 	} {
 		req := httptest.NewRequest(retired.method, retired.path, strings.NewReader(`{}`))
 		req.Header.Set("Content-Type", "application/json")

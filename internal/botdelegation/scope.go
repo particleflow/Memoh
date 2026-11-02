@@ -6,9 +6,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -90,7 +90,7 @@ func (s *Service) BindScope(ctx context.Context, r Record) context.Context {
 				}
 				for _, side := range []struct{ bot, mount string }{{r.Identity.SourceBotID, p.SourceMountID}, {r.Identity.TargetBotID, p.TargetMountID}} {
 					m, t, err := s.Authority.registration(ctx, side.bot, side.mount)
-					if err != nil || m.RuntimeID != p.RuntimeID || agenvo.TargetFingerprint(t) != p.Fingerprint {
+					if err != nil || m.RuntimeID != p.RuntimeID || computertarget.TargetFingerprint(t) != p.Fingerprint {
 						return ErrDenied
 					}
 				}

@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
@@ -28,7 +28,7 @@ type deliveryFixture struct {
 	mu                  sync.Mutex
 	record              dbstore.ComputerOperationRecord
 	id                  DeliveryIdentity
-	target              agenvo.Target
+	target              computertarget.Target
 	asset               media.Asset
 	revoked             bool
 	authorizations      int
@@ -43,10 +43,10 @@ func newDeliveryFixture(t testing.TB) (*deliveryFixture, *DeliveryService, conte
 	t.Helper()
 	f := &deliveryFixture{}
 	f.id = DeliveryIdentity{Binding: toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "synthetic-run"}, OperationID: uuid.NewString(), DeviceID: "fixture-device", InstanceID: "fixture-instance", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
-	f.target = agenvo.Target{DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1"}}
-	details, _ := json.Marshal(Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: agenvo.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}, Phase: "execution-completed"})
+	f.target = computertarget.Target{DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: computertarget.AgentProfile{ExecutionMode: "pi-json-v1"}}
+	details, _ := json.Marshal(Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}, Phase: "execution-completed"})
 	b := f.id.Binding
-	f.record = dbstore.ComputerOperationRecord{ID: f.id.OperationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: b.TargetID, RunID: b.RunID, TargetFingerprint: agenvo.TargetFingerprint(f.target), State: "completed", Details: details, Revision: 3}
+	f.record = dbstore.ComputerOperationRecord{ID: f.id.OperationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: b.TargetID, RunID: b.RunID, TargetFingerprint: computertarget.TargetFingerprint(f.target), State: "completed", Details: details, Revision: 3}
 	ref := DeliveryRequest{Version: 1, Direction: "upload", ContentHash: strings.Repeat("c", 64), SizeBytes: 42, Mime: "application/octet-stream"}
 	f.asset = media.Asset{BotID: b.BotID, ContentHash: ref.ContentHash, SizeBytes: ref.SizeBytes, Mime: ref.Mime}
 	ctx, err := toolcontext.WithComputerBinding(context.Background(), b)
@@ -64,10 +64,10 @@ func (f *deliveryFixture) transact(ctx context.Context, fn func(DeliveryTransact
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	before := f.record
-	err := fn(DeliveryTransaction{Store: f, Authorize: func(context.Context, DeliveryIdentity) (agenvo.Target, error) {
+	err := fn(DeliveryTransaction{Store: f, Authorize: func(context.Context, DeliveryIdentity) (computertarget.Target, error) {
 		f.authorizations++
 		if f.revoked {
-			return agenvo.Target{}, ErrDenied
+			return computertarget.Target{}, ErrDenied
 		}
 		return f.target, nil
 	}})

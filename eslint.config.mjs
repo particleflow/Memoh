@@ -12,7 +12,7 @@ export default [
   {
     // This finite Node CLI is embedded as CommonJS, outside the Web ESM build.
     // Permit only its Node builtins; keep the import rule for other modules.
-    files: ['internal/agenvo/pi_result.cjs'],
+    files: ['internal/computertarget/pi_result.cjs'],
     rules: {
       '@typescript-eslint/no-require-imports': ['error', {
         allow: ['^node:(?:fs|path|crypto|worker_threads)$'],

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 )
 
 var (
@@ -24,9 +24,9 @@ var (
 // by the executor through the official HERDR_* environment, not model input.
 // agent.start is intentionally unsupported: the old adapter's asynchronous
 // "starting" receipt is not the official CLI's synchronous startup contract.
-func buildCommand(method string, params map[string]any, target agenvo.Target) ([]string, error) {
+func buildCommand(method string, params map[string]any, target computertarget.Target) ([]string, error) {
 	if !sessionName.MatchString(target.Session) || params["session"] != target.Session {
-		return nil, agenvo.ErrInvalidTarget
+		return nil, computertarget.ErrInvalidTarget
 	}
 	allowed := map[string]bool{"session": true}
 	str := func(key, fallback string, limit int, multiline bool) (string, bool) {
@@ -57,7 +57,7 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 		}
 		ref, ok := id(key)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		argv = parts
 		if method == "pane.process-info" {
@@ -70,17 +70,17 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 	case "workspace.create", "tab.create":
 		cwd, ok := str("cwd", target.WorkDir, 4096, false)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		label, ok := str("label", "Memoh", 128, false)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		argv = strings.Split(method, ".")
 		if method == "tab.create" {
 			ref, ok := id("workspaceId")
 			if !ok {
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 			argv = append(argv, "--workspace", ref)
 		}
@@ -96,20 +96,20 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 				for k, v := range raw {
 					s, ok := v.(string)
 					if !ok {
-						return nil, agenvo.ErrUnsupported
+						return nil, computertarget.ErrUnsupported
 					}
 					env[k] = s
 				}
 			default:
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 			if len(env) > 32 {
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 			keys := make([]string, 0, len(env))
 			for k, v := range env {
 				if !environmentName.MatchString(k) || len(v) > 4096 || !utf8.ValidString(v) || strings.ContainsRune(v, 0) {
-					return nil, agenvo.ErrUnsupported
+					return nil, computertarget.ErrUnsupported
 				}
 				keys = append(keys, k)
 			}
@@ -125,11 +125,11 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 		}
 		ref, ok := id(key)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		source, ok := str("source", "recent-unwrapped", 32, false)
 		if !ok || (source != "visible" && source != "recent" && source != "recent-unwrapped" && source != "detection") {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		allowed["lines"] = true
 		lines := 80
@@ -139,27 +139,27 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 				lines = n
 			case float64:
 				if n < 1 || n > 500 || n != float64(int(n)) {
-					return nil, agenvo.ErrUnsupported
+					return nil, computertarget.ErrUnsupported
 				}
 				lines = int(n)
 			case json.Number:
 				x, err := strconv.Atoi(string(n))
 				if err != nil {
-					return nil, agenvo.ErrUnsupported
+					return nil, computertarget.ErrUnsupported
 				}
 				lines = x
 			default:
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 		}
 		if lines < 1 || lines > 500 {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		argv = append(strings.Split(method, "."), ref, "--lines", strconv.Itoa(lines), "--source", source)
 		if _, exists := params["format"]; exists && method == "pane.read" {
 			format, ok := str("format", "text", 16, false)
 			if !ok || format != "text" && format != "ansi" {
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 			argv = append(argv, "--format", format)
 		}
@@ -170,7 +170,7 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 		}
 		ref, ok := id(key)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		key = "text"
 		if method == "pane.run" {
@@ -178,7 +178,7 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 		}
 		value, ok := str(key, "", 48000, true)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		argv = append(strings.Split(method, "."), ref, value)
 	case "pane.send-keys", "agent.send-keys":
@@ -188,7 +188,7 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 		}
 		ref, ok := id(key)
 		if !ok {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		allowed["keys"] = true
 		var keys []string
@@ -199,35 +199,35 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 			for _, item := range raw {
 				k, ok := item.(string)
 				if !ok {
-					return nil, agenvo.ErrUnsupported
+					return nil, computertarget.ErrUnsupported
 				}
 				keys = append(keys, k)
 			}
 		default:
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		if len(keys) < 1 || len(keys) > 64 {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 		for _, key := range keys {
 			if key == "" || len(key) > 64 || !utf8.ValidString(key) || strings.ContainsAny(key, "\x00\r\n") || strings.HasPrefix(key, "-") {
-				return nil, agenvo.ErrUnsupported
+				return nil, computertarget.ErrUnsupported
 			}
 		}
 		argv = append(append(strings.Split(method, "."), ref), keys...)
 	default:
-		return nil, agenvo.ErrUnsupported
+		return nil, computertarget.ErrUnsupported
 	}
 	for key := range params {
 		if !allowed[key] {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 	}
 	// Herdr's global session parser scans every argv before dispatch, including
 	// positional text. Refuse its selector syntax so text cannot switch sessions.
 	for _, arg := range argv {
 		if arg == "--session" || strings.HasPrefix(arg, "--session=") {
-			return nil, agenvo.ErrUnsupported
+			return nil, computertarget.ErrUnsupported
 		}
 	}
 	return argv, nil
@@ -280,14 +280,14 @@ func responseID(method string) string {
 // parseReceipt never treats terminal text as JSON, even when it looks like a
 // success envelope. A successful CLI exit acknowledges the native request only.
 // The executor calls this only after receiving a complete, bounded EXIT stream.
-func parseReceipt(method string, target agenvo.Target, exitCode int, stdout, stderr []byte) (agenvo.Receipt, error) {
-	unknown := agenvo.Receipt{Execution: "unknown"}
+func parseReceipt(method string, target computertarget.Target, exitCode int, stdout, stderr []byte) (computertarget.Receipt, error) {
+	unknown := computertarget.Receipt{Execution: "unknown"}
 	kind := responseType(method)
 	if kind == "" {
-		return agenvo.Receipt{}, agenvo.ErrUnsupported
+		return computertarget.Receipt{}, computertarget.ErrUnsupported
 	}
 	if !sessionName.MatchString(target.Session) || len(stdout) > 128*1024 || len(stderr) > 128*1024 || !utf8.Valid(stdout) || !utf8.Valid(stderr) {
-		return unknown, agenvo.ErrUnknown
+		return unknown, computertarget.ErrUnknown
 	}
 	if exitCode != 0 {
 		var envelope struct {
@@ -298,7 +298,7 @@ func parseReceipt(method string, target agenvo.Target, exitCode int, stdout, std
 			Code string `json:"code"`
 		}
 		if len(bytes.TrimSpace(stdout)) != 0 || json.Unmarshal(stderr, &envelope) != nil || envelope.ID != responseID(method) || json.Unmarshal(envelope.Error, &cause) != nil || cause.Code == "" {
-			return unknown, agenvo.ErrUnknown
+			return unknown, computertarget.ErrUnknown
 		}
 		// Native errors can occur after side effects (prompt timeout, PTY write
 		// failure, etc). Only explicit pre-dispatch refusals are rejected.
@@ -318,14 +318,14 @@ func parseReceipt(method string, target agenvo.Target, exitCode int, stdout, std
 		}{Code: "native_error", Native: native}
 		if knownRejected {
 			r.Execution = "rejected"
-			return r, agenvo.ErrRejected
+			return r, computertarget.ErrRejected
 		}
-		return r, agenvo.ErrUnknown
+		return r, computertarget.ErrUnknown
 	}
 	// stderr on a supposedly successful command is not part of this pinned
 	// contract. Preserve uncertainty instead of interpreting unexpected output.
 	if len(bytes.TrimSpace(stderr)) != 0 {
-		return unknown, agenvo.ErrUnknown
+		return unknown, computertarget.ErrUnknown
 	}
 	value := map[string]any{"session": target.Session}
 	switch kind {
@@ -333,7 +333,7 @@ func parseReceipt(method string, target agenvo.Target, exitCode int, stdout, std
 		value["output"] = string(stdout)
 	case "empty":
 		if len(bytes.TrimSpace(stdout)) != 0 {
-			return unknown, agenvo.ErrUnknown
+			return unknown, computertarget.ErrUnknown
 		}
 		value["output"] = ""
 	default:
@@ -346,13 +346,13 @@ func parseReceipt(method string, target agenvo.Target, exitCode int, stdout, std
 			Type string `json:"type"`
 		}
 		if json.Unmarshal(stdout, &envelope) != nil || envelope.ID != responseID(method) || len(envelope.Error) != 0 || json.Unmarshal(envelope.Result, &body) != nil || body.Type != kind {
-			return unknown, agenvo.ErrUnknown
+			return unknown, computertarget.ErrUnknown
 		}
 		value["id"], value["result"] = envelope.ID, envelope.Result
 	}
 	raw, err := json.Marshal(value)
 	if err != nil {
-		return unknown, agenvo.ErrUnknown
+		return unknown, computertarget.ErrUnknown
 	}
-	return agenvo.Receipt{Execution: "accepted", RequestID: responseID(method), Result: raw}, nil
+	return computertarget.Receipt{Execution: "accepted", RequestID: responseID(method), Result: raw}, nil
 }

@@ -254,43 +254,6 @@ func (q *Queries) LatestStartedPiOperation(ctx context.Context, arg LatestStarte
 	return i, err
 }
 
-const listComputerConnectionEndpoints = `-- name: ListComputerConnectionEndpoints :many
-SELECT candidate.config AS candidate_config, registered.config AS registered_config,
-       (user_runtimes.provider_config->>'connection_id'=$1::text) AS direct
-FROM user_runtimes
-JOIN mcp_connections registered ON registered.team_id=user_runtimes.team_id
- AND registered.id::text=user_runtimes.provider_config->>'connection_id'
-JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
- AND candidate.id::text=$1::text
-WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo'
-`
-
-type ListComputerConnectionEndpointsRow struct {
-	CandidateConfig  []byte `json:"candidate_config"`
-	RegisteredConfig []byte `json:"registered_config"`
-	Direct           bool   `json:"direct"`
-}
-
-func (q *Queries) ListComputerConnectionEndpoints(ctx context.Context, connectionID string) ([]ListComputerConnectionEndpointsRow, error) {
-	rows, err := q.db.Query(ctx, listComputerConnectionEndpoints, connectionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListComputerConnectionEndpointsRow
-	for rows.Next() {
-		var i ListComputerConnectionEndpointsRow
-		if err := rows.Scan(&i.CandidateConfig, &i.RegisteredConfig, &i.Direct); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const previousComputerPiOperation = `-- name: PreviousComputerPiOperation :one
 SELECT id, team_id, bot_id, session_id, user_id, target_id, run_id, fingerprint, target_fingerprint, state, details, cancel_requested, revision, created_at, updated_at FROM computer_operations
 WHERE team_id=public.memoh_current_team_id() AND bot_id=$1

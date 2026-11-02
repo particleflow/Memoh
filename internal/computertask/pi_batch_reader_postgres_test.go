@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
@@ -19,7 +19,7 @@ import (
 )
 
 func TestBatchReaderPostgresPersistenceCAS(t *testing.T) {
-	dsn := os.Getenv("MEMOH_AGENVO_TEST_DATABASE_URL")
+	dsn := os.Getenv("MEMOH_COMPUTERTARGET_TEST_DATABASE_URL")
 	if dsn == "" {
 		t.Skip("requires isolated migrated PostgreSQL test database")
 	}
@@ -52,7 +52,7 @@ func TestBatchReaderPostgresPersistenceCAS(t *testing.T) {
 		}
 	}
 	store := postgresstore.NewWithQueries(dbsqlc.New(tx))
-	progress := agenvo.BatchProgress{Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RequestHash: strings.Repeat("c", 64), PiSessionID: strings.Repeat("d", 64), Phase: "batch_submitted", WorkspaceID: "original", PaneID: "pi", TerminalID: "pi-original", ControlPane: "control", ControlTerminal: "control-original"}
+	progress := computertarget.BatchProgress{Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RequestHash: strings.Repeat("c", 64), PiSessionID: strings.Repeat("d", 64), Phase: "batch_submitted", WorkspaceID: "original", PaneID: "pi", TerminalID: "pi-original", ControlPane: "control", ControlTerminal: "control-original"}
 	d := Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: progress}}
 	raw, _ := json.Marshal(d)
 	record, won, err := store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: bot, SessionID: session, UserID: user, TargetID: uuid.NewString(), RunID: "synthetic-reader", Fingerprint: "synthetic-request", TargetFingerprint: "synthetic-registration", Details: raw})
@@ -60,7 +60,7 @@ func TestBatchReaderPostgresPersistenceCAS(t *testing.T) {
 		t.Fatalf("claim: %v %v", won, err)
 	}
 	stale := record
-	d.Batch.RecoveryReader = &agenvo.BatchRecoveryReader{RequestID: uuid.NewString(), Phase: "creating"}
+	d.Batch.RecoveryReader = &computertarget.BatchRecoveryReader{RequestID: uuid.NewString(), Phase: "creating"}
 	record.Details, _ = json.Marshal(d)
 	record, err = store.SaveComputerOperation(ctx, record)
 	if err != nil {
