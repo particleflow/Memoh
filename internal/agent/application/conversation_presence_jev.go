@@ -145,6 +145,13 @@ type presenceDecisionTimings struct {
 	Stage1Ms   int64 `json:"stage1_ms"`
 	PullMs     int64 `json:"pull_ms"`
 	Stage2Ms   int64 `json:"stage2_ms"`
+	// GenerateMs is the wall time of the fast-reply generation attempt. step2
+	// commits before the generator runs, so the finish write point fills it.
+	// Absent means no generation was attempted (entry guard or constant
+	// fallback). The 2026-11-02 08:05 turn recorded neither value, which left
+	// "the window was too small to start" and "generation was still running
+	// at the window end" indistinguishable in the ledger.
+	GenerateMs int64 `json:"generate_ms,omitempty"`
 }
 
 type presenceDecisionDetail struct {

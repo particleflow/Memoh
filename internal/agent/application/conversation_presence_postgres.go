@@ -254,11 +254,24 @@ func (s *postgresPresenceClaims) finalizePresenceDecision(ctx context.Context, t
 	return nil
 }
 
+// presenceOutcomePatch builds the finish write point's JSON patch. Postgres
+// merges it with `detail || patch`, which is shallow: a nested object in the
+// patch replaces the stored one entirely. The patch therefore repeats the
+// whole timings object rather than only generate_ms, or the decision timings
+// step2 committed would be erased. GenerateMs is omitted when no generation
+// was attempted, so an entry-guard refusal never claims one.
+func presenceOutcomePatch(detail presenceDecisionDetail, outcome string) ([]byte, error) {
+	return json.Marshal(struct {
+		Outcome string                  `json:"outcome"`
+		Timings presenceDecisionTimings `json:"timings"`
+	}{Outcome: outcome, Timings: detail.Timings})
+}
+
 // recordPresenceOutcome is the fail-open finish write point (design v3
 // §6.3): fill the accounting outcome after the coordinator reached a
 // terminal state. Errors are logged by the caller, never blocking publish.
-func (s *postgresPresenceClaims) recordPresenceOutcome(ctx context.Context, ticket conversationpresence.Ticket, outcome string) error {
-	patch, err := json.Marshal(map[string]string{"outcome": outcome})
+func (s *postgresPresenceClaims) recordPresenceOutcome(ctx context.Context, ticket conversationpresence.Ticket, detail presenceDecisionDetail, outcome string) error {
+	patch, err := presenceOutcomePatch(detail, outcome)
 	if err != nil {
 		return err
 	}
