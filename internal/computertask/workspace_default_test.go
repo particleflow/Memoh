@@ -26,7 +26,7 @@ func TestWorkspaceDefaultResumeKeepsOriginalDirectory(t *testing.T) {
 		creates++
 		return computertarget.Receipt{}, computertarget.ErrUnknown
 	})
-	in := Submit{Kind: "herdr_pi_task", Task: "synthetic default directory"}
+	in := Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic default directory"}
 	first, err := service.submit(ctx, f.binding, in)
 	if !errors.Is(err, computertarget.ErrUnknown) || first.ID == "" || creates != 1 {
 		t.Fatalf("expected one uncertain create: %+v %v", first, err)

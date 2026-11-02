@@ -95,14 +95,14 @@ func completionAdapterProgram() string {
 // The adapter is finite deployment code written into this exclusive attempt,
 // outside Pi's installation/configuration. Node is an explicit preflight
 // requirement; missing Node cannot launch Pi and cannot select another runtime.
-func completionScriptParts(p BatchProgress, target Target) (prepare, preflight, project, receipt string) {
+func completionScriptParts(p BatchProgress, target Target, model string) (prepare, preflight, project, receipt string) {
 	if p.CompletionVersion != BatchCompletionVersion {
 		return "", "", "", ""
 	}
 	identity := map[string]any{
 		"attempt": p.Attempt, "generation": p.Generation, "request_hash": p.RequestHash,
 		"pi_session_id": p.PiSessionID, "workspace_id": p.WorkspaceID, "pane_id": p.PaneID,
-		"terminal_id": p.TerminalID, "provider": target.Agent.Provider, "model": target.Agent.Model,
+		"terminal_id": p.TerminalID, "provider": target.Agent.Provider, "model": model,
 	}
 	context, _ := json.Marshal(identity)
 	prepare = fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/result-reader.cjs"

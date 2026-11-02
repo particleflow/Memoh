@@ -51,7 +51,7 @@ if(fs.existsSync(process.env.SYNTH_DELETE)) fs.unlinkSync(file);
 	p.History = &BatchHistoryExpectation{Version: BatchHistoryVersion, Mode: "first"}
 	target := Target{WorkDir: dir, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
 	run := func(p BatchProgress) (*BatchReceipt, error) {
-		script, err := batchScript(p, target, dir, "synthetic only")
+		script, err := batchScript(p, target, dir, "synthetic only", target.Agent.Model)
 		if err != nil {
 			return nil, err
 		}

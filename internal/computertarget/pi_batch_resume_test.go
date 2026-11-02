@@ -102,7 +102,7 @@ func (f *batchResumeRelayFixture) call(_ context.Context, _ Scope, target Target
 		}
 		expected := f.progress
 		expected.WorkspaceID, expected.PaneID, expected.TerminalID = "w-synthetic", "job", "job-terminal"
-		script, err := batchScript(expected, target, target.WorkDir, "same synthetic task")
+		script, err := batchScript(expected, target, target.WorkDir, "same synthetic task", "fixture")
 		if err != nil || params["command"] != launchBatchScript(script, target) {
 			f.t.Fatal("resume changed the original batch script/identity")
 		}
@@ -221,7 +221,7 @@ func TestContinueBatchDurableStagesAndSameInvocation(t *testing.T) {
 				f.tab = true
 				p.Phase, p.PaneID, p.TerminalID = "batch_tab_adopted", "job", "job-terminal"
 			}
-			got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+			got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 			want := p
 			want.Phase, want.PaneID, want.TerminalID, want.RequestID = "batch_submitted", "job", "job-terminal", "synthetic-cli-receipt"
 			writes, saves := []string{"tab.create", "pane.run"}, []string{"batch_creating_tab", "batch_tab_adopted", "batch_submitting", "batch_submitted"}
@@ -251,12 +251,12 @@ func TestContinueBatchDoesNotReplayAfterSaveOrTransportUncertainty(t *testing.T)
 			f := newBatchResumeRelayFixture(t)
 			p := f.adopt()
 			f.failSave, f.failCall = tc.failSave, tc.failCall
-			got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+			got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 			if err == nil || got.Phase != tc.phase || !slices.Equal(f.writes, tc.writes) {
 				t.Fatalf("wrong uncertainty boundary: phase=%s err=%v writes=%v", got.Phase, err, f.writes)
 			}
 			before := len(f.calls)
-			if _, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", got, f.save); !errors.Is(err, ErrUnsupported) || len(f.calls) != before {
+			if _, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", got, f.save); !errors.Is(err, ErrUnsupported) || len(f.calls) != before {
 				t.Fatal("uncertain stage was reentered")
 			}
 		})
@@ -268,7 +268,7 @@ func TestContinueBatchRejectsChangedSavedPiTerminalBeforeDispatch(t *testing.T) 
 	p := f.adopt()
 	f.tab = true
 	p.Phase, p.PaneID, p.TerminalID = "batch_tab_adopted", "job", "previous-job-terminal"
-	got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+	got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 	if !errors.Is(err, ErrTargetChanged) || !reflect.DeepEqual(got, p) || len(f.writes) != 0 || len(f.saves) != 0 {
 		t.Fatalf("changed terminal accepted: err=%v writes=%v saves=%v", err, f.writes, f.saves)
 	}
@@ -285,11 +285,11 @@ func TestContinueBatchRechecksNewPiTerminalAfterSavingItsReceipt(t *testing.T) {
 			}
 		}
 	}
-	got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+	got, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 	if !errors.Is(err, ErrTargetChanged) || got.Phase != "batch_tab_adopted" || !slices.Equal(f.writes, []string{"tab.create"}) {
 		t.Fatalf("new terminal was not rechecked before input: phase=%s err=%v writes=%v", got.Phase, err, f.writes)
 	}
-	if _, err = f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", got, f.save); !errors.Is(err, ErrTargetChanged) || !slices.Equal(f.writes, []string{"tab.create"}) {
+	if _, err = f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", got, f.save); !errors.Is(err, ErrTargetChanged) || !slices.Equal(f.writes, []string{"tab.create"}) {
 		t.Fatal("changed terminal allowed a replay")
 	}
 }
@@ -335,7 +335,7 @@ func TestContinueBatchChecksForExistingAgentsBeforeEveryFirstPrompt(t *testing.T
 					envelope["result"].(map[string]any)["agents"] = []any{map[string]any{"agent_id": "existing-agent"}}
 				}
 			}
-			_, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+			_, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 			if err == nil || f.counts["pane.run"] != 0 || (!afterTab && f.counts["tab.create"] != 0) {
 				t.Fatalf("submitted with an existing agent: err=%v writes=%v", err, f.writes)
 			}
@@ -355,7 +355,7 @@ func TestContinueBatchAcceptsOnlyTheTwoVerifiedTabsAsActive(t *testing.T) {
 					envelope["result"].(map[string]any)["workspace"].(map[string]any)["active_tab_id"] = active
 				}
 			}
-			_, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", p, f.save)
+			_, err := f.service.ContinueBatch(t.Context(), request().Scope, "same synthetic task", "", "fixture", p, f.save)
 			if active == "unrelated-tab" {
 				if !errors.Is(err, ErrTargetChanged) || len(f.writes) != 0 {
 					t.Fatal("unverified active tab accepted", err)

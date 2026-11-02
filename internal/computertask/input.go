@@ -40,7 +40,7 @@ func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBindi
 		}
 		return result(*r, *d), nil
 	}
-	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task, in.Model); err != nil {
 		d.Phase = "pi_continuity_unconfirmed"
 		if saveErr := save("not_started"); saveErr != nil {
 			return result(*r, *d), saveErr
@@ -50,7 +50,7 @@ func (s *Service) dispatchBatch(ctx context.Context, b toolcontext.ComputerBindi
 	if err := s.checkTaskInputAuthority(ctx, b, in, target, *r, d.Batch.Progress.Inputs); err != nil {
 		return result(*r, *d), err
 	}
-	p, runErr := s.relay.SubmitBatch(ctx, scope(b, r.TargetID), in.Task, in.WorkDir, d.Batch.Progress, func(p computertarget.BatchProgress) error {
+	p, runErr := s.relay.SubmitBatch(ctx, scope(b, r.TargetID), in.Task, in.WorkDir, in.Model, d.Batch.Progress, func(p computertarget.BatchProgress) error {
 		if err := s.checkTaskInputAuthority(ctx, b, in, target, *r, p.Inputs); err != nil {
 			return err
 		}

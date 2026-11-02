@@ -97,7 +97,7 @@ type batchResumeFixture struct {
 
 func newBatchResumeFixture(t *testing.T) (*batchResumeFixture, context.Context) {
 	t.Helper()
-	return newBatchResumeFixtureWithInput(t, Submit{Kind: "herdr_pi_task", Task: "synthetic original batch instruction"})
+	return newBatchResumeFixtureWithInput(t, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "synthetic original batch instruction"})
 }
 
 func newBatchResumeFixtureWithInput(t *testing.T, input Submit) (*batchResumeFixture, context.Context) {
@@ -122,7 +122,7 @@ func (f *batchResumeFixture) service() *Service {
 			return ErrDenied
 		}
 		return nil
-	})
+	}).WithPiModelList(testPiModelList)
 }
 
 func (f *batchResumeFixture) record(id string) (dbstore.ComputerOperationRecord, computertarget.BatchProgress) {
@@ -481,7 +481,7 @@ func resumeJSONMap(t *testing.T, raw []byte) map[string]json.RawMessage {
 }
 
 func TestNativeBatchExplicitResumePreservesHistoricalProducerAndDeliveryFields(t *testing.T) {
-	f, ctx := newBatchResumeFixtureWithInput(t, Submit{Kind: "herdr_pi_task", Task: "original producer request", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+	f, ctx := newBatchResumeFixtureWithInput(t, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "original producer request", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
 	r, _ := f.record(f.op.ID)
 	details := resumeJSONMap(t, r.Details)
 	batch := resumeJSONMap(t, details["batch"])

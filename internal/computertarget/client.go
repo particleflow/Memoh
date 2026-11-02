@@ -35,14 +35,16 @@ type Target struct {
 	Producer        ProducerLocator `json:"producer,omitempty,omitzero"`
 }
 
-// AgentProfile is private deployment configuration, never model-supplied.
-// No provider default is inferred and no credential is stored here.
+// AgentProfile is private deployment configuration. The Pi model is not pinned
+// here: every invocation carries its own model id, validated by the task layer
+// against the live provider catalog. Model is decoded only for historical
+// profiles and is never a dispatch input. No credential is stored here.
 type AgentProfile struct {
 	// Empty is decoded only for historical profiles. Native configuration
 	// requires pi-json-v1; no protocol fallback occurs.
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	Provider      string `json:"provider"`
-	Model         string `json:"model"`
+	Model         string `json:"model,omitempty"`
 	ConfigDir     string `json:"config_dir"`
 	Path          string `json:"path,omitempty"`
 }
@@ -51,7 +53,7 @@ func (p AgentProfile) Validate() error {
 	if p.ExecutionMode != "" && p.ExecutionMode != "pi-json-v1" {
 		return ErrInvalidTarget
 	}
-	if p.Provider == "" || p.Model == "" || !windowsAbsolute.MatchString(p.ConfigDir) || len(p.ConfigDir) > 4096 || len(p.Provider) > 128 || len(p.Model) > 256 {
+	if p.Provider == "" || !windowsAbsolute.MatchString(p.ConfigDir) || len(p.ConfigDir) > 4096 || len(p.Provider) > 128 || len(p.Model) > 256 {
 		return ErrInvalidTarget
 	}
 	if len(p.Path) > 4096 {

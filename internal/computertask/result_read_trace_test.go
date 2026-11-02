@@ -25,7 +25,7 @@ type readTraceOutcome struct {
 func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcome, map[string]any) {
 	t.Helper()
 	f, service, ctx := newNativeTaskFixture(t)
-	original, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "PRIVATE_PROMPT"})
+	original, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "PRIVATE_PROMPT"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -154,7 +154,7 @@ exec "$SYNTH_PRODUCER_BINARY" "$@"
 		cmd.Env, cmd.Dir = env, source
 		return cmd.CombinedOutput()
 	}
-	script, err := batchScript(p, target, source, "create fresh_result exactly once")
+	script, err := batchScript(p, target, source, "create fresh_result exactly once", target.Agent.Model)
 	if err != nil {
 		t.Fatal(err)
 	}

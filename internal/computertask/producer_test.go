@@ -66,7 +66,7 @@ func exerciseProducerWake(t *testing.T, multiple bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	input := Submit{Kind: "herdr_pi_task", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
+	input := Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
 	if multiple {
 		input.Artifacts = []deliverymeta.Artifact{*input.Artifact, {SourceRef: "second", Mime: "text/plain"}}
 		input.Artifact = nil

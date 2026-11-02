@@ -29,6 +29,7 @@ type NativeTaskResumeInput struct {
 	Kind      string                  `json:"kind" validate:"required" enums:"herdr_pi_task"`
 	Task      string                  `json:"task" validate:"required"`
 	TargetID  string                  `json:"target_id,omitempty"`
+	Model     string                  `json:"model,omitempty"`
 	WorkDir   string                  `json:"work_dir,omitempty"`
 	Artifact  *deliverymeta.Artifact  `json:"artifact,omitempty"`
 	Artifacts []deliverymeta.Artifact `json:"artifacts,omitempty"`
@@ -86,7 +87,7 @@ func (h *SessionTaskHandler) Resume(c echo.Context) error {
 	if in.Task == "" {
 		return apperror.FieldRequired("task")
 	}
-	out, callErr := native.ResumeNative(ctx, b, c.Param("task_id"), computertask.Submit{Kind: in.Kind, Task: in.Task, TargetID: in.TargetID, WorkDir: in.WorkDir, Inputs: in.Inputs, Artifact: in.Artifact, Artifacts: in.Artifacts})
+	out, callErr := native.ResumeNative(ctx, b, c.Param("task_id"), computertask.Submit{Kind: in.Kind, Task: in.Task, TargetID: in.TargetID, Model: in.Model, WorkDir: in.WorkDir, Inputs: in.Inputs, Artifact: in.Artifact, Artifacts: in.Artifacts})
 	if err := h.recheckNative(c, b); err != nil {
 		return err
 	}

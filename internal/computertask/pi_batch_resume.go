@@ -64,7 +64,7 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 	if !ok || s.authorize == nil {
 		return result(r, d), ErrDenied
 	}
-	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+	if err := computertarget.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task, in.Model); err != nil {
 		return result(r, d), err
 	}
 	if err := s.authorize(ctx, b, r.TargetID, in.Kind, in.Task); err != nil {
@@ -165,7 +165,7 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 			return reload(err)
 		}
 	}
-	p, runErr := s.relay.ContinueBatch(work, scope(b, r.TargetID), in.Task, in.WorkDir, d.Batch.Progress, save)
+	p, runErr := s.relay.ContinueBatch(work, scope(b, r.TargetID), in.Task, in.WorkDir, in.Model, d.Batch.Progress, save)
 	if persistenceFailed {
 		return reload(runErr)
 	}

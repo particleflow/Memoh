@@ -110,7 +110,9 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 			manager := workspace.NewManager(slog.New(slog.DiscardHandler), nil, nil, config.WorkspaceConfig{}, "", nil)
 			manager.SetRemoteWorkspaceService(remote)
 			authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, nil)
-			source := computertask.NewSource(computertask.NewService(store, store, relay, nil, authorize))
+			source := computertask.NewSource(computertask.NewService(store, store, relay, nil, authorize).WithPiModelList(func(context.Context) ([]computertask.PiModel, error) {
+				return []computertask.PiModel{{ID: "synthetic-model"}}, nil
+			}))
 			ctx := t.Context()
 			selection := "native"
 			if tc.otherPC {
@@ -126,7 +128,7 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 			if tc.mismatch {
 				session.SessionID = "other-session"
 			}
-			args := map[string]any{"kind": "herdr_pi_task", "task": "Compute the synthetic value 6 * 7.", "work_dir": "."}
+			args := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "Compute the synthetic value 6 * 7.", "work_dir": "."}
 			if tc.target != "" {
 				args["target_id"] = tc.target
 			}

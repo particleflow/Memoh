@@ -120,13 +120,28 @@ func shellData(s string) string {
 	return "$(printf '%s' '" + base64.StdEncoding.EncodeToString([]byte(s)) + "' | base64 --decode; printf '.')"
 }
 
+// validBatchModel applies the same bounded-data contract as the historical
+// profile model to this invocation's id. It is a shape check only; catalog
+// membership is the task layer's live-list decision, never inferred here.
+func validBatchModel(model string) error {
+	if model == "" || len(model) > 256 || strings.ContainsAny(model, "\x00\r\n") || strings.HasPrefix(model, "-") || strings.TrimSpace(model) != model {
+		return ErrUnsupported
+	}
+	return nil
+}
+
 // batchScript is a finite envelope around the unchanged Pi CLI. User task text
 // is a file connected to stdin, never shell source or a command-line option.
-// Directory creation is exclusive; neither duplicate delivery nor a stale
-// session lock can start Pi twice. Crashed locks are deliberately not stolen.
-func batchScript(p BatchProgress, target Target, cwd, task string) (string, error) {
+// model is this one invocation's Pi model id; it is data for the existing
+// --model channel, never a persisted profile value. Directory creation is
+// exclusive; neither duplicate delivery nor a stale session lock can start Pi
+// twice. Crashed locks are deliberately not stolen.
+func batchScript(p BatchProgress, target Target, cwd, task, model string) (string, error) {
 	layout, err := resolveBatchLayout(p)
 	if err != nil {
+		return "", err
+	}
+	if err := validBatchModel(model); err != nil {
 		return "", err
 	}
 	if p.Inputs != nil {
@@ -147,7 +162,7 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	}
 	encoded, _ := json.Marshal(identity)
 	prefix := strings.TrimSuffix(string(encoded), "}")
-	prepare, preflight, project, completion := completionScriptParts(p, target)
+	prepare, preflight, project, completion := completionScriptParts(p, target, model)
 	historyPrepare, historyBefore, historyAfter, historyReceipt := historyScriptParts(p)
 	prepare += historyPrepare
 	if p.History != nil && preflight == "" {
@@ -220,7 +235,7 @@ fi
 printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
-`, shellData(target.WorkDir), shellData(cwd), shellData(target.Agent.Path), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
+`, shellData(target.WorkDir), shellData(cwd), shellData(target.Agent.Path), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
 	script, err = producerEnvelope(script, p, target)
 	if err != nil {
 		return "", err

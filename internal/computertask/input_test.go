@@ -234,13 +234,13 @@ func newTaskInputFixture(t *testing.T) taskInputFixture {
 }
 
 func (f taskInputFixture) request() Submit {
-	return Submit{Kind: "herdr_pi_task", Task: "Read the supplied binary input and report its exact SHA256.", Inputs: []string{f.asset.ContentHash}}
+	return Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "Read the supplied binary input and report its exact SHA256.", Inputs: []string{f.asset.ContentHash}}
 }
 
 func TestTaskInputSubmitStreamsAuthorizedOriginal(t *testing.T) {
 	f := newTaskInputFixture(t)
 	session := mcp.ToolSessionContext{BotID: f.base.binding.BotID, UserID: f.base.binding.UserID, SessionID: f.base.binding.SessionID, RunID: f.base.binding.RunID, RunContext: f.ctx}
-	response, err := NewSource(f.service).CallTool(f.ctx, session, "computer_task_submit", map[string]any{"kind": f.request().Kind, "task": f.request().Task, "inputs": []any{f.asset.ContentHash}})
+	response, err := NewSource(f.service).CallTool(f.ctx, session, "computer_task_submit", map[string]any{"kind": f.request().Kind, "model": f.request().Model, "task": f.request().Task, "inputs": []any{f.asset.ContentHash}})
 	wire, _ := json.Marshal(response["structuredContent"])
 	result := parseResult(t, wire)
 	if err != nil || result.State != "submitted" || result.Inputs == nil || result.Inputs.State != "verified" || len(result.Inputs.Files) != 1 || f.peer.writes.Load() != 1 || f.base.batch.runs != 1 {
@@ -253,7 +253,7 @@ func TestTaskInputSubmitStreamsAuthorizedOriginal(t *testing.T) {
 	p := d.Batch.Progress.Inputs
 	path := filepath.Join(f.root, filepath.FromSlash(p.Path(p.Files[0])))
 	actual, err := os.ReadFile(path) // #nosec G304 -- Test-owned fixture file; subprocess paths are passed only by this test parent.
-	if err != nil || !bytes.Equal(actual, f.data) || p.Task.OperationID != result.ID || p.Task.SessionID != f.base.binding.SessionID || p.Task.Attempt != d.Batch.Progress.Attempt || p.Task.Generation != d.Batch.Progress.Generation || p.Task.RootHash != deliverymeta.RootHash(f.base.profile.WorkDir) || r.Fingerprint != fingerprint(Submit{TargetID: f.base.binding.TargetID, Kind: f.request().Kind, Task: f.request().Task, WorkDir: ".", Inputs: f.request().Inputs}) {
+	if err != nil || !bytes.Equal(actual, f.data) || p.Task.OperationID != result.ID || p.Task.SessionID != f.base.binding.SessionID || p.Task.Attempt != d.Batch.Progress.Attempt || p.Task.Generation != d.Batch.Progress.Generation || p.Task.RootHash != deliverymeta.RootHash(f.base.profile.WorkDir) || r.Fingerprint != fingerprint(Submit{TargetID: f.base.binding.TargetID, Kind: f.request().Kind, Model: f.request().Model, Task: f.request().Task, WorkDir: ".", Inputs: f.request().Inputs}) {
 		t.Fatal("actual PC bytes or original task identity differ", err)
 	}
 	prior := f.peer.writes.Load()
@@ -513,7 +513,7 @@ func TestTaskInputProcessChild(t *testing.T) {
 	files := taskInputPathView{client: bridge.NewClientFromConn(conn).FilesOnly(), root: config.PC, win: config.Profile.WorkDir}
 	relay := computertarget.NewService(f.store, f, f.invoke)
 	store := &resumeOperationStore{nativeTaskStore: f.store}
-	s := NewService(store, f.store, relay, media.NewService(nil, localfs.New(config.NAS)), func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
+	s := NewService(store, f.store, relay, media.NewService(nil, localfs.New(config.NAS)), func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil }).WithPiModelList(testPiModelList)
 	s.WithInputFiles(func(context.Context, toolcontext.ComputerBinding, string, computertarget.Target) (InputFileSystem, error) {
 		return files, nil
 	})

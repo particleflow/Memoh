@@ -27,7 +27,8 @@ type batchPane struct {
 
 // ValidateBatchRequest applies the existing connector's command size limit
 // before a durable claim or any remote mutation. Native IDs are bounded too.
-func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) error {
+// model is this invocation's Pi model id, carried only in the generated script.
+func ValidateBatchRequest(p BatchProgress, target Target, workDir, task, model string) error {
 	if !p.valid() {
 		return ErrUnsupported
 	}
@@ -36,7 +37,7 @@ func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) 
 		return err
 	}
 	p.WorkspaceID, p.PaneID, p.TerminalID = strings.Repeat("x", 256), strings.Repeat("x", 256), strings.Repeat("x", 256)
-	script, err := batchScript(p, target, cwd, task)
+	script, err := batchScript(p, target, cwd, task, model)
 	if err != nil {
 		return err
 	}
@@ -48,12 +49,13 @@ func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) 
 
 // SubmitBatch only starts a previously reserved new invocation. The original
 // workspace pane is reserved for fixed file reads, and Pi gets a separate tab.
-func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir string, p BatchProgress, save func(BatchProgress) error) (BatchProgress, error) {
+// model is this invocation's Pi model id for the existing --model channel.
+func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir, model string, p BatchProgress, save func(BatchProgress) error) (BatchProgress, error) {
 	c, target, err := s.Client(ctx, scope)
 	if err != nil {
 		return p, err
 	}
-	if !p.valid() || p.Phase != "" || target.Agent.ExecutionMode != "pi-json-v1" || target.Agent.Validate() != nil || ValidateBatchRequest(p, target, workDir, task) != nil {
+	if !p.valid() || p.Phase != "" || target.Agent.ExecutionMode != "pi-json-v1" || target.Agent.Validate() != nil || validBatchModel(model) != nil || ValidateBatchRequest(p, target, workDir, task, model) != nil {
 		return p, ErrUnsupported
 	}
 	cwd, err := resolveWorkDir(target.WorkDir, workDir)
@@ -100,7 +102,7 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 	if len(p.PaneID) > 256 || len(p.WorkspaceID) > 256 || len(p.TerminalID) > 256 {
 		return p, ErrUnknown
 	}
-	script, err := batchScript(p, target, cwd, task)
+	script, err := batchScript(p, target, cwd, task, model)
 	if err != nil {
 		return p, err
 	}

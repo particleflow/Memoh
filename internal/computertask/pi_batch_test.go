@@ -91,6 +91,7 @@ type batchTransport struct {
 	noCompletion                                     bool
 	completionAttempt                                string
 	logReads                                         int
+	lastScript                                       string
 }
 
 func (f *batchTransport) projectCompletion() {
@@ -211,6 +212,7 @@ func (f *batchTransport) call(_ context.Context, scope computertarget.Scope, tar
 			_ = reader.Close()
 		}
 		script := string(raw)
+		f.lastScript = script
 		if strings.HasPrefix(script, "HERDR_PLUGIN_CONFIG_DIR=") && strings.Contains(script, " -action collect-result </dev/null") {
 			if params["paneId"] != "control" || !strings.Contains(script, "HERDR_PLUGIN_STATE_DIR=") || strings.Contains(script, "plugin action invoke") {
 				f.t.Fatal("native producer wake lost its fixed control route")
@@ -440,7 +442,7 @@ func TestNativeBatchColoredFramesAndOtherControls(t *testing.T) {
 	f.hiddenFrame = true
 	f.framePrefix, f.frameSuffix = "\x1b[32m", "\x1b[0m"
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	got := batchResultUntilReady(t, c, r.ID)
 	if got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
 		t.Fatalf("colored result: %+v", got)
@@ -468,12 +470,12 @@ func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
 		t.Fatal("wrong inventory scope/protocol")
 	}
 	for _, target := range []string{"pc-b", "native"} {
-		invoke(t, c, "computer_task_submit", map[string]any{"target_id": target, "kind": "herdr_pi_task", "task": "compute 42"}, true)
+		invoke(t, c, "computer_task_submit", map[string]any{"target_id": target, "kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, true)
 	}
 	if len(f.calls) != 0 {
 		t.Fatal("denial dispatched")
 	}
-	args := map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}
+	args := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}
 	r := parseResult(t, invoke(t, c, "computer_task_submit", args, false))
 	if r.State != "submitted" || r.ProcessStopped || r.PiResult != nil || f.runs != 1 {
 		t.Fatalf("submission=%+v", r)
@@ -510,12 +512,12 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 	f.lost = true
 	f.missing = true
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, true))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, true))
 	if r.State != "unknown" || f.runs != 1 {
 		t.Fatal("lost submission not retained")
 	}
 	for i := 0; i < 2; i++ {
-		blocked := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": fmt.Sprintf("other %d", i)}, true))
+		blocked := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": fmt.Sprintf("other %d", i)}, true))
 		if blocked.BlockedByOperation != r.ID {
 			t.Fatal("unknown task not fenced")
 		}
@@ -557,7 +559,7 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 				f.reason = "aborted"
 			}
 			c := standardClient(t, source, "pc-a", false)
-			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 			switch mode {
 			case "output_limit":
 				f.receipt.Stdout.Size = 65 << 20
@@ -623,7 +625,7 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 func TestStandardMCPPiBatchRejectsOversizeBeforeClaim(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32001)}, true)
+	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": strings.Repeat("x", 32001)}, true)
 	if len(store.records) != 0 || len(f.calls) != 0 {
 		t.Fatal("oversized launch reserved or dispatched")
 	}
@@ -642,7 +644,7 @@ func TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs(t *testing.T) {
 			}
 			source.service.assets = assets
 			c := standardClient(t, source, "pc-a", false)
-			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 			if mode != "stdout" {
 				f.stderr = nil
 				f.receipt.Stderr = batchFile("stderr.txt", nil)
@@ -688,7 +690,7 @@ func TestStandardMCPPiBatchDelayedFramesWithinVendorLimits(t *testing.T) {
 				f.control += strings.Repeat("historical decoration ", 20000) + "\r\n"
 			}
 			c := standardClient(t, source, "pc-a", false)
-			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 			f.stderr = []byte(strings.Repeat("z", 6000))
 			f.receipt.Stderr = batchFile("stderr.txt", f.stderr)
 			got := batchResultUntilReady(t, c, r.ID)
@@ -726,7 +728,7 @@ func TestPaneReadV020SchemaBounds(t *testing.T) {
 func TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	f.rejectRead = true
 	raw := invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, true)
 	got := parseResult(t, raw)
@@ -739,7 +741,7 @@ func TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation(t *testing.T
 	if persisted.State != "submitted" {
 		t.Fatal("read rejection released invocation slot")
 	}
-	blocked := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "different task"}, true))
+	blocked := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "different task"}, true))
 	if blocked.BlockedByOperation != r.ID {
 		t.Fatal("unknown read permitted another task")
 	}
@@ -753,7 +755,7 @@ func TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation(t *testing.T
 func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T) {
 	source, store, f, a := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	// Seed the durable format from the previous 16 KiB reader. No attempt,
 	// identity, chunk hash or byte offset may be reset by the corrected reader.
 	stdout := batchFile("stdout.jsonl", f.stdout)
@@ -781,7 +783,7 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 	}
 	store.records[r.ID] = old
 	store.mu.Unlock()
-	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
+	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize).WithPiModelList(testPiModelList))
 	resumed := standardClient(t, restarted, "pc-a", false)
 	got := batchResultUntilReady(t, resumed, r.ID)
 	if got.PiResult.Outcome != "succeeded" || got.StdoutHash != stdout.Hash || got.StderrHash != f.receipt.Stderr.Hash || f.runs != 1 || len(f.pageOffsets) == 0 || f.pageOffsets[0] != 16384 {
@@ -798,7 +800,7 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 func TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch(t *testing.T) {
 	source, store, f, a := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	store.mu.Lock()
 	record := store.records[r.ID]
 	var d Details
@@ -808,7 +810,7 @@ func TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch(t *testing.T) {
 	store.records[r.ID] = record
 	store.mu.Unlock()
 	before := len(f.calls)
-	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
+	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize).WithPiModelList(testPiModelList))
 	resumed := standardClient(t, restarted, "pc-a", false)
 	got := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": r.ID}, true))
 	if got.ID != r.ID || got.State != "submitted" || got.ProcessStopped || got.PiResult != nil || len(f.calls) != before || f.runs != 1 {
@@ -820,7 +822,7 @@ func TestStandardMCPPiBatchCompleteReceiptBudgetWithLongNativeIDs(t *testing.T) 
 	source, store, f, _ := setupBatch(t)
 	f.hiddenFrame = true
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	// Preserve the maximum identities accepted by the earlier saved format.
 	f.progress.WorkspaceID = strings.Repeat("w", 256)
 	f.progress.PaneID = strings.Repeat("p", 128)
@@ -848,14 +850,14 @@ func TestCompactResultIndependentOfLogStorageAndSurvivesRestart(t *testing.T) {
 	source, store, f, a := setupBatch(t)
 	a.fail = true // Media outage must not withhold the small semantic result.
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "compute 42"}, false))
 	f.corrupt = true
 	first := parseResult(t, invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, true))
 	if !first.ProcessStopped || first.PiResult != nil || f.runs != 1 {
 		t.Fatal("read failure altered invocation evidence")
 	}
 	f.corrupt = false
-	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
+	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize).WithPiModelList(testPiModelList))
 	resumed := standardClient(t, restarted, "pc-a", false)
 	got := batchResultUntilReady(t, resumed, r.ID)
 	if got.PiResult.Outcome != "succeeded" || f.logReads != 0 || len(a.data) != 0 || f.runs != 1 {

@@ -32,10 +32,10 @@ func TestNativeProducerComplexTaskPreflight(t *testing.T) {
 			if !p.valid() || !p.Producer.Valid() || target.Producer.validate() != nil {
 				t.Fatal("invalid synthetic identity or producer configuration")
 			}
-			if err := ValidateBatchRequest(p, target, ".", tc.task); err != nil {
+			if err := ValidateBatchRequest(p, target, ".", tc.task, target.Agent.Model); err != nil {
 				t.Fatalf("native complex task rejected before operation claim: task_bytes=%d: %v", len(tc.task), err)
 			}
-			script, err := batchScript(p, target, target.WorkDir, tc.task)
+			script, err := batchScript(p, target, target.WorkDir, tc.task, target.Agent.Model)
 			if err != nil {
 				t.Fatal(err)
 			}

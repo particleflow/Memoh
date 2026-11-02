@@ -3,7 +3,9 @@ package core
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 
@@ -17,16 +19,17 @@ import (
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/providers"
 	"github.com/felinics/memoh/internal/settings"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/userruntime"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *computertarget.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, delegations *botdelegation.Service, cfg config.Config) *computertask.Source {
+func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *computertarget.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, delegations *botdelegation.Service, providerService *providers.Service, cfg config.Config) *computertask.Source {
 	permissions := &applicationBotPermissionChecker{bots: botService, accounts: accountService}
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
-	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit)
+	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit).WithPiModelList(magpieModelList(providerService))
 	loader := &delegationAssetLoader{host: delegations.Host.(*delegationHost)}
 	service.WithInputReferences(loader.openComputerInput)
 	service.WithDefaultWorkDir(computerTaskWorkspaceDefault(store.GetMount, runtimes.SelectedWorkspaceDirectory))
@@ -51,6 +54,41 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 		host.computerResume = computerTaskResumeContext(delegations)
 	}
 	return source
+}
+
+// magpieModelList reads the live Magpie catalog through the saved provider
+// wiring: the one enabled saved provider named after the Magpie protocol, via
+// the existing read-only GET /v1/models catalog probe. No new provider or
+// credential configuration is introduced; an unreadable or ambiguous catalog
+// surfaces as an error instead of any cached or guessed list.
+func magpieModelList(providerService *providers.Service) computertask.PiModelList {
+	return func(ctx context.Context) ([]computertask.PiModel, error) {
+		if providerService == nil {
+			return nil, errors.New("pi model list unavailable: provider service not configured")
+		}
+		saved, err := providerService.List(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("pi model list unavailable: %w", err)
+		}
+		var matched []string
+		for _, p := range saved {
+			if p.Enable && strings.Contains(strings.ToLower(p.Name), providers.MediaCatalogProtocolMagpie) {
+				matched = append(matched, p.ID)
+			}
+		}
+		if len(matched) != 1 {
+			return nil, fmt.Errorf("pi model list unavailable: %d enabled saved providers named after %s", len(matched), providers.MediaCatalogProtocolMagpie)
+		}
+		catalog, err := providerService.DiscoverMediaCatalog(ctx, matched[0])
+		if err != nil {
+			return nil, fmt.Errorf("pi model list unavailable: %w", err)
+		}
+		models := make([]computertask.PiModel, 0, len(catalog.Models))
+		for _, m := range catalog.Models {
+			models = append(models, computertask.PiModel{ID: m.ID, Kind: m.Kind, Input: m.Input, Output: m.Output})
+		}
+		return models, nil
+	}
 }
 
 // HTTP management has no active turn scope. Rebuild it from the operation's

@@ -92,7 +92,7 @@ func recoveryFixture(t *testing.T) (*Source, *fixtureStore, *observationTranspor
 	t.Helper()
 	source, store, _, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic 42"}, false))
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic 42"}, false))
 	got := batchResultUntilReady(t, c, r.ID)
 	if got.PiResult == nil || got.PiResult.Outcome != "succeeded" {
 		t.Fatal("missing fixture result")

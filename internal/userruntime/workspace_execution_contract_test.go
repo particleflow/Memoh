@@ -216,6 +216,8 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 	taskService := computertask.NewService(registry, registry, relay, nil, func(ctx context.Context, _ toolcontext.ComputerBinding, _, _, _ string) error {
 		_, err := manager.ResolveMount(ctx, executionBot, executionTarget)
 		return err
+	}).WithPiModelList(func(context.Context) ([]computertask.PiModel, error) {
+		return []computertask.PiModel{{ID: "synthetic-model"}}, nil
 	}).WithDefaultWorkDir(func(ctx context.Context, _ toolcontext.ComputerBinding, _ string, target computertarget.Target) (string, error) {
 		selected, err := svc.SelectedWorkspaceDirectory(ctx, "owner", serviceTestRuntimeID)
 		if err != nil || selected == "" {
@@ -232,7 +234,7 @@ func selectedNASSubmission(t *testing.T, configuredRoot, requested string, optio
 	session.WorkdirPath = option.sessionDirectory
 	offline.Store(option.offline)
 	reads.Store(0)
-	args := map[string]any{"kind": "herdr_pi_task", "task": "synthetic task"}
+	args := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic task"}
 	if requested != "" {
 		args["work_dir"] = requested
 	}

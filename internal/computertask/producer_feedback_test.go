@@ -25,7 +25,7 @@ func TestProducerFeedbackStopsUnchangedBlockedWake(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+	first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestProducerFeedbackConcurrentCommitAndRevocation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+			first, err := source.service.submit(ctx, binding, Submit{Kind: "herdr_pi_task", Model: "synthetic-model", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
 			if err != nil {
 				t.Fatal(err)
 			}

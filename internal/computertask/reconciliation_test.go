@@ -16,7 +16,7 @@ func TestRecoveryReconcilesPersistedBatchWithoutGrantingStop(t *testing.T) {
 		t.Run(stage, func(t *testing.T) {
 			source, store, remote, assets := setupBatch(t)
 			client := standardClient(t, source, "pc-a", false)
-			original := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic reconciliation"}, false))
+			original := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "synthetic reconciliation"}, false))
 			remote.projectCompletion()
 			switch stage {
 			case "receipt_only":

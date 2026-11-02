@@ -163,14 +163,14 @@ func exerciseProducerCommandBound(t *testing.T, completion int) {
 		p.Producer.Artifacts = append(p.Producer.Artifacts, deliverymeta.Artifact{SourceRef: fmt.Sprintf("file_%02d", i), Mime: "application/octet-stream"})
 	}
 	target := Target{NativeRuntimeID: uuid.NewString(), Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}, WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
-	if err := ValidateBatchRequest(p, target, ".", "create declared results"); err != nil {
+	if err := ValidateBatchRequest(p, target, ".", "create declared results", target.Agent.Model); err != nil {
 		t.Fatal("16 short declarations rejected", err)
 	}
 	script := batchFixtureScript(t, p, target, target.WorkDir, "create declared results")
 	if size := len(launchBatchScript(script, target)); size > 30000 {
 		t.Fatal("launch exceeds finite producer command bound", size)
 	}
-	if err := ValidateBatchRequest(p, target, ".", variedSyntheticTask(32000)); err == nil {
+	if err := ValidateBatchRequest(p, target, ".", variedSyntheticTask(32000), target.Agent.Model); err == nil {
 		t.Fatal("oversized launch accepted")
 	}
 }

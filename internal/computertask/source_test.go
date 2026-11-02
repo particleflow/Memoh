@@ -180,7 +180,7 @@ func setup(t *testing.T) (*Source, *fixtureStore, *transportFixture) {
 	}
 	f := &transportFixture{t: t}
 	relay := computertarget.NewService(store, permissionChecker{}, f.call)
-	service := NewService(store, store, relay, nil, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
+	service := NewService(store, store, relay, nil, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil }).WithPiModelList(testPiModelList)
 	return NewSource(service), store, f
 }
 
@@ -246,7 +246,7 @@ func TestStandardMCPPreflightFailureHasNonRetryableStructuredFacts(t *testing.T)
 		return fmt.Errorf("private diagnostic SECRET: %w", ErrPreflightUnavailable)
 	}
 	client := standardClient(t, source, "pc-a", false)
-	response, err := client.CallTool(t.Context(), &sdkmcp.CallToolParams{Name: "computer_task_submit", Arguments: map[string]any{"kind": "herdr_pi_task", "task": "Compute synthetic 42", "work_dir": "."}})
+	response, err := client.CallTool(t.Context(), &sdkmcp.CallToolParams{Name: "computer_task_submit", Arguments: map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "Compute synthetic 42", "work_dir": "."}})
 	if err != nil || !response.IsError {
 		t.Fatalf("MCP preflight result=%v err=%v", response, err)
 	}
@@ -292,7 +292,7 @@ func TestStandardMCPPreflightFailurePreservesUnknownOperation(t *testing.T) {
 		return authorize(ctx, b, target, kind, task)
 	}
 	client := standardClient(t, source, "pc-a", false)
-	args := map[string]any{"kind": "herdr_pi_task", "task": "Compute synthetic 42", "work_dir": "."}
+	args := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "Compute synthetic 42", "work_dir": "."}
 	old := parseResult(t, invoke(t, client, "computer_task_submit", args, true))
 	if old.ID == "" || old.State != "unknown" || transport.runs != 1 {
 		t.Fatal("fixture did not persist the single uncertain dispatch")
@@ -313,7 +313,7 @@ func TestStandardMCPPreflightFailurePreservesUnknownOperation(t *testing.T) {
 	// are not automatic retries or permission to resubmit a real unknown task.
 	for _, task := range []string{"Compute synthetic 42", "A different synthetic task"} {
 		for _, explicit := range []bool{false, true} {
-			retryArgs := map[string]any{"kind": "herdr_pi_task", "task": task, "work_dir": "."}
+			retryArgs := map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": task, "work_dir": "."}
 			if explicit {
 				retryArgs["target_id"] = "pc-a"
 			}
@@ -337,7 +337,7 @@ func TestStandardMCPPreflightFailurePreservesUnknownOperation(t *testing.T) {
 	if got.ID != old.ID || got.State != "unknown" {
 		t.Fatal("recovered connection did not retain the original unknown receipt")
 	}
-	blocked := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "A different synthetic task"}, true))
+	blocked := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "model": "synthetic-model", "task": "A different synthetic task"}, true))
 	if blocked.ID != old.ID || blocked.BlockedByOperation != old.ID || !bytes.Equal(before, snapshot()) || len(transport.calls) != calls || transport.runs != 1 {
 		t.Fatal("connection recovery released the old slot or dispatched another task")
 	}
