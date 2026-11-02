@@ -201,7 +201,7 @@ func (s *playbackReuseSession) Append(ctx context.Context, frame input.Frame) er
 	select {
 	case s.frames <- frame:
 		return nil
-	case <-ctx.Done():
+	case <-s.ctx.Done():
 		return s.ctx.Err()
 	case <-ctx.Done():
 		return ctx.Err()
