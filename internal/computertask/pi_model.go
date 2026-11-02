@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/felinics/memoh/internal/computertarget"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -33,20 +34,39 @@ func (s *Service) WithPiModelList(list PiModelList) *Service {
 // requirePiModel enforces the per-request model choice against the catalog
 // current at dispatch time. Empty lister, unreadable catalog, missing id or an
 // id no longer present all stop the submission with the live list attached.
-func (s *Service) requirePiModel(ctx context.Context, in Submit) error {
+// The accepted entry is returned so its stated capability can travel with the
+// invocation; a choice absent from the live list never carries metadata.
+func (s *Service) requirePiModel(ctx context.Context, in Submit) (PiModel, error) {
 	if s.piModelList == nil {
-		return &ModelSelectionError{Models: nil}
+		return PiModel{}, &ModelSelectionError{Models: nil}
 	}
 	models, err := s.piModelList(ctx)
 	if err != nil {
-		return err
+		return PiModel{}, err
 	}
 	for _, m := range models {
 		if m.ID == in.Model {
-			return nil
+			return m, nil
 		}
 	}
-	return &ModelSelectionError{Models: models}
+	return PiModel{}, &ModelSelectionError{Models: models}
+}
+
+// batchModelCapability converts the accepted catalog entry into the capability
+// snapshot the endpoint writes into this one task's Pi configuration. Nothing
+// is invented: unstated fields stay absent and the endpoint keeps its anchor
+// entry value.
+func batchModelCapability(m PiModel) *computertarget.BatchModel {
+	caps := computertarget.BatchModel{ContextWindow: m.ContextWindow, MaxTokens: m.MaxOutput}
+	for _, modality := range m.Input {
+		if modality == "text" || modality == "image" {
+			caps.Input = append(caps.Input, modality)
+		}
+	}
+	if !caps.Stated() {
+		return nil
+	}
+	return &caps
 }
 
 // listedTargets is the computer_targets view: the capability listing plus the

@@ -70,6 +70,50 @@ func TestMediaCatalogReadOnlyContract(t *testing.T) {
 	}
 }
 
+// The catalog's capability fields are read for dispatch-time Pi configuration
+// and must never reappear on the caller-visible response.
+func TestMediaCatalogReadsCapabilityWithoutExposingIt(t *testing.T) {
+	for _, tc := range []struct {
+		name                   string
+		body                   string
+		wantWindow, wantOutput *int
+	}{
+		{"stated", `{"data":[{"id":"vendor/wide","context_window":1048576,"max_output_tokens":32768}]}`, intPtr(1048576), intPtr(32768)},
+		{"absent", `{"data":[{"id":"vendor/plain"}]}`, nil, nil},
+		{"zero-is-unknown", `{"data":[{"id":"vendor/zero","context_window":0,"max_output_tokens":0}]}`, nil, nil},
+		{"negative-is-unknown", `{"data":[{"id":"vendor/negative","context_window":-1,"max_output_tokens":-1}]}`, nil, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			q := &catalogQueries{provider: catalogFixture()}
+			s := NewService(nil, q, "")
+			s.httpClient.Transport = catalogTransport(func(*http.Request) (*http.Response, error) {
+				return catalogReply(200, tc.body), nil
+			})
+			result, err := s.DiscoverMediaCatalog(context.Background(), q.provider.ID.String())
+			if err != nil || len(result.Models) != 1 {
+				t.Fatalf("catalog: %+v %v", result, err)
+			}
+			got := result.Models[0]
+			if !equalIntPtr(got.ContextWindow, tc.wantWindow) || !equalIntPtr(got.MaxOutputTokens, tc.wantOutput) {
+				t.Fatalf("capability window=%v output=%v", got.ContextWindow, got.MaxOutputTokens)
+			}
+			wire, _ := json.Marshal(result)
+			if strings.Contains(string(wire), "context_window") || strings.Contains(string(wire), "max_output_tokens") {
+				t.Fatalf("capability leaked to the response body: %s", wire)
+			}
+		})
+	}
+}
+
+func intPtr(v int) *int { return &v }
+
+func equalIntPtr(a, b *int) bool {
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	return *a == *b
+}
+
 func TestMediaCatalogFailuresAreNotEmptySuccess(t *testing.T) {
 	cases := []struct {
 		name      string
