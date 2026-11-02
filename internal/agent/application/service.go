@@ -4,7 +4,9 @@ package application
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -1727,6 +1729,10 @@ func normalizeGatewaySkill(entry SkillEntry) (native.SkillEntry, bool) {
 	}, true
 }
 
+// normalizeUserMessageContent downgrades user image parts to their persisted
+// reference rows at the storage boundary. The model still receives the media
+// bytes as current-turn input through the runtime lanes; only the durable
+// content changes shape (see persistedUserImageReference).
 func normalizeUserMessageContent(msg ModelMessage) ModelMessage {
 	if !strings.EqualFold(strings.TrimSpace(msg.Role), "user") {
 		return msg
@@ -1754,13 +1760,11 @@ func normalizeUserContentParts(content json.RawMessage) (json.RawMessage, bool) 
 		partType := strings.TrimSpace(strings.ToLower(readAnyString(part["type"])))
 		switch partType {
 		case "image":
-			normalized, ok, didChange := normalizeUserImagePart(part)
-			if didChange {
-				changed = true
-			}
+			reference, ok := persistedUserImageReference(part)
 			if ok {
-				rebuilt = append(rebuilt, normalized)
+				rebuilt = append(rebuilt, reference)
 			}
+			changed = true
 		default:
 			rebuilt = append(rebuilt, part)
 		}
@@ -1781,35 +1785,85 @@ func normalizeUserContentParts(content json.RawMessage) (json.RawMessage, bool) 
 	return data, true
 }
 
-func normalizeUserImagePart(part map[string]any) (map[string]any, bool, bool) {
-	raw, ok := part["image"]
-	if !ok {
-		return nil, false, true
+// persistedUserImageReference replaces one user image part with the row that
+// persists: a text reference carrying the payload's identity — content_hash
+// (sha256 of the decoded bytes), mime, and size. The bytes themselves reach
+// the model only as current-turn vision input (the read_media decoration or
+// the gateway inline lane); bot_history_messages.content never carries them,
+// so replay stays identity-only and the model re-reads on demand via the read
+// tool, exactly like the redacted FilePart lane for documents. A part with no
+// decodable payload reports ok=false and is dropped.
+func persistedUserImageReference(part map[string]any) (map[string]any, bool) {
+	payload, mime := userImagePartPayload(part)
+	if len(payload) == 0 {
+		return nil, false
 	}
-	if image, ok := raw.(string); ok && strings.TrimSpace(image) != "" {
-		return part, true, false
+	if strings.TrimSpace(mime) == "" {
+		if sniffed := http.DetectContentType(payload[:min(len(payload), 512)]); sniffed != "" {
+			mime = sniffed
+		}
 	}
-	bytes, ok := anyIndexedByteObject(raw)
-	if !ok {
-		return nil, false, true
+	mime = strings.TrimSpace(strings.ToLower(mime))
+	if mime == "" || !strings.HasPrefix(mime, "image/") {
+		mime = "image/png"
 	}
-	cloned := cloneAnyMap(part)
-	mediaType := strings.TrimSpace(readAnyString(cloned["mediaType"]))
-	encoded := base64.StdEncoding.EncodeToString(bytes)
-	if mediaType != "" {
-		cloned["image"] = "data:" + mediaType + ";base64," + encoded
-	} else {
-		cloned["image"] = encoded
+	sum := sha256.Sum256(payload)
+	reference := map[string]any{
+		"type": "text",
+		"text": fmt.Sprintf(`<attachment content_hash="%s" mime=%q size="%d"/>`, hex.EncodeToString(sum[:]), mime, len(payload)),
 	}
-	return cloned, true, true
+	return reference, true
 }
 
-func cloneAnyMap(input map[string]any) map[string]any {
-	cloned := make(map[string]any, len(input))
-	for key, value := range input {
-		cloned[key] = value
+// userImagePartPayload decodes the payload of a stored-shape image part,
+// accepting the three wire forms the persistence boundary can meet: a data
+// URL string, a bare base64 string, and a legacy indexed byte object. The
+// second result is the part's media type, preferring the part's declared
+// mediaType over the data URL header.
+func userImagePartPayload(part map[string]any) ([]byte, string) {
+	raw, ok := part["image"]
+	if !ok {
+		return nil, ""
 	}
-	return cloned
+	declaredMime := strings.TrimSpace(readAnyString(part["mediaType"]))
+	if image, ok := raw.(string); ok {
+		image = strings.TrimSpace(image)
+		if image == "" {
+			return nil, declaredMime
+		}
+		body, headerMime := splitInlineDataURLPayload(image)
+		payload, err := base64.StdEncoding.DecodeString(body)
+		if err != nil {
+			return nil, declaredMime
+		}
+		if declaredMime != "" {
+			return payload, declaredMime
+		}
+		return payload, headerMime
+	}
+	payload, ok := anyIndexedByteObject(raw)
+	if !ok {
+		return nil, declaredMime
+	}
+	return payload, declaredMime
+}
+
+// splitInlineDataURLPayload splits a data URL down to its base64 body and
+// header mime; anything without the data: prefix returns unchanged with an
+// empty mime (bare base64 by the twilight ImagePart convention).
+func splitInlineDataURLPayload(payload string) (string, string) {
+	if !strings.HasPrefix(strings.ToLower(payload), "data:") {
+		return payload, ""
+	}
+	idx := strings.Index(payload, ",")
+	if idx < 0 {
+		return payload, ""
+	}
+	header := payload[len("data:"):idx]
+	if semi := strings.Index(header, ";"); semi >= 0 {
+		header = header[:semi]
+	}
+	return payload[idx+1:], strings.TrimSpace(header)
 }
 
 func readAnyString(value any) string {
