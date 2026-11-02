@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"strings"
 	"time"
@@ -13,8 +14,11 @@ import (
 
 	sdk "github.com/felinics/twilight/sdk"
 
+	"github.com/felinics/memoh/internal/apperror"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/models"
+	"github.com/felinics/memoh/internal/storage"
 )
 
 const (
@@ -38,15 +42,24 @@ const (
 // routeAndMergeAttachments applies CapabilityFallbackPolicy to split
 // request attachments by model input modalities, then merges the results
 // into a single []any for the gateway request.
-func (s *Service) routeAndMergeAttachments(ctx context.Context, model models.GetResponse, req ChatRequest) []any {
+func (s *Service) routeAndMergeAttachments(ctx context.Context, model models.GetResponse, req ChatRequest) ([]any, error) {
 	if len(req.Attachments) == 0 && len(req.ReplyAttachments) == 0 {
-		return []any{}
+		return []any{}, nil
 	}
-	typed := s.prepareGatewayAttachments(ctx, req, modelAcceptsImages(model))
+	typed, err := s.prepareGatewayAttachments(ctx, req, modelAcceptsImages(model))
+	if err != nil {
+		return nil, err
+	}
 	routed := routeAttachmentsByCapability(model.Config.Compatibilities, typed)
 	for i := range routed.Fallback {
 		fallbackPath := strings.TrimSpace(routed.Fallback[i].FallbackPath)
 		if fallbackPath == "" {
+			// The attachment passed admission, and now neither a payload nor a
+			// path can reach the model. Answering without it would tell the
+			// model the user sent an empty message; the turn fails instead.
+			if err := routed.Fallback[i].Unreachable; err != nil {
+				return nil, attachmentUnreachableError(err)
+			}
 			if s != nil && s.logger != nil {
 				s.logger.WarnContext(ctx,
 					"drop attachment without fallback path",
@@ -72,23 +85,29 @@ func (s *Service) routeAndMergeAttachments(ctx context.Context, model models.Get
 		merged = append(merged, fb)
 	}
 	if len(merged) == 0 {
-		return []any{}
+		return []any{}, nil
 	}
-	return merged
+	return merged, nil
 }
 
 // prepareGatewayAttachments materializes request attachments for the gateway.
+//
+// An attachment that carries a content hash has already passed admission, where
+// the original was opened successfully. If it can no longer be read here, the
+// turn must fail: answering without the file tells the model and the user that
+// an attachment they sent is simply absent, which is worse than an explicit
+// error they can act on.
 //
 // acceptsImages says whether inline images can be used at all. Preparing an
 // image is not free — an animated sticker is rasterised, any stored image is
 // read and encoded — and a model without vision routes every one of them to a
 // file reference regardless, so the work is skipped rather than thrown away.
-func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest, acceptsImages bool) []gatewayAttachment {
+func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest, acceptsImages bool) ([]gatewayAttachment, error) {
 	ctx, cancel := context.WithTimeout(ctx, attachmentPreparationTimeout)
 	defer cancel()
 	attachments := requestAttachmentsForGateway(req)
 	if len(attachments) == 0 {
-		return nil
+		return nil, nil
 	}
 	prepared := make([]gatewayAttachment, 0, len(attachments))
 	for _, raw := range attachments {
@@ -134,7 +153,8 @@ func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest
 			FallbackPath: fallbackPath,
 		}
 		if item.ContentHash != "" && strings.TrimSpace(item.FallbackPath) == "" {
-			if accessPath, err := s.assetAccessPath(ctx, strings.TrimSpace(req.BotID), item.ContentHash); err != nil {
+			accessPath, err := s.assetAccessPath(ctx, strings.TrimSpace(req.BotID), item.ContentHash)
+			if err != nil {
 				if s != nil && s.logger != nil {
 					s.logger.WarnContext(ctx,
 						"resolve gateway attachment access path failed",
@@ -143,6 +163,9 @@ func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest
 						slog.String("content_hash", item.ContentHash),
 					)
 				}
+				// A path is only one carrier. Whether this attachment reaches
+				// the model at all is decided once every carrier has been tried.
+				item.Unreachable = err
 			} else {
 				item.FallbackPath = accessPath
 			}
@@ -154,7 +177,22 @@ func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest
 		item = s.inlineFileAttachmentAssetIfNeeded(ctx, strings.TrimSpace(req.BotID), item)
 		prepared = append(prepared, item)
 	}
-	return prepared
+	return prepared, nil
+}
+
+// attachmentUnreachableError names why an admitted attachment can no longer be
+// read, so the client learns whether to resend the file or retry the turn. The
+// distinction comes from the read itself: bytes that are gone, bytes this
+// process may not read, and any other read failure are three different answers.
+func attachmentUnreachableError(err error) error {
+	switch {
+	case errors.Is(err, media.ErrAssetNotFound), errors.Is(err, fs.ErrNotExist):
+		return apperror.Wrap(apperror.CodeMediaAttachmentGone, err, nil)
+	case errors.Is(err, storage.ErrAccessPathUnavailable):
+		return apperror.Wrap(apperror.CodeMediaAttachmentUnreadable, err, nil)
+	default:
+		return apperror.Wrap(apperror.CodeMediaAttachmentUnavailable, err, nil)
+	}
 }
 
 func (s *Service) assetAccessPath(ctx context.Context, botID, contentHash string) (string, error) {
@@ -344,6 +382,12 @@ func (s *Service) inlineImageAttachmentAssetIfNeeded(ctx context.Context, botID 
 		if errors.Is(err, errUnsupportedImageBytes) {
 			return demoteNonImageAttachment(item)
 		}
+		// A stored image that cannot be read has no bytes to inline. With a
+		// reachable access path the agent can still read the original, so the
+		// turn is only at risk when no carrier resolved at all.
+		if strings.TrimSpace(item.FallbackPath) == "" {
+			item.Unreachable = err
+		}
 		return item
 	}
 	item.Transport = gatewayTransportInlineDataURL
@@ -420,6 +464,12 @@ func (s *Service) inlineFileAttachmentAssetIfNeeded(ctx context.Context, botID s
 				slog.String("bot_id", botID),
 				slog.String("content_hash", contentHash),
 			)
+		}
+		// The file lane carries no payload of its own, so a file that cannot be
+		// inlined depends on its access path. No path means the model has
+		// nothing to read.
+		if strings.TrimSpace(item.FallbackPath) == "" {
+			item.Unreachable = err
 		}
 		return item
 	}

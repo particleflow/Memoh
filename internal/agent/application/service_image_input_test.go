@@ -182,7 +182,10 @@ func TestGatewayStickerBytesRouteToFileFallback(t *testing.T) {
 		Compatibilities: []string{models.CompatVision},
 	}}}
 
-	merged := s.routeAndMergeAttachments(context.Background(), model, req)
+	merged, err := s.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if len(merged) != 1 {
 		t.Fatalf("routeAndMergeAttachments() = %d attachments, want 1", len(merged))
 	}

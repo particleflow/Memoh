@@ -42,7 +42,10 @@ func TestAnimatedStickerStaysOneAttachmentWithManyImages(t *testing.T) {
 		Compatibilities: []string{models.CompatVision},
 	}}}
 
-	merged := s.routeAndMergeAttachments(context.Background(), model, req)
+	merged, err := s.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if len(merged) != 1 {
 		t.Fatalf("routeAndMergeAttachments() = %d attachments, want the sticker counted once", len(merged))
 	}
@@ -97,7 +100,11 @@ func TestAnimatedStickerIsIdenticalAcrossEntryPoints(t *testing.T) {
 		Compatibilities: []string{models.CompatVision},
 	}}}
 
-	gateway := extractNativeImageParts(s.routeAndMergeAttachments(context.Background(), model, req))
+	merged, err := s.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
+	gateway := extractNativeImageParts(merged)
 	discuss := inlineImageParts(context.Background(), s, "bot-1",
 		[]timeline.ImageAttachmentRef{{ContentHash: "sticker", Mime: "application/x-gzip"}})
 	injected := s.inlineInjectAttachments(context.Background(), "bot-1", req.Attachments)

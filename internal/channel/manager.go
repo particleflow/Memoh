@@ -153,6 +153,18 @@ func (m *Manager) SetAttachmentStore(store OutboundAttachmentStore) {
 	m.attachmentStore = store
 }
 
+// WrapAttachmentStore composes decorate over the store outbound preparation
+// already uses. One place chooses the store, so a decorator such as
+// grant-backed reads sits on the same path as ordinary delivery.
+func (m *Manager) WrapAttachmentStore(decorate func(OutboundAttachmentStore) OutboundAttachmentStore) {
+	if m == nil || m.attachmentStore == nil || decorate == nil {
+		return
+	}
+	if wrapped := decorate(m.attachmentStore); wrapped != nil {
+		m.attachmentStore = wrapped
+	}
+}
+
 // RegisterAdapter adds an adapter to the registry and logs the registration.
 func (m *Manager) RegisterAdapter(adapter Adapter) {
 	if adapter == nil {

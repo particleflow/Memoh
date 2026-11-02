@@ -86,6 +86,7 @@ func Bind(callbackCtx context.Context, session Session) (context.Context, contex
 }
 
 func bindComputerScope(ctx context.Context, session Session) context.Context {
+	ctx = WithMediaIdentity(ctx, MediaIdentity{BotID: session.BotID, UserID: session.UserID, SessionID: session.SessionID})
 	if session.PublicRequest {
 		return context.WithValue(ctx, untrustedComputerKey{}, true)
 	}

@@ -330,6 +330,9 @@
     },
     "media": {
       "asset_not_found": "This file no longer exists. Upload it again if you still need it.",
+      "attachment_gone": "This file is no longer available, so the message could not be processed. Send it again.",
+      "attachment_unavailable": "Stored files could not be read right now, so the message was not processed. Try again shortly.",
+      "attachment_unreadable": "This file could not be read, so the message could not be processed. Send it again, or check that it is complete.",
       "ingest_failed": "The file could not be stored as an attachment. Check that it still exists and try again."
     },
     "memory": {

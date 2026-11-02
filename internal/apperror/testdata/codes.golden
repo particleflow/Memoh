@@ -157,6 +157,9 @@ mcp.oauth_client_id_required	400
 mcp.oauth_discovery_failed	502
 mcp.oauth_not_discovered	409
 media.asset_not_found	404
+media.attachment_gone	409
+media.attachment_unavailable	503
+media.attachment_unreadable	409
 media.ingest_failed	500
 memory.compact_unsupported	501
 message.not_found	404

@@ -351,7 +351,10 @@ func (s *Service) prepareRuntimeAttachments(ctx context.Context, req ChatRequest
 	// An External Agent's image support is discovered when the prompt is sent
 	// — the runtime retries with files on ErrImagePromptUnsupported — so there
 	// is no capability bit to read here and images are always prepared.
-	prepared := s.prepareGatewayAttachments(ctx, req, true)
+	prepared, err := s.prepareGatewayAttachments(ctx, req, true)
+	if err != nil {
+		return runtimePreparedAttachments{}, err
+	}
 	result := runtimePreparedAttachments{
 		Images:                   make([]external.Image, 0, len(prepared)),
 		Context:                  make([]ChatAttachment, 0, len(prepared)),

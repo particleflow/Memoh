@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/felinics/memoh/internal/apperror"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/media"
 )
@@ -35,6 +36,20 @@ type OutboundAttachmentStore interface {
 // Implementations must be safe for concurrent use.
 type ContainerAttachmentIngester interface {
 	IngestContainerFile(ctx context.Context, botID, containerPath string) (media.Asset, error)
+}
+
+// SharedAttachmentStore is an optional extension of OutboundAttachmentStore for
+// attachments a Bot may reference by content hash without owning the bytes: an
+// authorization grant (a delegation the Bot is part of) names the Bot whose
+// original backs the hash.
+//
+// The store reads that original where it lives. It never copies the bytes into
+// the sending Bot's storage and never changes the per-Bot directory layout, so
+// the hash keeps exactly one owner. A Bot without a live grant gets the
+// not-found error its own store already returned.
+type SharedAttachmentStore interface {
+	StatShared(ctx context.Context, botID, contentHash string) (media.Asset, error)
+	OpenShared(ctx context.Context, botID, contentHash string) (io.ReadCloser, media.Asset, error)
 }
 
 // PrepareOutboundMessage resolves the logical outbound message into the
@@ -197,12 +212,38 @@ func preparePersistedAttachment(
 	if strings.TrimSpace(botID) == "" {
 		return Attachment{}, PreparedAttachment{}, errors.New("bot id is required for persisted attachments")
 	}
-	asset, err := store.Stat(ctx, botID, strings.TrimSpace(item.ContentHash))
+	contentHash := strings.TrimSpace(item.ContentHash)
+	asset, err := store.Stat(ctx, botID, contentHash)
 	if err != nil {
-		return Attachment{}, PreparedAttachment{}, fmt.Errorf("stat content hash attachment: %w", err)
+		// A hash the sending Bot does not own is sent only when an
+		// authorization grant names the Bot that does. The shared store reads
+		// that original where it is; nothing is copied into the sender.
+		shared, ok := store.(SharedAttachmentStore)
+		if !ok {
+			return Attachment{}, PreparedAttachment{}, persistedAttachmentError(err)
+		}
+		sharedAsset, sharedErr := shared.StatShared(ctx, botID, contentHash)
+		if sharedErr != nil {
+			return Attachment{}, PreparedAttachment{}, persistedAttachmentError(err)
+		}
+		// The bytes keep their owner. No access path is materialized here:
+		// outbound delivery reads the original through OpenShared, and a
+		// path into another Bot's workspace is not this message's to use.
+		applyPreparedSharedAsset(botID, sharedAsset, &item)
+		return item, preparedSharedUploadAttachment(store, botID, item), nil
 	}
 	applyPreparedAsset(ctx, store, asset, botID, &item, sourcePath)
 	return item, preparedUploadAttachment(store, botID, item), nil
+}
+
+// persistedAttachmentError keeps a hash the store cannot resolve a stable,
+// client-visible code. An unreadable or misconfigured store keeps its own
+// error, which the boundary answers as a server fault.
+func persistedAttachmentError(err error) error {
+	if errors.Is(err, media.ErrAssetNotFound) {
+		return apperror.Wrap(apperror.CodeMediaAssetNotFound, err, nil)
+	}
+	return fmt.Errorf("stat content hash attachment: %w", err)
 }
 
 func prepareBase64Attachment(
@@ -368,6 +409,33 @@ func preparedUploadAttachment(store OutboundAttachmentStore, botID string, item 
 	}
 }
 
+// preparedSharedUploadAttachment opens a hash this Bot does not own. The grant
+// is rechecked on every attempt, so a revoked delegation fails the retry
+// instead of serving bytes it may no longer read.
+func preparedSharedUploadAttachment(store OutboundAttachmentStore, botID string, item Attachment) PreparedAttachment {
+	shared, ok := store.(SharedAttachmentStore)
+	if !ok {
+		// preparePersistedAttachment only takes this path after a successful
+		// StatShared, which a non-shared store cannot have answered.
+		return PreparedAttachment{}
+	}
+	contentHash := strings.TrimSpace(item.ContentHash)
+	return PreparedAttachment{
+		Logical: item,
+		Kind:    PreparedAttachmentUpload,
+		Name:    preparedAttachmentName(item, ""),
+		Mime:    preparedAttachmentMime(item, ""),
+		Size:    item.Size,
+		Open: func(ctx context.Context) (io.ReadCloser, error) {
+			reader, _, err := shared.OpenShared(ctx, botID, contentHash)
+			if err != nil {
+				return nil, err
+			}
+			return reader, nil
+		},
+	}
+}
+
 type preparedAttachmentPayload struct {
 	reader io.ReadCloser
 	mime   string
@@ -470,6 +538,22 @@ func applyPreparedAsset(ctx context.Context, store OutboundAttachmentStore, asse
 		bundle.Path = sourcePath
 	}
 	*item = AttachmentFromBundle(bundle.WithAssetAccess(botID, asset, store.AccessPath(ctx, asset)))
+	item.SourcePlatform = ""
+	if item.Type == AttachmentFile || item.Type == "" {
+		item.Type = preparedAttachmentTypeFromMime(item.Mime)
+	}
+}
+
+// applyPreparedSharedAsset records a grant-backed hash on the sending Bot's
+// attachment without any consumer-accessible path. The bytes are the owner's,
+// and an access path inside another Bot's workspace would hand the model a
+// location this message has no claim on.
+func applyPreparedSharedAsset(botID string, asset media.Asset, item *Attachment) {
+	if item == nil {
+		return
+	}
+	bundle := BundleFromAttachment(*item)
+	*item = AttachmentFromBundle(bundle.WithAsset(botID, asset))
 	item.SourcePlatform = ""
 	if item.Type == AttachmentFile || item.Type == "" {
 		item.Type = preparedAttachmentTypeFromMime(item.Mime)

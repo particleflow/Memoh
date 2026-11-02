@@ -57,7 +57,10 @@ func TestPrepareGatewayAttachments_InlineAssetToBase64(t *testing.T) {
 		},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 1 {
 		t.Fatalf("expected 1 attachment, got %d", len(prepared))
 	}
@@ -117,7 +120,10 @@ func TestPrepareGatewayAttachments_DataURLFromURLFieldIsNativeInline(t *testing.
 		},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 1 {
 		t.Fatalf("expected 1 attachment, got %d", len(prepared))
 	}
@@ -143,7 +149,10 @@ func TestPrepareGatewayAttachments_PublicURLFromURLFieldIsNativePublic(t *testin
 		},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 1 {
 		t.Fatalf("expected 1 attachment, got %d", len(prepared))
 	}
@@ -176,7 +185,10 @@ func TestRouteAndMergeAttachments_ImagePathOnlyFallsBackToFile(t *testing.T) {
 		},
 	}
 
-	merged := resolver.routeAndMergeAttachments(context.Background(), model, req)
+	merged, err := resolver.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if len(merged) != 1 {
 		t.Fatalf("expected 1 attachment, got %d", len(merged))
 	}
@@ -206,7 +218,10 @@ func TestPrepareGatewayAttachments_IncludesReplyAttachments(t *testing.T) {
 		},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 2 {
 		t.Fatalf("expected current and reply attachments, got %d", len(prepared))
 	}
@@ -238,11 +253,17 @@ func TestPrepareGatewayAttachments_ResolvesStoredFileAccessPath(t *testing.T) {
 		}},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 1 || prepared[0].FallbackPath != "/data/.memoh/media/aa/asset.pdf" {
 		t.Fatalf("prepared attachments = %#v, want reachable PDF path", prepared)
 	}
-	merged := resolver.routeAndMergeAttachments(context.Background(), models.GetResponse{}, req)
+	merged, err := resolver.routeAndMergeAttachments(context.Background(), models.GetResponse{}, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if len(merged) != 1 {
 		t.Fatalf("routeAndMergeAttachments() length = %d, want 1", len(merged))
 	}
@@ -427,7 +448,10 @@ func TestPrepareGatewayAttachments_DetectsImageMimeWhenOctetStream(t *testing.T)
 		},
 	}
 
-	prepared := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	prepared, err := resolver.prepareGatewayAttachments(context.Background(), req, true)
+	if err != nil {
+		t.Fatalf("prepareGatewayAttachments() error = %v", err)
+	}
 	if len(prepared) != 1 {
 		t.Fatalf("expected 1 attachment, got %d", len(prepared))
 	}
@@ -460,7 +484,10 @@ func TestRouteAndMergeAttachments_DropsUnsupportedInlineWithoutFallbackPath(t *t
 		},
 	}
 
-	merged := resolver.routeAndMergeAttachments(context.Background(), model, req)
+	merged, err := resolver.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if len(merged) != 0 {
 		t.Fatalf("expected unsupported inline attachment to be dropped, got %d", len(merged))
 	}
