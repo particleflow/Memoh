@@ -43,6 +43,10 @@ const (
 	presenceSlotUserMaxRunes  = 300
 	presenceSlotPointMaxRunes = 200
 	presenceSlotPointsTotal   = 600
+	// presenceSlotACKMaxRunes clamps each recent acknowledgement text to the
+	// published text budget. Published pieces already respect MaxTextRunes, but
+	// the slot builder must not trust stored text to stay within it.
+	presenceSlotACKMaxRunes = 160
 )
 
 // presenceSlots is the generation-side variable payload: mechanically
@@ -90,7 +94,7 @@ func buildPresenceSlots(botName, locale, userMessage string, points []string, ph
 		if len(slots.RecentACKTexts) >= 2 {
 			break
 		}
-		if ack = strings.TrimSpace(ack); ack != "" {
+		if ack = truncateRunes(strings.TrimSpace(ack), presenceSlotACKMaxRunes); ack != "" {
 			slots.RecentACKTexts = append(slots.RecentACKTexts, ack)
 		}
 	}

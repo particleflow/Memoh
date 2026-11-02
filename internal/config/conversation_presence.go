@@ -17,6 +17,12 @@ type ConversationPresenceConfig struct {
 	MaxTextRunes             int       `toml:"max_text_runes"`
 	MaxConcurrentPerProvider int       `toml:"max_concurrent_per_provider"`
 	Jev                      JevConfig `toml:"jev"`
+	// GenerationModel overrides the sidecar generation model by model_id ref,
+	// resolved inside the main selection's provider (same credentials and
+	// transport). Empty keeps the main selection. Server policy for the
+	// acknowledgement latency channel — not a Bot-visible surface and never a
+	// user latency guarantee.
+	GenerationModel string `toml:"generation_model"`
 }
 
 // JevConfig is the fast-reply v3 decision subtable. An empty endpoint keeps
