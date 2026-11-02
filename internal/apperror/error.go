@@ -272,6 +272,7 @@ const (
 	CodeWorkspaceFileNotFound         Code = "workspace_file.not_found"
 	CodeMCPConnectionNotFound         Code = "mcp.connection_not_found"
 	CodeMediaAssetNotFound            Code = "media.asset_not_found"
+	CodeMediaIngestFailed             Code = "media.ingest_failed"
 	CodeMessageNotFound               Code = "message.not_found"
 	CodeModelNotFound                 Code = "model.not_found"
 	CodeProviderNotFound              Code = "provider.not_found"
@@ -1289,6 +1290,7 @@ var catalog = map[Code]Definition{
 	CodeWorkspaceFileNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This file or folder no longer exists in the workspace. Refresh and try again."},
 	CodeMCPConnectionNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This MCP connection no longer exists or has closed. Refresh the list and reconnect."},
 	CodeMediaAssetNotFound:            {HTTPStatus: http.StatusNotFound, Detail: "This file no longer exists. Upload it again if you still need it."},
+	CodeMediaIngestFailed:             {HTTPStatus: http.StatusInternalServerError, Detail: "The file could not be stored as an attachment. Check that it still exists and try again."},
 	CodeMessageNotFound:               {HTTPStatus: http.StatusNotFound, Detail: "This message no longer exists. Refresh the conversation and try again."},
 	CodeModelNotFound:                 {HTTPStatus: http.StatusNotFound, Detail: "This model no longer exists. Refresh the list and choose another one."},
 	CodeProviderNotFound:              {HTTPStatus: http.StatusNotFound, Detail: "This provider no longer exists. Refresh the list and choose another one."},
