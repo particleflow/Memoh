@@ -344,13 +344,17 @@ func TestRefusalTokenClassifiesTargetDrift(t *testing.T) {
 		t.Fatal("named drift refusal not classified", err)
 	}
 	j := newJob([]byte("original"))
+	// A lifecycle projection needs a bound, valid task; otherwise the record is
+	// reported as a configuration block before its error code is consulted.
+	j.Task = DeviceTask{UserID: "u", SessionID: "s", TargetID: "t", RunID: "r", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
+	j.HostBinding = "fixture"
 	if err := fail(&j, statusErrorAt(resp, now), now, func(Job) error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 	if j.Phase != "blocked" || j.ErrorCode != "target_drift" {
 		t.Fatal("drift refusal persisted as", j.Phase, j.ErrorCode)
 	}
-	if s := recordLifecycle(QueueStatus{Job: j}, "", now); s.State != "blocked" || s.ErrorClass != "target_drift" {
+	if s := recordLifecycle(QueueStatus{Job: j}, j.HostBinding, now); s.State != "blocked" || s.ErrorClass != "target_drift" {
 		t.Fatal("drift record not projected", s)
 	}
 	for _, unknown := range []string{"", "unheard-of", " TARGET_FINGERPRINT_MISMATCH ", strings.Repeat("x", 256)} {
