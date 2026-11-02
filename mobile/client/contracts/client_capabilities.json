@@ -158,7 +158,7 @@
     },
     {
       "id": "pc_gpu_execution",
-      "owner": "Authorized Windows executor through Agenvo/Herdr",
+      "owner": "Authorized Windows executor through legacy-exec/Herdr",
       "constraint": "Ordinary computation runs programs directly; phone never holds maintenance/admin credentials."
     },
     {

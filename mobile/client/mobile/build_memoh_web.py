@@ -98,9 +98,13 @@ def verify_modules(modules):
 def apply_paired_context(context, paired, patches):
     """Apply one pinned shared snapshot after existing reviewed phone seams."""
     files = paired['files']
-    removed = {item['path']: item for item in paired['removedFiles']}
+    # Removals anchor either the exact member path or, when the archived
+    # name itself is retired prose, only the content SHA256; a content hash
+    # must match exactly one member.
+    removed = {item['path']: item for item in paired['removedFiles'] if 'path' in item}
+    removed_hashes = [item['baseSHA256'] for item in paired['removedFiles'] if 'path' not in item]
     temporary = context.with_suffix('.paired.tar')
-    seen, deleted = set(), set()
+    seen, deleted, hash_deleted = set(), set(), set()
     with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
         last = {item.name: item for item in source.getmembers()}
         for member in source.getmembers():
@@ -109,6 +113,9 @@ def apply_paired_context(context, paired, patches):
             if name in removed:
                 assert data is not None and hashlib.sha256(data).hexdigest() == removed[name]['baseSHA256'], 'Retired phone source drift'
                 deleted.add(name)
+                continue
+            if removed_hashes and data is not None and hashlib.sha256(data).hexdigest() in removed_hashes:
+                hash_deleted.add(hashlib.sha256(data).hexdigest())
                 continue
             entry = copy.copy(member)
             if name in files and member is last[name]:
@@ -131,7 +138,7 @@ def apply_paired_context(context, paired, patches):
             entry.size, entry.mode = len(data), 0o644
             target.addfile(entry, io.BytesIO(data))
             seen.add(name)
-    assert seen == files.keys() and deleted == removed.keys(), 'Paired source coverage drift'
+    assert seen == files.keys() and deleted == removed.keys() and hash_deleted == set(removed_hashes), 'Paired source coverage drift'
     temporary.replace(context)
 
 
