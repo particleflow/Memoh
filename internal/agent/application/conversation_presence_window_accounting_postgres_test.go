@@ -1,8 +1,6 @@
 ﻿package application
 
-import (
-	"testing"
-)
+import "testing"
 
 // TestConversationPresencePostgresOneSidecarPerTurnRegardlessOfMessageRows pins the field report's
 // arithmetic. The 2026-11-02 window had 26 bot_history_messages rows after
