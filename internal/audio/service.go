@@ -22,9 +22,10 @@ import (
 )
 
 type Service struct {
-	queries  dbstore.Queries
-	logger   *slog.Logger
-	registry *Registry
+	queries       dbstore.Queries
+	logger        *slog.Logger
+	registry      *Registry
+	playbackReuse *PlaybackReuseStore
 }
 
 func NewService(log *slog.Logger, queries dbstore.Queries, registry *Registry) *Service {
@@ -323,6 +324,44 @@ func (s *Service) StreamPlaybackWithIdentity(ctx context.Context, modelID string
 	return stream, params.identity, err
 }
 
+// PlaybackReuseKey derives the content-addressed identity for one utterance of
+// one Bot. It reads configuration only; it never synthesizes and never dials.
+//
+// The key covers the speech model row and the opaque resolved configuration
+// identity, which already includes voice, speed, format, provider credentials
+// and every other synthesis parameter. Changing any of them therefore misses
+// instead of replaying audio made under different settings.
+func (s *Service) PlaybackReuseKey(ctx context.Context, botID, modelID, text string) (PlaybackReuseKey, error) {
+	key, _, _, err := s.PlaybackReuseInfo(ctx, botID, modelID, text)
+	return key, err
+}
+
+// PlaybackReuseInfo additionally reports the configured voice identity and the
+// stream content type, so a reuse decision can be made without opening a task.
+func (s *Service) PlaybackReuseInfo(ctx context.Context, botID, modelID, text string) (PlaybackReuseKey, string, string, error) {
+	params, err := s.resolveSpeechParams(ctx, modelID, text, nil)
+	if err != nil {
+		return PlaybackReuseKey{}, "", "", err
+	}
+	if !params.providerEnabled || params.modelRowID == "" {
+		return PlaybackReuseKey{}, "", "", fmt.Errorf("%w: provider disabled", input.ErrUnsupported)
+	}
+	contentType := ""
+	if provider, ok := params.model.Provider.(input.Provider); ok {
+		if resolved, ctErr := provider.InputContentType(sdk.SpeechParams{Model: params.model, Config: params.config}); ctErr == nil {
+			contentType = resolved
+		}
+	}
+	return PlaybackReusePrefixKey(botID, params.modelRowID, params.identity, text), params.identity, contentType, nil
+}
+
+// SetPlaybackReuse installs the durable reuse store. Without it, playback
+// always synthesizes; reuse is an optimization and never a requirement.
+func (s *Service) SetPlaybackReuse(store *PlaybackReuseStore) { s.playbackReuse = store }
+
+// PlaybackReuse returns the installed store, or nil when reuse is disabled.
+func (s *Service) PlaybackReuse() *PlaybackReuseStore { return s.playbackReuse }
+
 func (s *Service) GetModelCapabilities(ctx context.Context, modelID string) (*ModelCapabilities, error) {
 	pgID, err := db.ParseUUID(modelID)
 	if err != nil {
@@ -474,6 +513,7 @@ type resolvedSpeechParams struct {
 	model           *sdk.SpeechModel
 	config          map[string]any
 	identity        string
+	modelRowID      string
 }
 
 type resolvedTranscriptionParams struct {
@@ -522,7 +562,16 @@ func (s *Service) resolveSpeechParams(ctx context.Context, modelID string, text 
 		model:           &sdk.SpeechModel{ID: modelRow.ModelID, Provider: provider},
 		config:          cfg,
 		identity:        hex.EncodeToString(digest[:]),
+		modelRowID:      uuidString(modelRow.ID),
 	}, nil
+}
+
+// uuidString renders a pgtype.UUID the way the rest of the API does.
+func uuidString(id pgtype.UUID) string {
+	if !id.Valid {
+		return ""
+	}
+	return id.String()
 }
 
 func (s *Service) resolveTranscriptionParams(ctx context.Context, modelID string, audio []byte, filename string, contentType string, overrideCfg map[string]any) (*resolvedTranscriptionParams, error) {

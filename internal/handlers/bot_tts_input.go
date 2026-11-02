@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	audiopkg "github.com/felinics/memoh/internal/audio"
 	"github.com/felinics/memoh/internal/audio/input"
 )
 
@@ -116,17 +117,48 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 	h.inputSessions.entries[key] = active
 	h.inputSessions.Unlock()
 	defer func() { h.inputSessions.Lock(); delete(h.inputSessions.entries, key); h.inputSessions.Unlock() }()
-	session, identity, err := service.OpenPlaybackInput(ctx, settings.TtsModelID)
-	if errors.Is(err, input.ErrUnsupported) {
-		return echo.NewHTTPError(http.StatusConflict, "native input is unavailable")
-	}
-	if err != nil {
-		return err
+	// A provider task is opened up front unless a finished utterance may already
+	// exist for these opening frames. The native contract only reveals the rest
+	// of the text after these headers, so that case defers the decision to a
+	// session that collects the client's frames first.
+	var session input.Session
+	var identity string
+	info, store, recorder := h.playbackReuse(c.Request().Context(), botID, settings.TtsModelID, request.Text)
+	candidates := playbackCandidates(c.Request().Context(), store, info)
+	if len(candidates) == 0 {
+		var err error
+		session, identity, err = service.OpenPlaybackInput(ctx, settings.TtsModelID)
+		if errors.Is(err, input.ErrUnsupported) {
+			return echo.NewHTTPError(http.StatusConflict, "native input is unavailable")
+		}
+		if err != nil {
+			return err
+		}
+		if err = session.Append(ctx, request.Frame); err != nil {
+			session.Cancel()
+			return err
+		}
+		recorder.record(request.Frame)
+		// Follow-up PUT frames carry the rest of the utterance, so the recorder
+		// must see them too; otherwise only the opening frame could ever be
+		// registered and a full replay would never match.
+		session = &playbackRecordedSession{Session: session, recorder: recorder}
+	} else {
+		open := func(openCtx context.Context) (input.Session, string, error) {
+			return service.OpenPlaybackInput(openCtx, settings.TtsModelID)
+		}
+		contentType, contentTypeErr := playbackContentType(c.Request().Context(), service, settings.TtsModelID)
+		if contentTypeErr != nil {
+			return contentTypeErr
+		}
+		deferred := newPlaybackReuseSession(ctx, open, *info, candidates, recorder, contentType)
+		if err = deferred.Append(ctx, request.Frame); err != nil {
+			deferred.Cancel()
+			return err
+		}
+		session, identity = deferred, playbackIdentity(c.Request().Context(), service, settings.TtsModelID)
 	}
 	defer session.Cancel()
-	if err = session.Append(ctx, request.Frame); err != nil {
-		return err
-	}
 	h.inputSessions.Lock()
 	active.session = session
 	active.identity = identity
@@ -155,11 +187,20 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 				if stream.Err() != nil {
 					panic(http.ErrAbortHandler)
 				}
+				// The utterance finished with closed input: register it so an
+				// identical replay is served from the store instead of another
+				// provider task. Detached from the request, which is about to end.
+				writeCtx, cancelWrite := context.WithTimeout(context.WithoutCancel(ctx), playbackReuseWriteTimeout)
+				recorder.commit(writeCtx, stream.ContentType)
+				cancelWrite()
 				return nil
 			}
 			if len(bytes) == 0 {
 				continue
 			}
+			// The bytes the client receives are the bytes a later replay serves,
+			// so the recorder observes exactly this stream.
+			recorder.recordAudio(bytes)
 			if _, err = c.Response().Write(bytes); err != nil {
 				return err
 			}
@@ -232,4 +273,55 @@ func (h *BotAudioHandler) AppendPlaybackInput(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusConflict, "playback input rejected")
 	}
 	return c.NoContent(http.StatusNoContent)
+}
+
+// playbackReuse resolves the reuse identity and store for one utterance. It
+// returns nil info and a nil store when reuse is unavailable, which is the
+// signal to take the unchanged synthesis path.
+func (h *BotAudioHandler) playbackReuse(ctx context.Context, botID, modelID, text string) (*audiopkg.PlaybackReuseKey, playbackReuseStore, *playbackReuseRecorder) {
+	if h.reuse == nil {
+		return nil, nil, nil
+	}
+	service, ok := h.audioService.(playbackReuseInfoService)
+	if !ok {
+		return nil, nil, nil
+	}
+	key, _, _, err := service.PlaybackReuseInfo(ctx, botID, modelID, text)
+	if err != nil {
+		return nil, nil, nil
+	}
+	// A recorder always exists when reuse is on: it is what registers the
+	// finished utterance, and a nil one would silently disable the other half.
+	return &key, h.reuse, newPlaybackReuseRecorder(h.reuse, key)
+}
+
+// playbackCandidates lists reusable audio that shares the posted opening frame.
+func playbackCandidates(ctx context.Context, store playbackReuseStore, info *audiopkg.PlaybackReuseKey) []audiopkg.CachedPlayback {
+	if store == nil || info == nil {
+		return nil
+	}
+	return store.Candidates(ctx, *info)
+}
+
+// playbackContentType reports the stream format without synthesizing.
+func playbackContentType(ctx context.Context, service playbackInputService, modelID string) (string, error) {
+	_, contentType, err := service.PlaybackInputInfo(ctx, modelID)
+	if err != nil {
+		return "", err
+	}
+	if !strings.HasPrefix(contentType, "audio/") {
+		return "", echo.NewHTTPError(http.StatusBadGateway, "invalid playback content type")
+	}
+	return contentType, nil
+}
+
+// playbackIdentity reports the configured identity without synthesizing. A
+// cached replay keeps advertising the same identity the client validates, so
+// the client's own ownership check stays meaningful.
+func playbackIdentity(ctx context.Context, service playbackInputService, modelID string) string {
+	identity, _, err := service.PlaybackInputInfo(ctx, modelID)
+	if err != nil {
+		return ""
+	}
+	return identity
 }

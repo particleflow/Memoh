@@ -544,5 +544,9 @@ type Queries interface {
 	UpsertSnapshot(ctx context.Context, arg dbsqlc.UpsertSnapshotParams) (dbsqlc.Snapshot, error)
 	UpsertUserChannelBinding(ctx context.Context, arg dbsqlc.UpsertUserChannelBindingParams) (dbsqlc.UserChannelBinding, error)
 	UpsertUserProviderOAuthToken(ctx context.Context, arg dbsqlc.UpsertUserProviderOAuthTokenParams) (dbsqlc.UserProviderOauthToken, error)
+	ListSpeechPlaybackCacheByPrefix(ctx context.Context, arg dbsqlc.ListSpeechPlaybackCacheByPrefixParams) ([]dbsqlc.ListSpeechPlaybackCacheByPrefixRow, error)
+	UpsertSpeechPlaybackCache(ctx context.Context, arg dbsqlc.UpsertSpeechPlaybackCacheParams) (dbsqlc.UpsertSpeechPlaybackCacheRow, error)
+	DeleteSpeechPlaybackCache(ctx context.Context, arg dbsqlc.DeleteSpeechPlaybackCacheParams) error
+	DeleteExpiredSpeechPlaybackCache(ctx context.Context) ([]string, error)
 	WithTx(tx pgx.Tx) Queries
 }

@@ -38,15 +38,33 @@ type BotAudioHandler struct {
 	tempStore       *audiopkg.TempStore
 	logger          *slog.Logger
 	inputSessions   playbackInputSessions
+	// reuse is the durable store. Tests inject an in-memory fixture, so it is an
+	// interface; SetPlaybackReuse is the only writer and stores an untyped nil
+	// when reuse is off, because a typed nil compares unequal to nil.
+	reuse playbackReuseStore
 }
 
 func NewBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settingsService *settings.Service, tempStore *audiopkg.TempStore) *BotAudioHandler {
-	return &BotAudioHandler{
+	h := &BotAudioHandler{
 		audioService:    audioService,
 		settingsService: settingsService,
 		tempStore:       tempStore,
 		logger:          log.With(slog.String("handler", "bot_audio")),
 	}
+	if audioService != nil {
+		h.SetPlaybackReuse(audioService.PlaybackReuse())
+	}
+	return h
+}
+
+// SetPlaybackReuse installs the durable reuse store. A nil store disables
+// reuse, which is the pre-existing behavior: every request synthesizes.
+func (h *BotAudioHandler) SetPlaybackReuse(store *audiopkg.PlaybackReuseStore) {
+	if store == nil {
+		h.reuse = nil
+		return
+	}
+	h.reuse = store
 }
 
 func (h *BotAudioHandler) Register(e *echo.Echo) {
