@@ -601,5 +601,13 @@
       "sha256": "5b06d494b03e317e039da88202a957000ebb5c09482d16833476ed0eeaa4230d"
     },
     "scope": "Attachment transfer progress visuals (E8): three-state cards without status copy; bubble-level ring fill and formatted speed; client-measured bytes only (XHR upload wire bytes, streamed media reads). Native bridge transfers expose no byte events and stay indeterminate with no invented speed."
+  },
+  "sharedQuoteReply": {
+    "sourceChanges": {
+      "local": "shared-quote-reply-changes.json",
+      "sha256": "010694667a2c2ff5d407128d690df0b05acc5c7e7482ba1647dbd640d0c5f4bf"
+    },
+    "scope": "Quote-reply entry points composed after the streaming read-aloud overlay: the long-press menu keeps read-aloud first and adds one quote item, the per-message action row gains a trailing icon-only quote button, the composer carries a quote chip (sender plus truncated preview, icon-only cancel) that clears on send and on conversation switch, and the WS message payload carries reply_to. Anchors on the composed streaming sources; harmony platform only.",
+    "upstreamCommitPendingWebLinePR": true
   }
 }
