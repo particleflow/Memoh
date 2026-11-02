@@ -43,9 +43,10 @@ func (h *ComputerDeliveryHandler) Register(e *echo.Echo) {
 		}
 	})
 	g := e.Group(prefix + "/:operation_id/:delivery_id")
-	g.Use(markTransferRefusal)
-	g.POST("/commit", h.commit)
-	g.POST("/resolve", h.resolve)
+	// Route-level, not g.Use: group middleware registers catch-all routes in
+	// echo and would turn method mismatches (405) into 404.
+	g.POST("/commit", h.commit, markTransferRefusal)
+	g.POST("/resolve", h.resolve, markTransferRefusal)
 }
 
 // RefusalTokenTargetFingerprint marks a 403 whose cause is target identity
