@@ -1,0 +1,164 @@
+{
+  "scope": "Quote-reply entry points on the shared phone composition: the long-press menu keeps read-aloud first and adds a quote item, the per-message action row gains a trailing icon-only quote button, the composer carries a quote chip with sender and truncated preview plus an icon-only cancel, and the send payload carries reply_to. Applied after the streaming read-aloud overlay; harmony platform only.",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "baseSHA256": "a2e8aad622fa8575d4575515f6d0ed343103a8f8f5fb28d758531e8ed84c7ac4",
+      "adaptedSHA256": "8410016cc9642d07093ee4f26662113669e82487111515b4c14cf63be0633733",
+      "replacements": [
+        [
+          "<ContextMenuTrigger\n                        as-child\n                        :disabled=\"!readAloud.menuAvailable(msg)\"\n                      >",
+          "<ContextMenuTrigger\n                        as-child\n                        :disabled=\"!readAloud.menuAvailable(msg) && !quoteMenuAvailable(msg)\"\n                      >",
+          1
+        ],
+        [
+          "<ContextMenuContent v-if=\"readAloud.menuAvailable(msg)\">\n                        <ContextMenuItem\n                          :disabled=\"!readAloud.canReplay(msg)\"\n                          @select=\"readAloud.replay(msg)\"\n                        >\n                          {{ $t(readAloud.replayLabel(msg)) }}\n                        </ContextMenuItem>\n                      </ContextMenuContent>",
+          "<ContextMenuContent v-if=\"readAloud.menuAvailable(msg) || quoteMenuAvailable(msg)\">\n                        <ContextMenuItem\n                          v-if=\"readAloud.menuAvailable(msg)\"\n                          :disabled=\"!readAloud.canReplay(msg)\"\n                          @select=\"readAloud.replay(msg)\"\n                        >\n                          {{ $t(readAloud.replayLabel(msg)) }}\n                        </ContextMenuItem>\n                        <ContextMenuItem\n                          v-if=\"quoteMenuAvailable(msg)\"\n                          @select=\"startQuoteReply(msg)\"\n                        >\n                          {{ $t('chat.quoteReply.menu') }}\n                        </ContextMenuItem>\n                      </ContextMenuContent>",
+          1
+        ],
+        [
+          "                            :on-reply-click=\"handleReplyJump\"\n                            :on-retry-message=\"handleRetryMessage\"",
+          "                            :on-reply-click=\"handleReplyJump\"\n                            :on-quote=\"quoteMenuAvailable(msg) ? () => startQuoteReply(msg) : undefined\"\n                            :on-retry-message=\"handleRetryMessage\"",
+          1
+        ],
+        [
+          "                </Transition>\n\n                <!-- While a voice recording/transcription is in flight the",
+          "                </Transition>\n\n                <!-- A pending quote rides the composer beside the input, the\n                     same slot the requested-skill chips occupy: the quoted\n                     sender plus a truncated preview, and a cancel control\n                     that is only an icon. -->\n                <Transition\n                  enter-active-class=\"transition-opacity duration-150 ease-out\"\n                  enter-from-class=\"opacity-0\"\n                  enter-to-class=\"opacity-100\"\n                  leave-active-class=\"transition-opacity duration-100 ease-in\"\n                  leave-from-class=\"opacity-100\"\n                  leave-to-class=\"opacity-0\"\n                >\n                  <div\n                    v-if=\"quoteReplyTarget\"\n                    class=\"order-first flex w-full basis-full flex-wrap gap-1.5 pb-1.5\"\n                  >\n                    <div\n                      class=\"flex min-h-8 max-w-full items-center gap-1.5 rounded-full bg-accent py-0.5 pl-2.5 pr-0.5 text-label text-foreground\"\n                    >\n                      <Quote class=\"size-3.5 shrink-0 text-muted-foreground\" />\n                      <span\n                        v-if=\"quoteReplyTarget.sender\"\n                        class=\"max-w-40 shrink-0 truncate text-muted-foreground\"\n                      >{{ quoteReplyTarget.sender }}</span>\n                      <span class=\"min-w-0 truncate\">{{ quoteReplyTarget.preview }}</span>\n                      <Button\n                        type=\"button\"\n                        variant=\"ghost\"\n                        size=\"icon-sm\"\n                        :aria-label=\"$t('chat.quoteReply.cancel')\"\n                        class=\"shrink-0\"\n                        @click=\"cancelQuoteReply\"\n                      >\n                        <X class=\"size-3.5\" />\n                      </Button>\n                    </div>\n                  </div>\n                </Transition>\n\n                <!-- While a voice recording/transcription is in flight the",
+          1
+        ],
+        [
+          "  draft: inputText,\n  messages,\n})\n\nuseQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)",
+          "  draft: inputText,\n  messages,\n})\n\n// A pending quote names the message the next send will reply to. It clears on\n// the send that consumed it, on its cancel control, and whenever the pane\n// moves to another conversation — a quote never crosses sessions.\nconst quoteReplyTarget = shallowRef<{ id: string, sender: string, preview: string } | null>(null)\n\nfunction quoteMenuAvailable(message: ChatMessage) {\n  return !!currentBotId.value\n    && !activeChatReadOnly.value\n    && (message.role === 'user' || message.role === 'assistant')\n    && !message.streaming\n    && !!message.id\n}\n\nfunction quotePreviewFor(message: ChatMessage) {\n  const raw = message.role === 'user'\n    ? message.text\n    : message.role === 'assistant'\n      ? message.messages\n        .flatMap(block => block.type === 'text' ? [block.content] : [])\n        .join(' ')\n      : ''\n  const flat = raw.replace(/\\s+/g, ' ').trim()\n  if (!flat) return ''\n  return [...flat].length > 100 ? [...flat].slice(0, 100).join('') + '…' : flat\n}\n\nfunction startQuoteReply(message: ChatMessage) {\n  if (!quoteMenuAvailable(message)) return\n  const sender = message.role === 'assistant'\n    ? currentBot.value?.display_name || currentBot.value?.name || ''\n    : message.role === 'user'\n      ? message.senderDisplayName || ''\n      : ''\n  quoteReplyTarget.value = { id: message.id, sender, preview: quotePreviewFor(message) }\n}\n\nfunction cancelQuoteReply() {\n  quoteReplyTarget.value = null\n}\n\nwatch(() => [paneTarget.value.botId, paneTarget.value.sessionId], () => {\n  quoteReplyTarget.value = null\n})\n\nuseQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)",
+          1
+        ],
+        [
+          "  const sentWorkspaceTargetId = sendWorkspaceTargetId.value\n",
+          "  const sentWorkspaceTargetId = sendWorkspaceTargetId.value\n  const sentReplyTo = quoteReplyTarget.value?.id\n",
+          1
+        ],
+        [
+          "    workspaceTargetId: sentWorkspaceTargetId,\n    requestedSkills: skills,\n    composerScope: sentContext.composerScope,",
+          "    workspaceTargetId: sentWorkspaceTargetId,\n    replyTo: sentReplyTo,\n    requestedSkills: skills,\n    composerScope: sentContext.composerScope,",
+          1
+        ],
+        [
+          "      clearSentInput(onSentPane)\n      if (holdsInput) {\n        draftSendStarting.value = false\n      }",
+          "      clearSentInput(onSentPane)\n      if (onSentPane) quoteReplyTarget.value = null\n      if (holdsInput) {\n        draftSendStarting.value = false\n      }",
+          1
+        ],
+        [
+          "  Check,\n  Sparkles,\n  X,\n  HelpCircle,",
+          "  Check,\n  Sparkles,\n  Quote,\n  X,\n  HelpCircle,",
+          1
+        ],
+        [
+          "                        <InlineLoadingRow>{{ $t('chat.uploadingAttachments') }}</InlineLoadingRow>\n",
+          "",
+          1
+        ],
+        [
+          "DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder",
+          "DropdownMenuTrigger, PanePlaceholder",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/chat/send.ts": {
+      "baseSHA256": "1a67a7e82b8a2c81762645cf30de636fe3648c4dd3b9f3fd11261dc198fd3d23",
+      "adaptedSHA256": "9883f9cd06aa8cf961b56e143630092f6a15d3f4b67778debf7359c03bd4b9e0",
+      "replacements": [
+        [
+          "        session_id: targetSessionId || undefined,\n        workdir_id: workdirId || undefined,",
+          "        session_id: targetSessionId || undefined,\n        workdir_id: workdirId || undefined,\n        reply_to: options.replyTo?.trim() || undefined,",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "e0fe4b3c347da70574c6d18737a73aa73e3dfeed45fca6b1429199e429d7b5ce",
+      "adaptedSHA256": "f8b7cea5878f431afb11820f77fb2c4d201f7cf610861c5900754212697118db",
+      "replacements": [
+        [
+          "  speechEnabled?: boolean\n  speechCanReplay?: boolean\n  speechStatus?: SpeechStatus\n}>()",
+          "  speechEnabled?: boolean\n  speechCanReplay?: boolean\n  speechStatus?: SpeechStatus\n  onQuote?: () => void\n}>()",
+          1
+        ],
+        [
+          "          :on-edit=\"canEditUserMessage ? handleEdit : undefined\"\n        />",
+          "          :on-edit=\"canEditUserMessage ? handleEdit : undefined\"\n          :on-quote=\"onQuote\"\n        />",
+          1
+        ],
+        [
+          "          :on-retry=\"canRetryAssistantMessage ? handleRetry : undefined\"\n          :on-fork=\"canForkAssistantMessage && canForkAssistant ? handleFork : undefined\"\n        />",
+          "          :on-retry=\"canRetryAssistantMessage ? handleRetry : undefined\"\n          :on-fork=\"canForkAssistantMessage && canForkAssistant ? handleFork : undefined\"\n          :on-quote=\"onQuote\"\n        />",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/message-actions.vue": {
+      "baseSHA256": "ae28bcfd3f6cd6997218a5f05e6e595cda1801d751138192fdbf225c7b34c6d1",
+      "adaptedSHA256": "81f786c0dbc1eec9741efb18a04f263d1113eded0ed0d4f1f719018ac9797e86",
+      "replacements": [
+        [
+          "  onRetry?: () => void\n  onEdit?: () => void\n  onFork?: () => void\n  onReplay?: () => void\n}>()",
+          "  onRetry?: () => void\n  onEdit?: () => void\n  onFork?: () => void\n  onReplay?: () => void\n  onQuote?: () => void\n}>()",
+          1
+        ],
+        [
+          "        <template v-if=\"inlineActions\">\n          <span\n            v-if=\"timeLabel\"\n            class=\"ml-1.5 min-w-0 truncate text-xs text-muted-foreground\"\n            :title=\"fullTime\"\n          >\n            {{ timeLabel }}\n          </span>\n        </template>\n      </template>\n    </TooltipProvider>",
+          "        <template v-if=\"inlineActions\">\n          <span\n            v-if=\"timeLabel\"\n            class=\"ml-1.5 min-w-0 truncate text-xs text-muted-foreground\"\n            :title=\"fullTime\"\n          >\n            {{ timeLabel }}\n          </span>\n        </template>\n      </template>\n      <!-- Quote stays icon-only: no visible label, no tooltip copy. -->\n      <Button\n        v-if=\"onQuote\"\n        type=\"button\"\n        variant=\"ghost\"\n        size=\"icon-sm\"\n        :class=\"actionIconClass\"\n        :aria-label=\"t('chat.quoteReply.action')\"\n        @click=\"onQuote\"\n      >\n        <Quote class=\"size-4\" />\n      </Button>\n    </TooltipProvider>",
+          1
+        ],
+        [
+          "import { PencilLine, RotateCcw, Volume2 } from 'lucide-vue-next'",
+          "import { PencilLine, Quote, RotateCcw, Volume2 } from 'lucide-vue-next'",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/chat/types.ts": {
+      "baseSHA256": "c8c01ec07a64f7036c08778f3a8074c4621827a3de16805f5eb3ab02a665e128",
+      "adaptedSHA256": "9eed74a516496edfd2e5a7f7f538ba4c9bc65965e4be04269e3e09b5057922fb",
+      "replacements": [
+        [
+          "  target?: ChatViewTarget\n  modelId?: string\n  reasoningEffort?: string\n  workspaceTargetId?: string\n",
+          "  target?: ChatViewTarget\n  modelId?: string\n  reasoningEffort?: string\n  workspaceTargetId?: string\n  /** Quote target: the id of the message this send replies to. */\n  replyTo?: string\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/composables/api/useChat.ws.ts": {
+      "baseSHA256": "5670b4341e8197dc5a641779047c5076fc0f618854809c295d92da2c8b4328f8",
+      "adaptedSHA256": "75f0ffc939b1ab12fbe00d974b5fb9b7be914910e5d3609bd58eab0627c53b7d",
+      "replacements": [
+        [
+          "      text?: string\n      attachments?: ChatAttachment[]\n      requested_skills?: RequestedSkillRequest[]\n    } & WSTurnOptions)",
+          "      text?: string\n      attachments?: ChatAttachment[]\n      requested_skills?: RequestedSkillRequest[]\n      /** Quote target: names a stored message of this session; validated server-side. */\n      reply_to?: string\n    } & WSTurnOptions)",
+          1
+        ]
+      ]
+    }
+  },
+  "locales": {
+    "en": {
+      "quoteReply": {
+        "menu": "Quote",
+        "action": "Quote",
+        "cancel": "Cancel quote"
+      }
+    },
+    "zh": {
+      "quoteReply": {
+        "menu": "引用",
+        "action": "引用",
+        "cancel": "取消引用"
+      }
+    },
+    "ja": {
+      "quoteReply": {
+        "menu": "引用",
+        "action": "引用",
+        "cancel": "引用をキャンセル"
+      }
+    }
+  }
+}

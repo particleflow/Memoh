@@ -20,7 +20,8 @@ entries = manifest['entries']
 # Two N1 IPv6 app-net binding sources (shell manager + stage2 decision table) extend194.
 # Four attachment transfer-progress sources (registry, ring, overlay, checks) extend196.
 # The visual-evidence page generator extends200.
-assert len(entries) == 201
+# Two scoped quote-reply composition sources extend201 (overlay + stage2 gate).
+assert len(entries) == 203
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',

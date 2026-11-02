@@ -77,6 +77,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-fixed-contact-task-directory.json')
     files.append(ROOT / 'mobile/memoh/shared-home-admission-final.json')
     files.append(ROOT / 'mobile/memoh/shared-read-aloud-streaming.json')
+    files.append(ROOT / 'mobile/memoh/shared-quote-reply-changes.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -228,6 +229,62 @@ def apply_attachment_progress(context, overlay, patches):
                 patches[member.name] = {'upstreamSHA256': item['baseSHA256'], 'adaptedSHA256': item['adaptedSHA256']}
             target.addfile(entry, io.BytesIO(data) if data is not None else None)
     assert edited == edits.keys(), 'Attachment progress source coverage drift'
+    temporary.replace(context)
+
+
+def apply_quote_reply_context(context, overlay, patches):
+    """Apply the quote-reply entry points after the attachment-progress overlay.
+
+    Replacements anchor on the composed streaming sources; locale files merge
+    one new chat.quoteReply block per language. No full-file additions."""
+    files = overlay.get('addedFiles', {})
+    edits = overlay.get('existingFiles', {})
+    locales = overlay.get('locales', {})
+    temporary = context.with_suffix('.quote.tar')
+    seen, edited = set(), set()
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        last = {item.name: item for item in source.getmembers()}
+        for member in source.getmembers():
+            name = member.name
+            data = source.extractfile(member).read() if member.isfile() else None
+            entry = copy.copy(member)
+            if name in edits and member is last[name]:
+                item = edits[name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Quote reply anchor drift'
+                text = data.decode()
+                for before, after, expected in item['replacements']:
+                    assert text.count(before) == expected, 'Quote reply replacement drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == item['adaptedSHA256'], 'Quote reply output drift'
+                entry.size = len(data)
+                edited.add(name)
+                patches[name] = {'upstreamSHA256': item['baseSHA256'], 'adaptedSHA256': item['adaptedSHA256']}
+            if name in files and member is last[name]:
+                item = files[name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Quote reply baseline drift'
+                data = item['source'].encode()
+                assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Quote reply shared output drift'
+                entry.size = len(data)
+                seen.add(name)
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in locales}:
+                value = json.loads(data)
+                assert 'quoteReply' not in value['chat'], 'Quote reply locale already present'
+                value['chat']['quoteReply'] = locales[Path(name).stem]['quoteReply']
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
+                entry.size = len(data)
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+        for name, item in files.items():
+            if name in seen:
+                continue
+            assert item['baseSHA256'] is None and name not in last, 'Quote reply source unexpectedly missing'
+            data = item['source'].encode()
+            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'New quote reply source drift'
+            entry = tarfile.TarInfo(name)
+            entry.size, entry.mode = len(data), 0o644
+            target.addfile(entry, io.BytesIO(data))
+            seen.add(name)
+    assert seen == files.keys() and edited == edits.keys(), 'Quote reply coverage drift'
     temporary.replace(context)
 
 
@@ -1130,6 +1187,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     attachment_progress = lock['sharedAttachmentProgress']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / attachment_progress['local']) == attachment_progress['sha256'], 'Attachment progress overlay drift'
     attachment_progress_sources = json.loads((ROOT / 'mobile/memoh' / attachment_progress['local']).read_text())
+    quote_reply = lock['sharedQuoteReply']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / quote_reply['local']) == quote_reply['sha256'], 'Quote reply source drift'
+    quote_reply_sources = json.loads((ROOT / 'mobile/memoh' / quote_reply['local']).read_text())
     for name, addition in fixed_contact_sources['sdkOverlays'].items():
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected task directory SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
@@ -1551,6 +1611,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     if platform == 'harmony':
         apply_read_aloud_streaming(context, streaming_sources, patches)
         apply_attachment_progress(context, attachment_progress_sources, patches)
+        apply_quote_reply_context(context, quote_reply_sources, patches)
     return context, patches
 
 
