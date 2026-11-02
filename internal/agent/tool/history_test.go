@@ -42,7 +42,7 @@ func (f *fakeHistoryMessageReader) ListBeforeBySession(_ context.Context, sessio
 	return f.beforeMessages, nil
 }
 
-func (f *fakeHistoryMessageReader) GetByIDBySession(_ context.Context, sessionID, messageID string) (messagepkg.Message, error) {
+func (f *fakeHistoryMessageReader) GetByIDBySession(_ context.Context, sessionID string, messageID string) (messagepkg.Message, error) {
 	f.exactSessionID = sessionID
 	f.exactMessageID = messageID
 	return f.exactMessage, f.exactErr

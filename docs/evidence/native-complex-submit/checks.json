@@ -10,7 +10,7 @@
       "argv": [
         "go",
         "test",
-        "./internal/computertarget",
+        "./internal/agenvo",
         "./internal/computertask",
         "./internal/nativeherdr",
         "-count=1",
@@ -23,7 +23,7 @@
       "argv": [
         "go",
         "vet",
-        "./internal/computertarget",
+        "./internal/agenvo",
         "./internal/computertask",
         "./internal/nativeherdr"
       ],
@@ -34,7 +34,7 @@
       "argv": [
         "golangci-lint",
         "run",
-        "./internal/computertarget/...",
+        "./internal/agenvo/...",
         "./internal/computertask/...",
         "./internal/nativeherdr/..."
       ],

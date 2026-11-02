@@ -26,7 +26,6 @@ type authorityFixture struct {
 	workdirs        map[string]workdir.Workdir
 	active          bool
 	registration    dbstore.UserRuntimeRecord
-	mcpCalls        int
 	registrationErr error
 }
 
@@ -120,11 +119,6 @@ func (f *authorityFixture) OwnedNativeHerdrRuntime(_ context.Context, owner, id 
 
 func (*authorityFixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
-}
-
-func (f *authorityFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	f.mcpCalls++
-	return "manager", nil
 }
 
 func (f *authorityFixture) SessionHasAsset(_ context.Context, bot, session, hash string) (bool, error) {

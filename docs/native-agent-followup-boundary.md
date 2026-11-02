@@ -16,9 +16,7 @@ remain available in Git at `910589c10e363545dd220cc3b9c212def0c815ec`.
 
 ## Official contracts and residual race
 
-- the producer CLI v0.2.0 commit `a89415e557c415faf5626354f8e87233eb69d877`:
-  [`agent.prompt`](https://github.com/Xuanwo/legacy-executor/blob/a89415e557c415faf5626354f8e87233eb69d877/apps/herdr/src/herdr.ts#L341-L356)
-  accepts session, name and text, without expected incarnation or deduplication key.
+
 - Herdr v0.9.5 annotated tag object `7573e821895d32c8d1f78b3f6c9a2f85a46df4ac`
   points to commit `2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01`.
   [`AgentSessionInfo` and `AgentPromptParams`](https://github.com/herdrdev/herdr/blob/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01/src/api/schema/agents.rs)

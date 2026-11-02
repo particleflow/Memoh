@@ -21,7 +21,7 @@ Log copies normalize local repository/verification paths, trim trailing line whi
 Normal additive commits preserve all previous checkpoints:
 
 - `fd8418ec1ec792672f67417e5023001f87f5ab69`: parent Bot run view.
-- `3c29adb0`: exact cherry-pick of `79047657f2cecef4b11bed7189c54ef82c91b10a`, three retired-legacy executor SELECT filters and generated Go, tests/evidence.
+- `3c29adb0`: exact cherry-pick of `79047657f2cecef4b11bed7189c54ef82c91b10a`, three retired-Agenvo SELECT filters and generated Go, tests/evidence.
 - `ed450430c119b54e5a673910f75145a98b07ca67`: exact cherry-pick of `a35b9127d8185313bb4931a900d485f3a3d6f700`, image-card terminal/receipt preservation. Source branches were not merged wholesale.
 
 No conflicts. Schema stays 176. The 8a Windows native 10-minute aggregate/35-minute job budget is unchanged. Official agent runtime, contextview and packages/runtime have zero diff from 8a. This candidate does not contain the separately owned attachment upload/download redesign.

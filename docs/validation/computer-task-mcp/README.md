@@ -88,8 +88,6 @@ Herdr **v0.9.5** [agents.rs, lines 82–268](https://github.com/herdrdev/herdr/b
 returns `agent_not_found`, `agent_not_ready`, `agent_blocked` and
 `empty_agent_prompt` before sending or queuing terminal input. The second
 not-found check inside submit also precedes `try_send_bytes` and queueing.
-legacy executor **v0.2.0** [herdr.ts](https://github.com/Xuanwo/legacy-executor/blob/v0.2.0/apps/herdr/src/herdr.ts)
-invokes `agent.prompt` without `--wait`. This fixed-source review establishes
 these four pre-input cases; synthetic fixtures alone do not establish it.
 
 Only the correctly associated response to the current prompt can mark that

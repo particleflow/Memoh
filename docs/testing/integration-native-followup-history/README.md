@@ -42,8 +42,8 @@ count named test/subtest events. These are local results, not new remote CI runs
 
 | Check | Exit | Result / readable output |
 | --- | --- | --- |
-| Full legacy executor package, race | 0 | [195 PASS, 1 opt-in PG SKIP](evidence/legacy-executor.output.txt) |
-| Account/Bot PG authorization, explicit DSN follow-up | 0 | [1 PASS](evidence/legacy-executor-account-pg.output.txt), covers the skipped case |
+| Full Agenvo package, race | 0 | [195 PASS, 1 opt-in PG SKIP](evidence/agenvo.output.txt) |
+| Account/Bot PG authorization, explicit DSN follow-up | 0 | [1 PASS](evidence/agenvo-account-pg.output.txt), covers the skipped case |
 | Full computer task package, race | 0 | [271 PASS](evidence/computertask.output.txt) |
 | Full session task package, race | 0 | [54 PASS](evidence/sessiontask.output.txt) |
 | CAS/RLS required PG gate, first attempt | 1 | [Isolated DB creation failed: no space](evidence/operation-pg.output.txt); assertions did not run |
@@ -63,7 +63,7 @@ capacity, unknown no-redispatch, damaged/legacy history, compaction/branch forms
 latest-row scoping. The complete 2,498 Web suite was **not rerun**; Web/SDK source
 was unchanged and only the affected task UI tests ran.
 
-The original legacy executor package's opt-in SKIP is retained, not edited into PASS. Its
+The original Agenvo package's opt-in SKIP is retained, not edited into PASS. Its
 explicit PostgreSQL rerun passed independently. The seven media failures recorded
 by the source PR remain un-attributed; they were neither rerun nor fixed here.
 No blocked legacy media P1 repair was attempted. Whole-repository Go tests/lint,

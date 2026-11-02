@@ -1,10 +1,10 @@
 # Retired legacy executor records and native Runtime cutover
 
 The production computer-task service uses the existing official Memoh Runtime
-Exec transport to Herdr/Pi. The legacy legacy executor create/discover/configuration
+Exec transport to Herdr/Pi. The legacy executor create/discover/configuration
 routes are removed, `provider=legacy-executor` is rejected on create, and the owner,
 Bot-target and account-grant lists select only `provider=memoh`. An active old
-MCP connection does not make an legacy executor registration executable or selectable.
+MCP connection does not make a legacy executor registration executable or selectable.
 The shared resolver rejects an explicitly selected retired target before any
 MCP/OAuth call and never substitutes the current primary computer.
 
@@ -63,7 +63,5 @@ report do not establish their completion.
 `internal/db/native_runtime_cutover_integration_test.go` verifies native-only
 selection, retired registration/grant/transfer rejection, zero legacy transport,
 and preservation of original rows and unknown operations in isolated PostgreSQL.
-The source checkpoint is recorded in
-[evidence/legacy-executor-project-retirement/checks.md](evidence/legacy-executor-project-retirement/checks.md).
 Its results are historical evidence for that recorded commit, not a current
 PC/NAS, browser or schedule acceptance claim.

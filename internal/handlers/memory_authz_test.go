@@ -34,7 +34,7 @@ func (p *recordingMemoryProvider) Update(_ context.Context, req memprovider.Upda
 	return memprovider.MemoryItem{ID: req.MemoryID}, nil
 }
 
-func (p *recordingMemoryProvider) Delete(_ context.Context, _, memoryID string) (memprovider.DeleteResponse, error) {
+func (p *recordingMemoryProvider) Delete(_ context.Context, _ string, memoryID string) (memprovider.DeleteResponse, error) {
 	p.deleteCalls = append(p.deleteCalls, memoryID)
 	return memprovider.DeleteResponse{}, nil
 }

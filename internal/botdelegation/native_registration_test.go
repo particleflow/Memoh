@@ -27,7 +27,7 @@ func nativeFixture(t *testing.T) (*Authority, *authorityFixture, Identity, Devic
 }
 
 func TestNativeRegistrationBindsDistinctBotsAndReconstructsScope(t *testing.T) {
-	a, f, b, p := nativeFixture(t)
+	a, _, b, p := nativeFixture(t)
 	bound, selected, err := a.Bind(t.Context(), b.UserID, b.SourceBotID, b.SourceSessionID, b.TargetBotID)
 	if err != nil || selected != p.SourceMountID || bound.SourceRootID != b.SourceRootID {
 		t.Fatalf("native bind=%+v %q %v", bound, selected, err)
@@ -44,9 +44,6 @@ func TestNativeRegistrationBindsDistinctBotsAndReconstructsScope(t *testing.T) {
 	}
 	if err := toolcontext.CheckDelegationTarget(ctx, b.SourceBotID, p.TargetMountID, bots.PermissionWorkspaceRead); !errors.Is(err, ErrDenied) {
 		t.Fatalf("forged Bot=%v", err)
-	}
-	if f.mcpCalls != 0 {
-		t.Fatal("native registration used MCP")
 	}
 }
 
@@ -121,9 +118,6 @@ func TestNativeRegistrationRejectsLiveChangesAndForgedIdentity(t *testing.T) {
 			f.mounts["specialist/specialist-pc-a"] = m
 			if err := a.AuthorizeDevice(t.Context(), b, p, bots.PermissionWorkspaceExec); !errors.Is(err, ErrDenied) {
 				t.Fatalf("got %v", err)
-			}
-			if f.mcpCalls != 0 {
-				t.Fatal("native path contacted MCP")
 			}
 		})
 	}
@@ -204,9 +198,6 @@ func TestNativeHandoffReturnsToSourceAndNeverRedispatches(t *testing.T) {
 				}
 			} else if h.deliveries.Load() != 1 || replay.DeliveryState != "accepted" || replay.Summary != nil {
 				t.Fatal("opted-in unknown notification missing or exposed an unconfirmed result")
-			}
-			if f.mcpCalls != 0 {
-				t.Fatal("legacy MCP fallback")
 			}
 		})
 	}

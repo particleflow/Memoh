@@ -16,7 +16,7 @@ The other pre-claim branches remain intact:
 - Missing/invalid native producer locator: unsupported (invalid registered nonempty profiles are rejected at target resolution).
 - Producer launch above 30,000, or general launch above 48,000: unsupported.
 
-The native CLI's 24,000 UTF-16 argv guard is later than the claim and cannot explain this reported pre-claim failure. Its original encoder is exercised by the new service fixture and its limit is unchanged. The old error's legacy executor wording alone does not establish legacy routing.
+The native CLI's 24,000 UTF-16 argv guard is later than the claim and cannot explain this reported pre-claim failure. Its original encoder is exercised by the new service fixture and its limit is unchanged. The old error's Agenvo wording alone does not establish legacy routing.
 
 ## Minimal change
 
@@ -31,9 +31,9 @@ PowerShell's error handling is terminating within the launcher. Invalid gzip, pa
 Official Go 1.25.7 and repository-pinned golangci-lint 2.10.1 were used. Linux PowerShell 7.4.6 was downloaded from the official release and verified against its official SHA256 listing. Commands, with the isolated PowerShell path supplied through the existing test environment convention:
 
 ```sh
-MEMOH_TEST_PWSH=<isolated-pwsh> go test ./internal/computertarget ./internal/computertask ./internal/nativeherdr -count=1 -timeout=5m
-go vet ./internal/computertarget ./internal/computertask ./internal/nativeherdr
-golangci-lint run ./internal/computertarget/... ./internal/computertask/... ./internal/nativeherdr/...
+MEMOH_TEST_PWSH=<isolated-pwsh> go test ./internal/agenvo ./internal/computertask ./internal/nativeherdr -count=1 -timeout=5m
+go vet ./internal/agenvo ./internal/computertask ./internal/nativeherdr
+golangci-lint run ./internal/agenvo/... ./internal/computertask/... ./internal/nativeherdr/...
 git diff --check
 ```
 

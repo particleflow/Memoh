@@ -141,10 +141,6 @@ func (f *resumeHTTPStore) OwnedNativeHerdrRuntime(_ context.Context, user, id st
 	return dbstore.UserRuntimeRecord{}, db.ErrNotFound
 }
 
-func (*resumeHTTPStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	return "", db.ErrNotFound
-}
-
 func (f *resumeHTTPStore) HasBotPermission(_ context.Context, bot, user, _ string) (bool, error) {
 	return !f.revoked && bot == imageSpawnBot && user == imageSpawnUser, nil
 }

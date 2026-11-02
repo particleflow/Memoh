@@ -1,13 +1,13 @@
 {
   "base": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
   "product_files": [
-    "internal/computertarget/pi_batch_service.go",
+    "internal/agenvo/pi_batch_service.go",
     "internal/nativeherdr/commands.go",
-    "internal/computertarget/batch_read_trace.go",
+    "internal/agenvo/batch_read_trace.go",
     "internal/computertask/source.go"
   ],
   "baseline_contract": {
-    "command": "go test ./internal/computertarget -run '^TestNativeBatchSnapshotUsesDirectANSIFormat$' -count=1 -v",
+    "command": "go test ./internal/agenvo -run '^TestNativeBatchSnapshotUsesDirectANSIFormat$' -count=1 -v",
     "exit_code": 1,
     "cause": "previous native batch read lacked direct format and presentation normalization"
   },
@@ -22,7 +22,7 @@
     "command": "node .husky/checks.mjs",
     "exit_code": 0,
     "packages": [
-      "./internal/computertarget",
+      "./internal/agenvo",
       "./internal/computertask",
       "./internal/nativeherdr"
     ],
@@ -30,11 +30,11 @@
     "web": "no staged UI changes"
   },
   "race": {
-    "command": "go test -race ./internal/computertarget ./internal/nativeherdr ./internal/computertask -run '^Test(NativeBatchSnapshotUsesDirectANSIFormat|BatchSnapshotStripsOnlyPresentationSGR|BatchReadExplicitANSIIsOfficialAndOrdinaryDefaultUnchanged|ResultReadTracePreservesErrorsAndDispatch)$' -count=1",
+    "command": "go test -race ./internal/agenvo ./internal/nativeherdr ./internal/computertask -run '^Test(NativeBatchSnapshotUsesDirectANSIFormat|BatchSnapshotStripsOnlyPresentationSGR|BatchReadExplicitANSIIsOfficialAndOrdinaryDefaultUnchanged|ResultReadTracePreservesErrorsAndDispatch)$' -count=1",
     "exit_code": 0
   },
   "vet": {
-    "command": "go vet ./internal/computertarget ./internal/nativeherdr ./internal/computertask",
+    "command": "go vet ./internal/agenvo ./internal/nativeherdr ./internal/computertask",
     "exit_code": 0
   },
   "official_core_boundary": {

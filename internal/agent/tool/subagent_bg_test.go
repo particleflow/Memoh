@@ -332,7 +332,7 @@ func (*fakeAgentMessageService) LocateByExternalIDBySession(context.Context, str
 	return messagepkg.LocateResult{}, nil
 }
 
-func (s *fakeAgentMessageService) GetByIDBySession(_ context.Context, sessionID, messageID string) (messagepkg.Message, error) {
+func (s *fakeAgentMessageService) GetByIDBySession(_ context.Context, sessionID string, messageID string) (messagepkg.Message, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for _, msg := range s.messages[sessionID] {
@@ -343,7 +343,7 @@ func (s *fakeAgentMessageService) GetByIDBySession(_ context.Context, sessionID,
 	return messagepkg.Message{}, nil
 }
 
-func (s *fakeAgentMessageService) ListVisibleFromBySession(_ context.Context, sessionID, messageID string) ([]messagepkg.Message, error) {
+func (s *fakeAgentMessageService) ListVisibleFromBySession(_ context.Context, sessionID string, messageID string) ([]messagepkg.Message, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	msgs := s.messages[sessionID]

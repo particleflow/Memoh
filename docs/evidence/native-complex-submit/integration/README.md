@@ -18,7 +18,7 @@ credential, provider, UI field, timeout or deployment configuration is added.
 
 ## Actual combination checks
 
-`go test -p 1 ./internal/computertarget ./internal/computertask ./internal/nativeherdr
+`go test -p 1 ./internal/agenvo ./internal/computertask ./internal/nativeherdr
 ./internal/imagecapability -count=1 -timeout=5m` passed all four packages (12.671s,
 11.294s,0.115s,0.793s). Scoped lint additionally includes cmd/internal/core and
 passed. Only the affected packages were rerun; prior Web160/129 and published391

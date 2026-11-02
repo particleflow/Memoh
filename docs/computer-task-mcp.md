@@ -30,7 +30,7 @@ restricted host connection. This change creates no production token, OAuth
 grant or persistent credential and does not make a broad account token safe
 for several differently scoped conversations.
 
-An legacy executor command target cannot host the external Agent binary, its filesystem
+A legacy executor command target cannot host the external Agent binary, its filesystem
 or credentials. The original drivers' container requirement and the host's
 legacy executor rejection remain. The host bridge resolves the native workspace explicitly
 for an authenticated computer-bound turn; the same context retains the selected
@@ -96,7 +96,7 @@ confinement of arbitrary programs or unknown third-party tools.
 ## Existing registration and Pi configuration
 
 Registration and per-Bot grants reuse the existing account runtime tables.
-`PUT /users/me/runtimes/{id}/native-herdr` updates an existing owned native Runtime. Its `agent` field contains `{execution_mode: "pi-json-v1", provider, model, config_dir, path?}`. An empty Agent profile disables Pi tasks. Legacy legacy executor discovery/configuration routes are removed.
+`PUT /users/me/runtimes/{id}/native-herdr` updates an existing owned native Runtime. Its `agent` field contains `{execution_mode: "pi-json-v1", provider, model, config_dir, path?}`. An empty Agent profile disables Pi tasks. Legacy executor discovery/configuration routes are removed.
 Updates use owner checks and compare-and-swap; they do not create a duplicate
 connection, credentials, default target or grants. Actual paths and secrets
 belong only in private deployment configuration. The response advertises

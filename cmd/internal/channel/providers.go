@@ -574,8 +574,8 @@ func (r *settingsTranscriptionModelResolver) ResolveTranscriptionModelID(ctx con
 }
 
 type channelAudio interface {
-	Synthesize(ctx context.Context, modelID, text string, overrideCfg map[string]any) ([]byte, string, error)
-	Transcribe(ctx context.Context, modelID string, audio []byte, filename, contentType string, overrideCfg map[string]any) (inbound.TranscriptionResult, error)
+	Synthesize(ctx context.Context, modelID string, text string, overrideCfg map[string]any) ([]byte, string, error)
+	Transcribe(ctx context.Context, modelID string, audio []byte, filename string, contentType string, overrideCfg map[string]any) (inbound.TranscriptionResult, error)
 }
 
 type localChannelAudio struct{ service *audiopkg.Service }

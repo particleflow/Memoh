@@ -749,7 +749,7 @@ func prependPathDir(env []string, dir string) []string {
 	return append(env, "PATH="+dir+":"+defaultExecPath)
 }
 
-func filterUnsetEnv(env, unset []string) []string {
+func filterUnsetEnv(env []string, unset []string) []string {
 	if len(env) == 0 || len(unset) == 0 {
 		return env
 	}

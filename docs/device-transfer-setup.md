@@ -3,7 +3,7 @@
 File-transfer authentication and native Runtime control authentication are
 separate purposes. The existing Server verifier uses the activated, non-revoked
 owned native Runtime (`provider=memoh`), its configured Herdr instance and current
-account/team access. Legacy legacy executor registrations cannot enroll or verify a new
+account/team access. Legacy executor registrations cannot enroll or verify a new
 file-transfer credential. Old credential rows and original HostBinding values
 remain stored; they are not converted into native authorization.
 

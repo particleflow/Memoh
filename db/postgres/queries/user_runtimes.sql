@@ -242,13 +242,3 @@ WHERE binding.team_id = public.memoh_current_team_id()
   AND runtime.revoked_at IS NULL
   AND runtime.provider = 'memoh'
 ORDER BY binding.created_at ASC, binding.id ASC;
-
--- name: OwnedHTTPMCPConnectionBot :one
-SELECT bot.id FROM mcp_connections connection
-JOIN bots bot ON bot.id = connection.bot_id AND bot.team_id = public.memoh_current_team_id()
-JOIN team_members membership ON membership.team_id = public.memoh_current_team_id() AND membership.user_id = bot.owner_user_id AND membership.is_active
-JOIN users owner ON owner.id = bot.owner_user_id AND owner.is_active
-WHERE connection.team_id = public.memoh_current_team_id()
-  AND connection.id = sqlc.arg(connection_id)
-  AND bot.owner_user_id = sqlc.arg(owner_id)
-  AND connection.is_active AND connection.type = 'http';

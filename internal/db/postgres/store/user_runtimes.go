@@ -125,19 +125,3 @@ func userRuntimeRecord(row dbsqlc.UserRuntime) dbstore.UserRuntimeRecord {
 		Provider: row.Provider, ProviderConfig: row.ProviderConfig,
 	}
 }
-
-func (s *Store) OwnedHTTPMCPConnectionBot(ctx context.Context, ownerID, connectionID string) (string, error) {
-	owner, err := db.ParseUUID(ownerID)
-	if err != nil {
-		return "", err
-	}
-	connection, err := db.ParseUUID(connectionID)
-	if err != nil {
-		return "", err
-	}
-	bot, err := s.queries.OwnedHTTPMCPConnectionBot(ctx, dbsqlc.OwnedHTTPMCPConnectionBotParams{OwnerID: owner, ConnectionID: connection})
-	if err != nil {
-		return "", mapQueryErr(err)
-	}
-	return bot.String(), nil
-}

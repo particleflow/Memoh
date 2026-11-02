@@ -51,7 +51,6 @@ type Mounts interface {
 	GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error)
-	OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
 }
 
 type AssetLinks interface {

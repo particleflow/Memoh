@@ -284,7 +284,7 @@ func PlatformRendersMarkdownMath(platform string) bool {
 	return false
 }
 
-func sendToolPromptMetadata(session SessionContext) (description, platformDescription, targetDescription string, required []string) {
+func sendToolPromptMetadata(session SessionContext) (description string, platformDescription string, targetDescription string, required []string) {
 	if session.SessionType == sessionmode.Discuss {
 		if session.CanOmitMessagingTarget() {
 			return "Send a message into the observed conversation. When target is omitted, sends to the observed conversation. When target is specified, sends to that channel/person.",
@@ -309,7 +309,7 @@ func sendToolPromptMetadata(session SessionContext) (description, platformDescri
 		[]string{"platform", "target"}
 }
 
-func reactToolPromptMetadata(session SessionContext) (description, platformDescription, targetDescription string, required []string) {
+func reactToolPromptMetadata(session SessionContext) (description string, platformDescription string, targetDescription string, required []string) {
 	if session.CanOmitMessagingTarget() {
 		return "Add or remove an emoji reaction on a message. When target/platform are omitted, reacts in the current conversation.",
 			"Channel platform name. Defaults to current session platform.",

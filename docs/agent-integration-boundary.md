@@ -22,7 +22,7 @@ guarantee or security boundary. Historical evidence is
 
 PR #4's extra external-runtime rejection has moved out of the engine to
 `cmd/internal/core/container_runtime_bridge.go`, injected into the host's
-Codex, Claude Code and Grok driver constructors. It rejects an legacy executor backend
+Codex, Claude Code and Grok driver constructors. It rejects a legacy executor backend
 before exposing a bridge client. The original upstream check continues to
 reject ordinary remote workspaces. Container information is not relabeled and
 failure never selects another workspace. Restoring the engine therefore does
@@ -48,7 +48,7 @@ Pi/provider configuration and enforces authorization before transport.
 
 A PC-selected conversation must see and use only that PC. A native/NAS-selected
 conversation may choose among its Bot grants; multiple genuinely suitable PCs
-require disambiguation. A target ID is a Memoh mount ID, never an legacy executor
+require disambiguation. A target ID is a Memoh mount ID, never a legacy executor
 device ID. Raw legacy executor search/execute access must be closed at both discovery
 and execution boundaries, including stale tool routes, before claiming this
 isolation works. No grant is expanded by a skill, default selection or model.

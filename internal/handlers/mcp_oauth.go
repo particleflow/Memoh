@@ -358,7 +358,7 @@ func (h *MCPOAuthHandler) authorizeBotAccess(ctx context.Context, channelIdentit
 	return AuthorizeBotAccess(ctx, h.botService, h.accountService, channelIdentityID, botID)
 }
 
-func renderMCPOAuthCallbackResult(c echo.Context, status int, result, message string) error {
+func renderMCPOAuthCallbackResult(c echo.Context, status int, result string, message string) error {
 	page := template.Must(template.New("mcp-oauth-result").Parse(`<!doctype html>
 <html>
   <head>

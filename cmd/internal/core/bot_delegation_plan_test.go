@@ -89,10 +89,6 @@ func (f *delegationPlanFixture) OwnedNativeHerdrRuntime(_ context.Context, owner
 	return f.registration, nil
 }
 
-func (*delegationPlanFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	return "", errors.New("legacy MCP unavailable")
-}
-
 func (f *delegationPlanFixture) ListMounts(_ context.Context, bot string) ([]dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return []dbstore.BotRemoteRuntimeBindingRecord{f.mounts[bot+"/"+planSourceMount]}, nil
 }

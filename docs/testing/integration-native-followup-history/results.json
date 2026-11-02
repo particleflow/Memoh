@@ -1,6 +1,6 @@
 {
-  "legacy-executor-account-pg": {
-    "check": "legacy-executor-account-pg",
+  "agenvo-account-pg": {
+    "check": "agenvo-account-pg",
     "command": [
       "go",
       "test",
@@ -11,7 +11,7 @@
       "1",
       "-run",
       "^TestPostgresAccountAndBotAuthorization$",
-      "./internal/computertarget"
+      "./internal/agenvo"
     ],
     "exit_code": 0,
     "started_at_utc": "2026-10-23T00:05:01Z",
@@ -20,8 +20,8 @@
       "pass": 1
     }
   },
-  "legacy-executor": {
-    "check": "legacy-executor",
+  "agenvo": {
+    "check": "agenvo",
     "command": [
       "go",
       "test",
@@ -32,7 +32,7 @@
       "1",
       "-timeout",
       "240s",
-      "./internal/computertarget"
+      "./internal/agenvo"
     ],
     "exit_code": 0,
     "started_at_utc": "2026-10-22T23:57:22Z",

@@ -1,6 +1,6 @@
 # Compact Pi completion results
 
-> Current routing: legacy legacy executor enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. legacy executor wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/computertarget` ledger remains in use by native Herdr/Pi. See [retirement audit](legacy-executor-retirement-audit.md).
+> Current routing: legacy executor enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. The wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/computertarget` ledger remains in use by native Herdr/Pi.
 
 This is a separate, unshipped follow-up to the merged versioned path resolver in PR #11.
 It does not change Pi, Memoh's Agent runtime/contextview, the configured provider,

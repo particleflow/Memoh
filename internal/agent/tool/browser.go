@@ -1975,7 +1975,7 @@ func (p *cdpPage) navigateHistory(ctx context.Context, forward bool) error {
 	return err
 }
 
-func (p *BrowserProvider) buildScreenshotResult(ctx context.Context, botID, base64Data, dir string, data map[string]any) any {
+func (p *BrowserProvider) buildScreenshotResult(ctx context.Context, botID, base64Data string, dir string, data map[string]any) any {
 	imgBytes, err := base64.StdEncoding.DecodeString(base64Data)
 	if err != nil {
 		return map[string]any{"content": []map[string]any{{"type": "text", "text": "Screenshot captured (failed to decode image data)"}}}
@@ -1983,7 +1983,7 @@ func (p *BrowserProvider) buildScreenshotResult(ctx context.Context, botID, base
 	return p.buildScreenshotBytesResult(ctx, botID, imgBytes, "image/png", dir, data)
 }
 
-func (p *BrowserProvider) buildScreenshotBytesResult(ctx context.Context, botID string, imgBytes []byte, mimeType, dir string, data map[string]any) any {
+func (p *BrowserProvider) buildScreenshotBytesResult(ctx context.Context, botID string, imgBytes []byte, mimeType string, dir string, data map[string]any) any {
 	if mimeType == "" {
 		mimeType = "image/png"
 	}

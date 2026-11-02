@@ -1,5 +1,5 @@
 {
-  "check": "legacy-executor-account-pg",
+  "check": "agenvo-account-pg",
   "command": [
     "go",
     "test",
@@ -10,7 +10,7 @@
     "1",
     "-run",
     "^TestPostgresAccountAndBotAuthorization$",
-    "./internal/computertarget"
+    "./internal/agenvo"
   ],
   "exit_code": 0,
   "started_at_utc": "2026-10-23T00:05:01Z",

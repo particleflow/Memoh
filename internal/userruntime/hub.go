@@ -115,7 +115,7 @@ func (h *Hub) Get(runtimeID string) (*Connection, bool) {
 	return connection, ok
 }
 
-func (h *Hub) Kick(runtimeID, reason string) {
+func (h *Hub) Kick(runtimeID string, reason string) {
 	if h == nil || runtimeID == "" {
 		return
 	}

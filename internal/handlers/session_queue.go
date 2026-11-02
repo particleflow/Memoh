@@ -615,7 +615,7 @@ func followUpQueueItemResponseFrom(item sessionruntime.FollowUpItem) followUpQue
 	return followUpQueueItemResponse{ItemID: item.ID, Status: item.Status, Position: item.Position, Text: application.QueuePayloadText(item.Payload), EnqueuedDuringRunID: item.EnqueuedDuringRunID}
 }
 
-func mapQueueItems[T, R any](items []T, mapItem func(T) R) []R {
+func mapQueueItems[T any, R any](items []T, mapItem func(T) R) []R {
 	out := make([]R, 0, len(items))
 	for _, item := range items {
 		out = append(out, mapItem(item))
