@@ -665,14 +665,14 @@ type grantedStore struct {
 	ownerBotID string
 }
 
-func (s *grantedStore) StatShared(ctx context.Context, botID, contentHash string) (media.Asset, error) {
+func (s *grantedStore) StatShared(ctx context.Context, _ string, contentHash string) (media.Asset, error) {
 	if s.owner == nil || s.ownerBotID == "" {
 		return media.Asset{}, media.ErrAssetNotFound
 	}
 	return s.owner.Stat(ctx, s.ownerBotID, contentHash)
 }
 
-func (s *grantedStore) OpenShared(ctx context.Context, botID, contentHash string) (io.ReadCloser, media.Asset, error) {
+func (s *grantedStore) OpenShared(ctx context.Context, _ string, contentHash string) (io.ReadCloser, media.Asset, error) {
 	if s.owner == nil || s.ownerBotID == "" {
 		return nil, media.Asset{}, media.ErrAssetNotFound
 	}
