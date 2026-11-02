@@ -985,7 +985,7 @@ func (s *Service) persistTerminalSnapshotResult(ctx context.Context, req ChatReq
 		RequireCompletePersist: true,
 		ContextLifecycle:       rc.runConfig.ContextLifecycle,
 		ReasoningTiming:        snap.reasoningTiming,
-		ReasoningEffortTier:    rc.runConfig.ReasoningTierDecision,
+		ReasoningEffortTier:    rc.effortTier,
 	})
 	if err != nil {
 		return nil, err
@@ -1129,7 +1129,7 @@ func (s *Service) persistTurnFailure(ctx context.Context, req ChatRequest, rc re
 			},
 		},
 		ContextLifecycle:    rc.runConfig.ContextLifecycle,
-		ReasoningEffortTier: rc.runConfig.ReasoningTierDecision,
+		ReasoningEffortTier: rc.effortTier,
 	})
 	if err != nil {
 		return nil, err

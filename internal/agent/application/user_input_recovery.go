@@ -267,7 +267,7 @@ func (s *Service) runRecoveredUserInput(ctx context.Context, in UserInputRecover
 	if err != nil {
 		return err
 	}
-	cfg, model, _, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{BotID: in.BotID, ChatID: in.BotID, SessionID: in.SessionID, UserID: in.ActorID, ChannelIdentityID: in.ActorID, CurrentPlatform: saved.resume.CurrentChannel, ReplyTarget: saved.resume.ReplyTarget, ConversationType: saved.resume.ConversationType, SessionToken: in.ChatToken, SessionType: sessionmode.Chat, Model: saved.resume.Model, ReasoningEffort: saved.resume.ReasoningEffort})
+	cfg, model, _, _, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{BotID: in.BotID, ChatID: in.BotID, SessionID: in.SessionID, UserID: in.ActorID, ChannelIdentityID: in.ActorID, CurrentPlatform: saved.resume.CurrentChannel, ReplyTarget: saved.resume.ReplyTarget, ConversationType: saved.resume.ConversationType, SessionToken: in.ChatToken, SessionType: sessionmode.Chat, Model: saved.resume.Model, ReasoningEffort: saved.resume.ReasoningEffort})
 	if err != nil {
 		return err
 	}

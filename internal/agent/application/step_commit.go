@@ -219,7 +219,7 @@ func (c *agentStepCommitter) persist(ctx context.Context, stepIndex int, record 
 		AllowPendingToolCalls: record.Deferred != nil,
 		ContextLifecycle:      c.rc.runConfig.ContextLifecycle,
 		ReasoningTiming:       reasoningTiming,
-		ReasoningEffortTier:   c.rc.runConfig.ReasoningTierDecision,
+		ReasoningEffortTier:   c.rc.effortTier,
 	}
 	if interrupted {
 		opts.MessageMetadataByIndex = make(map[int]map[string]any)

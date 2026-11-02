@@ -30,7 +30,7 @@ func TestBuildBaseRunConfigMissingModelPreservesPublicCode(t *testing.T) {
 	queries := &missingModelQueries{}
 	logger := slog.New(slog.DiscardHandler)
 	svc := &Service{logger: logger, queries: queries, settingsService: settings.NewService(logger, queries, nil, nil), modelsService: models.NewService(logger, queries)}
-	_, _, _, err := svc.buildBaseRunConfig(t.Context(), baseRunConfigParams{BotID: "00000000-0000-0000-0000-000000000001"})
+	_, _, _, _, err := svc.buildBaseRunConfig(t.Context(), baseRunConfigParams{BotID: "00000000-0000-0000-0000-000000000001"})
 	const want apperror.Code = "agent.chat_model_not_configured"
 	if got := publicFailureCode(err); got != want {
 		t.Fatalf("startup code = %q, want %q (error: %v)", got, want, err)

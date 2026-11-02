@@ -16,7 +16,6 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/models"
 	"github.com/felinics/memoh/internal/models/modelretry"
-	"github.com/felinics/memoh/internal/reasoning"
 )
 
 // SessionContext carries request-scoped identity and routing information.
@@ -165,13 +164,8 @@ type RunConfig struct {
 	// behind ReasoningConfig. Tools that select a different model (notably
 	// spawn_agent) must resolve those inputs against that model instead of copying
 	// a decision made for the parent model.
-	ReasoningStoredEffort    string
-	ReasoningRequestedEffort string
-	// ReasoningTierDecision records the per-turn effort tiering outcome for
-	// accounting on the turn's assistant rows. It is set once with the run's
-	// resolved decision and read only at the persistence boundary; spawn paths
-	// leave it nil and record their own.
-	ReasoningTierDecision          *reasoning.TierDecision
+	ReasoningStoredEffort          string
+	ReasoningRequestedEffort       string
 	ChatCompletionsCompat          string
 	Messages                       []sdk.Message
 	Query                          string

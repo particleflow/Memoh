@@ -431,6 +431,7 @@ func (s *Service) InlineImageAttachments(ctx context.Context, botID string, refs
 type resolvedContext struct {
 	presence                    *presenceResolvedModel
 	runConfig                   native.RunConfig
+	effortTier                  *reasoning.TierDecision
 	model                       models.GetResponse
 	provider                    sqlc.Provider
 	query                       string // headerified persistable query
@@ -521,7 +522,7 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 
 	var presenceModel *presenceResolvedModel
 	modelHook := s.presenceModelHook(req, &presenceModel)
-	runCfg, chatModel, provider, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
+	runCfg, chatModel, provider, tierDecision, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
 		ModelConfigHook:    modelHook,
 		BotID:              req.BotID,
 		ChatID:             req.ChatID,
@@ -824,6 +825,7 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 		historyPressureTokens:       historyPressureTokens,
 		compactableTokensKnown:      compactableTokensKnown,
 		contextTokenBudget:          contextTokenBudget,
+		effortTier:                  tierDecision,
 	}, req, nil
 }
 
@@ -907,7 +909,7 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 		if err := s.storeRoundWithOptions(ctx, storeReq, roundMessages, rc.model.ID, storeRoundOptions{
 			SkipMemory:          storeReq.SkipMemoryExtraction,
 			ContextLifecycle:    cfg.ContextLifecycle,
-			ReasoningEffortTier: cfg.ReasoningTierDecision,
+			ReasoningEffortTier: rc.effortTier,
 		}); err != nil {
 			lifecycleCause = err
 			return ChatResponse{}, err
@@ -961,11 +963,14 @@ type baseRunConfigParams struct {
 
 // buildBaseRunConfig creates a RunConfig with model, credentials, skills,
 // identity and system prompt — everything except Messages/Query/InlineImages.
-// Both resolve() and ResolveRunConfig() delegate to this shared builder.
-func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams) (native.RunConfig, models.GetResponse, sqlc.Provider, error) {
+// Both resolve() and ResolveRunConfig() delegate to this shared builder. The
+// fourth return is the per-turn effort tiering decision (nil when none
+// applied); it stays here rather than on RunConfig because the agent runtime
+// is boundary-frozen and persistence, not execution, consumes it.
+func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams) (native.RunConfig, models.GetResponse, sqlc.Provider, *reasoning.TierDecision, error) {
 	botSettings, err := s.loadBotSettings(ctx, p.BotID)
 	if err != nil {
-		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, err
+		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, nil, err
 	}
 	botInfo, loopDetectionEnabled := s.loadBotRuntimeInfo(ctx, p.BotID)
 	userTimezoneName, userClockLocation := s.resolveTimezone(ctx, p.BotID, p.UserID)
@@ -982,14 +987,14 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		if errors.Is(err, errChatModelNotConfigured) {
 			err = apperror.Wrap(apperror.CodeAgentChatModelNotConfigured, err, nil)
 		}
-		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, err
+		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, nil, err
 	}
 
 	authService := providers.NewService(nil, s.queries, "")
 	authCtx := oauthctx.WithUserID(ctx, p.UserID)
 	creds, err := authService.ResolveModelCredentials(authCtx, provider)
 	if err != nil {
-		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, fmt.Errorf("resolve provider credentials: %w", err)
+		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, nil, fmt.Errorf("resolve provider credentials: %w", err)
 	}
 
 	baseURL := providers.ProviderConfigString(provider, "base_url")
@@ -1071,7 +1076,6 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		ReasoningConfig:          reasoningConfig,
 		ReasoningStoredEffort:    strings.TrimSpace(botSettings.ReasoningEffort),
 		ReasoningRequestedEffort: strings.TrimSpace(p.ReasoningEffort),
-		ReasoningTierDecision:    tierDecision,
 		ChatCompletionsCompat:    chatCompletionsCompat,
 		PromptCacheTTL:           providers.ProviderConfigString(provider, "prompt_cache_ttl"),
 		SessionType:              p.SessionType,
@@ -1111,7 +1115,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		cfg.ToolApprovalHandler = s.buildToolApprovalHandler(p)
 	}
 	if bound, hasWorkdir, workdirErr := s.resolveSessionWorkdirBinding(ctx, p.BotID, p.SessionID); workdirErr != nil {
-		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, workdirErr
+		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, nil, workdirErr
 	} else if hasWorkdir {
 		ctx = toolcontext.WithExplicitWorkdir(ctx, bound.WorkDir)
 		cfg.Identity.WorkdirPath = bound.WorkDir
@@ -1125,11 +1129,11 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 			cfg.Identity.WorkspaceTargetKind = strings.TrimSpace(target.Kind)
 			cfg.Identity.WorkspaceTargetName = strings.TrimSpace(target.Name)
 		} else if workspace.WorkspaceTargetFromContext(ctx) != "" {
-			return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, targetErr
+			return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, nil, targetErr
 		}
 	}
 
-	return cfg, chatModel, provider, nil
+	return cfg, chatModel, provider, tierDecision, nil
 }
 
 func (s *Service) canDeliverUserInputStream() bool {
@@ -1478,7 +1482,7 @@ func (s *Service) ResolveRunConfig(ctx context.Context, botID, sessionID, channe
 	if !strings.EqualFold(strings.TrimSpace(sessionType), sessionmode.Schedule) {
 		sessionPrefModelID, sessionPrefEffort = s.sessionModelPreference(ctx, sessionID)
 	}
-	cfg, chatModel, _, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
+	cfg, chatModel, _, tierDecision, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
 		BotID:              botID,
 		SessionID:          sessionID,
 		ChannelIdentityID:  channelIdentityID,
@@ -1502,6 +1506,7 @@ func (s *Service) ResolveRunConfig(ctx context.Context, botID, sessionID, channe
 		ModelID:                chatModel.ID,
 		RuntimeType:            runtimeType,
 		ContextBudgetMaxTokens: contextBudget,
+		ReasoningTierDecision:  tierDecision,
 	}, nil
 }
 
