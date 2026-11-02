@@ -417,6 +417,12 @@ type AgentConfig struct {
 	// Admission recovery can compact in shadow or active mode when enabled;
 	// off disables recovery. Pressure includes raw history and active summaries.
 	SyncCompaction string `toml:"sync_compaction"`
+	// EffortTiering gates the per-turn reasoning effort tier selection that
+	// trades reasoning depth for first-text latency: "active" (default) tiers
+	// turns by session type and input shape, never above the bot's configured
+	// effort and never over a user's explicit choice; "off" sends every turn
+	// at the effort the ordinary resolution chain picks.
+	EffortTiering string `toml:"effort_tiering"`
 }
 
 // EffectiveContextAbsoluteMaxTokens resolves the server-wide context
@@ -439,6 +445,26 @@ const (
 	SyncCompactionModeShadow = "shadow"
 	SyncCompactionModeOff    = "off"
 )
+
+const (
+	EffortTieringModeActive = "active"
+	EffortTieringModeOff    = "off"
+)
+
+// EffectiveEffortTieringMode normalizes the per-turn effort tiering rollout
+// mode. Empty defaults to active; recognized is false when a non-empty value
+// does not match active/off.
+func (c AgentConfig) EffectiveEffortTieringMode() (mode string, recognized bool) {
+	value := strings.TrimSpace(strings.ToLower(c.EffortTiering))
+	switch value {
+	case "":
+		return EffortTieringModeActive, true
+	case EffortTieringModeActive, EffortTieringModeOff:
+		return value, true
+	default:
+		return EffortTieringModeActive, false
+	}
+}
 
 // EffectiveSyncCompactionMode normalizes the pre-turn synchronous compaction
 // rollout mode. Empty defaults to shadow (observe before enforcing, per the

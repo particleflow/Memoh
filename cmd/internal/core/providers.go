@@ -883,6 +883,11 @@ func provideAgentService(log *slog.Logger, a *native.Agent, modelsService *model
 		log.Warn("unrecognized agent.sync_compaction value; defaulting to shadow", slog.String("value", cfg.Agent.SyncCompaction))
 	}
 	service.SetSyncCompactionMode(syncCompactionMode)
+	effortTieringMode, tieringRecognized := cfg.Agent.EffectiveEffortTieringMode()
+	if !tieringRecognized {
+		log.Warn("unrecognized agent.effort_tiering value; defaulting to active", slog.String("value", cfg.Agent.EffortTiering))
+	}
+	service.SetEffortTiering(effortTieringMode)
 	service.SetBotPermissionChecker(&applicationBotPermissionChecker{bots: botService, accounts: accountService})
 	// Every turn entry point goes through admission, so a service without it can
 	// start nothing: this is the thread's single-run guarantee, not an add-on.
@@ -1219,7 +1224,12 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewBackgroundProvider(log, bgManager),
 		agenttools.NewBrowserProvider(log, settingsService, nativeWorkspaceBridgeProvider{manager: manager}, displayService, config.DefaultDataMount),
 		agenttools.NewWebFetchProvider(log, settingsService, fetchProviderService),
-		agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager),
+		func() agenttools.ToolProvider {
+			spawner := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
+			spawnTieringMode, _ := cfg.Agent.EffectiveEffortTieringMode()
+			spawner.SetEffortTiering(spawnTieringMode != config.EffortTieringModeOff)
+			return spawner
+		}(),
 		agenttools.NewSkillProvider(log, func(ctx context.Context, botID string) (map[string]agenttools.SkillDetail, error) {
 			items, err := containerdHandler.LoadSkills(ctx, botID)
 			if err != nil {

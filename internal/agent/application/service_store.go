@@ -16,6 +16,7 @@ import (
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	"github.com/felinics/memoh/internal/inputsource"
+	"github.com/felinics/memoh/internal/reasoning"
 )
 
 func (s *Service) storeRound(ctx context.Context, req ChatRequest, messages []ModelMessage, modelID string) error {
@@ -28,6 +29,7 @@ type storeRoundOptions struct {
 	AllowEmptyAssistantText           bool
 	MessageMetadataByIndex            map[int]map[string]any
 	ReasoningTiming                   []messagepkg.ReasoningTimingSegment
+	ReasoningEffortTier               *reasoning.TierDecision
 	RequireCompletePersist            bool
 	CleanupRuntimeDecisionProjections bool
 	AgentPublication                  *messagepkg.AgentPublication
@@ -252,6 +254,7 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 	// Project timing only at the final persistence boundary, after callers have
 	// finished filtering, repairing, or augmenting the rows being stored.
 	opts = opts.withReasoningTimingMetadata(messages)
+	opts = opts.withReasoningEffortMetadata(messages)
 	// Check bot setting for full tool result persistence.
 	pruneToolResults := true
 	if botSettings, err := s.loadBotSettings(ctx, req.BotID); err == nil {
