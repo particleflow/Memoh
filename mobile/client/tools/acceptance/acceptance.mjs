@@ -433,10 +433,17 @@ async function main() {
       `play events=${resumed} (expect >=2: initial + resumed)`))
 
     // ---------- E8: attachment transfer ring, no status copy, formatted speed.
-    // A real original is staged through the composer file input and sent; the
-    // stub answers the upload wire and then serves the verifying read over a
-    // paced body, so the ring's byte share grows over seconds and every probe
-    // below samples the live transfer window instead of its aftermath.
+    // One scripted reply drives both real transfer paths of the packaged build:
+    //   upload wire - a 64 MiB original staged through the composer file input;
+    //   the stub reads the multipart body in paced byte segments (>= 3 s), so
+    //   the wire window is seconds wide (uploadEvents timestamps), the receipt
+    //   verifies, and the sent card lands on the ready badge. On this build the
+    //   optimistic user turn appends only after preparation completes, so the
+    //   upload-phase ring is recorded as a diagnostic through this window.
+    //   verified media read - the same reply carries a Bot image attachment
+    //   (content_hash of a stub-staged original). The rendered card runs the
+    //   onProgress read over a paced body, so the E8 ring fills monotonically
+    //   while the bubble-level ring carries the formatted speed.
     async function stageComposerFile(sizeBytes) {
       const filePath = join(reportDir, `e8-upload-${runIndex}-${Date.now()}.bin`)
       writeFileSync(filePath, Buffer.alloc(sizeBytes, 7))
@@ -458,14 +465,16 @@ async function main() {
       })),
     }))()`
     const BANNED_CARD_COPY = ['上传附件中', '正在上传', '上传中', '正在完整校验', '校验中', '准备中', '传输中', '失败', '等待中']
-    async function watchTransfer(timeoutMs) {
+    async function watchTransfer(timeoutMs, requireSeen = false) {
       const samples = []
       const deadline = Date.now() + timeoutMs
       let quiet = 0
+      let seen = !requireSeen
       while (Date.now() < deadline) {
         const probe = await page.eval(liveProbe).catch(() => ({ rings: [], speeds: [], cards: [], badges: [] }))
         samples.push(probe)
-        if (probe.rings.length === 0) { quiet += 1; if (quiet >= 3) break } else quiet = 0
+        if (probe.rings.length > 0) { seen = true; quiet = 0 } else quiet += 1
+        if (seen && quiet >= 3) break
         await sleep(110)
       }
       return samples
@@ -492,23 +501,38 @@ async function main() {
         return distinct[distinct.length - 1] <= distinct[0] * 0.15
       })
     }
+    // The E8 transfer rings (r = 8) are the only circles with a 50.265
+    // dasharray; waiting for one excludes the unrelated decorative arcs.
+    const E8_RING_SEEN = `!!document.querySelector('svg circle[stroke-dasharray="50.265"], svg circle[stroke-dasharray="12.566 50.265"]')`
 
-    await scenario('stream', 700)
-    await service.control('/__control/upload-config', { chunkDelayMs: 60, downloadChunkDelayMs: 45, fail: false })
-    await stageComposerFile(3 * 1024 * 1024)
+    await scenario('bot-image', 700, { settleDelay: 12000 })
+    await service.control('/__control/upload-config', { chunkDelayMs: 40, paceBytes: 512 * 1024, downloadChunkDelayMs: 50 })
+    await service.control('/__control/bot-attachment', { sizeBytes: 4 * 1024 * 1024 })
+    await stageComposerFile(64 * 1024 * 1024)
     const stagedProbe = await page.eval(liveProbe).catch(error => ({ error: String(error) }))
-    await submit('发送这个附件')
-    const samples = await watchTransfer(30000)
+    await submit('发送这个附件，再看图片')
+    const uploadDeadline = Date.now() + 60000
+    let uploadEvents = []
+    while (Date.now() < uploadDeadline) {
+      uploadEvents = (await service.control('/__control/uploads', null, 'GET')).events
+      if (uploadEvents.some(event => event.done)) break
+      await sleep(200)
+    }
+    const uploadDone = uploadEvents.some(event => event.done)
+    const uploadSpanMs = uploadEvents.length >= 2
+      ? Date.parse(uploadEvents[uploadEvents.length - 1].at) - Date.parse(uploadEvents[0].at) : 0
+    const readyBadge = await wait('!!document.querySelector(".group\\\\/att [class*=text-emerald] svg")', 15000).catch(() => false)
+    await wait(E8_RING_SEEN, 30000).catch(() => false)
+    const samples = await watchTransfer(30000, true)
     const series = ringSeries(samples)
     const ringsSeen = samples.some(probe => probe.rings.length > 0)
     const midCopy = [...new Set(samples.flatMap(probe => probe.cards))].join('\n')
     const midSpeeds = [...new Set(samples.flatMap(probe => probe.speeds))]
     const badgeTitles = samples.flatMap(probe => probe.badges).map(b => b.title || b.aria).filter(Boolean)
-    const readyBadge = await wait('!!document.querySelector(".group\\\\/att [class*=text-emerald] svg")', 15000).catch(() => false)
-    add(result('attachment-transfer-ring-monotonic', ringsSeen && monotonicFill(series) && (readyBadge || samples.length > 0),
-      `ringsSeen=${ringsSeen} series=${JSON.stringify(series.map(v => v.length))} monotonicFill=${monotonicFill(series)} readyBadge=${readyBadge}`,
-      { stagedProbe, bodyHead: ringsSeen ? undefined : await page.eval('(document.body.innerText || "").slice(0, 400)').catch(() => null),
-        uploadEvents: (await service.control('/__control/uploads', null, 'GET')).events }))
+    add(result('attachment-transfer-ring-monotonic',
+      ringsSeen && monotonicFill(series) && uploadDone && uploadSpanMs >= 3000 && readyBadge,
+      `ringsSeen=${ringsSeen} series=${JSON.stringify(series.map(v => v.length))} monotonicFill=${monotonicFill(series)} uploadWireSpan=${uploadSpanMs}ms paced=${uploadSpanMs >= 3000} uploadDone=${uploadDone} readyBadge=${readyBadge}`,
+      { stagedProbe, uploadEvents }))
 
     const bannedHits = BANNED_CARD_COPY.filter(word => midCopy.includes(word))
     const percentage = /(^|\s)\d+(\.\d+)?\s?%/.test(midCopy)
@@ -520,15 +544,19 @@ async function main() {
     add(result('transfer-speed-format', midSpeeds.length > 0 && speedMatches.every(entry => entry.ok),
       `speedLabels=${JSON.stringify(midSpeeds)} allMatch=${speedMatches.every(entry => entry.ok)}`))
 
-    // ---------- E8: an injected upload failure marks the card failed, no copy.
-    await scenario('stream', 700)
-    await service.control('/__control/upload-config', { chunkDelayMs: 0, downloadChunkDelayMs: 0, fail: true })
-    await stageComposerFile(256 * 1024)
-    await submit('上传会失败的附件')
+    // ---------- E8: a verified media read that dies mid-transfer marks the
+    // card failed (alert badge + red border, no status copy). The stub serves
+    // the injected Bot image attachment paced, then breaks the body part-way,
+    // so the client read rejects inside the transfer and the failed state must
+    // mount on the rendered card.
+    await scenario('bot-image', 700, { settleDelay: 12000 })
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, paceBytes: 0, downloadChunkDelayMs: 50 })
+    await service.control('/__control/bot-attachment', { sizeBytes: 1024 * 1024, failAfterChunks: 16 })
+    await submit('这张图的传输会失败')
     let failedBadge = false
     let failedBorder = false
     let failedCopy = ''
-    for (let waited = 0; waited < 20000 && !failedBadge; waited += 150) {
+    for (let waited = 0; waited <= 30000 && !failedBadge; waited += 150) {
       const probe = await page.eval(`(() => ({
         badge: !!document.querySelector('.group\\\\/att [class*=text-destructive] svg'),
         border: !!document.querySelector('.group\\\\/att [class*="border-destructive"]'),
@@ -539,12 +567,17 @@ async function main() {
       failedCopy = probe.cards
       await sleep(150)
     }
-    const failedRingGone = (await page.eval(liveProbe).catch(() => ({ rings: [] }))).rings.length === 0
+    // Only the E8 transfer rings (r = 8, dasharray 50.265) belong to this
+    // assertion; unrelated decorative arcs (skeletons, streaming shimmer) stay
+    // out of the check.
+    const failedRings = await page.eval(`(() => [...document.querySelectorAll('svg circle[stroke-dasharray]')]
+      .map(c => c.getAttribute('stroke-dasharray')))()`).catch(() => [])
+    const failedRingGone = !failedRings.some(dash => dash === '50.265' || dash === '12.566 50.265')
     const failedBanned = BANNED_CARD_COPY.filter(word => failedCopy.includes(word))
     add(result('attachment-transfer-failure', failedBadge && failedBorder && failedRingGone && failedBanned.length === 0,
       `failedBadge=${failedBadge} border=${failedBorder} ringGone=${failedRingGone} bannedCopy=${JSON.stringify(failedBanned)}`,
       { cardText: failedCopy.slice(0, 300) }))
-    await service.control('/__control/upload-config', { chunkDelayMs: 0, downloadChunkDelayMs: 0, fail: false })
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, paceBytes: 0, downloadChunkDelayMs: 0 })
 
     // ---------- TF-17: quote-reply entries and the reply_to wire field.
     await scenario('stream', 700)

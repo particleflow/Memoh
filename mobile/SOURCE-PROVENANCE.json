@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "9dc1dc8899c0730c97bf8ed025831821323cbc00a8fb67c5a6ef3b0e25675747",
+      "sha256": "87e877e880a7145f76dfa896964a79ee3dbcdd464f0ee8051a98789ac369cbab",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -571,7 +571,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "6e2aea271cccc04f1debf52f3e896e562bb41891abf55d96bc8dd2e30ef55126",
+      "sha256": "336507fbba29f64f74f1e03998c6532a706c80c67e4ed072a15729b979342796",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -2034,7 +2034,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-attachment-progress-changes.json",
-      "sha256": "5b06d494b03e317e039da88202a957000ebb5c09482d16833476ed0eeaa4230d",
+      "sha256": "59119497722b70bd191a8685f2411566d2243b7122532f72b8823901264226d4",
       "origin": "Workspace-authored phone overlay for attachment transfer-progress visuals; post-overrides the composed card/block/message sources. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [

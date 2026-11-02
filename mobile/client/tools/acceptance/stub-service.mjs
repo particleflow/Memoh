@@ -65,6 +65,20 @@ function multipartFile(body, contentType) {
   return { bytes: body, mime: '' }
 }
 
+// Deterministic pseudo-image bytes (PNG signature + a fixed LCG stream): the
+// same size always yields the same sha256, so scenario evidence is reproducible
+// across runs, reports and the emulator level.
+function botImageBytes(size) {
+  const bytes = Buffer.alloc(size)
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes, 0)
+  let state = 0x2d6ef1 >>> 0
+  for (let at = 8; at < size; at++) {
+    state = (Math.imul(state, 0x41c64e6d) + 0x3039) >>> 0
+    bytes[at] = (state >>> 16) & 0xff
+  }
+  return bytes
+}
+
 function silentMp3(seconds = 30) {
   const dir = join(tmpdir(), 'memoh-acceptance-audio')
   const file = join(dir, `silence-${seconds}.mp3`)
@@ -125,6 +139,12 @@ export class StubService {
     this.generation = 0
     this.mode = 'stream'
     this.delay = 700
+    // Upload pacing: bytes per paced segment (0 = legacy per-chunk delay only)
+    // and the per-segment sleep; the staged Bot attachment of a bot-image reply.
+    this.uploadPaceBytes = 0
+    this.uploadChunkDelayMs = 0
+    this.downloadChunkDelayMs = 0
+    this.botAttachment = null
     // Gap between the last sentence frame and the completed frame; null keeps
     // the ordinary per-step delay. A long settle separates "read on the first
     // sentence" from "read when the reply settles" by whole seconds.
@@ -207,10 +227,30 @@ export class StubService {
     if (path === '/__control/upload-config') {
       const body = JSON.parse(await this.readBody(req) || '{}')
       if (body.chunkDelayMs !== undefined) this.uploadChunkDelayMs = body.chunkDelayMs
+      if (body.paceBytes !== undefined) this.uploadPaceBytes = body.paceBytes
       if (body.downloadChunkDelayMs !== undefined) this.downloadChunkDelayMs = body.downloadChunkDelayMs
-      if (body.fail !== undefined) this.mediaFail = body.fail
       this.uploadEvents = []
       this.json(res, 200, { ok: true })
+      return
+    }
+    // Stage the original a scripted Bot reply will attach: deterministic bytes
+    // (stable sha256 across runs), registered in the media store so the client
+    // verified-read path can fetch it by content hash. failAfterChunks breaks
+    // the paced download body part-way to drive the transfer-failure state.
+    if (path === '/__control/bot-attachment') {
+      const body = JSON.parse(await this.readBody(req) || '{}')
+      const size = Number(body.sizeBytes)
+      if (!Number.isSafeInteger(size) || size <= 0) {
+        this.botAttachment = null
+        this.json(res, 200, { ok: true, cleared: true })
+        return
+      }
+      const bytes = botImageBytes(size)
+      const hash = createHash('sha256').update(bytes).digest('hex')
+      ;(this.mediaFiles ??= new Map()).set(hash, { mime: 'image/png', bytes })
+      this.botAttachment = { hash, size,
+        failAfterChunks: Number.isSafeInteger(body.failAfterChunks) && body.failAfterChunks > 0 ? body.failAfterChunks : null }
+      this.json(res, 200, { ok: true, content_hash: hash, size_bytes: size, failAfterChunks: this.botAttachment.failAfterChunks })
       return
     }
     if (path === '/__control/uploads') {
@@ -358,11 +398,16 @@ export class StubService {
       const stored = this.mediaFiles?.get(mediaMatch[1])
       if (!stored) { this.json(res, 404, { title: 'not found' }); return }
       res.writeHead(200, { 'content-type': stored.mime, 'content-length': String(stored.bytes.length), 'cache-control': 'no-store', 'access-control-allow-origin': '*' })
-      if (!this.downloadChunkDelayMs) { res.end(stored.bytes); return }
+      // A scripted mid-body break: the paced response dies after failAfterChunks
+      // writes so the client's verified read rejects part-way through the
+      // transfer, exactly like a connection lost mid-download.
+      const failAfter = this.botAttachment?.hash === mediaMatch[1] ? this.botAttachment.failAfterChunks : null
+      if (!this.downloadChunkDelayMs && failAfter == null) { res.end(stored.bytes); return }
       const step = Math.max(1, Math.ceil(stored.bytes.length / 64))
-      for (let at = 0; at < stored.bytes.length; at += step) {
+      for (let at = 0, written = 0; at < stored.bytes.length; at += step, written += 1) {
+        if (failAfter != null && written >= failAfter) { res.destroy(); return }
         res.write(stored.bytes.subarray(at, at + step))
-        await new Promise(resolve => setTimeout(resolve, this.downloadChunkDelayMs))
+        if (this.downloadChunkDelayMs) await new Promise(resolve => setTimeout(resolve, this.downloadChunkDelayMs))
       }
       res.end()
       return
@@ -370,17 +415,23 @@ export class StubService {
     if (path === `/bots/${BOT_ID}/media` && req.method === 'POST') {
       ;(this.uploadEvents ??= []).push({ at: nowIso(), bytes: 0, done: false })
       const event = this.uploadEvents[this.uploadEvents.length - 1]
-      if (this.mediaFail) {
-        this.json(res, 503, { title: 'upload rejected' })
-        return
-      }
       const chunks = []
       let received = 0
+      let pacedAt = 0
       for await (const chunk of req) {
         chunks.push(chunk)
         received += chunk.length
         event.bytes = received
-        if (this.uploadChunkDelayMs) await new Promise(resolve => setTimeout(resolve, this.uploadChunkDelayMs))
+        // Paced byte segments: with uploadPaceBytes set, the read sleeps once
+        // per segment (independent of TCP chunk sizing), so a large body keeps
+        // the wire window open for seconds. Without it, the legacy per-chunk
+        // delay applies.
+        const boundary = this.uploadPaceBytes > 0 && received - pacedAt >= this.uploadPaceBytes
+        if (boundary || (!this.uploadPaceBytes && this.uploadChunkDelayMs)) {
+          if (boundary) pacedAt = received
+          this.uploadEvents.push({ at: nowIso(), bytes: received, done: false })
+          if (this.uploadChunkDelayMs) await new Promise(resolve => setTimeout(resolve, this.uploadChunkDelayMs))
+        }
       }
       event.done = true
       const file = multipartFile(Buffer.concat(chunks), req.headers['content-type'] || '')
@@ -485,6 +536,17 @@ export class StubService {
     const ackBlock = { id: 0, type: 'status', name: 'conversation_ack', args: { text: ACK_TEXT } }
     const reasoning = { id: 1, type: 'reasoning', content: '' }
     const body = { id: 2, type: 'text', content: '' }
+    // The bot-image reply carries the staged original as an image attachment
+    // instead of a text body, so the rendered card runs the verified-read
+    // onProgress path against the paced (or breaking) media body.
+    const botImage = this.mode === 'bot-image' && this.botAttachment ? {
+      id: 3, type: 'attachments',
+      attachments: [{
+        type: 'image', name: 'bot-image.png', mime: 'image/png',
+        size: this.botAttachment.size, content_hash: this.botAttachment.hash,
+        metadata: { bot_id: BOT_ID },
+      }],
+    } : null
     const blocks = [ackBlock]
     const step = async (deltaFor, delay = this.delay) => {
       state.seq += 1
@@ -499,28 +561,36 @@ export class StubService {
     // The acknowledgement stays alone on screen long enough to be observed:
     // on the phone it is the only visible output until the first body text.
     await pause(1200)
-    if (this.mode !== 'no-reasoning') {
-      reasoning.content = REASONING[0]
-      blocks.push(reasoning)
-      await step({ message_upserts: [{ ...reasoning }] })
-      reasoning.content = REASONING.join('')
-      await step({ message_appends: [{ id: 1, type: 'reasoning', content: REASONING[1] }] })
-    }
-    blocks.push(body)
-    // Gate 2 replays the long body: the first task is rejected by the service
-    // and the client must roll its text back into the next task. Gate 1 replays
-    // the same long body so "read on the first sentence" is separated from
-    // "read when the reply settles" by several sentences and a long settle.
-    const sentences = this.mode === 'fail-task' || this.mode === 'long' ? FAIL_TASK_BODY : BODY
-    const settle = this.settleDelay ?? this.delay
-    for (const [index, sentence] of sentences.entries()) {
-      body.content += sentence
-      const last = index === sentences.length - 1
-      if (last) this.lastSentenceAt = Date.now() - this.t0
-      if (index === 0) {
-        this.firstSentenceAt = Date.now() - this.t0
-        await step({ message_upserts: [{ ...body }] }, last ? settle : this.delay)
-      } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, last ? settle : this.delay)
+    if (botImage) {
+      blocks.push(botImage)
+      // The settle delay holds the live run open (as it does for the last body
+      // sentence), so the paced verified read finishes inside the live turn
+      // before the persisted transcript replaces it.
+      await step({ message_upserts: [{ id: botImage.id, type: 'attachments', attachments: botImage.attachments.map(attachment => ({ ...attachment })) }] }, this.settleDelay ?? this.delay)
+    } else {
+      if (this.mode !== 'no-reasoning') {
+        reasoning.content = REASONING[0]
+        blocks.push(reasoning)
+        await step({ message_upserts: [{ ...reasoning }] })
+        reasoning.content = REASONING.join('')
+        await step({ message_appends: [{ id: 1, type: 'reasoning', content: REASONING[1] }] })
+      }
+      blocks.push(body)
+      // Gate 2 replays the long body: the first task is rejected by the service
+      // and the client must roll its text back into the next task. Gate 1 replays
+      // the same long body so "read on the first sentence" is separated from
+      // "read when the reply settles" by several sentences and a long settle.
+      const sentences = this.mode === 'fail-task' || this.mode === 'long' ? FAIL_TASK_BODY : BODY
+      const settle = this.settleDelay ?? this.delay
+      for (const [index, sentence] of sentences.entries()) {
+        body.content += sentence
+        const last = index === sentences.length - 1
+        if (last) this.lastSentenceAt = Date.now() - this.t0
+        if (index === 0) {
+          this.firstSentenceAt = Date.now() - this.t0
+          await step({ message_upserts: [{ ...body }] }, last ? settle : this.delay)
+        } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, last ? settle : this.delay)
+      }
     }
     // Settle: the persisted transcript replaces the live one on refresh.
     state.seq += 1
@@ -529,10 +599,12 @@ export class StubService {
       { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-u` },
       {
         turn_id: turnId, role: 'assistant', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-a`,
-        messages: [
-          ...(this.mode === 'no-reasoning' ? [] : [{ id: 1, type: 'reasoning', content: REASONING.join('') }]),
-          { id: 2, type: 'text', content: sentences.join('') },
-        ],
+        messages: botImage
+          ? [{ id: botImage.id, type: 'attachments', attachments: botImage.attachments.map(attachment => ({ ...attachment })) }]
+          : [
+              ...(this.mode === 'no-reasoning' ? [] : [{ id: 1, type: 'reasoning', content: REASONING.join('') }]),
+              { id: 2, type: 'text', content: (this.mode === 'fail-task' || this.mode === 'long' ? FAIL_TASK_BODY : BODY).join('') },
+            ],
       },
     ]
     const existing = this.history.get(sessionId) ?? []
