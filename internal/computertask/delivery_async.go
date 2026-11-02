@@ -22,16 +22,17 @@ type DeliveryIdentityCheck func(context.Context, DeliveryIdentity) error
 // AsyncDeliveryService owns finite work inside the existing server process.
 // Only an authorized request starts/reclaims a job; there is no polling loop.
 type AsyncDeliveryService struct {
-	base   *DeliveryService
-	check  DeliveryIdentityCheck
-	log    *slog.Logger
-	life   context.Context
-	cancel context.CancelFunc
-	slots  chan struct{}
-	mu     sync.Mutex
-	closed bool
-	wg     sync.WaitGroup
-	lease  time.Duration
+	base      *DeliveryService
+	check     DeliveryIdentityCheck
+	log       *slog.Logger
+	life      context.Context
+	cancel    context.CancelFunc
+	slots     chan struct{}
+	mu        sync.Mutex
+	closed    bool
+	wg        sync.WaitGroup
+	lease     time.Duration
+	committed func(context.Context, DeliveryIdentity)
 }
 
 func NewAsyncDeliveryService(lifetime context.Context, base *DeliveryService, check DeliveryIdentityCheck, log *slog.Logger) (*AsyncDeliveryService, error) {
@@ -39,7 +40,7 @@ func NewAsyncDeliveryService(lifetime context.Context, base *DeliveryService, ch
 		return nil, ErrDeliveryBinding
 	}
 	life, cancel := context.WithCancel(lifetime)
-	return &AsyncDeliveryService{base: base, check: check, log: log, life: life, cancel: cancel, slots: make(chan struct{}, 2), lease: 10 * time.Minute}, nil
+	return &AsyncDeliveryService{base: base, check: check, log: log, life: life, cancel: cancel, slots: make(chan struct{}, 2), lease: 10 * time.Minute, committed: base.commitObserver}, nil
 }
 
 // Close cancels cooperative work. Filesystem calls can still outlive cancellation.
@@ -203,7 +204,7 @@ func (s *AsyncDeliveryService) verify(ctx context.Context, id DeliveryIdentity, 
 	if checkErr := s.check(finish, id); checkErr != nil {
 		return checkErr
 	}
-	_, saveErr := s.transact(finish, id, delivery, ref, func(e *deliveryEntry, exists bool) (bool, error) {
+	outcome, saveErr := s.transact(finish, id, delivery, ref, func(e *deliveryEntry, exists bool) (bool, error) {
 		if !exists || e.Outcome != "pending" || e.Lease != epoch {
 			return false, nil
 		}
@@ -215,6 +216,11 @@ func (s *AsyncDeliveryService) verify(ctx context.Context, id DeliveryIdentity, 
 	})
 	if saveErr != nil {
 		return saveErr
+	}
+	// A verified upload commit is the endpoint's only idle-time completion
+	// signal for the owning operation. Wake a result scan; never scan here.
+	if s.committed != nil && outcome.Outcome == "committed" {
+		s.committed(finish, id)
 	}
 	return err
 }

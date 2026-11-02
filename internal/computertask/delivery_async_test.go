@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"sync"
 	"testing"
 	"time"
 
@@ -240,5 +241,47 @@ func TestAsyncDeliveryVerificationDeadlineStaysFailed(t *testing.T) {
 	out, err = s.Commit(ctx, f.id.OperationID, "slow", ref, "")
 	if err != nil || out.Outcome != "failed" {
 		t.Fatalf("deadline became absent or restarted: %+v %v", out, err)
+	}
+}
+
+// A verified upload commit is the endpoint's only idle-time completion signal;
+// it wakes the host result scan once and never on failed verifications.
+func TestAsyncDeliveryCommitObserverSignalsVerifiedCommitOnly(t *testing.T) {
+	f, s, a, ctx, ref := asyncFixture(t)
+	var mu sync.Mutex
+	var observed []DeliveryIdentity
+	s.committed = func(_ context.Context, id DeliveryIdentity) {
+		mu.Lock()
+		defer mu.Unlock()
+		observed = append(observed, id)
+	}
+	if _, err := s.Commit(ctx, f.id.OperationID, "result", ref, ""); err != nil {
+		t.Fatal(err)
+	}
+	<-a.started
+	close(a.release)
+	awaitDelivery(ctx, t, s, f.id.OperationID, "result", ref, "committed")
+	mu.Lock()
+	if len(observed) != 1 || observed[0].OperationID != f.id.OperationID || observed[0].Binding.SessionID != f.id.Binding.SessionID {
+		mu.Unlock()
+		t.Fatalf("commit observer: %+v", observed)
+	}
+	mu.Unlock()
+	// A deadline-expired verification fails without a completion signal.
+	f2, s2, _, ctx2, ref2 := asyncFixture(t)
+	s2.committed = func(context.Context, DeliveryIdentity) {
+		mu.Lock()
+		defer mu.Unlock()
+		observed = append(observed, DeliveryIdentity{})
+	}
+	s2.lease = 50 * time.Millisecond
+	if _, err := s2.Commit(ctx2, f2.id.OperationID, "slow", ref2, ""); err != nil {
+		t.Fatal(err)
+	}
+	awaitDelivery(ctx2, t, s2, f2.id.OperationID, "slow", ref2, "failed")
+	mu.Lock()
+	defer mu.Unlock()
+	if len(observed) != 1 {
+		t.Fatalf("failed verification signalled completion: %+v", observed)
 	}
 }

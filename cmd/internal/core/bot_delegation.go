@@ -51,6 +51,8 @@ type delegationHost struct {
 	resultWake            *resultDeliveryWake
 	resultSubmit          func(context.Context, string, turn.StartTurnCommand) error
 	resultSummaryAttempts int
+	computerSource        computerResultObserver
+	computerResume        func(context.Context, toolcontext.ComputerBinding) (context.Context, error)
 }
 
 func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig, routes *route.DBService, cfg config.Config) (*botdelegation.Service, error) {

@@ -15,8 +15,11 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/config"
+	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/taskresult"
 )
@@ -125,6 +128,9 @@ func (h *delegationHost) scanResults(ctx context.Context) error {
 		}
 	}
 	if err := h.scanScheduleResults(ctx); err != nil {
+		failures = append(failures, err)
+	}
+	if err := h.scanComputerResults(ctx); err != nil {
 		failures = append(failures, err)
 	}
 	return errors.Join(failures...)
@@ -327,6 +333,35 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.save = func(ctx context.Context, old, next []byte) error {
 			_, e := h.store.SaveDelegationResultDelivery(ctx, sqlc.SaveDelegationResultDeliveryParams{ID: nativeTaskUUID(id), Expected: old, Delivery: next})
+			return e
+		}
+	case "computer_task":
+		r, e := h.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: bot, SessionID: session, UserID: user})
+		if errors.Is(e, db.ErrNotFound) {
+			return t, botdelegation.ErrDenied
+		}
+		if e != nil {
+			return t, e
+		}
+		var d computertask.Details
+		if json.Unmarshal(r.Details, &d) != nil || !computerOutcomeFinal(r.State, d) {
+			return t, errResultNotReady
+		}
+		b, routing, e := h.computerResultRouting(ctx, bot, user, session)
+		if e != nil {
+			return t, e
+		}
+		t.state, t.run = computerResultState(r.State), r.RunID
+		t.originBot, t.originSession = r.BotID, r.SessionID
+		t.text = computerResultText(r, d)
+		t.cmd = delegationDeliveryCommand(botdelegation.Record{Identity: b}, routing, t.text, nil)
+		t.cmd.DelegationResultID = ""
+		t.raw, e = h.store.ReadComputerResultDelivery(ctx, nativeTaskUUID(id))
+		if e != nil {
+			return t, e
+		}
+		t.save = func(ctx context.Context, old, next []byte) error {
+			_, e := h.store.SaveComputerResultDelivery(ctx, sqlc.SaveComputerResultDeliveryParams{ID: nativeTaskUUID(id), Expected: old, Delivery: next})
 			return e
 		}
 	default:
