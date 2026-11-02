@@ -8,7 +8,7 @@ import (
 )
 
 // TestConversationPresencePostgresDecisionAccounting covers the fast-reply v3
-// accounting timeline (design v3 §6.3): step1 inserts the receipt as
+// accounting timeline (design v3 搂6.3): step1 inserts the receipt as
 // uncertain, step2 updates the decision and inserts the decision row with a
 // NULL outcome, and the finish write point fills the outcome exactly once.
 func TestConversationPresencePostgresDecisionAccounting(t *testing.T) {
@@ -76,23 +76,42 @@ func TestConversationPresencePostgresDecisionAccounting(t *testing.T) {
 	if ok, err := claims.Claim(ctx, ticket); err != nil || !ok {
 		t.Fatalf("claim after step2: %v %v", ok, err)
 	}
+	// The generation wall time only exists after step2 commits; the finish write
+	// point is the only place that can record it, and it must not drop the
+	// decision trail step2 already wrote (postgres `detail || patch` replaces a
+	// nested object wholesale).
+	result.Detail.Timings.GenerateMs = 9167
 	// Finish write point fills the outcome once; a second write is a no-op.
-	if err := claims.recordPresenceOutcome(ctx, ticket, "published"); err != nil {
+	if err := claims.recordPresenceOutcome(ctx, ticket, result.Detail, "published"); err != nil {
 		t.Fatalf("outcome write: %v", err)
 	}
-	if err := claims.recordPresenceOutcome(ctx, ticket, "superseded"); err != nil {
+	if err := claims.recordPresenceOutcome(ctx, ticket, result.Detail, "superseded"); err != nil {
 		t.Fatalf("second outcome write must be fail-open idempotent: %v", err)
 	}
 	var finalOutcome string
-	if err := pool.QueryRow(ctx, `SELECT detail->>'outcome' FROM conversation_presence_decisions WHERE invocation_id=$1`, ticket.InvocationID).Scan(&finalOutcome); err != nil {
+	var finalDetail []byte
+	if err := pool.QueryRow(ctx, `SELECT detail->>'outcome', detail FROM conversation_presence_decisions WHERE invocation_id=$1`, ticket.InvocationID).Scan(&finalOutcome, &finalDetail); err != nil {
 		t.Fatal(err)
 	}
 	if finalOutcome != "published" {
 		t.Fatalf("outcome overwritten: %q", finalOutcome)
 	}
+	var merged presenceDecisionDetail
+	if err := json.Unmarshal(finalDetail, &merged); err != nil {
+		t.Fatal(err)
+	}
+	if merged.Timings.GenerateMs != 9167 {
+		t.Fatalf("finish write point lost generate_ms: %+v", merged.Timings)
+	}
+	if merged.Timings.Stage1Ms != result.Detail.Timings.Stage1Ms || merged.Timings.Stage2Ms != result.Detail.Timings.Stage2Ms || merged.Timings.AssembleMs != result.Detail.Timings.AssembleMs {
+		t.Fatalf("finish write point dropped decision timings: %+v", merged.Timings)
+	}
+	if len(merged.Stage1) != 1 || merged.Stage2 == nil || len(merged.Pulls) != 1 || merged.Usage == nil || merged.Usage.InputTokens != 574 {
+		t.Fatalf("finish write point dropped decision trail: %+v", merged)
+	}
 }
 
-// TestConversationPresencePostgresDecisionRowSurvivesClose keeps the §6.3
+// TestConversationPresencePostgresDecisionRowSurvivesClose keeps the 搂6.3
 // superseded accounting: a row closed after step2 keeps its decision trail
 // even though the receipt can no longer flip temperature.
 func TestConversationPresencePostgresDecisionRowSurvivesClose(t *testing.T) {
@@ -120,7 +139,7 @@ func TestConversationPresencePostgresDecisionRowSurvivesClose(t *testing.T) {
 		t.Fatalf("decision row must survive close: count=%d error=%v", count, err)
 	}
 	// And the finish write point still closes the accounting row.
-	if err := claims.recordPresenceOutcome(ctx, ticket, "superseded"); err != nil {
+	if err := claims.recordPresenceOutcome(ctx, ticket, result.Detail, "superseded"); err != nil {
 		t.Fatal(err)
 	}
 	var outcome []byte

@@ -8,6 +8,25 @@ import (
 	"github.com/felinics/memoh/internal/conversationpresence"
 )
 
+// presenceTimedGenerator records the wall time of one generation attempt into
+// the decision detail. step2 commits before the generator runs, so the value
+// is only available to the finish write point; without it the ledger cannot
+// tell an entry-guard refusal from a generation still running at the window
+// end (2026-11-02 08:05 recorded outcome=expired with neither).
+type presenceTimedGenerator struct {
+	base   conversationpresence.Generator
+	detail *presenceDecisionDetail
+}
+
+func (g presenceTimedGenerator) Generate(ctx context.Context, input conversationpresence.Input, limits conversationpresence.Limits) (conversationpresence.Result, error) {
+	start := time.Now()
+	result, err := g.base.Generate(ctx, input, limits)
+	if g.detail != nil {
+		g.detail.Timings.GenerateMs = time.Since(start).Milliseconds()
+	}
+	return result, err
+}
+
 // presenceFallbackText is the §7 hardcoded constant acknowledgement
 // (approved wording, design v3 §7 / O-5): a presence claim with zero action
 // assertion, matching the PreviousSettled trigger.

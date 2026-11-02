@@ -109,7 +109,7 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 	recordOutcome := func(status string) {
 		finishCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
-		if err := claims.recordPresenceOutcome(finishCtx, ticket, status); err != nil && s.logger != nil {
+		if err := claims.recordPresenceOutcome(finishCtx, ticket, result.Detail, status); err != nil && s.logger != nil {
 			s.logger.WarnContext(ctx, "conversation_presence_outcome_write_failed", slog.String("outcome", status), slog.String("error", err.Error()))
 		}
 	}
@@ -149,7 +149,7 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 			recordOutcome("expired")
 			return
 		}
-		generatorForRun = &presenceDirectedGenerator{
+		generatorForRun = presenceTimedGenerator{detail: &result.Detail, base: &presenceDirectedGenerator{
 			base:         generator,
 			direction:    result.Direction,
 			etaBand:      result.ETABand(),
@@ -161,7 +161,7 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 			points:       result.ContextPoints,
 			urgency:      result.Urgency,
 			imagePresent: imagePresent,
-		}
+		}}
 	}
 	coordinator.Generator = generatorForRun
 	// Generation ctx deadline = the 10s window end (design v3 §4.4): the
@@ -187,7 +187,7 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 	select {
 	case runOutcome := <-handle.Done:
 		if s.logger != nil {
-			s.logger.InfoContext(ctx, "conversation_presence", slog.String("path", "jev"), slog.String("status", runOutcome.Status), slog.String("temperature", string(runOutcome.Decision.Temperature)), slog.String("reason", runOutcome.Decision.Reason), slog.String("mode", result.Mode), slog.String("direction", result.Direction), slog.Int("urgency", result.Urgency), slog.String("fallback_reason", result.FallbackReason))
+			s.logger.InfoContext(ctx, "conversation_presence", slog.String("path", "jev"), slog.String("status", runOutcome.Status), slog.String("temperature", string(runOutcome.Decision.Temperature)), slog.String("reason", runOutcome.Decision.Reason), slog.String("mode", result.Mode), slog.String("direction", result.Direction), slog.Int("urgency", result.Urgency), slog.String("fallback_reason", result.FallbackReason), slog.Int64("generate_ms", result.Detail.Timings.GenerateMs), slog.Float64("window_remaining_seconds", presenceWindowRemaining(sideCtx, decisionStart, settings.Timeout).Seconds()))
 		}
 		recordOutcome(runOutcome.Status)
 		select {
