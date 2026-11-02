@@ -8,7 +8,9 @@ control identity. The [admission gate](README.md) is still not a stop permit.
 
 ## Fixed owner API and persistence
 
-
+The owner endpoint locator is a configuration-only read through the existing
+authenticated account owner and an owned, unrevoked registration/MCP connection.
+It makes no native call. Its fields are:
 
 - `connection_id`, `device_id`, `instance_id`: the current stored execution mapping.
 - `target_fingerprint`: the existing execution Target fingerprint.

@@ -11,8 +11,8 @@ candidate `69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee`. There is no diff between
 these commits in `cmd/internal/core/bot_delegation.go`,
 `internal/botdelegation/authority.go`, or `internal/computertarget/native_profile.go`.
 
-At candidate lines 185 and 204, `delegationHost.Plan` filters both mounts to
-`legacy-executor.Provider` and decodes only `DecodeTarget`. At authority lines 287–295,
+At candidate lines 185 and 204, `delegationHost.Plan` filtered both mounts to the retired legacy provider
+constant and decoded only `DecodeTarget`. At authority lines 287–295,
 `registration` rejects every other provider and requires an owned HTTP MCP
 connection. Thus the native `memoh` Runtime registration cannot enter the shared
 device plan or authorize a selected native remote mount. This is separate from

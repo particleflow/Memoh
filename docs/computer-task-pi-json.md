@@ -64,6 +64,11 @@ limited to Bot grants. The same checks apply to result, cancellation and refs.
    exposing content refs. Persist only refs, offsets and a bounded text preview,
    never the complete JSONL in conversation/operation context. One observation
    imports at most 16 pages within its time budget; another observation resumes.
+   The pane.read v0.2.0 schema permits only 1-500 rendered rows; `recent-unwrapped` does
+   not change that unit. Start with eight rows and wait for this response's exact nonce end
+   marker before expanding, so delayed responses do not expand into unrelated
+   historical frames. A connector `result_too_large` narrows only the read.
+   The snapshot never exceeds 500 rows and no input is repeated in that poll.
    Data pages are 2 KiB; complete receipt recovery has an independent 4 KiB
    budget, including long native IDs. Existing 16 KiB chunks remain valid:
    continuation uses their saved byte offsets without resetting the attempt.

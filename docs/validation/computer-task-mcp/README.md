@@ -88,7 +88,8 @@ Herdr **v0.9.5** [agents.rs, lines 82–268](https://github.com/herdrdev/herdr/b
 returns `agent_not_found`, `agent_not_ready`, `agent_blocked` and
 `empty_agent_prompt` before sending or queuing terminal input. The second
 not-found check inside submit also precedes `try_send_bytes` and queueing.
-these four pre-input cases; synthetic fixtures alone do not establish it.
+This fixed-source review establishes these four Herdr pre-input cases;
+synthetic fixtures alone do not establish it.
 
 Only the correctly associated response to the current prompt can mark that
 operation rejected. A later get/read error or a text substring cannot free

@@ -10,6 +10,7 @@ The existing mobile 1.0.7 parent-task list/detail HTTP contract is unchanged.
 
 ## Native API sources
 
+The adapter uses the published producer CLI v0.2.0 pane and agent methods:
 
 | Method | Arguments | Use |
 | --- | --- | --- |
@@ -26,6 +27,9 @@ other service sessions. Herdr v0.9.5 response fields are defined in
 [`agents.rs`](https://github.com/herdrdev/herdr/blob/v0.9.5/src/api/schema/agents.rs).
 The native status enum is `idle | working | blocked | done | unknown`.
 
+The relay's explicit `device_offline` and `runtime_unavailable` failures originate in the
+relay core (relay v0.2.0). Transport error text is never used to classify these
+states; only the explicit failure codes do.
 
 ## Tool contract
 

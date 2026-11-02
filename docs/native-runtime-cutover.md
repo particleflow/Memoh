@@ -60,8 +60,9 @@ report do not establish their completion.
 
 ## Source evidence
 
-`internal/db/native_runtime_cutover_integration_test.go` verifies native-only
-selection, retired registration/grant/transfer rejection, zero legacy transport,
-and preservation of original rows and unknown operations in isolated PostgreSQL.
-Its results are historical evidence for that recorded commit, not a current
-PC/NAS, browser or schedule acceptance claim.
+`internal/db/native_runtime_cutover_integration_test.go` (since removed by the
+retirement cleanup) verified native-only selection, retired registration/grant/
+transfer rejection, zero legacy transport, and preservation of original rows and
+unknown operations in isolated PostgreSQL. Those results are historical evidence
+for the recorded source checkpoint, not a current PC/NAS, browser or schedule
+acceptance claim.
