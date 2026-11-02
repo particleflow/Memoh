@@ -76,7 +76,7 @@ func (s *Service) WithTerminalObservation(observe func(context.Context, dbstore.
 
 // reportTerminalOutcome is called only where an immutable parsed outcome is
 // saved for the first time; re-reading a saved outcome never re-fires it.
-func (s *Service) reportTerminalOutcome(ctx context.Context, b toolcontext.ComputerBinding, r dbstore.ComputerOperationRecord, d Details) {
+func (s *Service) reportTerminalOutcome(ctx context.Context, r dbstore.ComputerOperationRecord, d Details) {
 	if s.terminalObservation != nil {
 		s.terminalObservation(ctx, r, d)
 	}

@@ -212,9 +212,11 @@ func computerResultText(r dbstore.ComputerOperationRecord, d computertask.Detail
 		text += "\n\n" + output
 	}
 	if d.Batch != nil && d.Batch.Progress.Producer != nil {
+		var files strings.Builder
 		for _, artifact := range d.Batch.Progress.Producer.FilePlans() {
-			text += "\nDeclared result file: " + artifact.Artifact.SourceRef + " (" + artifact.Artifact.Mime + ")"
+			files.WriteString("\nDeclared result file: " + artifact.Artifact.SourceRef + " (" + artifact.Artifact.Mime + ")")
 		}
+		text += files.String()
 	}
 	return text
 }

@@ -22,16 +22,16 @@ type DeliveryIdentityCheck func(context.Context, DeliveryIdentity) error
 // AsyncDeliveryService owns finite work inside the existing server process.
 // Only an authorized request starts/reclaims a job; there is no polling loop.
 type AsyncDeliveryService struct {
-	base     *DeliveryService
-	check    DeliveryIdentityCheck
-	log      *slog.Logger
-	life     context.Context
-	cancel   context.CancelFunc
-	slots    chan struct{}
-	mu       sync.Mutex
-	closed   bool
-	wg       sync.WaitGroup
-	lease    time.Duration
+	base      *DeliveryService
+	check     DeliveryIdentityCheck
+	log       *slog.Logger
+	life      context.Context
+	cancel    context.CancelFunc
+	slots     chan struct{}
+	mu        sync.Mutex
+	closed    bool
+	wg        sync.WaitGroup
+	lease     time.Duration
 	committed func(context.Context, DeliveryIdentity)
 }
 

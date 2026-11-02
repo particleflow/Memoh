@@ -286,7 +286,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		if err := save(); err != nil {
 			return Result{}, err
 		}
-		s.reportTerminalOutcome(ctx, b, r, d)
+		s.reportTerminalOutcome(ctx, r, d)
 		return result(r, d), nil
 	}
 	// Release the invocation slot, but do not claim AI success or expose refs.
@@ -300,7 +300,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			if err := save(); err != nil {
 				return Result{}, err
 			}
-			s.reportTerminalOutcome(ctx, b, r, d)
+			s.reportTerminalOutcome(ctx, r, d)
 			return result(r, d), nil
 		}
 	}
@@ -377,6 +377,6 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	if err := save(); err != nil {
 		return Result{}, err
 	}
-	s.reportTerminalOutcome(ctx, b, r, d)
+	s.reportTerminalOutcome(ctx, r, d)
 	return result(r, d), nil
 }

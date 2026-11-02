@@ -72,8 +72,10 @@ func TestComputerTaskResultFollowUpPostgres(t *testing.T) {
 					"result": map[string]any{"outcome": outcome, "output": "Pi finished the report."},
 					"progress": map[string]any{"producer": map[string]any{
 						"version": 2,
-						"task": map[string]any{"operation_id": id, "bot_id": bot, "user_id": user, "session_id": owner, "target_id": onTarget, "run_id": run,
-							"attempt": strings.Repeat("a", 32), "generation": strings.Repeat("b", 32), "root_hash": strings.Repeat("c", 64)},
+						"task": map[string]any{
+							"operation_id": id, "bot_id": bot, "user_id": user, "session_id": owner, "target_id": onTarget, "run_id": run,
+							"attempt": strings.Repeat("a", 32), "generation": strings.Repeat("b", 32), "root_hash": strings.Repeat("c", 64),
+						},
 						"artifacts": []any{map[string]any{"source_ref": "report_md", "mime": "text/markdown"}},
 					}},
 				},
