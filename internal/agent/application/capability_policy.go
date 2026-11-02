@@ -31,6 +31,10 @@ type gatewayAttachment struct {
 
 	// FallbackPath is an internal helper only used by server-side routing.
 	FallbackPath string `json:"-"`
+	// Unreachable records why this attachment's stored original could not be
+	// resolved while the turn was being prepared. It stays server-side: an
+	// attachment the model cannot read must fail the turn, not vanish from it.
+	Unreachable error `json:"-"`
 	// Frames holds every rendered frame of an animated attachment, Payload
 	// being the first of them. It stays server-side: the attachment is still
 	// one attachment for routing, fallbacks, attachment paths and the size

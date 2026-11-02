@@ -732,7 +732,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	if source := requestInputSource(req); source.Kind != "user" {
 		displayName = source.Kind
 	}
-	mergedAttachments := s.routeAndMergeAttachments(ctx, chatModel, req)
+	mergedAttachments, err := s.routeAndMergeAttachments(ctx, chatModel, req)
+	if err != nil {
+		return resolvedContext{}, req, err
+	}
 
 	tz := runCfg.Identity.TimezoneLocation
 	if tz == nil {

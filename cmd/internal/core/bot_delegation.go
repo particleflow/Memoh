@@ -478,6 +478,10 @@ func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Recor
 
 func (h *delegationHost) prepare(ctx context.Context, req application.ChatRequest) (context.Context, application.ChatRequest, error) {
 	ctx = context.WithValue(ctx, delegationMediaKey{}, delegationMediaIdentity{req.BotID, req.UserID, req.ThreadID})
+	// Native tools run in-process on this context, so the conversation they
+	// belong to travels with it. Without it a grant-backed media read cannot
+	// tell which conversation is asking.
+	ctx = toolcontext.WithMediaIdentity(ctx, toolcontext.MediaIdentity{BotID: req.BotID, UserID: req.UserID, SessionID: req.ThreadID})
 	if req.TaskResultReceipt != "" {
 		var err error
 		ctx, req, err = h.prepareResult(ctx, req)

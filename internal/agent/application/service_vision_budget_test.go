@@ -35,8 +35,11 @@ func TestNonVisionModelDoesNotPrepareImages(t *testing.T) {
 		{Type: "image", ContentHash: "sticker", Mime: "application/x-tgsticker"},
 	}}
 
-	merged := s.routeAndMergeAttachments(context.Background(),
+	merged, err := s.routeAndMergeAttachments(context.Background(),
 		models.GetResponse{Model: models.Model{Config: models.ModelConfig{Compatibilities: []string{}}}}, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if opens != 0 {
 		t.Fatalf("asset opened %d time(s) for a model that cannot use images", opens)
 	}
@@ -52,10 +55,13 @@ func TestNonVisionModelDoesNotPrepareImages(t *testing.T) {
 	}
 
 	// The same request on a vision model still renders.
-	merged = s.routeAndMergeAttachments(context.Background(),
+	merged, err = s.routeAndMergeAttachments(context.Background(),
 		models.GetResponse{Model: models.Model{Config: models.ModelConfig{
 			Compatibilities: []string{models.CompatVision},
 		}}}, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
 	if opens == 0 {
 		t.Fatal("a vision model must still get the rendered frames")
 	}

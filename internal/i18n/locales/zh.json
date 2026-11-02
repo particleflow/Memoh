@@ -708,6 +708,9 @@
     },
     "media": {
       "asset_not_found": "这个文件已不存在，如仍需要请重新上传。",
+      "attachment_gone": "该文件已不可用，消息未处理。请重新发送。",
+      "attachment_unavailable": "暂时无法读取已存文件，消息未处理。请稍后重试。",
+      "attachment_unreadable": "无法读取该文件，消息未处理。请重新发送，或确认文件完整。",
       "ingest_failed": "文件未能存储为附件。请确认文件仍然存在后重试。"
     },
     "memory": {

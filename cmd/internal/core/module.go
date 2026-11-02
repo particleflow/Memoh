@@ -150,6 +150,7 @@ func ServerModule() fx.Option {
 			setupComputerTargetService,
 			injectToolProviders,
 			injectBotDelegation,
+			injectSharedOutboundAttachments,
 			injectComputerResultAssociator,
 			injectBackgroundTaskEvents,
 			recoverDurableFollowUps,

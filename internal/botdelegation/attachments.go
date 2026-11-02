@@ -60,6 +60,13 @@ func (s *AttachmentSet) authorize(ctx context.Context, hash string, result bool)
 	return owner, nil
 }
 
+// Owner names the Bot whose original backs hash under this set's grant. An
+// input keeps its source owner; a result belongs to the specialist unless the
+// specialist returned the very input it was given.
+func (s *AttachmentSet) Owner(ctx context.Context, hash string, result bool) (string, error) {
+	return s.authorize(ctx, hash, result)
+}
+
 // Describe returns only metadata; no URL, storage key, private path, or inline
 // bytes can escape into the public projection or model context.
 func (s *AttachmentSet) Describe(ctx context.Context, hash string, result bool) (Attachment, error) {

@@ -3,12 +3,14 @@ package channel
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/channel/channeltest"
 	"github.com/felinics/memoh/internal/media"
 )
@@ -518,6 +520,164 @@ func TestPrepareOutboundMessage_HTTPAttachmentBadStatus(t *testing.T) {
 }
 
 // --- ContentHash (persisted asset) ---
+
+// A hash the sending Bot does not own is sent through a grant: the bytes are
+// read from the Bot that does own them, and nothing is written into the
+// sender's stores.
+func TestPrepareOutboundMessage_GrantedHashReadsOwnerOriginal(t *testing.T) {
+	t.Parallel()
+
+	owner := channeltest.NewMemoryAttachmentStore()
+	ownerAsset, err := owner.SeedAsset("expert-bot", []byte("expert-output"), "image/png", ".png")
+	if err != nil {
+		t.Fatalf("seed owner asset: %v", err)
+	}
+	manager := channeltest.NewMemoryAttachmentStore()
+	store := &grantedStore{
+		MemoryAttachmentStore: manager,
+		owner:                 owner,
+		ownerBotID:            "expert-bot",
+	}
+
+	prepared, err := PrepareOutboundMessage(context.Background(), store, ChannelConfig{
+		BotID:       "manager-bot",
+		ChannelType: ChannelTypeDiscord,
+	}, OutboundMessage{
+		Target: "chan-1",
+		Message: Message{
+			Attachments: []Attachment{{
+				Type:        AttachmentImage,
+				ContentHash: ownerAsset.ContentHash,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("PrepareOutboundMessage failed: %v", err)
+	}
+	att := prepared.Message.Attachments[0]
+	if att.Kind != PreparedAttachmentUpload || att.Open == nil {
+		t.Fatalf("prepared attachment = %#v, want an upload with an opener", att)
+	}
+	reader, err := att.Open(context.Background())
+	if err != nil {
+		t.Fatalf("open prepared attachment: %v", err)
+	}
+	defer func() { _ = reader.Close() }()
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		t.Fatalf("read prepared attachment: %v", err)
+	}
+	if string(data) != "expert-output" {
+		t.Fatalf("prepared bytes = %q, want the owner's original", string(data))
+	}
+
+	// The owner still holds the only copy: the sender gained no asset and no
+	// access path into the owner's storage.
+	if _, err := manager.Stat(context.Background(), "manager-bot", ownerAsset.ContentHash); !errors.Is(err, media.ErrAssetNotFound) {
+		t.Fatalf("sender store holds the hash: %v, want it to hold nothing", err)
+	}
+	if path := prepared.Message.Message.Attachments[0].Path; path != "" {
+		t.Fatalf("logical path = %q, want no path borrowed from the owner", path)
+	}
+}
+
+// Without a grant the hash stays unresolvable, and the error names the file the
+// client sent rather than describing the storage layer.
+func TestPrepareOutboundMessage_UngrantedHashIsRefused(t *testing.T) {
+	t.Parallel()
+
+	store := &grantedStore{MemoryAttachmentStore: channeltest.NewMemoryAttachmentStore()}
+
+	_, err := PrepareOutboundMessage(context.Background(), store, ChannelConfig{
+		BotID:       "manager-bot",
+		ChannelType: ChannelTypeDiscord,
+	}, OutboundMessage{
+		Target: "chan-1",
+		Message: Message{
+			Attachments: []Attachment{{
+				Type:        AttachmentImage,
+				ContentHash: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+			}},
+		},
+	})
+	if err == nil {
+		t.Fatal("PrepareOutboundMessage() = nil error, want the send refused")
+	}
+	if code := apperror.CodeOf(err); code != apperror.CodeMediaAssetNotFound {
+		t.Fatalf("error code = %q, want %q", code, apperror.CodeMediaAssetNotFound)
+	}
+	definition, ok := apperror.Lookup(apperror.CodeMediaAssetNotFound)
+	if !ok {
+		t.Fatalf("%q is not in the catalog", apperror.CodeMediaAssetNotFound)
+	}
+	if strings.Contains(definition.Detail, "media") || strings.Contains(definition.Detail, "delegation") {
+		t.Fatalf("catalog copy names an internal component: %q", definition.Detail)
+	}
+}
+
+// A Bot sending a hash it owns keeps the existing path, including the access
+// path materialized for the attachment.
+func TestPrepareOutboundMessage_OwnedHashKeepsAccessPath(t *testing.T) {
+	t.Parallel()
+
+	store := channeltest.NewMemoryAttachmentStore()
+	owned, err := store.SeedAsset("manager-bot", []byte("owned-bytes"), "application/pdf", ".pdf")
+	if err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	prepared, err := PrepareOutboundMessage(context.Background(), store, ChannelConfig{
+		BotID:       "manager-bot",
+		ChannelType: ChannelTypeDiscord,
+	}, OutboundMessage{
+		Target: "chan-1",
+		Message: Message{
+			Attachments: []Attachment{{
+				Type:        AttachmentFile,
+				ContentHash: owned.ContentHash,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("PrepareOutboundMessage failed: %v", err)
+	}
+	logical := prepared.Message.Message.Attachments[0]
+	if logical.Path != "/data/.memoh/media/"+owned.StorageKey {
+		t.Fatalf("logical path = %q, want the sender's own access path", logical.Path)
+	}
+	reader, err := prepared.Message.Attachments[0].Open(context.Background())
+	if err != nil {
+		t.Fatalf("open prepared attachment: %v", err)
+	}
+	defer func() { _ = reader.Close() }()
+	data, err := io.ReadAll(reader)
+	if err != nil || string(data) != "owned-bytes" {
+		t.Fatalf("prepared bytes = %q, %v; want the sender's own original", string(data), err)
+	}
+}
+
+// grantedStore is a store whose own assets are the sender's, with a grant that
+// resolves a hash to another Bot's store. It models the delegation-backed
+// store the composition root installs.
+type grantedStore struct {
+	*channeltest.MemoryAttachmentStore
+	owner      *channeltest.MemoryAttachmentStore
+	ownerBotID string
+}
+
+func (s *grantedStore) StatShared(ctx context.Context, _ string, contentHash string) (media.Asset, error) {
+	if s.owner == nil || s.ownerBotID == "" {
+		return media.Asset{}, media.ErrAssetNotFound
+	}
+	return s.owner.Stat(ctx, s.ownerBotID, contentHash)
+}
+
+func (s *grantedStore) OpenShared(ctx context.Context, _ string, contentHash string) (io.ReadCloser, media.Asset, error) {
+	if s.owner == nil || s.ownerBotID == "" {
+		return nil, media.Asset{}, media.ErrAssetNotFound
+	}
+	return s.owner.Open(ctx, s.ownerBotID, contentHash)
+}
 
 func TestPrepareOutboundMessage_PersistedContentHash(t *testing.T) {
 	t.Parallel()

@@ -272,20 +272,27 @@ const (
 	CodeWorkspaceFileNotFound         Code = "workspace_file.not_found"
 	CodeMCPConnectionNotFound         Code = "mcp.connection_not_found"
 	CodeMediaAssetNotFound            Code = "media.asset_not_found"
-	CodeMediaIngestFailed             Code = "media.ingest_failed"
-	CodeMessageNotFound               Code = "message.not_found"
-	CodeModelNotFound                 Code = "model.not_found"
-	CodeProviderNotFound              Code = "provider.not_found"
-	CodeTTSProviderNotFound           Code = "tts_provider.not_found"
-	CodeTTSModelNotFound              Code = "tts_model.not_found"
-	CodeTranscriptionModelNotFound    Code = "transcription_model.not_found"
-	CodeVideoProviderNotFound         Code = "video_provider.not_found"
-	CodeVideoModelNotFound            Code = "video_model.not_found"
-	CodeUserNotFound                  Code = "user.not_found"
-	CodeUserRuntimeNotFound           Code = "user_runtime.not_found"
-	CodeWorkdirNotFound               Code = "workdir.not_found"
-	CodeWorkspaceTargetNotFound       Code = "workspace_target.not_found"
-	CodeSupermarketNotFound           Code = "supermarket.not_found"
+	// A turn whose admitted attachment cannot be read again before the model
+	// runs. The three codes name why: the original is gone, this process may no
+	// longer read it, or reading it failed for another reason. A turn that
+	// already passed admission must fail rather than answer without the file.
+	CodeMediaAttachmentGone        Code = "media.attachment_gone"
+	CodeMediaAttachmentUnreadable  Code = "media.attachment_unreadable"
+	CodeMediaAttachmentUnavailable Code = "media.attachment_unavailable"
+	CodeMediaIngestFailed          Code = "media.ingest_failed"
+	CodeMessageNotFound            Code = "message.not_found"
+	CodeModelNotFound              Code = "model.not_found"
+	CodeProviderNotFound           Code = "provider.not_found"
+	CodeTTSProviderNotFound        Code = "tts_provider.not_found"
+	CodeTTSModelNotFound           Code = "tts_model.not_found"
+	CodeTranscriptionModelNotFound Code = "transcription_model.not_found"
+	CodeVideoProviderNotFound      Code = "video_provider.not_found"
+	CodeVideoModelNotFound         Code = "video_model.not_found"
+	CodeUserNotFound               Code = "user.not_found"
+	CodeUserRuntimeNotFound        Code = "user_runtime.not_found"
+	CodeWorkdirNotFound            Code = "workdir.not_found"
+	CodeWorkspaceTargetNotFound    Code = "workspace_target.not_found"
+	CodeSupermarketNotFound        Code = "supermarket.not_found"
 
 	// MCP connection codes, and the OAuth state code that MCP shares with
 	// provider sign-in.
@@ -1290,6 +1297,9 @@ var catalog = map[Code]Definition{
 	CodeWorkspaceFileNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This file or folder no longer exists in the workspace. Refresh and try again."},
 	CodeMCPConnectionNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This MCP connection no longer exists or has closed. Refresh the list and reconnect."},
 	CodeMediaAssetNotFound:            {HTTPStatus: http.StatusNotFound, Detail: "This file no longer exists. Upload it again if you still need it."},
+	CodeMediaAttachmentGone:           {HTTPStatus: http.StatusConflict, Detail: "This file is no longer available, so the message could not be processed. Send it again."},
+	CodeMediaAttachmentUnreadable:     {HTTPStatus: http.StatusConflict, Detail: "This file could not be read, so the message could not be processed. Send it again, or check that it is complete."},
+	CodeMediaAttachmentUnavailable:    {HTTPStatus: http.StatusServiceUnavailable, Detail: "Stored files could not be read right now, so the message was not processed. Try again shortly."},
 	CodeMediaIngestFailed:             {HTTPStatus: http.StatusInternalServerError, Detail: "The file could not be stored as an attachment. Check that it still exists and try again."},
 	CodeMessageNotFound:               {HTTPStatus: http.StatusNotFound, Detail: "This message no longer exists. Refresh the conversation and try again."},
 	CodeModelNotFound:                 {HTTPStatus: http.StatusNotFound, Detail: "This model no longer exists. Refresh the list and choose another one."},
