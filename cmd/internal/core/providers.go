@@ -1345,6 +1345,22 @@ func provideAudioTempStore() (*audiopkg.TempStore, error) {
 	return audiopkg.NewTempStore(os.TempDir())
 }
 
+// provideAudioService installs the audio service and, when a data root and a
+// database are available, the cross-session playback reuse store. Reuse is
+// optional: without a store, playback synthesizes on every request as before.
+func provideAudioService(log *slog.Logger, queries dbstore.Queries, registry *audiopkg.Registry, cfg config.Config) *audiopkg.Service {
+	service := audiopkg.NewService(log, queries, registry)
+	service.SetPlaybackReuse(audiopkg.NewPlaybackReuseStore(queries, audioDataRoot(cfg)))
+	return service
+}
+
+func audioDataRoot(cfg config.Config) string {
+	if root := strings.TrimSpace(cfg.Workspace.DataRoot); root != "" {
+		return root
+	}
+	return config.DefaultDataRoot
+}
+
 func startAudioTempStoreCleanup(lc fx.Lifecycle, store *audiopkg.TempStore) {
 	done := make(chan struct{})
 	lc.Append(fx.Hook{

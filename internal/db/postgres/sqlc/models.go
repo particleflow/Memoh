@@ -997,6 +997,25 @@ type Snapshot struct {
 	TeamID                    pgtype.UUID        `json:"team_id"`
 }
 
+type SpeechPlaybackCache struct {
+	TeamID         pgtype.UUID        `json:"team_id"`
+	ID             pgtype.UUID        `json:"id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	PrefixHash     string             `json:"prefix_hash"`
+	CacheKey       string             `json:"cache_key"`
+	ModelID        pgtype.UUID        `json:"model_id"`
+	VoiceIdentity  string             `json:"voice_identity"`
+	ContentSha256  string             `json:"content_sha256"`
+	ContentChars   int32              `json:"content_chars"`
+	AudioSha256    string             `json:"audio_sha256"`
+	AudioSize      int64              `json:"audio_size"`
+	ContentType    string             `json:"content_type"`
+	StorageKey     string             `json:"storage_key"`
+	ProviderTaskID string             `json:"provider_task_id"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+}
+
 type StorageProvider struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`

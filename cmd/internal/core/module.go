@@ -10,7 +10,6 @@ import (
 	userinput "github.com/felinics/memoh/internal/agent/decision/input"
 	"github.com/felinics/memoh/internal/agentcredential"
 	"github.com/felinics/memoh/internal/apps"
-	audiopkg "github.com/felinics/memoh/internal/audio"
 	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/channelaccess"
@@ -114,7 +113,7 @@ func ServerModule() fx.Option {
 			provideAppService,
 			mcp.NewToolSessionContextStore,
 			provideAudioRegistry,
-			audiopkg.NewService,
+			provideAudioService,
 			provideVideoRegistry,
 			videopkg.NewService,
 			provideAudioTempStore,
