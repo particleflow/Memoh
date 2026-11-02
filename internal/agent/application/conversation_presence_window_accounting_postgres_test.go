@@ -1,4 +1,4 @@
-﻿package application
+package application
 
 import "testing"
 
@@ -52,4 +52,3 @@ func TestConversationPresencePostgresOneSidecarPerTurnRegardlessOfMessageRows(t 
 		t.Fatalf("presence receipts=%d want 1 per admitted turn", receipts)
 	}
 }
-
