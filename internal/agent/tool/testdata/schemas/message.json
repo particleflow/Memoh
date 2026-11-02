@@ -35,7 +35,7 @@
     "additionalProperties": false,
     "properties": {
       "attachments": {
-        "description": "File paths, URLs, data URLs, or attachment objects to attach.",
+        "description": "File paths, URLs, data URLs, or attachment objects to attach. A file path resolves inside this bot's own workspace; a file on a managed computer must be delivered as a task artifact before it can be attached.",
         "items": {
           "anyOf": [
             {
@@ -169,7 +169,7 @@
             "type": "array"
           },
           "attachments": {
-            "description": "File paths, URLs, data URLs, or attachment objects to attach.",
+            "description": "File paths, URLs, data URLs, or attachment objects to attach. A file path resolves inside this bot's own workspace; a file on a managed computer must be delivered as a task artifact before it can be attached.",
             "items": {
               "anyOf": [
                 {

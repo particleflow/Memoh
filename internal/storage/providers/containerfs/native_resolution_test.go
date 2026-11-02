@@ -18,7 +18,7 @@ type nativeSelectingClientProvider struct {
 	seenTargets        []string
 }
 
-func (p *nativeSelectingClientProvider) MCPClient(ctx context.Context, botID string) (*bridge.Client, error) {
+func (p *nativeSelectingClientProvider) MCPClient(ctx context.Context, _ string) (*bridge.Client, error) {
 	target := bridge.WorkspaceTargetFromContext(ctx)
 	p.seenTargets = append(p.seenTargets, target)
 	if target == workspacepkg.WorkspaceTargetNative {
