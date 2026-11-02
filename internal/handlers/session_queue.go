@@ -17,6 +17,7 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
+	localadapter "github.com/felinics/memoh/internal/channel/adapters/local"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/errs"
@@ -101,6 +102,10 @@ type queueScope struct {
 	SessionID  string
 	TeamID     string
 	IdentityID string
+	// Channel is the platform this queue request arrived on. These routes are
+	// the Web UI's own, so the queued input records the same input source an
+	// idle send over the Web socket would have.
+	Channel string
 }
 
 func (s queueScope) input(invocationID, text string) application.QueueInput {
@@ -111,6 +116,7 @@ func (s queueScope) input(invocationID, text string) application.QueueInput {
 		InvocationID:            invocationID,
 		UserID:                  s.IdentityID,
 		SourceChannelIdentityID: s.IdentityID,
+		Channel:                 s.Channel,
 		Text:                    text,
 	}
 }
@@ -156,7 +162,7 @@ func (h *SessionQueueHandler) authorize(c echo.Context) (queueScope, error) {
 	if sess.TeamID.Valid {
 		teamID = sess.TeamID.String()
 	}
-	return queueScope{BotID: botID, SessionID: sessionID, TeamID: teamID, IdentityID: identityID}, nil
+	return queueScope{BotID: botID, SessionID: sessionID, TeamID: teamID, IdentityID: identityID, Channel: localadapter.WebType.String()}, nil
 }
 
 func (h *SessionQueueHandler) authorizeQueueAccess(ctx context.Context, identityID, botID string, ownsSession bool) error {

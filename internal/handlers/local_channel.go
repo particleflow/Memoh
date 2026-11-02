@@ -622,6 +622,7 @@ func (h *LocalChannelHandler) executeWSQueueCommand(ctx context.Context, writer 
 			InvocationID:            msg.InvocationID,
 			UserID:                  channelIdentityID,
 			SourceChannelIdentityID: channelIdentityID,
+			Channel:                 h.channelType.String(),
 			Text:                    text,
 		}
 		if actionID == "steer" {

@@ -43,6 +43,7 @@ func (a *Adapter) enqueue(input inbound.QueueCommandInput, admit func(applicatio
 		InvocationID:            input.InvocationID,
 		UserID:                  input.UserID,
 		SourceChannelIdentityID: input.ChannelIdentityID,
+		Channel:                 input.Channel,
 		Text:                    input.Text,
 	}))
 }

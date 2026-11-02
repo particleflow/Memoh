@@ -34,7 +34,10 @@ type QueueInput struct {
 	// that has no platform account for the sender.
 	UserID                  string
 	SourceChannelIdentityID string
-	Text                    string
+	// Channel is the ingress's platform name, so the queued input records the
+	// same input source an idle send from that ingress would have.
+	Channel string
+	Text    string
 }
 
 // ErrQueueInputIncomplete reports an ingress that admitted queue input without
@@ -70,6 +73,7 @@ func queueTurnCommand(input QueueInput) (turn.StartTurnCommand, error) {
 		ThreadID:                sessionID,
 		UserID:                  strings.TrimSpace(input.UserID),
 		SourceChannelIdentityID: strings.TrimSpace(input.SourceChannelIdentityID),
+		CurrentChannel:          strings.TrimSpace(input.Channel),
 		Query:                   text,
 		UserVisibleText:         text,
 	}, nil

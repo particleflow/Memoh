@@ -258,8 +258,8 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 		pruneToolResults = !botSettings.PersistFullToolResults
 	}
 	meta := buildRouteMetadata(req)
-	currentSource := requestInputSource(req)
-	meta = mergeMetadata(meta, map[string]any{"input_source": currentSource})
+	turnSource := requestInputSource(req)
+	meta = mergeMetadata(meta, map[string]any{"input_source": turnSource})
 	meta = mergeMetadata(meta, workspaceTargetMetadata(req.WorkspaceTarget))
 	senderChannelIdentityID, senderUserID := s.resolvePersistSenderIDs(ctx, req)
 	sessionMode, runtimeType := s.persistSessionRuntimeSnapshot(ctx, req)
@@ -313,7 +313,11 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 		messageEventID := ""
 		displayText := ""
 		assets := []messagepkg.AssetRef(nil)
-		persistMeta := mergeMetadata(meta, map[string]any{inputsource.MetadataKey: currentSource})
+		// Every row of the turn starts on the turn's own source. Only the
+		// synthetic user row may narrow it, and that decision is local to that
+		// row: the assistant/tool rows after a steer belong to the turn and must
+		// not inherit the steer's fallback.
+		persistMeta := mergeMetadata(meta, map[string]any{inputsource.MetadataKey: turnSource})
 		// The admitted turn belongs to exactly one row: the turn-leading user
 		// query. Everything else in the round either binds to it or is a
 		// synthetic mid-turn message that must not claim the turn's identity.
@@ -335,7 +339,6 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 			isOriginalQuery := originalQueryAvailable && ((ownText != "" && ownText == strings.TrimSpace(req.Query)) || isOriginalSkillActivation)
 
 			if isOriginalQuery {
-				currentSource = requestInputSource(req)
 				originalQueryAvailable = false
 				externalMessageID = req.ExternalMessageID
 				sourceReplyToMessageID = req.SourceReplyToMessageID
@@ -366,9 +369,12 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 				displayText = ownText
 				// A steered/synthetic input has its own sender. Do not borrow the
 				// enclosing turn's attribution when its source is unavailable.
+				// The caller that owns the input (the queue claim) overwrites this
+				// with its recorded identity before the row is written.
 				messageSenderChannelIdentityID, messageSenderUserID = "", ""
-				currentSource = inputsource.Unattributed(req.BotID, req.ThreadID)
-				persistMeta = mergeMetadata(meta, map[string]any{inputsource.MetadataKey: currentSource})
+				persistMeta = mergeMetadata(meta, map[string]any{
+					"input_source": inputsource.Unattributed(req.BotID, req.ThreadID),
+				})
 			}
 		} else if !isInternalFeedback && strings.TrimSpace(req.ExternalMessageID) != "" {
 			sourceReplyToMessageID = req.ExternalMessageID

@@ -38,7 +38,11 @@ type QueueCommandInput struct {
 	InvocationID      string `json:"invocation_id"`
 	UserID            string `json:"user_id,omitempty"`
 	ChannelIdentityID string `json:"channel_identity_id,omitempty"`
-	Text              string `json:"text"`
+	// Channel is the platform the command arrived on. The queued input records
+	// it as its input source, so a mid-run input renders with the same
+	// attribution an idle send from that channel would have.
+	Channel string `json:"channel,omitempty"`
+	Text    string `json:"text"`
 }
 
 // QueueCommandHandler is the narrow live-queue port used by channel slash
