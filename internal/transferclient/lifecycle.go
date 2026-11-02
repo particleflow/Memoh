@@ -31,6 +31,10 @@ func lifecycleErrorClass(err error) string {
 	switch {
 	case errors.Is(err, ErrAuthorization):
 		return "authentication"
+	case errors.As(err, &h) && h.Status == http.StatusForbidden && h.Code == refusalCodeTargetFingerprintMismatch:
+		// The server named the cause: its bound target identity drifted. A
+		// credential was not rejected, so hosts must not fail closed on it.
+		return "target_drift"
 	case errors.As(err, &h) && (h.Status == http.StatusUnauthorized || h.Status == http.StatusForbidden):
 		return "authentication"
 	case errors.Is(err, ErrPermission), errors.Is(err, os.ErrPermission):
@@ -145,6 +149,8 @@ func recordLifecycle(r QueueStatus, binding string, now time.Time) Lifecycle {
 		switch r.Job.ErrorCode {
 		case "authorization":
 			class = "authentication"
+		case "target_drift":
+			class = "target_drift"
 		case "file_limit", "capacity_blocked":
 			class = "capacity"
 		case "configuration_changed", "resumable_unavailable":

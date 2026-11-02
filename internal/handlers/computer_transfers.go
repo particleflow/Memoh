@@ -119,7 +119,9 @@ func (h *ComputerTransferHandler) Register(e *echo.Echo) {
 }
 
 func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	// markTransferRefusal wraps every guarded route here instead of g.Use, which
+	// would register catch-all routes in echo and turn 405 into 404.
+	return markTransferRefusal(func(c echo.Context) error {
 		if h == nil || h.verifier == nil && h.deviceVerifier == nil || h.base == nil || h.async == nil || h.files == nil || h.files.mediaService == nil {
 			return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
 		}
@@ -195,7 +197,7 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 		}
 		c.SetRequest(c.Request().WithContext(context.WithValue(bound, transferHTTPKey{}, &transferHTTPContext{handler: h, principal: p})))
 		return next(c)
-	}
+	})
 }
 
 func taskTransferCreate(c echo.Context, size int64, hash, mime string) (string, error) {

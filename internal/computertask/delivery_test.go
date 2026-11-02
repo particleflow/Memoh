@@ -230,6 +230,62 @@ func TestDeliveryRejectsCrossScopeAndForgedIdentity(t *testing.T) {
 	}
 }
 
+// E3b regression: a deployment switch of the producer locator (program_path and
+// friends), WorkDir or agent locator must not strand an in-flight delivery
+// behind a fingerprint refusal. The claim-time snapshot keeps the binding at
+// the identity tuple that HistoricalTargetMatches already defines.
+func TestDeliveryToleratesDeploymentDriftViaSnapshot(t *testing.T) {
+	f, s, ctx, ref := newDeliveryFixture(t)
+	f.target.NativeRuntimeID = "runtime-fixture"
+	f.target.WorkDir = `C:\Synthetic\work`
+	f.target.Producer = computertarget.ProducerLocator{ProgramPath: `C:\Synthetic\producer\transferqueue.exe`, ConfigDir: `C:\Synthetic\producer\config`, StateDir: `C:\Synthetic\producer\state`}
+	snapshot := f.target
+	details, err := json.Marshal(Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}, Phase: "execution-completed", TargetSnapshot: &snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.record.Details = details
+	f.record.TargetFingerprint = computertarget.TargetFingerprint(f.target)
+	// The 2026-11-02 incident shape: only deployment fields move.
+	f.target.Producer.ProgramPath = `C:\Synthetic\producer\v2\transferqueue.exe`
+	f.target.WorkDir = `C:\Synthetic\work-2`
+	f.target.Agent.Provider = "other-provider"
+	if out, err := s.Commit(ctx, f.id.OperationID, "result", ref); err != nil || out.Outcome != "committed" {
+		t.Fatalf("deployment drift must not strand the delivery: %+v %v", out, err)
+	}
+	if out, err := s.Resolve(ctx, f.id.OperationID, "result", ref, false); err != nil || out.Outcome != "committed" {
+		t.Fatalf("resolve after drift-tolerant commit: %+v %v", out, err)
+	}
+}
+
+// A fingerprint refusal must carry its own cause so endpoints can separate
+// target drift from every other binding failure and from rejected credentials.
+func TestDeliveryTargetDriftIsDistinctFromBindingAndCredentialRefusals(t *testing.T) {
+	// Identity drift with a snapshot: distinct refusal.
+	f, s, ctx, ref := newDeliveryFixture(t)
+	f.target.NativeRuntimeID = "runtime-fixture"
+	snapshot := f.target
+	details, _ := json.Marshal(Details{Kind: "herdr_pi_task", Batch: &BatchDetails{Progress: computertarget.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}, TargetSnapshot: &snapshot})
+	f.record.Details = details
+	f.record.TargetFingerprint = computertarget.TargetFingerprint(f.target)
+	f.target.NativeRuntimeID = "runtime-replaced"
+	if _, err := s.Commit(ctx, f.id.OperationID, "result", ref); !errors.Is(err, ErrDeliveryTargetDrift) || f.record.Revision != 3 {
+		t.Fatalf("identity drift: %v", err)
+	}
+	// Legacy row without a snapshot: still refused, still with the drift cause.
+	f2, s2, ctx2, ref2 := newDeliveryFixture(t)
+	f2.target.WorkDir = `C:\Synthetic\moved`
+	if _, err := s2.Commit(ctx2, f2.id.OperationID, "result", ref2); !errors.Is(err, ErrDeliveryTargetDrift) {
+		t.Fatalf("legacy drift: %v", err)
+	}
+	// Credential-class refusals keep their own errors.
+	f3, s3, ctx3, ref3 := newDeliveryFixture(t)
+	f3.revoked = true
+	if _, err := s3.Commit(ctx3, f3.id.OperationID, "result", ref3); !errors.Is(err, ErrDenied) {
+		t.Fatalf("revoked authorization must stay ErrDenied: %v", err)
+	}
+}
+
 func TestDeliveryRechecksRevocationAndBoundsCASRetries(t *testing.T) {
 	for _, mode := range []string{"revoked-before", "revoked-after-commit", "revoke-on-conflict", "revoke-during-verify", "retry-success", "retry-exhausted"} {
 		t.Run(mode, func(t *testing.T) {

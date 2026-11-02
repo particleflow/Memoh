@@ -22,16 +22,17 @@ import (
 )
 
 var (
-	ErrDeliveryBinding  = errors.New("delivery requires a verified execution identity")
-	ErrDeliveryConflict = errors.New("delivery binding conflicts with its persisted outcome")
-	ErrDeliveryVersion  = errors.New("unsupported delivery ledger version")
-	ErrDeliveryLimit    = errors.New("operation delivery limit reached")
-	ErrDeliveryRetry    = errors.New("delivery transaction conflicted; resolve before retrying")
-	ErrDeliveryAsset    = errors.New("delivery asset is unavailable or does not match")
-	errVerifyDelivery   = errors.New("verify delivery outside the database transaction")
-	deliveryIDPattern   = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,128}$`)
-	deliveryHash        = regexp.MustCompile(`^[a-f0-9]{64}$`)
-	deliveryAttempt     = regexp.MustCompile(`^[a-f0-9]{32}$`)
+	ErrDeliveryBinding     = errors.New("delivery requires a verified execution identity")
+	ErrDeliveryTargetDrift = errors.New("delivery target identity drifted from its recorded binding")
+	ErrDeliveryConflict    = errors.New("delivery binding conflicts with its persisted outcome")
+	ErrDeliveryVersion     = errors.New("unsupported delivery ledger version")
+	ErrDeliveryLimit       = errors.New("operation delivery limit reached")
+	ErrDeliveryRetry       = errors.New("delivery transaction conflicted; resolve before retrying")
+	ErrDeliveryAsset       = errors.New("delivery asset is unavailable or does not match")
+	errVerifyDelivery      = errors.New("verify delivery outside the database transaction")
+	deliveryIDPattern      = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,128}$`)
+	deliveryHash           = regexp.MustCompile(`^[a-f0-9]{64}$`)
+	deliveryAttempt        = regexp.MustCompile(`^[a-f0-9]{32}$`)
 )
 
 // Legacy JSON readers remain bounded. Row storage has no cumulative entry cap.
@@ -417,6 +418,23 @@ type deliveryOperationDetails struct {
 	Kind   string          `json:"kind"`
 	Batch  *BatchDetails   `json:"batch"`
 	Ledger json.RawMessage `json:"delivery_ledger"`
+	// TargetSnapshot is the claim-time registration snapshot already persisted
+	// by the task service (Details.TargetSnapshot). It carries no authority;
+	// authorizeDeliveryRecord only reads it to separate deployment drift from
+	// an identity change.
+	TargetSnapshot *computertarget.Target `json:"target_snapshot,omitempty"`
+}
+
+// targetBindingHolds keeps the delivery bound to the recorded target identity
+// while tolerating deployment-only drift. The stored fingerprint still pins the
+// record: a matching claim-time snapshot passes only when its full fingerprint
+// equals the stored one and the identity tuple (NativeRuntimeID, ConnectionID,
+// DeviceID, InstanceID — the HistoricalTargetMatches scope) is unchanged, so
+// WorkDir, BashPath, Agent and Producer locator changes no longer strand
+// in-flight deliveries. Legacy rows without a snapshot keep the exact form.
+func targetBindingHolds(target computertarget.Target, r dbstore.ComputerOperationRecord, snapshot *computertarget.Target) bool {
+	return r.TargetFingerprint == computertarget.TargetFingerprint(target) ||
+		computertarget.HistoricalTargetMatches(target, snapshot, r.TargetFingerprint)
 }
 
 func authorizeDeliveryRecord(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity) (dbstore.ComputerOperationRecord, deliveryOperationDetails, error) {
@@ -439,12 +457,21 @@ func authorizeDeliveryRecord(ctx context.Context, tx DeliveryTransaction, id Del
 	if err != nil {
 		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, err
 	}
-	if r.ID != id.OperationID || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID || r.TargetID != b.TargetID || r.RunID != b.RunID ||
-		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || r.TargetFingerprint != computertarget.TargetFingerprint(target) || target.Agent.ExecutionMode != "pi-json-v1" {
+	var details deliveryOperationDetails
+	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &details) != nil {
 		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
 	}
-	var details deliveryOperationDetails
-	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &details) != nil || details.Kind != "herdr_pi_task" || details.Batch == nil ||
+	if r.ID != id.OperationID || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID || r.TargetID != b.TargetID || r.RunID != b.RunID ||
+		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || target.Agent.ExecutionMode != "pi-json-v1" {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
+	}
+	if !targetBindingHolds(target, r, details.TargetSnapshot) {
+		// Distinct from ErrDeliveryBinding: the record and target identities
+		// both resolved, but the registration identity drifted. Hosts classify
+		// this as target drift, never as a rejected credential.
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryTargetDrift
+	}
+	if details.Kind != "herdr_pi_task" || details.Batch == nil ||
 		details.Batch.Progress.Attempt != id.Attempt || details.Batch.Progress.Generation != id.Generation {
 		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
 	}
