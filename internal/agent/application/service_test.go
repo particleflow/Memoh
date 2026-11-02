@@ -3,9 +3,12 @@ package application
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"strings"
@@ -557,9 +560,15 @@ func TestSanitizeMessagesNormalizesUserMultipartImageBytes(t *testing.T) {
 	if got := parts[0]["text"]; got != "> quoted reply\n\nWhere is Antelope Canyon?" {
 		t.Fatalf("unexpected text part: %#v", got)
 	}
-	image, _ := parts[1]["image"].(string)
-	if !strings.HasPrefix(image, "data:image/png;base64,") {
-		t.Fatalf("expected data URL image payload, got %#v", parts[1]["image"])
+	// The image payload never survives this boundary — replay and persistence
+	// both see the identity-only reference row instead.
+	sum := sha256.Sum256([]byte{137, 80})
+	want := fmt.Sprintf(`<attachment content_hash="%s" mime="image/png" size="2"/>`, hex.EncodeToString(sum[:]))
+	if got := parts[1]["text"]; got != want {
+		t.Fatalf("expected reference row %q, got %#v", want, parts[1]["text"])
+	}
+	if _, exists := parts[1]["image"]; exists {
+		t.Fatalf("image payload must not persist: %#v", parts[1])
 	}
 }
 
