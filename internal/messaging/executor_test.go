@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/media"
 )
 
@@ -138,11 +139,58 @@ func TestSendSameConversationWithAttachmentsUsesLocalResult(t *testing.T) {
 		t.Fatalf("expected 1 local attachment, got %d", len(result.LocalAttachments))
 	}
 	att := result.LocalAttachments[0]
-	if att.Path != "/data/screenshot.png" {
-		t.Fatalf("unexpected local attachment path: %q", att.Path)
+	// The same-conversation shortcut resolves workspace files through the asset
+	// resolver before answering, so a persistence failure fails the tool call
+	// with its code instead of surfacing only to the client after the turn is
+	// already running.
+	if att.ContentHash != "hash_1" {
+		t.Fatalf("unexpected local attachment: %+v", att)
 	}
 	if att.Type != AttachmentImage {
 		t.Fatalf("unexpected local attachment type: %q", att.Type)
+	}
+}
+
+type failingIngestAssetResolver struct {
+	testAssetResolver
+}
+
+func (*failingIngestAssetResolver) IngestContainerFile(_ context.Context, _, _ string) (AssetMeta, error) {
+	return AssetMeta{}, errors.New("container file unreadable")
+}
+
+// A same-conversation send whose attachment cannot be persisted must fail the
+// tool call with the machine code, so the model can state the failure itself
+// instead of the server answering ok and pre-writing a sentence elsewhere.
+func TestSendSameConversationAttachmentIngestFailureReturnsCode(t *testing.T) {
+	t.Parallel()
+
+	sender := &testSender{}
+	exec := &Executor{
+		Sender:        sender,
+		Resolver:      testResolver{},
+		AssetResolver: &failingIngestAssetResolver{},
+	}
+
+	session := SessionContext{
+		BotID:              "bot_1",
+		CanOmitTarget:      true,
+		AllowLocalShortcut: true,
+		CurrentPlatform:    "feishu",
+		ReplyTarget:        "chat_id:oc_group_1",
+	}
+
+	_, err := exec.Send(context.Background(), session, map[string]any{
+		"attachments": []any{"screenshot.png"},
+	})
+	if err == nil {
+		t.Fatal("expected ingest failure to fail the send")
+	}
+	if got := apperror.CodeOf(err); got != apperror.CodeMediaIngestFailed {
+		t.Fatalf("send must fail with media.ingest_failed, got %q (%v)", got, err)
+	}
+	if sender.called != 0 {
+		t.Fatalf("sender must not be called on ingest failure, got %d", sender.called)
 	}
 }
 

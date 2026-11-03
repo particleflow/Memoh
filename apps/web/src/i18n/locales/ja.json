@@ -325,13 +325,6 @@
       "oauth_discovery_failed": "この MCP サーバーから OAuth 設定を検出できませんでした。URL が正しいこと、サーバーが OAuth に対応していることを確認してください。",
       "oauth_not_discovered": "先にこの接続の OAuth 検出を実行してください。"
     },
-    "media": {
-      "asset_not_found": "このファイルは存在しなくなりました。必要な場合は再度アップロードしてください。",
-      "attachment_gone": "このファイルは利用できなくなったため、メッセージを処理できませんでした。もう一度送信してください。",
-      "attachment_unavailable": "保存済みファイルを現在読み取れないため、メッセージを処理できませんでした。しばらくしてから再試行してください。",
-      "attachment_unreadable": "このファイルを読み取れなかったため、メッセージを処理できませんでした。もう一度送信するか、ファイルが完全か確認してください。",
-      "ingest_failed": "ファイルを添付ファイルとして保存できませんでした。ファイルが存在するか確認して、もう一度お試しください。"
-    },
     "memory": {
       "compact_unsupported": "選択中の Memory Provider は Memory の圧縮に対応していません。Bot の Memory 設定で、圧縮に対応した Provider に切り替えてください。"
     },
