@@ -41,12 +41,17 @@ node mobile/client/tools/acceptance/acceptance.mjs /path/to/rawfile/client-web
 | V3d | 提交新消息停读 | 提交后 1.5s | pause 事件数增加 | — |
 | G7 | 加载历史不朗读 | 历史渲染后 3s | speech 请求 = 0 | — |
 | G8 | 后台/前台不乱不断 | 前台后 2s | 播放事件 ≥2 | 先停后恢复 |
+| bubble-kind-ack | 快回为轻量气泡 | ack 单独在屏期间 | 1 个 `data-bubble-kind=ack` | 文本恰为 ack 行；虚线描边+浅底（浅/深色主题）；正文到达后消失 |
+| bubble-kind-body | 正文保持标准气泡 | settle 后 | 1 个 `data-bubble-kind=body` | 无描边、无底色；行内无 ack/receipt |
+| bubble-kind-receipt | 回执轮为另一种气泡 | 流式与 settle 后 | 1 个 `data-bubble-kind=receipt` | 左缘 3px 色条+淡强调底；文本与同一回复的正文气泡完全相同；三种形态两两不同（浅/深色主题） |
 
 G1 的时机起算点是**首个完整句子的帧**（脚本化模型的 `text_chunk_ready`），不是按键时刻；口径与 PR #121 `speech-field-acceptance.test.ts` 六门一致，差別只在于本 harness 驱动打包 dist 而非组合树。
 
 G1 回放**长回复**（`FAIL_TASK_BODY`，6 句、句间 800ms、末句后 3s 才 settle），断言「携带首句的 speech 请求时刻 − 首句终止符到达时刻 ≤ 1000ms，且早于末句帧、≪ settle 时刻」：只会 settle 才开读的产物在 4 句短回复上可以把 2.8s 的 settle 时刻误算成首句时延（TF-18 坐实过），长回复把「首句即读」与「settle 才读」拉开到秒级可分辨。该口径与 #126 ③级（首句帧→首请求）一致，供 ③级复用。快回 ack 以其自己的短任务先读（stub 对 ack 行回放短音频），不计入首句时延的起算或终点。
 
 未驱动的断言（例如打包版本里找不到思考折叠控件）报告为 `uncovered`，**同样让门禁失败**——没有证据不等于通过。
+
+三种气泡场景只认计算样式与 DOM 文本：每个形态元素不得带 `title`/`aria-label`/tooltip 属性或伪元素文字，自身不得有直接文本节点（ack 除外，恰为 ack 行）。回执轮由 stub 的 `receipt` 模式回放：该轮每一行带 `task_result` 输入源，且不发快回（服务端对 task_result 输入不出 ack）。
 
 ## 已知红项与修复线
 
