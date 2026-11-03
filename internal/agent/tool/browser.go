@@ -76,10 +76,10 @@ func (*BrowserProvider) Usage(_ context.Context, session SessionContext, availab
 	browserRefs := available.Refs(ToolBrowserObserve(), ToolBrowserAction())
 	switch len(browserRefs) {
 	case 2:
-		parts = append(parts, "**Browser** ("+strings.Join(browserRefs, ", ")+"): Web pages in Chrome. Observe before acting; prefer element refs from snapshot over CSS selectors.")
+		parts = append(parts, "**Browser** ("+strings.Join(browserRefs, ", ")+"): Web pages in Chrome. Observe before acting; prefer snapshot refs over CSS selectors.")
 	case 1:
 		if ref, ok := available.Ref(ToolBrowserObserve()); ok {
-			parts = append(parts, "**Browser** ("+ref+"): Web pages in Chrome. Observe before acting; prefer element refs from snapshot over CSS selectors.")
+			parts = append(parts, "**Browser** ("+ref+"): Web pages in Chrome. Observe before acting; prefer snapshot refs over CSS selectors.")
 		} else {
 			parts = append(parts, "**Browser** ("+browserRefs[0]+"): Web pages in Chrome.")
 		}
@@ -87,30 +87,30 @@ func (*BrowserProvider) Usage(_ context.Context, session SessionContext, availab
 	desktopRefs := available.Refs(ToolComputerObserve(), ToolComputerAction())
 	switch len(desktopRefs) {
 	case 2:
-		parts = append(parts, "**Computer** ("+strings.Join(desktopRefs, ", ")+"): Whole-desktop fallback for native dialogs, non-browser apps, or when the browser path fails. Start with a snapshot to get an accessibility tree with element refs, then drive actions with those refs; raw coordinates are a last-resort fallback.")
+		parts = append(parts, "**Computer** ("+strings.Join(desktopRefs, ", ")+"): Whole-desktop fallback for native dialogs, non-browser apps, or browser-path failures. Snapshot first for refs, drive actions with them; coordinates last resort.")
 	case 1:
 		if ref, ok := available.Ref(ToolComputerObserve()); ok {
-			parts = append(parts, "**Computer** ("+ref+"): Whole-desktop fallback for native dialogs, non-browser apps, or when the browser path fails.")
+			parts = append(parts, "**Computer** ("+ref+"): Whole-desktop fallback for native dialogs, non-browser apps, or browser-path failures.")
 		} else {
-			parts = append(parts, "**Computer** ("+desktopRefs[0]+"): Whole-desktop fallback for native dialogs, non-browser apps, or when the browser path fails; raw coordinates are a last-resort fallback.")
+			parts = append(parts, "**Computer** ("+desktopRefs[0]+"): Whole-desktop fallback for native dialogs, non-browser apps, or browser-path failures; coordinates last resort.")
 		}
 	}
 	if ref, ok := available.Ref(ToolBrowserRemoteSession()); ok {
 		if len(browserRefs) > 0 || len(desktopRefs) > 0 {
-			parts = append(parts, ref+": Only when running Playwright or other CDP automation inside the workspace is clearly better than the GUI tools above.")
+			parts = append(parts, ref+": only when CDP automation inside the workspace clearly beats the GUI tools above.")
 		} else {
-			parts = append(parts, ref+": Use for code-driven Playwright or other CDP automation inside the workspace.")
+			parts = append(parts, ref+": code-driven Playwright/CDP automation inside the workspace.")
 		}
 	}
 	hasObserve := available.Has(ToolBrowserObserve()) || available.Has(ToolComputerObserve())
 	if hasObserve {
-		readHint := "the returned path can be used by later workspace actions when needed."
+		readHint := "the path works with later workspace actions."
 		if session.SupportsImageInput {
 			if readRef, ok := available.Ref(ToolRead()); ok {
-				readHint = "Read the returned path with " + readRef + " when you need the image."
+				readHint = "Read the path with " + readRef + " when you need the image."
 			}
 		}
-		parts = append(parts, "**Screenshots**: Observe tools save screenshots to a workspace path; they are not attached to the conversation. "+readHint)
+		parts = append(parts, "**Screenshots**: saved to a workspace path, not attached to the conversation. "+readHint)
 	}
 	if len(parts) == 0 {
 		return ""
@@ -145,20 +145,20 @@ func (p *BrowserProvider) Tools(ctx context.Context, session SessionContext) ([]
 // the numeric bounds are shape functions; every field is trimmed on the way
 // into browserCommand.
 type browserActionArgs struct {
-	Action         string   `json:"action" jsonschema:"Browser action to perform. Compatibility aliases dblclick, scrollintoview, keyboard_type, and keyboard_inserttext are also accepted; keydown and keyup dispatch a single raw key event."`
+	Action         string   `json:"action" jsonschema:"Browser action. Aliases accepted: dblclick, scrollintoview, keyboard_type, keyboard_inserttext; keydown/keyup dispatch one raw key event."`
 	URL            string   `json:"url,omitempty" jsonschema:"URL to open for navigate or tab_new."`
-	Ref            string   `json:"ref,omitempty" jsonschema:"Element ref such as e12 from a browser observation snapshot or screenshot annotation. Preferred over selector."`
-	Selector       string   `json:"selector,omitempty" jsonschema:"CSS selector for the target element when no ref is available."`
+	Ref            string   `json:"ref,omitempty" jsonschema:"Element ref (e12) from a snapshot or screenshot annotation; preferred over selector."`
+	Selector       string   `json:"selector,omitempty" jsonschema:"CSS selector when no ref is available."`
 	Text           string   `json:"text,omitempty" jsonschema:"Text for type or fill."`
-	Key            string   `json:"key,omitempty" jsonschema:"Key or key chord for press, e.g. Enter, Tab, Escape, Control+a."`
+	Key            string   `json:"key,omitempty" jsonschema:"Key or chord for press (Enter, Control+a)."`
 	Value          string   `json:"value,omitempty" jsonschema:"Option value for select."`
-	TargetRef      string   `json:"target_ref,omitempty" jsonschema:"Drop target ref for drag, preferred over target_selector."`
-	TargetSelector string   `json:"target_selector,omitempty" jsonschema:"Drop target CSS selector for drag when no target_ref is available."`
+	TargetRef      string   `json:"target_ref,omitempty" jsonschema:"Drag drop-target ref; preferred over target_selector."`
+	TargetSelector string   `json:"target_selector,omitempty" jsonschema:"Drag drop-target CSS selector when no ref."`
 	Files          []string `json:"files,omitempty" jsonschema:"Workspace file paths to upload."`
 	TabIndex       *int     `json:"tab_index,omitempty" jsonschema:"Tab index for tab_select or tab_close."`
-	Direction      string   `json:"direction,omitempty" jsonschema:"Scroll direction. Defaults to down."`
+	Direction      string   `json:"direction,omitempty" jsonschema:"Scroll direction; default down."`
 	Amount         *int     `json:"amount,omitempty" jsonschema:"Scroll amount in pixels."`
-	Timeout        *int     `json:"timeout,omitempty" jsonschema:"Timeout in milliseconds for wait or navigation readiness."`
+	Timeout        *int     `json:"timeout,omitempty" jsonschema:"Timeout in ms for wait or navigation readiness."`
 }
 
 func (a browserActionArgs) command() browserCommand {
@@ -171,9 +171,9 @@ func (a browserActionArgs) command() browserCommand {
 
 type browserObserveArgs struct {
 	Observe  string `json:"observe" jsonschema:"What to observe from the page."`
-	Ref      string `json:"ref,omitempty" jsonschema:"Element ref from snapshot or screenshot_annotate. Scopes get_content/get_html and evaluate helper use."`
-	Selector string `json:"selector,omitempty" jsonschema:"CSS selector to scope get_content or get_html when no ref is available."`
-	Script   string `json:"script,omitempty" jsonschema:"JavaScript expression to evaluate. Keep it short and read-only unless the task requires otherwise."`
+	Ref      string `json:"ref,omitempty" jsonschema:"Element ref from snapshot or screenshot_annotate; scopes get_content/get_html and evaluate."`
+	Selector string `json:"selector,omitempty" jsonschema:"CSS selector scoping get_content/get_html when no ref."`
+	Script   string `json:"script,omitempty" jsonschema:"JavaScript expression; keep it short and read-only unless the task requires otherwise."`
 	FullPage bool   `json:"full_page,omitempty" jsonschema:"Capture a full-page screenshot for screenshot."`
 }
 
@@ -184,7 +184,7 @@ func (a browserObserveArgs) command() browserCommand {
 type browserRemoteSessionArgs struct {
 	Action    string `json:"action" jsonschema:"Session action to perform."`
 	SessionID string `json:"session_id,omitempty" jsonschema:"Target/session ID returned by create or status."`
-	URL       string `json:"url,omitempty" jsonschema:"Optional URL to open when creating a target."`
+	URL       string `json:"url,omitempty" jsonschema:"URL to open when creating a target."`
 }
 
 type computerObserveArgs struct {
@@ -193,16 +193,16 @@ type computerObserveArgs struct {
 
 type computerActionArgs struct {
 	Action     string `json:"action" jsonschema:"Desktop action to perform."`
-	Ref        string `json:"ref,omitempty" jsonschema:"Element ref such as e3 from a desktop observation snapshot. Preferred over coordinates for click/double_click/type/fill/scroll."`
-	X          *int   `json:"x,omitempty" jsonschema:"X coordinate in desktop pixels (used when no ref is provided or as fallback)."`
-	Y          *int   `json:"y,omitempty" jsonschema:"Y coordinate in desktop pixels (used when no ref is provided or as fallback)."`
-	ToX        *int   `json:"to_x,omitempty" jsonschema:"Destination X coordinate for drag."`
-	ToY        *int   `json:"to_y,omitempty" jsonschema:"Destination Y coordinate for drag."`
-	Button     string `json:"button,omitempty" jsonschema:"Mouse button. Defaults to left."`
-	ButtonMask *int   `json:"button_mask,omitempty" jsonschema:"Raw RFB button mask for pointer actions."`
-	Direction  string `json:"direction,omitempty" jsonschema:"Scroll direction. Defaults to down."`
+	Ref        string `json:"ref,omitempty" jsonschema:"Element ref (e3) from a desktop snapshot; preferred over coordinates for click/double_click/type/fill/scroll."`
+	X          *int   `json:"x,omitempty" jsonschema:"X coordinate in desktop pixels (fallback when no ref)."`
+	Y          *int   `json:"y,omitempty" jsonschema:"Y coordinate in desktop pixels (fallback when no ref)."`
+	ToX        *int   `json:"to_x,omitempty" jsonschema:"Drag destination X."`
+	ToY        *int   `json:"to_y,omitempty" jsonschema:"Drag destination Y."`
+	Button     string `json:"button,omitempty" jsonschema:"Mouse button; default left."`
+	ButtonMask *int   `json:"button_mask,omitempty" jsonschema:"Raw button mask for pointer actions."`
+	Direction  string `json:"direction,omitempty" jsonschema:"Scroll direction; default down."`
 	Amount     *int   `json:"amount,omitempty" jsonschema:"Scroll amount or wait duration in milliseconds."`
-	Key        string `json:"key,omitempty" jsonschema:"Key or key chord, e.g. Enter, Escape, Control+a."`
+	Key        string `json:"key,omitempty" jsonschema:"Key or chord (Enter, Control+a)."`
 	Text       string `json:"text,omitempty" jsonschema:"Text to type or fill into the target."`
 }
 
@@ -246,7 +246,7 @@ var browserDirections = []any{"up", "down", "left", "right"}
 func (p *BrowserProvider) browserTools(session SessionContext) []toolexec.Tool {
 	sess := session
 	return []toolexec.Tool{
-		toolexec.Define(ToolBrowserAction().String(), "Operate the current workspace browser tab. Prefer element refs from an observation result over CSS selectors; use selectors only as a fallback. Use fill to replace input values, type to append text, and press for shortcuts or submit keys. After navigation or UI-changing actions, observe again only when the next step depends on the changed state.",
+		toolexec.Define(ToolBrowserAction().String(), "Operate the workspace browser tab. Prefer element refs from an observation over CSS selectors (fallback). fill replaces input values, type appends, press sends shortcuts or submit keys. After navigation or UI-changing actions, observe again only when the next step needs the new state.",
 			func(ctx *toolexec.ToolExecContext, args browserActionArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execBrowserAction(ctx.Context, sess, args))
 			},
@@ -257,7 +257,7 @@ func (p *BrowserProvider) browserTools(session SessionContext) []toolexec.Tool {
 			toolexec.Range("timeout", 1, 45000), toolexec.Default("timeout", 1000),
 			toolexec.Strict(),
 		),
-		toolexec.Define(ToolBrowserObserve().String(), "Inspect the current workspace browser without changing page state. Prefer snapshot for interactive elements and get_content for readable text. Use screenshot_annotate only when visual layout matters or you need rendered-page refs. Use evaluate only for small DOM queries or page-state checks. Screenshots are saved to a workspace path and are not attached automatically.",
+		toolexec.Define(ToolBrowserObserve().String(), "Inspect the workspace browser without changing page state. snapshot lists interactive elements; get_content reads text; screenshot_annotate when visual layout or rendered-page refs matter; evaluate for small DOM or page-state checks. Screenshots save to a workspace path, not attached automatically.",
 			func(ctx *toolexec.ToolExecContext, args browserObserveArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execBrowserObserve(ctx.Context, sess, args))
 			},
@@ -265,14 +265,14 @@ func (p *BrowserProvider) browserTools(session SessionContext) []toolexec.Tool {
 			toolexec.Default("full_page", false),
 			toolexec.Strict(),
 		),
-		toolexec.Define(ToolComputerObserve().String(), "Inspect the workspace desktop without changing state. Use snapshot for an accessibility-tree listing of interactive UI elements with refs for later desktop actions. Use screenshot only when accessibility is unavailable or you need visual layout; the image is saved to a workspace path and is not attached automatically.",
+		toolexec.Define(ToolComputerObserve().String(), "Inspect the workspace desktop without changing state. snapshot gives an accessibility tree of interactive elements with refs for desktop actions; screenshot for visual layout or when accessibility is unavailable (saved to a workspace path, not attached).",
 			func(ctx *toolexec.ToolExecContext, args computerObserveArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execComputerObserve(ctx.Context, sess, args))
 			},
 			toolexec.Enum("observe", "snapshot", "screenshot"),
 			toolexec.Strict(),
 		),
-		toolexec.Define(ToolComputerAction().String(), "Drive the workspace desktop. Prefer refs from a desktop observation snapshot for click/double_click/type/fill/scroll; coordinates (x, y) are only a fallback when no ref applies (native dialogs, raw drags, pointer hovers). For in-page browser targets, prefer browser-specific actions when they are available.",
+		toolexec.Define(ToolComputerAction().String(), "Drive the workspace desktop. Prefer refs from a desktop snapshot for click/double_click/type/fill/scroll; x/y coordinates only as fallback (native dialogs, raw drags, hovers). For in-page targets prefer the browser actions when available.",
 			func(ctx *toolexec.ToolExecContext, args computerActionArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execComputerAction(ctx.Context, sess, args))
 			},
@@ -284,7 +284,7 @@ func (p *BrowserProvider) browserTools(session SessionContext) []toolexec.Tool {
 			toolexec.Range("amount", 1, 10000), toolexec.Default("amount", 500),
 			toolexec.Strict(),
 		),
-		toolexec.Define(ToolBrowserRemoteSession().String(), "Advanced escape hatch for code-driven automation. Exposes the workspace Chrome CDP endpoint for chromium.connectOverCDP or other CDP clients.",
+		toolexec.Define(ToolBrowserRemoteSession().String(), "Escape hatch for code-driven automation: exposes the workspace Chrome CDP endpoint for chromium.connectOverCDP or other CDP clients.",
 			func(ctx *toolexec.ToolExecContext, args browserRemoteSessionArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execRemoteSession(ctx.Context, sess, args))
 			},

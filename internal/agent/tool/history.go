@@ -60,18 +60,18 @@ func (*HistoryProvider) Usage(_ context.Context, _ SessionContext, available Ava
 	listSessionsRef := ""
 	if ref, ok := available.Ref(ToolListSessions()); ok {
 		listSessionsRef = ref
-		parts = append(parts, ref+": List accessible chat sessions with their bound contact/route info. Filter by `type` (chat/schedule) or `platform`.")
+		parts = append(parts, ref+": List accessible chat sessions with bound contact/route info; filter by `type` (chat/schedule) or `platform`.")
 	}
 	if ref, ok := available.Ref(ToolGetMessages()); ok {
 		parts = append(parts, ref+": Get recent messages from the current or selected session, or resolve one exact `message_id`.")
 		if listSessionsRef != "" {
-			parts = append(parts, "Use session IDs from "+listSessionsRef+" as `session_id` for "+ref+" when reading a specific conversation.")
+			parts = append(parts, "Use session IDs from "+listSessionsRef+" as `session_id` for "+ref+".")
 		}
 	}
 	if ref, ok := available.Ref(ToolSearchMessages()); ok {
-		parts = append(parts, ref+": Search past message history. All parameters are optional: `start_time` / `end_time`, `keyword`, `session_id`, `contact_id`, and `role`.")
+		parts = append(parts, ref+": Search past messages; all filters optional: `start_time`/`end_time`, `keyword`, `session_id`, `contact_id`, `role`.")
 		if listSessionsRef != "" {
-			parts = append(parts, "Use session IDs from "+listSessionsRef+" as `session_id` for "+ref+" when searching a specific conversation.")
+			parts = append(parts, "Use session IDs from "+listSessionsRef+" as `session_id` for "+ref+".")
 		}
 	}
 	return usageSection("Sessions & History", parts)
@@ -96,7 +96,7 @@ func (p *HistoryProvider) Tools(_ context.Context, sess SessionContext) ([]toole
 		s := sess
 		tools = append(tools, toolexec.Tool{
 			Name:        ToolGetMessages().String(),
-			Description: "Get recent messages from a chat session, or resolve one exact message ID. Defaults to the current session. Results are returned oldest-first.",
+			Description: "Get recent messages from a session, or resolve one exact message_id. Defaults to the current session; results oldest-first.",
 			Parameters:  toolexec.SchemaFor[getMessagesArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, args getMessagesArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execGetMessages(ctx.Context, s, args))
@@ -108,7 +108,7 @@ func (p *HistoryProvider) Tools(_ context.Context, sess SessionContext) ([]toole
 		s := sess
 		tools = append(tools, toolexec.Tool{
 			Name:        ToolSearchMessages().String(),
-			Description: "Search message history across sessions accessible from the current user or channel route. Supports filtering by time range, keyword, session, contact, and role. All parameters are optional. If start_time is not provided, only the last 7 days are searched.",
+			Description: "Search message history across sessions accessible from the current user or channel route; optional filters: time range, keyword, session, contact, role. Without start_time, only the last 7 days are searched.",
 			Parameters:  toolexec.SchemaFor[searchMessagesArgs](toolexec.Enum("role", "user", "assistant")),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, args searchMessagesArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execSearchMessages(ctx.Context, s, args))
@@ -636,24 +636,24 @@ func parseFlexibleTime(s string) (time.Time, error) {
 }
 
 type listSessionsArgs struct {
-	Limit    *int   `json:"limit,omitempty" jsonschema:"Maximum number of sessions to return. Default 50."`
-	Platform string `json:"platform,omitempty" jsonschema:"Filter by channel platform (e.g. telegram, feishu). Returns all platforms when omitted."`
-	Type     string `json:"type,omitempty" jsonschema:"Filter by session type: chat or schedule. Returns all types when omitted."`
+	Limit    *int   `json:"limit,omitempty" jsonschema:"Max sessions to return; default 50."`
+	Platform string `json:"platform,omitempty" jsonschema:"Channel platform filter (e.g. telegram, feishu); all when omitted."`
+	Type     string `json:"type,omitempty" jsonschema:"Session type: chat or schedule; all when omitted."`
 }
 
 type getMessagesArgs struct {
-	Before    string `json:"before,omitempty" jsonschema:"ISO 8601 timestamp cursor. When provided, returns messages created before this time."`
-	Limit     *int   `json:"limit,omitempty" jsonschema:"Maximum number of messages to return. Default 30, max 100."`
-	MessageID string `json:"message_id,omitempty" jsonschema:"Exact persisted message ID to resolve, such as a message_id returned in search_memory source_refs."`
-	SessionID string `json:"session_id,omitempty" jsonschema:"Session ID to read. Defaults to the current session when omitted."`
+	Before    string `json:"before,omitempty" jsonschema:"ISO 8601 cursor; returns messages created before this time."`
+	Limit     *int   `json:"limit,omitempty" jsonschema:"Max messages to return; default 30, max 100."`
+	MessageID string `json:"message_id,omitempty" jsonschema:"Exact persisted message ID, e.g. from search_memory source_refs."`
+	SessionID string `json:"session_id,omitempty" jsonschema:"Session to read; defaults to the current session."`
 }
 
 type searchMessagesArgs struct {
 	ContactID string `json:"contact_id,omitempty" jsonschema:"Filter by sender channel identity ID."`
-	EndTime   string `json:"end_time,omitempty" jsonschema:"ISO 8601 timestamp. Only return messages created at or before this time."`
-	Keyword   string `json:"keyword,omitempty" jsonschema:"Search keyword — matches against the text content of messages (case-insensitive)."`
-	Limit     *int   `json:"limit,omitempty" jsonschema:"Maximum number of messages to return. Default 50, max 200."`
+	EndTime   string `json:"end_time,omitempty" jsonschema:"ISO 8601; only messages created at or before this time."`
+	Keyword   string `json:"keyword,omitempty" jsonschema:"Keyword matched against message text (case-insensitive)."`
+	Limit     *int   `json:"limit,omitempty" jsonschema:"Max messages to return; default 50, max 200."`
 	Role      string `json:"role,omitempty" jsonschema:"Filter by message role."`
 	SessionID string `json:"session_id,omitempty" jsonschema:"Filter by session ID."`
-	StartTime string `json:"start_time,omitempty" jsonschema:"ISO 8601 timestamp. Only return messages created at or after this time."`
+	StartTime string `json:"start_time,omitempty" jsonschema:"ISO 8601; only messages created at or after this time."`
 }

@@ -347,15 +347,14 @@ func (*SpawnProvider) Usage(_ context.Context, _ SessionContext, available Avail
 	if spawnRef, ok := available.Ref(ToolSpawnAgent()); ok {
 		canStartBackground = true
 		parts = append(parts,
-			"Use "+spawnRef+" to create a managed subagent for an independent task.",
-			"Subagents can use the bot's configured tools, including workspace, web, memory, skills, browser, media, and MCP tools. They cannot ask the user, send direct chat messages or reactions, or create more subagents.",
-			"Subagents use an enabled chat model from the current session's provider. `model_id` selects a model within that provider; omitting it uses the current session model.",
-			"Set `fork: true` when the worker needs the parent model's current message context; otherwise it starts with only the assigned task.",
-			"Use subagents when work benefits from isolated context or can proceed while you continue. Don't use one for simple single-step work — just do it directly.",
+			"Use "+spawnRef+" for an independent task that benefits from isolated context or can proceed while you continue; for simple single-step work, do it directly.",
+			"Subagents can use the bot's configured tools (workspace, web, memory, skills, browser, media, MCP) but cannot ask the user, send chat messages or reactions, or spawn more subagents.",
+			"They run an enabled chat model from the session's provider; `model_id` selects one, omit for the session model.",
+			"Set `fork: true` to give the worker the parent's current message context; otherwise it starts with only the task.",
 		)
 	}
 	if ref, ok := available.Ref(ToolListModels()); ok {
-		parts = append(parts, ref+" lists enabled chat models, provider names, and descriptions. Only models from the current session's provider are available to subagents.")
+		parts = append(parts, ref+" lists enabled models with providers; only the session's provider is available to subagents.")
 	}
 	if ref, ok := available.Ref(ToolSendMessage()); ok {
 		canStartBackground = true
@@ -363,7 +362,7 @@ func (*SpawnProvider) Usage(_ context.Context, _ SessionContext, available Avail
 	}
 	if backgroundTools := available.Refs(ToolWaitUntil(), ToolGetBackgroundStatus(), ToolListBackground(), ToolKillBackground()); len(backgroundTools) > 0 {
 		if canStartBackground {
-			parts = append(parts, "For long work, set `run_in_background: true`. The call returns a task ID immediately. Use `wait_until(task_id)`, then `get_background_status(task_id)` to read `result`.")
+			parts = append(parts, "For long work, set `run_in_background: true`; the call returns a task ID. Read `result` with `wait_until(task_id)`, then `get_background_status(task_id)`.")
 		}
 		parts = append(parts, "Manage running agent tasks with "+joinRefs(backgroundTools, "and")+".")
 	}
@@ -371,7 +370,7 @@ func (*SpawnProvider) Usage(_ context.Context, _ SessionContext, available Avail
 		parts = append(parts, "Use "+ref+" to see agents created in the current session.")
 	}
 	if ref, ok := available.Ref(ToolSearchMessages()); ok {
-		parts = append(parts, "Read a finished task's full transcript with "+ref+" using the session ID returned by get_background_status when the brief result is not enough.")
+		parts = append(parts, "For a finished task's full transcript, read "+ref+" with the session ID from get_background_status.")
 	}
 	if len(parts) == 0 {
 		return ""
@@ -405,7 +404,7 @@ func (p *SpawnProvider) Tools(ctx context.Context, session SessionContext) ([]to
 		},
 		{
 			Name:        ToolSendMessage().String(),
-			Description: "Send a follow-up message to an existing managed subagent. Messages to a busy agent are queued and run serially.",
+			Description: "Send a follow-up message to an existing subagent. Queued and run serially when the agent is busy.",
 			Parameters:  toolexec.SchemaFor[sendMessageArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, args sendMessageArgs) (sdk.ToolOutput, error) {
 				callCtx := withNativeTaskCall(ctx.Context, ctx.ToolCallID, ctx.ToolName, args)
@@ -425,7 +424,7 @@ func (p *SpawnProvider) Tools(ctx context.Context, session SessionContext) ([]to
 		},
 		{
 			Name:        ToolListModels().String(),
-			Description: "List enabled chat models, including model_id, provider, description, and the current session model marker. Subagents can only use models from the current session's provider.",
+			Description: "List enabled chat models (model_id, provider, description, current marker). Subagents can only use the current session's provider.",
 			Parameters:  toolexec.SchemaFor[listModelsArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, _ listModelsArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execListModels(ctx.Context, sess))
@@ -1787,7 +1786,7 @@ func appendModelCatalogToSpawnDescription(base string, catalog []subagentModelCa
 		}
 		lines = append(lines, fmt.Sprintf("- %s | %s | %s%s", item.ModelID, item.ProviderName, description, marker))
 	}
-	lines = append(lines, "list_models includes models from all providers; subagents are limited to the current session's provider.")
+	lines = append(lines, "list_models lists all providers; subagents are limited to the current session's provider.")
 	return strings.Join(lines, "\n")
 }
 
@@ -2025,18 +2024,18 @@ func applyEffortTieringForSubagent(resolved *reasoning.Config, advertised []stri
 }
 
 type spawnAgentArgs struct {
-	Fork            bool   `json:"fork,omitempty" jsonschema:"If true, inherit the parent model's current message context while keeping the subagent system prompt and tools."`
-	ID              string `json:"id,omitempty" jsonschema:"Optional memorable agent id. If omitted, an id like agent_1 is assigned. Must be lowercase letters, digits, underscore, or hyphen."`
-	ModelID         string `json:"model_id,omitempty" jsonschema:"Optional external model name from the current session's provider. Omit to use the current session model."`
-	Provider        string `json:"provider,omitempty" jsonschema:"Optional provider name. Must match the current session's provider."`
-	RunInBackground bool   `json:"run_in_background,omitempty" jsonschema:"If true, return immediately with a task_id. Use wait_until(task_id), then get_background_status(task_id) to inspect result."`
+	Fork            bool   `json:"fork,omitempty" jsonschema:"Inherit the parent's current message context; the subagent prompt and tools stay."`
+	ID              string `json:"id,omitempty" jsonschema:"Optional agent id (lowercase letters, digits, _, -); default agent_N."`
+	ModelID         string `json:"model_id,omitempty" jsonschema:"Model name from the session's provider; omit for the session model."`
+	Provider        string `json:"provider,omitempty" jsonschema:"Provider name; must be the session's provider."`
+	RunInBackground bool   `json:"run_in_background,omitempty" jsonschema:"Return immediately with a task_id; inspect with wait_until(task_id), then get_background_status(task_id)."`
 	Task            string `json:"task" jsonschema:"Task instruction for the new agent."`
 }
 
 type sendMessageArgs struct {
 	ID              string `json:"id" jsonschema:"Existing agent id returned when the agent was created or listed."`
 	Message         string `json:"message" jsonschema:"Follow-up instruction for the agent."`
-	RunInBackground bool   `json:"run_in_background,omitempty" jsonschema:"If true, return immediately with a task_id. If the agent is busy, the message is queued regardless of this value. Use wait_until(task_id), then get_background_status(task_id) to inspect result."`
+	RunInBackground bool   `json:"run_in_background,omitempty" jsonschema:"Return immediately with a task_id; a busy agent queues the message regardless. Inspect with wait_until(task_id), then get_background_status(task_id)."`
 }
 
 type listAgentsArgs struct{}
