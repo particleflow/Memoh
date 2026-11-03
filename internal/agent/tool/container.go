@@ -57,6 +57,7 @@ type ContainerProvider struct {
 	hookService workspaceHookService
 	execWorkDir string
 	logger      *slog.Logger
+	transcriber ReadTranscriber
 }
 
 type workspaceHookService interface {
@@ -188,6 +189,7 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP) — binary images are loaded into model context automatically."
 	}
 	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files are truncated)."
+	readDesc += " Audio files are transcribed to text (up to 10 MB encoded and 5 minutes) when the Bot has a transcription model configured."
 
 	toolList := []toolexec.Tool{
 		toolexec.Define(ToolRead().String(), readDesc,
@@ -826,6 +828,13 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 			return nil, readErr
 		}
 		return readOfficeResult(filePath, officeKind, data)
+	}
+	// Audio before the generic binary probe: an mp3 may carry no NUL byte in
+	// its first 8KB, and audio needs its own 90s transcription budget rather
+	// than the image lane. The probe stream stays for the deferred close; the
+	// audio branch re-opens the file under its own context.
+	if audioMime, ok := readAudioContentType(probe[:probeN], filePath); ok {
+		return p.execReadAudio(ctx, client, filePath, audioMime, session)
 	}
 	if bytes.IndexByte(probe[:probeN], 0) >= 0 {
 		if !session.SupportsImageInput {
