@@ -367,7 +367,6 @@
     "queue_follow_up_unsupported_channel": "このチャンネルではキュー投入を利用できません。返信は送信したメッセージに対してのみ届きます。/steer で現在の返信に追加するか、Web アプリからキューに追加してください。",
     "queue_invocation_conflict": "このメッセージは別の内容ですでに送信されています。",
     "queue_item_not_editable": "このキュー内のメッセージは送信者のみ編集できます。",
-    "queue_item_not_pending": "このメッセージは待機中のキューにありません。",
     "queue_no_active_run": "現在の応答は終了しています。内容を新しいメッセージとして送信してください。",
     "queue_request_invalid": "既存の会話で /steer または /queue の後に内容を入力してください。",
     "queue_target_run_not_active": "この指示が届く前に応答が終了しました。新しいメッセージとして送信してください。",

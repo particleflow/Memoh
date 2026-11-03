@@ -131,4 +131,58 @@ describe('useSessionFollowUpQueue', () => {
     expect(queue.items.value.map(entry => entry.item_id)).toEqual(['s1', 'f2', 'f1'])
     expect(queue.items.value[0]?.queueKind).toBe('steer')
   })
+
+  // The server keeps listing an item the mutations already refuse
+  // (HAP42: a promotion stranded between its two writes). The row must leave
+  // with the first refusal instead of surviving every action.
+  const notPendingError = () => Object.assign(new Error('gone'), { body: { code: 'queue_item_not_pending' } })
+
+  it('drops the row when the delete is answered not-pending, without throwing', async () => {
+    api.fetchSessionQueues.mockResolvedValue({ follow_up: [item('f1', '我看是0秒啊')], steer: [] })
+    api.deleteFollowUpQueueItem.mockRejectedValue(notPendingError())
+    const queue = useSessionFollowUpQueue(ref('bot'), ref('session'))
+    await nextTick()
+    await Promise.resolve()
+
+    await expect(queue.remove(queue.items.value[0]!)).resolves.toBeUndefined()
+
+    expect(queue.items.value).toHaveLength(0)
+  })
+
+  it('drops the row when the promote is answered not-pending, without throwing', async () => {
+    api.fetchSessionQueues.mockResolvedValue({ follow_up: [item('f1', 'gone')], steer: [] })
+    api.promoteFollowUpQueueItemToSteer.mockRejectedValue(notPendingError())
+    const queue = useSessionFollowUpQueue(ref('bot'), ref('session'))
+    await nextTick()
+    await Promise.resolve()
+
+    await expect(queue.steer(queue.items.value[0]!)).resolves.toBeUndefined()
+
+    expect(queue.items.value).toHaveLength(0)
+  })
+
+  it('drops the row when the edit is answered not-pending, without throwing', async () => {
+    api.fetchSessionQueues.mockResolvedValue({ follow_up: [item('f1', 'gone')], steer: [] })
+    api.updateFollowUpQueueItem.mockRejectedValue(notPendingError())
+    const queue = useSessionFollowUpQueue(ref('bot'), ref('session'))
+    await nextTick()
+    await Promise.resolve()
+
+    queue.items.value[0]!.text = 'edited'
+    await expect(queue.update(queue.items.value[0]!)).resolves.toBeUndefined()
+
+    expect(queue.items.value).toHaveLength(0)
+  })
+
+  it('still surfaces other delete failures', async () => {
+    api.fetchSessionQueues.mockResolvedValue({ follow_up: [item('f1', 'keep')], steer: [] })
+    api.deleteFollowUpQueueItem.mockRejectedValue(new Error('network'))
+    const queue = useSessionFollowUpQueue(ref('bot'), ref('session'))
+    await nextTick()
+    await Promise.resolve()
+
+    await expect(queue.remove(queue.items.value[0]!)).rejects.toThrow('network')
+
+    expect(queue.items.value).toHaveLength(1)
+  })
 })
