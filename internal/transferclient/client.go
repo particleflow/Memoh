@@ -50,9 +50,11 @@ type Client struct {
 	transport       *http.Transport
 }
 
-// New accepts HTTPS only. The supplied transport must validate the server's
-// certificate and hostname. Test roots belong only in an isolated TLS fixture.
-// Redirects and cookie jars are disabled, and requests have a finite deadline.
+// New accepts an HTTPS API base, or plain HTTP only when the configured host
+// is a private-network IP literal (RFC 1918 / IPv6 unique local). The supplied
+// transport must validate the server's certificate and hostname for HTTPS.
+// Test roots belong only in an isolated TLS fixture. Redirects and cookie jars
+// are disabled, and requests have a finite deadline.
 func New(base string, client *http.Client, auth Authorization) (*Client, error) {
 	u, err := parseAPIBase(base)
 	if err != nil || auth == nil {

@@ -73,9 +73,10 @@ completion receipt.
 
 ## One-time connection checklist (not executed by this package)
 
-1. Approve the Memoh HTTPS origin and its valid hostname/certificate trust. The
-   helper requires HTTPS and normal certificate verification. Existing HTTP is
-   not encryption and cannot be configured as a shortcut.
+1. Approve the Memoh origin and, for HTTPS, its valid hostname/certificate
+   trust. The helper accepts HTTPS for any host and plain HTTP only for
+   private-network IP literals (RFC 1918 IPv4 or IPv6 unique local); normal
+   certificate verification stays mandatory for HTTPS and cannot be disabled.
 2. Upgrade the fully integrated Server through migrations 171/172 and approve
    enabling `files.device_transfers_enabled`. The existing runtime registry
    includes the stable credential backend and Server verifier. The runtime
