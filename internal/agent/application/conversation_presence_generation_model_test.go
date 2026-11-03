@@ -35,7 +35,7 @@ const presenceAckRequestByteCap = 6144
 func TestPresenceAckRequestStaysBounded(t *testing.T) {
 	long := strings.Repeat("字", 400)
 	acks := []string{strings.Repeat("在", 400), strings.Repeat("好", 400)}
-	slots := buildPresenceSlots("红玉", "zh", long, []string{long, long, long, long}, conversationpresence.Thinking, true, 3, "可能要一会儿", acks)
+	slots := buildPresenceSlots("红玉", "zh", long, []string{long, long, long, long}, conversationpresence.Thinking, []string{"图片", "图片", "视频"}, 3, "可能要一会儿", acks)
 	if got := len([]rune(slots.UserMessage)); got != presenceSlotUserMaxRunes {
 		t.Fatalf("user_message runes=%d want the %d cap", got, presenceSlotUserMaxRunes)
 	}

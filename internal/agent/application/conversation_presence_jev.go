@@ -13,6 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
+	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/conversationpresence"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/jev"
@@ -99,10 +100,15 @@ type PresenceJevRuntimeOptions struct {
 
 // presenceJevInput is the per-message decision input.
 type presenceJevInput struct {
-	Text         string
-	Facts        conversationpresence.Facts
-	Reply        bool
-	ImagePresent bool
+	Text  string
+	Facts conversationpresence.Facts
+	Reply bool
+	// AttachmentCount is the number of attachments newly added this turn
+	// (req.Attachments only; reply-merged attachments are not "new this turn").
+	AttachmentCount int
+	// AttachmentKinds holds one mechanical kind per new attachment, in arrival
+	// order, repeats preserved (TF-16 design §1).
+	AttachmentKinds []string
 	// Effort is the main model's thinking effort for this run ("" unknown).
 	Effort string
 	// AdmittedAt anchors wall_since_admission_ms.
@@ -155,11 +161,15 @@ type presenceDecisionTimings struct {
 }
 
 type presenceDecisionDetail struct {
-	Stage1               []presenceStage1Attempt `json:"stage1,omitempty"`
-	Forced               bool                    `json:"forced,omitempty"`
-	Q1Attempts           int                     `json:"q1_attempts"`
-	Stage2               *presenceStage2Record   `json:"stage2,omitempty"`
-	Pulls                []presencePullRecord    `json:"pulls,omitempty"`
+	Stage1     []presenceStage1Attempt `json:"stage1,omitempty"`
+	Forced     bool                    `json:"forced,omitempty"`
+	Q1Attempts int                     `json:"q1_attempts"`
+	Stage2     *presenceStage2Record   `json:"stage2,omitempty"`
+	Pulls      []presencePullRecord    `json:"pulls,omitempty"`
+	// AttachmentOverride records the §2.3 deterministic re-judgment: stage one
+	// answered no_fast_reply while attachments were present, and the rule layer
+	// overrode it into the stage-two fast-reply path.
+	AttachmentOverride   bool                    `json:"attachment_override,omitempty"`
 	Outcome              string                  `json:"outcome,omitempty"`
 	WallSinceAdmissionMs int64                   `json:"wall_since_admission_ms"`
 	Timings              presenceDecisionTimings `json:"timings"`
@@ -555,10 +565,14 @@ func (l *presenceJevLoop) stageTwo() *presenceJevResult {
 
 // applyDowngradeCascade evaluates the server-side preconditions once
 // (design v3 §3.3): progress needs task_state pulled this round with a
-// mappable phase; eta needs a computable band; brief needs complete evidence
+// mappable phase — or attachments newly present this turn, whose handling the
+// server itself scheduled (TF-16 design §3: ActiveRunState excludes this run,
+// so an attachment turn with no other active run would otherwise always
+// downgrade to soothe, whose wording contradicts "will look at the
+// attachments"); eta needs a computable band; brief needs complete evidence
 // (off by default) and cascades through progress. soothe is the terminus.
 func (l *presenceJevLoop) applyDowngradeCascade(direction string) (string, string) {
-	progressOK := l.taskStatePull && l.signals.ActiveRunState != ""
+	progressOK := (l.taskStatePull && l.signals.ActiveRunState != "") || l.eng.in.AttachmentCount > 0
 	switch direction {
 	case "progress":
 		if progressOK {
@@ -644,7 +658,15 @@ func (l *presenceJevLoop) directionOffered(direction string) bool {
 	return described
 }
 
-func (*presenceJevLoop) terminalNoFast() *presenceJevResult {
+// terminalNoFast closes a no_fast_reply terminal judgment. Attachments present
+// are a deterministic fact: the §2.3 rule layer overrides the stage-one answer
+// into the stage-two fast-reply path instead (recorded in the detail for audit
+// and replay), so an attachment turn never ends on no_fast_reply.
+func (l *presenceJevLoop) terminalNoFast() *presenceJevResult {
+	if l.eng.in.AttachmentCount > 0 {
+		l.detail.AttachmentOverride = true
+		return l.stageTwo()
+	}
 	return &presenceJevResult{
 		Mode:        presenceModeNoFastReply,
 		Temperature: conversationpresence.Hot,
@@ -743,7 +765,7 @@ func (l *presenceJevLoop) renderState(input string, truncatedInput bool, tokenEs
 		"；首条输入=" + yesNo(facts.FirstDirectInput) +
 		"；引用回复=" + yesNo(l.eng.in.Reply) +
 		"；主链思考档位=" + presenceEffortLabel(l.eng.in.Effort) +
-		"；带图片=" + yesNo(l.eng.in.ImagePresent) +
+		"；新增附件=" + presenceAttachmentSummary(l.eng.in) +
 		"；历史可用=" + yesNo(facts.HistoryAvailable) +
 		"；上一轮因长度截断=" + yesNo(l.signals.LastReplyTruncated) +
 		"；上下文token估算=" + token +
@@ -856,6 +878,30 @@ func presenceEffortLabel(effort string) string {
 		return "未知"
 	}
 	return effort
+}
+
+// presenceAttachmentSummary renders the 新增附件 signal value (TF-16 design
+// §2.1): the count plus one label-times-count entry per kind in first-seen
+// order, e.g. "2（图片x1、视频x1）"; zero attachments render as "0". Every value
+// is derived server-side from req.Attachments — the user text is flattened by
+// presenceStateLine and cannot forge this line.
+func presenceAttachmentSummary(in presenceJevInput) string {
+	if in.AttachmentCount <= 0 || len(in.AttachmentKinds) == 0 {
+		return "0"
+	}
+	var order []string
+	counts := map[string]int{}
+	for _, kind := range in.AttachmentKinds {
+		if _, seen := counts[kind]; !seen {
+			order = append(order, kind)
+		}
+		counts[kind]++
+	}
+	parts := make([]string, 0, len(order))
+	for _, kind := range order {
+		parts = append(parts, attachmentpkg.KindLabel(kind)+"x"+strconv.Itoa(counts[kind]))
+	}
+	return strconv.Itoa(in.AttachmentCount) + "（" + strings.Join(parts, "、") + "）"
 }
 
 func wallSince(admitted time.Time) int64 {
