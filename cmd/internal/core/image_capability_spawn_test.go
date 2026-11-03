@@ -171,7 +171,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 						t.Error("child unexpectedly retried its turn")
 					}
 					output := imageSpawnLastTool(req)
-					if mode == "success" || mode == "reference_success" {
+					if mode == "success" || mode == "reference_success" || mode == "foreign_reference" {
 						if !strings.Contains(output, hash) || !strings.Contains(output, "completed") {
 							t.Errorf("child has no persisted reference: %s", output)
 						}
@@ -190,7 +190,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 					if mode == "revoked" && !strings.Contains(output, "not authorized for this conversation") {
 						t.Errorf("current permission revocation not enforced: %s", output)
 					}
-					if (mode == "foreign_reference" || mode == "missing_reference") && !strings.Contains(output, "input image reference is unavailable for this Bot") {
+					if mode == "missing_reference" && !strings.Contains(output, "input image reference is unavailable for this Bot") {
 						t.Errorf("invalid reference not rejected in current Bot scope: %s", output)
 					}
 					imageSpawnReply(w, true, "", nil, "synthetic child has no ready image: "+mode)
@@ -206,7 +206,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 				}
 				if n == 2 {
 					output := imageSpawnLastTool(req)
-					if mode == "success" || mode == "reference_success" {
+					if mode == "success" || mode == "reference_success" || mode == "foreign_reference" {
 						if !strings.Contains(output, "synthetic child reference "+hash) {
 							t.Errorf("child report missing from supervisor: %s", output)
 						}
@@ -289,7 +289,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 				t.Fatalf("child steps not committed through application factory: %d", steps)
 			}
 			wantPosts := int32(0)
-			if mode == "success" || mode == "reference_success" || mode == "unknown" {
+			if mode == "success" || mode == "reference_success" || mode == "foreign_reference" || mode == "unknown" {
 				wantPosts = 1
 			}
 			if imagePosts.Load() != wantPosts {
@@ -298,7 +298,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 			if mode == "revoked" && storage.opens.Load() != 0 {
 				t.Fatal("revoked child opened an existing current-Bot image")
 			}
-			if mode == "success" || mode == "reference_success" {
+			if mode == "success" || mode == "reference_success" || mode == "foreign_reference" {
 				if sender.calls.Load() != 1 || sender.hash != hash || !bytes.Equal(sender.bytes, original.Bytes()) || parentCalls.Load() != 3 {
 					t.Fatal("supervisor send changed or lost original reference/bytes")
 				}

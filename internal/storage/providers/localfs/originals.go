@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -325,4 +326,69 @@ func (p *Originals) ListPrefix(ctx context.Context, prefix string) ([]string, er
 		}
 	}
 	return keys, nil
+}
+
+// ListPrefixAcrossBots answers which Bot directories hold a storage-key
+// prefix. Bot roots are walked in name order, so the first listed owner is
+// deterministic. Like ListPrefix this is metadata-only: no payload bytes are
+// read and nothing moves between Bot directories.
+func (p *Originals) ListPrefixAcrossBots(ctx context.Context, storageKeyPrefix string) ([]string, error) {
+	if !validStorageKeyPrefix(storageKeyPrefix) {
+		return nil, errors.New("invalid storage key prefix")
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	root, err := os.OpenRoot(p.root)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = root.Close() }()
+	top, err := root.Open(".")
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = top.Close() }()
+	entries, err := top.ReadDir(-1)
+	if err != nil {
+		return nil, err
+	}
+	bots := make([]string, 0, len(entries))
+	for _, e := range entries {
+		// Only real Bot directories are candidates; the per-Bot listing's own
+		// key validation still applies to each.
+		if !e.IsDir() || !validComponent(e.Name()) {
+			continue
+		}
+		bots = append(bots, e.Name())
+	}
+	slices.Sort(bots)
+	var keys []string
+	for _, bot := range bots {
+		botKeys, err := p.ListPrefix(ctx, path.Join(bot, storageKeyPrefix))
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			return nil, err
+		}
+		keys = append(keys, botKeys...)
+	}
+	return keys, nil
+}
+
+// validStorageKeyPrefix accepts the Bot-independent half of a routing key:
+// "<hash prefix>/<hash>", without an extension — the same ext-less prefix the
+// per-Bot ListPrefix consumes.
+func validStorageKeyPrefix(value string) bool {
+	parts := strings.Split(value, "/")
+	if len(parts) != 2 {
+		return false
+	}
+	for _, part := range parts {
+		if !validComponent(part) || strings.Contains(part, ".") {
+			return false
+		}
+	}
+	return true
 }

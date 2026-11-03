@@ -1748,7 +1748,9 @@ func (a *gatewayAssetLoaderAdapter) AccessPathForGateway(ctx context.Context, bo
 	if err != nil {
 		return "", err
 	}
-	accessPath, err := a.media.EnsureAccessPath(ctx, asset)
+	// A reference that resolved to another Bot's original materializes into
+	// the reading Bot's own addressable storage, so path tools reach it.
+	accessPath, err := a.media.EnsureAccessPathFor(ctx, botID, asset)
 	if err != nil {
 		return "", err
 	}

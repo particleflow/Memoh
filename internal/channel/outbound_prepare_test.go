@@ -679,6 +679,78 @@ func (s *grantedStore) OpenShared(ctx context.Context, _ string, contentHash str
 	return s.owner.Open(ctx, s.ownerBotID, contentHash)
 }
 
+// referenceResolvingStore models a store whose plain hash lookups resolve the
+// reference to whichever Bot owns the bytes, the way the media service does
+// after cross-Bot reference resolution. It needs no grant.
+type referenceResolvingStore struct {
+	*channeltest.MemoryAttachmentStore
+	owner      *channeltest.MemoryAttachmentStore
+	ownerBotID string
+}
+
+func (s *referenceResolvingStore) Stat(ctx context.Context, botID, contentHash string) (media.Asset, error) {
+	if asset, err := s.MemoryAttachmentStore.Stat(ctx, botID, contentHash); err == nil {
+		return asset, nil
+	}
+	return s.owner.Stat(ctx, s.ownerBotID, contentHash)
+}
+
+func (s *referenceResolvingStore) Open(ctx context.Context, botID, contentHash string) (io.ReadCloser, media.Asset, error) {
+	if reader, asset, err := s.MemoryAttachmentStore.Open(ctx, botID, contentHash); err == nil {
+		return reader, asset, nil
+	}
+	return s.owner.Open(ctx, s.ownerBotID, contentHash)
+}
+
+// A hash the sender does not own still sends: the reference resolves to the
+// owner, delivery streams the owner's original, and the logical attachment
+// carries no path borrowed from the owner's workspace.
+func TestPrepareOutboundMessage_ReferenceResolvesOwnerWithoutGrant(t *testing.T) {
+	t.Parallel()
+
+	owner := channeltest.NewMemoryAttachmentStore()
+	ownerAsset, err := owner.SeedAsset("owner-bot", []byte("owner original"), "image/png", ".png")
+	if err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	store := &referenceResolvingStore{MemoryAttachmentStore: channeltest.NewMemoryAttachmentStore(), owner: owner, ownerBotID: "owner-bot"}
+
+	prepared, err := PrepareOutboundMessage(context.Background(), store, ChannelConfig{
+		BotID:       "manager-bot",
+		ChannelType: ChannelTypeDiscord,
+	}, OutboundMessage{
+		Target: "chan-1",
+		Message: Message{
+			Attachments: []Attachment{{
+				Type:        AttachmentImage,
+				ContentHash: ownerAsset.ContentHash,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("PrepareOutboundMessage failed: %v", err)
+	}
+	att := prepared.Message.Attachments[0]
+	if att.Kind != PreparedAttachmentUpload || att.Open == nil {
+		t.Fatalf("prepared attachment = %#v, want an upload with an opener", att)
+	}
+	reader, err := att.Open(context.Background())
+	if err != nil {
+		t.Fatalf("open prepared attachment: %v", err)
+	}
+	defer func() { _ = reader.Close() }()
+	data, err := io.ReadAll(reader)
+	if err != nil || string(data) != "owner original" {
+		t.Fatalf("prepared bytes = %q, %v; want the owner's original", string(data), err)
+	}
+	if path := prepared.Message.Message.Attachments[0].Path; path != "" {
+		t.Fatalf("logical path = %q, want no path borrowed from the owner", path)
+	}
+	if hash := prepared.Message.Message.Attachments[0].ContentHash; hash != ownerAsset.ContentHash {
+		t.Fatalf("logical hash = %q, want %q", hash, ownerAsset.ContentHash)
+	}
+}
+
 func TestPrepareOutboundMessage_PersistedContentHash(t *testing.T) {
 	t.Parallel()
 

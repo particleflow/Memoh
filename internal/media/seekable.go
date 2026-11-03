@@ -24,7 +24,10 @@ type ReadSeekCloser interface {
 // Legacy providers retain full-file verification and disk-only spooling.
 func (s *Service) OpenSeekable(ctx context.Context, botID, contentHash string) (ReadSeekCloser, Asset, error) {
 	if opener, ok := s.provider.(storage.VerifiedRangeOpener); ok {
-		asset, err := s.Resolve(ctx, botID, contentHash)
+		// Verified ranges stay scoped to the named Bot's own originals: this
+		// surface backs HTTP range delivery and task input production, where
+		// the Bot in the request is the owner the bytes must come from.
+		asset, err := s.resolveByContentHash(ctx, botID, contentHash)
 		if err != nil {
 			return nil, Asset{}, err
 		}

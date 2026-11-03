@@ -312,16 +312,38 @@ func TestInvalidInputsNeverDispatch(t *testing.T) {
 			}
 		})
 	}
-	p, _ := fixture(t, func(http.ResponseWriter, *http.Request) { t.Error("foreign attachment dispatched") })
-	asset, err := p.media.Ingest(t.Context(), media.IngestInput{BotID: "other-bot", Mime: "image/png", Reader: bytes.NewReader(pngBytes(t, 50))})
+	p, _ := fixture(t, func(http.ResponseWriter, *http.Request) { t.Error("path/URL input dispatched") })
+	for _, ref := range []string{"/data/image.png", "https://example.invalid/image.png"} {
+		args, _ := json.Marshal(map[string]any{"prompt": "synthetic", "images": []string{ref}})
+		if !call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", string(args)).IsError {
+			t.Fatal("path/URL input accepted")
+		}
+	}
+}
+
+// A hash another Bot owns is a readable reference: the edit consumes the
+// owner's original, and the reference keeps naming the owner Bot.
+func TestForeignHashReferenceDispatchesFromOwner(t *testing.T) {
+	var calls atomic.Int32
+	data := pngBytes(t, 50)
+	p, _ := fixture(t, func(w http.ResponseWriter, _ *http.Request) { calls.Add(1); respondImage(w, data) })
+	asset, err := p.media.Ingest(t.Context(), media.IngestInput{BotID: "other-bot", Mime: "image/png", Reader: bytes.NewReader(data)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, ref := range []string{asset.ContentHash, "/data/image.png", "https://example.invalid/image.png"} {
-		args, _ := json.Marshal(map[string]any{"prompt": "synthetic", "images": []string{ref}})
-		if !call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", string(args)).IsError {
-			t.Fatal("foreign/path/URL input accepted")
-		}
+	args, _ := json.Marshal(map[string]any{"prompt": "synthetic", "images": []string{asset.ContentHash}})
+	result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", string(args))
+	if result.IsError || calls.Load() != 1 {
+		t.Fatalf("referenced edit did not dispatch: calls=%d result=%s", calls.Load(), result.Result.String())
+	}
+	reader, _, err := p.media.Open(t.Context(), "synthetic-bot", asset.ContentHash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := io.ReadAll(reader)
+	_ = reader.Close()
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("reference bytes = %q, %v; want the owner's original", got, err)
 	}
 }
 

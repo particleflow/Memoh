@@ -7,6 +7,8 @@ import (
 	"errors"
 	"image"
 	"image/png"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -25,6 +27,7 @@ func (f delegationSizeAuthority) ResultHasAsset(_ context.Context, bot, user, se
 
 type delegationSizeStorage struct {
 	*localfs.Originals
+	root   string
 	opens  int
 	onOpen func()
 }
@@ -44,7 +47,8 @@ func delegationSizeFixture(t *testing.T, input bool) (*delegationHost, botdelega
 		"synthetic-source": {ID: "synthetic-source", BotID: imageSpawnOtherBot, CreatedByUserID: imageSpawnUser, TeamID: "synthetic-team", Type: thread.TypeChat, Metadata: map[string]any{"workspace_target_id": "native"}},
 		"synthetic-target": {ID: "synthetic-target", BotID: imageSpawnBot, CreatedByUserID: imageSpawnUser, TeamID: "synthetic-team", Type: thread.TypeChat, Metadata: map[string]any{"workspace_target_id": "native"}},
 	}}}
-	originals := &delegationSizeStorage{Originals: localfs.NewOriginals(t.TempDir())}
+	originalsRoot := t.TempDir()
+	originals := &delegationSizeStorage{Originals: localfs.NewOriginals(originalsRoot), root: originalsRoot}
 	assets := media.NewService(nil, originals)
 	assets.SetRequirePersistence(true)
 	owner := imageSpawnBot
@@ -82,7 +86,7 @@ func TestDelegationAttachmentSizeFromStoredOriginal(t *testing.T) {
 			name = "returned-input"
 		}
 		t.Run(name, func(t *testing.T) {
-			host, r, _, _, asset, size := delegationSizeFixture(t, input)
+			host, r, _, originals, asset, size := delegationSizeFixture(t, input)
 			located, e := host.media.Stat(t.Context(), asset.BotID, asset.ContentHash)
 			if e != nil || located.SizeBytes != 0 {
 				t.Fatal("fixture no longer represents size-less locator", located, e)
@@ -96,11 +100,18 @@ func TestDelegationAttachmentSizeFromStoredOriginal(t *testing.T) {
 			if e != nil || len(projected) != 1 || projected[0].Size != size {
 				t.Fatalf("return size lost: attachments=%+v expected=%d error=%v", projected, size, e)
 			}
-			// A delegated unchanged input keeps its original Bot owner; no media alias.
+			// A delegated unchanged input keeps its original Bot owner: no
+			// canonical bytes appear under the target Bot. Reading the hash
+			// from the target scope resolves the owner by reference instead.
 			if input {
-				if _, e := host.media.Stat(t.Context(), imageSpawnBot, asset.ContentHash); !errors.Is(e, media.ErrAssetNotFound) {
-					t.Fatal("input copied into target scope", e)
+				if _, e := os.Stat(filepath.Join(originals.root, imageSpawnBot)); !errors.Is(e, os.ErrNotExist) {
+					t.Fatal("input copied into target scope")
 				}
+				reader, _, e := host.media.Open(t.Context(), imageSpawnBot, asset.ContentHash)
+				if e != nil {
+					t.Fatal("reference read from target scope failed", e)
+				}
+				_ = reader.Close()
 			}
 		})
 	}

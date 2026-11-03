@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/felinics/memoh/internal/chat/thread"
@@ -84,8 +86,14 @@ func TestComputerInputDelegationUsesOriginalAndTrustedConversation(t *testing.T)
 			if err != nil || int64(len(data)) != size || hex.EncodeToString(sum[:]) != asset.ContentHash {
 				t.Fatal("original bytes/hash changed", err)
 			}
-			if _, err := host.media.Stat(ctx, b.BotID, asset.ContentHash); !errors.Is(err, media.ErrAssetNotFound) {
-				t.Fatal("delegated input acquired a target Bot alias", err)
+			// Zero copy, probed on the canonical store: the delegated input
+			// never materializes bytes under the target Bot, while the hash
+			// remains readable from the target scope by reference.
+			if _, err := os.Stat(filepath.Join(originals.root, b.BotID)); !errors.Is(err, os.ErrNotExist) {
+				t.Fatal("delegated input acquired a target Bot copy")
+			}
+			if _, _, err := host.media.Open(ctx, b.BotID, asset.ContentHash); err != nil {
+				t.Fatal("reference read from target scope failed", err)
 			}
 			// Keep checking already-open streams, not just the first download.
 			authority.active = false

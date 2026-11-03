@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -16,7 +19,8 @@ import (
 // Exercise the ordinary text result + send(content_hash) path with a real file
 // store. The deterministic SpawnAgent is not a live model or an external agent.
 func TestSubagentTextReferenceCanUseParentSend(t *testing.T) {
-	m := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+	root := t.TempDir()
+	m := media.NewService(nil, localfs.NewOriginals(root))
 	m.SetRequirePersistence(true)
 	asset, err := m.Ingest(t.Context(), media.IngestInput{BotID: "bot-1", Mime: "text/plain", Reader: strings.NewReader("synthetic child artifact")})
 	if err != nil {
@@ -52,11 +56,20 @@ func TestSubagentTextReferenceCanUseParentSend(t *testing.T) {
 	if err != nil || string(data) != "synthetic child artifact" {
 		t.Fatal("attachment changed", err)
 	}
-	// This store has no delegation or artifact binding to another Bot. This
-	// negative lookup does not specify whether authorized Bot delegation is
-	// allowed, and does not test a supervisor-to-specialist task flow.
-	if _, err := m.Stat(t.Context(), "unrelated-bot", ref); err == nil {
-		t.Fatal("unrelated Bot without an artifact binding resolved the hash")
+	// A hash is a reference any Bot session can read: the unrelated Bot
+	// resolves it to the owner and reads the same bytes, while the owner keeps
+	// the only canonical copy.
+	unrelated, err := m.Stat(t.Context(), "unrelated-bot", ref)
+	if err != nil || unrelated.BotID != "bot-1" {
+		t.Fatalf("reference from an unrelated Bot = %+v, %v; want the owner's asset", unrelated, err)
+	}
+	r, _, err = m.Open(t.Context(), "unrelated-bot", ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = r.Close()
+	if _, err := os.Stat(filepath.Join(root, "unrelated-bot")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("reference read wrote canonical bytes for the unrelated Bot: %v", err)
 	}
 }
 
