@@ -683,7 +683,7 @@ func TestUploadMutationReadSkipsJournalBarrier(t *testing.T) {
 	s := uploadService(t, root, 1024).Uploads()
 	b := []byte("barrier accounting")
 	u := createUpload(ctx, t, s, b)
-	appendBytes(ctx, t, s, u, b[:8])
+	u = appendBytes(ctx, t, s, u, b[:8])
 	dirSyncs := 0
 	s.syncFile = func(f *os.File) error {
 		info, err := f.Stat()
