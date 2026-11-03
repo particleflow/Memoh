@@ -50,6 +50,22 @@ func (a *pgGatedDeliveryAssets) OpenSeekable(ctx context.Context, bot, hash stri
 	return a.Service.OpenSeekable(ctx, bot, hash)
 }
 
+// The reference-following verification passes the same gate; only the owner
+// resolution differs from the embedded service's plain read.
+func (a *pgGatedDeliveryAssets) OpenSeekableFor(ctx context.Context, bot, hash string) (media.ReadSeekCloser, media.Asset, error) {
+	a.started <- struct{}{}
+	select {
+	case <-a.release:
+	case <-ctx.Done():
+		return nil, media.Asset{}, ctx.Err()
+	}
+	asset, err := a.Resolve(ctx, bot, hash)
+	if err != nil {
+		return nil, media.Asset{}, err
+	}
+	return a.Service.OpenSeekable(ctx, asset.BotID, hash)
+}
+
 // Runs under the real fixture's NOBYPASSRLS role. Only the incoming execution
 // verifier and local destination publication service are synthetic ports.
 func exerciseDeliveryHandoff(ctx context.Context, t *testing.T, store *postgresstore.Store, assets *media.Service, id computertask.DeliveryIdentity, ref computertask.DeliveryRequest) {

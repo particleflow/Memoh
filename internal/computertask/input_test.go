@@ -155,6 +155,16 @@ func (a *taskInputAssets) OpenSeekable(ctx context.Context, bot, hash string) (m
 	return r, asset, err
 }
 
+// The reference-following read keeps the same failure hooks: it only adds the
+// owner resolution the embedded service would do without them.
+func (a *taskInputAssets) OpenSeekableFor(ctx context.Context, bot, hash string) (media.ReadSeekCloser, media.Asset, error) {
+	asset, err := a.Resolve(ctx, bot, hash)
+	if err != nil {
+		return nil, media.Asset{}, err
+	}
+	return a.OpenSeekable(ctx, asset.BotID, hash)
+}
+
 func (a *taskInputAssets) Open(ctx context.Context, bot, hash string) (io.ReadCloser, media.Asset, error) {
 	if a.revoked {
 		return nil, media.Asset{}, ErrDenied

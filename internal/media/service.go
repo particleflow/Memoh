@@ -55,6 +55,8 @@ func NewService(log *slog.Logger, provider storage.Provider) *Service {
 
 // Ingest persists a new media asset. It hashes the content, deduplicates by
 // checking the filesystem, and stores the bytes. Returns a derived Asset.
+// Identical bytes another Bot already owns come back as a reference to that
+// owner's asset: no second canonical copy is written.
 func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) {
 	if s.provider == nil {
 		return Asset{}, ErrProviderUnavailable
@@ -118,6 +120,33 @@ func (s *Service) persist(ctx context.Context, input IngestInput, contentHash st
 			Mime:        mime,
 			SizeBytes:   sizeBytes,
 			StorageKey:  storageKey,
+		}, nil
+	}
+
+	// Cross-Bot dedup: identical bytes already have exactly one owner. The
+	// second ingest becomes a reference to that owner's original instead of a
+	// second canonical copy; a Bot that truly needs its own bytes (editing
+	// produces new content, a new hash) still writes below.
+	if owner, ownerErr := s.resolveOwnerByHash(ctx, contentHash); ownerErr == nil && owner.BotID != input.BotID && validStorageKey(owner.StorageKey) {
+		ownerRoutingKey := path.Join(owner.BotID, owner.StorageKey)
+		if ensurer, ok := s.provider.(storage.DurabilityEnsurer); ok {
+			if err := ensurer.EnsureDurable(ctx, ownerRoutingKey); err != nil {
+				return Asset{}, fmt.Errorf("confirm existing media durability: %w", err)
+			}
+		} else if s.requirePersistence {
+			if err := s.provider.Put(ctx, ownerRoutingKey, reader); err != nil {
+				return Asset{}, fmt.Errorf("republish existing media: %w", err)
+			}
+		}
+		if err := ctx.Err(); err != nil {
+			return Asset{}, err
+		}
+		return Asset{
+			ContentHash: contentHash,
+			BotID:       owner.BotID,
+			Mime:        owner.Mime,
+			SizeBytes:   sizeBytes,
+			StorageKey:  owner.StorageKey,
 		}, nil
 	}
 
