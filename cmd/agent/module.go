@@ -82,6 +82,7 @@ func commonOptions() fx.Option {
 		fx.Provide(
 			provideCatalogTargetResolver,
 			provideServerHandler(handlers.NewPingHandler),
+			provideServerHandler(handlers.NewClientNetReportHandler),
 			provideServerHandler(handlers.NewWebhookTunnelHandler),
 			provideServerHandler(provideAuthHandler),
 			provideServerHandler(provideMemoryHandler),
