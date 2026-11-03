@@ -534,12 +534,16 @@ async function main() {
     }
     function ringSeries(samples) {
       // Track the dashoffset of every filled arc keyed by its dasharray so two
-      // concurrent rings never interleave into one series.
+      // concurrent rings never interleave into one series. One ring's dashoffset
+      // is a toFixed(3) string, so a single continuous fill changes string
+      // length at 10.000 (6 chars -> 5 chars); segmenting on that length would
+      // split it in two and pin the tail segment's pass on a probe catching the
+      // final chunk before the read completes and unmounts the ring.
       const series = new Map()
       for (const probe of samples) {
         for (const ring of probe.rings) {
           if (ring.dashoffset == null) continue
-          const key = ring.dasharray + '|' + ring.dashoffset.length
+          const key = ring.dasharray
           if (!series.has(key)) series.set(key, [])
           series.get(key).push(Number(ring.dashoffset))
         }

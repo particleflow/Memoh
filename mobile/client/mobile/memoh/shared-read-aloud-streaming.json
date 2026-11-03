@@ -218,8 +218,8 @@
       ]
     },
     "apps/web/src/i18n/locales/zh.json": {
-      "baseSHA256": "131108248480990ea445d2a669951420005eff236ccf9f734d8d5b5277795b97",
-      "adaptedSHA256": "ecc14174d0a4ee8b5be8664e40d02ce54bb3b0745550c3bcca5bac0aca4c0c7e",
+      "baseSHA256": "eec11a29d23e64c07b58319ed2edb58f28e9802ad088fefdfa670282078122b2",
+      "adaptedSHA256": "69ea5089c001f886541241f2c07ce7357c5d356f243babac6f6a969bb2e4e5fe",
       "replacements": [
         [
           "      \"continue\": \"继续朗读\"\n    },",
@@ -229,8 +229,8 @@
       ]
     },
     "apps/web/src/i18n/locales/en.json": {
-      "baseSHA256": "836474527b31c92965a7ccac4addd4c049c88e6955f955d290537dfbda2f976f",
-      "adaptedSHA256": "d66707ff98a8c3067df97febda5b0e929053d46791739fc1cd07afeaae18772f",
+      "baseSHA256": "8818cda0bfb97a4a12f5a58e047f07161d8de0ed974fbc9544102d0fc9edd686",
+      "adaptedSHA256": "0de9c403818956293ddf272e7eb47f5dd980ef9daa4fedea92ad11036bcfaeda",
       "replacements": [
         [
           "      \"continue\": \"Continue reading\"\n    },",
@@ -240,8 +240,8 @@
       ]
     },
     "apps/web/src/i18n/locales/ja.json": {
-      "baseSHA256": "c667d75bd716c480906392b4f10be7528bd0f2a131f2d84b13b32e20265d0d1c",
-      "adaptedSHA256": "c58fb1b9cfdf6f1126f97078f853c3e6e9700d914abb36c2d85f23aba24d6d8c",
+      "baseSHA256": "a618a2293e48f771088e57a4ac96a48c811a5d94f0e21b6d8e1d4b04d23dcc4c",
+      "adaptedSHA256": "5ffbe7caef497ad58550ab922b43411b8f371e1a4639d89c04ee600f29eb634f",
       "replacements": [
         [
           "      \"continue\": \"読み上げを続ける\"\n    },",

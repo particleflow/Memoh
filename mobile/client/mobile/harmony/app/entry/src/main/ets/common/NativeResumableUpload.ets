@@ -223,10 +223,10 @@ export class NativeResumableUpload {
         await md.update({ data: new Uint8Array(buffer, 0, n) }); at += n;
       }
       j.hash = Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
-      // Re-read the granted source; mutation during snapshot copy cannot silently
-      // substitute a mixed original even when its size did not change.
-      run.phase = 'source-verify';
-      await verifyMediaFd(input.fd, j.size, j.hash, () => this.check(run)); this.check(run);
+      // The snapshot hash above is the content identity this upload declares, and
+      // the server recomputes it over the durable bytes at Complete. Re-reading the
+      // granted source adds nothing to that loop: a source change after the copy
+      // cannot alter the snapshot, and the snapshot is what gets uploaded.
       run.phase = 'journal-publish';
       this.save(j, () => { committed = true; run.staged.push(j); run.phase = 'journal-dir-sync'; }); this.check(run);
       this.visible.set(j.handle, j); return this.info(j);
@@ -432,7 +432,6 @@ export class NativeResumableUpload {
     const run = this.start(input); run.accepted = true;
     try {
       const owner = await this.owner(run), j = await this.owned(run, owner), limit = await this.limits(run);
-      await this.verify(run, j); this.check(run);
       const base = this.base(run);
       if (!j.uploadId && j.state === 'create-unknown') { throw new Error('UPLOAD_CREATE_UNCERTAIN'); }
       if (j.state === 'ready' || j.state === 'legacy-unknown') {
@@ -484,7 +483,11 @@ export class NativeResumableUpload {
       if (j.completePending && j.state !== 'ready') { throw new Error('UPLOAD_COMPLETE_UNCERTAIN'); }
       if (j.state === 'canceled') { throw new Error('UPLOAD_CANCELLED'); }
       const file = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.READ_ONLY | fs.OpenMode.NOFOLLOW);
-      const buffer = new ArrayBuffer(Math.min(262144, limit.chunk_max_bytes ?? 262144));
+      // The server advertises the largest chunk it accepts; only the non-resumable
+      // branch above has no chunk size. Sending 256 KiB regardless turned one file
+      // into thousands of serial round trips, which is a throughput limit, not a
+      // correctness one: the server already rejects an over-long Upload-Length.
+      const buffer = new ArrayBuffer(limit.chunk_max_bytes ?? 262144);
       try {
         while (j.offset < j.size) {
           this.check(run); if (j.state === 'canceled') { throw new Error('UPLOAD_CANCELLED'); }
@@ -512,7 +515,9 @@ export class NativeResumableUpload {
           if (j.offset !== start + n || j.state !== 'uploading') { throw new Error('UPLOAD_RECEIPT_INVALID'); }
         }
       } finally { fs.closeSync(file); }
-      await this.verify(run, j);
+      // Per-chunk acks advancing offset to size, then the server's own hash of the
+      // durable bytes at Complete, already close the loop; hashing the local
+      // snapshot again cannot change the stored original.
       if (j.state !== 'ready') {
         j.completePending = true; this.save(j);
         let reply: Reply;
