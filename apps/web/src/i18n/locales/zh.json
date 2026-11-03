@@ -370,7 +370,6 @@
     "queue_follow_up_unsupported_channel": "该渠道暂不支持排队消息：渠道回复只能随你发送的消息投递。可用 /steer 补充当前回复，或在 Web 端排队。",
     "queue_invocation_conflict": "这条消息已用不同内容提交过。",
     "queue_item_not_editable": "只有发送者可以编辑这条排队消息。",
-    "queue_item_not_pending": "这条消息已不在待处理队列中。",
     "queue_no_active_run": "当前回复已结束，请将内容作为新消息发送。",
     "queue_request_invalid": "请在已有会话中使用 /steer 或 /queue，并在命令后输入内容。",
     "queue_target_run_not_active": "这条指令送达前回复已结束，请把它作为新消息发送。",

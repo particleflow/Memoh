@@ -39,6 +39,14 @@ export const FAIL_TASK_BODY = [
   '第六段话是整段回复最后的收尾与致谢。',
 ]
 const HISTORY_BODY = '这是历史回复，加载时不应朗读。'
+// The post-steer continuation of the steer scenario: its own sentences, so the
+// harness can tell the text only the claimed follow-up produced apart from the
+// first reply the user interrupted by sending the follow-up.
+export const STEER_BODY = [
+  '追问后的第一段回答说明了新的安排。',
+  '追问后的第二段给出了进一步的解释。',
+  '追问后的第三段是这轮回答的收尾。',
+]
 // A receipt round is the turn the server opens from a finished task: every row
 // of that turn carries the task_result input source, and presence never posts
 // an acknowledgement for it (task_result input is ineligible).
@@ -164,6 +172,17 @@ export class StubService {
     this.firstSentenceAt = null
     this.lastSentenceAt = null
     this.settledAt = null
+    // Steer scenario: the queued follow-up claimed mid-run, and the timing of
+    // the continuation it produced (same clock base as the speech entries).
+    // A message the composer sends while a run streams does not travel as a
+    // websocket message at all: the client enqueues it through the session
+    // input queues over REST, and the running turn claims it as a steer.
+    this.queueItems = []
+    this.scriptActive = false
+    this.steerDone = false
+    this.steerClaimedAt = null
+    this.steerFirstSentenceAt = null
+    this.steerSettledAt = null
     this.server = createServer((req, res) => this.handle(req, res).catch(error => {
       res.writeHead(500, { 'content-type': 'application/json' })
       res.end(JSON.stringify({ message: String(error && error.message || error) }))
@@ -189,7 +208,7 @@ export class StubService {
     return fetch(`http://127.0.0.1:${this.port}${path}`, method === 'GET' ? { method } : { method, body: JSON.stringify(body ?? {}) }).then(response => response.json())
   }
 
-  mark() { this.t0 = Date.now(); this.speech.length = 0; this.apiLog.length = 0; this.postCount = 0; this.bodyPostCount = 0; this.firstSentenceAt = null; this.lastSentenceAt = null; this.settledAt = null }
+  mark() { this.t0 = Date.now(); this.speech.length = 0; this.apiLog.length = 0; this.postCount = 0; this.bodyPostCount = 0; this.firstSentenceAt = null; this.lastSentenceAt = null; this.settledAt = null; this.steerClaimedAt = null; this.steerFirstSentenceAt = null; this.steerSettledAt = null }
 
   async handle(req, res) {
     const url = new URL(req.url, this.apiOrigin)
@@ -204,12 +223,14 @@ export class StubService {
       if (body.scenario) this.mode = body.scenario
       if (body.delay !== undefined) this.delay = body.delay
       this.settleDelay = body.settleDelay ?? null
+      this.queueItems = []
+      this.steerDone = false
       this.mark()
       this.json(res, 200, { ok: true })
       return
     }
     if (path === '/__control/speech') {
-      this.json(res, 200, { t0: this.t0, firstSentenceAt: this.firstSentenceAt, lastSentenceAt: this.lastSentenceAt, settledAt: this.settledAt, entries: this.speech })
+      this.json(res, 200, { t0: this.t0, firstSentenceAt: this.firstSentenceAt, lastSentenceAt: this.lastSentenceAt, settledAt: this.settledAt, steerClaimedAt: this.steerClaimedAt, steerFirstSentenceAt: this.steerFirstSentenceAt, steerSettledAt: this.steerSettledAt, entries: this.speech })
       return
     }
     if (path === '/__control/mark') { this.mark(); this.json(res, 200, { ok: true }); return }
@@ -221,7 +242,7 @@ export class StubService {
       // the next scenario's baseline, so it is dropped together with the
       // projections. Scenario configuration survives.
       this.generation += 1
-      this.history.clear(); this.runtime.clear(); this.mark()
+      this.history.clear(); this.runtime.clear(); this.queueItems = []; this.steerDone = false; this.mark()
       this.json(res, 200, { ok: true, generation: this.generation })
       return
     }
@@ -321,6 +342,52 @@ export class StubService {
       return
     }
     if (path === `/bots/${BOT_ID}/container`) { this.json(res, 200, { id: '', status: 'stopped' }); return }
+    // Session input queues: a message the composer sends while a run streams
+    // is enqueued here (never as a websocket message). The pending item is
+    // the follow-up the steer scenario's running turn claims; a claimed item
+    // leaves the queue, exactly as the promoted input stops being pending.
+    const queueFollowUp = new RegExp(`^/bots/${BOT_ID}/sessions/([0-9a-f-]+)/follow-up-queue$`).exec(path)
+    const queueSteer = new RegExp(`^/bots/${BOT_ID}/sessions/([0-9a-f-]+)/steer-queue$`).exec(path)
+    if ((queueFollowUp || queueSteer) && req.method === 'POST') {
+      const body = JSON.parse(await this.readBody(req) || '{}')
+      const kind = queueFollowUp ? 'follow_up' : 'steer'
+      const item = {
+        item_id: `qi-${kind}-${Date.now()}-${this.queueItems.length}`,
+        status: 'pending', position: this.queueItems.length + 1, text: body.text ?? '',
+        ...(kind === 'steer' ? { target_run_id: '' } : { enqueued_during_run_id: '' }),
+      }
+      this.queueItems.push({ ...item, invocationId: body.invocation_id ?? '', kind, claimed: false })
+      this.json(res, 200, item)
+      return
+    }
+    const sessionQueue = new RegExp(`^/bots/${BOT_ID}/sessions/([0-9a-f-]+)/queue$`).exec(path)
+    if (sessionQueue && req.method === 'GET') {
+      const pending = this.queueItems.filter(item => !item.claimed)
+      this.json(res, 200, {
+        steer_supported: true,
+        steer: pending.filter(item => item.kind === 'steer').map(({ claimed, invocationId, kind, ...item }) => item),
+        follow_up: pending.filter(item => item.kind === 'follow_up').map(({ claimed, invocationId, kind, ...item }) => item),
+      })
+      return
+    }
+    if ((queueFollowUp || queueSteer) && req.method === 'GET') {
+      const kind = queueFollowUp ? 'follow_up' : 'steer'
+      this.json(res, 200, { items: this.queueItems.filter(item => !item.claimed && item.kind === kind).map(({ claimed, invocationId, kind: _kind, ...item }) => item) })
+      return
+    }
+    const queueItem = new RegExp(`^/bots/${BOT_ID}/sessions/([0-9a-f-]+)/(follow-up-queue|steer-queue)/([^/]+)$`).exec(path)
+    if (queueItem && (req.method === 'PATCH' || req.method === 'DELETE')) {
+      const target = this.queueItems.find(item => item.item_id === queueItem[3])
+      if (target && req.method === 'PATCH') {
+        const body = JSON.parse(await this.readBody(req) || '{}')
+        target.text = body.text ?? target.text
+        this.json(res, 200, { item_id: target.item_id, status: target.status, position: target.position, text: target.text })
+        return
+      }
+      if (target) this.queueItems = this.queueItems.filter(item => item !== target)
+      this.json(res, 200, { ok: true })
+      return
+    }
     if (path === `/bots/${BOT_ID}/sessions` && req.method === 'GET') {
       this.json(res, 200, {
         items: [
@@ -499,9 +566,30 @@ export class StubService {
       })
       return
     }
-    if (message.type === 'message' || message.type === 'retry_message') this.runScript(message, socket).catch(error => {
-      if (error !== SCENARIO_RESET) this.scriptErrors.push(String((error && error.message) || error))
-    })
+    if (message.type === 'message' || message.type === 'retry_message') {
+      this.runScript(message, socket).catch(error => {
+        if (error !== SCENARIO_RESET) this.scriptErrors.push(String((error && error.message) || error))
+      })
+    }
+  }
+
+  // The steer script waits inside its held step for the queued follow-up (the
+  // harness submits it there). A wait that times out without one settles the
+  // reply normally instead of hanging the scenario.
+  async awaitSteerQueue(pause, timeoutMs = 30000) {
+    const deadline = Date.now() + timeoutMs
+    let pending = this.pendingQueueItems()
+    while (!pending.length && Date.now() < deadline) {
+      await pause(120)
+      pending = this.pendingQueueItems()
+    }
+    if (!pending.length) return null
+    pending[0].claimed = true
+    return pending[0]
+  }
+
+  pendingQueueItems() {
+    return this.queueItems.filter(item => !item.claimed)
   }
 
   runtimeFor(sessionId) {
@@ -518,6 +606,15 @@ export class StubService {
   // transcript, or that page shows a second reply it never read.
   async runScript(message, socket) {
     const generation = this.generation
+    this.scriptActive = true
+    try {
+      await this.replayScript(message, socket, generation)
+    } finally {
+      this.scriptActive = false
+    }
+  }
+
+  async replayScript(message, socket, generation) {
     const pause = ms => new Promise(r => setTimeout(r, ms)).then(() => { if (this.generation !== generation) throw SCENARIO_RESET })
     const sessionId = message.session_id || SESSION_ID
     const invocation = message.invocation_id
@@ -587,16 +684,95 @@ export class StubService {
       // and the client must roll its text back into the next task. Gate 1 replays
       // the same long body so "read on the first sentence" is separated from
       // "read when the reply settles" by several sentences and a long settle.
-      const sentences = this.mode === 'fail-task' || this.mode === 'long' ? FAIL_TASK_BODY : BODY
+      // The steer scenario streams the same long body only until the second
+      // sentence, then holds the run open for the queued follow-up to be
+      // claimed (the harness submits it inside that window).
+      const steerScript = this.mode === 'steer' && !this.steerDone
+      const sentences = this.mode === 'fail-task' || this.mode === 'long' || steerScript ? FAIL_TASK_BODY : BODY
       const settle = this.settleDelay ?? this.delay
+      const streamCount = steerScript ? 2 : sentences.length
       for (const [index, sentence] of sentences.entries()) {
+        if (index >= streamCount) break
+        body.content += sentence
+        const last = index === streamCount - 1
+        if (last && !steerScript) this.lastSentenceAt = Date.now() - this.t0
+        if (index === 0) {
+          this.firstSentenceAt = Date.now() - this.t0
+          await step({ message_upserts: [{ ...body }] }, this.delay)
+        } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, this.delay)
+      }
+      if (steerScript) {
+        // The server claims the queued follow-up at the next step boundary and
+        // publishes it before the step's output: the steer names the turn it
+        // opens (after the committed text block), and the claimed input itself
+        // arrives as a user turn upsert (PR #131's claim frame).
+        const claim = await this.awaitSteerQueue(pause)
+        if (claim) {
+          const steerTurnId = `turn-${claim.invocationId}`
+          state.seq += 1
+          this.steerClaimedAt = Date.now() - this.t0
+          this.send(socket, {
+            type: 'runtime_delta', session_id: sessionId, epoch: state.epoch, seq: state.seq,
+            delta: {
+              steer_turn_upserts: [{
+                item_id: `steer-${claim.invocationId}`, status: 'applied', text: claim.text ?? '',
+                turn_id: steerTurnId, turn_position: 11, after_message_id: 2, timestamp: nowIso(),
+              }],
+              user_turn_upserts: [{
+                turn_id: steerTurnId, role: 'user', text: claim.text ?? '', timestamp: nowIso(),
+                turn_position: 11,
+                input_source: { kind: 'user', user_id: 'user-stub', bot_id: BOT_ID, session_id: sessionId },
+              }],
+            },
+          })
+          await pause(this.delay)
+          // The continuation is the model's answer to the claimed input: a new
+          // text block after the steer boundary, its own sentences on the same
+          // paced cadence, and its own settle gap after the last one.
+          const continuation = { id: 3, type: 'text', content: '' }
+          blocks.push(continuation)
+          for (const [index, sentence] of STEER_BODY.entries()) {
+            continuation.content += sentence
+            const last = index === STEER_BODY.length - 1
+            if (index === 0) {
+              this.steerFirstSentenceAt = Date.now() - this.t0
+              await step({ message_upserts: [{ ...continuation }] }, this.delay)
+            } else await step({ message_appends: [{ id: 3, type: 'text', content: sentence }] }, this.delay)
+            if (last) await pause(settle)
+          }
+          this.steerSettledAt = Date.now() - this.t0
+          this.settledAt = this.steerSettledAt
+          const existing = this.history.get(sessionId) ?? []
+          this.history.set(sessionId, [...existing,
+            { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-u` },
+            {
+              turn_id: turnId, role: 'assistant', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-a`,
+              messages: [
+                ...(this.mode === 'no-reasoning' ? [] : [{ id: 1, type: 'reasoning', content: REASONING.join('') }]),
+                { id: 2, type: 'text', content: FAIL_TASK_BODY.slice(0, 2).join('') },
+              ],
+            },
+            { turn_id: steerTurnId, role: 'user', text: claim.text ?? '', timestamp: nowIso(), turn_position: 11, id: `t-${claim.invocationId}-u` },
+            {
+              turn_id: steerTurnId, role: 'assistant', timestamp: nowIso(), turn_position: 11, id: `t-${claim.invocationId}-a`,
+              messages: [{ id: 3, type: 'text', content: STEER_BODY.join('') }],
+            },
+          ])
+          state.seq += 1
+          this.steerDone = true
+          this.send(socket, {
+            type: 'runtime_delta', session_id: sessionId, epoch: state.epoch, seq: state.seq,
+            delta: { run: { run_id: runId, status: 'completed', updated_at: nowIso() } },
+          })
+          return
+        }
+      }
+      for (let index = streamCount; index < sentences.length; index++) {
+        const sentence = sentences[index]
         body.content += sentence
         const last = index === sentences.length - 1
         if (last) this.lastSentenceAt = Date.now() - this.t0
-        if (index === 0) {
-          this.firstSentenceAt = Date.now() - this.t0
-          await step({ message_upserts: [{ ...body }] }, last ? settle : this.delay)
-        } else await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, last ? settle : this.delay)
+        await step({ message_appends: [{ id: 2, type: 'text', content: sentence }] }, last ? settle : this.delay)
       }
     }
     // Settle: the persisted transcript replaces the live one on refresh.

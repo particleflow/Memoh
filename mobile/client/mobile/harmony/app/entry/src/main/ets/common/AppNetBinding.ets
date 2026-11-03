@@ -1,4 +1,5 @@
 import { connection } from '@kit.NetworkKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { ClientDiagnostics } from './ClientDiagnostics';
 
 export interface NetFact { netId: number; wifi: boolean; cellular: boolean; ipv6: boolean; }
@@ -33,6 +34,10 @@ export class AppNetBinding {
   private static queued: boolean = false;
   private static boundNetId: number = 0;
   private static strandedNetId: number = 0;
+  private static settled: boolean = false;
+  private static settleWaiters: Array<() => void> = [];
+  private static cellularPending: boolean = false;
+  private static reboundListeners: Array<(netId: number) => void> = [];
   private static decision: BindingDecision = { action: 'default', netId: 0, reason: 'not-evaluated' };
   private static facts: NetFact[] = [];
   private static summary: string = '';
@@ -48,7 +53,11 @@ export class AppNetBinding {
     watcher.on('netLost', (net: connection.NetHandle): void => { AppNetBinding.lost(net.netId, 'net-lost'); });
     watcher.on('netCapabilitiesChange', (_info: connection.NetCapabilityInfo): void => { void AppNetBinding.evaluate('capabilities-change'); });
     watcher.on('netConnectionPropertiesChange', (_info: connection.NetConnectionPropertyInfo): void => { void AppNetBinding.evaluate('properties-change'); });
-    watcher.register((): void => {});
+    watcher.register((error: BusinessError): void => {
+      // Without registration no further network event arrives; the journal
+      // must show why re-evaluation stopped instead of failing silently.
+      if (error) { ClientDiagnostics.event('NETWORK', 'app-net', 'register-failed', 'errorCode=' + (typeof error.code === 'number' ? error.code : 0)); }
+    });
     AppNetBinding.watcher = watcher;
     ClientDiagnostics.event('NETWORK', 'app-net', 'start', '');
     void AppNetBinding.evaluate('start');
@@ -73,23 +82,71 @@ export class AppNetBinding {
     return ['GarnetAppNet:' + JSON.stringify(snapshot)];
   }
 
+  // The app's first connection must not race an in-flight binding decision:
+  // resolve once the first evaluation has applied its decision, or after
+  // timeoutMs at the latest (the system default then stays in charge exactly
+  // as before this module existed).
+  static whenSettled(timeoutMs: number): Promise<void> {
+    if (AppNetBinding.settled) { return Promise.resolve(); }
+    return new Promise<void>((resolve: () => void): void => {
+      setTimeout((): void => { resolve(); }, timeoutMs);
+      AppNetBinding.settleWaiters.push((): void => { resolve(); });
+    });
+  }
+
+  // A bind to a network different from the previously bound one notifies the
+  // listeners; the shell retries a first connection that failed before the
+  // binding landed (cellular activation can finish seconds after cold start).
+  static onRebound(listener: (netId: number) => void): void {
+    AppNetBinding.reboundListeners.push(listener);
+  }
+
+  static offRebound(listener: (netId: number) => void): void {
+    const at: number = AppNetBinding.reboundListeners.indexOf(listener);
+    if (at >= 0) { AppNetBinding.reboundListeners.splice(at, 1); }
+  }
+
+  // Returning to the foreground re-evaluates without waiting for a system
+  // network event, so a decision made while backgrounded cannot go stale.
+  static refresh(): void {
+    if (!AppNetBinding.started) { return; }
+    void AppNetBinding.evaluate('foreground');
+  }
+
   private static lost(netId: number, trigger: string): void {
     if (netId !== 0 && netId === AppNetBinding.boundNetId) { AppNetBinding.strandedNetId = netId; }
     void AppNetBinding.evaluate(trigger);
   }
 
   private static holdCellular(): void {
-    if (AppNetBinding.cellularRequest) { return; }
+    if (AppNetBinding.cellularRequest || AppNetBinding.cellularPending) { return; }
+    AppNetBinding.cellularPending = true;
     const specifier: connection.NetSpecifier = { netCapabilities: { bearerTypes: [connection.NetBearType.BEARER_CELLULAR] } };
     const request = connection.createNetConnection(specifier);
     request.on('netAvailable', (_net: connection.NetHandle): void => { void AppNetBinding.evaluate('cellular-available'); });
     request.on('netLost', (net: connection.NetHandle): void => { AppNetBinding.lost(net.netId, 'cellular-lost'); });
+    request.on('netUnavailable', (): void => { ClientDiagnostics.event('NETWORK', 'app-net', 'cellular-unavailable', ''); });
     request.on('netConnectionPropertiesChange', (_info: connection.NetConnectionPropertyInfo): void => { void AppNetBinding.evaluate('cellular-properties-change'); });
-    try { request.register((): void => {}); AppNetBinding.cellularRequest = request; }
-    catch { /* Activation request refused; later watcher events re-evaluate. */ }
+    try {
+      request.register((error: BusinessError): void => {
+        AppNetBinding.cellularPending = false;
+        if (error) {
+          // A refused activation request (for example by policy) is journaled,
+          // never held: the next evaluation may request again.
+          ClientDiagnostics.event('NETWORK', 'app-net', 'cellular-register-failed', 'errorCode=' + (typeof error.code === 'number' ? error.code : 0));
+          return;
+        }
+        if (!AppNetBinding.started) { try { request.unregister((): void => {}); } catch { /* Already unregistered. */ } return; }
+        AppNetBinding.cellularRequest = request;
+      });
+    } catch {
+      AppNetBinding.cellularPending = false;
+      ClientDiagnostics.event('NETWORK', 'app-net', 'cellular-register-failed', 'sync-throw');
+    }
   }
 
   private static releaseCellular(): void {
+    AppNetBinding.cellularPending = false;
     const request = AppNetBinding.cellularRequest;
     AppNetBinding.cellularRequest = undefined;
     if (!request) { return; }
@@ -138,9 +195,17 @@ export class AppNetBinding {
       await connection.setAppNet(handle);
       AppNetBinding.boundNetId = netId;
       ClientDiagnostics.event('NETWORK', 'app-net', 'bound', 'net=' + netId);
+      AppNetBinding.notifyRebound(netId);
     } catch {
       // The previous binding, if any, stays; the next evaluation retries.
       ClientDiagnostics.event('NETWORK', 'app-net', 'bind-failed', 'net=' + netId + '/bound=' + AppNetBinding.boundNetId);
+    }
+  }
+
+  private static notifyRebound(netId: number): void {
+    const listeners = AppNetBinding.reboundListeners.slice();
+    for (const listener of listeners) {
+      try { listener(netId); } catch { /* A failing retry hook never breaks binding. */ }
     }
   }
 
@@ -188,6 +253,12 @@ export class AppNetBinding {
       ClientDiagnostics.event('NETWORK', 'app-net', 'evaluate-failed', 'trigger=' + trigger);
     } finally {
       AppNetBinding.running = false;
+      if (!AppNetBinding.settled) {
+        AppNetBinding.settled = true;
+        const waiters = AppNetBinding.settleWaiters;
+        AppNetBinding.settleWaiters = [];
+        for (const waiter of waiters) { waiter(); }
+      }
       if (AppNetBinding.queued) { AppNetBinding.queued = false; void AppNetBinding.evaluate('queued'); }
     }
   }

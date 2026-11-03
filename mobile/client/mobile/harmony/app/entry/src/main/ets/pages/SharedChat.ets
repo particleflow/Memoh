@@ -11,6 +11,7 @@ import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { UiThemes } from '../common/UiTheme';
 import { NativeWebNetwork } from '../common/NativeWebNetwork';
+import { AppNetBinding } from '../common/AppNetBinding';
 
 
 @Entry
@@ -124,6 +125,17 @@ struct SharedChat {
 
   private backPending: boolean = false;
 
+  // A first connection that lost the race against the initial network binding
+  // (cellular activation can finish seconds after cold start) retries once
+  // when the binding lands on a new network; an already working chat ignores it.
+  private reboundRetry: (netId: number) => void = (netId: number): void => {
+    if (!this.active || this.probing || this.renderWaiting || !this.nativeReady || this.chatReady || this.loginReady) { return; }
+    ClientDiagnostics.event('SYSTEM', 'shared-client', 'app-net-rebound-retry', 'net=' + netId);
+    this.retry();
+  };
+
+  aboutToAppear(): void { AppNetBinding.onRebound(this.reboundRetry); }
+
   onBackPress(): boolean {
     if (!this.active || this.loadFailed || this.renderWaiting || !sharedWebAvailable()) { return false; }
     if (this.backPending) { return true; }
@@ -143,6 +155,7 @@ struct SharedChat {
   }
 
   aboutToDisappear(): void {
+    AppNetBinding.offRebound(this.reboundRetry);
     ImageTimingDump.detach();
     this.clearClientWait();
     this.cancelWebDownloads();

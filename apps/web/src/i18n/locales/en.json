@@ -370,7 +370,6 @@
     "queue_follow_up_unsupported_channel": "Queued follow-ups are not available on this channel; its replies are delivered from the message you send. Use /steer to add to the current reply, or queue from the web app.",
     "queue_invocation_conflict": "This message was already submitted with different content.",
     "queue_item_not_editable": "Only the sender can edit this queued message.",
-    "queue_item_not_pending": "This message is no longer pending in the queue.",
     "queue_no_active_run": "The current response has ended. Send this as a new message.",
     "queue_request_invalid": "Enter text after /steer or /queue in an existing conversation.",
     "queue_target_run_not_active": "The response ended before this instruction reached it. Send it as a new message.",

@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "445a09235b3312d9ae74d0240f5ee224da3912f04a253c8d454e58a2bad26071",
+      "sha256": "823bb7181b106084a33a941b821166d2cc04c8458d8eaa2a2361bc38d2098a85",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -52,6 +52,7 @@
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
         "Bubble kinds round (HAP43 candidate): add the sharedBubbleKind overlay pin; every other lock value unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
@@ -83,11 +84,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AppNetBinding.ets",
-      "sha256": "b75c572967e780e1b970dbfc21fdcacd215dd8c1e497a25e1378e0ab05189c29",
+      "sha256": "1d5af86b11620a8de10abb633fb850a22b44998776d9b3156d402cf5f405e466",
       "origin": "Project-authored shell network binding manager for the N1 IPv6 field issue; not recovered historical source.",
       "licenseReview": "Derived Memoh source under the retained repository license; public Network Kit APIs only, no SDK binary or private configuration.",
       "preparationChanges": [
-        "Bind the whole app with connection.setAppNet to a Wi-Fi network whose IPv6 link is valid, else to a cellular network activated through a NetSpecifier request and validated the same way, else keep the system default; a lost bound network is released before any re-decision and the decision/facts stay visible on the existing journal and dump surfaces. No web overlay, interception, proxy or permission change."
+        "Bind the whole app with connection.setAppNet to a Wi-Fi network whose IPv6 link is valid, else to a cellular network activated through a NetSpecifier request and validated the same way, else keep the system default; a lost bound network is released before any re-decision and the decision/facts stay visible on the existing journal and dump surfaces. No web overlay, interception, proxy or permission change.",
+        "HAP42 field fix: the first page load can wait for the initial decision via whenSettled (bounded by a timeout), a bind to a new network notifies rebound listeners so a first connection that lost the race retries once, foreground refresh re-evaluates without a system event, and registration failures (default watcher and the cellular activation request) plus cellular netUnavailable reach the journal instead of vanishing; a refused activation request is no longer held."
       ]
     },
     {
@@ -114,7 +116,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "bfe96fc33e8356ba6d1a97e85f92dcca7b943c997bb64e387a83dc73791b1871",
+      "sha256": "3d07bd8cad91e87dc1ab2ddc3c9d7decc14fbbedaaaf1a2514318007b9c27a3a",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -257,11 +259,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_app_net_binding.cjs",
-      "sha256": "6cf0c970dcc6cd1a47dd4a676185b62e8c0c02f3e6f003ae06952f4be4af23b8",
+      "sha256": "70708597edd5de15f97881a5f88978af5e88e4e12b28efa9f28d5bce733bcc25",
       "origin": "Project-authored stage2 decision-table adapter for the N1 IPv6 app-net binding; mocked Network Kit seams only.",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
-        "Decision table (Wi-Fi IPv6 preferred, cellular activated by request as fallback, no-IPv6 or no-network keeps default) plus lifecycle checks: bound-net loss releases first, Wi-Fi regaining IPv6 rebinds and drops the cellular request, stop unbinds and unregisters, failed binds retry, and SDK error text never reaches the journal."
+        "Decision table (Wi-Fi IPv6 preferred, cellular activated by request as fallback, no-IPv6 or no-network keeps default) plus lifecycle checks: bound-net loss releases first, Wi-Fi regaining IPv6 rebinds and drops the cellular request, stop unbinds and unregisters, failed binds retry, and SDK error text never reaches the journal.",
+        "HAP42 field fix coverage: whenSettled gate (resolve on first settle, timeout escape on a stalled probe), rebound notified exactly once per new bound network with offRebound honored, register failures journaled with a refused cellular request not held and retried, foreground refresh re-evaluates, and the EntryAbility/SharedChat wiring is asserted."
       ]
     },
     {
@@ -368,7 +371,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "e84b8271aee2e61a7c10f970f0b055d8a9bbf1a6d2c640e013cd1911c2a93112",
+      "sha256": "9d2d132451b265b1b9092b283204bc1eae97b58103c48985814867eb75d4ac7f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -895,7 +898,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
-      "sha256": "303a75ecf5d5829abf59ef1fd59847113216b1b786cee6d7404e17264fa916ec",
+      "sha256": "9432ba137a5ba54d5629bdd459fecd597d91d52f2644184be6f5c5a73491d7fe",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
@@ -905,12 +908,13 @@
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
-        "N1 IPv6 network binding: AppNetBinding starts on ability create, stops on destroy, and its read-only binding snapshot line joins the existing onDump surface."
+        "N1 IPv6 network binding: AppNetBinding starts on ability create, stops on destroy, and its read-only binding snapshot line joins the existing onDump surface.",
+        "HAP42 field fix: the first page load is gated on AppNetBinding.whenSettled (bounded 1500 ms) so the first connection never races the initial binding decision, and onForeground refreshes the binding evaluation."
       ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "1828a2a6fd9e3164beca0f54ecfb64bfcef8e382bd1cbdeacf9512bd4d3ca981",
+      "sha256": "ffb54e3576a0e27c00513e954546971a377c6fe109a3ca23c4a3d205aa6203bd",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
@@ -921,7 +925,8 @@
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked."
+        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked.",
+        "HAP42 field fix: the page subscribes to AppNetBinding rebound notifications and retries once when the client is not ready yet, recovering a first connection that failed before the binding landed (for example cellular activated seconds after cold start)."
       ]
     },
     {
@@ -1134,7 +1139,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "a35142b604550d5298885eb7f95246e75ba68dc6cef9d0eb99437084810729e7",
+      "sha256": "cc2a590897ede8579566279717ca530fdd62623e56f8e97b6ddba3e6a823609c",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -1883,14 +1888,15 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "b2083410780dd9c965db371b918707f5c1161613ca0f8722a5ada41aa129c3f7",
+      "sha256": "55e1de0efd3094ed0f227d3fd0839b203401473e1fb0d5f9df20d737ac4241d6",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Source-only Home/Dockview speech admission and exact task run/turn consumption, preserving existing phone seams. No version/package/build/publication action.",
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
         "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values.",
-        "Consume PR#97 read-aloud ungating on the phone: paired959 speech files advance to 635fe1722db7 (canReplay pure-text condition, uncached replay synthesizes on demand, cached replay after read-only identity check, identity mismatch re-synthesizes) and the three gated locale strings are removed. Automatic path, interruption and account isolation unchanged."
+        "Consume PR#97 read-aloud ungating on the phone: paired959 speech files advance to 635fe1722db7 (canReplay pure-text condition, uncached replay synthesizes on demand, cached replay after read-only identity check, identity mismatch re-synthesizes) and the three gated locale strings are removed. Automatic path, interruption and account isolation unchanged.",
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only."
       ]
     },
     {
@@ -2015,7 +2021,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "dc1e0c17fb55dcb58db9448e77d1d7de46d77eabbc8c36e56518fafb302af9e6",
+      "sha256": "72072ff10ce04e1162eb7a6d59c4c5d7ae9e013e2d59c8fb284e7e5dcfb19983",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2031,7 +2037,8 @@
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)",
         "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client.",
-        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged."
+        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only."
       ]
     },
     {
