@@ -30,9 +30,9 @@
       class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
     >{{ backgroundOutput }}</pre>
     <CalloutBanner
-      v-if="agenvoReceipt"
-      :tone="agenvoReceipt.state === 'completed' ? 'neutral' : 'warning'"
-      :description="agenvoNotice"
+      v-if="computerReceipt"
+      :tone="computerReceipt.state === 'completed' ? 'neutral' : 'warning'"
+      :description="computerNotice"
     />
     <pre
       v-if="combinedOutput"
@@ -54,7 +54,7 @@
       v-if="fallbackText"
       class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
     >{{ fallbackText }}</pre>
-    <EmptyRow v-if="!agenvoReceipt && !combinedOutput && !progressText && !backgroundOutput && !stdout && !stderr && !errorText && !fallbackText">
+    <EmptyRow v-if="!computerReceipt && !combinedOutput && !progressText && !backgroundOutput && !stdout && !stderr && !errorText && !fallbackText">
       {{ isBackgroundActive ? t('chat.tools.detail.waitingOutput') : t('chat.tools.detail.noOutput') }}
     </EmptyRow>
   </div>
@@ -84,22 +84,22 @@ function resolveResult(): Record<string, unknown> | null {
   return sc ?? result
 }
 
-const agenvoReceipt = computed(() => {
+const computerReceipt = computed(() => {
   const result = resolveResult()
   const receipt = result?.result && typeof result.result === 'object'
     ? result.result as Record<string, unknown> : result
   return typeof receipt?.cleanup_required === 'boolean' && typeof receipt.state === 'string' ? receipt : null
 })
 const combinedOutput = computed(() => {
-  const value = agenvoReceipt.value?.output
+  const value = computerReceipt.value?.output
   return typeof value === 'string' ? value : ''
 })
-const agenvoNotice = computed(() => {
-  const receipt = agenvoReceipt.value
+const computerNotice = computed(() => {
+  const receipt = computerReceipt.value
   if (!receipt) return ''
-  const parts = [receipt.state === 'completed' ? t('agenvo.completed') : t('agenvo.uncertain')]
-  if (receipt.cleanup_required) parts.push(t('agenvo.retained', { id: receipt.workspace_id || '' }))
-  if (receipt.truncated) parts.push(t('agenvo.truncated'))
+  const parts = [receipt.state === 'completed' ? t('computerExec.completed') : t('computerExec.uncertain')]
+  if (receipt.cleanup_required) parts.push(t('computerExec.retained', { id: receipt.workspace_id || '' }))
+  if (receipt.truncated) parts.push(t('computerExec.truncated'))
   return parts.join(' ')
 })
 
@@ -159,7 +159,7 @@ const errorText = computed(() => {
 // (rather than structuredContent.stdout). Only used when nothing else matched
 // so we never silently show "no output" when output is actually present.
 const fallbackText = computed(() => {
-  if (agenvoReceipt.value || stdout.value || stderr.value || errorText.value) return ''
+  if (computerReceipt.value || stdout.value || stderr.value || errorText.value) return ''
   const result = props.block.result as Record<string, unknown> | null
   if (!result || !Array.isArray(result.content)) return ''
   return (result.content as Array<Record<string, unknown>>)
