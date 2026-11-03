@@ -20,7 +20,7 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
-import { StubService, FAIL_TASK_BODY } from './stub-service.mjs'
+import { StubService, FAIL_TASK_BODY, STEER_BODY } from './stub-service.mjs'
 import { launchChrome, CDP, openPage } from './cdp.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -411,6 +411,59 @@ async function main() {
       && afterRejection.indexOf(FAIL_TASK_BODY[0]) <= afterRejection.indexOf(lastSentence)
     add(result('G2 single task failure ends only that task (remaining text rereads)', rolledBack && tailReread,
       `bodyPosts=${bodyPosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
+
+    // ---------- S1/S2: a follow-up sent mid-stream is claimed as a steer; the
+    // continuation it produces is a new live reply and must still auto-read.
+    // The submit itself stops the first reply's reading (V3d) — what may never
+    // happen is the continuation staying silent: on HAP42 every reply after a
+    // mid-stream follow-up stopped being read at all (field report 2026-11-03).
+    // The stub streams two sentences, then performs the claim exactly as the
+    // server does at the next step boundary: the steer names the turn it opens
+    // after the committed text, and the claimed input itself is published as a
+    // user turn upsert in the same frame (PR #131). The continuation carries
+    // its own sentences, so the first speech POST of that text is measurable
+    // against its first completed sentence with the G1 window.
+    await scenario('steer', 800, { settleDelay: 3000 })
+    await submit('第一轮问题，先流式回答')
+    await waitBodyReading(FAIL_TASK_BODY[0], 30000)
+    await waitBody(FAIL_TASK_BODY[1], 30000)
+    await submit('中途追问：补充这一点')
+    await waitBody(STEER_BODY[0], 60000)
+    const steerTiming = await waitSettled(30000)
+    // Leave room for a settle-time request so a late read is recorded, not missed.
+    await sleep(1500)
+    const steerSpeech = await speech()
+    const steerFirst = steerSpeech.find(entry => (entry.text || '').includes(STEER_BODY[0]))
+    const steerLatencyMs = steerFirst && steerTiming.steerFirstSentenceAt !== null ? steerFirst.ms - steerTiming.steerFirstSentenceAt : null
+    const steerSettleLeadMs = steerFirst && steerTiming.steerSettledAt !== null ? steerTiming.steerSettledAt - steerFirst.ms : null
+    const steerDiagnostics = await page.eval(`(() => ({
+      rows: [...document.querySelectorAll('[data-message-id]')].map(n => ({
+        id: n.getAttribute('data-message-id'),
+        speechState: n.querySelector('[data-speech-state]')?.getAttribute('data-speech-state') ?? null,
+        text: (n.innerText || '').replace(/\\n/g, ' | ').slice(0, 90),
+      })),
+      errors: (window.__acc.errors || []).slice(-3),
+    }))()`).catch(() => null)
+    add(result('S1 mid-stream follow-up claim keeps automatic read-aloud', !!steerFirst && steerLatencyMs !== null && steerLatencyMs <= FIRST_POST_WINDOW_MS,
+      steerFirst
+        ? `continuation first POST ${steerLatencyMs}ms after its first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), ${steerSettleLeadMs}ms before settle`
+        : `no speech request carried the continuation (claimed at ${steerTiming.steerClaimedAt}ms, first sentence ${steerTiming.steerFirstSentenceAt}ms, settled ${steerTiming.steerSettledAt}ms, requests=${steerSpeech.length})`,
+      { steer: { claimedAtMs: steerTiming.steerClaimedAt, firstSentenceAtMs: steerTiming.steerFirstSentenceAt, settledAtMs: steerTiming.steerSettledAt, firstRequestMs: steerFirst?.ms ?? null, latencyMs: steerLatencyMs, windowMs: FIRST_POST_WINDOW_MS }, diagnostics: steerDiagnostics }))
+
+    // The round after the claimed follow-up is a brand-new reply; it must read
+    // on its first completed sentence like any first reply (G1 shape).
+    await submit('追问之后的全新一轮问题')
+    await waitBody(BODY[0], 30000)
+    const nextTiming = await waitSettled(30000)
+    await sleep(1500)
+    const nextSpeech = (await speech()).filter(entry => (entry.text || '').includes(BODY[0]))
+    const nextFirst = nextSpeech[0]
+    const nextLatencyMs = nextFirst && nextTiming.firstSentenceAt !== null ? nextFirst.ms - nextTiming.firstSentenceAt : null
+    add(result('S2 next round after a follow-up still auto-reads', !!nextFirst && nextLatencyMs !== null && nextLatencyMs <= FIRST_POST_WINDOW_MS,
+      nextFirst
+        ? `first-sentence ${nextFirst.kind.toUpperCase()} ${nextLatencyMs}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms)`
+        : `no speech request carried the new round (first sentence ${nextTiming.firstSentenceAt}ms, settled ${nextTiming.settledAt}ms)`,
+      { nextRound: { firstSentenceAtMs: nextTiming.firstSentenceAt, settledAtMs: nextTiming.settledAt, firstRequestMs: nextFirst?.ms ?? null, latencyMs: nextLatencyMs, windowMs: FIRST_POST_WINDOW_MS } }))
 
     // ---------- General: loading history must not read it aloud.
     await scenario('stream', 700, { seedHistory: true })

@@ -41,10 +41,14 @@ node mobile/client/tools/acceptance/acceptance.mjs /path/to/rawfile/client-web
 | V3d | 提交新消息停读 | 提交后 1.5s | pause 事件数增加 | — |
 | G7 | 加载历史不朗读 | 历史渲染后 3s | speech 请求 = 0 | — |
 | G8 | 后台/前台不乱不断 | 前台后 2s | 播放事件 ≥2 | 先停后恢复 |
+| S1 | 追问认领后续段自动开读 | 续段首句帧后 ≤ 1000ms 出现携带续段首句的 speech 请求 | ≥1 个 task | 早于 settle，流式期间而非 settle 时 |
+| S2 | 追问后下一轮全新回复仍开读 | 新一轮首句帧后 ≤ 1000ms | ≥1 个 task | — |
 
 G1 的时机起算点是**首个完整句子的帧**（脚本化模型的 `text_chunk_ready`），不是按键时刻；口径与 PR #121 `speech-field-acceptance.test.ts` 六门一致，差別只在于本 harness 驱动打包 dist 而非组合树。
 
 G1 回放**长回复**（`FAIL_TASK_BODY`，6 句、句间 800ms、末句后 3s 才 settle），断言「携带首句的 speech 请求时刻 − 首句终止符到达时刻 ≤ 1000ms，且早于末句帧、≪ settle 时刻」：只会 settle 才开读的产物在 4 句短回复上可以把 2.8s 的 settle 时刻误算成首句时延（TF-18 坐实过），长回复把「首句即读」与「settle 才读」拉开到秒级可分辨。该口径与 #126 ③级（首句帧→首请求）一致，供 ③级复用。快回 ack 以其自己的短任务先读（stub 对 ack 行回放短音频），不计入首句时延的起算或终点。
+
+S1/S2 复现「流式中途追问后不再自动朗读」（HAP42 现场，2026-11-03）。追问走真实入队协议：客户端在流式期间提交的不是 websocket `message`，而是 `POST /bots/{bot}/sessions/{sid}/follow-up-queue`（stub 按服务端 `sessionQueueResponse` 形状回放队列与 `/queue` 读回）。stub 的脚本在下一句边界执行认领，帧形状对齐 PR #131：`steer_turn_upserts`（认领项命名其新开 turn，锚在已提交文本块之后）与 `user_turn_upserts`（被认领输入以 UITurn 随帧发布）同帧下发；后续正文以新文本块续流（`STEER_BODY`，专用句子以便与被打断的首段区分），settle 落四条持久化 turn。断言：提交追问按 V3d 停掉首段朗读后，**认领续段仍按首句即读**（首句终止符后 ≤1000ms 出现携带续段首句的 speech 请求，早于 settle）；HAP42 真包上该断言红（续段首请求晚 5474ms、落在 settle 前 27ms，即流式期间完全静默、settle 才读）。S2 断言追问 settle 后的**全新一轮**回复仍按 G1 口径开读（HAP42 上本就绿，用于钉住修复不回归该路径）。
 
 未驱动的断言（例如打包版本里找不到思考折叠控件）报告为 `uncovered`，**同样让门禁失败**——没有证据不等于通过。
 
