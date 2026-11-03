@@ -173,7 +173,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "370a5a301f004b618966c08e0299d1588c75f9f7f350dfa002264d29a5a9372e",
+      "sha256": "5af9f714e4526141be3c21cad896b809fcbe2608519287064c1ef30badfdfa4a",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -186,7 +186,7 @@
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
-        "N1 field fix: install the native WebSocket overlay before the shared client boots."
+        "N1 field fix: install the native WebSocket overlay before the shared client boots; HAP45 follow-up installs it from boot() with the configured API origin so plain-HTTP origins (no rcp identity bridge) keep the browser WebSocket."
       ],
       "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
       "windowsInjectionBaseSHA256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75"
@@ -1968,7 +1968,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_entry_lifetime.cjs",
-      "sha256": "697c456a6f50a2586d1e88e319f2d09a51568d789d3a6cb663011d8982782913",
+      "sha256": "7df94cf63af42988d0d6fdeb30eabadabe7db3a773d07505e3cc52a72989d219",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
     },
@@ -2183,18 +2183,18 @@
       "origin": "Project-authored Harmony overlay for the N1 IPv6 field issue; not recovered historical source.",
       "licenseReview": "Derived Memoh source under the retained repository license; no third-party code.",
       "preparationChanges": [
-        "Replace window.WebSocket inside the Harmony shell only (native bridge present) with a shim over the native chat socket commands, reusing the socket URL's existing single token query for the session identity; browser and desktop builds never load it."
+        "Replace window.WebSocket inside the Harmony shell only (native bridge present and https API origin, where the rcp identity bridge participates) with a shim over the native chat socket commands, reusing the socket URL's existing single token query for the session identity; plain-HTTP origins keep the browser WebSocket on the default network, and a later non-qualifying origin retires an installed shim; browser and desktop builds never load it."
       ],
-      "sha256": "9ef0d0021936166535ad26911a1999d9da32d9533a999ba6fd96fb6f77b95297"
+      "sha256": "eab79bbf8e026fa185f0c8e4405200dc271c36aedcad05c38653ca84e949d9ed"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_chat_socket.cjs",
       "origin": "Project-authored stage2 regression gate for the N1 socket bridge.",
       "licenseReview": "Test source under the retained repository license; synthetic credentials only.",
       "preparationChanges": [
-        "Drive the actual ArkTS socket bridge and the real overlay shim through the real command dispatch and garnet CustomEvent channel with controlled Kit/webSocket boundaries."
+        "Drive the actual ArkTS socket bridge and the real overlay shim through the real command dispatch and garnet CustomEvent channel with controlled Kit/webSocket boundaries; the install gate is asserted per API origin (https installs, plain HTTP does not and retires an installed shim)."
       ],
-      "sha256": "741c3a07d5dedc9b326a2ee140bec4a11f9af35281bf524a594c1552b74ed4a1"
+      "sha256": "c24e2436481cf158b894ee1a45a0f6660ea7e0f641868b51875334f90ec3e0b4"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_net_report.cjs",

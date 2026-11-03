@@ -21,9 +21,6 @@ async function nativeCommand(command: string, apiOrigin?: string, networkPolicy?
 }
 
 installHarmonyBack()
-// Ride the native-bound network for chat/terminal sockets before main mounts;
-// a no-op in plain browser builds without the native bridge.
-installNativeWebSocket()
 
 // Before main mounts, the existing setup form still uses the shared preferences
 // and tokens. Release its media watchers when the shared settings store takes over.
@@ -67,6 +64,12 @@ async function boot(config: ServiceConfig) {
       config = commitServiceTransition(config)
     }
     await nativeCommand('client.configure', config.apiOrigin, deploymentNetworkPolicy(packagedConfig, config.apiOrigin))
+    // Ride the native-bound network for chat/terminal sockets before main
+    // mounts, but only where the native identity bridge participates (https
+    // API origins); under http origins the browser WebSocket already reaches
+    // the server on the default network. No-op in plain browser builds
+    // without the native bridge.
+    installNativeWebSocket(config.apiOrigin)
     stopSetupAppearance()
     await import('../main')
     const { default: router } = await import('../router')

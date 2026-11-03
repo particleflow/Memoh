@@ -1,7 +1,9 @@
 // Actual ArkTS socket bridge and the real overlay shim, driven through the
 // real NativeClient command dispatch and the real garnet CustomEvent channel
 // (the native push script is evaluated inside the shim realm). Kit/webSocket
-// boundaries are controlled; no OS netstack, TLS or phone.
+// boundaries are controlled; no OS netstack, TLS or phone. The install gate
+// is asserted per API origin: the shim mounts only where the rcp identity
+// bridge participates (https), and a later http origin retires it.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict')
 const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_TYPESCRIPT||path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
 const common='mobile/harmony/app/entry/src/main/ets/common/'
@@ -63,12 +65,22 @@ async function check(name,fn){await fn();checks++;console.log('ok -',name)}
   const bareRealm={...realm,module:{exports:{}},window:bareWindow}
   bareRealm.exports=bareRealm.module.exports
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,'mobile/memoh/harmony-ws.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,bareRealm)
-  bareRealm.module.exports.installNativeWebSocket()
+  bareRealm.module.exports.installNativeWebSocket('https://nas.example/api')
   assert.equal(bareWindow.WebSocket,undefined)
  })
- shim.installNativeWebSocket()
+ // The native identity the bridge admits exists only where the rcp HTTP
+ // bridge participates (https API origins). Plain-HTTP origins -- the
+ // acceptance stub topology and LAN direct deployments -- must keep the
+ // browser WebSocket, whose default-network path already reaches them.
+ const browserWebSocket=function BrowserWebSocket(){}
+ windowRealm.WebSocket=browserWebSocket
+ await check('http api origin leaves the browser WebSocket untouched',async()=>{
+  shim.installNativeWebSocket('http://10.0.2.2:18081')
+  assert.equal(windowRealm.WebSocket,browserWebSocket)
+ })
+ shim.installNativeWebSocket('https://nas.example/api')
  const NativeWebSocket=windowRealm.WebSocket
- assert.ok(NativeWebSocket)
+ assert.ok(NativeWebSocket&&NativeWebSocket!==browserWebSocket)
  await check('open rides the native bridge with the session bearer',async()=>{
   const probe=new NativeWebSocket(url)
   assert.equal(probe.readyState,NativeWebSocket.CONNECTING)
@@ -129,6 +141,15 @@ async function check(name,fn){await fn();checks++;console.log('ok -',name)}
   const before=closed.length
   windowRealm.dispatchEvent({type:'pagehide'})
   await wait(()=>closed.length>before)
+ })
+ await check('a later http origin uninstalls the shim and closes live sockets',async()=>{
+  const live=new NativeWebSocket(url)
+  const native=sockets[sockets.length-1]
+  native.handlers.open(null,{})
+  await wait(()=>live.readyState===NativeWebSocket.OPEN)
+  shim.installNativeWebSocket('http://10.0.2.2:18081')
+  assert.equal(windowRealm.WebSocket,browserWebSocket)
+  await wait(()=>live.readyState===NativeWebSocket.CLOSED)
  })
  console.log(JSON.stringify({actualArkTsBridge:true,actualOverlayShim:true,realCommandDispatch:true,realPushChannel:true,nativeDevice:false,checks}))
 })().catch(error=>{console.error(error);process.exitCode=1})

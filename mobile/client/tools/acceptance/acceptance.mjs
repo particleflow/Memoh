@@ -208,6 +208,19 @@ async function main() {
     const nonce = `run=${++runIndex}`
     await page.goto(`${origin}/index.html?${nonce}`)
     await page.waitFor('document.readyState === "complete"', 20000).catch(() => {})
+    // The harmony entry persists its deployment config asynchronously. Planting
+    // the token before that write lands classifies the fresh profile as unbound
+    // (unknown storage + token) and parks the next load on the migration stop
+    // screen, so wait for the config write first; a bundle that never writes
+    // the key keeps the old behavior after the bounded wait.
+    await page.waitFor(`(() => {
+      try {
+        const raw = localStorage.getItem('memoh:harmony:service-config:v1')
+        if (!raw) return false
+        const value = JSON.parse(raw)
+        return !!(value && typeof value.apiOrigin === 'string' && value.apiOrigin)
+      } catch { return false }
+    })()`, 20000).catch(() => {})
     await page.eval(`localStorage.setItem('token', 'acceptance-token')`)
     await page.eval(`sessionStorage.setItem('memoh.speechTiming', '1')`)
     // The boot URL differs from the seeding URL, so this is a real document

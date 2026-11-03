@@ -1,12 +1,17 @@
 // Harmony WebSocket bridge overlay. Inside the Harmony shell the page origin
 // (begonia-client://app) is cross-origin to the service, and ArkWeb's own
 // socket path shares the engine's default-network DNS view — the exact N1
-// failure. When the native bridge is present this replaces window.WebSocket
-// with a shim that runs each socket on the native netstack (which follows the
-// app's bound network) through the existing begoniaNative command channel;
-// socket events come back on the existing garnet CustomEvent channel. Browser
-// and desktop builds never load this module, so the plain browser WebSocket
-// path stays untouched.
+// failure. When the native bridge is present and the native identity bridge
+// participates (https API origins) this replaces window.WebSocket with a shim
+// that runs each socket on the native netstack (which follows the app's bound
+// network) through the existing begoniaNative command channel; socket events
+// come back on the existing garnet CustomEvent channel. The native socket
+// admission requires the rcp HTTP bridge's owner-session identity, which that
+// bridge only captures for https origins — under an http API origin (the
+// emulator acceptance stub, LAN direct deployments) the identity never exists
+// and the default network is already the correct path, so the browser
+// WebSocket stays in place. Browser and desktop builds never load this module,
+// so the plain browser WebSocket path stays untouched.
 
 type Bridge = { request: (raw: string) => Promise<string> }
 
@@ -139,6 +144,16 @@ class NativeWebSocket extends EventTarget implements WebSocket {
     if (liveSockets.get(this.id) === this) liveSockets.delete(this.id)
   }
 
+  // Bridge-internal: called when the module retires an installed shim. The
+  // native close is fire-and-forget (its confirmation never reaches a page
+  // socket this decision ended), and the local error+close lets the page's
+  // own reconnect logic come back over the restored browser WebSocket.
+  retire(): void {
+    if (this.finished) return
+    void nativeWsCommand('ws.close', { id: this.id }).catch(() => {})
+    this.fail()
+  }
+
   // Bridge-internal: called by the module-level garnet:ws listener.
   handle(detail: WsNativeEventDetail): void {
     if (this.finished) return
@@ -177,17 +192,45 @@ class NativeWebSocket extends EventTarget implements WebSocket {
 // The handler types above bind `this` to WebSocket; the shim keeps the plain
 // property-call semantics the two call sites rely on.
 
-export function installNativeWebSocket(): void {
-  if (!nativeBridge()) return
-  window.addEventListener('garnet:ws', (event: Event) => {
-    const detail = (event as CustomEvent<WsNativeEventDetail>).detail
-    if (!detail || typeof detail.id !== 'string') return
-    const socket = liveSockets.get(detail.id)
-    if (socket) socket.handle(detail)
-  })
-  // The document is going away; the native sockets must not outlive it.
-  window.addEventListener('pagehide', () => {
-    for (const socket of [...liveSockets.values()]) socket.close()
-  })
+let browserWebSocket: (typeof WebSocket) | null = null
+let listenersBound = false
+
+// Install only where the native identity exists: the rcp HTTP bridge that owns
+// the session identity participates for https API origins only. Every other
+// origin (or a missing native bridge) keeps the browser WebSocket, whose
+// default-network path already reaches plain-HTTP servers. Re-evaluating the
+// same decision after an install retires the shim when the origin stopped
+// qualifying.
+export function installNativeWebSocket(apiOrigin: string): void {
+  if (!nativeBridge() || !apiOrigin.startsWith('https://')) {
+    uninstallNativeWebSocket()
+    return
+  }
+  if (browserWebSocket) return
+  browserWebSocket = (window as { WebSocket: typeof WebSocket }).WebSocket
+  if (!listenersBound) {
+    listenersBound = true
+    window.addEventListener('garnet:ws', (event: Event) => {
+      const detail = (event as CustomEvent<WsNativeEventDetail>).detail
+      if (!detail || typeof detail.id !== 'string') return
+      const socket = liveSockets.get(detail.id)
+      if (socket) socket.handle(detail)
+    })
+    // The document is going away; the native sockets must not outlive it.
+    window.addEventListener('pagehide', () => {
+      for (const socket of [...liveSockets.values()]) socket.close()
+    })
+  }
   ;(window as { WebSocket: typeof WebSocket }).WebSocket = NativeWebSocket as unknown as typeof WebSocket
+}
+
+// The origin (or its identity bridge) stopped qualifying: hand the page back
+// its browser WebSocket and retire the sockets the retired decision created —
+// they ride the native netstack under an admission rule the page no longer
+// meets, so they must not outlive that decision.
+function uninstallNativeWebSocket(): void {
+  if (!browserWebSocket) return
+  ;(window as { WebSocket: typeof WebSocket }).WebSocket = browserWebSocket
+  browserWebSocket = null
+  for (const socket of [...liveSockets.values()]) socket.retire()
 }
