@@ -4,11 +4,11 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 
+	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/conversationpresence"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/inputsource"
@@ -68,7 +68,8 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		logStage("capability_unavailable", slog.String("reason", "scope_unavailable"))
 		return
 	}
-	imagePresent := presenceRequestHasImage(req)
+	attachmentCount := len(req.Attachments)
+	attachmentKinds := presenceAttachmentKinds(req.Attachments)
 	effort := ""
 	if model.sdk.ReasoningConfig != nil {
 		effort = model.sdk.ReasoningConfig.Effort
@@ -78,12 +79,13 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 		pulls:    pullReader,
 		settings: settings,
 		in: presenceJevInput{
-			Text:         req.RawQuery,
-			Facts:        facts,
-			Reply:        req.SourceReplyToMessageID != "",
-			ImagePresent: imagePresent,
-			Effort:       effort,
-			AdmittedAt:   admittedAt,
+			Text:            req.RawQuery,
+			Facts:           facts,
+			Reply:           req.SourceReplyToMessageID != "",
+			AttachmentCount: attachmentCount,
+			AttachmentKinds: attachmentKinds,
+			Effort:          effort,
+			AdmittedAt:      admittedAt,
 		},
 		scope:  scope,
 		logger: s.logger,
@@ -120,17 +122,16 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 
 	coordinator := conversationpresence.Coordinator{Claims: claims, Capacity: runtime.capacity, Policy: runtime.options.Policy}
 	input := conversationpresence.Input{
-		Ticket:       ticket,
-		Source:       source,
-		Facts:        facts,
-		Identity:     identity,
-		Choice:       choice,
-		Phase:        conversationpresence.Thinking,
-		BotName:      rc.runConfig.Bot.Name,
-		Locale:       "zh",
-		Text:         req.RawQuery,
-		ImagePresent: imagePresent,
-		Precomputed:  &conversationpresence.Decision{Temperature: result.Temperature, Reason: result.Reason},
+		Ticket:      ticket,
+		Source:      source,
+		Facts:       facts,
+		Identity:    identity,
+		Choice:      choice,
+		Phase:       conversationpresence.Thinking,
+		BotName:     rc.runConfig.Bot.Name,
+		Locale:      "zh",
+		Text:        req.RawQuery,
+		Precomputed: &conversationpresence.Decision{Temperature: result.Temperature, Reason: result.Reason},
 	}
 	var generatorForRun conversationpresence.Generator
 	switch {
@@ -154,17 +155,17 @@ func (s *Service) runConversationPresenceJev(ctx context.Context, runtime *conve
 			return
 		}
 		generatorForRun = presenceTimedGenerator{detail: &result.Detail, base: &presenceDirectedGenerator{
-			base:         generator,
-			direction:    result.Direction,
-			etaBand:      result.ETABand(),
-			recentACKs:   result.RecentACKs,
-			windowEnd:    decisionStart.Add(settings.Timeout),
-			botName:      rc.runConfig.Bot.Name,
-			locale:       "zh",
-			userMessage:  req.RawQuery,
-			points:       result.ContextPoints,
-			urgency:      result.Urgency,
-			imagePresent: imagePresent,
+			base:            generator,
+			direction:       result.Direction,
+			etaBand:         result.ETABand(),
+			recentACKs:      result.RecentACKs,
+			windowEnd:       decisionStart.Add(settings.Timeout),
+			botName:         rc.runConfig.Bot.Name,
+			locale:          "zh",
+			userMessage:     req.RawQuery,
+			points:          result.ContextPoints,
+			urgency:         result.Urgency,
+			attachmentKinds: presenceAttachmentKindLabels(attachmentKinds),
 		}}
 	}
 	coordinator.Generator = generatorForRun
@@ -252,13 +253,34 @@ func presenceWindowRemaining(sideCtx context.Context, decisionStart time.Time, t
 	return remaining
 }
 
-func presenceRequestHasImage(req ChatRequest) bool {
-	for _, attachment := range req.Attachments {
-		if attachment.Type == "image" || strings.HasPrefix(attachment.Mime, "image/") {
-			return true
+// presenceAttachmentKinds maps this turn's new attachments to mechanical kinds
+// (TF-16 design §1): one entry per attachment, arrival order, repeats kept.
+// MIME leads; a missing MIME falls back to the declared attachment type
+// vocabulary.
+func presenceAttachmentKinds(attachments []ChatAttachment) []string {
+	if len(attachments) == 0 {
+		return nil
+	}
+	kinds := make([]string, 0, len(attachments))
+	for _, item := range attachments {
+		kinds = append(kinds, attachmentpkg.Kind(item.Mime, item.Type))
+	}
+	return kinds
+}
+
+// presenceAttachmentKindLabels maps kinds to the Chinese slot labels (design
+// §3); empty kinds drop out so the slot list stays mechanical.
+func presenceAttachmentKindLabels(kinds []string) []string {
+	if len(kinds) == 0 {
+		return nil
+	}
+	labels := make([]string, 0, len(kinds))
+	for _, kind := range kinds {
+		if label := attachmentpkg.KindLabel(kind); label != "" {
+			labels = append(labels, label)
 		}
 	}
-	return false
+	return labels
 }
 
 func presencePullScopeFor(claims *postgresPresenceClaims) (presencePullScope, error) {

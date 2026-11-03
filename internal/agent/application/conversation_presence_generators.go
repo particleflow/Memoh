@@ -38,21 +38,21 @@ const presenceFallbackText = "在的，你继续说。"
 // the eta duration regex) retry once each and only while the window still
 // affords a generation (design v3 §5.2).
 type presenceDirectedGenerator struct {
-	base         *conversationPresenceSDKGenerator
-	direction    string
-	etaBand      string
-	recentACKs   []string
-	windowEnd    time.Time
-	botName      string
-	locale       string
-	userMessage  string
-	points       []string
-	urgency      int
-	imagePresent bool
+	base            *conversationPresenceSDKGenerator
+	direction       string
+	etaBand         string
+	recentACKs      []string
+	windowEnd       time.Time
+	botName         string
+	locale          string
+	userMessage     string
+	points          []string
+	urgency         int
+	attachmentKinds []string
 }
 
 func (g *presenceDirectedGenerator) Generate(ctx context.Context, input conversationpresence.Input, limits conversationpresence.Limits) (conversationpresence.Result, error) {
-	slots := buildPresenceSlots(g.botName, g.locale, g.userMessage, g.points, input.Phase, g.imagePresent, g.urgency, g.etaBand, g.recentACKs)
+	slots := buildPresenceSlots(g.botName, g.locale, g.userMessage, g.points, input.Phase, g.attachmentKinds, g.urgency, g.etaBand, g.recentACKs)
 	result, err := g.base.generateDirected(ctx, g.direction, "", slots, input.Phase, limits)
 	if err != nil {
 		return result, err
