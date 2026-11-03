@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "54539a2b3ef80ca8244ada3ca07aabb19999a26b421e9b9ced4d8b40a62d07d8",
+      "sha256": "7b71fd3750655dddaa4693cdf26570139f2610c8c4be3f1b8cc4007ca9ac2d4d",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -54,7 +54,8 @@
         "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
         "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
         "Bubble kinds round (HAP43 candidate): add the sharedBubbleKind overlay pin; every other lock value unchanged.",
-        "Input-side drop round (PR #177): re-pin the sharedReadAloudStreaming source hash after the four input-drop fixes and the render-regression fix; every other lock value unchanged."
+        "Input-side drop round (PR #177): re-pin the sharedReadAloudStreaming source hash after the four input-drop fixes and the render-regression fix; every other lock value unchanged.",
+        "Receipt source first frame (HAP45): re-pin the sharedHomeAdmissionFinal snapshot hash after folding the PR #173 run-level input_source attribution into the paired sources; every other lock value unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -1908,7 +1909,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "55e1de0efd3094ed0f227d3fd0839b203401473e1fb0d5f9df20d737ac4241d6",
+      "sha256": "2d523be0c3836f2b8fbae59cc7f992c3a8bc71f352b6393aecc7542626c4c05d",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -1916,7 +1917,8 @@
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
         "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values.",
         "Consume PR#97 read-aloud ungating on the phone: paired959 speech files advance to 635fe1722db7 (canReplay pure-text condition, uncached replay synthesizes on demand, cached replay after read-only identity check, identity mismatch re-synthesizes) and the three gated locale strings are removed. Automatic path, interruption and account isolation unchanged.",
-        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only."
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
+        "Receipt source first frame (HAP45, PR #173 web half): the paired runtime projection carries the run-level input_source annotation from the first frame, so receipt-shaped turns (no user turn) attribute their live assistant output from the run view instead of rendering an unknown source until history lands; RuntimeCurrentRunView gains the input_source field and the run-input-source regression fixture joins the snapshot."
       ]
     },
     {

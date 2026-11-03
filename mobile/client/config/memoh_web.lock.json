@@ -455,9 +455,9 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "55e1de0efd3094ed0f227d3fd0839b203401473e1fb0d5f9df20d737ac4241d6"
+      "sha256": "2d523be0c3836f2b8fbae59cc7f992c3a8bc71f352b6393aecc7542626c4c05d"
     },
-    "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action. Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
+    "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action. Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only. Receipt source first frame (HAP45, PR #173 web half): the paired runtime projection carries the run-level input_source annotation from the first frame, so receipt-shaped turns (no user turn) attribute their live assistant output from the run view instead of rendering an unknown source until history lands; RuntimeCurrentRunView gains the input_source field and the run-input-source regression fixture joins the snapshot.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
     "HAP27ContainsDelta": false,
     "releaseBuildAuthorized": true,
