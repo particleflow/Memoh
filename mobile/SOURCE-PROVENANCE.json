@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "87e5d5264aae7ac5c6a3cd9fcf7e8680e7c40c85b16c03e2b59d48dcb1e47f37",
+      "sha256": "9830d3d659be37ad5420ee215ca30d9eb3edeefa43d44fa996050844a7575dee",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -2019,7 +2019,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "eb9b06ec7b6a9e9865644fcb6a8bf2251346e0bd5776a3de767e1b4d1e9d911b",
+      "sha256": "72072ff10ce04e1162eb7a6d59c4c5d7ae9e013e2d59c8fb284e7e5dcfb19983",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
