@@ -80,17 +80,6 @@ func taskTransfer(c echo.Context) *transferHTTPContext {
 	return scope
 }
 
-// Recheck before exposing a result/stream. An expired/revoked response can follow
-// a durable file mutation; receipt/operation queries must reconcile that outcome.
-func checkTaskTransferResponse(c echo.Context) error {
-	if scope := taskTransfer(c); scope != nil {
-		if err := scope.handler.checkIdentity(c.Request().Context(), scope.principal.Identity); err != nil {
-			return deliveryHTTPError(err)
-		}
-	}
-	return nil
-}
-
 func (h *ComputerTransferHandler) Register(e *echo.Echo) {
 	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

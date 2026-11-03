@@ -62,9 +62,6 @@ func finishTaskDelivery(c echo.Context, out computertask.DeliveryOutcome) error 
 	if scope == nil {
 		return nil
 	}
-	if err := checkTaskTransferResponse(c); err != nil {
-		return err
-	}
 	if out.Outcome != "committed" || scope.principal.Reference.Direction != "upload" {
 		return nil
 	}
@@ -81,5 +78,5 @@ func finishTaskDelivery(c echo.Context, out computertask.DeliveryOutcome) error 
 	if err := scope.handler.files.mediaService.Uploads().RetireTaskReceipt(c.Request().Context(), p.Identity.Binding.UserID, p.Identity.Binding.BotID, proof); err != nil {
 		return resumableError(err)
 	}
-	return checkTaskTransferResponse(c)
+	return nil
 }

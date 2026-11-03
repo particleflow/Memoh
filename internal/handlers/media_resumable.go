@@ -113,9 +113,6 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		if err := checkTaskTransferResponse(c); err != nil {
-			return err
-		}
 		return c.JSON(http.StatusCreated, result)
 	}
 	create := store.Create
@@ -138,9 +135,6 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 			return deliveryHTTPError(err)
 		}
 	}
-	if err := checkTaskTransferResponse(c); err != nil {
-		return err
-	}
 	return c.JSON(http.StatusCreated, result)
 }
 
@@ -160,9 +154,6 @@ func (h *MessageHandler) GetMediaUpload(c echo.Context) error {
 	}
 	result, err := readMediaUpload(c, store, owner, bot, c.Param("upload_id"), false)
 	if err != nil {
-		return err
-	}
-	if err := checkTaskTransferResponse(c); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, MediaUploadStatusResponse{Upload: result, NetworkPolicy: h.mediaService.TransferNetworkPolicy()})
@@ -216,9 +207,6 @@ func (h *MessageHandler) AppendMediaUpload(c echo.Context) error {
 		return resumableError(err)
 	}
 	_ = controller.SetReadDeadline(time.Time{})
-	if err := checkTaskTransferResponse(c); err != nil {
-		return err
-	}
 	return c.JSON(http.StatusOK, result)
 }
 
@@ -238,9 +226,6 @@ func (h *MessageHandler) CompleteMediaUpload(c echo.Context) error {
 	}
 	result, err := readMediaUpload(c, store, owner, bot, c.Param("upload_id"), true)
 	if err != nil {
-		return err
-	}
-	if err := checkTaskTransferResponse(c); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, result)
@@ -263,9 +248,6 @@ func (h *MessageHandler) CancelMediaUpload(c echo.Context) error {
 	result, err := store.Cancel(c.Request().Context(), owner, bot, c.Param("upload_id"))
 	if err != nil {
 		return resumableError(err)
-	}
-	if err := checkTaskTransferResponse(c); err != nil {
-		return err
 	}
 	return c.JSON(http.StatusOK, result)
 }
