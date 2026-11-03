@@ -19,7 +19,7 @@ nor modifies that implementation, generated SDK, Agent, runtime or contextview.
 | Verified source | Consequence |
 | --- | --- |
 | `internal/handlers/media_upload.go`, `media.Service`, `storage/providers/localfs/originals.go` | Reuse ingest, canonical per-Bot hashes and originals; no second filesystem API. |
-| Frozen PR #8 `media/uploads.go`, `handlers/media_resumable.go` | Sequential 1 byte–8 MiB chunks, per-chunk/final SHA-256, durable receipts, 24h TTL, idempotent complete, cancel, current Bot permission checks. Default file limit stays 200 MiB. |
+| Frozen PR #8 `media/uploads.go`, `handlers/media_resumable.go` | Sequential 1 byte–8 MiB chunks, per-chunk/final SHA-256, durable receipts, 24h TTL, idempotent complete, cancel, current Bot permission checks. Admission has no built-in file limit; only a configured `max_upload_bytes` bounds uploads. |
 | `handlers/message.go:ServeMedia`, `media_range_test.go` | Authenticated GET/HEAD, Range, If-Range and hash ETag already exist. Avoid public-image/preview paths and full-buffer workspace FSRead. |
 | `computertask/source.go`, `service.go` | Existing artifact action saves a bounded terminal snapshot. It does not register arbitrary Windows output files or a multi-result delivery manifest. |
 | `auth/jwt.go`, `docs/native-runtime-herdr.md` | Memoh account/chat authentication and legacy executor command authorization are different. No task-scoped PC upload credential or encrypted PC↔NAS route is demonstrated. |
