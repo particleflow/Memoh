@@ -22,6 +22,7 @@ require (
 	github.com/felinics/connect-it/sdk/go v0.1.1-0.20261016070556-d8593c2a7ec7
 	github.com/felinics/dingtalk-stream-sdk-go v0.0.0-20260829152622-ce4b7ea674a5
 	github.com/felinics/twilight v0.7.2-0.20261002230120-f6d0ce1a0e8c
+	github.com/fumiama/go-docx v0.0.0-20250506085032-0c30fd09304b
 	github.com/go-ego/gse v1.0.2
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -50,6 +51,7 @@ require (
 	github.com/slack-go/slack v0.19.0
 	github.com/stretchr/testify v1.12.1
 	github.com/swaggo/swag v1.16.6
+	github.com/xuri/excelize/v2 v2.10.1
 	github.com/yuin/goldmark v1.7.13
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.71.0
@@ -73,9 +75,15 @@ require golang.org/x/oauth2 v0.36.0 // indirect
 
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/fumiama/imgsz v0.0.2 // indirect
 	github.com/go-openapi/swag/pools v0.28.0 // indirect
 	github.com/gowebpki/jcs v1.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
+	github.com/richardlehane/mscfb v1.0.6 // indirect
+	github.com/richardlehane/msoleps v1.0.6 // indirect
+	github.com/tiendc/go-deepcopy v1.7.2 // indirect
+	github.com/xuri/efp v0.0.1 // indirect
+	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260819154853-08b0e4226688 // indirect
