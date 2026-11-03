@@ -36,6 +36,14 @@ func (s *readMediaTestContainerService) ReadRaw(req *pb.ReadRawRequest, stream p
 	return stream.Send(&pb.DataChunk{Data: data})
 }
 
+func (s *readMediaTestContainerService) Stat(_ context.Context, req *pb.StatRequest) (*pb.StatResponse, error) {
+	data, ok := s.files[req.GetPath()]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+	return &pb.StatResponse{Entry: &pb.FileEntry{Path: req.GetPath(), Size: int64(len(data))}}, nil
+}
+
 func newReadMediaTestClient(t *testing.T, files map[string][]byte) *bridge.Client {
 	t.Helper()
 

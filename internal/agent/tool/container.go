@@ -187,6 +187,7 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 	if sess.SupportsImageInput {
 		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP) — binary images are loaded into model context automatically."
 	}
+	readDesc += " Video files return a reference (mime, size, content hash) instead of content; hand it to a specialist bot via delegate_to_bot attachments."
 
 	toolList := []toolexec.Tool{
 		toolexec.Define(ToolRead().String(), readDesc,
@@ -816,6 +817,15 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 			return nil, errors.New("file is a PDF document and the current model has no native PDF input (file-input capability). Ask the user to switch to a PDF-capable model; do not attempt to install PDF readers")
 		}
 		return ReadImageFromContainer(opCtx, client, filePath, defaultReadMediaMaxBytes), nil
+	}
+	// Video before the generic binary probe: the read tool does not decode
+	// video, it returns a reference (mime, size, content hash) the model can
+	// hand to a specialist bot. Delegating is the model's decision, not ours.
+	if videoMime, isVideo, videoErr := readVideoContentType(probe[:probeN], filePath); isVideo || videoErr != nil {
+		if videoErr != nil {
+			return nil, videoErr
+		}
+		return readVideoReference(opCtx, client, strings.TrimSpace(args.Path), filePath, videoMime)
 	}
 	if bytes.IndexByte(probe[:probeN], 0) >= 0 {
 		if !session.SupportsImageInput {
