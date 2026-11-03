@@ -11,6 +11,7 @@ import {
   updateFollowUpQueueItem,
   type SessionQueueItem,
 } from '@/composables/api/useChat.chat-api'
+import { isApiErrorCode } from '@/utils/api-error'
 
 export interface EditableFollowUpQueueItem extends SessionQueueItem {
   text: string
@@ -77,6 +78,22 @@ export function useSessionFollowUpQueue(
     return items.value.filter(entry => entry.queueKind === kind)
   }
 
+  function dropLocal(id: string) {
+    items.value = items.value.filter(entry => entry.item_id !== id)
+  }
+
+  /**
+   * The server answered that this item is no longer pending. The list holds a
+   * stale row, so the action is complete once the row is gone: drop it, stay
+   * silent, and let the regular refresh reconcile anything else. Retrying or
+   * reporting would only ask again about an item the server no longer has.
+   */
+  function resolvesStaleItem(error: unknown, id: string): boolean {
+    if (!isApiErrorCode(error, 'queue_item_not_pending')) return false
+    dropLocal(id)
+    return true
+  }
+
   async function refresh() {
     const { bot, session } = queueTarget()
     const version = ++requestVersion
@@ -116,6 +133,7 @@ export function useSessionFollowUpQueue(
       if (index >= 0) items.value[index] = editable(updated, item.queueKind)
     } catch (error) {
       if (scope !== scopeVersion) return
+      if (resolvesStaleItem(error, id)) return
       await refresh()
       if (scope !== scopeVersion) return
       throw error
@@ -136,6 +154,7 @@ export function useSessionFollowUpQueue(
       items.value = items.value.filter(entry => entry.item_id !== id)
     } catch (error) {
       if (scope !== scopeVersion) return
+      if (resolvesStaleItem(error, id)) return
       await refresh()
       if (scope !== scopeVersion) return
       throw error
@@ -157,6 +176,7 @@ export function useSessionFollowUpQueue(
       await refresh()
     } catch (error) {
       if (scope !== scopeVersion) return
+      if (resolvesStaleItem(error, id)) return
       await refresh()
       if (scope !== scopeVersion) return
       throw error
@@ -192,6 +212,7 @@ export function useSessionFollowUpQueue(
       }
     } catch (error) {
       if (scope !== scopeVersion) return
+      if (resolvesStaleItem(error, moved.item_id)) return
       await refresh()
       if (scope !== scopeVersion) return
       throw error
@@ -210,6 +231,17 @@ export function useSessionFollowUpQueue(
     void refresh().catch(() => {})
   }, { immediate: true, flush: 'sync' })
   watch(() => toValue(changeSignal), () => { void refresh().catch(() => {}) })
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    // The fallback timer pauses while the host is hidden, and a hidden host
+    // can miss the runtime boundary that would have refreshed the list. Coming
+    // back visible rebuilds from the server's queue instead of trusting rows
+    // that aged behind a backgrounded app.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && hasItems.value) void refresh().catch(() => {})
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    if (getCurrentScope()) onScopeDispose(() => document.removeEventListener('visibilitychange', onVisible))
+  }
 
   function stopAutoRefresh() {
     if (refreshTimer === undefined) return
