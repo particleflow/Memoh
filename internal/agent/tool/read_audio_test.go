@@ -203,13 +203,13 @@ func newReadAudioWAVFixture(byteRate uint32, dataBytes int) []byte {
 	chunk := func(id string, body []byte) []byte {
 		head := make([]byte, 8)
 		copy(head[0:4], id)
-		binary.LittleEndian.PutUint32(head[4:8], uint32(len(body)))
+		binary.LittleEndian.PutUint32(head[4:8], uint32(len(body))) //nolint:gosec // G115: fixture chunk sizes are far below 2^32.
 		return append(head, body...)
 	}
 	out := append([]byte("RIFF\x00\x00\x00\x00"), []byte("WAVE")...)
 	out = append(out, chunk("fmt ", fmtBody)...)
 	out = append(out, chunk("data", make([]byte, dataBytes))...)
-	binary.LittleEndian.PutUint32(out[4:8], uint32(len(out)-8))
+	binary.LittleEndian.PutUint32(out[4:8], uint32(len(out)-8)) //nolint:gosec // G115: fixture RIFF size is far below 2^32.
 	return out
 }
 
@@ -218,7 +218,7 @@ func newReadAudioWAVFixture(byteRate uint32, dataBytes int) []byte {
 func newReadAudioMP4Fixture(timescale, duration uint32) []byte {
 	box := func(typ string, body []byte) []byte {
 		b := make([]byte, 8+len(body))
-		binary.BigEndian.PutUint32(b[0:4], uint32(len(b)))
+		binary.BigEndian.PutUint32(b[0:4], uint32(len(b))) //nolint:gosec // G115: fixture box sizes are far below 2^32.
 		copy(b[4:8], typ)
 		copy(b[8:], body)
 		return b
