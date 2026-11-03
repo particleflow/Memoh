@@ -189,7 +189,7 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP)."
 	}
 	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files truncated)."
-	readDesc += " Audio files are transcribed to text (up to 10 MB and 5 minutes) when a transcription model is configured."
+	readDesc += " Audio files are transcribed to text when a transcription model is configured."
 	readDesc += " Video files return a reference (mime, size, content hash) instead of content; hand it to a specialist bot via delegate_to_bot attachments."
 
 	toolList := []toolexec.Tool{
