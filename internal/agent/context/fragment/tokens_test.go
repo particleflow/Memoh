@@ -216,7 +216,12 @@ func TestEstimateFragTokensFlatImageEstimate(t *testing.T) {
 	t.Parallel()
 
 	bulky := strings.Repeat("A", 40000)
-	frag := ImageFrag("current_user.images", []sdk.ImagePart{{Image: "data:image/png;base64," + bulky, MediaType: "image/png"}}, Scope{}, "run_config")
+	frag := MessageFrag(MessageFragInput{
+		ID:      "message.000",
+		Message: sdk.UserMessage("", sdk.ImagePart{Image: "data:image/png;base64," + bulky, MediaType: "image/png"}),
+		Kind:    KindConversationEvent,
+		Slot:    SlotHistory,
+	})
 	if got := EstimateFragTokens(frag); got != EstimateImageTokens {
 		t.Fatalf("EstimateFragTokens(image) = %d, want %d", got, EstimateImageTokens)
 	}
@@ -260,7 +265,7 @@ func TestResolveFragTokensPrefersPresetEstimate(t *testing.T) {
 	}
 }
 
-func TestProviderEnvelopeTokensPricesInlineImagesFlat(t *testing.T) {
+func TestProviderEnvelopeTokensPricesMessageImagesFlat(t *testing.T) {
 	t.Parallel()
 
 	photo := sdk.Message{Role: sdk.MessageRoleUser, Content: []sdk.MessagePart{

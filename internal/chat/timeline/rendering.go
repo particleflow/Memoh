@@ -14,13 +14,6 @@ type RenderedContentPiece struct {
 	URL  string `json:"url,omitempty"`
 }
 
-// ImageAttachmentRef holds the content hash and MIME type of an image
-// attachment that can be inlined as a vision input via the media store.
-type ImageAttachmentRef struct {
-	ContentHash string `json:"content_hash"`
-	Mime        string `json:"mime,omitempty"`
-}
-
 // RenderedSegment is a single segment of rendered context, one per IC node.
 type RenderedSegment struct {
 	MessageID       string                 `json:"message_id,omitempty"`
@@ -32,7 +25,6 @@ type RenderedSegment struct {
 	IsSelfSent      bool                   `json:"is_self_sent,omitempty"`
 	MentionsMe      bool                   `json:"mentions_me,omitempty"`
 	RepliesToMe     bool                   `json:"replies_to_me,omitempty"`
-	ImageRefs       []ImageAttachmentRef   `json:"image_refs,omitempty"`
 }
 
 // RenderedContext is the output of the Rendering layer — a slice of segments.
@@ -163,16 +155,6 @@ func renderMessage(msg *ICMessage, params RenderParams) RenderedSegment {
 
 	pieces := []RenderedContentPiece{{Type: "text", Text: text}}
 
-	var imageRefs []ImageAttachmentRef
-	for _, att := range msg.Attachments {
-		if strings.EqualFold(att.Type, "image") && att.ContentHash != "" {
-			imageRefs = append(imageRefs, ImageAttachmentRef{
-				ContentHash: att.ContentHash,
-				Mime:        att.MimeType,
-			})
-		}
-	}
-
 	return RenderedSegment{
 		MessageID:       msg.MessageID,
 		ReceivedAtMs:    msg.ReceivedAtMs,
@@ -183,7 +165,6 @@ func renderMessage(msg *ICMessage, params RenderParams) RenderedSegment {
 		IsSelfSent:      msg.IsSelfSent,
 		MentionsMe:      mentionsMe,
 		RepliesToMe:     repliesToMe,
-		ImageRefs:       imageRefs,
 	}
 }
 

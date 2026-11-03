@@ -22,12 +22,6 @@ type DiscussContextConfig struct {
 	// ComposedMessages is the authoritative output of timeline composition
 	// when non-nil.
 	ComposedMessages []timeline.ContextMessage
-	// InlineImages are freshly surfaced attachments delivered as native vision
-	// input on the latest user message.
-	InlineImages []sdk.ImagePart
-	// SourceImages are freshly surfaced attachments keyed by the external
-	// message they arrived with; each rides on that message.
-	SourceImages map[string][]sdk.ImagePart
 }
 
 type DiscussContextCollector struct{}
@@ -54,16 +48,12 @@ func (*DiscussContextCollector) Collect(_ context.Context, req CollectRequest) (
 		currentUserIndex = latestComposedUserMessageIndex(cfg.ComposedMessages)
 	}
 	for i, message := range cfg.ComposedMessages {
-		frag := discussComposedMessageFrag(message, i, i == currentUserIndex, req.Scope)
-		if message.Source != nil && message.Source.Kind == "external" {
-			frag = appendDiscussImages(frag, cfg.SourceImages[message.Source.ID])
-		}
-		frags = append(frags, frag)
+		frags = append(frags, discussComposedMessageFrag(message, i, i == currentUserIndex, req.Scope))
 	}
 	if req.Intent == contextfrag.IntentRunConfigPreProvider {
 		frags = contextfrag.RepairToolClosureFrags(frags, req.Scope, discussContextCollectorName)
 	}
-	return injectDiscussImages(frags, cfg.InlineImages), nil
+	return frags, nil
 }
 
 func latestComposedCurrentIndex(messages []timeline.ContextMessage) (int, bool) {
@@ -123,36 +113,6 @@ func discussComposedMessageFrag(message timeline.ContextMessage, index int, curr
 		input.Budget = contextfrag.BudgetPolicy{Overflow: contextfrag.OverflowKeep}
 	}
 	return contextfrag.MessageFrag(input)
-}
-
-// injectDiscussImages mirrors the legacy inject-into-last-user-message
-// behavior at fragment granularity.
-func injectDiscussImages(frags []contextfrag.ContextFrag, images []sdk.ImagePart) []contextfrag.ContextFrag {
-	for i := len(frags) - 1; i >= 0; i-- {
-		if frags[i].Kind == contextfrag.KindCurrentUserMessage && contextfrag.FragMessage(frags[i]) != nil {
-			frags[i] = appendDiscussImages(frags[i], images)
-			return frags
-		}
-	}
-	return frags
-}
-
-func appendDiscussImages(frag contextfrag.ContextFrag, images []sdk.ImagePart) contextfrag.ContextFrag {
-	msg := contextfrag.FragMessage(frag)
-	if msg == nil {
-		return frag
-	}
-	enriched := *msg
-	enriched.Content = append([]sdk.MessagePart(nil), msg.Content...)
-	for _, img := range images {
-		if strings.TrimSpace(img.Image) != "" {
-			enriched.Content = append(enriched.Content, img)
-		}
-	}
-	if len(enriched.Content) == len(msg.Content) {
-		return frag
-	}
-	return contextfrag.RebuildFragMessage(frag, enriched)
 }
 
 func discussContextConfig(config any) (DiscussContextConfig, error) {

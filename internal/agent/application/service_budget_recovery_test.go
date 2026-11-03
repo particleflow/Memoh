@@ -174,13 +174,11 @@ func countRecoveryText(messages []sdk.Message, text string) int {
 	return count
 }
 
-func TestChatBudgetRecoveryPreservesMaterializedCurrentMedia(t *testing.T) {
+func TestChatBudgetRecoveryPreservesMaterializedCurrentRequest(t *testing.T) {
 	s, _, _, cfg := chatRecoveryFixture(t)
 	cfg.Messages = cfg.Messages[:23]
 	cfg.ContextCurrentUserMessageIndex = nil
 	cfg.Query = "the original timestamped request"
-	cfg.InlineImages = []sdk.ImagePart{{Image: "data:image/png;base64,YQ==", MediaType: "image/png"}}
-	cfg.InlineAttachments = []sdk.MessagePart{sdk.FilePart{Data: "Yg==", MediaType: "application/pdf", Filename: "attached.pdf"}}
 	cfg.ForkContextSourceMessageIDs = make([]string, len(cfg.Messages))
 	cfg.ForkContextSourceMessageIDs[0] = "inherited-source"
 	cfg = s.prepareRunConfig(t.Context(), cfg)
@@ -560,74 +558,9 @@ func TestChatBudgetRecoveryInsertsEmptyHistoryBeforeFrozenSuffix(t *testing.T) {
 	}
 }
 
-func TestPipelineMediaFollowsExplicitCurrentInput(t *testing.T) {
-	s, _, _, cfg := chatRecoveryFixture(t)
-	cfg.Messages = []sdk.Message{sdk.UserMessage("current"), sdk.UserMessage("self echo"), sdk.UserMessage("memory")}
-	cfg.ContextCurrentUserMessageIndex = intPointer(0)
-	cfg.ContextMemoryMessageIndex = intPointer(2)
-	cfg.InlineImages = []sdk.ImagePart{{Image: "data:image/png;base64,YQ=="}}
-	cfg.InlineAttachments = []sdk.MessagePart{sdk.FilePart{Data: "Yg==", MediaType: "application/pdf"}}
-	cfg = s.prepareRunConfig(t.Context(), cfg)
-	if len(cfg.Messages[0].Content) != 3 || len(cfg.Messages[1].Content) != 1 || len(cfg.Messages[2].Content) != 1 {
-		t.Fatalf("media detached from current input: %v", cfg.Messages)
-	}
-}
-
 func discussHistoryFrag(index int, sourceID string, kind contextfrag.Kind, msg sdk.Message) contextfrag.ContextFrag {
 	return contextfrag.MessageFrag(contextfrag.MessageFragInput{
 		ID: fmt.Sprintf("discuss.message.%03d", index), Message: msg, Kind: kind, Slot: contextfrag.SlotHistory,
 		SourceID: sourceID, Collector: discussContextCollector, Index: index,
 	})
-}
-
-// Selection trims answered history with a notice; that notice counts against
-// what must stay, so shedding does not stop one notice short and leave the
-// selector to drop the older input with its text.
-func TestShedOlderBatchImagesChargesTheTrimNotice(t *testing.T) {
-	older := sdk.UserMessage("older input", sdk.ImagePart{Image: "data:image/png;base64,YQ=="})
-	frags := []contextfrag.ContextFrag{
-		discussHistoryFrag(0, "answered", contextfrag.KindConversationEvent, sdk.UserMessage(strings.Repeat("answered ", 500))),
-		discussHistoryFrag(1, "older", contextfrag.KindConversationEvent, older),
-		discussHistoryFrag(2, "newest", contextfrag.KindCurrentUserMessage, sdk.UserMessage("newest input")),
-	}
-	batch := map[string]turn.ContextMessageSource{"older": {Kind: "external", ID: "older", Current: true}, "newest": {Kind: "external", ID: "newest", Current: true}}
-	notice := contextfrag.ResolveProviderBudgetFragTokens(contextview.TrimNoticeFrag(contextfrag.Scope{}))
-	budget := contextfrag.ResolveProviderBudgetFragTokens(frags[1]) + notice - 1
-	cfg := native.RunConfig{ContextSourceFrags: frags, Messages: []sdk.Message{sdk.UserMessage(strings.Repeat("answered ", 500)), older, sdk.UserMessage("newest input")}, ContextMutations: contextfrag.NewMutationLedger()}
-	if _, shed := shedOlderBatchImages(cfg, batch, budget); !shed {
-		t.Fatal("the older input kept an image that leaves no room for the trim notice")
-	}
-	if _, shed := shedOlderBatchImages(cfg, batch, budget+1); shed {
-		t.Fatal("an image that fits beside the trim notice was shed")
-	}
-}
-
-// A message sheds only as many of its images as the budget needs, oldest
-// first.
-func TestShedOlderBatchImagesShedsOnlyTheImagesNeeded(t *testing.T) {
-	image := func(data string) sdk.ImagePart { return sdk.ImagePart{Image: "data:image/png;base64," + data} }
-	album := sdk.UserMessage("album", image("MQ=="), image("Mg=="), image("Mw=="))
-	frags := []contextfrag.ContextFrag{
-		discussHistoryFrag(0, "album", contextfrag.KindConversationEvent, album),
-		discussHistoryFrag(1, "newest", contextfrag.KindCurrentUserMessage, sdk.UserMessage("newest input")),
-	}
-	batch := map[string]turn.ContextMessageSource{"album": {Kind: "external", ID: "album", Current: true}, "newest": {Kind: "external", ID: "newest", Current: true}}
-	cfg := native.RunConfig{ContextSourceFrags: frags, Messages: []sdk.Message{album, sdk.UserMessage("newest input")}, ContextMutations: contextfrag.NewMutationLedger()}
-	budget := contextfrag.ResolveProviderBudgetFragTokens(frags[0]) - contextfrag.EstimateImageTokens
-	shed, ok := shedOlderBatchImages(cfg, batch, budget)
-	if !ok {
-		t.Fatal("an album over budget shed nothing")
-	}
-	var kept []string
-	for _, part := range shed.Messages[0].Content {
-		if image, isImage := part.(sdk.ImagePart); isImage {
-			kept = append(kept, image.Image)
-		}
-	}
-	if len(kept) != 2 || kept[0] != image("Mg==").Image {
-		t.Fatalf("album kept %v, want only its oldest image shed", kept)
-	}
-	if records := cfg.ContextMutations.Records(); len(records) != 1 || records[0].Detail != "sources=album" {
-		t.Fatalf("mutations = %+v", records)
-	}
 }

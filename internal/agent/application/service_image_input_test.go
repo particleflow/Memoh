@@ -10,13 +10,9 @@ import (
 	"image/png"
 	"io"
 	"log/slog"
-	"slices"
 	"strings"
 	"testing"
 
-	sdk "github.com/felinics/twilight/sdk"
-
-	"github.com/felinics/memoh/internal/chat/timeline"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -84,89 +80,37 @@ func imageInputService(t *testing.T, assets map[string][]byte) *Service {
 	}
 }
 
-func inlineImageParts(ctx context.Context, s *Service, botID string, refs []timeline.ImageAttachmentRef) []sdk.ImagePart {
-	return slices.Concat(s.InlineImageAttachments(ctx, botID, refs)...)
-}
-
-// The reported failure: an unusable attachment sitting in pending discussion
-// context made every later turn fail image parsing. It must be skipped without
-// taking the other images of the turn down with it.
-func TestInlineImageAttachmentsRendersAnimationsAndSkipsUnparsableBytes(t *testing.T) {
+// Stored media preparation renders animations and withholds bytes the vision
+// lane cannot parse, whatever the stored label claims.
+func TestStoredImagePrepRendersAnimationsAndSkipsUnparsableBytes(t *testing.T) {
 	s := imageInputService(t, map[string][]byte{
-		"video-sticker":    webmSticker(),
 		"animated-sticker": movingStickerTGS(t),
 		"photo":            rasterPNG(t),
 	})
 
-	parts := inlineImageParts(context.Background(), s, "bot-1", []timeline.ImageAttachmentRef{
-		// WebM has no renderer here, so it stays out of the vision lane.
-		{ContentHash: "video-sticker", Mime: "video/webm"},
-		// TGS is rendered into frames, whatever the stored label claims.
-		{ContentHash: "animated-sticker", Mime: "application/x-gzip"},
-		{ContentHash: "photo", Mime: "image/png"},
+	sticker := s.inlineImageAttachmentAssetIfNeeded(context.Background(), "bot-1", gatewayAttachment{
+		Type: "image", ContentHash: "animated-sticker", Mime: "application/x-gzip",
 	})
-
-	if len(parts) != animationFrameCount+1 {
-		t.Fatalf("InlineImageAttachments() = %d parts, want %d sticker frames plus the photo",
-			len(parts), animationFrameCount)
+	if len(sticker.Frames) != animationFrameCount || sticker.Transport != gatewayTransportInlineDataURL {
+		t.Fatalf("animated prep = %#v, want %d rendered frames inline", sticker, animationFrameCount)
 	}
-	for i, part := range parts {
-		if part.MediaType != "image/png" || !strings.HasPrefix(part.Image, "data:image/png;base64,") {
-			t.Fatalf("part %d = %#v, want a PNG data URL", i, part)
-		}
-	}
-	if parts[len(parts)-1].Image != dataURL("image/png", rasterPNG(t)) {
-		t.Fatal("the ordinary photo was not passed through untouched")
+	photo := s.inlineImageAttachmentAssetIfNeeded(context.Background(), "bot-1", gatewayAttachment{
+		Type: "image", ContentHash: "photo", Mime: "image/png",
+	})
+	if photo.Payload != dataURL("image/png", rasterPNG(t)) || photo.Mime != "image/png" {
+		t.Fatalf("photo prep = %#v, want the stored image passed through untouched", photo)
 	}
 }
 
 // Historical records label sticker bytes as image/png. The label must not be
 // enough to get them into a vision request.
-func TestInlineImageAttachmentsIgnoresMislabeledStickerBytes(t *testing.T) {
+func TestStoredImagePrepIgnoresMislabeledStickerBytes(t *testing.T) {
 	s := imageInputService(t, map[string][]byte{"legacy": webmSticker()})
-	parts := inlineImageParts(context.Background(), s, "bot-1", []timeline.ImageAttachmentRef{
-		{ContentHash: "legacy", Mime: "image/png"},
+	got := s.inlineImageAttachmentAssetIfNeeded(context.Background(), "bot-1", gatewayAttachment{
+		Type: "image", ContentHash: "legacy", Mime: "image/png",
 	})
-	if len(parts) != 0 {
-		t.Fatalf("InlineImageAttachments() = %#v, want nothing for WebM bytes labelled image/png", parts)
-	}
-}
-
-func TestInlineImageAttachmentsLoadsEachAssetOnce(t *testing.T) {
-	opens := 0
-	s := &Service{
-		logger: slog.Default(),
-		assetLoader: &fakeGatewayAssetLoader{
-			openFn: func(context.Context, string, string) (io.ReadCloser, string, error) {
-				opens++
-				return io.NopCloser(bytes.NewReader(rasterPNG(t))), "image/png", nil
-			},
-		},
-	}
-	refs := []timeline.ImageAttachmentRef{
-		{ContentHash: "photo", Mime: "image/png"},
-		{ContentHash: "photo", Mime: "image/png"},
-	}
-	if parts := inlineImageParts(context.Background(), s, "bot-1", refs); len(parts) != 1 {
-		t.Fatalf("InlineImageAttachments() = %d parts, want the repeated reference collapsed", len(parts))
-	}
-	if opens != 1 {
-		t.Fatalf("asset opened %d times, want 1", opens)
-	}
-}
-
-func TestInlineInjectAttachmentsRendersAnimations(t *testing.T) {
-	s := imageInputService(t, map[string][]byte{
-		"animated-sticker": movingStickerTGS(t),
-		"video-sticker":    webmSticker(),
-	})
-	parts := s.inlineInjectAttachments(context.Background(), "bot-1", []ChatAttachment{
-		{Type: "image", ContentHash: "animated-sticker", Mime: "image/webp"},
-		{Type: "image", ContentHash: "video-sticker", Mime: "image/png"},
-	})
-	if len(parts) != animationFrameCount {
-		t.Fatalf("inlineInjectAttachments() = %d parts, want %d frames from the animation and nothing from the WebM",
-			len(parts), animationFrameCount)
+	if isNativeImageAttachment(got) {
+		t.Fatalf("attachment = %#v, want WebM bytes labelled image/png kept out of the vision lane", got)
 	}
 }
 
@@ -195,9 +139,6 @@ func TestGatewayStickerBytesRouteToFileFallback(t *testing.T) {
 	}
 	if item.Payload != "/data/.memoh/media/video-sticker" {
 		t.Fatalf("file reference = %q, want the stored original", item.Payload)
-	}
-	if parts := extractNativeImageParts(merged); len(parts) != 0 {
-		t.Fatalf("extractNativeImageParts() = %#v, want no vision input", parts)
 	}
 }
 
@@ -233,11 +174,6 @@ func TestGatewayInlineDataURLRestampsMislabeledSubtype(t *testing.T) {
 	if got.Mime != "image/png" || got.Payload != dataURL("image/png", data) {
 		t.Fatalf("attachment = %#v, want both the MIME and the data URL corrected to image/png", got)
 	}
-	parts := extractNativeImageParts([]any{got})
-	if len(parts) != 1 || parts[0].MediaType != "image/png" ||
-		!strings.HasPrefix(parts[0].Image, "data:image/png;base64,") {
-		t.Fatalf("image part = %#v, want a consistent image/png", parts)
-	}
 	image, err := runtimePromptImageFromDataURL(got.Payload, got.Mime)
 	if err != nil || image.MimeType != "image/png" {
 		t.Fatalf("External Agent image = %#v (err=%v), want image/png", image, err)
@@ -270,14 +206,12 @@ func TestStoredImageSurvivesShortReads(t *testing.T) {
 			},
 		},
 	}
-	parts := inlineImageParts(context.Background(), s, "bot-1", []timeline.ImageAttachmentRef{
-		{ContentHash: "photo", Mime: "image/png"},
-	})
-	if len(parts) != 1 || parts[0].MediaType != "image/png" {
-		t.Fatalf("InlineImageAttachments() = %#v, want the image through a drip-feeding reader", parts)
+	dataURLs, mime, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "photo", "image/png")
+	if err != nil {
+		t.Fatal(err)
 	}
-	if parts[0].Image != dataURL("image/png", data) {
-		t.Fatal("drip-feeding reader truncated the encoded image")
+	if len(dataURLs) != 1 || mime != "image/png" || dataURLs[0] != dataURL("image/png", data) {
+		t.Fatalf("inlineStoredImageDataURLs() = %#v (%q), want the image through a drip-feeding reader", dataURLs, mime)
 	}
 }
 
@@ -285,11 +219,12 @@ func TestStoredImageSurvivesShortReads(t *testing.T) {
 func TestStoredImageShorterThanSniffWindow(t *testing.T) {
 	jpegBytes := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0xFF, 0xD9}
 	s := imageInputService(t, map[string][]byte{"tiny": jpegBytes})
-	parts := inlineImageParts(context.Background(), s, "bot-1", []timeline.ImageAttachmentRef{
-		{ContentHash: "tiny", Mime: "image/jpeg"},
-	})
-	if len(parts) != 1 || parts[0].Image != dataURL("image/jpeg", jpegBytes) {
-		t.Fatalf("InlineImageAttachments() = %#v, want the whole short image", parts)
+	dataURLs, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "tiny", "image/jpeg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dataURLs) != 1 || dataURLs[0] != dataURL("image/jpeg", jpegBytes) {
+		t.Fatalf("inlineStoredImageDataURLs() = %#v, want the whole short image", dataURLs)
 	}
 }
 
@@ -311,11 +246,12 @@ func TestGatewayInlineDataURLKeepsRealImage(t *testing.T) {
 func TestStoredImageMimeIsCorrectedFromBytes(t *testing.T) {
 	jpegBytes := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0xFF, 0xD9}
 	s := imageInputService(t, map[string][]byte{"mislabeled": jpegBytes})
-	parts := inlineImageParts(context.Background(), s, "bot-1", []timeline.ImageAttachmentRef{
-		{ContentHash: "mislabeled", Mime: "image/png"},
-	})
-	if len(parts) != 1 || parts[0].MediaType != "image/jpeg" {
-		t.Fatalf("InlineImageAttachments() = %#v, want the sniffed image/jpeg", parts)
+	dataURLs, mime, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "mislabeled", "image/png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dataURLs) != 1 || mime != "image/jpeg" {
+		t.Fatalf("inlineStoredImageDataURLs() = %#v (%q), want the sniffed image/jpeg", dataURLs, mime)
 	}
 }
 

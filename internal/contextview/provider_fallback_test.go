@@ -15,17 +15,16 @@ import (
 func TestProviderViewFallbackKeepsLegacyBytesAndAudit(t *testing.T) {
 	t.Parallel()
 	duplicate := systemTextFrag("duplicate", "source ignored", contextfrag.KindSystemPrompt, 20)
-	image := sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png"}
 	cfg := agentpkg.RunConfig{
 		System: "  legacy system \n", Messages: []sdk.Message{sdk.AssistantMessage("history")},
-		Query: "  current \n", InlineImages: []sdk.ImagePart{image},
+		Query:              "  current \n",
 		ContextSourceFrags: []contextfrag.ContextFrag{duplicate, duplicate},
 	}
 	got := ApplyProviderRunConfig(context.Background(), nil, cfg)
 	if got.System != cfg.System {
 		t.Fatalf("system = %q, want %q", got.System, cfg.System)
 	}
-	assertMessagesEqual(t, got.Messages, []sdk.Message{sdk.AssistantMessage("history"), sdk.UserMessage(cfg.Query, image)})
+	assertMessagesEqual(t, got.Messages, []sdk.Message{sdk.AssistantMessage("history"), sdk.UserMessage(cfg.Query)})
 	if got.ContextManifest.CachePlan == nil || got.ContextManifest.Mutations == nil || got.ContextMutations == nil {
 		t.Fatalf("manifest = %#v", got.ContextManifest)
 	}

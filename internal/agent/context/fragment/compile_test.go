@@ -15,7 +15,6 @@ func TestCompileRendersLegacyFieldsAndSplitsToolUsage(t *testing.T) {
 		sdk.UserMessage("history"),
 		sdk.AssistantMessage("reply"),
 	}
-	images := []sdk.ImagePart{{Image: "data:image/png;base64,abc", MediaType: "image/png"}}
 	scope := Scope{
 		BotID:            "bot-1",
 		ChatID:           "chat-1",
@@ -26,13 +25,12 @@ func TestCompileRendersLegacyFieldsAndSplitsToolUsage(t *testing.T) {
 	}
 
 	got := Compile(CompileInput{
-		Source:       "test",
-		Scope:        scope,
-		System:       system,
-		Messages:     messages,
-		Query:        "current",
-		InlineImages: images,
-		ToolUsage:    "## Tool usage\n\nuse the right tool",
+		Source:    "test",
+		Scope:     scope,
+		System:    system,
+		Messages:  messages,
+		Query:     "current",
+		ToolUsage: "## Tool usage\n\nuse the right tool",
 		DynamicMutators: []DynamicMutator{
 			DynamicMutatorReadMedia,
 			DynamicMutatorReadMedia,
@@ -56,9 +54,6 @@ func TestCompileRendersLegacyFieldsAndSplitsToolUsage(t *testing.T) {
 	}
 	if len(got.Messages) != len(messages) {
 		t.Fatalf("rendered messages = %d, want %d", len(got.Messages), len(messages))
-	}
-	if len(got.InlineImages) != 1 || got.InlineImages[0].Image != images[0].Image {
-		t.Fatalf("rendered images = %#v, want %#v", got.InlineImages, images)
 	}
 	if !manifestHasKind(got.Manifest, KindToolUsage) {
 		t.Fatalf("manifest missing tool usage item: %#v", got.Manifest.Items)

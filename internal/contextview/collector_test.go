@@ -92,26 +92,6 @@ func TestCurrentUserCollectorOnlyOmitsEmptyString(t *testing.T) {
 	}
 }
 
-func TestInlineImageCollectorFiltersEmptyImages(t *testing.T) {
-	t.Parallel()
-
-	images := []sdk.ImagePart{
-		{Image: "data:image/png;base64,abc", MediaType: "image/png"},
-		{Image: "", MediaType: "image/png"},
-		{Image: "data:image/jpeg;base64,def", MediaType: "image/jpeg"},
-	}
-	frags, err := (&InlineImageCollector{}).Collect(context.Background(), CollectRequest{Config: InlineImageConfig{Images: images}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(frags) != 1 || len(frags[0].Parts) != 2 {
-		t.Fatalf("frags = %#v", frags)
-	}
-	if frags[0].Kind != contextfrag.KindNativeImage || frags[0].Slot != contextfrag.SlotCurrentUser {
-		t.Fatalf("image frag metadata = %#v", frags[0])
-	}
-}
-
 func collectedSystemText(frags []contextfrag.ContextFrag) string {
 	var parts []string
 	for _, frag := range frags {

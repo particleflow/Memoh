@@ -1125,23 +1125,14 @@ func (e *streamEngine) drainInjectedMessages(boundary int, messages []sdk.Messag
 				break
 			}
 			text := injectedMessageText(injected)
-			if text != "" || (cfg.SupportsImageInput && len(injected.ImageParts) > 0) {
-				var extra []sdk.MessagePart
-				if cfg.SupportsImageInput {
-					for _, img := range injected.ImageParts {
-						if strings.TrimSpace(img.Image) != "" {
-							extra = append(extra, img)
-						}
-					}
-				}
-				message := sdk.UserMessage(text, extra...)
+			if text != "" {
+				message := sdk.UserMessage(text)
 				cfg.ContextMutations.Record(contextfrag.MutationInjectedMessage, fmt.Sprintf("bytes=%d", len(text)))
 				e.dynamic.append(message, false, text, len(messages))
 				messages = append(messages, message)
 				e.agent.logger.InfoContext(e.streamCtx, "injected user message into agent stream",
 					slog.String("bot_id", cfg.Identity.BotID),
 					slog.Int("after_step", boundary-1),
-					slog.Int("image_parts", len(extra)),
 				)
 			}
 			continue

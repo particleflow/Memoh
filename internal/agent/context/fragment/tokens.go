@@ -100,8 +100,6 @@ func fragEstimate(frag ContextFrag) (bytes, images int) {
 				bytes += msgBytes
 				images += msgImages
 			}
-		case PartImage:
-			images++
 		}
 	}
 	return bytes, images

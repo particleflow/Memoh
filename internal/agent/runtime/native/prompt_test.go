@@ -42,6 +42,58 @@ func TestGenerateSystemPromptOmitsVolatileCurrentTime(t *testing.T) {
 	}
 }
 
+// attachmentReferenceSentence is the TF-16 design section 4.3 sentence: with the
+// inline content channels closed, attachments reach the model as reference
+// rows only, the read tool fetches content on demand, and the formal reply
+// leads with the result instead of restating the acknowledgement's plan.
+const attachmentReferenceSentence = "Attachments arrive as reference rows (path/metadata), not inline content. " +
+	"When a reply depends on an attachment, call the read tool on its path first. " +
+	"Start the formal reply with what you found or the answer itself; " +
+	"do not restate plans to look at files the user has already been told about."
+
+func TestSystemCommonAttachmentReferenceSentence(t *testing.T) {
+	t.Parallel()
+
+	if !strings.Contains(systemCommonTmpl, attachmentReferenceSentence) {
+		t.Fatalf("system_common.md is missing the attachment reference sentence:\n%s", systemCommonTmpl)
+	}
+	for _, sessionType := range allPromptSessionTypes() {
+		prompt := GenerateSystemPrompt(SystemPromptParams{SessionType: sessionType, Timezone: "UTC"})
+		if !strings.Contains(prompt, attachmentReferenceSentence) {
+			t.Fatalf("%s prompt lost the attachment reference sentence:\n%s", sessionType, prompt)
+		}
+	}
+	// The sentence is static template text in the tail section: it rides the
+	// typed sections (priority 50 tail), so fragment-level rendering keeps it.
+	sections := GenerateSystemSections(SystemPromptParams{SessionType: sessionmode.Chat, Timezone: "UTC"})
+	found := false
+	for _, section := range sections {
+		if section.ID == sectionIDTail && strings.Contains(section.Text, attachmentReferenceSentence) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("attachment reference sentence missing from the tail section: %+v", sections)
+	}
+}
+
+// TestFormalReplyAntiRestatementRule pins the anti-restatement half of the
+// section 5 wording division: the formal-reply rule text lives in the system
+// prompt (results first, no restated plans) for every session type.
+func TestFormalReplyAntiRestatementRule(t *testing.T) {
+	t.Parallel()
+
+	for _, sessionType := range allPromptSessionTypes() {
+		prompt := GenerateSystemPrompt(SystemPromptParams{SessionType: sessionType, Timezone: "UTC"})
+		if !strings.Contains(prompt, "Start the formal reply with what you found or the answer itself") {
+			t.Fatalf("%s prompt lost the results-first rule:\n%s", sessionType, prompt)
+		}
+		if !strings.Contains(prompt, "do not restate plans to look at files the user has already been told about") {
+			t.Fatalf("%s prompt lost the do-not-restate clause:\n%s", sessionType, prompt)
+		}
+	}
+}
+
 func TestGenerateSystemPromptIncludesCommonAndModeContracts(t *testing.T) {
 	t.Parallel()
 
@@ -276,6 +328,10 @@ func TestGenerateSystemPromptDoesNotEnumerateConditionalTools(t *testing.T) {
 				Timezone:                  "UTC",
 				PlatformIdentitiesSection: "## Platform Identities\n\n<identity channel=\"telegram\" username=\"@memoh\"/>",
 			})
+			// The approved TF-16 section 4.3 attachment sentence names the read
+			// tool by design ("call the read tool on its path first"); it is a
+			// fixed functional sentence, not a conditional-tool enumeration.
+			prompt = strings.ReplaceAll(prompt, attachmentReferenceSentence, "")
 			for _, name := range conditionalTools {
 				if promptEnumeratesTool(prompt, name) {
 					t.Fatalf("system prompt for %s must not statically enumerate conditional tool %q; put its usage in ToolUsage gated by registration", sessionType, name)

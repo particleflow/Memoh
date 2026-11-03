@@ -26,7 +26,6 @@ type CompileInput struct {
 	// Messages for byte-equivalent provider ordering.
 	MemoryMessageIndex *int
 	Query              string
-	InlineImages       []sdk.ImagePart
 	ToolUsage          string
 	View               ManifestView
 	DynamicMutators    []DynamicMutator
@@ -118,12 +117,6 @@ func CompileFrags(input CompileInput) []ContextFrag {
 			Collector:  CollectorRunConfigFields,
 			Render:     RenderPolicy{Format: RenderSDKMessage},
 		}))
-	}
-	if len(input.InlineImages) > 0 {
-		imageFrag := ImageFrag("current_user.images", input.InlineImages, scope, source)
-		if len(imageFrag.Parts) > 0 {
-			frags = append(frags, imageFrag)
-		}
 	}
 
 	return normalizeContextRefs(frags)
@@ -315,42 +308,6 @@ func MessageFrag(input MessageFragInput) ContextFrag {
 			Message:    &msg,
 			SDKMessage: &msg,
 		}},
-	}
-}
-
-// ImageFrag creates one fragment for native image parts.
-func ImageFrag(id string, images []sdk.ImagePart, scope Scope, source string) ContextFrag {
-	parts := make([]Part, 0, len(images))
-	for _, image := range images {
-		if strings.TrimSpace(image.Image) == "" {
-			continue
-		}
-		img := image
-		parts = append(parts, Part{
-			Type: PartImage,
-			Image: ImageRef{
-				MediaType: strings.TrimSpace(image.MediaType),
-				Source:    "inline",
-			},
-			ImagePart: &img,
-			SDKImage:  &img,
-		})
-	}
-	return ContextFrag{
-		ID:         strings.TrimSpace(id),
-		Kind:       KindNativeImage,
-		Role:       sdk.MessageRoleUser,
-		Slot:       SlotCurrentUser,
-		Priority:   90,
-		CacheClass: CacheNever,
-		Trust:      TrustUser,
-		Scope:      normalizeScope(scope),
-		Render:     RenderPolicy{Format: RenderNativePart},
-		Provenance: Provenance{
-			Source:    strings.TrimSpace(source),
-			Collector: CollectorRunConfigFields,
-		},
-		Parts: parts,
 	}
 }
 

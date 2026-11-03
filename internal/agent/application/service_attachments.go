@@ -10,9 +10,6 @@ import (
 	"log/slog"
 	"strings"
 	"time"
-	"unicode/utf8"
-
-	sdk "github.com/felinics/twilight/sdk"
 
 	"github.com/felinics/memoh/internal/apperror"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
@@ -29,14 +26,6 @@ const (
 	// ceiling on a turn that carries a lot of them, so a batch of pathological
 	// media cannot hold a conversation open indefinitely.
 	attachmentPreparationTimeout = 30 * time.Second
-
-	// maxTurnVisionImages caps how many images one turn hands the model.
-	//
-	// A discussion turn gathers attachments from every new message, and an
-	// animated sticker expands into several images, so the two multiply. Past
-	// the cap an attachment contributes its first frame only — every
-	// attachment stays visible, and it is the expansion that is shed first.
-	maxTurnVisionImages = 20
 )
 
 // routeAndMergeAttachments applies CapabilityFallbackPolicy to split
@@ -76,8 +65,35 @@ func (s *Service) routeAndMergeAttachments(ctx context.Context, model models.Get
 		routed.Fallback[i].Transport = gatewayTransportToolFileRef
 		routed.Fallback[i].Payload = fallbackPath
 	}
+	// With the inline content channels closed, the header reference row is the
+	// only lane that reaches the model. A natively-routed attachment without a
+	// resolvable access path therefore has no lane at all: fail the turn the
+	// same way the fallback lane does instead of silently dropping it.
+	for i := range routed.Native {
+		if strings.TrimSpace(routed.Native[i].FallbackPath) != "" {
+			continue
+		}
+		if err := routed.Native[i].Unreachable; err != nil {
+			return nil, attachmentUnreachableError(err)
+		}
+		if s != nil && s.logger != nil {
+			s.logger.WarnContext(ctx,
+				"drop attachment without any reference path",
+				slog.String("type", strings.TrimSpace(routed.Native[i].Type)),
+				slog.String("transport", strings.TrimSpace(routed.Native[i].Transport)),
+				slog.String("content_hash", strings.TrimSpace(routed.Native[i].ContentHash)),
+				slog.Bool("has_payload", strings.TrimSpace(routed.Native[i].Payload) != ""),
+			)
+		}
+		routed.Native[i] = gatewayAttachment{}
+	}
 	merged := make([]any, 0, len(routed.Native)+len(routed.Fallback))
-	merged = append(merged, attachmentsToAny(routed.Native)...)
+	for _, att := range routed.Native {
+		if att.Type == "" || strings.TrimSpace(att.Transport) == "" {
+			continue
+		}
+		merged = append(merged, att)
+	}
 	for _, fb := range routed.Fallback {
 		if fb.Type == "" || strings.TrimSpace(fb.Transport) == "" || strings.TrimSpace(fb.Payload) == "" {
 			continue
@@ -174,7 +190,6 @@ func (s *Service) prepareGatewayAttachments(ctx context.Context, req ChatRequest
 		if acceptsImages {
 			item = s.inlineImageAttachmentAssetIfNeeded(ctx, strings.TrimSpace(req.BotID), item)
 		}
-		item = s.inlineFileAttachmentAssetIfNeeded(ctx, strings.TrimSpace(req.BotID), item)
 		prepared = append(prepared, item)
 	}
 	return prepared, nil
@@ -251,43 +266,6 @@ func isLikelyPublicURL(raw string) bool {
 	return strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://")
 }
 
-// extractNativeAttachmentParts returns non-image native parts for attachments
-// routed to inline multimodal input: sdk.FilePart for provider-native
-// documents (PDF), wrapped sdk.TextPart for the small plain-text channel.
-// Images are handled by extractNativeImageParts.
-func extractNativeAttachmentParts(attachments []any) []sdk.MessagePart {
-	var parts []sdk.MessagePart
-	for _, att := range attachments {
-		ga, ok := att.(gatewayAttachment)
-		if !ok || ga.Type != "file" {
-			continue
-		}
-		if strings.ToLower(strings.TrimSpace(ga.Transport)) != gatewayTransportInlineDataURL {
-			continue
-		}
-		if strings.TrimSpace(ga.Payload) == "" {
-			continue
-		}
-		switch {
-		case isNativeDocumentMime(ga.Mime):
-			data, mime := splitInlineDataURL(ga.Payload)
-			if strings.TrimSpace(ga.Mime) != "" {
-				mime = strings.TrimSpace(ga.Mime)
-			}
-			parts = append(parts, sdk.FilePart{
-				Data:      data,
-				MediaType: mime,
-				Filename:  strings.TrimSpace(ga.Name),
-			})
-		case isInlineTextMime(ga.Mime):
-			if part, ok := inlineTextAttachmentPart(ga); ok {
-				parts = append(parts, part)
-			}
-		}
-	}
-	return parts
-}
-
 // splitInlineDataURL strips a data URL down to bare base64 plus the header
 // mime. FilePart.Data carries bare base64 by convention; provider framing is
 // the adapters' job.
@@ -305,51 +283,6 @@ func splitInlineDataURL(payload string) (string, string) {
 		header = header[:semi]
 	}
 	return payload[idx+1:], strings.TrimSpace(header)
-}
-
-func inlineTextAttachmentPart(ga gatewayAttachment) (sdk.TextPart, bool) {
-	data, _ := splitInlineDataURL(ga.Payload)
-	decoded, err := base64.StdEncoding.DecodeString(data)
-	if err != nil || !utf8.Valid(decoded) {
-		return sdk.TextPart{}, false
-	}
-	name := strings.TrimSpace(ga.Name)
-	if name == "" {
-		name = "attachment.txt"
-	}
-	// The wrapper delimits untrusted user content; escape a would-be closing
-	// tag so the content cannot break out of the attachment envelope.
-	content := strings.ReplaceAll(string(decoded), "</attachment", "<\\/attachment")
-	return sdk.TextPart{Text: fmt.Sprintf("<attachment filename=%q>\n%s\n</attachment>", name, content)}, true
-}
-
-// inlineInjectAttachments converts image attachments from an injected message
-// into sdk.ImagePart values for direct vision input. Non-image attachments and
-// media the model cannot parse are skipped; the message text still carries the
-// attachment, so the agent keeps a usable reference to the original.
-func (s *Service) inlineInjectAttachments(ctx context.Context, botID string, atts []ChatAttachment) []sdk.ImagePart {
-	ctx, cancel := context.WithTimeout(ctx, attachmentPreparationTimeout)
-	defer cancel()
-	var parts []sdk.ImagePart
-	var budget visionBudget
-	seen := make(map[string]bool, len(atts))
-	for _, att := range atts {
-		if strings.ToLower(strings.TrimSpace(att.Type)) != "image" {
-			continue
-		}
-		contentHash := strings.TrimSpace(att.ContentHash)
-		if contentHash == "" || seen[contentHash] {
-			continue
-		}
-		seen[contentHash] = true
-		framed, err := s.inlineStoredImageParts(ctx, botID, contentHash, att.Mime)
-		if err != nil {
-			s.logImageInputRejected(err, botID, contentHash)
-			continue
-		}
-		parts = append(parts, budget.take(framed)...)
-	}
-	return parts
 }
 
 func (s *Service) inlineImageAttachmentAssetIfNeeded(ctx context.Context, botID string, item gatewayAttachment) gatewayAttachment {
@@ -433,74 +366,6 @@ func (s *Service) logImageInputRejected(err error, botID, contentHash string) {
 		slog.String("bot_id", strings.TrimSpace(botID)),
 		slog.String("content_hash", strings.TrimSpace(contentHash)),
 	)
-}
-
-// inlineFileAttachmentAssetIfNeeded mirrors inlineImageAttachmentAssetIfNeeded
-// for the file lane: native-document (PDF) and inline-text candidates get
-// their payload materialized from the media store so the capability router can
-// route them natively. Other file types are left to the workspace fallback.
-func (s *Service) inlineFileAttachmentAssetIfNeeded(ctx context.Context, botID string, item gatewayAttachment) gatewayAttachment {
-	if item.Type != "file" {
-		return item
-	}
-	nativeDoc := isNativeDocumentMime(item.Mime)
-	smallText := isInlineTextMime(item.Mime) && attachmentBinarySize(item) <= inlineTextAttachmentMaxBytes
-	if !nativeDoc && !smallText {
-		return item
-	}
-	if strings.TrimSpace(item.Payload) != "" && item.Transport == gatewayTransportInlineDataURL {
-		return item
-	}
-	contentHash := strings.TrimSpace(item.ContentHash)
-	if contentHash == "" {
-		return item
-	}
-	dataURL, mime, err := s.inlineAssetAsDataURL(ctx, botID, contentHash, item.Type, item.Mime)
-	if err != nil {
-		if s != nil && s.logger != nil {
-			s.logger.WarnContext(ctx,
-				"inline gateway file attachment failed",
-				slog.Any("error", err),
-				slog.String("bot_id", botID),
-				slog.String("content_hash", contentHash),
-			)
-		}
-		// The file lane carries no payload of its own, so a file that cannot be
-		// inlined depends on its access path. No path means the model has
-		// nothing to read.
-		if strings.TrimSpace(item.FallbackPath) == "" {
-			item.Unreachable = err
-		}
-		return item
-	}
-	item.Transport = gatewayTransportInlineDataURL
-	item.Payload = dataURL
-	if strings.TrimSpace(item.Mime) == "" {
-		item.Mime = mime
-	}
-	return item
-}
-
-func (s *Service) inlineAssetAsDataURL(ctx context.Context, botID, contentHash, attachmentType, fallbackMime string) (string, string, error) {
-	if s == nil || s.assetLoader == nil {
-		return "", "", errors.New("gateway asset loader not configured")
-	}
-	reader, assetMime, err := s.assetLoader.OpenForGateway(ctx, botID, contentHash)
-	if err != nil {
-		return "", "", fmt.Errorf("open asset: %w", err)
-	}
-	defer func() {
-		_ = reader.Close()
-	}()
-	mime := strings.TrimSpace(fallbackMime)
-	if mime == "" {
-		mime = strings.TrimSpace(assetMime)
-	}
-	dataURL, resolvedMime, err := encodeReaderAsDataURL(reader, gatewayInlineAttachmentMaxBytes, attachmentType, mime)
-	if err != nil {
-		return "", "", err
-	}
-	return dataURL, resolvedMime, nil
 }
 
 func encodeReaderAsDataURL(reader io.Reader, maxBytes int64, attachmentType, fallbackMime string) (string, string, error) {

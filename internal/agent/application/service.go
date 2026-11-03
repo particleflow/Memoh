@@ -397,39 +397,6 @@ func (s *Service) Pipeline() *timeline.Pipeline {
 	return s.pipeline
 }
 
-// InlineImageAttachments resolves image content hashes to sdk.ImagePart values
-// using the configured asset loader. Intended for the discuss driver to inline
-// images from new RC segments before calling the LLM. The result holds what
-// each reference contributes, in order, under one turn-wide vision budget; a
-// duplicate or unusable reference contributes nothing.
-func (s *Service) InlineImageAttachments(ctx context.Context, botID string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-	if s == nil || s.assetLoader == nil || len(refs) == 0 {
-		return nil
-	}
-	ctx, cancel := context.WithTimeout(ctx, attachmentPreparationTimeout)
-	defer cancel()
-	parts := make([][]sdk.ImagePart, len(refs))
-	var budget visionBudget
-	seen := make(map[string]bool, len(refs))
-	for i, ref := range refs {
-		contentHash := strings.TrimSpace(ref.ContentHash)
-		if contentHash == "" || seen[contentHash] {
-			continue
-		}
-		seen[contentHash] = true
-		framed, err := s.inlineStoredImageParts(ctx, botID, contentHash, ref.Mime)
-		if err != nil {
-			// One unusable attachment must not cost the turn its other images:
-			// the reference stays in the rendered context and every later turn
-			// skips the same bytes again instead of failing the model call.
-			s.logImageInputRejected(err, botID, contentHash)
-			continue
-		}
-		parts[i] = budget.take(framed)
-	}
-	return parts
-}
-
 type resolvedContext struct {
 	presence                    *presenceResolvedModel
 	runConfig                   native.RunConfig
@@ -787,8 +754,6 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	if !usePipeline && !req.ReusePersistedUserMessage {
 		runCfg.Query = headerifiedModelQuery
 	}
-	runCfg.InlineImages = extractNativeImageParts(mergedAttachments)
-	runCfg.InlineAttachments = extractNativeAttachmentParts(mergedAttachments)
 	runCfg.ContextScope = buildContextFragScope(req, displayName, runCfg.Identity)
 	runCfg = runCfg.RefreshContextFrag()
 	historyLayout := chatHistoryLayout{forkCount: min(forkMessageCount, runCfg.ContextTrimmableMessages), historyCount: runCfg.ContextTrimmableMessages, pressureTokens: historyPressureTokens, usePipeline: usePipeline}
@@ -802,16 +767,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 		agentInjectCh := make(chan native.InjectMessage, cap(req.InjectCh))
 		go func() {
 			for msg := range req.InjectCh {
-				agentMsg := native.InjectMessage{
+				agentInjectCh <- native.InjectMessage{
 					Text:            msg.Text,
 					HeaderifiedText: msg.HeaderifiedText,
 				}
-				// Inline any image attachments from the injected message so the
-				// model receives them as vision input alongside the text.
-				if runCfg.SupportsImageInput && len(msg.Attachments) > 0 {
-					agentMsg.ImageParts = s.inlineInjectAttachments(ctx, req.BotID, msg.Attachments)
-				}
-				agentInjectCh <- agentMsg
 			}
 			close(agentInjectCh)
 		}()
@@ -980,7 +939,7 @@ type baseRunConfigParams struct {
 }
 
 // buildBaseRunConfig creates a RunConfig with model, credentials, skills,
-// identity and system prompt — everything except Messages/Query/InlineImages.
+// identity and system prompt — everything except Messages/Query.
 // Both resolve() and ResolveRunConfig() delegate to this shared builder. The
 // fourth return is the per-turn effort tiering decision (nil when none
 // applied); it stays here rather than on RunConfig because the agent runtime
@@ -1601,50 +1560,11 @@ func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig, re
 	cfg.ContextHookText = strings.Join(promptHookTexts, "\n\n")
 
 	if cfg.Query != "" {
-		var extra []sdk.MessagePart
-		for _, img := range cfg.InlineImages {
-			if strings.TrimSpace(img.Image) != "" {
-				extra = append(extra, img)
-			}
-		}
-		extra = append(extra, cfg.InlineAttachments...)
-		cfg.Messages = append(cfg.Messages, sdk.UserMessage(cfg.Query, extra...))
+		cfg.Messages = append(cfg.Messages, sdk.UserMessage(cfg.Query))
 		cfg.ForkContextSourceMessageIDs = append(cfg.ForkContextSourceMessageIDs, "")
 		index := len(cfg.Messages) - 1
 		cfg.ContextCurrentUserMessageIndex = &index
 		cfg.ContextQueryMaterialized = true
-	} else if len(cfg.InlineImages) > 0 || len(cfg.InlineAttachments) > 0 {
-		// Pipeline path: the user query is already embedded in the RC messages,
-		// but media parts are not rendered by the pipeline renderer. Inject the
-		// inline media into the identified current input.
-		imageParts := make([]sdk.MessagePart, 0, len(cfg.InlineImages)+len(cfg.InlineAttachments))
-		for _, img := range cfg.InlineImages {
-			if strings.TrimSpace(img.Image) != "" {
-				imageParts = append(imageParts, img)
-			}
-		}
-		imageParts = append(imageParts, cfg.InlineAttachments...)
-		if len(imageParts) > 0 {
-			currentIndex := validCurrentUserMessageIndex(
-				cfg.Messages,
-				cfg.ContextCurrentUserMessageIndex,
-				cfg.ContextMemoryMessageIndex,
-			)
-			if currentIndex != nil {
-				i := *currentIndex
-				cfg.Messages[i].Content = append(cfg.Messages[i].Content, imageParts...)
-				if i < len(cfg.ForkContextSourceMessageIDs) {
-					cfg.ForkContextSourceMessageIDs[i] = ""
-				}
-			} else {
-				cfg.Messages = append(cfg.Messages, sdk.UserMessage("", imageParts...))
-				cfg.ForkContextSourceMessageIDs = append(cfg.ForkContextSourceMessageIDs, "")
-				index := len(cfg.Messages) - 1
-				currentIndex = &index
-			}
-			cfg.ContextCurrentUserMessageIndex = currentIndex
-			cfg.ContextQueryMaterialized = true
-		}
 	}
 
 	hookBuild := buildHookSystemSections([]promptHookOutput{
@@ -2017,38 +1937,4 @@ func extractAttachmentPaths(attachments []any) []string {
 		}
 	}
 	return paths
-}
-
-// extractNativeImageParts returns sdk.ImagePart entries for attachments that
-// the model can consume as inline multimodal input (vision-capable images with
-// an inline data URL or public URL payload).
-func extractNativeImageParts(attachments []any) []sdk.ImagePart {
-	var parts []sdk.ImagePart
-	for _, att := range attachments {
-		ga, ok := att.(gatewayAttachment)
-		if !ok || ga.Type != "image" {
-			continue
-		}
-		transport := strings.ToLower(strings.TrimSpace(ga.Transport))
-		if transport != gatewayTransportInlineDataURL && transport != gatewayTransportPublicURL {
-			continue
-		}
-		payload := strings.TrimSpace(ga.Payload)
-		if payload == "" {
-			continue
-		}
-		// An animated attachment carries every rendered frame; anything else
-		// is its single payload.
-		images := ga.Frames
-		if len(images) == 0 {
-			images = []string{payload}
-		}
-		for _, image := range images {
-			parts = append(parts, sdk.ImagePart{
-				Image:     image,
-				MediaType: strings.TrimSpace(ga.Mime),
-			})
-		}
-	}
-	return parts
 }

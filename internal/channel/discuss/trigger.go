@@ -67,7 +67,6 @@ func (discussTriggerBuilder) Build(cfg DiscussSessionConfig, rc timeline.Rendere
 			DiscussMessages:         msgs,
 			DiscussCurrentSources:   currentSources,
 			DiscussOmittedSources:   admission.OmittedSources,
-			DiscussImageRefs:        extractNewImageRefs(rc, after),
 			DiscussAddressed:        addressed,
 			DiscussContextTokens:    admission.EstimatedTokens,
 			DiscussContextOverflow:  admission.ProtectedOverflow,
@@ -77,20 +76,6 @@ func (discussTriggerBuilder) Build(cfg DiscussSessionConfig, rc timeline.Rendere
 		messageCount:    len(composed.Messages),
 		estimatedTokens: composed.EstimatedTokens,
 	}, admission, !admission.ProtectedOverflow
-}
-
-// extractNewImageRefs collects image references from external RC segments
-// that arrived after the last consumed cursor, each naming its message.
-func extractNewImageRefs(rc timeline.RenderedContext, after timeline.DiscussCursorPosition) []turn.DiscussImageRef {
-	refs := make([]turn.DiscussImageRef, 0)
-	for _, segment := range rc {
-		if !after.Covers(segment) && !segment.IsMyself && !segment.IsSelfSent {
-			for _, ref := range segment.ImageRefs {
-				refs = append(refs, turn.DiscussImageRef{ContentHash: ref.ContentHash, Mime: ref.Mime, MessageID: segment.MessageID})
-			}
-		}
-	}
-	return refs
 }
 
 func wasRecentlyMentioned(rc timeline.RenderedContext, after timeline.DiscussCursorPosition) bool {

@@ -136,9 +136,6 @@ type DirectiveInput struct {
 type InjectMessage struct {
 	Text            string
 	HeaderifiedText string
-	// ImageParts carries inline images (data URL or public URL) to attach
-	// alongside the injected text when the model supports vision input.
-	ImageParts []sdk.ImagePart
 }
 
 // RunConfig holds everything needed for a single agent invocation.
@@ -207,18 +204,11 @@ type RunConfig struct {
 	SupportsImageInput           bool
 	SupportsFileInput            bool
 	SupportsToolCall             bool
-	InlineImages                 []sdk.ImagePart
-	// InlineAttachments carries non-image native attachment parts (documents
-	// as sdk.FilePart, small text files as wrapped sdk.TextPart) appended to
-	// the current user message. Images stay in InlineImages, which also feeds
-	// the context-frag view; these parts are materialized by prepareRunConfig
-	// only.
-	InlineAttachments []sdk.MessagePart
-	Identity          SessionContext
-	Bot               BotInfo
-	Skills            []SkillEntry
-	LoopDetection     LoopDetectionConfig
-	Retry             modelretry.Config
+	Identity                     SessionContext
+	Bot                          BotInfo
+	Skills                       []SkillEntry
+	LoopDetection                LoopDetectionConfig
+	Retry                        modelretry.Config
 	// StepIndexOffset lets an application-owned continuation of the same run
 	// keep durable step indexes monotonic when the step loop is restarted
 	// after a parked decision.

@@ -34,8 +34,6 @@ func (*DiscussSDKContextBuilder) CollectDiscussSourceFrags(
 		Intent: contextfrag.IntentRunConfigPreProvider,
 		Config: DiscussContextConfig{
 			ComposedMessages: input.ComposedMessages,
-			InlineImages:     input.InlineImages,
-			SourceImages:     input.SourceImages,
 		},
 	})
 	if err != nil {
