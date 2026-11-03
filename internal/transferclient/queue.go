@@ -237,16 +237,28 @@ func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapsho
 		}
 		return accept(j, r, save)
 	}
-	// No PATCH/complete replay from cached offsets, even after a clean restart.
-	r, err := c.Get(ctx, j.BotID, j.ReceiptID)
-	if err != nil {
-		return fail(j, err, now, save)
-	}
-	if err := accept(j, r, save); err != nil {
-		return err
-	}
-	if j.Phase != "uploading" {
-		return nil
+	// Reconcile a receipt before any mutation, except when the journal is clean
+	// and the next step is a fresh chunk PATCH: that offset was itself the
+	// server's last acknowledgement, so a Get would only repeat it. Unknown
+	// outcomes (Attempts/ErrorCode set) and every non-chunk mutation still Get
+	// first, and a torn-but-clean journal (a crash between server ack and local
+	// checkpoint) self-heals because the server rejects a mismatching PATCH
+	// offset before writing and the retried attempt re-syncs from the receipt.
+	var (
+		r   Receipt
+		err error
+	)
+	if j.Attempts > 0 || j.ErrorCode != "" || j.CancelRequested || j.Offset == j.Spec.SizeBytes {
+		r, err = c.Get(ctx, j.BotID, j.ReceiptID)
+		if err != nil {
+			return fail(j, err, now, save)
+		}
+		if err := accept(j, r, save); err != nil {
+			return err
+		}
+		if j.Phase != "uploading" {
+			return nil
+		}
 	}
 	switch {
 	case j.CancelRequested:

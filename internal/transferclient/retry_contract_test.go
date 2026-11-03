@@ -98,7 +98,9 @@ func TestRetryContractTransferSurvivesFailuresAndRestart(t *testing.T) {
 	if err := q.RunOne(t.Context(), "delivery-1", c, nil, r.Job.NextAttempt.Add(-time.Nanosecond)); err != nil {
 		t.Fatal(err)
 	}
-	if f.count("GET /bots/bot-1/media/uploads/"+receipt) != 15 {
+	// The first 503 was discovered by the direct clean-journal PATCH; the other
+	// 14 attempts reconciled through the receipt before mutating.
+	if f.count("GET /bots/bot-1/media/uploads/"+receipt) != 14 {
 		t.Fatal("early retry")
 	}
 	f.setStatus(0)

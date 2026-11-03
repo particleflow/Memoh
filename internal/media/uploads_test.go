@@ -507,7 +507,7 @@ func failJournalDirectorySync(s *UploadStore) error {
 	return failure
 }
 
-func TestUploadJournalRenameFailureRequiresReadBarrier(t *testing.T) {
+func TestUploadJournalRenameFailureNeedsNoReadTimeBarrier(t *testing.T) {
 	ctx := t.Context()
 	root := t.TempDir()
 	s := uploadService(t, root, 1024).Uploads()
@@ -517,9 +517,13 @@ func TestUploadJournalRenameFailureRequiresReadBarrier(t *testing.T) {
 	if _, err := s.Append(ctx, "owner", "bot", u.ID, 0, int64(len(b)), digest(b), bytes.NewReader(b)); !errors.Is(err, failure) {
 		t.Fatal(err)
 	}
-	// A visible checkpoint alone is not an acknowledged durable offset.
-	if got, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, failure) || got.ID != "" {
-		t.Fatal(got, err)
+	// An uploading-state read no longer repairs a torn rename: the visible
+	// checkpoint is reported, but it is not an acknowledged durable offset.
+	// The offset contract (conflicting PATCH rejected, resend from the receipt)
+	// reconciles it, so durability is restored by the next acknowledged save.
+	status, err := s.Get(ctx, "owner", "bot", u.ID)
+	if err != nil || status.Offset != int64(len(b)) {
+		t.Fatal(status, err)
 	}
 	restarted := uploadService(t, root, 1024).Uploads()
 	barriers := 0
@@ -533,12 +537,11 @@ func TestUploadJournalRenameFailureRequiresReadBarrier(t *testing.T) {
 		}
 		return f.Sync()
 	}
-	status, err := restarted.Get(ctx, "owner", "bot", u.ID)
-	if err != nil || status.Offset != int64(len(b)) || barriers == 0 {
-		t.Fatal(status, err, barriers)
-	}
 	if _, err := restarted.Complete(ctx, "owner", "bot", u.ID); err != nil {
 		t.Fatal(err)
+	}
+	if barriers == 0 {
+		t.Fatal("completion save established no durability barrier")
 	}
 }
 
@@ -656,12 +659,14 @@ func TestUploadProcessDeathAfterJournalRename(t *testing.T) {
 		}
 		return f.Sync()
 	}
+	// The uploading-state read reports the visible checkpoint without repairing
+	// the torn rename; the acknowledged completion save restores the barrier.
 	status, err := s.Get(ctx, "owner", "bot", id)
-	if err != nil || status.Offset != int64(len("crash after rename")) || barriers == 0 {
+	if err != nil || status.Offset != int64(len("crash after rename")) || barriers != 0 {
 		t.Fatal(status, err, barriers)
 	}
-	if _, err := s.Complete(ctx, "owner", "bot", id); err != nil {
-		t.Fatal(err)
+	if _, err := s.Complete(ctx, "owner", "bot", id); err != nil || barriers == 0 {
+		t.Fatal(err, barriers)
 	}
 }
 

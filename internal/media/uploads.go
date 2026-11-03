@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/felinics/memoh/internal/storage"
 )
 
 const (
@@ -176,13 +178,18 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 		return r, ErrUploadInvalid
 	}
 	// A prior process may have renamed this journal and failed before its
-	// directory fsync. Repair that barrier before GET/ready retry can acknowledge
-	// it, or Sweep can remove the payload on the strength of a terminal state.
-	if err := s.syncFile(f); err != nil {
-		return uploadRecord{}, err
-	}
-	if err := syncRootWith(s.root, s.syncFile); err != nil {
-		return uploadRecord{}, err
+	// directory fsync. Repair that barrier before a terminal state can be
+	// acknowledged or swept. An uploading record needs no read-time repair:
+	// the offset contract reconciles it (Append rejects a mismatching offset
+	// and every acknowledged mutation saves with its own full barrier), so
+	// per-chunk receipt reads do not pay two extra fsyncs.
+	if r.State != "uploading" {
+		if err := s.syncFile(f); err != nil {
+			return uploadRecord{}, err
+		}
+		if err := syncRootWith(s.root, s.syncFile); err != nil {
+			return uploadRecord{}, err
+		}
 	}
 	return r, nil
 }
@@ -395,21 +402,21 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 		return Upload{}, err
 	}
 	defer func() { _ = f.Close() }()
-	h := sha256.New()
-	n, err := io.CopyBuffer(h, contextReader{ctx, f}, make([]byte, 256<<10))
-	if err != nil {
-		return Upload{}, err
-	}
-	if n != r.SizeBytes || hex.EncodeToString(h.Sum(nil)) != r.SHA256 {
-		return Upload{}, ErrUploadInvalid
-	}
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return Upload{}, err
 	}
 	// Reuse the canonical media publication and deduplication path, without a
-	// second whole-file spool. The durable provider also verifies before rename.
+	// second whole-file spool or a second whole-file read here. Publication is
+	// the single full read that ties the staged bytes to the announced hash:
+	// the durable provider hashes the payload in the same read that writes it
+	// and rejects a mismatch before rename. On a dedup hit the staged bytes are
+	// discarded unverified; every chunk was still checked against its
+	// Upload-SHA256 at Append time.
 	_, err = s.media.persist(ctx, IngestInput{BotID: bot, Mime: r.Mime}, r.SHA256, r.SizeBytes, f)
 	if err != nil {
+		if errors.Is(err, storage.ErrContentMismatch) {
+			return Upload{}, ErrUploadInvalid
+		}
 		return Upload{}, err
 	}
 	r.State = "ready"

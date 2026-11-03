@@ -310,7 +310,10 @@ func TestRetryAuthorizationExpiryAndSourceChange(t *testing.T) {
 					t.Fatal("transient failure stopped recoverable transfer")
 				}
 			}
-			if f.count("PATCH /bots/bot-1/media/uploads/receipt-1") != 0 || f.count("POST /bots/bot-1/media/uploads") != 1 {
+			// A clean journal PATCHes the next chunk directly, so at most one
+			// discovery mutation happens; after the failure no further mutation
+			// is sent (retries reconcile through the receipt first).
+			if patches := f.count("PATCH /bots/bot-1/media/uploads/receipt-1"); patches > 1 || f.count("POST /bots/bot-1/media/uploads") != 1 {
 				t.Fatal("failed state caused extra mutation")
 			}
 		})

@@ -29,16 +29,26 @@ func TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins(t *testing.T) 
 	if !errors.Is(err, ErrCheckpoint) || s.load().Offset != 0 || fixtureReceipt(f).Offset != 4 {
 		t.Fatal("checkpoint fault was not preserved")
 	}
-	// A stale local offset never drives a PATCH; even a lower server offset wins.
+	// A stale-but-clean local offset may drive one PATCH, but it never mutates
+	// server state: the server rejects the mismatched offset before writing and
+	// the retried attempt reconciles from the receipt, so even a lower server
+	// offset wins.
 	j := s.load()
 	j.Offset = 7
 	if err := s.save(j); err != nil {
 		t.Fatal(err)
 	}
 	advance(t, c, s, src)
+	if receipt, _ := f.current(); receipt.Offset != 4 {
+		t.Fatalf("stale offset mutated server state: %+v", receipt)
+	}
 	j = advance(t, c, s, src)
-	if j.Phase != "ready" || f.count("PATCH /bots/bot-1/media/uploads/receipt-1") != 2 {
-		t.Fatal("stale offset replayed")
+	if j.Phase != "uploading" || j.Offset != int64(len(src)) || f.count("PATCH /bots/bot-1/media/uploads/receipt-1") != 3 {
+		t.Fatalf("stale offset was not reconciled from the receipt: %+v", j)
+	}
+	j = advance(t, c, s, src)
+	if j.Phase != "ready" || f.count("PATCH /bots/bot-1/media/uploads/receipt-1") != 3 {
+		t.Fatal("reconciled transfer did not finish exactly once")
 	}
 }
 

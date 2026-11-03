@@ -12,6 +12,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/felinics/memoh/internal/storage"
 )
 
 // Originals stores verified originals in independent, per-bot directory roots.
@@ -155,10 +157,13 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	}
 	defer func() { _ = root.Close() }()
 	dir := path.Dir(name)
-	if err := root.Mkdir(dir, 0o750); err != nil && !errors.Is(err, os.ErrExist) {
-		return err
-	}
-	if err := p.syncDirectory(root, "."); err != nil {
+	// Persist the prefix directory entry only when this call created it. An
+	// existing entry was already synced by the publication that created it.
+	if err := root.Mkdir(dir, 0o750); err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			return err
+		}
+	} else if err := p.syncDirectory(root, "."); err != nil {
 		return err
 	}
 	temp := dir + "/.pending-" + rand.Text()
@@ -172,7 +177,7 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 		return fmt.Errorf("write media: %w", err)
 	}
 	if hex.EncodeToString(h.Sum(nil)) != expected {
-		return errors.New("media content hash mismatch")
+		return storage.ErrContentMismatch
 	}
 	if err := p.syncFile(f); err != nil {
 		return err
@@ -258,7 +263,7 @@ func (p *Originals) Open(ctx context.Context, key string) (io.ReadCloser, error)
 		return fail(err)
 	}
 	if hex.EncodeToString(h.Sum(nil)) != expected {
-		return fail(errors.New("media content hash mismatch"))
+		return fail(storage.ErrContentMismatch)
 	}
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return fail(err)

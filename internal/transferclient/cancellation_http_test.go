@@ -136,9 +136,9 @@ func TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked(t *testing.T) {
 		for range 14 {
 			final = advance(t, client, store, source)
 		}
-		want, calls := "authorization", 1
+		want, gets := "authorization", 0
 		if status == 499 {
-			want, calls = "connection", 14
+			want, gets = "connection", 13
 		}
 		phase := "blocked"
 		if status == 499 {
@@ -147,8 +147,10 @@ func TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked(t *testing.T) {
 		if final.Phase != phase || final.ErrorCode != want || final.DeliveryID != initial.DeliveryID || final.OperationID != initial.OperationID || final.ReceiptID != "receipt-1" {
 			t.Fatalf("status %d classification: %+v", status, final)
 		}
-		if f.count("GET /bots/bot-1/media/uploads/receipt-1") != calls || f.count("POST /bots/bot-1/media/uploads") != 1 {
-			t.Fatal("failure changed the request schedule or re-admitted work", status)
+		// The clean first attempt PATCHes directly; every retry reconciles
+		// through the receipt, so exactly one discovery mutation is sent.
+		if get, patch := f.count("GET /bots/bot-1/media/uploads/receipt-1"), f.count("PATCH /bots/bot-1/media/uploads/receipt-1"); get != gets || patch != 1 || f.count("POST /bots/bot-1/media/uploads") != 1 {
+			t.Fatalf("failure changed the request schedule or re-admitted work (status %d): get=%d patch=%d", status, get, patch)
 		}
 	}
 	for _, err := range []error{errors.Join(ErrAuthorization, context.DeadlineExceeded), errors.Join(&HTTPError{Status: 403}, context.Canceled)} {
