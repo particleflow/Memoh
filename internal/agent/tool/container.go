@@ -190,6 +190,7 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 	}
 	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files are truncated)."
 	readDesc += " Audio files are transcribed to text (up to 10 MB encoded and 5 minutes) when the Bot has a transcription model configured."
+	readDesc += " Video files return a reference (mime, size, content hash) instead of content; hand it to a specialist bot via delegate_to_bot attachments."
 
 	toolList := []toolexec.Tool{
 		toolexec.Define(ToolRead().String(), readDesc,
@@ -819,6 +820,15 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 			return nil, errors.New("file is a PDF document and the current model has no native PDF input (file-input capability). Ask the user to switch to a PDF-capable model; do not attempt to install PDF readers")
 		}
 		return ReadImageFromContainer(opCtx, client, filePath, defaultReadMediaMaxBytes), nil
+	}
+	// Video before the generic binary probe: the read tool does not decode
+	// video, it returns a reference (mime, size, content hash) the model can
+	// hand to a specialist bot. Delegating is the model's decision, not ours.
+	if videoMime, isVideo, videoErr := readVideoContentType(probe[:probeN], filePath); isVideo || videoErr != nil {
+		if videoErr != nil {
+			return nil, videoErr
+		}
+		return readVideoReference(opCtx, client, strings.TrimSpace(args.Path), filePath, videoMime)
 	}
 	// Office containers before the generic binary probe: xlsx/docx are zip
 	// binaries the image lane rejects; parse them into plain text instead.
