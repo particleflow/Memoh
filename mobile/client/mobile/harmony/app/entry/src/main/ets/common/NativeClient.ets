@@ -1,17 +1,20 @@
 import { webview } from '@kit.ArkWeb';
 import { common } from '@kit.AbilityKit';
 import { NativeVoice } from './NativeVoice';
+import { NativeChatSocket } from './NativeChatSocket';
 import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure, UploadFailure } from './NativeResumableUpload';
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
 import { TransferNetworkPolicy } from './ServiceUrl';
 import { NativeTransferOwner, nativeTransferOwner } from './NativeTransferOwner';
 import { ClientDiagnostics, DiagnosticBatch } from './ClientDiagnostics';
+import { NetReport } from './NetReport';
 
 interface ClientRequest {
   version: number; command: string; state?: string; themeId?: string; handle?: string; offset?: number;
   apiOrigin?: string; networkPolicy?: TransferNetworkPolicy; operation?: string; botId?: string; hash?: string; size?: number;
   name?: string; type?: string; data?: string; url?: string; authorization?: string; scope?: string; photos?: boolean; recoverDrafts?: boolean;
   document?: string; batch?: DiagnosticBatch; verifiedHash?: string; verifiedSize?: number;
+  id?: string; binary?: boolean;
 }
 const PERMISSION: string = '{"javascriptProxyPermission":{"urlPermissionList":[{"scheme":"begonia-client","host":"app","port":"","path":"/index.html"}]}}';
 
@@ -26,14 +29,19 @@ export class NativeClient {
   private ready: boolean = false;
   private resetNetwork: () => void;
   private owner: NativeTransferOwner;
+  private sockets: NativeChatSocket;
   private view: number = 0;
   constructor(controller: webview.WebviewController, stateChanged: (state: string) => void,
-    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext, resetNetwork: () => void = (): void => {}) {
+    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext, resetNetwork: () => void = (): void => {},
+    isSession: (authorization: string) => boolean = (): boolean => false) {
     this.controller = controller; this.stateChanged = stateChanged; this.themeChanged = themeChanged;
     this.voice = new NativeVoice(context);
     this.resetNetwork = resetNetwork;
     this.owner = nativeTransferOwner(context);
     this.uploads = this.owner.uploads;
+    this.sockets = new NativeChatSocket(controller, isSession, (): boolean => {
+      try { this.checkView(); return true; } catch { return false; }
+    });
   }
 
   register(): boolean {
@@ -41,6 +49,9 @@ export class NativeClient {
       this.controller.registerJavaScriptProxy(this, 'begoniaNative', ['request'], [], PERMISSION);
       this.view = this.owner.attach(); this.active = true;
       ClientDiagnostics.onForeground((): void => {
+        // Returning to the foreground drains queued failure reports whether or
+        // not the page is currently attached.
+        NetReport.flush();
         if (!this.active || !this.ready || !this.owner.current(this.view) || this.controller.getUrl().split('#')[0] !== 'begonia-client://app/index.html') { return; }
         void this.controller.runJavaScript("window.dispatchEvent(new Event('garnet:diagnostic-resume'))").catch(() => {});
       });
@@ -58,12 +69,12 @@ export class NativeClient {
     this.active = false;
     ClientDiagnostics.onForeground(undefined);
     ClientDiagnostics.onLifecycle(undefined);
-    this.ready = false; this.resetNetwork(); this.voice.close(); this.owner.detach(this.view);
+    this.ready = false; this.sockets.closeAll(); this.resetNetwork(); this.voice.close(); this.owner.detach(this.view);
     try { this.controller.deleteJavaScriptRegister('begoniaNative'); } catch { /* Already detached. */ }
   }
 
   private stopTransfers(): void {
-    this.ready = false; this.resetNetwork(); this.voice.close(); this.owner.revoke();
+    this.ready = false; this.sockets.closeAll(); this.resetNetwork(); this.voice.close(); this.owner.revoke();
   }
 
   uploadPreview(handle: string): UploadPreview {
@@ -103,7 +114,7 @@ export class NativeClient {
           catch (error) { this.ready = false; throw error as Error; }
         }
         else if (value.state === 'login-page') { this.stopTransfers(); }
-        else { this.resetNetwork(); this.voice.close(); }
+        else { this.sockets.closeAll(); this.resetNetwork(); this.voice.close(); }
         this.stateChanged(value.state);
       }
       else if (this.ready && value.command.startsWith('diagnostic.')) {
@@ -127,6 +138,22 @@ export class NativeClient {
       }
       else if (value.command === 'client.theme' && typeof value.themeId === 'string') {
         await this.themeChanged(value.themeId);
+      } else if (value.command.startsWith('ws.')) {
+        // The native chat/terminal socket family; admission is the logical URL
+        // guard plus the HTTP bridge's owner session inside NativeChatSocket.
+        if (value.command === 'ws.open') {
+          if (typeof value.id !== 'string' || typeof value.url !== 'string' || typeof value.authorization !== 'string') {
+            throw new Error('NATIVE_REQUEST_INVALID');
+          }
+          this.sockets.open(value.id, value.url, value.authorization);
+        } else if (value.command === 'ws.send') {
+          if (typeof value.id !== 'string' || typeof value.data !== 'string' ||
+            (value.binary !== undefined && typeof value.binary !== 'boolean')) { throw new Error('NATIVE_REQUEST_INVALID'); }
+          this.sockets.send(value.id, value.data, value.binary === true);
+        } else if (value.command === 'ws.close') {
+          if (typeof value.id !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
+          this.sockets.close(value.id);
+        } else { throw new Error('NATIVE_COMMAND_UNAVAILABLE'); }
       } else if (value.command === 'upload.view.release') {
         this.uploads.releasePreviews();
       } else if (value.command === 'upload.observe.detach' || value.command === 'download.observe.detach') {

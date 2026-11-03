@@ -23,7 +23,8 @@ entries = manifest['entries']
 # Two scoped quote-reply composition sources extend201 (overlay + stage2 gate).
 # One visual-only bubble-kind overlay extends203.
 # The dead NativeTransferPolicy constants file (zero references) is deleted; 204 retires to 203.
-assert len(entries) == 203
+# Five N1 bridge sources (socket bridge, net-report, ws overlay and their stage2 gates) extend203.
+assert len(entries) == 208
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',

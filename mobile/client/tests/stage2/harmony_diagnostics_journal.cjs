@@ -75,7 +75,7 @@ async function main(){
  let frame='begonia-client://app/index.html'
  class Stub{close(){}prepare(){}}
  const owner={uploads:{releasePreviews(){}},attach:()=>1,current:()=>true,detach(){},generation:()=>0,check(){},async ready(){},revoke(){}}
- const {NativeClient}=load('NativeClient',{'./NativeTransferOwner':{nativeTransferOwner:()=>owner},'./ClientDiagnostics':{ClientDiagnostics:D},'./NativeVoice':{NativeVoice:Stub},'./NativeMediaDownload':{NativeMediaDownload:Stub},'./NativeResumableUpload':{NativeResumableUpload:Stub},'./MemohClientConfig':{MEMOH_ORIGIN:'https://example.test/api',resetMemohOrigin(){}}})
+ const {NativeClient}=load('NativeClient',{'./NativeTransferOwner':{nativeTransferOwner:()=>owner},'./ClientDiagnostics':{ClientDiagnostics:D},'./NativeVoice':{NativeVoice:Stub},'./NativeMediaDownload':{NativeMediaDownload:Stub},'./NativeResumableUpload':{NativeResumableUpload:Stub},'./MemohClientConfig':{MEMOH_ORIGIN:'https://example.test/api',resetMemohOrigin(){}},'./NativeChatSocket':{NativeChatSocket:class{open(){throw new Error('NATIVE_WS_REJECTED')}send(){}close(){}closeAll(){}}},'./NetReport':{NetReport:{report(){},flush(){}}}})
  const scripts=[]
  const controller={registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=> 'begonia-client://app/index.html',runJavaScript:async script=>{scripts.push(script);return ''},deleteJavaScriptRegister(){}}
  const client=new NativeClient(controller,()=>{},async()=>{},{});client.register()

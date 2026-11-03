@@ -51,6 +51,7 @@ def inputs():
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts', 'mobile/memoh/harmony-transfer-lifetime.ts',
         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-back.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
+        'mobile/memoh/harmony-ws.ts',
         'mobile/memoh/harmony-transfer-progress.ts', 'mobile/memoh/HarmonyTransferRing.vue',
         'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts',
         'tests/stage2/attachment_transfer_progress.cjs')]
@@ -1600,7 +1601,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             'harmony-download.ts', 'harmony-service-url.ts', 'harmony-transfer-lifetime.ts',
             'harmony-transfer-progress.ts', 'HarmonyTransferRing.vue')}
         if platform == 'harmony':
-            for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
+            for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css', 'harmony-ws.ts'):
                 host_sources[name] = ROOT / 'mobile/memoh' / name
         host_sources['harmony-theme.json'] = ROOT / 'contracts/ui_theme.json'
         for name, path in host_sources.items():
