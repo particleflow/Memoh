@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	sdk "github.com/felinics/twilight/sdk"
@@ -104,6 +105,19 @@ func (r *playbackReuseRecorder) recordAudio(chunk []byte) {
 	r.audio = append(r.audio, chunk...)
 }
 
+// stats reports the session's frame/codepoint totals for the structured
+// observation line. A nil recorder (reuse disabled) reports zeros; a
+// non-contiguous frame history reports contiguous=false, which is the signal
+// that input was skipped or reordered on the way in.
+func (r *playbackReuseRecorder) stats() (frames, codepoints uint64, contiguous bool) {
+	if r == nil {
+		return 0, 0, true
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.count, r.offset, !r.overflow
+}
+
 // commit registers the finished utterance under its whole-text identity. It is
 // a no-op unless input closed cleanly, and it never fails the response: reuse
 // is an optimization, so a storage error only costs the next synthesis.
@@ -161,6 +175,21 @@ type playbackReuseSession struct {
 	chunks   chan []byte
 	errs     chan error
 	frames   chan input.Frame
+	hit      atomic.Bool
+	// The frames of a served replay, for the observation line only: the
+	// recorder stays untouched on this path so commit() never re-registers
+	// the utterance that was just served.
+	hitFrames, hitCodepoints atomic.Uint64
+}
+
+// cacheHit reports whether this session served stored bytes instead of
+// dialing a provider, with the frame and codepoint counts it served. Only
+// the observation line reads them.
+func (s *playbackReuseSession) cacheHit() (frames, codepoints uint64, hit bool) {
+	if !s.hit.Load() {
+		return 0, 0, false
+	}
+	return s.hitFrames.Load(), s.hitCodepoints.Load(), true
 }
 
 func newPlaybackReuseSession(
@@ -251,6 +280,12 @@ collect:
 	}
 	if !broken && len(accepted) > 0 && accepted[len(accepted)-1].Final {
 		if match, ok := s.key.Match(string(text), s.cached); ok && len(match.Audio) > 0 {
+			// A served replay counts its frames for the observation line on
+			// the session itself: the recorder stays untouched so commit()
+			// never re-registers the utterance that was just served.
+			s.hitFrames.Store(uint64(len(accepted)))
+			s.hitCodepoints.Store(offset)
+			s.hit.Store(true)
 			s.chunks <- match.Audio
 			return
 		}

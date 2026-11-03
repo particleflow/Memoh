@@ -3,9 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
@@ -59,6 +61,37 @@ func inputOwner(c echo.Context, botID, id string) (string, error) {
 	return actor + ":" + botID + ":" + id, nil
 }
 
+// logPlaybackInputSession reports one finished playback input session in
+// machine form: the session id, the frame and codepoint counts the recorder
+// mirrored, whether the frames stayed contiguous, whether stored audio served
+// the reply instead of a provider, the audio bytes the client received and the
+// wall time. Never the spoken text itself (2026-11-04 field forensics: the
+// drop had to be reconstructed from the database and audio lengths because the
+// chain logged nothing).
+func (h *BotAudioHandler) logPlaybackInputSession(ctx context.Context, id string, session input.Session, recorder *playbackReuseRecorder, written int64, started time.Time) {
+	if h.logger == nil {
+		return
+	}
+	outcome := "synthesized"
+	frames, codepoints, contiguous := recorder.stats()
+	if deferred, ok := session.(*playbackReuseSession); ok {
+		if hitFrames, hitCodepoints, hit := deferred.cacheHit(); hit {
+			outcome = "cache_hit"
+			frames, codepoints = hitFrames, hitCodepoints
+		}
+	}
+	h.logger.InfoContext(ctx, "playback_input",
+		slog.String("event", "session"),
+		slog.String("session_id", id),
+		slog.String("outcome", outcome),
+		slog.Uint64("frames", frames),
+		slog.Uint64("codepoints", codepoints),
+		slog.Bool("contiguous", contiguous),
+		slog.Int64("audio_bytes", written),
+		slog.Int64("duration_ms", time.Since(started).Milliseconds()),
+	)
+}
+
 // StartPlaybackInput godoc
 // @Summary Start one configured native incremental speech task
 // @Description Requires an active account JWT and Bot chat permission. Streams one task's audio until final input and provider completion. Maximum 20000 Unicode characters per frame, within the native protocol limit. Never retry an uncertain synthesis. No message or attachment is created.
@@ -74,6 +107,7 @@ func inputOwner(c echo.Context, botID, id string) (string, error) {
 // @Failure 409 {object} server.Problem
 // @Router /bots/{bot_id}/tts/playback/input [post].
 func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
+	started := time.Now()
 	botID, err := h.authorizePlayback(c)
 	if err != nil {
 		return err
@@ -176,6 +210,7 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 	// producing its first frame. Waiting for audio here deadlocks duplex ingress.
 	c.Response().WriteHeader(http.StatusOK)
 	c.Response().Flush()
+	var written int64
 	for {
 		select {
 		case <-ctx.Done():
@@ -193,6 +228,7 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 				writeCtx, cancelWrite := context.WithTimeout(context.WithoutCancel(ctx), playbackReuseWriteTimeout)
 				recorder.commit(writeCtx, stream.ContentType)
 				cancelWrite()
+				h.logPlaybackInputSession(c.Request().Context(), request.ID, session, recorder, written, started)
 				return nil
 			}
 			if len(bytes) == 0 {
@@ -202,8 +238,10 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 			// so the recorder observes exactly this stream.
 			recorder.recordAudio(bytes)
 			if _, err = c.Response().Write(bytes); err != nil {
+				h.logPlaybackInputSession(c.Request().Context(), request.ID, session, recorder, written, started)
 				return err
 			}
+			written += int64(len(bytes))
 			c.Response().Flush()
 		}
 	}
@@ -246,6 +284,17 @@ func (h *BotAudioHandler) AppendPlaybackInput(c echo.Context) error {
 	}
 	h.inputSessions.Unlock()
 	if active == nil {
+		// The input this frame belongs to is gone (closed by a final frame, a
+		// stop, or a disconnect). Its text can never be synthesized through
+		// this session again, so the miss is the drop signal for the client
+		// race window: one structured line, never the text itself.
+		if h.logger != nil {
+			h.logger.WarnContext(c.Request().Context(), "playback_input",
+				slog.String("event", "append_missed"),
+				slog.String("session_id", request.ID),
+				slog.Uint64("sequence", request.Sequence),
+				slog.Uint64("offset", request.Offset))
+		}
 		return echo.NewHTTPError(http.StatusNotFound, "playback input is unavailable")
 	}
 	if session == nil {
@@ -269,6 +318,16 @@ func (h *BotAudioHandler) AppendPlaybackInput(c echo.Context) error {
 	if err = session.Append(c.Request().Context(), request.Frame); err != nil {
 		if errors.Is(err, context.Canceled) {
 			cancel()
+		}
+		// A frame the open task refused (a provider task already closed by its
+		// final frame): the text is not synthesized, so the rejection is the
+		// other half of the drop signal.
+		if h.logger != nil {
+			h.logger.WarnContext(c.Request().Context(), "playback_input",
+				slog.String("event", "append_rejected"),
+				slog.String("session_id", request.ID),
+				slog.Uint64("sequence", request.Sequence),
+				slog.Uint64("offset", request.Offset))
 		}
 		return echo.NewHTTPError(http.StatusConflict, "playback input rejected")
 	}
