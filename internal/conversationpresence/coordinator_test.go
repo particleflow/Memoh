@@ -264,6 +264,22 @@ func TestFormalBeforeClaimAndEpisodeReplayDoNotGenerate(t *testing.T) {
 	}
 }
 
+func TestAcknowledgementWithAngleBracketsIsPublished(t *testing.T) {
+	s, capacity := newFixtureClaims(), &fixtureCapacity{}
+	const text = "下一步是 <处理照片> 哦"
+	c := fixtureCoordinator(s, capacity, func(_ context.Context, in Input, _ Limits) (Result, error) {
+		return Result{Text: text, Phase: in.Phase}, nil
+	})
+	h, err := c.Start(context.Background(), fixtureInput())
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := awaitOutcome(t, h)
+	if out.Status != "published" || len(s.pieces) != 1 || s.pieces[0].Text != text {
+		t.Fatalf("ack containing angle brackets was dropped: %+v %+v", out, s.pieces)
+	}
+}
+
 func TestFailureCapacityAndWrongPhaseNeverPublishOrRetry(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
@@ -275,7 +291,6 @@ func TestFailureCapacityAndWrongPhaseNeverPublishOrRetry(t *testing.T) {
 		{"provider", false, Result{}, errors.New("synthetic provider failure"), "generation_failed"},
 		{"capacity", true, Result{}, nil, "capacity_unavailable"},
 		{"phase", false, Result{Text: "Already executing.", Phase: Thinking}, nil, "invalid_output"},
-		{"markup", false, Result{Text: "<think>secret</think>", Phase: Accepted}, nil, "invalid_output"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			s, capacity := newFixtureClaims(), &fixtureCapacity{deny: tc.deny}
