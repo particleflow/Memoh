@@ -5,7 +5,7 @@ import { util } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 
-interface DiagnosticEvent { at: number; area: string; component: string; phase: string; detail: string; }
+export interface DiagnosticEvent { at: number; area: string; component: string; phase: string; detail: string; }
 interface TraceEvent { seq: number; t: number; kind: string; g: number; request: number | null; method?: string; status?: number; loaded?: number; total?: number; lengthComputable?: boolean; check?: string; ok?: boolean; reason?: string; requestTag?: string; }
 interface TraceBody { schema: number; document: string; timeUnit: string; events: TraceEvent[]; }
 export interface DiagnosticBatch { id: string; document: string; through: number; body: string; writeAttempted?: boolean; }
@@ -154,5 +154,38 @@ export class ClientDiagnostics {
       const record: DiagnosticEvent = { at: Date.now(), area, component, phase, detail };
       ClientDiagnostics.append(JSON.stringify(record));
     } catch { hilog.error(0xB001, 'BegoniaClient', 'Local diagnostic write failed'); }
+  }
+  // Tail read of the committed NETWORK/SYSTEM journal for the failure
+  // self-report; never parses or returns content-bearing areas.
+  static recentEvents(): DiagnosticEvent[] {
+    const context = ClientDiagnostics.context;
+    if (!context) { return []; }
+    const path = ClientDiagnostics.path();
+    const events: DiagnosticEvent[] = [];
+    for (const file of [path + '.previous', path]) {
+      try {
+        if (!fs.accessSync(file)) { continue; }
+        const size = fs.statSync(file).size;
+        const length = Math.min(size, 65536);
+        if (length <= 0) { continue; }
+        const handle = fs.openSync(file, fs.OpenMode.READ_ONLY);
+        try {
+          const raw = new Uint8Array(length);
+          if (fs.readSync(handle.fd, raw.buffer, { offset: size - length, length }) !== length) { continue; }
+          const text = new util.TextDecoder().decodeToString(raw);
+          const committed = text.slice(0, text.lastIndexOf('\n') + 1);
+          for (const line of committed.split('\n')) {
+            if (!line) { continue; }
+            const record = JSON.parse(line) as DiagnosticEvent;
+            if (record && (record.area === 'NETWORK' || record.area === 'SYSTEM') &&
+              Number.isSafeInteger(record.at) && record.at > 0 &&
+              typeof record.component === 'string' && typeof record.phase === 'string' && typeof record.detail === 'string') {
+              events.push(record);
+            }
+          }
+        } finally { fs.closeSync(handle); }
+      } catch { /* A torn or dissolving journal tail yields what it yielded. */ }
+    }
+    return events.slice(-50);
   }
 }

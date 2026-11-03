@@ -4,12 +4,13 @@ import { util, url } from '@kit.ArkTS';
 import { MEMOH_ORIGIN } from './MemohClientConfig';
 import { WEB_START, memohRequest } from './SharedWebPolicy';
 import { NativeTransferNetwork, NativeTransferPolicy } from './NativeTransferNetwork';
+import { ClientDiagnostics } from './ClientDiagnostics';
 
 interface WebIdentity { id: string; network_policy?: NativeTransferPolicy; }
 interface WebTransfer {
   source: webview.WebSchemeHandlerRequest; sink: webview.WebResourceHandler;
   session: rcp.Session; epoch: number; base: string; authorization: string;
-  ownerRead: boolean; stopped: boolean; request?: rcp.Request;
+  ownerRead: boolean; file: boolean; stopped: boolean; request?: rcp.Request;
 }
 
 // Connection adapter below the unchanged logical URL guard. No new page URL,
@@ -58,7 +59,14 @@ export class NativeWebNetwork {
 
   private check(state: WebTransfer): void {
     if (state.stopped || !this.alive() || state.epoch !== this.epoch || state.base !== MEMOH_ORIGIN ||
-      (!state.ownerRead && state.authorization !== this.authorization)) { throw new Error('WEB_NETWORK_IDENTITY'); }
+      (!state.ownerRead && state.authorization !== '' && state.authorization !== this.authorization)) {
+      throw new Error('WEB_NETWORK_IDENTITY');
+    }
+  }
+
+  // The WebSocket bridge shares this HTTP bridge's owner-session identity.
+  session(authorization: string): boolean {
+    return authorization !== '' && authorization === this.authorization;
   }
 
   private start(source: webview.WebSchemeHandlerRequest, sink: webview.WebResourceHandler): boolean {
@@ -66,20 +74,40 @@ export class NativeWebNetwork {
     // Direct physical URLs, subframes and external URLs retain the old refusal.
     if (!this.alive() || !MEMOH_ORIGIN.startsWith('https://') || source.isMainFrame() ||
       source.getFrameUrl().split('#')[0] !== WEB_START || !memohRequest(target)) { return false; }
-    if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(source.getRequestMethod())) { return false; }
-    const ownerRead = target === MEMOH_ORIGIN + '/users/me' && source.getRequestMethod() === 'GET';
+    const method = source.getRequestMethod();
+    if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method)) { return false; }
+    const ownerRead = target === MEMOH_ORIGIN + '/users/me' && method === 'GET';
     const path = target.slice(MEMOH_ORIGIN.length).split('?')[0];
     const file = /^\/bots\/[^/]+\/(?:media(?:\/|$)|container\/fs(?:\/|$)|sessions\/[^/]+\/delegations\/[^/]+\/attachments\/)/.test(path);
-    if (!ownerRead && (!file || !this.route)) { return false; }
+    // ArkWeb anchors its own DNS/network view on the default network, so every
+    // API request below the lexical guard now rides the native stack instead.
+    // The credential-free set is exactly the login POST and its CORS preflight:
+    // both are answered by the server itself and carry no session to protect.
+    const login = path === '/auth/login' && method === 'POST';
+    const preflight = method === 'OPTIONS' && source.getHeader().some((header: webview.WebHeader): boolean =>
+      header.headerKey.toLowerCase() === 'access-control-request-method');
+    const decline = (phase: string): boolean => {
+      ClientDiagnostics.event('NETWORK', 'web-network', phase, 'path=' + path);
+      return false;
+    };
     const auth = source.getHeader().filter((header: webview.WebHeader): boolean => header.headerKey.toLowerCase() === 'authorization');
     const query = url.URL.parseURL(target).searchParams.getAll('token');
-    if (auth.length > 1 || query.length > 1 || ownerRead && auth.length !== 1) { return false; }
+    if (auth.length > 1 || query.length > 1 || ownerRead && auth.length !== 1) { return decline('bridge-decline'); }
     const authorization = auth.length === 1 ? auth[0].headerValue : query.length === 1 ? 'Bearer ' + query[0] : '';
-    if (!/^Bearer [^\s\r\n]+$/.test(authorization) || query.length === 1 && authorization !== 'Bearer ' + query[0]) { return false; }
-    if (ownerRead && authorization !== this.authorization) { this.reset(); this.authorization = authorization; }
-    else if (authorization !== this.authorization) { return false; }
+    if (login || preflight) {
+      // The whitelisted credential-free set; anything carrying a token declines.
+      if (authorization !== '') { return decline('bridge-decline'); }
+    } else {
+      if (!/^Bearer [^\s\r\n]+$/.test(authorization) || query.length === 1 && authorization !== 'Bearer ' + query[0]) {
+        return decline('bridge-decline');
+      }
+      if (ownerRead && authorization !== this.authorization) { this.reset(); this.authorization = authorization; }
+      else if (authorization !== this.authorization) { return decline('bridge-decline'); }
+      if (file && !this.route) { return decline('bridge-decline'); }
+    }
+    ClientDiagnostics.event('NETWORK', 'web-network', 'bridge-accept', 'path=' + path);
     const state: WebTransfer = { source, sink, session: rcp.createSession(), epoch: this.epoch,
-      base: MEMOH_ORIGIN, authorization, ownerRead, stopped: false };
+      base: MEMOH_ORIGIN, authorization, ownerRead, file, stopped: false };
     this.transfers.set(source, state);
     void this.run(state).catch(() => {
       if (!state.stopped) { try { sink.didFail(-2); } catch { /* Stopped by ArkWeb. */ } }
@@ -173,9 +201,12 @@ export class NativeWebNetwork {
         if (!responded) { throw new Error('WEB_NETWORK_HEADERS'); }
         state.sink.didReceiveResponseBody(data);
       };
+      // File bodies keep the owner policy route; every other accepted request
+      // (api, login, preflight) goes straight to the native stack.
       const route = this.route;
-      if (!route) { throw new Error('WEB_NETWORK_IDENTITY'); }
-      const response = await route.resource(state.session, target, method, (): rcp.Request => { this.check(state); return request; });
+      const response = state.file && route
+        ? await route.resource(state.session, target, method, (): rcp.Request => { this.check(state); return request; })
+        : await state.session.fetch(request);
       this.check(state);
       if (!responded) { this.response(state, response.statusCode, response.headers); }
     }

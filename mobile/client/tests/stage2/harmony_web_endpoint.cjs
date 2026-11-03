@@ -35,8 +35,10 @@ class Session{
  close(){this.cancel()}
  async fetch(request){
   if(failTransport)throw Object.assign(Error('controlled certificate failure'),{code:1007900060})
-  const target=new URL(request.url),isControl=target.origin===logical
-  const actual=isControl?controlOrigin+target.pathname:target.href
+  const target=new URL(request.url),isControl=target.origin===logical&&target.pathname==='/prefix/api/users/me'
+  // Direct api/login fetches keep the logical URL by design (rcp resolves the
+  // real service); the fixture maps them onto its byte-stream server.
+  const actual=isControl?controlOrigin+target.pathname:target.origin===logical?physical+target.pathname+target.search:target.href
   assert.equal(request.configuration.security.remoteValidation,'system');assert.equal(request.configuration.transfer.autoRedirect,false)
   const events=request.configuration.tracing?.httpEventsHandler
   return new Promise((resolve,reject)=>{
@@ -54,14 +56,14 @@ class Session{
  }
 }
 const rcp={Request,createSession:()=>new Session()}
-const {NativeWebNetwork}=load(common+'NativeWebNetwork.ets',{'@kit.ArkWeb':{webview:{WebSchemeHandler:SchemeHandler,WebSchemeHandlerResponse:SchemeResponse}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkTS':ark,'./MemohClientConfig':origin,'./SharedWebPolicy':policy,'./NativeTransferNetwork':network})
+const {NativeWebNetwork}=load(common+'NativeWebNetwork.ets',{'@kit.ArkWeb':{webview:{WebSchemeHandler:SchemeHandler,WebSchemeHandlerResponse:SchemeResponse}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkTS':ark,'./MemohClientConfig':origin,'./SharedWebPolicy':policy,'./NativeTransferNetwork':network,'./ClientDiagnostics':{ClientDiagnostics:{event(){}}}})
 let alive=true
 const bridge=new NativeWebNetwork(()=>alive),handlers={};bridge.attach({setWebSchemeHandler:(scheme,handler)=>{handlers[scheme]=handler}})
 function source(target,options={}){
  let position=0
  const body=options.body
  return{getRequestUrl:()=>target,getRequestMethod:()=>options.method||'GET',isMainFrame:()=>!!options.main,getFrameUrl:()=>options.frame||policy.WEB_START,
- getHeader:()=>[...(options.noAuth?[]:[{headerKey:'Authorization',headerValue:options.auth||token}]),{headerKey:'Range',headerValue:'bytes=262144-'},{headerKey:'Upload-Offset',headerValue:'262144'},{headerKey:'Content-Type',headerValue:'multipart/form-data; boundary=existing-boundary'}],
+ getHeader:()=>[...(options.noAuth?[]:[{headerKey:'Authorization',headerValue:options.auth||token}]),...(options.acrm?[{headerKey:'Access-Control-Request-Method',headerValue:options.acrm}]:[]),{headerKey:'Range',headerValue:'bytes=262144-'},{headerKey:'Upload-Offset',headerValue:'262144'},{headerKey:'Content-Type',headerValue:'multipart/form-data; boundary=existing-boundary'}],
  getHttpBodyStream:()=>body?{initialize:async()=>{if(delayBody)await delayBody},read:async max=>{const chunk=body.subarray(position,position+max);position+=chunk.length;return buffer(chunk)}}:null}
 }
 function call(target,options={}){
@@ -87,7 +89,10 @@ const listen=s=>new Promise(resolve=>s.listen(0,'127.0.0.1',resolve))
  await check('redirect refused without repeat/follow',async()=>{const count=records.length,result=await call(target+'&status=302').done;assert.equal(result.error,-2);assert.equal(records.length,count+1)})
  await check('unknown PATCH not repeated',async()=>{const count=records.length,result=await call(base+'/bots/original-bot/media/uploads/original-receipt?disconnect=1',{method:'PATCH',body:bytes}).done;assert.equal(result.error,-2);assert.equal(records.length,count+1);assert.equal(records.at(-1).hash,hash(bytes))})
  await check('foreign, physical and encoded escape remain refused',async()=>{for(const url of [physical+'/prefix/api/bots/original-bot/media/hash','https://foreign.invalid/prefix/api/bots/original-bot/media/hash',base+'/bots/original-bot/media/%2e%2e/hash']){assert.equal(policy.memohRequest(url),false);assert.equal(call(url).accepted,false)}})
- await check('frame, main document, unrelated control and changed token not mapped',async()=>{for(const [url,options] of [[target,{frame:'https://foreign.invalid'}],[target,{main:true}],[base+'/bots/original-bot/messages',{}],[target,{auth:tokenB}]])assert.equal(call(url,options).accepted,false)})
+ await check('frame, main document and changed token not mapped',async()=>{for(const [url,options] of [[target,{frame:'https://foreign.invalid'}],[target,{main:true}],[target,{auth:tokenB}]])assert.equal(call(url,options).accepted,false)})
+ await check('session api request rides the native bridge once',async()=>{const count=records.length,result=await call(base+'/bots/original-bot/messages').done;assert.equal(result.error,undefined);assert.equal(result.response.status,200);assert.equal(hash(result.bytes),hash(bytes));assert.equal(records.length,count+1);assert.equal(records.at(-1).method,'GET');assert.equal(records.at(-1).authorization,token);assert.equal(records.at(-1).path,'/prefix/api/bots/original-bot/messages')})
+ await check('credential-free login POST and its preflight ride the bridge',async()=>{const count=records.length;const posted=call(base+'/auth/login',{method:'POST',noAuth:true});const result=await posted.done;assert.equal(result.error,undefined);assert.equal(result.response.status,200);assert.equal(records.at(-1).method,'POST');assert.equal(records.at(-1).authorization,undefined);assert.equal(records.at(-1).path,'/prefix/api/auth/login');const preflight=await call(base+'/bots/original-bot/messages',{method:'OPTIONS',noAuth:true,acrm:'POST'}).done;assert.equal(preflight.error,undefined);assert.equal(records.at(-1).method,'OPTIONS');assert.equal(records.at(-1).authorization,undefined);assert.equal(records.length,count+2)})
+ await check('token-bearing login, credential-free plain OPTIONS and wrong-token api stay refused',async()=>{assert.equal(call(base+'/auth/login',{method:'POST'}).accepted,false);assert.equal(call(base+'/bots/original-bot/messages',{method:'OPTIONS',noAuth:true}).accepted,false);assert.equal(call(base+'/bots/original-bot/messages',{method:'OPTIONS',acrm:'POST'}).accepted,false);assert.equal(call(base+'/bots/original-bot/messages',{auth:tokenB}).accepted,false)})
  await check('existing query-token resource uses same credential without adding a bearer header',async()=>{const result=await call(target+'&token=synthetic-no-authority',{noAuth:true}).done;assert.equal(result.error,undefined);assert.equal(hash(result.bytes),hash(bytes));assert.equal(records.at(-1).authorization,undefined);assert.equal(call(target+'&token=unknown',{noAuth:true}).accepted,false);assert.equal(call(target+'&token=synthetic-no-authority&token=synthetic-no-authority',{noAuth:true}).accepted,false);assert.equal(call(target+'&token=unknown').accepted,false)})
  await check('delegated attachment keeps scope and status with no bot/hash fallback',async()=>{const scope=base+'/bots/bot-a/sessions/session-b/delegations/delegation-c/attachments/'+'a'.repeat(64)+'?status=403';const count=records.length,result=await call(scope).done;assert.equal(result.response.status,403);assert.equal(records.length,count+1);assert(records.at(-1).path.includes('/session-b/delegations/delegation-c/attachments/'))})
  await check('lifecycle reset during body initialization sends zero bytes',async()=>{let release;delayBody=new Promise(resolve=>release=resolve);const count=records.length,x=call(target,{method:'POST',body:bytes});bridge.reset();release();const result=await x.done;delayBody=undefined;assert.equal(result.error,-3);await new Promise(resolve=>setImmediate(resolve));assert.equal(records.length,count);assert.equal(call(target).accepted,false);await profile()})

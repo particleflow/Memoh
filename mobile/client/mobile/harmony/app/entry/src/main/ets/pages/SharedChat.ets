@@ -12,6 +12,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { UiThemes } from '../common/UiTheme';
 import { NativeWebNetwork } from '../common/NativeWebNetwork';
 import { AppNetBinding } from '../common/AppNetBinding';
+import { NetReport } from '../common/NetReport';
 
 
 @Entry
@@ -134,7 +135,15 @@ struct SharedChat {
     this.retry();
   };
 
-  aboutToAppear(): void { AppNetBinding.onRebound(this.reboundRetry); }
+  // A landed binding is also the natural moment to drain queued failure
+  // reports: whatever blocked the post may just have been repaired.
+  private reboundFlush: () => void = (): void => { NetReport.flush(); };
+
+  aboutToAppear(): void {
+    NetReport.bind(this.context);
+    AppNetBinding.onRebound(this.reboundRetry);
+    AppNetBinding.onRebound(this.reboundFlush);
+  }
 
   onBackPress(): boolean {
     if (!this.active || this.loadFailed || this.renderWaiting || !sharedWebAvailable()) { return false; }
@@ -156,6 +165,7 @@ struct SharedChat {
 
   aboutToDisappear(): void {
     AppNetBinding.offRebound(this.reboundRetry);
+    AppNetBinding.offRebound(this.reboundFlush);
     ImageTimingDump.detach();
     this.clearClientWait();
     this.cancelWebDownloads();
@@ -180,7 +190,8 @@ struct SharedChat {
       this.attachDownloads();
       this.nativeClient?.close();
       this.nativeClient = new NativeClient(this.controller, (state: string) => this.clientState(state),
-        (theme: string) => this.setClientTheme(theme), this.context, (): void => this.webNetwork.reset());
+        (theme: string) => this.setClientTheme(theme), this.context, (): void => this.webNetwork.reset(),
+        (authorization: string): boolean => this.webNetwork.session(authorization));
       this.nativeReady = this.nativeClient.register();
       if (this.nativeReady) { this.webNetwork.attach(this.controller); }
       ImageTimingDump.bind(this.controller, (): boolean => this.active && this.chatReady && this.nativeReady);
@@ -333,6 +344,7 @@ struct SharedChat {
       if (!this.active || generation !== this.probeGeneration || this.chatReady || this.loginReady || this.loadFailed) { return; }
       this.status = '聊天加载超时，请重试';
       ClientDiagnostics.event('SYSTEM', 'shared-client', 'client-timeout', this.clientStage);
+      NetReport.report('client-timeout');
     }, 60000);
   }
   private clientState(state: string): void {
@@ -344,6 +356,8 @@ struct SharedChat {
     if (this.chatReady || this.loginReady || state === 'failed') { this.clearClientWait(); } else { this.waitForClient(); }
     this.status = state === 'failed' ? '聊天初始化失败，请在页面中重试' : state === 'ready' ? '聊天已连接' : '正在恢复聊天会话…';
     ClientDiagnostics.event('SYSTEM', 'shared-client', 'client-' + state, '');
+    if (state === 'failed') { NetReport.report('client-failed'); }
+    else if (state === 'ready') { NetReport.flush(); }
   }
   private pageFailed(event: OnErrorReceiveEvent): void {
     if (!this.active) { return; }
@@ -365,6 +379,7 @@ struct SharedChat {
     this.status = '聊天页面加载失败，请重试';
     this.webNetwork.reset();
     ClientDiagnostics.event('SYSTEM', 'arkweb-capability-gate', 'main-document-load-failed', 'errorCode=' + event.error.getErrorCode());
+    NetReport.report('page-failed');
   }
   private renderExited(reason: RenderExitReason): void {
     if (!this.active) { return; }

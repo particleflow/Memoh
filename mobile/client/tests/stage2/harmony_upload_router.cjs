@@ -21,7 +21,7 @@ class Uploads {
 }
 const config={MEMOH_ORIGIN:'',configureMemohOrigin:v=>{config.MEMOH_ORIGIN=v},resetMemohOrigin:()=>{config.MEMOH_ORIGIN=''}}
 class Voice{close(){}prepare(){}}class Downloads{close(){}}
-const {NativeClient}=load(file('common/NativeClient.ets'),{'./NativeVoice':{NativeVoice:Voice},'./NativeMediaDownload':{NativeMediaDownload:Downloads},'./NativeResumableUpload':{NativeResumableUpload:Uploads},'./MemohClientConfig':config})
+const {NativeClient}=load(file('common/NativeClient.ets'),{'./NativeVoice':{NativeVoice:Voice},'./NativeMediaDownload':{NativeMediaDownload:Downloads},'./NativeResumableUpload':{NativeResumableUpload:Uploads},'./MemohClientConfig':config,'./NativeChatSocket':{NativeChatSocket:class{open(){throw new Error('NATIVE_WS_REJECTED')}send(){}close(){}closeAll(){}}},'./NetReport':{NetReport:{report(){},flush(){}}},'./ClientDiagnostics':{ClientDiagnostics:{event(){},onForeground(){},onLifecycle(){}}}})
 let frame='begonia-client://app/index.html'
 const client=new NativeClient({registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame},()=>{},async()=>{},{})
 const request=(command,fields={})=>client.request(JSON.stringify({version:1,command,...fields})).then(JSON.parse)

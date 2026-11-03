@@ -105,7 +105,7 @@ const downloads=[];class Download extends Media{
  async save(operation,botId){assert.equal(this.authorized(),true);downloads.push(['save',operation,botId]);return true}
  abort(operation,botId){downloads.push(['abort',operation,botId])}
 }
-const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeResumableUpload':{NativeResumableUpload:Media},'./NativeMediaDownload':{NativeMediaDownload:Download}})
+const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeResumableUpload':{NativeResumableUpload:Media},'./NativeMediaDownload':{NativeMediaDownload:Download},'./NativeChatSocket':{NativeChatSocket:class{open(){throw new Error('NATIVE_WS_REJECTED')}send(){}close(){}closeAll(){}}},'./NetReport':{NetReport:{report(){},flush(){}}},'./ClientDiagnostics':{ClientDiagnostics:{event(){},onForeground(){},onLifecycle(){}}}})
 let frame='begonia-client://app/index.html';const controller={getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame,registerJavaScriptProxy(){},deleteJavaScriptRegister(){}}
 const bridge=new NativeClient(controller,s=>events.push(s),async()=>{},{});bridge.register()
 async function call(command,rest={}){return JSON.parse(await bridge.request(JSON.stringify({version:1,command,...rest})))}

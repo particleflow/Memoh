@@ -44,6 +44,8 @@ const modules = {
   '@kit.RemoteCommunicationKit': { rcp }, '@kit.ArkData': { uniformTypeDescriptor: {} }, '@kit.NetworkKit': {},
   './NativePhotoSelection': { NativePhotoSelection: class {} }, './ClientDiagnostics': { ClientDiagnostics: { event() {}, failure() {}, onForeground() {}, onLifecycle() {} } },
   './NativeVoice': { NativeVoice: class { prepare() {} close() {} } },
+  './NativeChatSocket': { NativeChatSocket: class { open() { throw new Error('NATIVE_WS_REJECTED') } send() {} close() {} closeAll() {} } },
+  './NetReport': { NetReport: { report() {}, flush() {} } },
 }
 function load(name) {
   if (cache.has(name)) return cache.get(name)
@@ -128,7 +130,7 @@ function pageHost(client) {
     { exports: m.exports, NativeClient: Client, Promise, ImageTimingDump: { detach() {}, bind() {} }, ClientDiagnostics: { event() {} }, AppNetBinding: { onRebound() {}, offRebound() {} } })
   return Object.assign(new m.exports.PageHost(), { active: true, nativeClient: client, probeGeneration: 0, context,
     controller: { registerJavaScriptProxy() {}, deleteJavaScriptRegister() {}, getUrl: () => frame, getLastJavascriptProxyCallingFrameUrl: () => frame },
-    photoSelection: { close() {} }, webNetwork: { reset() {}, attach() {} }, clearClientWait() {}, cancelWebDownloads() {}, releaseKeyboardInsets() {}, prepareWindow: async () => {}, applyChatInsets() {}, attachDownloads() {}, clientState() {}, setClientTheme: async () => {} })
+    photoSelection: { close() {} }, webNetwork: { reset() {}, attach() {}, session: () => false }, clearClientWait() {}, cancelWebDownloads() {}, releaseKeyboardInsets() {}, prepareWindow: async () => {}, applyChatInsets() {}, attachDownloads() {}, clientState() {}, setClientTheme: async () => {} })
 }
 let seq = 0
 const scope = () => ({ operation: (++seq).toString(16).padStart(32, '0'), botId: 'bot-a', scope: 'session-a', authorization: 'Bearer alice' })

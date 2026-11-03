@@ -1,4 +1,5 @@
 import { installHarmonyBack } from './harmony-back'
+import { installNativeWebSocket } from './harmony-ws'
 import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, deploymentNetworkPolicy, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
 import type { TransferNetworkPolicy } from './harmony-service-url'
 import { effectScope, watch } from 'vue'
@@ -20,6 +21,9 @@ async function nativeCommand(command: string, apiOrigin?: string, networkPolicy?
 }
 
 installHarmonyBack()
+// Ride the native-bound network for chat/terminal sockets before main mounts;
+// a no-op in plain browser builds without the native bridge.
+installNativeWebSocket()
 
 // Before main mounts, the existing setup form still uses the shared preferences
 // and tokens. Release its media watchers when the shared settings store takes over.
