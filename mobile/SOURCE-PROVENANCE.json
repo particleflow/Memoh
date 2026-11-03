@@ -67,7 +67,7 @@
     },
     {
       "path": "mobile/client/mobile/client_config.py",
-      "sha256": "09cc1d9894c04cfdbb71880a3321ff2e0705162c3276701047f07ceb1cc07884",
+      "sha256": "ded5fac5ed8aafae7dd1cea0a4aee7674dbf011fa3724d0094917de096857557",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -76,7 +76,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
       "urlParityBaseSHA256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc",
@@ -94,11 +95,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
-      "sha256": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
+      "sha256": "88d9a9ca1ed46393490c8079618660652648f13cfd6609e056ed970fc95fb95d",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
@@ -200,27 +202,29 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-config.ts",
-      "sha256": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+      "sha256": "0ab483649c3d91eeee7f06d7a2311518f8a333ee437df1cc2288c2d26d45e089",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "windowsInjectionBaseSHA256": "8b204ff2322d51140e01f2d0ab3e3743b82332db148be3c17d70e1ba5f1f76df"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
-      "sha256": "c1514f910bf94f8bde28c1b260c2a1b5153de494e72eeef554be0bdc97f1ddc8",
+      "sha256": "f1cb07f0e9aa7d90ab8f3b9febee9d9a2717a90e2325dc79c3e20c28ba1b65ef",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f",
       "urlParityBaseSHA256": "f663289a3c65c54a4f950fde438519b509283416927dd15f3c24912a6e271153"
@@ -416,7 +420,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "f87443182acc5c6695ccea690dbecfc104e1e19e2cd8771ff3cd42f73be5a34d",
+      "sha256": "8574c1fbf435f6be9a8dce2904e1fe8c1d4c892511ba630a264eb2bd243c9390",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -426,7 +430,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
       "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c",
@@ -1400,12 +1405,13 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
-      "sha256": "3439209123e86eaa7115f08122b84e83b6b558ee34e802d964e61efee6f2790a",
+      "sha256": "a2ed08a04590f6917ca250b441a926fb4ef9f100d4994292fd9eb5d135d703bc",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
@@ -1420,11 +1426,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/network_policy_config.py",
-      "sha256": "71f6032fd64fb477e93bcdb91c1798cd90ba24158576503fc8e0c9c17995f5bc",
+      "sha256": "87adcbc6c0a8f0c6061fcb7cd72ebe37d907c60c29b6e8e04681c238f5e1d14d",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
@@ -1924,9 +1931,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_endpoint_routing.cjs",
-      "sha256": "cd5b0c709789a239f4b6c322d334123392cd0e33b8d10c711e17c7895649ad73",
+      "sha256": "932ede0a5b913306385491f07a3c6ab1e63ee4d4e1b345ed7aba7c400921b420",
       "origin": "Native RCP endpoint v2 consumer regression for fixed808cf801 contract; real controlled HTTP/files/processes, synthetic-only identity.",
-      "licenseReview": "Project regression source; no SDK binaries/private config."
+      "licenseReview": "Project regression source; no SDK binaries/private config.",
+      "preparationChanges": [
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
+      ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets",
