@@ -8,6 +8,7 @@ import (
 	"time"
 
 	chatview "github.com/felinics/memoh/internal/agent/view"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -296,6 +297,13 @@ type CurrentRunView struct {
 	// admitted into this run, including the original input and applied steers.
 	// The legacy request_user_turn is derived only at the JSON boundary.
 	UserTurns []chatview.UITurn `json:"user_turns,omitempty"`
+	// InputSource is the admitted turn's host-recorded provenance, stamped at
+	// admission so it rides the first projection frame. Receipt-shaped turns
+	// (task results, delegation deliveries) project no user turn — their user
+	// row renders no bubble — so without this field the run's live assistant
+	// output is unattributable until history replaces the projection, which is
+	// exactly the window a subscriber rendered as an unknown source.
+	InputSource *inputsource.Source `json:"input_source,omitempty"`
 	// SteerSupported is published only by an installed step-boundary consumer.
 	// Missing on old owners and on runtimes without that execution capability.
 	SteerSupported bool `json:"steer_supported,omitempty"`
@@ -345,9 +353,12 @@ type SteerTurnView struct {
 // RunAdmissionView is the canonical state published when a reserved run
 // becomes active. RequestUserTurn is intentionally runtime state rather than
 // a durable history row; ordinary sends still persist user + assistant
-// together when the run reaches a terminal result.
+// together when the run reaches a terminal result. InputSource names the
+// admitted turn's provenance on the run view itself, which is the only frame
+// available for turns that project no user turn.
 type RunAdmissionView struct {
 	RequestUserTurn *chatview.UITurn
+	InputSource     *inputsource.Source
 	Operation       *RunOperationView
 }
 

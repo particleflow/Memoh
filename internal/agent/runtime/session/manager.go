@@ -1299,6 +1299,7 @@ func (m *Manager) startRun(ctx context.Context, start runStart) (RunHandle, Curs
 		snapshot.UpdatedAt = now
 		run.Status = RunStatusRunning
 		run.Operation = admission.Operation
+		run.InputSource = admission.InputSource
 		switch {
 		case admission.RequestUserTurn != nil:
 			run.UserTurns = []chatview.UITurn{*admission.RequestUserTurn}

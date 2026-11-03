@@ -503,6 +503,11 @@ export interface RuntimeCurrentRunView {
   updated_at: string
   messages: UIMessage[]
   request_user_turn?: UIUserTurn
+  // The admitted turn's host-recorded provenance, present from the first
+  // frame. Receipt-shaped turns admit no user turn (their user row renders no
+  // bubble), so this is the only place their live assistant output can be
+  // attributed from until history replaces the projection.
+  input_source?: UIInputSource
   // Ordered inputs already admitted into this run. The first entry is the
   // request turn when present; later entries are applied steers.
   user_turns?: UIUserTurn[]
