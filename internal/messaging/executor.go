@@ -8,8 +8,8 @@ import (
 	"log/slog"
 	"strings"
 
-	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/apperror"
+	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/media"
 )
 
