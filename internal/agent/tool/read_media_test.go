@@ -30,10 +30,19 @@ func (s *readMediaTestContainerService) ReadRaw(req *pb.ReadRawRequest, stream p
 	if !ok {
 		return status.Error(codes.NotFound, "not found")
 	}
-	if len(data) == 0 {
-		return nil
+	// Chunk like the real bridge server so multi-megabyte fixtures stay under
+	// the default gRPC message limit.
+	const chunkSize = 64 * 1024
+	for offset := 0; offset < len(data); offset += chunkSize {
+		end := offset + chunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+		if err := stream.Send(&pb.DataChunk{Data: data[offset:end]}); err != nil {
+			return err
+		}
 	}
-	return stream.Send(&pb.DataChunk{Data: data})
+	return nil
 }
 
 func newReadMediaTestClient(t *testing.T, files map[string][]byte) *bridge.Client {
