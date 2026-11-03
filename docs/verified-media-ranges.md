@@ -69,8 +69,9 @@ modify Server memory is outside this boundary.
 ## Bounded costs and fail-closed behavior
 
 - Cached digests have a 16 MiB budget and at most 128 entries (plus small cache
-  bookkeeping). Each index is at most 8 MiB: 256 GiB at 1 MiB/block. Larger files
-  keep the previous full-verification path; their admission limit is not changed.
+  bookkeeping). An index is admitted only when it fits that shared budget:
+  up to 512 GiB at 1 MiB/block. Larger files keep the previous
+  full-verification path; their admission limit is not changed.
 - Each active reader allocates one 1 MiB data buffer on demand. A cold verifier
   uses one scan buffer plus its bounded index. Active streams may retain an index
   evicted from the shared cache; these are per-stream bounds, not a global RSS
@@ -180,7 +181,8 @@ the per-read block checks. Kernel timestamp limitations remain as documented abo
 Unfinished and completed entries share the same 16 MiB digest/cache accounting
 budget and 128-entry LRU. A paused entry retains no descriptor or data buffer.
 Active verification remains limited by the 32 existing stripes, each holding at
-most an 8 MiB index and 1 MiB scan buffer; active reader/index bounds above still
+most a cache-budget-sized index (512 GiB at 1 MiB/block) and a 1 MiB scan
+buffer; active reader/index bounds above still
 apply. There is no timer, worker, detached scan or new service. Eviction/restart
 loses unfinished progress and forces complete verification. File, Bot or root
 replacement does not inherit a mismatching file identity's progress.

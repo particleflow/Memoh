@@ -99,14 +99,21 @@ retroactively change existing receipts.
 Each chunk is streamed with a 256 KiB copy buffer into one private staging file,
 verified, fsynced, and then checkpointed with atomic journal rename plus directory
 fsync. The journal advances only after durable byte verification. Restart repair
-truncates any unacknowledged tail to the stored offset. A final pass computes the
-whole-file SHA; the existing canonical provider independently verifies its
-atomic publication. Completion avoids a second whole-file temporary spool.
+truncates any unacknowledged tail to the stored offset. Completion performs one
+whole-file read: the canonical provider hashes the staged bytes in the same read
+that publishes them and rejects a mismatch against the declared SHA before
+rename, so there is no separate verification pass and no second whole-file
+temporary spool. On a deduplication hit the staged bytes are discarded
+unverified; every chunk was still checked against its Upload-SHA256 at append
+time, and the existing original is re-verified and barrier-repaired instead.
 
 Readable files alone are not proof of durable publication. Deduplication repairs
 the canonical file and directory fsync barriers before acknowledging an existing
-original. Journal reads likewise fsync the visible journal and its directory
-before returning an offset/ready receipt or allowing terminal payload cleanup.
+original. Journal reads fsync the visible journal and its directory before a
+ready receipt is returned or terminal payload cleanup runs; an uploading-state
+offset read performs no such repair, because the offset protocol reconciles a
+torn checkpoint (a conflicting append is rejected and retried from the receipt)
+and the next acknowledged save restores the barrier.
 This repairs a process interruption or lost acknowledgement between rename and
 directory fsync. A failed barrier returns an error and preserves staging until
 recovery; it cannot authorize deleting the only pending copy. These guarantees
