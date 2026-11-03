@@ -57,6 +57,7 @@ type ContainerProvider struct {
 	hookService workspaceHookService
 	execWorkDir string
 	logger      *slog.Logger
+	transcriber ReadTranscriber
 }
 
 type workspaceHookService interface {
@@ -187,6 +188,8 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 	if sess.SupportsImageInput {
 		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP) — binary images are loaded into model context automatically."
 	}
+	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files are truncated)."
+	readDesc += " Audio files are transcribed to text (up to 10 MB encoded and 5 minutes) when the Bot has a transcription model configured."
 	readDesc += " Video files return a reference (mime, size, content hash) instead of content; hand it to a specialist bot via delegate_to_bot attachments."
 
 	toolList := []toolexec.Tool{
@@ -826,6 +829,22 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 			return nil, videoErr
 		}
 		return readVideoReference(opCtx, client, strings.TrimSpace(args.Path), filePath, videoMime)
+	}
+	// Office containers before the generic binary probe: xlsx/docx are zip
+	// binaries the image lane rejects; parse them into plain text instead.
+	if officeKind, ok := readOfficeContentType(probe[:probeN], filePath); ok {
+		data, readErr := readAllAfterProbe(reader, probe[:probeN])
+		if readErr != nil {
+			return nil, readErr
+		}
+		return readOfficeResult(filePath, officeKind, data)
+	}
+	// Audio before the generic binary probe: an mp3 may carry no NUL byte in
+	// its first 8KB, and audio needs its own 90s transcription budget rather
+	// than the image lane. The probe stream stays for the deferred close; the
+	// audio branch re-opens the file under its own context.
+	if audioMime, ok := readAudioContentType(probe[:probeN], filePath); ok {
+		return p.execReadAudio(ctx, client, filePath, audioMime, session)
 	}
 	if bytes.IndexByte(probe[:probeN], 0) >= 0 {
 		if !session.SupportsImageInput {

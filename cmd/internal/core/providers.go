@@ -1220,7 +1220,11 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewACPAgentsProvider(log, &acpRuntimePoolAdapter{pool: acpPool}, queries),
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),
 		agenttools.NewWebProvider(log, settingsService, searchProviderService),
-		agenttools.NewContainerProvider(log, manager, bgManager, config.DefaultDataMount, hookService),
+		func() agenttools.ToolProvider {
+			container := agenttools.NewContainerProvider(log, manager, bgManager, config.DefaultDataMount, hookService)
+			container.SetTranscriber(readTranscriberAdapter{settings: settingsService, audio: audioService})
+			return container
+		}(),
 		agenttools.NewBackgroundProvider(log, bgManager),
 		agenttools.NewBrowserProvider(log, settingsService, nativeWorkspaceBridgeProvider{manager: manager}, displayService, config.DefaultDataMount),
 		agenttools.NewWebFetchProvider(log, settingsService, fetchProviderService),
@@ -1290,6 +1294,26 @@ func (a *acpRuntimePoolAdapter) CreateAgentRuntime(ctx context.Context, botID, a
 
 func (a *acpRuntimePoolAdapter) CloseAgentRuntime(botID, runtimeID string) error {
 	return a.pool.CloseRuntime(botID, runtimeID)
+}
+
+// readTranscriberAdapter projects the existing settings and audio services
+// onto the tool package's narrow ReadTranscriber seam, so the read tool's
+// audio branch shares the same transcription entry as transcribe_audio.
+type readTranscriberAdapter struct {
+	settings *settings.Service
+	audio    *audiopkg.Service
+}
+
+func (a readTranscriberAdapter) TranscriptionModelID(ctx context.Context, botID string) string {
+	botSettings, err := a.settings.GetBot(ctx, botID)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(botSettings.TranscriptionModelID)
+}
+
+func (a readTranscriberAdapter) Transcribe(ctx context.Context, modelID string, audio []byte, filename string, contentType string) (*sdk.TranscriptionResult, error) {
+	return a.audio.Transcribe(ctx, modelID, audio, filename, contentType, nil)
 }
 
 func provideMediaStorage(provider bridge.Provider, cfg config.Config) storagepkg.Provider {
