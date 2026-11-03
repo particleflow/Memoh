@@ -33,7 +33,6 @@ export function deploymentNetworkPolicy(raw: unknown, apiOrigin: string): Transf
   if (typeof seed.apiOrigin !== 'string') throw new Error('DEPLOYMENT_CONFIG_INVALID')
   const bound = normalizeServiceUrl(seed.apiOrigin)
   if (bound !== normalizeServiceUrl(apiOrigin)) return undefined
-  if (!bound.startsWith('https://')) throw new Error('NETWORK_POLICY_HTTPS')
   return normalizeTransferNetworkPolicy(seed.networkPolicy as TransferNetworkPolicy)
 }
 

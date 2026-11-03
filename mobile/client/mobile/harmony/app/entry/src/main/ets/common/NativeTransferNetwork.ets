@@ -25,8 +25,6 @@ export class NativeTransferNetwork {
     this.base = base.replace(/\/+$/, '');
     if (policy === undefined) { return; } // Omitted policy preserves the old path.
     this.policy = normalizeTransferNetworkPolicy(policy);
-    const parsed = url.URL.parseURL(this.base);
-    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) { throw new Error('NETWORK_POLICY_HTTPS'); }
     // Static DNS mapping for literal authorities is unproven. Preserve normal
     // platform routing rather than blocking files or inventing another URL.
     this.authority(this.base);
@@ -45,7 +43,6 @@ export class NativeTransferNetwork {
     if (value === undefined || value === null) { return; }
     if (Array.isArray(value) || Object.keys(value).some((key: string): boolean => !['version', 'lan_addresses', 'endpoint'].includes(key))) { throw new Error('NETWORK_POLICY_INVALID'); }
     if (value.version === 1 && value.endpoint === undefined) {
-      if (url.URL.parseURL(this.base).protocol !== 'https:') { throw new Error('NETWORK_POLICY_HTTPS'); }
       const old: TransferNetworkPolicy = { version: 1, lan_addresses: value.lan_addresses ?? [] };
       this.policy = normalizeTransferNetworkPolicy(old); this.physicalOrigin = undefined; this.authority(this.base); return;
     }
