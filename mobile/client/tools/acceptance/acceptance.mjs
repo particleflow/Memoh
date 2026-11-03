@@ -32,8 +32,15 @@ const CHROME = process.env.ACCEPTANCE_CHROME
 
 const ACK_TEXT = '收到，我来处理。'
 const BODY = ['第一句已经说完。', '第二句跟上来了。', '第三句也来了。', '最后一句收尾。']
+// Gate 1 replays the six-sentence body with 800 ms between sentences and a
+// 3 s settle after the last one: "read on the first sentence" and "read when
+// the reply settles" are then seconds apart, so a settle-time read cannot pass
+// the first-sentence window the way the four short sentences let it (TF-18).
+const LONG_BODY = FAIL_TASK_BODY
+const LONG_DELAY_MS = 800
+const LONG_SETTLE_MS = 3000
 const ACK_WINDOW_MS = 3000
-const FIRST_POST_WINDOW_MS = 4000
+const FIRST_POST_WINDOW_MS = 1000
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
@@ -90,7 +97,9 @@ async function main() {
   await service.start()
   const origin = `http://stub.test:${service.port}`
 
-  const chrome = await launchChrome({ executable: CHROME })
+  // The packaged bundle hashes attachments with crypto.subtle, which Chromium
+  // exposes only in secure contexts; the harness origin is http on loopback.
+  const chrome = await launchChrome({ executable: CHROME, args: [`--unsafely-treat-insecure-origin-as-secure=${origin}`] })
   const cdp = await CDP.connect(chrome.wsUrl)
   // One isolated browser context per scenario: storage, page-memory caches and
   // the socket are torn down with the page, so scenarios cannot leak into each
@@ -188,12 +197,12 @@ async function main() {
   // A scenario starts from a discarded browser context AND an empty service:
   // the previous case's transcript must not be fetched as this case's history
   // during boot, because that load is exactly the gate under test.
-  async function scenario(name, delay = 700, { seedHistory = false } = {}) {
+  async function scenario(name, delay = 700, { seedHistory = false, settleDelay = null } = {}) {
     await cdp.send('Target.disposeBrowserContext', { browserContextId }).catch(() => {})
     const created = await newPage()
     page = created.page
     browserContextId = created.browserContextId
-    await service.control('/__control/scenario', { scenario: name, delay })
+    await service.control('/__control/scenario', { scenario: name, delay, settleDelay })
     await service.control('/__control/reset', {})
     if (seedHistory) await service.control('/__control/history', {})
     const nonce = `run=${++runIndex}`
@@ -214,8 +223,28 @@ async function main() {
     await networkIdle(1000, 25000)
     return true
   }
-  async function waitAudioPlaying(timeout = 20000) {
-    return wait(`window.__acc.audio.some(event => event.kind === 'playing')`, timeout)
+  // The reply body is being read: a speech request that carries the sentence
+  // has really left and audio has really started after it. The ack line reads
+  // first as its own short task, so "some audio is playing" alone would
+  // resolve before the body (or even before the reasoning block) exists.
+  async function waitBodyReading(sentence, timeout = 30000) {
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const status = await service.control('/__control/speech', null, 'GET')
+      const carried = status.entries.find(entry => (entry.text || '').includes(sentence))
+      if (carried && (await audio()).some(event => event.kind === 'playing' && event.at >= status.t0 + carried.ms)) return true
+      await sleep(100)
+    }
+    return false
+  }
+  async function waitSettled(timeout = 15000) {
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const status = await service.control('/__control/speech', null, 'GET')
+      if (status.settledAt !== null) return status
+      await sleep(100)
+    }
+    return service.control('/__control/speech', null, 'GET')
   }
 
   try {
@@ -238,32 +267,40 @@ async function main() {
     // ---------- Gate 1 + 5: automatic start on the first sentence; ordered body.
     // The measured interval starts at the first *completed sentence* in the
     // frame sequence (the scripted model's "text_chunk_ready"), not at the
-    // keystroke: the contract is "first sentence -> speech POST", not
-    // "keystroke -> audio".
-    await scenario('stream', 700)
+    // keystroke: the contract is "first sentence -> speech request", not
+    // "keystroke -> audio". The long body with a long settle makes the two
+    // readings distinguishable: the request that carries the first sentence
+    // must leave within the window and before the last sentence is even
+    // streamed, so a read that only starts at settle cannot pass (TF-18).
+    await scenario('long', LONG_DELAY_MS, { settleDelay: LONG_SETTLE_MS })
     await submit('请朗读这段回复')
-    const started = await waitAudioPlaying(25000)
-    await waitBody(BODY[BODY.length - 1], 20000)
+    const started = await waitBodyReading(LONG_BODY[0], 30000)
+    await waitBody(LONG_BODY[LONG_BODY.length - 1], 30000)
+    const timing = await waitSettled(15000)
+    // Leave room for a settle-time request so a late read is recorded, not missed.
+    await sleep(1500)
     const firstSpeech = await speech()
-    const timing = await service.control('/__control/speech', null, 'GET')
-    const posts = firstSpeech.filter(entry => entry.kind === 'post')
-    const firstPost = posts[0]
-    const firstSentenceAt = timing.firstSentenceAt
-    const latencyMs = firstPost && firstSentenceAt !== null ? firstPost.ms - firstSentenceAt : null
+    const firstSentenceRequest = firstSpeech.find(entry => (entry.text || '').includes(LONG_BODY[0]))
+    const latencyMs = firstSentenceRequest && timing.firstSentenceAt !== null ? firstSentenceRequest.ms - timing.firstSentenceAt : null
+    const beforeLastSentence = !!firstSentenceRequest && timing.lastSentenceAt !== null && firstSentenceRequest.ms < timing.lastSentenceAt
+    const settleLeadMs = firstSentenceRequest && timing.settledAt !== null ? timing.settledAt - firstSentenceRequest.ms : null
+    const ackPosts = firstSpeech.filter(entry => entry.kind === 'post' && entry.text === ACK_TEXT).length
     const g1Diagnostics = await page.eval(`(() => ({
       speechStates: [...document.querySelectorAll('[data-speech-state]')].map(n => n.getAttribute('data-speech-state')),
       speechEnabled: [...document.querySelectorAll('[data-chat-content]')].map(n => (n.innerText || '').slice(0, 30)),
       ttsFetch: (window.__acc.fetch || []).filter(f => /tts/.test(f.url)).map(f => ({ method: f.method, status: f.status, error: f.error })),
       errors: (window.__acc.errors || []).slice(-3),
     }))()`).catch(() => null)
-    add(result('G1 automatic read-aloud starts on the first sentence', !!firstPost && latencyMs !== null && latencyMs <= FIRST_POST_WINDOW_MS,
-      firstPost ? `first POST ${latencyMs}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), final=${firstPost.final}` : 'no speech POST during the reply',
-      { speechTiming: { firstSentenceAtMs: firstSentenceAt, firstPostMs: firstPost?.ms ?? null, latencyMs, windowMs: FIRST_POST_WINDOW_MS, audioStarted: started }, diagnostics: g1Diagnostics }))
-    const spoken = [firstPost?.text, ...firstSpeech.filter(e => e.kind === 'put').map(e => e.text)].filter(Boolean).join('')
-    const ordered = spoken.includes(BODY[0]) && spoken.includes(BODY[BODY.length - 1])
-      && spoken.indexOf(BODY[0]) < spoken.indexOf(BODY[BODY.length - 1])
+    add(result('G1 automatic read-aloud starts on the first sentence', !!firstSentenceRequest && latencyMs !== null && latencyMs <= FIRST_POST_WINDOW_MS && beforeLastSentence,
+      firstSentenceRequest
+        ? `first-sentence ${firstSentenceRequest.kind.toUpperCase()} ${latencyMs}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), ${settleLeadMs}ms before settle, before the last sentence=${beforeLastSentence}, ack posts=${ackPosts}`
+        : 'no speech request carried the first sentence',
+      { speechTiming: { firstSentenceAtMs: timing.firstSentenceAt, lastSentenceAtMs: timing.lastSentenceAt, settledAtMs: timing.settledAt, firstSentenceRequestMs: firstSentenceRequest?.ms ?? null, firstSentenceRequestKind: firstSentenceRequest?.kind ?? null, latencyMs, settleLeadMs, windowMs: FIRST_POST_WINDOW_MS, beforeLastSentence, ackPosts, audioStarted: started }, diagnostics: g1Diagnostics }))
+    const spoken = firstSpeech.map(entry => entry.text).filter(Boolean).join('')
+    const ordered = spoken.includes(LONG_BODY[0]) && spoken.includes(LONG_BODY[LONG_BODY.length - 1])
+      && spoken.indexOf(LONG_BODY[0]) < spoken.indexOf(LONG_BODY[LONG_BODY.length - 1])
     add(result('G5 whole body read in order without a dropped segment', ordered,
-      ordered ? `spoken order kept, ${spoken.length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`))
+      ordered ? `spoken order kept, ${Array.from(spoken).length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`))
 
     // ---------- V2: thinking collapsed by default (PR #118 semantics).
     const disclosure = await reasoningDisclosure()
@@ -279,7 +316,7 @@ async function main() {
     // the audio must not make the next case unmeasurable.
     await scenario('stream', 700)
     await submit('继续说')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeToggle = await pauses()
     const toggled = await page.eval(`(() => {
       const marked = document.querySelector('[data-reasoning-disclosure]')
@@ -297,7 +334,7 @@ async function main() {
 
     await scenario('stream', 700)
     await submit('打字和点气泡')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeTyping = await pauses()
     await type('正在打字的草稿')
     await sleep(1200)
@@ -313,7 +350,7 @@ async function main() {
 
     await scenario('stream', 700)
     await submit('再读一段')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     const beforeSubmit = await pauses()
     await submit('新问题')
     await sleep(1500)
@@ -355,24 +392,25 @@ async function main() {
       `posts=${earlyPosts} tailSpoken=${earlyText.includes(BODY[BODY.length - 1])}`))
 
     // ---------- Gate 2: a task failure rolls back and the rest reads again.
-    // The service rejects the first speech task of the long reply. The client
-    // must end only that task: the text it had fed is rolled back and read
-    // again through the next task, and the reply still reads to its last
-    // sentence, in order (PR #121 "failure rollback rereads").
+    // The service rejects the first body task of the long reply (the ack's
+    // own short task is not the reply body). The client must end only that
+    // task: the text it had fed is rolled back and read again through the
+    // next task, and the reply still reads to its last sentence, in order
+    // (PR #121 "failure rollback rereads").
     await scenario('fail-task', 700)
     await submit('失败后继续朗读')
     await waitBody(FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1], 30000)
     await sleep(6000)
     const failureSpeech = await speech()
-    const failurePosts = failureSpeech.filter(entry => entry.kind === 'post')
-    const rejected = failurePosts[0]
+    const bodyPosts = failureSpeech.filter(entry => entry.kind === 'post' && entry.text !== ACK_TEXT)
+    const rejected = failureSpeech.find(entry => entry.kind === 'post' && entry.status === 503)
     const afterRejection = rejected ? failureSpeech.slice(failureSpeech.indexOf(rejected) + 1).map(entry => entry.text).filter(Boolean).join('') : ''
-    const rolledBack = !!rejected && failurePosts.length >= 2 && afterRejection.includes(rejected.text)
+    const rolledBack = !!rejected && bodyPosts.length >= 2 && afterRejection.includes(rejected.text)
     const lastSentence = FAIL_TASK_BODY[FAIL_TASK_BODY.length - 1]
     const tailReread = afterRejection.includes(lastSentence)
       && afterRejection.indexOf(FAIL_TASK_BODY[0]) <= afterRejection.indexOf(lastSentence)
     add(result('G2 single task failure ends only that task (remaining text rereads)', rolledBack && tailReread,
-      `posts=${failurePosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
+      `bodyPosts=${bodyPosts.length} rejectedCodePoints=${Array.from(rejected?.text ?? '').length} rolledBack=${rolledBack} tailReread=${tailReread}`))
 
     // ---------- General: loading history must not read it aloud.
     await scenario('stream', 700, { seedHistory: true })
@@ -385,7 +423,7 @@ async function main() {
     // ---------- General: background/foreground parks instead of consuming.
     await scenario('stream', 700)
     await submit('后台切换检查')
-    await waitAudioPlaying(25000)
+    await waitBodyReading(BODY[0], 30000)
     await page.eval(`window.dispatchEvent(new CustomEvent('garnet:lifecycle', { detail: { state: 'background' } }))`)
     await sleep(700)
     await page.eval(`window.dispatchEvent(new CustomEvent('garnet:lifecycle', { detail: { state: 'foreground' } }))`)
@@ -393,6 +431,223 @@ async function main() {
     const resumed = await plays()
     add(result('G8 background/foreground parks and resumes', resumed >= 2,
       `play events=${resumed} (expect >=2: initial + resumed)`))
+
+    // ---------- E8: attachment transfer ring, no status copy, formatted speed.
+    // One scripted reply drives both real transfer paths of the packaged build:
+    //   upload wire - a 64 MiB original staged through the composer file input;
+    //   the stub reads the multipart body in paced byte segments (>= 3 s), so
+    //   the wire window is seconds wide (uploadEvents timestamps), the receipt
+    //   verifies, and the sent card lands on the ready badge. On this build the
+    //   optimistic user turn appends only after preparation completes, so the
+    //   upload-phase ring is recorded as a diagnostic through this window.
+    //   verified media read - the same reply carries a Bot image attachment
+    //   (content_hash of a stub-staged original). The rendered card runs the
+    //   onProgress read over a paced body, so the E8 ring fills monotonically
+    //   while the bubble-level ring carries the formatted speed.
+    async function stageComposerFile(sizeBytes) {
+      const filePath = join(reportDir, `e8-upload-${runIndex}-${Date.now()}.bin`)
+      writeFileSync(filePath, Buffer.alloc(sizeBytes, 7))
+      const { root } = await cdp.send('DOM.getDocument', {}, page.sessionId)
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: 'input[type=file]:not([accept])' }, page.sessionId)
+      if (!nodeId) throw new Error('composer file input not found')
+      await cdp.send('DOM.setFileInputFiles', { files: [filePath], nodeId }, page.sessionId)
+      return filePath
+    }
+    const liveProbe = `(() => ({
+      rings: [...document.querySelectorAll('svg circle[stroke-dasharray]')].map(c => ({
+        dasharray: c.getAttribute('stroke-dasharray'),
+        dashoffset: c.getAttribute('stroke-dashoffset'),
+      })),
+      speeds: [...document.querySelectorAll('span.text-caption.tabular-nums')].map(n => n.textContent || '').filter(Boolean),
+      cards: [...document.querySelectorAll('.group\\\\/att')].map(n => n.innerText || ''),
+      badges: [...document.querySelectorAll('.group\\\\/att [class*=bottom-1]')].map(n => ({
+        title: n.getAttribute('title'), aria: n.getAttribute('aria-label'), text: n.innerText || '',
+      })),
+    }))()`
+    const BANNED_CARD_COPY = ['上传附件中', '正在上传', '上传中', '正在完整校验', '校验中', '准备中', '传输中', '失败', '等待中']
+    async function watchTransfer(timeoutMs, requireSeen = false) {
+      const samples = []
+      const deadline = Date.now() + timeoutMs
+      let quiet = 0
+      let seen = !requireSeen
+      while (Date.now() < deadline) {
+        const probe = await page.eval(liveProbe).catch(() => ({ rings: [], speeds: [], cards: [], badges: [] }))
+        samples.push(probe)
+        if (probe.rings.length > 0) { seen = true; quiet = 0 } else quiet += 1
+        if (seen && quiet >= 3) break
+        await sleep(110)
+      }
+      return samples
+    }
+    function ringSeries(samples) {
+      // Track the dashoffset of every filled arc keyed by its dasharray so two
+      // concurrent rings never interleave into one series.
+      const series = new Map()
+      for (const probe of samples) {
+        for (const ring of probe.rings) {
+          if (ring.dashoffset == null) continue
+          const key = ring.dasharray + '|' + ring.dashoffset.length
+          if (!series.has(key)) series.set(key, [])
+          series.get(key).push(Number(ring.dashoffset))
+        }
+      }
+      return [...series.values()]
+    }
+    function monotonicFill(series) {
+      return series.some(values => {
+        const distinct = [...new Set(values.map(v => Math.round(v * 1000) / 1000))]
+        if (distinct.length < 3) return false
+        for (let i = 1; i < values.length; i++) if (values[i] > values[i - 1] + 1e-9) return false
+        return distinct[distinct.length - 1] <= distinct[0] * 0.15
+      })
+    }
+    // The E8 transfer rings (r = 8) are the only circles with a 50.265
+    // dasharray; waiting for one excludes the unrelated decorative arcs.
+    const E8_RING_SEEN = `!!document.querySelector('svg circle[stroke-dasharray="50.265"], svg circle[stroke-dasharray="12.566 50.265"]')`
+
+    await scenario('bot-image', 700, { settleDelay: 12000 })
+    await service.control('/__control/upload-config', { chunkDelayMs: 40, paceBytes: 512 * 1024, downloadChunkDelayMs: 50 })
+    await service.control('/__control/bot-attachment', { sizeBytes: 4 * 1024 * 1024 })
+    await stageComposerFile(64 * 1024 * 1024)
+    const stagedProbe = await page.eval(liveProbe).catch(error => ({ error: String(error) }))
+    await submit('发送这个附件，再看图片')
+    const uploadDeadline = Date.now() + 60000
+    let uploadEvents = []
+    while (Date.now() < uploadDeadline) {
+      uploadEvents = (await service.control('/__control/uploads', null, 'GET')).events
+      if (uploadEvents.some(event => event.done)) break
+      await sleep(200)
+    }
+    const uploadDone = uploadEvents.some(event => event.done)
+    const uploadSpanMs = uploadEvents.length >= 2
+      ? Date.parse(uploadEvents[uploadEvents.length - 1].at) - Date.parse(uploadEvents[0].at) : 0
+    const readyBadge = await wait('!!document.querySelector(".group\\\\/att [class*=text-emerald] svg")', 15000).catch(() => false)
+    await wait(E8_RING_SEEN, 30000).catch(() => false)
+    const samples = await watchTransfer(30000, true)
+    const series = ringSeries(samples)
+    const ringsSeen = samples.some(probe => probe.rings.length > 0)
+    const midCopy = [...new Set(samples.flatMap(probe => probe.cards))].join('\n')
+    const midSpeeds = [...new Set(samples.flatMap(probe => probe.speeds))]
+    const badgeTitles = samples.flatMap(probe => probe.badges).map(b => b.title || b.aria).filter(Boolean)
+    add(result('attachment-transfer-ring-monotonic',
+      ringsSeen && monotonicFill(series) && uploadDone && uploadSpanMs >= 3000 && readyBadge,
+      `ringsSeen=${ringsSeen} series=${JSON.stringify(series.map(v => v.length))} monotonicFill=${monotonicFill(series)} uploadWireSpan=${uploadSpanMs}ms paced=${uploadSpanMs >= 3000} uploadDone=${uploadDone} readyBadge=${readyBadge}`,
+      { stagedProbe, uploadEvents }))
+
+    const bannedHits = BANNED_CARD_COPY.filter(word => midCopy.includes(word))
+    const percentage = /(^|\s)\d+(\.\d+)?\s?%/.test(midCopy)
+    add(result('attachment-card-no-status-copy', bannedHits.length === 0 && !percentage && badgeTitles.length === 0,
+      `bannedCopy=${JSON.stringify(bannedHits)} percentage=${percentage} badgeTitles=${JSON.stringify(badgeTitles)}`,
+      { cardText: midCopy.slice(0, 300) }))
+
+    const speedMatches = midSpeeds.map(text => ({ text, ok: /^\d+(\.\d+)? (B|KB|MB)\/s$/.test(text) }))
+    add(result('transfer-speed-format', midSpeeds.length > 0 && speedMatches.every(entry => entry.ok),
+      `speedLabels=${JSON.stringify(midSpeeds)} allMatch=${speedMatches.every(entry => entry.ok)}`))
+
+    // ---------- E8: a verified media read that dies mid-transfer marks the
+    // card failed (alert badge + red border, no status copy). The stub serves
+    // the injected Bot image attachment paced, then breaks the body part-way,
+    // so the client read rejects inside the transfer and the failed state must
+    // mount on the rendered card.
+    await scenario('bot-image', 700, { settleDelay: 12000 })
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, paceBytes: 0, downloadChunkDelayMs: 50 })
+    await service.control('/__control/bot-attachment', { sizeBytes: 1024 * 1024, failAfterChunks: 16 })
+    await submit('这张图的传输会失败')
+    let failedBadge = false
+    let failedBorder = false
+    let failedCopy = ''
+    for (let waited = 0; waited <= 30000 && !failedBadge; waited += 150) {
+      const probe = await page.eval(`(() => ({
+        badge: !!document.querySelector('.group\\\\/att [class*=text-destructive] svg'),
+        border: !!document.querySelector('.group\\\\/att [class*="border-destructive"]'),
+        cards: [...document.querySelectorAll('.group\\\\/att')].map(n => n.innerText || '').join('\\n'),
+      }))()`).catch(() => ({ badge: false, border: false, cards: '' }))
+      failedBadge = probe.badge
+      failedBorder = probe.border
+      failedCopy = probe.cards
+      await sleep(150)
+    }
+    // Only the E8 transfer rings (r = 8, dasharray 50.265) belong to this
+    // assertion; unrelated decorative arcs (skeletons, streaming shimmer) stay
+    // out of the check.
+    const failedRings = await page.eval(`(() => [...document.querySelectorAll('svg circle[stroke-dasharray]')]
+      .map(c => c.getAttribute('stroke-dasharray')))()`).catch(() => [])
+    const failedRingGone = !failedRings.some(dash => dash === '50.265' || dash === '12.566 50.265')
+    const failedBanned = BANNED_CARD_COPY.filter(word => failedCopy.includes(word))
+    add(result('attachment-transfer-failure', failedBadge && failedBorder && failedRingGone && failedBanned.length === 0,
+      `failedBadge=${failedBadge} border=${failedBorder} ringGone=${failedRingGone} bannedCopy=${JSON.stringify(failedBanned)}`,
+      { cardText: failedCopy.slice(0, 300) }))
+    await service.control('/__control/upload-config', { chunkDelayMs: 0, paceBytes: 0, downloadChunkDelayMs: 0 })
+
+    // ---------- TF-17: quote-reply entries and the reply_to wire field.
+    await scenario('stream', 700)
+    await submit('引用这条回复试试')
+    await waitBodyReading(BODY[0], 30000)
+    await waitSettled(15000)
+    await waitBody(BODY[BODY.length - 1], 10000)
+    const quotedId = await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      return rows.length ? rows[rows.length - 1].getAttribute('data-message-id') : null
+    })()`)
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-chat-content]')]
+      rows[rows.length - 1].dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+    })()`)
+    const menuSeen = await wait('document.querySelectorAll(\'[role=menuitem]\').length >= 2', 8000).catch(() => false)
+    const menuItems = menuSeen ? await page.eval(`[...document.querySelectorAll('[role=menuitem]')].map(n => (n.innerText || '').trim())`) : []
+    const readAloudFirst = menuItems.length > 0 && /朗读|read aloud/i.test(menuItems[0])
+    const quoteSecond = menuItems.length > 1 && /^(引用|quote)$/i.test(menuItems[1])
+    const quoteCount = menuItems.filter(t => /^(引用|quote)$/i.test(t)).length
+    add(result('quote-reply-menu-order', menuSeen && readAloudFirst && quoteSecond && quoteCount === 1,
+      `menu=${JSON.stringify(menuItems)} readAloudFirst=${readAloudFirst} quoteSecond=${quoteSecond}`))
+
+    await page.eval(`document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))`).catch(() => {})
+    await sleep(300)
+    const quoteButton = await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const buttons = row ? [...row.querySelectorAll('button[aria-label]')] : []
+      const quote = buttons.filter(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      return { count: quote.length, iconOnly: quote.map(b => (b.innerText || '').trim() === ''), trailing: quote.length ? buttons[buttons.length - 1] === quote[quote.length - 1] : false }
+    })()`)
+    add(result('quote-reply-action-row-icon', quoteButton.count >= 1 && quoteButton.iconOnly.every(Boolean) && quoteButton.trailing,
+      `count=${quoteButton.count} iconOnly=${quoteButton.iconOnly} trailing=${quoteButton.trailing}`))
+
+    const chipCancelProbe = `[...document.querySelectorAll('button[aria-label]')].some(b => /^(取消引用|cancel quote)$/i.test(b.getAttribute('aria-label') || ''))`
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const button = row && [...row.querySelectorAll('button[aria-label]')].find(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      if (button) button.click()
+    })()`)
+    const chipCancelSeen = await wait(chipCancelProbe, 8000).catch(() => false)
+    await page.eval(`[...document.querySelectorAll('button[aria-label]')].find(b => /^(取消引用|cancel quote)$/i.test(b.getAttribute('aria-label') || ''))?.click()`)
+    await sleep(400)
+    const chipGoneAfterCancel = !(await page.eval(chipCancelProbe))
+    await page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const button = row && [...row.querySelectorAll('button[aria-label]')].find(b => /^(引用|quote)$/i.test(b.getAttribute('aria-label') || ''))
+      if (button) button.click()
+    })()`)
+    await wait(chipCancelProbe, 8000).catch(() => {})
+    await submit('这条带引用')
+    await sleep(600)
+    const chipGoneAfterSend = !(await page.eval(chipCancelProbe))
+    add(result('quote-reply-composer-roundtrip', chipCancelSeen && chipGoneAfterCancel && chipGoneAfterSend,
+      `chip=${chipCancelSeen} clearedOnCancel=${chipGoneAfterCancel} clearedOnSend=${chipGoneAfterSend}`))
+
+    await waitSettled(15000)
+    await waitBodyReading(BODY[0], 30000)
+    await waitSettled(15000)
+    const messagesAfterQuote = (await service.control('/__control/messages', null, 'GET')).items
+    const quotedSend = [...messagesAfterQuote].reverse().find(item => item.type === 'message' && (item.payload || '').includes('这条带引用'))
+    const plainSend = [...messagesAfterQuote].reverse().find(item => item.type === 'message' && (item.payload || '').includes('引用这条回复试试'))
+    const replyToMatch = quotedSend ? /"reply_to"\s*:\s*"([^"]+)"/.exec(quotedSend.payload || '') : null
+    const plainHasReplyTo = plainSend ? /"reply_to"\s*:/.test(plainSend.payload || '') : null
+    add(result('quote-reply-payload-reply-to', !!replyToMatch && replyToMatch[1] === quotedId && plainHasReplyTo === false,
+      `replyTo=${replyToMatch ? replyToMatch[1] : null} quotedRow=${quotedId} plainSendCarriesReplyTo=${plainHasReplyTo}`,
+      { quotedPayload: (quotedSend?.payload || '').slice(0, 400) }))
   } catch (error) {
     add(result('harness', false, String((error && error.message) || error)))
   } finally {

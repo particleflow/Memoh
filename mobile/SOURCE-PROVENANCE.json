@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "76d4e9ac0752f1f276b0f5e315e402fb0255294abd27584a0729fc2fe71b1969",
+      "sha256": "87e877e880a7145f76dfa896964a79ee3dbcdd464f0ee8051a98789ac369cbab",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -50,7 +50,8 @@
         "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP.",
         "E2/E2b field round (incident 2026-11-02, HAP40): streaming rows are never absorbed as baseline; the chat-list refresh leaves the read gate; a hidden host parks speech at the spoken cursor instead of consuming it; one task failure ends only that task; the client closes an idle task inside the 23 s provider budget; short completed sentences batch to a 20 code-point minimum with a 1.5 s hold; a tool step flushes the pending tail sentence.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
-        "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path."
+        "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
+        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -81,11 +82,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AppNetBinding.ets",
-      "sha256": "b75c572967e780e1b970dbfc21fdcacd215dd8c1e497a25e1378e0ab05189c29",
+      "sha256": "1d5af86b11620a8de10abb633fb850a22b44998776d9b3156d402cf5f405e466",
       "origin": "Project-authored shell network binding manager for the N1 IPv6 field issue; not recovered historical source.",
       "licenseReview": "Derived Memoh source under the retained repository license; public Network Kit APIs only, no SDK binary or private configuration.",
       "preparationChanges": [
-        "Bind the whole app with connection.setAppNet to a Wi-Fi network whose IPv6 link is valid, else to a cellular network activated through a NetSpecifier request and validated the same way, else keep the system default; a lost bound network is released before any re-decision and the decision/facts stay visible on the existing journal and dump surfaces. No web overlay, interception, proxy or permission change."
+        "Bind the whole app with connection.setAppNet to a Wi-Fi network whose IPv6 link is valid, else to a cellular network activated through a NetSpecifier request and validated the same way, else keep the system default; a lost bound network is released before any re-decision and the decision/facts stay visible on the existing journal and dump surfaces. No web overlay, interception, proxy or permission change.",
+        "HAP42 field fix: the first page load can wait for the initial decision via whenSettled (bounded by a timeout), a bind to a new network notifies rebound listeners so a first connection that lost the race retries once, foreground refresh re-evaluates without a system event, and registration failures (default watcher and the cellular activation request) plus cellular netUnavailable reach the journal instead of vanishing; a refused activation request is no longer held."
       ]
     },
     {
@@ -255,11 +257,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_app_net_binding.cjs",
-      "sha256": "6cf0c970dcc6cd1a47dd4a676185b62e8c0c02f3e6f003ae06952f4be4af23b8",
+      "sha256": "70708597edd5de15f97881a5f88978af5e88e4e12b28efa9f28d5bce733bcc25",
       "origin": "Project-authored stage2 decision-table adapter for the N1 IPv6 app-net binding; mocked Network Kit seams only.",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
-        "Decision table (Wi-Fi IPv6 preferred, cellular activated by request as fallback, no-IPv6 or no-network keeps default) plus lifecycle checks: bound-net loss releases first, Wi-Fi regaining IPv6 rebinds and drops the cellular request, stop unbinds and unregisters, failed binds retry, and SDK error text never reaches the journal."
+        "Decision table (Wi-Fi IPv6 preferred, cellular activated by request as fallback, no-IPv6 or no-network keeps default) plus lifecycle checks: bound-net loss releases first, Wi-Fi regaining IPv6 rebinds and drops the cellular request, stop unbinds and unregisters, failed binds retry, and SDK error text never reaches the journal.",
+        "HAP42 field fix coverage: whenSettled gate (resolve on first settle, timeout escape on a stalled probe), rebound notified exactly once per new bound network with offRebound honored, register failures journaled with a refused cellular request not held and retried, foreground refresh re-evaluates, and the EntryAbility/SharedChat wiring is asserted."
       ]
     },
     {
@@ -366,7 +369,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "b001cfd515a48b73e3f8899658a588707a3c4ab25016fac74bc4be833d0aa8cc",
+      "sha256": "9d2d132451b265b1b9092b283204bc1eae97b58103c48985814867eb75d4ac7f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -524,7 +527,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "c444f67f8ffddb82a7b12e60d92060768dd0ee197a5ef8ff2715b0415822e5a0",
+      "sha256": "4589ec7bde707ea6339699db375e591d0c1d1f963a4d53bd9b95e49391162f3b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -570,7 +573,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "6e2aea271cccc04f1debf52f3e896e562bb41891abf55d96bc8dd2e30ef55126",
+      "sha256": "336507fbba29f64f74f1e03998c6532a706c80c67e4ed072a15729b979342796",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -892,7 +895,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
-      "sha256": "303a75ecf5d5829abf59ef1fd59847113216b1b786cee6d7404e17264fa916ec",
+      "sha256": "9432ba137a5ba54d5629bdd459fecd597d91d52f2644184be6f5c5a73491d7fe",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
@@ -902,12 +905,13 @@
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
-        "N1 IPv6 network binding: AppNetBinding starts on ability create, stops on destroy, and its read-only binding snapshot line joins the existing onDump surface."
+        "N1 IPv6 network binding: AppNetBinding starts on ability create, stops on destroy, and its read-only binding snapshot line joins the existing onDump surface.",
+        "HAP42 field fix: the first page load is gated on AppNetBinding.whenSettled (bounded 1500 ms) so the first connection never races the initial binding decision, and onForeground refreshes the binding evaluation."
       ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "1828a2a6fd9e3164beca0f54ecfb64bfcef8e382bd1cbdeacf9512bd4d3ca981",
+      "sha256": "ffb54e3576a0e27c00513e954546971a377c6fe109a3ca23c4a3d205aa6203bd",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
@@ -918,7 +922,8 @@
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked."
+        "Set Web mediaPlayGestureAccess(false) so read-aloud audio can start without a user gesture; ArkWeb's default gesture requirement for audible media otherwise keeps automatic reading blocked.",
+        "HAP42 field fix: the page subscribes to AppNetBinding rebound notifications and retries once when the client is not ready yet, recovering a first connection that failed before the binding landed (for example cellular activated seconds after cold start)."
       ]
     },
     {
@@ -1131,7 +1136,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "f93a0994606a8514c7667936630cce802d3994a8cbf9c3e20269fed691889371",
+      "sha256": "cc2a590897ede8579566279717ca530fdd62623e56f8e97b6ddba3e6a823609c",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -2012,7 +2017,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "e8bdaaea9d7b1c53d41ff67925b399540e97670d56e0d098e819ce28aa4ea5d7",
+      "sha256": "dc1e0c17fb55dcb58db9448e77d1d7de46d77eabbc8c36e56518fafb302af9e6",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2027,7 +2032,72 @@
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)",
-        "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client."
+        "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client.",
+        "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-attachment-progress-changes.json",
+      "sha256": "59119497722b70bd191a8685f2411566d2243b7122532f72b8823901264226d4",
+      "origin": "Workspace-authored phone overlay for attachment transfer-progress visuals; post-overrides the composed card/block/message sources. Not recovered historical source.",
+      "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
+      "preparationChanges": [
+        "Same-path post-override form as the streaming read-aloud overlay; anchors on the composed sources it replaces."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-transfer-progress.ts",
+      "sha256": "cc2885eec790ecb33f7383706dec77e823fc2d2bac1463afc02b658b0b6d52e8",
+      "origin": "Workspace-authored client-side transfer byte/time measurement (rolling window, aggregate views, speed formatting). No network or native calls.",
+      "licenseReview": "Original workspace source; no dependency change.",
+      "preparationChanges": [
+        "Pure registry module consumed by the card, block and message-level ring."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyTransferRing.vue",
+      "sha256": "d9a30a47b75b70ead711df1b497d7a0cb870928eae032458d61b97cdfa52eb6a",
+      "origin": "Workspace-authored progress ring component (determinate fill, indeterminate spin arc, formatted speed label).",
+      "licenseReview": "Original workspace source; no dependency change.",
+      "preparationChanges": [
+        "Visual-only indicator; carries no status copy."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/attachment_transfer_progress.cjs",
+      "sha256": "cd335e70cdfdaa606dfafa1238ff03da195b561b67a2c0193b828f57da07ee1a",
+      "origin": "Workspace-authored stage2 acceptance checks for the E8 transfer visuals.",
+      "licenseReview": "Test only; no runtime dependency.",
+      "preparationChanges": [
+        "Slow-replay monotonic ring fill to completion, injected failure state, no-status-copy assertion on the composed card, speed formatting unit checks."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/attachment_transfer_evidence.cjs",
+      "sha256": "7be42141f7a309cbbb3274b033dae426ce5b8f90cdef6a85c942ad6846c817cd",
+      "origin": "Workspace-authored stage2 evidence-page generator for the E8 transfer visuals.",
+      "licenseReview": "Test only; no runtime dependency.",
+      "preparationChanges": [
+        "Regenerates the visual evidence page from the committed HarmonyTransferRing.vue and harmony-transfer-progress.ts sources; page output stays outside the repository."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-quote-reply-changes.json",
+      "sha256": "010694667a2c2ff5d407128d690df0b05acc5c7e7482ba1647dbd640d0c5f4bf",
+      "origin": "Workspace-authored phone overlay for the quote-reply entry points; same-path replacement anchors on the composed streaming read-aloud sources. Not recovered historical source.",
+      "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
+      "preparationChanges": [
+        "Long-press menu keeps read-aloud as the first item and adds one quote item; the per-message action row gains a trailing icon-only quote button; the composer carries a quote chip (sender plus truncated preview, icon-only cancel) cleared on send and on conversation switch; the WS message payload carries reply_to.",
+        "Applied after the streaming read-aloud overlay on the harmony platform only; per-file baseSHA256/adaptedSHA256 pairs are computed by the build tool chain."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/quote_reply_composition.cjs",
+      "sha256": "1d1b26df4c81ab8d3aa3c97a7e90d3e41942375ccd932098f3666275a2680f6e",
+      "origin": "Scoped composition gate for the quote-reply overlay; reads the real official-context.tar.",
+      "licenseReview": "Project source and focused tests; no private configuration or SDK binary.",
+      "preparationChanges": [
+        "Asserts menu order (read-aloud first), the icon-only trailing quote button, the composer chip with its icon-only cancel, reply_to on the message payload only, clearing on send and conversation switch, and the approved locale label set."
       ]
     }
   ],

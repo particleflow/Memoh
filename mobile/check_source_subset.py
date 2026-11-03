@@ -18,7 +18,10 @@ entries = manifest['entries']
 # Three scoped diagnostic journal/SDK test sources extend the prior190.
 # The 112 streaming overlay added one entry (194) without this count; kept as history.
 # Two N1 IPv6 app-net binding sources (shell manager + stage2 decision table) extend194.
-assert len(entries) == 196
+# Four attachment transfer-progress sources (registry, ring, overlay, checks) extend196.
+# The visual-evidence page generator extends200.
+# Two scoped quote-reply composition sources extend201 (overlay + stage2 gate).
+assert len(entries) == 203
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
