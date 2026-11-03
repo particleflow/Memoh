@@ -293,19 +293,23 @@ async function main() {
 
     // Read-aloud start is proven by the app's own synthesis request; the visible
     // speech state is corroboration, because a short reply can finish playing
-    // before this harness polls again.
+    // before this harness polls again. The acknowledgement line reads as its own
+    // short task ahead of the body, so the carrier of the first sentence — not
+    // the chronologically first POST — is the request G1 times, and G5 joins
+    // every request in order instead of only the first POST plus appends.
     const first = await waitFor(async () => (await speech()).find(entry => entry.kind === 'post'), 30000, 250, 'first speech POST')
       .then(entry => entry, () => undefined)
     const sawPlaying = await waitFor(playing, 5000, 200, 'speech playing').then(() => true, () => false)
     await page.wait(`document.body.innerText.includes(${JSON.stringify(BODY[3])})`, 25000, 'final sentence').catch(() => {})
     const timing = await control('/__control/speech', null, 'GET')
     const entries = timing.entries
-    const latency = first && timing.firstSentenceAt !== null ? first.ms - timing.firstSentenceAt : null
-    pass('G1 automatic read-aloud starts on the first sentence', !!first && latency !== null && latency <= FIRST_POST_WINDOW_MS,
-      first ? `first POST ${latency}ms after the first completed sentence, final=${first.final}, state played=${sawPlaying}`
-        : 'no speech POST during the reply',
-      { speechTiming: { firstSentenceAtMs: timing.firstSentenceAt, firstPostMs: first?.ms ?? null, latencyMs: latency } })
-    const spoken = [first?.text, ...entries.filter(e => e.kind === 'put').map(e => e.text)].filter(Boolean).join('')
+    const carrier = entries.find(entry => (entry.text || '').includes(BODY[0]))
+    const latency = carrier && timing.firstSentenceAt !== null ? carrier.ms - timing.firstSentenceAt : null
+    pass('G1 automatic read-aloud starts on the first sentence', !!carrier && latency !== null && latency <= FIRST_POST_WINDOW_MS,
+      carrier ? `first-sentence ${carrier.kind.toUpperCase()} ${latency}ms after the first completed sentence (window ${FIRST_POST_WINDOW_MS}ms), final=${carrier.final}, state played=${sawPlaying}`
+        : 'no speech request carried the first sentence',
+      { speechTiming: { firstSentenceAtMs: timing.firstSentenceAt, firstCarrierMs: carrier?.ms ?? null, latencyMs: latency } })
+    const spoken = entries.map(e => e.text).filter(Boolean).join('')
     const ordered = spoken.includes(BODY[0]) && spoken.includes(BODY[3]) && spoken.indexOf(BODY[0]) < spoken.indexOf(BODY[3])
     pass('G5 whole body read in order without a dropped segment', ordered,
       ordered ? `spoken order kept, ${spoken.length} code points` : `spoken=${JSON.stringify(spoken).slice(0, 120)}`)
