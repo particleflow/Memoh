@@ -113,13 +113,12 @@ recovery; it cannot authorize deleting the only pending copy. These guarantees
 depend on the filesystem honoring its fsync contract.
 
 Cross-process nonblocking locks cover append, completion, cancellation and
-collection. Receipt admission has a separate lock. The current bounded policy
-allows 16 active uploads globally, four per identity (across Bots), active
-reserved bytes totaling four times the configured per-file limit, and 128 total
-receipts until expiration. Exceeding a quota returns 429. Admission reserves the
-entire declared file size. Publication may temporarily require both staging and
-canonical copies (up to two copies of that file); the operator must still budget
-storage for retained originals. This is not an originals disk-quota system.
+collection. Receipt admission has a separate lock. Admission sets no
+concurrency, session-count or aggregate-reservation cap; receipts are bounded
+by the per-file size limit, the 24-hour expiry, task-receipt retirement and
+collection. Publication may temporarily require both staging and canonical
+copies (up to two copies of that file); the operator must still budget storage
+for retained originals. This is not an originals disk-quota system.
 
 Collection runs at startup, hourly, and before admission. It scans only the
 private staging directory, retains active locked transfers, removes expired

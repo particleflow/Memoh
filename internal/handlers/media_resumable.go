@@ -121,7 +121,7 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 	}
 	result, err := create(c.Request().Context(), owner, bot, in)
 	if err != nil {
-		if scope := taskTransfer(c); scope != nil && (errors.Is(err, media.ErrUploadQuota) || errors.Is(err, media.ErrUploadInvalid) || errors.Is(err, media.ErrAssetTooLarge) || errors.Is(err, media.ErrUploadBusy)) {
+		if scope := taskTransfer(c); scope != nil && (errors.Is(err, media.ErrUploadInvalid) || errors.Is(err, media.ErrAssetTooLarge) || errors.Is(err, media.ErrUploadBusy)) {
 			// These refusals occur before UploadStore.save. Other errors can mean
 			// a receipt was durably created; retain the unknown-create fence.
 			if resetErr := scope.handler.base.FinishTransferUpload(c.Request().Context(), ""); resetErr != nil {

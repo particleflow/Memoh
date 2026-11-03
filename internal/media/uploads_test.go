@@ -178,7 +178,7 @@ func (p *failedPublication) Put(ctx context.Context, key string, r io.Reader) er
 	return errors.New("synthetic lost publication acknowledgement")
 }
 
-func TestUploadsConcurrentWritersAndQuotas(t *testing.T) {
+func TestUploadsConcurrentWriters(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 	s := uploadService(t, root, 1024).Uploads()
@@ -211,8 +211,8 @@ func TestUploadsConcurrentWritersAndQuotas(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		createUpload(ctx, t, s, b)
 	}
-	if _, err := s.Create(ctx, "owner", "bot", UploadInput{8, digest(b), "application/octet-stream"}); !errors.Is(err, ErrUploadQuota) {
-		t.Fatal(err)
+	if _, err := s.Create(ctx, "owner", "bot", UploadInput{8, digest(b), "application/octet-stream"}); err != nil {
+		t.Fatal("fifth concurrent upload for one owner was refused", err)
 	}
 	if _, err := s.Create(ctx, "other", "bot", UploadInput{1025, digest(b), "application/octet-stream"}); !errors.Is(err, ErrAssetTooLarge) {
 		t.Fatal(err)

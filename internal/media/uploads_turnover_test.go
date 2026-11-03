@@ -237,7 +237,7 @@ func TestTaskRetirementFaultsNeverAcknowledgeOrEraseUnknown(t *testing.T) {
 	}
 }
 
-func TestTaskUnknownReceiptsBackpressureWithoutTTLEviction(t *testing.T) {
+func TestTaskUnknownReceiptsSurviveCreatePressurePastTTL(t *testing.T) {
 	root := t.TempDir()
 	s := uploadService(t, root, 1024).Uploads()
 	for range maxUploadSessions {
@@ -248,9 +248,8 @@ func TestTaskUnknownReceiptsBackpressureWithoutTTLEviction(t *testing.T) {
 		}
 	}
 	s.now = func() time.Time { return time.Now().Add(10 * UploadTTL) }
-	_, err := s.CreateTransfer(t.Context(), "owner", "bot", UploadInput{1, digest([]byte("x")), "application/octet-stream"})
-	if !errors.Is(err, ErrUploadQuota) {
-		t.Fatal("pressure evicted unknown receipts", err)
+	if _, err := s.CreateTransfer(t.Context(), "owner", "bot", UploadInput{1, digest([]byte("x")), "application/octet-stream"}); err != nil {
+		t.Fatal("admission is no longer backpressured by unknown task receipts", err)
 	}
 	entries, err := s.entries()
 	if err != nil {
@@ -262,8 +261,8 @@ func TestTaskUnknownReceiptsBackpressureWithoutTTLEviction(t *testing.T) {
 			count++
 		}
 	}
-	if count != maxUploadSessions {
-		t.Fatal("lost unknown records", count)
+	if count != maxUploadSessions+1 {
+		t.Fatal("pressure evicted unknown records", count)
 	}
 }
 
