@@ -119,14 +119,12 @@ type StartTurnCommand struct {
 
 	// DiscussMessages is the composed conversation context for a discuss
 	// turn (Mode == ModeDiscuss), already rendered by the caller's
-	// projection. Image parts are injected into the last real user message
-	// before the runtime starts streaming.
+	// projection.
 	DiscussCurrentSources []ContextMessageSource
 	// DiscussOmittedSources is older unconsumed input Channel selection left
 	// out of DiscussMessages; the server compacts it or records its omission.
 	DiscussOmittedSources []ContextMessageSource
 	DiscussMessages       []DiscussMessage
-	DiscussImageRefs      []DiscussImageRef
 	// Pressure is measured before Channel selection. Overflow requests recovery
 	// without materializing or forwarding the rejected context.
 	DiscussContextTokens     int
@@ -153,15 +151,6 @@ type DiscussMessage struct {
 	Content              string                `json:"content"`
 	RawContent           json.RawMessage       `json:"raw_content,omitempty"`
 	CompactionArtifactID string                `json:"compaction_artifact_id,omitempty"`
-}
-
-// DiscussImageRef references an image attachment to inline as vision input.
-// MessageID names the external message it arrived with; a ref without one
-// rides on the current input.
-type DiscussImageRef struct {
-	ContentHash string `json:"content_hash"`
-	Mime        string `json:"mime,omitempty"`
-	MessageID   string `json:"message_id,omitempty"`
 }
 
 // Synthetic discuss event kinds emitted by the runtime before (or instead

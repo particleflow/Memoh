@@ -15,50 +15,11 @@ import (
 	"github.com/felinics/memoh/internal/chat/timeline"
 )
 
-func TestExtractNewImageRefs(t *testing.T) {
-	rc := timeline.RenderedContext{
-		{ReceivedAtMs: 100, ImageRefs: []timeline.ImageAttachmentRef{{ContentHash: "old-hash", Mime: "image/png"}}},
-		{ReceivedAtMs: 200, IsMyself: true, ImageRefs: []timeline.ImageAttachmentRef{{ContentHash: "self-hash"}}},
-		{MessageID: "new-message", ReceivedAtMs: 300, ImageRefs: []timeline.ImageAttachmentRef{{ContentHash: "new-hash", Mime: "image/jpeg"}}},
-		{ReceivedAtMs: 400, ImageRefs: nil},
-	}
-
-	refs := extractNewImageRefs(rc, timeline.DiscussCursorPosition{SourceCursor: 150})
-	if len(refs) != 1 {
-		t.Fatalf("expected 1 ref, got %d", len(refs))
-	}
-	if refs[0].ContentHash != "new-hash" {
-		t.Fatalf("expected new-hash, got %q", refs[0].ContentHash)
-	}
-	if refs[0].Mime != "image/jpeg" {
-		t.Fatalf("expected image/jpeg, got %q", refs[0].Mime)
-	}
-	if refs[0].MessageID != "new-message" {
-		t.Fatalf("image ref names message %q, want the message it arrived with", refs[0].MessageID)
-	}
-}
-
-func TestExtractNewImageRefs_IncludesMultiple(t *testing.T) {
-	rc := timeline.RenderedContext{
-		{ReceivedAtMs: 100},
-		{ReceivedAtMs: 200, ImageRefs: []timeline.ImageAttachmentRef{
-			{ContentHash: "a"},
-			{ContentHash: "b"},
-		}},
-		{ReceivedAtMs: 300, ImageRefs: []timeline.ImageAttachmentRef{{ContentHash: "c"}}},
-	}
-	refs := extractNewImageRefs(rc, timeline.DiscussCursorPosition{SourceCursor: 50})
-	if len(refs) != 3 {
-		t.Fatalf("expected 3 refs, got %d", len(refs))
-	}
-}
-
-func TestHandleReplyWithTurn_PassesContextAndImageRefs(t *testing.T) {
+func TestHandleReplyWithTurn_PassesComposedContext(t *testing.T) {
 	rc := timeline.RenderedContext{
 		{
 			ReceivedAtMs: 200,
 			Content:      []timeline.RenderedContentPiece{{Type: "text", Text: `<message id="1">photo</message>`}},
-			ImageRefs:    []timeline.ImageAttachmentRef{{ContentHash: "img-hash", Mime: "image/jpeg"}},
 		},
 	}
 	svc := &fakeTurnService{}
@@ -75,9 +36,6 @@ func TestHandleReplyWithTurn_PassesContextAndImageRefs(t *testing.T) {
 	cmd := svc.lastCmd
 	if cmd.Mode != turn.ModeDiscuss || cmd.TeamID != "team-1" || cmd.BotID != "bot-1" {
 		t.Fatalf("cmd = %+v", cmd)
-	}
-	if len(cmd.DiscussImageRefs) != 1 || cmd.DiscussImageRefs[0].ContentHash != "img-hash" || cmd.DiscussImageRefs[0].Mime != "image/jpeg" {
-		t.Fatalf("image refs = %+v", cmd.DiscussImageRefs)
 	}
 	if len(cmd.DiscussMessages) == 0 {
 		t.Fatal("expected composed discuss messages")

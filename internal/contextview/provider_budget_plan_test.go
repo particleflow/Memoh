@@ -38,14 +38,13 @@ func TestProviderContextBudgetPlanAccountsForCurrentRequestAndTools(t *testing.T
 		Slot: contextfrag.SlotCurrentUser, Text: "current request", Trust: contextfrag.TrustUser,
 	})
 	current.TokenEstimate = 120
-	image := contextfrag.ImageFrag("image", []sdk.ImagePart{{Image: "data:image/png;base64,abc", MediaType: "image/png"}}, contextfrag.Scope{}, contextfrag.SourceRunConfig)
 	history := contextfrag.MessageFrag(contextfrag.MessageFragInput{
 		ID: "history", Message: sdk.UserMessage("old"), Kind: contextfrag.KindConversationEvent,
 		Slot: contextfrag.SlotHistory, TokenEstimate: 900,
 	})
 	plan, err := providerContextBudgetPlan(context.Background(), agentpkg.RunConfig{
 		ContextBudgetMaxTokens: 20000,
-		ContextSourceFrags:     []contextfrag.ContextFrag{history, current, image},
+		ContextSourceFrags:     []contextfrag.ContextFrag{history, current},
 		ContextToolDefs: []contextfrag.ToolDefAccounting{
 			{Name: "one", TokenEstimate: 100},
 			{Name: "two", TokenEstimate: 200},
@@ -55,7 +54,7 @@ func TestProviderContextBudgetPlanAccountsForCurrentRequestAndTools(t *testing.T
 		t.Fatal(err)
 	}
 	if plan == nil || plan.Window != 20000 || plan.OutputReserve != 5000 || plan.ToolDefsCost != 300 ||
-		plan.CurrentRequestCost != 120+contextfrag.EstimateImageTokens {
+		plan.CurrentRequestCost != 120 {
 		t.Fatalf("plan = %#v", plan)
 	}
 	if plan.Estimator != contextfrag.ProviderBudgetEstimator ||
@@ -147,8 +146,8 @@ func TestProviderContextBudgetPlanUsesMaterializedRequestEstimate(t *testing.T) 
 
 	current := 1
 	plan, err := providerContextBudgetPlan(context.Background(), agentpkg.RunConfig{
-		Messages: []sdk.Message{sdk.AssistantMessage("old"), sdk.UserMessage("materialized")},
-		Query:    "do not count twice", InlineImages: []sdk.ImagePart{{Image: "data:image/png;base64,ignored"}},
+		Messages:                 []sdk.Message{sdk.AssistantMessage("old"), sdk.UserMessage("materialized")},
+		Query:                    "do not count twice",
 		ContextQueryMaterialized: true, ContextCurrentUserMessageIndex: &current,
 		ContextHistoryTokenEstimates: []int{77, 222}, ContextBudgetMaxTokens: 10000,
 	})
@@ -390,8 +389,7 @@ func TestApplyProviderRunConfigStoresActivePlanWithoutNoPressureMutation(t *test
 	}
 	if out.System != legacyOut.System ||
 		out.Query != legacyOut.Query ||
-		!reflect.DeepEqual(out.Messages, legacyOut.Messages) ||
-		!reflect.DeepEqual(out.InlineImages, legacyOut.InlineImages) {
+		!reflect.DeepEqual(out.Messages, legacyOut.Messages) {
 		t.Fatalf("active no-pressure payload diverged:\nactive=%#v\nlegacy=%#v", out, legacyOut)
 	}
 }

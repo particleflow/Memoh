@@ -202,7 +202,9 @@ func TestCanonicalFragmentHashGoldenValue(t *testing.T) {
 	if err != nil {
 		t.Fatalf("canonical hash: %v", err)
 	}
-	const want = "a33139d731966124ebcadf9eb4f2ce815b63650e866794086fc587c504193764"
+	// Updated when canonicalPart dropped its image lane (inline content
+	// channels closed; images now only travel inside SDK message parts).
+	const want = "fcc9bba8724cb0852891817f64eb3c5b8bb581ac65e5cb8e89be7bce5ed3186a"
 	if hash.Value != want {
 		t.Fatalf("golden hash drifted: got %q, want %q — if the canonical struct shape changed intentionally, update this value", hash.Value, want)
 	}
@@ -266,15 +268,18 @@ func TestCanonicalFragmentHashDiscriminatesSDKMessagePartTypes(t *testing.T) {
 func TestCanonicalFragmentHashIncludesNativeImageSDKPayload(t *testing.T) {
 	t.Parallel()
 
-	base := ImageFrag("image", []sdk.ImagePart{{
-		Image:     "data:image/png;base64,abc",
-		MediaType: "image/png",
-	}}, Scope{}, "test")
-	withCache := ImageFrag("image", []sdk.ImagePart{{
-		Image:        "data:image/png;base64,abc",
-		MediaType:    "image/png",
-		CacheControl: &sdk.CacheControl{Type: "ephemeral"},
-	}}, Scope{}, "test")
+	base := MessageFrag(MessageFragInput{
+		ID:      "message.image",
+		Message: sdk.UserMessage("", sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png"}),
+		Kind:    KindConversationEvent,
+		Slot:    SlotHistory,
+	})
+	withCache := MessageFrag(MessageFragInput{
+		ID:      "message.image",
+		Message: sdk.UserMessage("", sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png", CacheControl: &sdk.CacheControl{Type: "ephemeral"}}),
+		Kind:    KindConversationEvent,
+		Slot:    SlotHistory,
+	})
 
 	baseHash, err := CanonicalFragmentHash(base)
 	if err != nil {
@@ -285,7 +290,7 @@ func TestCanonicalFragmentHashIncludesNativeImageSDKPayload(t *testing.T) {
 		t.Fatalf("cache-control image hash: %v", err)
 	}
 	if baseHash.Value == cacheHash.Value {
-		t.Fatalf("image fragments with different SDK cache control must not collide: %q", baseHash.Value)
+		t.Fatalf("image message parts with different SDK cache control must not collide: %q", baseHash.Value)
 	}
 }
 

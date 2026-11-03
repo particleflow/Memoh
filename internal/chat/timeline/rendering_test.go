@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestRenderMessage_ImageRefsPopulated(t *testing.T) {
+func TestRenderMessage_AttachmentsRenderAsReferenceRows(t *testing.T) {
 	msg := &ICMessage{
 		MessageID:    "msg-1",
 		ReceivedAtMs: 100,
@@ -14,25 +14,24 @@ func TestRenderMessage_ImageRefsPopulated(t *testing.T) {
 		Attachments: []Attachment{
 			{Type: "image", ContentHash: "hash-1", MimeType: "image/jpeg", FilePath: "/data/.memoh/media/bot/ab/hash-1.jpg"},
 			{Type: "file", ContentHash: "hash-2", MimeType: "application/pdf", FilePath: "/data/.memoh/media/bot/cd/hash-2.pdf"},
-			{Type: "image", MimeType: "image/png"},
 		},
 		Conversation: ConversationMeta{Channel: "telegram", ConversationType: "private"},
 	}
 
 	seg := renderMessage(msg, RenderParams{})
 
-	if len(seg.ImageRefs) != 1 {
-		t.Fatalf("expected 1 image ref (only images with ContentHash), got %d", len(seg.ImageRefs))
-	}
-	if seg.ImageRefs[0].ContentHash != "hash-1" {
-		t.Fatalf("expected hash-1, got %q", seg.ImageRefs[0].ContentHash)
-	}
-	if seg.ImageRefs[0].Mime != "image/jpeg" {
-		t.Fatalf("expected image/jpeg, got %q", seg.ImageRefs[0].Mime)
+	text := seg.Content[0].Text
+	for _, want := range []string{
+		`path="/data/.memoh/media/bot/ab/hash-1.jpg"`,
+		`path="/data/.memoh/media/bot/cd/hash-2.pdf"`,
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("rendered message missing reference row %q:\n%s", want, text)
+		}
 	}
 }
 
-func TestRenderMessage_NoImageRefs(t *testing.T) {
+func TestRenderMessage_NoAttachmentsNoReferenceRows(t *testing.T) {
 	msg := &ICMessage{
 		MessageID:    "msg-2",
 		ReceivedAtMs: 200,
@@ -43,8 +42,8 @@ func TestRenderMessage_NoImageRefs(t *testing.T) {
 
 	seg := renderMessage(msg, RenderParams{})
 
-	if len(seg.ImageRefs) != 0 {
-		t.Fatalf("expected 0 image refs, got %d", len(seg.ImageRefs))
+	if strings.Contains(seg.Content[0].Text, "<attachment") {
+		t.Fatalf("expected no attachment reference rows:\n%s", seg.Content[0].Text)
 	}
 }
 

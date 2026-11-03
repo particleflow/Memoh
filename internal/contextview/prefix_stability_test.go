@@ -80,30 +80,27 @@ func TestApplyProviderRunConfigStablePrefixIgnoresTurnLocalScope(t *testing.T) {
 	}
 }
 
-func TestApplyProviderRunConfigImageOnlyCurrentMovesStableMessageBoundary(t *testing.T) {
+func TestApplyProviderRunConfigCurrentOnlyInputMovesStableMessageBoundary(t *testing.T) {
 	t.Parallel()
 	system := systemTextFrag("system.prompt", "stable system", contextfrag.KindSystemPrompt, 20)
 	history := stableHistoryMessageFrag("message.000", sdk.UserMessage("history"))
-	build := func(imageData string) agentpkg.RunConfig {
-		image := contextfrag.ImageFrag("current_user.images", []sdk.ImagePart{{
-			Image: imageData, MediaType: "image/png",
-		}}, contextfrag.Scope{}, contextfrag.SourceRunConfig)
+	build := func(question string) agentpkg.RunConfig {
 		return ApplyProviderRunConfig(context.Background(), nil, agentpkg.RunConfig{
-			ContextSourceFrags: []contextfrag.ContextFrag{system, history, image},
+			ContextSourceFrags: []contextfrag.ContextFrag{system, history, currentMessageFrag("current", question)},
 		})
 	}
-	first := build("data:image/png;base64,first")
-	second := build("data:image/png;base64,second")
+	first := build("first question")
+	second := build("second question")
 
 	if reflect.DeepEqual(first.Messages, second.Messages) {
-		t.Fatalf("image-only current input did not change provider messages: %#v", first.Messages)
+		t.Fatalf("current-only input did not change provider messages: %#v", first.Messages)
 	}
-	if first.ContextCachePlan.StableMessageCount != 0 || second.ContextCachePlan.StableMessageCount != 0 {
-		t.Fatalf("stable message counts = %d and %d, want image target excluded", first.ContextCachePlan.StableMessageCount, second.ContextCachePlan.StableMessageCount)
+	if first.ContextCachePlan.StableMessageCount == 0 || second.ContextCachePlan.StableMessageCount == 0 {
+		t.Fatalf("stable message counts = %d and %d, want history included", first.ContextCachePlan.StableMessageCount, second.ContextCachePlan.StableMessageCount)
 	}
-	wantHash := stablePrefixHash([]contextfrag.ContextFrag{system})
+	wantHash := stablePrefixHash([]contextfrag.ContextFrag{system, history})
 	if wantHash == "" || first.ContextCachePlan.StablePrefixHash != wantHash || second.ContextCachePlan.StablePrefixHash != wantHash {
-		t.Fatalf("stable hashes = %q and %q, want system-only %q", first.ContextCachePlan.StablePrefixHash, second.ContextCachePlan.StablePrefixHash, wantHash)
+		t.Fatalf("stable hashes = %q and %q, want system+history %q", first.ContextCachePlan.StablePrefixHash, second.ContextCachePlan.StablePrefixHash, wantHash)
 	}
 }
 

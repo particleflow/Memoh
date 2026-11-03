@@ -11,18 +11,16 @@ func TestCompileAddsRefsAndManifestTraceWithoutChangingRenderedLegacyView(t *tes
 
 	system := "base system"
 	messages := []sdk.Message{sdk.UserMessage("history")}
-	images := []sdk.ImagePart{{Image: "data:image/png;base64,abc", MediaType: "image/png"}}
 
 	got := Compile(CompileInput{
-		Source:       "test",
-		System:       system,
-		Messages:     messages,
-		Query:        "current",
-		InlineImages: images,
+		Source:   "test",
+		System:   system,
+		Messages: messages,
+		Query:    "current",
 	})
 
-	if got.System != system || got.Query != "current" || len(got.Messages) != 1 || len(got.InlineImages) != 1 {
-		t.Fatalf("rendered legacy view changed: system=%q query=%q messages=%d images=%d", got.System, got.Query, len(got.Messages), len(got.InlineImages))
+	if got.System != system || got.Query != "current" || len(got.Messages) != 1 {
+		t.Fatalf("rendered legacy view changed: system=%q query=%q messages=%d", got.System, got.Query, len(got.Messages))
 	}
 	for _, frag := range got.Frags {
 		if err := ValidateContextRef(frag.Ref); err != nil {

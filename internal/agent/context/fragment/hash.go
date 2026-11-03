@@ -67,11 +67,9 @@ type canonicalProvenance struct {
 }
 
 type canonicalPart struct {
-	Type      PartType        `json:"type"`
-	Text      string          `json:"text,omitempty"`
-	Image     ImageRef        `json:"image,omitempty"`
-	Message   json.RawMessage `json:"message,omitempty"`
-	ImagePart json.RawMessage `json:"image_part,omitempty"`
+	Type    PartType        `json:"type"`
+	Text    string          `json:"text,omitempty"`
+	Message json.RawMessage `json:"message,omitempty"`
 }
 
 func canonicalParts(parts []Part) ([]canonicalPart, error) {
@@ -81,9 +79,8 @@ func canonicalParts(parts []Part) ([]canonicalPart, error) {
 	out := make([]canonicalPart, 0, len(parts))
 	for _, part := range parts {
 		next := canonicalPart{
-			Type:  part.Type,
-			Text:  part.Text,
-			Image: part.Image,
+			Type: part.Type,
+			Text: part.Text,
 		}
 		if msg := partMessage(part); msg != nil {
 			raw, err := json.Marshal(msg)
@@ -91,13 +88,6 @@ func canonicalParts(parts []Part) ([]canonicalPart, error) {
 				return nil, err
 			}
 			next.Message = raw
-		}
-		if image := partSDKImage(part); image != nil {
-			raw, err := json.Marshal(image)
-			if err != nil {
-				return nil, err
-			}
-			next.ImagePart = raw
 		}
 		out = append(out, next)
 	}

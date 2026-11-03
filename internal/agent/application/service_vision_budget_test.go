@@ -6,9 +6,6 @@ import (
 	"io"
 	"testing"
 
-	sdk "github.com/felinics/twilight/sdk"
-
-	"github.com/felinics/memoh/internal/chat/timeline"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -50,9 +47,6 @@ func TestNonVisionModelDoesNotPrepareImages(t *testing.T) {
 	if item.Type != "file" || item.Payload != "/data/sticker" {
 		t.Fatalf("routed attachment = %#v, want the original as a file reference", item)
 	}
-	if parts := extractNativeImageParts(merged); len(parts) != 0 {
-		t.Fatalf("extractNativeImageParts() = %d, want none", len(parts))
-	}
 
 	// The same request on a vision model still renders.
 	merged, err = s.routeAndMergeAttachments(context.Background(),
@@ -65,32 +59,37 @@ func TestNonVisionModelDoesNotPrepareImages(t *testing.T) {
 	if opens == 0 {
 		t.Fatal("a vision model must still get the rendered frames")
 	}
-	if parts := extractNativeImageParts(merged); len(parts) != animationFrameCount {
-		t.Fatalf("extractNativeImageParts() = %d, want %d frames", len(parts), animationFrameCount)
+	if frames := merged[0].(gatewayAttachment).Frames; len(frames) != animationFrameCount {
+		t.Fatalf("Frames = %d, want %d rendered frames", len(frames), animationFrameCount)
 	}
 }
 
-// A sticker that stays in a discussion's context is re-prepared on every model
+// A sticker that stays in a session's context is re-prepared on every model
 // call, and re-rendering it produces byte-identical frames.
 func TestRenderedFramesAreCachedAcrossTurns(t *testing.T) {
 	opens := 0
 	s := countingStickerService(t, &opens)
-	refs := []timeline.ImageAttachmentRef{{ContentHash: "sticker", Mime: "application/x-tgsticker"}}
 
-	first := inlineImageParts(context.Background(), s, "bot-1", refs)
+	first, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "sticker", "application/x-tgsticker")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(first) != animationFrameCount || opens != 1 {
-		t.Fatalf("first turn: %d parts, %d opens", len(first), opens)
+		t.Fatalf("first turn: %d frames, %d opens", len(first), opens)
 	}
 	for turn := range 3 {
-		again := inlineImageParts(context.Background(), s, "bot-1", refs)
+		again, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "sticker", "application/x-tgsticker")
+		if err != nil {
+			t.Fatal(err)
+		}
 		if opens != 1 {
 			t.Fatalf("turn %d re-read the asset: %d opens", turn+2, opens)
 		}
 		if len(again) != len(first) {
-			t.Fatalf("turn %d: %d parts, want %d", turn+2, len(again), len(first))
+			t.Fatalf("turn %d: %d frames, want %d", turn+2, len(again), len(first))
 		}
 		for i := range first {
-			if again[i].Image != first[i].Image {
+			if again[i] != first[i] {
 				t.Fatalf("turn %d frame %d differs from the cached render", turn+2, i)
 			}
 		}
@@ -101,9 +100,12 @@ func TestRenderedFramesAreCachedAcrossTurns(t *testing.T) {
 func TestFrameCacheIsScopedPerBot(t *testing.T) {
 	opens := 0
 	s := countingStickerService(t, &opens)
-	refs := []timeline.ImageAttachmentRef{{ContentHash: "sticker", Mime: "application/x-tgsticker"}}
-	inlineImageParts(context.Background(), s, "bot-a", refs)
-	inlineImageParts(context.Background(), s, "bot-b", refs)
+	if _, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-a", "sticker", "application/x-tgsticker"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-b", "sticker", "application/x-tgsticker"); err != nil {
+		t.Fatal(err)
+	}
 	if opens != 2 {
 		t.Fatalf("asset opened %d time(s), want one per bot", opens)
 	}
@@ -123,50 +125,5 @@ func TestFrameCacheEvictsOldestEntries(t *testing.T) {
 	}
 	if size != entries*len("frame") {
 		t.Fatalf("byte accounting = %d, want %d", size, entries*len("frame"))
-	}
-}
-
-// A discussion turn gathers attachments from every new message, and each
-// animation multiplies into frames. Past the budget an attachment contributes
-// its first frame only, so every attachment stays visible.
-func TestTurnVisionBudgetShedsExpansionFirst(t *testing.T) {
-	data := movingStickerTGS(t)
-	s := &Service{assetLoader: &fakeGatewayAssetLoader{
-		openFn: func(context.Context, string, string) (io.ReadCloser, string, error) {
-			return io.NopCloser(bytes.NewReader(data)), "application/x-tgsticker", nil
-		},
-	}}
-	const stickers = 10
-	refs := make([]timeline.ImageAttachmentRef, 0, stickers)
-	for i := range stickers {
-		refs = append(refs, timeline.ImageAttachmentRef{
-			ContentHash: "sticker-" + string(rune('a'+i)),
-			Mime:        "application/x-tgsticker",
-		})
-	}
-
-	parts := inlineImageParts(context.Background(), s, "bot-1", refs)
-	if len(parts) > maxTurnVisionImages {
-		t.Fatalf("InlineImageAttachments() = %d parts, over the %d budget", len(parts), maxTurnVisionImages)
-	}
-	// Four stickers fit whole (20 images); the rest still contribute one frame
-	// each until the budget is gone, so nothing disappears silently while
-	// there is room.
-	if len(parts) != maxTurnVisionImages {
-		t.Fatalf("InlineImageAttachments() = %d parts, want the budget spent in full", len(parts))
-	}
-}
-
-func TestVisionBudgetKeepsOneFrameWhenExpansionDoesNotFit(t *testing.T) {
-	budget := visionBudget{used: maxTurnVisionImages - 2}
-	five := make([]sdk.ImagePart, 5)
-	if got := budget.take(five); len(got) != 1 {
-		t.Fatalf("take(5 frames) with 2 left = %d, want the single representative frame", len(got))
-	}
-	if got := budget.take(five); len(got) != 1 {
-		t.Fatalf("take(5 frames) with 1 left = %d, want one", len(got))
-	}
-	if got := budget.take(five); got != nil {
-		t.Fatalf("take(5 frames) with nothing left = %d, want none", len(got))
 	}
 }

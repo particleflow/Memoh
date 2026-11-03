@@ -7,16 +7,20 @@ import (
 	"github.com/felinics/memoh/internal/agent/sessionmode"
 )
 
+// The baselines and the pre-Round-6 anchors both include the TF-16 section
+// 4.3 attachment reference sentence (~73 tokens per mode); the pre-Round-6
+// markers shifted by the same delta so "still slimmer than before Round 6"
+// keeps comparing like for like.
 const (
 	staticPromptTokenHeadroom           = 4
-	staticPromptChatBaselineTokens      = 1212
-	staticPromptDiscussBaselineTokens   = 1281
-	staticPromptScheduleBaselineTokens  = 1220
-	staticPromptSubagentBaselineTokens  = 599
-	staticPromptChatPreRound6Tokens     = 1224
-	staticPromptDiscussPreRound6Tokens  = 1297
-	staticPromptSchedulePreRound6Tokens = 1226
-	staticPromptSubagentPreRound6Tokens = 617
+	staticPromptChatBaselineTokens      = 1285
+	staticPromptDiscussBaselineTokens   = 1354
+	staticPromptScheduleBaselineTokens  = 1293
+	staticPromptSubagentBaselineTokens  = 670
+	staticPromptChatPreRound6Tokens     = 1297
+	staticPromptDiscussPreRound6Tokens  = 1370
+	staticPromptSchedulePreRound6Tokens = 1299
+	staticPromptSubagentPreRound6Tokens = 688
 )
 
 var staticPromptTokenBaselines = map[string]int{

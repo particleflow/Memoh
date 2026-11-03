@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -21,7 +20,6 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
-	"github.com/felinics/memoh/internal/chat/timeline"
 	"github.com/felinics/memoh/internal/contextview"
 )
 
@@ -69,7 +67,6 @@ func (p *countingDiscussLifecycleProvider) DoStream(
 
 type fakeDiscussService struct {
 	resolveResult  ResolveRunConfigResult
-	inlineFn       func(ctx context.Context, botID string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart
 	storeCalls     int
 	lastStoreRunID string
 	lastLifecycle  *contextfrag.LifecycleHolder
@@ -79,13 +76,6 @@ type fakeDiscussService struct {
 
 func (f *fakeDiscussService) ResolveRunConfig(_ context.Context, _, _, _, _, _, _, _ string) (ResolveRunConfigResult, error) {
 	return f.resolveResult, nil
-}
-
-func (f *fakeDiscussService) InlineImageAttachments(ctx context.Context, botID string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-	if f.inlineFn != nil {
-		return f.inlineFn(ctx, botID, refs)
-	}
-	return nil
 }
 
 func (f *fakeDiscussService) StoreRound(_ context.Context, runID, _, _, _, _ string, _ []sdk.Message, _ string, lifecycle *contextfrag.LifecycleHolder) error {
@@ -104,7 +94,6 @@ type testAgentStreamer interface {
 
 type testDiscussService interface {
 	ResolveRunConfig(context.Context, string, string, string, string, string, string, string) (ResolveRunConfigResult, error)
-	InlineImageAttachments(context.Context, string, []timeline.ImageAttachmentRef) [][]sdk.ImagePart
 	StoreRound(context.Context, string, string, string, string, string, []sdk.Message, string, *contextfrag.LifecycleHolder) error
 }
 
@@ -115,7 +104,6 @@ func newDiscussTestService(streamer testChatStreamer, agent testAgentStreamer, r
 	}
 	service.turnHooks.streamAgent = agent.Stream
 	service.turnHooks.resolveRunConfig = resolver.ResolveRunConfig
-	service.turnHooks.inlineImages = resolver.InlineImageAttachments
 	service.turnHooks.storeRound = resolver.StoreRound
 	return service
 }
@@ -179,221 +167,6 @@ func discussCommand() turn.StartTurnCommand {
 			{Role: "user", Content: `<message id="1">photo</message>`},
 		},
 		DiscussAddressed: true,
-	}
-}
-
-func TestDiscussInlinesImages(t *testing.T) {
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{
-		resolveResult: ResolveRunConfigResult{
-			RunConfig: native.RunConfig{SupportsImageInput: true},
-			ModelID:   "model-1",
-		},
-		inlineFn: func(_ context.Context, _ string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-			if len(refs) != 1 || refs[0].ContentHash != "img-hash" {
-				t.Fatalf("unexpected refs: %v", refs)
-			}
-			return [][]sdk.ImagePart{{{Image: "data:image/jpeg;base64,FAKE", MediaType: "image/jpeg"}}}
-		},
-	}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	cmd := discussCommand()
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{{ContentHash: "img-hash", Mime: "image/jpeg"}}
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	if agent.lastConfig == nil {
-		t.Fatal("expected agent to be called")
-	}
-	var userMsgs []sdk.Message
-	for _, m := range agent.lastConfig.Messages {
-		if m.Role == sdk.MessageRoleUser {
-			userMsgs = append(userMsgs, m)
-		}
-	}
-	if len(userMsgs) != 1 {
-		t.Fatalf("expected only the canonical RC user message, got %d", len(userMsgs))
-	}
-	hasImage := false
-	for _, part := range userMsgs[0].Content {
-		if imgPart, ok := part.(sdk.ImagePart); ok {
-			hasImage = true
-			if !strings.HasPrefix(imgPart.Image, "data:image/jpeg;base64,") {
-				t.Fatalf("unexpected image data: %q", imgPart.Image)
-			}
-		}
-	}
-	if !hasImage {
-		t.Fatal("expected image part in RC user message")
-	}
-	if resolver.storeCalls != 1 {
-		t.Fatalf("store calls = %d, want 1 after terminal agent_end", resolver.storeCalls)
-	}
-}
-
-// Each image rides on the message it arrived with, and a message admission
-// leaves out takes its images with it instead of piling them onto the
-// protected current input.
-func TestDiscussInlinesImagesOnTheirAdmittedMessages(t *testing.T) {
-	var requested []string
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{
-		resolveResult: ResolveRunConfigResult{
-			RunConfig:              native.RunConfig{SupportsImageInput: true},
-			ModelID:                "model-1",
-			ContextBudgetMaxTokens: 1000,
-		},
-		inlineFn: func(_ context.Context, _ string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-			parts := make([][]sdk.ImagePart, len(refs))
-			for i, ref := range refs {
-				requested = append(requested, ref.ContentHash)
-				parts[i] = []sdk.ImagePart{{Image: "data:image/png;base64," + ref.ContentHash}}
-			}
-			return parts
-		},
-	}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	cmd := discussCommand()
-	cmd.DiscussMessages = []turn.DiscussMessage{
-		{Role: "user", Content: strings.Repeat("o", 4400), Source: &turn.ContextMessageSource{Kind: "external", ID: "omitted", Current: true}},
-		{Role: "user", Content: "older", Source: &turn.ContextMessageSource{Kind: "external", ID: "older", Current: true}},
-		{Role: "user", Content: "newest", Source: &turn.ContextMessageSource{Kind: "external", ID: "newest", Current: true}},
-	}
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{
-		{ContentHash: "omitted-image", MessageID: "omitted"},
-		{ContentHash: "older-image", MessageID: "older"},
-		{ContentHash: "newest-image", MessageID: "newest"},
-		{ContentHash: "unattributed-image"},
-	}
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	if strings.Join(requested, ",") != "unattributed-image,newest-image,older-image" {
-		t.Fatalf("loaded images %v, want only those of admitted messages, newest first", requested)
-	}
-	images := map[string][]string{}
-	for _, message := range agent.lastConfig.Messages {
-		for _, part := range message.Content {
-			if image, ok := part.(sdk.ImagePart); ok {
-				text := message.Content[0].(sdk.TextPart).Text
-				images[text] = append(images[text], strings.TrimPrefix(image.Image, "data:image/png;base64,"))
-			}
-		}
-	}
-	if len(images) != 2 || strings.Join(images["older"], ",") != "older-image" || strings.Join(images["newest"], ",") != "newest-image,unattributed-image" {
-		t.Fatalf("images by message = %v, want each on its own message and the unattributed one on the current input", images)
-	}
-	recorded := false
-	for _, record := range agent.lastConfig.ContextMutations.Records() {
-		recorded = recorded || record.Kind == contextfrag.MutationCurrentInputImagesOmitted && record.Detail == "sources=omitted"
-	}
-	if !recorded {
-		t.Fatalf("mutations = %+v, want the left-out message's image recorded", agent.lastConfig.ContextMutations.Records())
-	}
-}
-
-// The turn-wide vision budget goes to the newest input first: older images
-// are history a budget may trim, the newest input's own images are protected.
-func TestDiscussVisionBudgetKeepsTheNewestInputImages(t *testing.T) {
-	assets := map[string][]byte{}
-	cmd := discussCommand()
-	cmd.DiscussMessages = nil
-	for i := range maxTurnVisionImages + 1 {
-		id := fmt.Sprintf("m%02d", i)
-		assets[id] = rasterPNG(t)
-		cmd.DiscussMessages = append(cmd.DiscussMessages, turn.DiscussMessage{Role: "user", Content: id, Source: &turn.ContextMessageSource{Kind: "external", ID: id, Current: true}})
-		cmd.DiscussImageRefs = append(cmd.DiscussImageRefs, turn.DiscussImageRef{ContentHash: id, Mime: "image/png", MessageID: id})
-	}
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{resolveResult: ResolveRunConfigResult{RunConfig: native.RunConfig{SupportsImageInput: true}, ModelID: "model-1"}}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	a.turnHooks.inlineImages = imageInputService(t, assets).InlineImageAttachments
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	var withImage []string
-	for _, message := range agent.lastConfig.Messages {
-		for _, part := range message.Content {
-			if _, ok := part.(sdk.ImagePart); ok {
-				withImage = append(withImage, message.Content[0].(sdk.TextPart).Text)
-			}
-		}
-	}
-	newest := fmt.Sprintf("m%02d", maxTurnVisionImages)
-	if len(withImage) != maxTurnVisionImages || withImage[0] != "m01" || withImage[len(withImage)-1] != newest {
-		t.Fatalf("images on %v, want the budget spent newest first and kept in message order", withImage)
-	}
-	if records := agent.lastConfig.ContextMutations.Records(); len(records) != 1 ||
-		records[0].Kind != contextfrag.MutationCurrentInputImagesOmitted || records[0].Detail != "sources=m00" {
-		t.Fatalf("mutations = %+v, want the image the budget left out recorded", records)
-	}
-}
-
-// A repeated image belongs to its newest sender: the older message is history
-// a budget may trim, the newest input is protected.
-func TestDiscussRepeatedImageRidesOnTheNewestInput(t *testing.T) {
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{resolveResult: ResolveRunConfigResult{RunConfig: native.RunConfig{SupportsImageInput: true}, ModelID: "model-1"}}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	a.turnHooks.inlineImages = imageInputService(t, map[string][]byte{"sticker": rasterPNG(t)}).InlineImageAttachments
-	cmd := discussCommand()
-	cmd.DiscussMessages = []turn.DiscussMessage{
-		{Role: "user", Content: "alice", Source: &turn.ContextMessageSource{Kind: "external", ID: "alice", Current: true}},
-		{Role: "user", Content: "bob", Source: &turn.ContextMessageSource{Kind: "external", ID: "bob", Current: true}},
-	}
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{{ContentHash: "sticker", Mime: "image/png", MessageID: "alice"}, {ContentHash: "sticker", Mime: "image/png", MessageID: "bob"}}
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	var withImage []string
-	for _, message := range agent.lastConfig.Messages {
-		for _, part := range message.Content {
-			if _, ok := part.(sdk.ImagePart); ok {
-				withImage = append(withImage, message.Content[0].(sdk.TextPart).Text)
-			}
-		}
-	}
-	if strings.Join(withImage, ",") != "bob" {
-		t.Fatalf("repeated image rides on %v, want only the newest sender", withImage)
-	}
-}
-
-// An old Channel names no message for its images; one that is not delivered
-// is recorded under the current input it would have ridden on.
-func TestDiscussRecordsWithheldLegacyImageUnderTheCurrentInput(t *testing.T) {
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{resolveResult: ResolveRunConfigResult{RunConfig: native.RunConfig{SupportsImageInput: true}, ModelID: "model-1"}}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	a.turnHooks.inlineImages = imageInputService(t, map[string][]byte{"clip": webmSticker()}).InlineImageAttachments
-	cmd := discussCommand()
-	cmd.DiscussMessages = []turn.DiscussMessage{{Role: "user", Content: "look", Source: &turn.ContextMessageSource{Kind: "external", ID: "current", Current: true}}}
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{{ContentHash: "clip", Mime: "video/webm"}}
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	if records := agent.lastConfig.ContextMutations.Records(); len(records) != 1 ||
-		records[0].Kind != contextfrag.MutationCurrentInputImagesOmitted || records[0].Detail != "sources=current" {
-		t.Fatalf("mutations = %+v, want the undelivered legacy image recorded under the current input", records)
 	}
 }
 
@@ -702,40 +475,6 @@ func TestAdmittedDiscussStoreFailurePersistsFailedProviderLifecycle(t *testing.T
 	}
 }
 
-func TestDiscussNoInlineWhenNoVision(t *testing.T) {
-	agent := &fakeAgentStreamer{}
-	resolver := &fakeDiscussService{
-		resolveResult: ResolveRunConfigResult{
-			RunConfig: native.RunConfig{SupportsImageInput: false},
-			ModelID:   "model-1",
-		},
-		inlineFn: func(_ context.Context, _ string, _ []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-			t.Fatal("should not be called when model doesn't support vision")
-			return nil
-		},
-	}
-	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
-	cmd := discussCommand()
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{{ContentHash: "img-hash", Mime: "image/jpeg"}}
-
-	h, err := a.StartTurn(context.Background(), cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	drainDiscuss(t, h)
-
-	if agent.lastConfig == nil {
-		t.Fatal("expected agent to be called")
-	}
-	for _, m := range agent.lastConfig.Messages {
-		for _, part := range m.Content {
-			if _, ok := part.(sdk.ImagePart); ok {
-				t.Fatal("should not have image parts when vision is not supported")
-			}
-		}
-	}
-}
-
 func TestDiscussACPUsesChatStreamer(t *testing.T) {
 	agent := &fakeAgentStreamer{}
 	runner := &fakeRunner{chunks: []string{`{"type":"agent_end"}`}}
@@ -897,9 +636,6 @@ func TestDiscussCarriesComposedMessagesThroughTypedFragments(t *testing.T) {
 			ModelID:                "model-1",
 			ContextBudgetMaxTokens: 128000,
 		},
-		inlineFn: func(_ context.Context, _ string, _ []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-			return [][]sdk.ImagePart{{{Image: "data:image/png;base64,abc", MediaType: "image/png"}}}
-		},
 	}
 	a := newDiscussTestService(&fakeRunner{}, agent, resolver)
 	cmd := discussCommand()
@@ -919,8 +655,6 @@ func TestDiscussCarriesComposedMessagesThroughTypedFragments(t *testing.T) {
 		},
 		{Role: "user", Content: "latest user"},
 	}
-	cmd.DiscussImageRefs = []turn.DiscussImageRef{{ContentHash: "image-1", Mime: "image/png"}}
-
 	h, err := a.StartTurn(context.Background(), cmd)
 	if err != nil {
 		t.Fatal(err)
@@ -969,8 +703,8 @@ func TestDiscussCarriesComposedMessagesThroughTypedFragments(t *testing.T) {
 		t.Fatalf("current discuss fragment = %#v", current)
 	}
 	currentMessage := contextfrag.FragMessage(*current)
-	if currentMessage == nil || len(currentMessage.Content) != 2 {
-		t.Fatalf("current discuss message = %#v, want text plus one image", currentMessage)
+	if currentMessage == nil || len(currentMessage.Content) != 1 {
+		t.Fatalf("current discuss message = %#v, want its composed text", currentMessage)
 	}
 	memoryIndex := contextFragIndex(frags, "memory.recall")
 	hookIndex := contextFragIndex(frags, "hook_context.message")
@@ -1017,48 +751,6 @@ func contextFragByID(frags []contextfrag.ContextFrag, id string) *contextfrag.Co
 	return nil
 }
 
-func TestInjectImagePartsIntoLastUserMessage(t *testing.T) {
-	msgs := []sdk.Message{
-		sdk.UserMessage("hello"),
-		sdk.AssistantMessage("hi"),
-		sdk.UserMessage("look at this"),
-	}
-	parts := []sdk.ImagePart{
-		{Image: "data:image/png;base64,abc", MediaType: "image/png"},
-	}
-
-	injectImagePartsIntoLastUserMessage(msgs, parts)
-
-	lastUser := msgs[2]
-	if len(lastUser.Content) != 2 {
-		t.Fatalf("expected 2 content parts, got %d", len(lastUser.Content))
-	}
-	imgPart, ok := lastUser.Content[1].(sdk.ImagePart)
-	if !ok {
-		t.Fatalf("expected ImagePart, got %T", lastUser.Content[1])
-	}
-	if imgPart.Image != "data:image/png;base64,abc" {
-		t.Fatalf("unexpected image: %q", imgPart.Image)
-	}
-}
-
-func TestInjectImagePartsIntoLastUserMessage_Empty(t *testing.T) {
-	msgs := []sdk.Message{sdk.UserMessage("hello")}
-	injectImagePartsIntoLastUserMessage(msgs, nil)
-	if len(msgs[0].Content) != 1 {
-		t.Fatalf("expected no change, got %d parts", len(msgs[0].Content))
-	}
-}
-
-func TestInjectImagePartsIntoLastUserMessage_SkipsEmptyImage(t *testing.T) {
-	msgs := []sdk.Message{sdk.UserMessage("hello")}
-	parts := []sdk.ImagePart{{Image: "", MediaType: "image/png"}}
-	injectImagePartsIntoLastUserMessage(msgs, parts)
-	if len(msgs[0].Content) != 1 {
-		t.Fatalf("expected no change, got %d parts", len(msgs[0].Content))
-	}
-}
-
 func lastMessageFragContains(frags []contextfrag.ContextFrag, needle string) bool {
 	for i := len(frags) - 1; i >= 0; i-- {
 		frag := frags[i]
@@ -1075,8 +767,6 @@ func lastMessageFragContains(frags []contextfrag.ContextFrag, needle string) boo
 	return false
 }
 
-// TestDiscussCancelUnblocksFullEventBuffer mirrors the chat-mode burst
-// repro for the discuss pump's emit path.
 func TestDiscussCancelUnblocksFullEventBuffer(t *testing.T) {
 	agent := &burstAgentStreamer{count: 40}
 	resolver := &fakeDiscussService{

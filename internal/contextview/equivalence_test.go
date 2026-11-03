@@ -13,22 +13,19 @@ type legacyInput struct {
 	system    string
 	messages  []sdk.Message
 	query     string
-	images    []sdk.ImagePart
 	toolUsage string
 }
 
 func TestContextViewMatchesLegacyProviderBytes(t *testing.T) {
 	t.Parallel()
 	toolUsage := "## Tool usage\nUse tools carefully."
-	image := sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png"}
 	cases := map[string]legacyInput{
-		"basic":                      {system: "You are helpful.", messages: []sdk.Message{sdk.UserMessage("hello"), sdk.AssistantMessage("hi")}, query: "What is 2+2?"},
-		"system whitespace":          {system: "  preserve outer system bytes\n", messages: []sdk.Message{sdk.UserMessage("hello")}},
-		"tool usage and workspace":   {system: "Base.\n\n" + toolUsage + "\n\n## Workspace instruction files\nAGENTS.md", toolUsage: toolUsage, query: "continue"},
-		"query whitespace and image": {system: "vision", query: "  inspect this \n", images: []sdk.ImagePart{image}},
-		"image only pipeline":        {system: "vision", messages: []sdk.Message{sdk.UserMessage("embedded query"), sdk.AssistantMessage("working")}, images: []sdk.ImagePart{image}},
-		"memory bytes":               {system: "system", messages: []sdk.Message{sdk.UserMessage("<memory>raw & unescaped</memory>"), sdk.UserMessage("current")}},
-		"hook bytes":                 {system: "system\n\n[Hook Context: BeforePromptBuild]\n  exact hook output \n"},
+		"basic":                    {system: "You are helpful.", messages: []sdk.Message{sdk.UserMessage("hello"), sdk.AssistantMessage("hi")}, query: "What is 2+2?"},
+		"system whitespace":        {system: "  preserve outer system bytes\n", messages: []sdk.Message{sdk.UserMessage("hello")}},
+		"tool usage and workspace": {system: "Base.\n\n" + toolUsage + "\n\n## Workspace instruction files\nAGENTS.md", toolUsage: toolUsage, query: "continue"},
+		"query whitespace":         {system: "plain", query: "  inspect this \n"},
+		"memory bytes":             {system: "system", messages: []sdk.Message{sdk.UserMessage("<memory>raw & unescaped</memory>"), sdk.UserMessage("current")}},
+		"hook bytes":               {system: "system\n\n[Hook Context: BeforePromptBuild]\n  exact hook output \n"},
 	}
 	for name, input := range cases {
 		name, input := name, input
@@ -41,9 +38,9 @@ func TestContextViewMatchesLegacyProviderBytes(t *testing.T) {
 
 func assertContextViewEquivalent(t *testing.T, input legacyInput) {
 	t.Helper()
-	want := legacyProviderMessages(input.messages, input.query, input.images)
+	want := legacyProviderMessages(input.messages, input.query)
 	builder := NewBuilder(
-		NewMapCollectorRegistry(&SystemPromptCollector{}, &HistoryMessagesCollector{}, &CurrentUserCollector{}, &InlineImageCollector{}),
+		NewMapCollectorRegistry(&SystemPromptCollector{}, &HistoryMessagesCollector{}, &CurrentUserCollector{}),
 		&FragmentSelector{}, StablePrefixPlacer{}, NewMapRendererRegistry(&SDKMessagesRenderer{}),
 	)
 	view, err := builder.Build(context.Background(), BuildInput{
@@ -52,7 +49,6 @@ func assertContextViewEquivalent(t *testing.T, input legacyInput) {
 			{Name: systemPromptCollectorName, Config: SystemPromptConfig{System: input.system, ToolUsage: input.toolUsage}},
 			{Name: historyMessagesCollectorName, Config: HistoryMessagesConfig{Messages: input.messages}},
 			{Name: currentUserCollectorName, Config: CurrentUserConfig{Query: input.query}},
-			{Name: inlineImagesCollectorName, Config: InlineImageConfig{Images: input.images}},
 		},
 		Targets: []contextfrag.RenderTarget{contextfrag.RenderSDKMessages},
 	})
@@ -66,7 +62,7 @@ func assertContextViewEquivalent(t *testing.T, input legacyInput) {
 	assertMessagesEqual(t, payload.Messages, want)
 }
 
-func legacyProviderMessages(messages []sdk.Message, query string, images []sdk.ImagePart) []sdk.Message {
+func legacyProviderMessages(messages []sdk.Message, query string) []sdk.Message {
 	var out []sdk.Message
 	if messages != nil {
 		out = make([]sdk.Message, len(messages))
@@ -74,23 +70,8 @@ func legacyProviderMessages(messages []sdk.Message, query string, images []sdk.I
 			out[i] = cloneSDKMessage(message)
 		}
 	}
-	parts := make([]sdk.MessagePart, 0, len(images))
-	for _, image := range images {
-		if image.Image != "" {
-			parts = append(parts, image)
-		}
-	}
 	if query != "" {
-		return append(out, sdk.UserMessage(query, parts...))
+		return append(out, sdk.UserMessage(query))
 	}
-	if len(parts) == 0 {
-		return out
-	}
-	for i := len(out) - 1; i >= 0; i-- {
-		if out[i].Role == sdk.MessageRoleUser {
-			out[i].Content = append(out[i].Content, parts...)
-			return out
-		}
-	}
-	return append(out, sdk.UserMessage("", parts...))
+	return out
 }

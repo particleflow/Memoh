@@ -91,10 +91,9 @@ func TestBuildContextFragScopeDoesNotInferDirectedReplyFromAnyReplyID(t *testing
 	}
 }
 
-func TestPrepareRunConfigDoesNotDoubleCountPipelineInlineImages(t *testing.T) {
+func TestPrepareRunConfigMaterializesRawQueryOnce(t *testing.T) {
 	t.Parallel()
 
-	image := sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png"}
 	resolver := &Service{}
 	currentIndex := 0
 	memoryIndex := 1
@@ -103,23 +102,12 @@ func TestPrepareRunConfigDoesNotDoubleCountPipelineInlineImages(t *testing.T) {
 			sdk.UserMessage("pipeline current user"),
 			sdk.UserMessage("memory recall"),
 		},
-		InlineImages:                   []sdk.ImagePart{image},
 		ContextCurrentUserMessageIndex: &currentIndex,
 		ContextMemoryMessageIndex:      &memoryIndex,
 	}
 
 	got := resolver.prepareRunConfig(context.Background(), cfg)
 
-	if got.ContextManifest.Counts.Images != 1 {
-		t.Fatalf("manifest image count = %d, want only image injected into SDK message: %#v", got.ContextManifest.Counts.Images, got.ContextManifest.Items)
-	}
-	rendered := contextfrag.Render(got.ContextFrags)
-	if len(rendered.InlineImages) != 0 {
-		t.Fatalf("rendered inline images = %#v, want images only inside pipeline SDK message", rendered.InlineImages)
-	}
-	if !messagesContainImage(got.Messages) {
-		t.Fatalf("prepared messages do not contain injected image: %#v", got.Messages)
-	}
 	if got.ContextCurrentUserMessageIndex == nil || *got.ContextCurrentUserMessageIndex != 0 {
 		t.Fatalf("current user index = %#v, want pipeline current 0", got.ContextCurrentUserMessageIndex)
 	}
@@ -127,7 +115,7 @@ func TestPrepareRunConfigDoesNotDoubleCountPipelineInlineImages(t *testing.T) {
 		t.Fatalf("memory index = %#v, want 1", got.ContextMemoryMessageIndex)
 	}
 	wantMessages := []sdk.Message{
-		sdk.UserMessage("pipeline current user", image),
+		sdk.UserMessage("pipeline current user"),
 		sdk.UserMessage("memory recall"),
 	}
 	if !reflect.DeepEqual(got.Messages, wantMessages) {
@@ -135,30 +123,6 @@ func TestPrepareRunConfigDoesNotDoubleCountPipelineInlineImages(t *testing.T) {
 	}
 	if len(got.ContextSourceFrags) == 0 {
 		t.Fatal("prepared config did not build authoritative source fragments")
-	}
-}
-
-func TestPrepareRunConfigPreservesPipelineFileAttachmentBytes(t *testing.T) {
-	t.Parallel()
-
-	file := sdk.FilePart{
-		Data:      "JVBERi0xLjQ=",
-		MediaType: "application/pdf",
-		Filename:  "report.pdf",
-	}
-	currentIndex := 0
-	cfg := native.RunConfig{
-		Messages:                       []sdk.Message{sdk.UserMessage("pipeline current user")},
-		InlineAttachments:              []sdk.MessagePart{file},
-		ContextCurrentUserMessageIndex: &currentIndex,
-	}
-
-	prepared := (&Service{}).prepareRunConfig(context.Background(), cfg)
-	got := contextview.ApplyProviderRunConfig(context.Background(), nil, prepared)
-	want := []sdk.Message{sdk.UserMessage("pipeline current user", file)}
-
-	if !reflect.DeepEqual(got.Messages, want) {
-		t.Fatalf("provider messages changed: got %#v want %#v", got.Messages, want)
 	}
 }
 

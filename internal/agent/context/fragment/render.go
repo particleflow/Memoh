@@ -49,8 +49,6 @@ func BuildManifest(frags []ContextFrag) Manifest {
 				item.TextBytes += messageTextBytes(partMessage(part))
 				item.ImageCount += messageImageCount(partMessage(part))
 				manifest.Counts.Messages++
-			case PartImage:
-				item.ImageCount++
 			}
 		}
 		item.TokenEstimate = ResolveFragTokens(frag)
@@ -157,10 +155,6 @@ func Render(frags []ContextFrag) AssembledContext {
 					if strings.TrimSpace(part.Text) != "" {
 						out.Query = strings.TrimSpace(part.Text)
 					}
-				case PartImage:
-					if image := partSDKImage(part); image != nil && strings.TrimSpace(image.Image) != "" {
-						out.InlineImages = append(out.InlineImages, *image)
-					}
 				case PartSDKMessage:
 					if msg := partMessage(part); msg != nil {
 						out.Messages = append(out.Messages, cloneMessage(*msg))
@@ -191,13 +185,6 @@ func partMessage(part Part) *sdk.Message {
 		return part.SDKMessage
 	}
 	return part.Message
-}
-
-func partSDKImage(part Part) *sdk.ImagePart {
-	if part.SDKImage != nil {
-		return part.SDKImage
-	}
-	return part.ImagePart
 }
 
 func messageTextBytes(msg *sdk.Message) int {
@@ -288,10 +275,6 @@ func fragContributesToRender(index int, frag ContextFrag, lastCurrentText int) b
 			switch part.Type {
 			case PartText:
 				if index == lastCurrentText && strings.TrimSpace(part.Text) != "" {
-					return true
-				}
-			case PartImage:
-				if image := partSDKImage(part); image != nil && strings.TrimSpace(image.Image) != "" {
 					return true
 				}
 			case PartSDKMessage:

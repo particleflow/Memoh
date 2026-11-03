@@ -22,10 +22,8 @@ func (cfg RunConfig) GenerationLimits() models.GenerationLimits {
 // RunConfig fields. The SDK-facing fields remain the source of truth in phase 1.
 func (cfg RunConfig) RefreshContextFrag() RunConfig {
 	query := cfg.Query
-	inlineImages := cfg.InlineImages
 	if cfg.ContextQueryMaterialized {
 		query = ""
-		inlineImages = nil
 	}
 	assembled := contextfrag.Compile(contextfrag.CompileInput{
 		Source:                  contextfrag.SourceRunConfig,
@@ -35,7 +33,6 @@ func (cfg RunConfig) RefreshContextFrag() RunConfig {
 		CurrentUserMessageIndex: cfg.ContextCurrentUserMessageIndex,
 		MemoryMessageIndex:      cfg.ContextMemoryMessageIndex,
 		Query:                   query,
-		InlineImages:            inlineImages,
 		ToolUsage:               cfg.ContextToolUsage,
 		DynamicMutators:         cfg.ContextDynamicMutators,
 		Existing:                cfg.ContextFrags,

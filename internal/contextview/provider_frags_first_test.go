@@ -164,14 +164,13 @@ func TestCollectNonSystemProviderSourceFragsExcludesSystem(t *testing.T) {
 	t.Parallel()
 	frags := CollectNonSystemProviderSourceFrags(context.Background(), agentpkg.RunConfig{
 		System: "ignored", Messages: []sdk.Message{sdk.UserMessage("history")}, Query: "  current \n",
-		InlineImages: []sdk.ImagePart{{Image: "data:image/png;base64,abc", MediaType: "image/png"}},
 	})
 	for _, frag := range frags {
 		if frag.Slot == contextfrag.SlotSystem {
 			t.Fatalf("system frag = %#v", frag)
 		}
 	}
-	if len(frags) != 3 || frags[1].ID != "current_user.message" || frags[2].ID != "current_user.images" {
+	if len(frags) != 2 || frags[1].ID != "current_user.message" {
 		t.Fatalf("frags = %#v", frags)
 	}
 }

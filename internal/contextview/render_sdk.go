@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	sdk "github.com/felinics/twilight/sdk"
 
@@ -15,10 +14,9 @@ import (
 )
 
 type SDKRenderedPayload struct {
-	System       string
-	Messages     []sdk.Message
-	Query        string
-	InlineImages []sdk.ImagePart
+	System   string
+	Messages []sdk.Message
+	Query    string
 }
 
 type SDKMessagesRenderer struct{}
@@ -56,7 +54,7 @@ func renderSDKPayloadFromFrags(ordered []contextfrag.ContextFrag) *SDKRenderedPa
 			renderMessageFrag(payload, frag)
 		}
 	}
-	materializeRenderedCurrent(payload)
+	materializeRenderedQuery(payload)
 	return payload
 }
 
@@ -114,10 +112,6 @@ func renderCurrentUserFrag(payload *SDKRenderedPayload, frag contextfrag.Context
 		switch part.Type {
 		case contextfrag.PartText:
 			payload.Query = part.Text
-		case contextfrag.PartImage:
-			if image := sdkImagePart(part); image != nil && strings.TrimSpace(image.Image) != "" {
-				payload.InlineImages = append(payload.InlineImages, *image)
-			}
 		case contextfrag.PartSDKMessage:
 			if msg := sdkMessagePart(part); msg != nil {
 				payload.Messages = append(payload.Messages, cloneSDKMessage(*msg))
@@ -136,31 +130,14 @@ func renderMessageFrag(payload *SDKRenderedPayload, frag contextfrag.ContextFrag
 	}
 }
 
-func materializeRenderedCurrent(payload *SDKRenderedPayload) {
-	images := make([]sdk.MessagePart, 0, len(payload.InlineImages))
-	for _, image := range payload.InlineImages {
-		if strings.TrimSpace(image.Image) != "" {
-			images = append(images, image)
-		}
-	}
-	if payload.Query != "" {
-		payload.Messages = append(payload.Messages, sdk.UserMessage(payload.Query, images...))
-		payload.Query = ""
-		payload.InlineImages = nil
+// materializeRenderedQuery folds the raw query into the message list as the
+// final user message.
+func materializeRenderedQuery(payload *SDKRenderedPayload) {
+	if payload.Query == "" {
 		return
 	}
-	if len(images) == 0 {
-		return
-	}
-	for i := len(payload.Messages) - 1; i >= 0; i-- {
-		if payload.Messages[i].Role == sdk.MessageRoleUser {
-			payload.Messages[i].Content = append(payload.Messages[i].Content, images...)
-			payload.InlineImages = nil
-			return
-		}
-	}
-	payload.Messages = append(payload.Messages, sdk.UserMessage("", images...))
-	payload.InlineImages = nil
+	payload.Messages = append(payload.Messages, sdk.UserMessage(payload.Query))
+	payload.Query = ""
 }
 
 func sdkMessagePart(part contextfrag.Part) *sdk.Message {
@@ -168,13 +145,6 @@ func sdkMessagePart(part contextfrag.Part) *sdk.Message {
 		return part.SDKMessage
 	}
 	return part.Message
-}
-
-func sdkImagePart(part contextfrag.Part) *sdk.ImagePart {
-	if part.SDKImage != nil {
-		return part.SDKImage
-	}
-	return part.ImagePart
 }
 
 func cloneSDKMessage(msg sdk.Message) sdk.Message {
@@ -185,11 +155,10 @@ func cloneSDKMessage(msg sdk.Message) sdk.Message {
 
 func sdkRenderedPayloadHash(payload *SDKRenderedPayload) (string, error) {
 	raw, err := json.Marshal(struct {
-		System       string          `json:"system"`
-		Messages     []sdk.Message   `json:"messages"`
-		Query        string          `json:"query"`
-		InlineImages []sdk.ImagePart `json:"inline_images"`
-	}{payload.System, payload.Messages, payload.Query, payload.InlineImages})
+		System   string        `json:"system"`
+		Messages []sdk.Message `json:"messages"`
+		Query    string        `json:"query"`
+	}{payload.System, payload.Messages, payload.Query})
 	if err != nil {
 		return "", fmt.Errorf("marshal sdk rendered payload: %w", err)
 	}

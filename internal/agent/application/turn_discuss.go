@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
-	"slices"
 	"strings"
 
 	sdk "github.com/felinics/twilight/sdk"
@@ -29,7 +28,6 @@ type turnRuntimeHooks struct {
 	streamChat       func(context.Context, ChatRequest) (<-chan StreamChunk, <-chan error)
 	streamAgent      func(context.Context, native.RunConfig) <-chan native.StreamEvent
 	resolveRunConfig func(context.Context, string, string, string, string, string, string, string) (ResolveRunConfigResult, error)
-	inlineImages     func(context.Context, string, []timeline.ImageAttachmentRef) [][]sdk.ImagePart
 	storeRound       func(context.Context, string, string, string, string, string, []sdk.Message, string, *contextfrag.LifecycleHolder) error
 }
 
@@ -241,21 +239,9 @@ func (s *Service) pumpDiscussNative(ctx context.Context, cmd turn.StartTurnComma
 	}
 	runConfig.ContextBudgetMaxTokens = resolved.ContextBudgetMaxTokens
 
-	// Inline image attachments from new RC segments so the model receives
-	// them as native vision input (ImagePart) on the first encounter.
-	var currentImages []sdk.ImagePart
-	var sourceImages map[string][]sdk.ImagePart
-	if runConfig.SupportsImageInput && len(cmd.DiscussImageRefs) > 0 {
-		var withheld []string
-		currentImages, sourceImages, withheld = s.discussImageParts(ctx, cmd, admitted)
-		if len(withheld) > 0 {
-			runConfig.ContextMutations.Record(contextfrag.MutationCurrentInputImagesOmitted, "sources="+strings.Join(withheld, ","))
-		}
-	}
-	runConfig.ContextSourceFrags = s.collectDiscussSourceFrags(ctx, runConfig, admitted, currentImages, sourceImages)
+	runConfig.ContextSourceFrags = s.collectDiscussSourceFrags(ctx, runConfig, admitted)
 	for _, frag := range runConfig.ContextSourceFrags {
-		if frag.Provenance.Collector == discussContextCollector &&
-			(frag.Kind == contextfrag.KindCurrentUserMessage || len(sourceImages[frag.Provenance.SourceID]) > 0) {
+		if frag.Provenance.Collector == discussContextCollector && frag.Kind == contextfrag.KindCurrentUserMessage {
 			if message := contextfrag.FragMessage(frag); message != nil {
 				runConfig.Messages[frag.Provenance.Index] = *message
 			}
@@ -450,71 +436,10 @@ func (s *Service) persistDiscussTerminalSnapshot(
 // discussContextCollector names the collector of composed discuss messages.
 const discussContextCollector = "discuss_context"
 
-// discussImageParts inlines the batch's new images, each on the admitted
-// message it arrived with; a ref naming no message rides on the current input.
-// A message admission left out takes its images with it, so older input of
-// the batch carries its own images as history instead of growing the
-// protected current input. The vision budget is spent newest first; the
-// messages whose images are not delivered are reported.
-func (s *Service) discussImageParts(ctx context.Context, cmd turn.StartTurnCommand, admitted []turn.DiscussMessage) ([]sdk.ImagePart, map[string][]sdk.ImagePart, []string) {
-	admittedIDs := make(map[string]bool, len(admitted))
-	currentID := ""
-	for _, message := range admitted {
-		if message.Source != nil && message.Source.Kind == "external" {
-			admittedIDs[message.Source.ID] = true
-			if message.Source.Current {
-				currentID = message.Source.ID
-			}
-		}
-	}
-	var refs []timeline.ImageAttachmentRef
-	var owners, withheld []string
-	for _, ref := range cmd.DiscussImageRefs {
-		switch {
-		case ref.MessageID == "" || admittedIDs[ref.MessageID]:
-			refs = append(refs, timeline.ImageAttachmentRef{ContentHash: ref.ContentHash, Mime: ref.Mime})
-			owners = append(owners, ref.MessageID)
-		case !slices.Contains(withheld, ref.MessageID):
-			// Admission left the message out or compaction summarized it; no
-			// summary carries an image.
-			withheld = append(withheld, ref.MessageID)
-		}
-	}
-	if len(refs) == 0 {
-		return nil, nil, withheld
-	}
-	slices.Reverse(refs)
-	inlined := s.inlineDiscussImages(ctx, cmd.BotID, refs)
-	var current []sdk.ImagePart
-	bySource := make(map[string][]sdk.ImagePart)
-	delivered := make(map[string]bool)
-	for i := len(inlined) - 1; i >= 0; i-- {
-		if len(inlined[i]) > 0 {
-			delivered[refs[i].ContentHash] = true
-		}
-		if owner := owners[len(owners)-1-i]; owner == "" {
-			current = append(current, inlined[i]...)
-		} else {
-			bySource[owner] = append(bySource[owner], inlined[i]...)
-		}
-	}
-	for i, owner := range owners {
-		if owner == "" {
-			owner = currentID
-		}
-		if hash := refs[len(refs)-1-i].ContentHash; owner != "" && !delivered[hash] && !slices.Contains(withheld, owner) {
-			withheld = append(withheld, owner)
-		}
-	}
-	return current, bySource, withheld
-}
-
 func (s *Service) collectDiscussSourceFrags(
 	ctx context.Context,
 	runConfig native.RunConfig,
 	messages []turn.DiscussMessage,
-	inlineImages []sdk.ImagePart,
-	sourceImages map[string][]sdk.ImagePart,
 ) []contextfrag.ContextFrag {
 	var systemFrags []contextfrag.ContextFrag
 	var memoryFrags []contextfrag.ContextFrag
@@ -535,8 +460,6 @@ func (s *Service) collectDiscussSourceFrags(
 		runConfig.System,
 		contextview.DiscussContextInput{
 			ComposedMessages: discussMessagesToTimeline(messages),
-			InlineImages:     inlineImages,
-			SourceImages:     sourceImages,
 			SystemFrags:      systemFrags,
 		},
 	)
@@ -710,13 +633,6 @@ func (s *Service) resolveDiscussRunConfig(
 	)
 }
 
-func (s *Service) inlineDiscussImages(ctx context.Context, botID string, refs []timeline.ImageAttachmentRef) [][]sdk.ImagePart {
-	if s.turnHooks != nil && s.turnHooks.inlineImages != nil {
-		return s.turnHooks.inlineImages(ctx, botID, refs)
-	}
-	return s.InlineImageAttachments(ctx, botID, refs)
-}
-
 func (s *Service) streamDiscussAgent(ctx context.Context, cfg native.RunConfig) <-chan native.StreamEvent {
 	if s.turnHooks != nil && s.turnHooks.streamAgent != nil {
 		return s.turnHooks.streamAgent(ctx, cfg)
@@ -796,27 +712,4 @@ func discussMessagesToTimeline(messages []turn.DiscussMessage) []timeline.Contex
 		}
 	}
 	return result
-}
-
-// injectImagePartsIntoLastUserMessage appends ImageParts to the last user
-// message in msgs so the model receives inline vision input.
-func injectImagePartsIntoLastUserMessage(msgs []sdk.Message, parts []sdk.ImagePart) {
-	if len(parts) == 0 {
-		return
-	}
-	extra := make([]sdk.MessagePart, 0, len(parts))
-	for _, p := range parts {
-		if strings.TrimSpace(p.Image) != "" {
-			extra = append(extra, p)
-		}
-	}
-	if len(extra) == 0 {
-		return
-	}
-	for i := len(msgs) - 1; i >= 0; i-- {
-		if msgs[i].Role == sdk.MessageRoleUser {
-			msgs[i].Content = append(msgs[i].Content, extra...)
-			return
-		}
-	}
 }

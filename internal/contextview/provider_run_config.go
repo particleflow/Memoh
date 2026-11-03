@@ -51,8 +51,8 @@ func CollectProviderSourceFrags(ctx context.Context, cfg agentpkg.RunConfig) []c
 
 // CollectNonSystemProviderSourceFrags preserves the exact SDK message order.
 // A marked current message keeps its original index even though it receives a
-// current-user slot, and raw Query/InlineImages are collected only when the
-// caller has not materialized them yet.
+// current-user slot, and the raw Query is collected only when the caller has
+// not materialized it yet.
 func CollectNonSystemProviderSourceFrags(ctx context.Context, cfg agentpkg.RunConfig) []contextfrag.ContextFrag {
 	historyConfig := HistoryMessagesConfig{
 		Messages:                cfg.Messages,
@@ -111,14 +111,7 @@ func CollectNonSystemProviderSourceFrags(ctx context.Context, cfg agentpkg.RunCo
 	if err != nil {
 		return nil
 	}
-	images, err := (&InlineImageCollector{}).Collect(ctx, CollectRequest{
-		Scope: cfg.ContextScope, Intent: contextfrag.IntentRunConfigPreProvider, Config: InlineImageConfig{Images: cfg.InlineImages},
-	})
-	if err != nil {
-		return nil
-	}
 	messages = append(messages, rawCurrent...)
-	messages = append(messages, images...)
 	return messages
 }
 
@@ -261,10 +254,8 @@ func providerCurrentRequestCost(ctx context.Context, cfg agentpkg.RunConfig) (in
 		return currentRequestFragCost(cfg.ContextSourceFrags), nil
 	}
 	query := cfg.Query
-	inlineImages := cfg.InlineImages
 	if cfg.ContextQueryMaterialized {
 		query = ""
-		inlineImages = nil
 	}
 	historyConfig := HistoryMessagesConfig{
 		Messages:                cfg.Messages,
@@ -278,7 +269,6 @@ func providerCurrentRequestCost(ctx context.Context, cfg agentpkg.RunConfig) (in
 	}{
 		{&materializedCurrentUserCollector{}, historyConfig},
 		{&CurrentUserCollector{}, CurrentUserConfig{Query: query}},
-		{&InlineImageCollector{}, InlineImageConfig{Images: inlineImages}},
 	}
 	var frags []contextfrag.ContextFrag
 	for _, spec := range specs {
@@ -647,39 +637,13 @@ func materializeLegacyQuery(cfg agentpkg.RunConfig, includeHookContext bool) age
 	if cfg.ContextQueryMaterialized {
 		return cfg
 	}
-	imageParts := make([]sdk.MessagePart, 0, len(cfg.InlineImages))
-	for _, image := range cfg.InlineImages {
-		if strings.TrimSpace(image.Image) != "" {
-			imageParts = append(imageParts, image)
-		}
-	}
 	if cfg.Query != "" {
-		cfg.Messages = append(cfg.Messages, sdk.UserMessage(cfg.Query, imageParts...))
+		cfg.Messages = append(cfg.Messages, sdk.UserMessage(cfg.Query))
 		cfg.ForkContextSourceMessageIDs = append(cfg.ForkContextSourceMessageIDs, "")
 		index := len(cfg.Messages) - 1
 		cfg.ContextCurrentUserMessageIndex = &index
 		cfg.ContextQueryMaterialized = true
-		return cfg
 	}
-	if len(imageParts) == 0 {
-		return cfg
-	}
-	for i := len(cfg.Messages) - 1; i >= 0; i-- {
-		if cfg.Messages[i].Role != sdk.MessageRoleUser {
-			continue
-		}
-		cfg.Messages[i].Content = append(cfg.Messages[i].Content, imageParts...)
-		if i < len(cfg.ForkContextSourceMessageIDs) {
-			cfg.ForkContextSourceMessageIDs[i] = ""
-		}
-		cfg.ContextCurrentUserMessageIndex = intPointer(i)
-		cfg.ContextQueryMaterialized = true
-		return cfg
-	}
-	cfg.Messages = append(cfg.Messages, sdk.UserMessage("", imageParts...))
-	cfg.ForkContextSourceMessageIDs = append(cfg.ForkContextSourceMessageIDs, "")
-	cfg.ContextCurrentUserMessageIndex = intPointer(len(cfg.Messages) - 1)
-	cfg.ContextQueryMaterialized = true
 	return cfg
 }
 

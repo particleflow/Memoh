@@ -23,8 +23,13 @@ func breakdownFixtureFrags() []ContextFrag {
 		Slot:    SlotHistory,
 	})
 	hist.TokenEstimate = 123
-	img := ImageFrag("current_user.images", []sdk.ImagePart{{Image: "data:image/png;base64,AAAA", MediaType: "image/png"}}, Scope{}, "run_config")
-	return []ContextFrag{sysA, sysB, hist, img}
+	media := MessageFrag(MessageFragInput{
+		ID:      "history.db_message.m2",
+		Message: sdk.UserMessage("", sdk.ImagePart{Image: "data:image/png;base64,AAAA", MediaType: "image/png"}),
+		Kind:    KindConversationEvent,
+		Slot:    SlotHistory,
+	})
+	return []ContextFrag{sysA, sysB, hist, media}
 }
 
 func TestBuildManifestItemsCarryTokenEstimates(t *testing.T) {
@@ -38,7 +43,7 @@ func TestBuildManifestItemsCarryTokenEstimates(t *testing.T) {
 		"system.prompt":         10,
 		"system.prompt.tail":    5,
 		"history.db_message.m1": 123,
-		"current_user.images":   EstimateImageTokens,
+		"history.db_message.m2": EstimateImageTokens,
 	}
 	for _, item := range manifest.Items {
 		if want, ok := wantByID[item.ID]; ok && item.TokenEstimate != want {
@@ -55,8 +60,7 @@ func TestBuildManifestBreakdownAggregatesByKind(t *testing.T) {
 
 	manifest := BuildManifest(breakdownFixtureFrags())
 	want := []KindBreakdown{
-		{Kind: KindNativeImage, Fragments: 1, TokenEstimate: EstimateImageTokens, Images: 1},
-		{Kind: KindConversationEvent, Fragments: 1, TokenEstimate: 123, TextBytes: 2},
+		{Kind: KindConversationEvent, Fragments: 2, TokenEstimate: 123 + EstimateImageTokens, TextBytes: 2, Images: 1},
 		{Kind: KindSystemPrompt, Fragments: 2, TokenEstimate: 15, TextBytes: 60},
 	}
 	if len(manifest.Breakdown) != len(want) {

@@ -14,8 +14,6 @@ import (
 	"strings"
 	"time"
 
-	sdk "github.com/felinics/twilight/sdk"
-
 	"github.com/felinics/memoh/internal/media/lottie"
 )
 
@@ -30,48 +28,6 @@ const animationFrameCount = 5
 // input rather than a budget — and it is the deadline the sandbox aborts a
 // runaway render on, which is the whole reason the renderer runs in one.
 const animationRenderTimeout = 10 * time.Second
-
-// visionBudget bounds how many images one turn hands the model.
-//
-// It is spent in two stages so a turn that carries more media than the budget
-// still shows the model something of everything: an attachment offers all its
-// frames, and once the budget is tight it contributes only its first. The
-// zero value is a full budget.
-type visionBudget struct{ used int }
-
-// take returns the frames this attachment may contribute.
-func (b *visionBudget) take(frames []sdk.ImagePart) []sdk.ImagePart {
-	remaining := maxTurnVisionImages - b.used
-	switch {
-	case remaining <= 0:
-		return nil
-	case len(frames) <= remaining:
-		b.used += len(frames)
-		return frames
-	default:
-		// Not enough room for the expansion — keep the representative frame.
-		b.used++
-		return frames[:1]
-	}
-}
-
-// inlineStoredImageParts turns a stored asset into direct vision input.
-//
-// An animated sticker becomes several frames while every other image stays a
-// single part, so this is where the one-attachment-to-many-images fan-out
-// begins and ends: the attachment itself is never duplicated, which keeps
-// attachment paths, file fallbacks and size accounting counting it once.
-func (s *Service) inlineStoredImageParts(ctx context.Context, botID, contentHash, declaredMime string) ([]sdk.ImagePart, error) {
-	dataURLs, mime, err := s.inlineStoredImageDataURLs(ctx, botID, contentHash, declaredMime)
-	if err != nil {
-		return nil, err
-	}
-	parts := make([]sdk.ImagePart, 0, len(dataURLs))
-	for _, dataURL := range dataURLs {
-		parts = append(parts, sdk.ImagePart{Image: dataURL, MediaType: mime})
-	}
-	return parts, nil
-}
 
 // inlineStoredImageDataURLs returns one data URL per frame — one entry for an
 // ordinary image, several for an animation — together with their shared MIME.

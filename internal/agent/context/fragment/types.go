@@ -284,25 +284,14 @@ type PartType string
 const (
 	PartText       PartType = "text"
 	PartSDKMessage PartType = "sdk_message"
-	PartImage      PartType = "image"
 )
-
-// ImageRef records image metadata without embedding the image payload in the
-// manifest. The actual SDK image part is retained in SDKImage for rendering.
-type ImageRef struct {
-	MediaType string `json:"media_type,omitempty"`
-	Source    string `json:"source,omitempty"`
-}
 
 // Part is one payload item in a context fragment.
 type Part struct {
-	Type       PartType       `json:"type"`
-	Text       string         `json:"text,omitempty"`
-	Image      ImageRef       `json:"image,omitempty"`
-	Message    *sdk.Message   `json:"message,omitempty"`
-	ImagePart  *sdk.ImagePart `json:"image_part,omitempty"`
-	SDKMessage *sdk.Message   `json:"-"`
-	SDKImage   *sdk.ImagePart `json:"-"`
+	Type       PartType     `json:"type"`
+	Text       string       `json:"text,omitempty"`
+	Message    *sdk.Message `json:"message,omitempty"`
+	SDKMessage *sdk.Message `json:"-"`
 }
 
 // ContextFrag is the typed context fragment abstraction.
@@ -333,12 +322,11 @@ type ContextFrag struct {
 
 // AssembledContext is the compiled view produced from fragments.
 type AssembledContext struct {
-	Frags        []ContextFrag   `json:"frags,omitempty"`
-	System       string          `json:"system,omitempty"`
-	Messages     []sdk.Message   `json:"-"`
-	Query        string          `json:"query,omitempty"`
-	InlineImages []sdk.ImagePart `json:"-"`
-	Manifest     Manifest        `json:"manifest"`
+	Frags    []ContextFrag `json:"frags,omitempty"`
+	System   string        `json:"system,omitempty"`
+	Messages []sdk.Message `json:"-"`
+	Query    string        `json:"query,omitempty"`
+	Manifest Manifest      `json:"manifest"`
 }
 
 // Manifest is a content-light accounting view for debugging and review.

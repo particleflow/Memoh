@@ -1,20 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/png"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -67,7 +62,6 @@ type backlogFixture struct {
 	cfg         discuss.DiscussSessionConfig
 	cursor      *notifyingRecoveryCursor
 	broadcaster *recordingFailureBroadcaster
-	images      *backlogImageLoader
 	summaries   atomic.Int32
 	modelCalls  atomic.Int32
 	lastRequest atomic.Value
@@ -219,11 +213,6 @@ func (f *backlogFixture) omittedInput() map[string]bool {
 	return f.recordedOmissions("current_input_omitted", true)
 }
 
-// omittedImages collects the inputs whose images runs recorded as shed.
-func (f *backlogFixture) omittedImages() map[string]bool {
-	return f.recordedOmissions("current_input_images_omitted", false)
-}
-
 func (f *backlogFixture) recordedOmissions(kind string, withSelections bool) map[string]bool {
 	f.t.Helper()
 	omitted := map[string]bool{}
@@ -339,268 +328,6 @@ func TestPostgresDiscussOversizedInputFailsOnceThenNextMessageIsAnswered(t *test
 				t.Fatal("an input compaction could not summarize left the provider context without a record")
 			}
 			t.Logf("size=%d compacted=%v summaries=%d", size, compacted, f.summaries.Load())
-		})
-	}
-}
-
-// backlogImageLoader serves each content hash as a PNG of its own width, so
-// the provider request tells which stored image every image part is.
-type backlogImageLoader struct {
-	mu     sync.Mutex
-	hashes map[string]string
-}
-
-func (l *backlogImageLoader) OpenForGateway(_ context.Context, _, contentHash string) (io.ReadCloser, string, error) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	var encoded bytes.Buffer
-	if err := png.Encode(&encoded, image.NewGray(image.Rect(0, 0, len(l.hashes)+1, 1))); err != nil {
-		return nil, "", err
-	}
-	l.hashes[encoded.String()] = contentHash
-	return io.NopCloser(bytes.NewReader(encoded.Bytes())), "image/png", nil
-}
-
-func (*backlogImageLoader) AccessPathForGateway(context.Context, string, string) (string, error) {
-	return "", io.EOF
-}
-
-func (l *backlogImageLoader) hash(data []byte) string {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return l.hashes[string(data)]
-}
-
-// enableVision lets the chat model take images from a loader that tells the
-// stored images apart.
-func (f *backlogFixture) enableVision() {
-	f.t.Helper()
-	if _, err := f.pool.Exec(f.ctx, `UPDATE models SET config = config || '{"compatibilities":["vision"]}'::jsonb WHERE id=$1`, f.chatModel); err != nil {
-		f.t.Fatal(err)
-	}
-	f.images = &backlogImageLoader{hashes: map[string]string{}}
-	f.service.SetGatewayAssetLoader(f.images)
-}
-
-func (f *backlogFixture) appendImageMessage(id, text string, hashes ...string) {
-	f.t.Helper()
-	f.appendMessage(id, text)
-	for _, hash := range hashes {
-		f.rc[len(f.rc)-1].ImageRefs = append(f.rc[len(f.rc)-1].ImageRefs, timeline.ImageAttachmentRef{ContentHash: hash, Mime: "image/png"})
-	}
-}
-
-// requestImages maps each provider message carrying images to the image
-// content hashes it carries, keyed by the message's text.
-func (f *backlogFixture) requestImages(request string) map[string][]string {
-	t := f.t
-	t.Helper()
-	var body struct {
-		Messages []struct {
-			Content json.RawMessage `json:"content"`
-		} `json:"messages"`
-	}
-	if err := json.Unmarshal([]byte(request), &body); err != nil {
-		t.Fatal(err)
-	}
-	images := map[string][]string{}
-	for _, message := range body.Messages {
-		var parts []struct {
-			Type     string `json:"type"`
-			Text     string `json:"text"`
-			ImageURL struct {
-				URL string `json:"url"`
-			} `json:"image_url"`
-		}
-		if json.Unmarshal(message.Content, &parts) != nil {
-			continue
-		}
-		var text strings.Builder
-		var hashes []string
-		for _, part := range parts {
-			switch part.Type {
-			case "text":
-				text.WriteString(part.Text)
-			case "image_url":
-				_, encoded, _ := strings.Cut(part.ImageURL.URL, ";base64,")
-				decoded, err := base64.StdEncoding.DecodeString(encoded)
-				if err != nil {
-					t.Fatalf("image part %q: %v", part.ImageURL.URL, err)
-				}
-				hashes = append(hashes, f.images.hash(decoded))
-			}
-		}
-		if len(hashes) > 0 {
-			images[text.String()] = hashes
-		}
-	}
-	return images
-}
-
-// assertImagesOnOwnMessages fails unless every image the request carries sits
-// on the message it arrived with.
-func (f *backlogFixture) assertImagesOnOwnMessages(request string, owners map[string]string) int {
-	t := f.t
-	t.Helper()
-	total := 0
-	for text, hashes := range f.requestImages(request) {
-		for _, hash := range hashes {
-			total++
-			if owner, ok := owners[hash]; !ok || !strings.Contains(text, owner) {
-				t.Fatalf("image %s arrived with %q but rides on a message %q", hash, owner, text)
-			}
-		}
-	}
-	return total
-}
-
-// Images of an unconsumed backlog belong to their own messages: the older
-// ones are history recovery may compact, not protected input riding on the
-// newest message. A backlog whose images exceed the window is answered, and
-// the next message is answered too.
-func TestPostgresDiscussImageBacklogKeepsImagesOnTheirMessages(t *testing.T) {
-	f := newBacklogFixture(t)
-	f.enableVision()
-	owners := map[string]string{}
-	for i := range 6 {
-		id, hash := fmt.Sprintf("image-%d", i), fmt.Sprintf("image-hash-%d", i)
-		owners[hash] = id + " "
-		f.appendImageMessage(id, id+" look at this", hash)
-	}
-	request := f.answer("image backlog", "image-5 ")
-	if f.assertImagesOnOwnMessages(request, owners) == 0 || len(f.requestImages(request)["image-5 look at this"]) != 1 {
-		t.Fatalf("the newest input lost its image: %v", f.requestImages(request))
-	}
-	images, shed := f.requestImages(request), f.omittedImages()
-	for i := range 6 {
-		id := fmt.Sprintf("image-%d", i)
-		if !strings.Contains(request, id+" look at this") {
-			t.Fatalf("%s lost its text to image pressure", id)
-		}
-		if len(images[id+" look at this"]) == 0 && !shed[id] {
-			t.Fatalf("%s lost its image without a record; shed=%v", id, shed)
-		}
-	}
-	if len(images) < 2 {
-		t.Fatalf("shedding must stop once the history fits, but only %v kept images", images)
-	}
-	f.appendMessage("next-round", "next-round small message")
-	request = f.answer("next round", "next-round small message")
-	f.assertImagesOnOwnMessages(request, owners)
-	t.Logf("summary_calls=%d provider_calls=%d", f.summaries.Load(), f.modelCalls.Load())
-}
-
-// A newest message whose own images cannot fit fails once without consuming
-// the batch; the next message demotes it to history and is answered without
-// the demoted images riding on it.
-func TestPostgresDiscussOversizedImageInputFailsOnceThenNextMessageIsAnswered(t *testing.T) {
-	f := newBacklogFixture(t)
-	f.enableVision()
-	owners := map[string]string{}
-	hashes := make([]string, 6)
-	for i := range hashes {
-		hashes[i] = fmt.Sprintf("album-hash-%d", i)
-		owners[hashes[i]] = "album "
-	}
-	f.appendImageMessage("album", "album of six", hashes...)
-	if code := f.trigger(); code != "context.budget_unsatisfied" || f.modelCalls.Load() != 0 {
-		t.Fatalf("oversized image input: code=%q provider_calls=%d, want one bounded failure", code, f.modelCalls.Load())
-	}
-	f.appendMessage("next-round", "next-round small message")
-	request := f.answer("next round", "next-round small message")
-	f.assertImagesOnOwnMessages(request, owners)
-	if !strings.Contains(request, "album of six") {
-		t.Fatal("the demoted album lost its text to its images")
-	}
-	if len(f.requestImages(request)["album of six"]) < len(hashes) && !f.omittedImages()["album"] {
-		t.Fatal("the demoted album shed images without a record")
-	}
-	t.Logf("summary_calls=%d provider_calls=%d", f.summaries.Load(), f.modelCalls.Load())
-}
-
-// Answered history goes before the images of unconsumed input: with or
-// without compaction, an older unconsumed message keeps its image when
-// trimming or summarizing what was already answered makes room.
-func TestPostgresDiscussImageBacklogYieldsAnsweredHistoryFirst(t *testing.T) {
-	for _, tc := range []struct {
-		compaction bool
-		rounds     int
-	}{{false, 10}, {true, 10}, {true, 4}, {false, 4}} {
-		t.Run(fmt.Sprintf("compaction=%v/rounds=%d", tc.compaction, tc.rounds), func(t *testing.T) {
-			f := newBacklogFixture(t)
-			f.enableVision()
-			if _, err := f.pool.Exec(f.ctx, `UPDATE bots SET compaction_enabled=$2 WHERE id=$1`, f.botID, tc.compaction); err != nil {
-				t.Fatal(err)
-			}
-			for i := range tc.rounds {
-				id := fmt.Sprintf("old-%d", i)
-				f.appendMessage(id, id+" "+strings.Repeat("h", 2400))
-				f.answer(id, id+" ")
-			}
-			f.appendImageMessage("img-old", "img-old look at this", "img-hash")
-			f.appendMessage("newest", "newest small message")
-			request := f.answer("batch", "newest small message")
-			if len(f.requestImages(request)["img-old look at this"]) != 1 || f.omittedImages()["img-old"] {
-				t.Fatalf("img-old's image was shed although answered history could make room; shed=%v", f.omittedImages())
-			}
-		})
-	}
-}
-
-// Older unconsumed input that compaction summarizes cannot carry its images
-// into the summary; each such image is still recorded, never silently lost.
-func TestPostgresDiscussCompactedImageInputIsRecorded(t *testing.T) {
-	f := newBacklogFixture(t)
-	f.enableVision()
-	for i := range 10 {
-		id := fmt.Sprintf("img-%d", i)
-		f.appendImageMessage(id, id+" look "+strings.Repeat("z", 2800), fmt.Sprintf("hash-%d", i))
-	}
-	request := f.answer("batch", "img-9 look")
-	images, shed := f.requestImages(request), f.omittedImages()
-	if _, compacted := f.backlogRowsPrefixed("img-"); compacted == 0 {
-		t.Fatal("the fixture must summarize part of the batch")
-	}
-	for i := range 10 {
-		id := fmt.Sprintf("img-%d", i)
-		if len(images[id+" look "+strings.Repeat("z", 2800)]) == 0 && !shed[id] {
-			t.Fatalf("%s: image neither delivered nor recorded; shed=%v", id, shed)
-		}
-	}
-}
-
-// Recovery that compacts keeps older input of the batch raw by the cost of its
-// text, so an older message is not summarized for its image while newer ones
-// keep theirs: images go before text, oldest first.
-func TestPostgresDiscussCompactionKeepsBatchTextOverImages(t *testing.T) {
-	for _, tc := range []struct{ rounds, images, size int }{{2, 3, 1200}, {4, 3, 1200}, {2, 5, 600}} {
-		t.Run(fmt.Sprintf("rounds=%d/images=%d/size=%d", tc.rounds, tc.images, tc.size), func(t *testing.T) {
-			f := newBacklogFixture(t)
-			f.enableVision()
-			for i := range tc.rounds {
-				id := fmt.Sprintf("old-%d", i)
-				f.appendMessage(id, id+" "+strings.Repeat("h", 2400))
-				f.answer(id, id+" ")
-			}
-			for i := range tc.images {
-				id := fmt.Sprintf("img-%d", i)
-				f.appendImageMessage(id, id+" look "+strings.Repeat("t", tc.size), fmt.Sprintf("hash-%d", i))
-			}
-			f.appendMessage("newest", "newest small message")
-			request := f.answer("batch", "newest small message")
-			if _, compacted := f.backlogRowsPrefixed("img-"); compacted != 0 {
-				t.Fatalf("%d batch messages were summarized for their images", compacted)
-			}
-			images, shed := f.requestImages(request), f.omittedImages()
-			for i := range tc.images {
-				id := fmt.Sprintf("img-%d", i)
-				if !strings.Contains(request, id+" look ") {
-					t.Fatalf("%s lost its text", id)
-				}
-				if len(images[id+" look "+strings.Repeat("t", tc.size)]) == 0 && !shed[id] {
-					t.Fatalf("%s: image neither delivered nor recorded; shed=%v", id, shed)
-				}
-			}
 		})
 	}
 }

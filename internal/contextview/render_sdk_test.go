@@ -93,33 +93,16 @@ func TestSDKRendererSystemRenderGroupsUseDeclaredJoiners(t *testing.T) {
 func TestSDKRendererPreservesMessagesAndMaterializesRawCurrentInput(t *testing.T) {
 	t.Parallel()
 	query := "  current request \n"
-	images := []sdk.ImagePart{{Image: "data:image/png;base64,abc", MediaType: "image/png"}}
 	frags := []contextfrag.ContextFrag{
 		messageFrag("history", sdk.AssistantMessage("answer")),
 		contextfrag.MessageFrag(contextfrag.MessageFragInput{ID: "current", Message: sdk.UserMessage(query), Kind: contextfrag.KindCurrentUserMessage, Slot: contextfrag.SlotCurrentUser}),
-		contextfrag.ImageFrag("images", images, contextfrag.Scope{}, contextfrag.SourceRunConfig),
 	}
 	payload, _ := renderSDKPayload(t, frags, placementFor(frags))
-	want := []sdk.Message{sdk.AssistantMessage("answer"), sdk.UserMessage(query, images[0])}
+	want := []sdk.Message{sdk.AssistantMessage("answer"), sdk.UserMessage(query)}
 	assertMessagesEqual(t, payload.Messages, want)
-	if payload.Query != "" || len(payload.InlineImages) != 0 {
+	if payload.Query != "" {
 		t.Fatalf("unmaterialized current input: %#v", payload)
 	}
-}
-
-func TestSDKRendererImageOnlyInputInjectsLatestUser(t *testing.T) {
-	t.Parallel()
-	image := sdk.ImagePart{Image: "data:image/png;base64,abc", MediaType: "image/png"}
-	frags := []contextfrag.ContextFrag{
-		messageFrag("user", sdk.UserMessage("pipeline query")),
-		messageFrag("assistant", sdk.AssistantMessage("working")),
-		contextfrag.ImageFrag("images", []sdk.ImagePart{image}, contextfrag.Scope{}, contextfrag.SourceRunConfig),
-	}
-	payload, _ := renderSDKPayload(t, frags, placementFor(frags))
-	assertMessagesEqual(t, payload.Messages, []sdk.Message{
-		sdk.UserMessage("pipeline query", image),
-		sdk.AssistantMessage("working"),
-	})
 }
 
 func TestSDKRendererValidatesPlacementAndHashesDeterministically(t *testing.T) {
