@@ -301,6 +301,10 @@ async function main() {
       .then(entry => entry, () => undefined)
     const sawPlaying = await waitFor(playing, 5000, 200, 'speech playing').then(() => true, () => false)
     await page.wait(`document.body.innerText.includes(${JSON.stringify(BODY[3])})`, 25000, 'final sentence').catch(() => {})
+    // The on-screen tail races the read: G5 joins the requests only after the
+    // last sentence has actually been sent for synthesis, so the join cannot
+    // snapshot a stream that is still mid-body.
+    await waitFor(async () => (await speech()).some(entry => (entry.text || '').includes(BODY[3])), 15000, 250, 'last sentence read').then(() => true, () => false)
     const timing = await control('/__control/speech', null, 'GET')
     const entries = timing.entries
     const carrier = entries.find(entry => (entry.text || '').includes(BODY[0]))
