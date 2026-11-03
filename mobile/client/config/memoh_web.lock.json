@@ -609,5 +609,12 @@
     },
     "scope": "Quote-reply entry points composed after the streaming read-aloud overlay: the long-press menu keeps read-aloud first and adds one quote item, the per-message action row gains a trailing icon-only quote button, the composer carries a quote chip (sender plus truncated preview, icon-only cancel) that clears on send and on conversation switch, and the WS message payload carries reply_to. Anchors on the composed streaming sources; harmony platform only.",
     "upstreamCommitPendingWebLinePR": true
+  },
+  "sharedBubbleKind": {
+    "sourceChanges": {
+      "local": "shared-bubble-kind-changes.json",
+      "sha256": "254b5289d50f9baf5a397b0b256251595213b13e28e675f7a193f2964c08d896"
+    },
+    "scope": "Visual-only ack/body/receipt bubble kinds composed after the quote-reply overlay: dashed light ack bubble, unchanged body bubble, left accent bar for task_result/schedule receipt rounds. No copy; read-aloud, interruption and quote controls unchanged. Anchors on the composed message source; harmony platform only."
   }
 }

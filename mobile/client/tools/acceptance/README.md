@@ -43,6 +43,9 @@ node mobile/client/tools/acceptance/acceptance.mjs /path/to/rawfile/client-web
 | G8 | 后台/前台不乱不断 | 前台后 2s | 播放事件 ≥2 | 先停后恢复 |
 | S1 | 追问认领后续段自动开读 | 续段首句帧后 ≤ 1000ms 出现携带续段首句的 speech 请求 | ≥1 个 task | 早于 settle，流式期间而非 settle 时 |
 | S2 | 追问后下一轮全新回复仍开读 | 新一轮首句帧后 ≤ 1000ms | ≥1 个 task | — |
+| bubble-kind-ack | 快回为轻量气泡 | ack 单独在屏期间 | 1 个 `data-bubble-kind=ack` | 文本恰为 ack 行；虚线描边+浅底（浅/深色主题）；正文到达后消失 |
+| bubble-kind-body | 正文保持标准气泡 | settle 后 | 1 个 `data-bubble-kind=body` | 无描边、无底色；行内无 ack/receipt |
+| bubble-kind-receipt | 回执轮为另一种气泡 | 流式与 settle 后 | 1 个 `data-bubble-kind=receipt` | 左缘 3px 色条+淡强调底；文本与同一回复的正文气泡完全相同；三种形态两两不同（浅/深色主题） |
 
 G1 的时机起算点是**首个完整句子的帧**（脚本化模型的 `text_chunk_ready`），不是按键时刻；口径与 PR #121 `speech-field-acceptance.test.ts` 六门一致，差別只在于本 harness 驱动打包 dist 而非组合树。
 
@@ -51,6 +54,8 @@ G1 回放**长回复**（`FAIL_TASK_BODY`，6 句、句间 800ms、末句后 3s 
 S1/S2 复现「流式中途追问后不再自动朗读」（HAP42 现场，2026-11-03）。追问走真实入队协议：客户端在流式期间提交的不是 websocket `message`，而是 `POST /bots/{bot}/sessions/{sid}/follow-up-queue`（stub 按服务端 `sessionQueueResponse` 形状回放队列与 `/queue` 读回）。stub 的脚本在下一句边界执行认领，帧形状对齐 PR #131：`steer_turn_upserts`（认领项命名其新开 turn，锚在已提交文本块之后）与 `user_turn_upserts`（被认领输入以 UITurn 随帧发布）同帧下发；后续正文以新文本块续流（`STEER_BODY`，专用句子以便与被打断的首段区分），settle 落四条持久化 turn。断言：提交追问按 V3d 停掉首段朗读后，**认领续段仍按首句即读**（首句终止符后 ≤1000ms 出现携带续段首句的 speech 请求，早于 settle）；HAP42 真包上该断言红（续段首请求晚 5474ms、落在 settle 前 27ms，即流式期间完全静默、settle 才读）。S2 断言追问 settle 后的**全新一轮**回复仍按 G1 口径开读（HAP42 上本就绿，用于钉住修复不回归该路径）。
 
 未驱动的断言（例如打包版本里找不到思考折叠控件）报告为 `uncovered`，**同样让门禁失败**——没有证据不等于通过。
+
+三种气泡场景只认计算样式与 DOM 文本：每个形态元素不得带 `title`/`aria-label`/tooltip 属性或伪元素文字，自身不得有直接文本节点（ack 除外，恰为 ack 行）。回执轮由 stub 的 `receipt` 模式回放：该轮每一行带 `task_result` 输入源，且不发快回（服务端对 task_result 输入不出 ack）。
 
 ## 已知红项与修复线
 

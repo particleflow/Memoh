@@ -705,6 +705,102 @@ async function main() {
     add(result('quote-reply-payload-reply-to', !!replyToMatch && replyToMatch[1] === quotedId && plainHasReplyTo === false,
       `replyTo=${replyToMatch ? replyToMatch[1] : null} quotedRow=${quotedId} plainSendCarriesReplyTo=${plainHasReplyTo}`,
       { quotedPayload: (quotedSend?.payload || '').slice(0, 400) }))
+
+    // ---------- Bubble kinds: ack / body / receipt differ by bubble shape only.
+    // Each kind is marked on its own bubble element (data-bubble-kind) and must
+    // show a pairwise-distinct computed shape in the light AND dark themes. No
+    // copy may be added: the ack bubble holds exactly the ack line, a receipt
+    // bubble holds exactly what a body bubble holds for the same reply, and no
+    // kind element carries title/aria/tooltip text or pseudo-element content.
+    const probeBubble = kind => page.eval(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      const node = row ? row.querySelector('[data-bubble-kind="${kind}"]') : null
+      if (!node) return null
+      const root = document.documentElement
+      const shape = () => {
+        const s = getComputedStyle(node)
+        return [s.borderTopStyle, s.borderLeftStyle, s.borderLeftWidth, s.borderTopLeftRadius, s.backgroundColor, s.paddingLeft].join('|')
+      }
+      const wasDark = root.classList.contains('dark')
+      root.classList.remove('dark')
+      const light = shape()
+      root.classList.add('dark')
+      const dark = shape()
+      if (!wasDark) root.classList.remove('dark')
+      const pseudo = ['::before', '::after'].map(p => getComputedStyle(node, p).content)
+        .filter(content => content && content !== 'none' && content !== 'normal' && content !== '""')
+      const ownText = [...node.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).filter(Boolean)
+      return {
+        light, dark, pseudo, ownText,
+        text: (node.innerText || '').trim(),
+        labelled: ['title', 'aria-label', 'data-tooltip', 'aria-description'].filter(name => node.hasAttribute(name)),
+        rowKinds: [...row.querySelectorAll('[data-bubble-kind]')].map(n => n.getAttribute('data-bubble-kind')),
+        allKinds: [...document.querySelectorAll('[data-bubble-kind]')].map(n => n.getAttribute('data-bubble-kind')),
+      }
+    })()`)
+    const KINDS = new Set(['ack', 'body', 'receipt'])
+    const exclusive = probe => !!probe && probe.allKinds.every(kind => KINDS.has(kind))
+    const quiet = probe => !!probe && probe.pseudo.length === 0 && probe.labelled.length === 0
+    const distinct = (...shapes) => new Set(shapes).size === shapes.length
+
+    await scenario('stream', 700)
+    await submit('看看这三种气泡')
+    const ackShown = await wait(`(() => {
+      const rows = [...document.querySelectorAll('[data-message-id]')].filter(n => n.querySelector('[data-chat-content]'))
+      const row = rows[rows.length - 1]
+      return !!row && !!row.querySelector('[data-bubble-kind="ack"]')
+    })()`, ACK_WINDOW_MS + 1000)
+    const ackProbe = ackShown ? await probeBubble('ack') : null
+    await waitBody(BODY[BODY.length - 1], 20000)
+    await waitSettled(15000)
+    await sleep(800)
+    const bodyProbe = await probeBubble('body')
+    const ackAfterBody = await probeBubble('ack')
+    const plainShape = shape => /^(none|solid)\|(none|solid)\|0px\|0px\|rgba\(0, 0, 0, 0\)\|0px$/.test(shape)
+
+    await scenario('receipt', 700)
+    await submit('任务结果回执')
+    await waitBody(BODY[BODY.length - 1], 20000)
+    const receiptLive = await probeBubble('receipt')
+    await waitSettled(15000)
+    await sleep(800)
+    const receiptSettled = await probeBubble('receipt')
+    const receiptRowBody = await probeBubble('body')
+
+    const shapes = [ackProbe, bodyProbe, receiptSettled].every(Boolean)
+      ? { light: [ackProbe.light, bodyProbe.light, receiptSettled.light], dark: [ackProbe.dark, bodyProbe.dark, receiptSettled.dark] }
+      : null
+    const shapesDistinct = !!shapes && distinct(...shapes.light) && distinct(...shapes.dark)
+
+    add(result('bubble-kind-ack',
+      !!ackProbe && ackProbe.text === ACK_TEXT && ackProbe.ownText.join('') === ACK_TEXT && quiet(ackProbe) && exclusive(ackProbe)
+        && /^dashed\|dashed\|/.test(ackProbe.light) && /^dashed\|dashed\|/.test(ackProbe.dark)
+        && !/rgba\(0, 0, 0, 0\)/.test(ackProbe.light) && !/rgba\(0, 0, 0, 0\)/.test(ackProbe.dark)
+        && ackAfterBody === null && shapesDistinct,
+      ackProbe
+        ? `ack bubble light=${ackProbe.light} dark=${ackProbe.dark} text=${JSON.stringify(ackProbe.text)} pseudo=${ackProbe.pseudo.length} labelled=${ackProbe.labelled.length} clearedAfterBody=${ackAfterBody === null}`
+        : 'no ack bubble in the streaming reply row',
+      { ack: ackProbe, ackAfterBody }))
+    add(result('bubble-kind-body',
+      !!bodyProbe && plainShape(bodyProbe.light) && plainShape(bodyProbe.dark) && bodyProbe.ownText.length === 0
+        && bodyProbe.text.includes(BODY[0]) && bodyProbe.text.includes(BODY[BODY.length - 1])
+        && quiet(bodyProbe) && exclusive(bodyProbe) && !bodyProbe.rowKinds.includes('ack') && !bodyProbe.rowKinds.includes('receipt'),
+      bodyProbe
+        ? `body bubble light=${bodyProbe.light} dark=${bodyProbe.dark} rowKinds=${bodyProbe.rowKinds.join(',')} pseudo=${bodyProbe.pseudo.length} labelled=${bodyProbe.labelled.length}`
+        : 'no body bubble in the settled reply row',
+      { body: bodyProbe }))
+    add(result('bubble-kind-receipt',
+      !!receiptLive && !!receiptSettled && receiptRowBody === null
+        && /\|3px\|/.test(receiptSettled.light) && /\|3px\|/.test(receiptSettled.dark)
+        && !/rgba\(0, 0, 0, 0\)/.test(receiptSettled.light) && !/rgba\(0, 0, 0, 0\)/.test(receiptSettled.dark)
+        && receiptSettled.ownText.length === 0 && !!bodyProbe && receiptSettled.text === bodyProbe.text
+        && quiet(receiptLive) && quiet(receiptSettled) && exclusive(receiptSettled)
+        && !receiptSettled.rowKinds.includes('ack') && shapesDistinct,
+      receiptSettled
+        ? `receipt bubble live=${!!receiptLive} settled light=${receiptSettled.light} dark=${receiptSettled.dark} sameTextAsBody=${!!bodyProbe && receiptSettled.text === bodyProbe.text} shapesDistinct=${shapesDistinct}`
+        : `no receipt bubble (live=${!!receiptLive})`,
+      { receiptLive, receiptSettled, shapes }))
   } catch (error) {
     add(result('harness', false, String((error && error.message) || error)))
   } finally {

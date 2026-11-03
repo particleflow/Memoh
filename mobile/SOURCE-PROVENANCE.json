@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "9830d3d659be37ad5420ee215ca30d9eb3edeefa43d44fa996050844a7575dee",
+      "sha256": "823bb7181b106084a33a941b821166d2cc04c8458d8eaa2a2361bc38d2098a85",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -52,7 +52,8 @@
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
-        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only."
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
+        "Bubble kinds round (HAP43 candidate): add the sharedBubbleKind overlay pin; every other lock value unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -528,7 +529,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "4589ec7bde707ea6339699db375e591d0c1d1f963a4d53bd9b95e49391162f3b",
+      "sha256": "6fe08dae6568fd4b2bcb23bc4ed28832b9c3d7a08f9688b2451f3efb9d5e6ae7",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -560,7 +561,8 @@
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
         "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "Hash-only refresh: this entry had drifted since 08738497b (streaming read-aloud v2 overlay) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
+        "Hash-only refresh: this entry had drifted since 08738497b (streaming read-aloud v2 overlay) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round.",
+        "Bubble kinds round (HAP43 candidate): load the sharedBubbleKind overlay and apply it after the quote-reply post-override in the same byte-anchored form; no other build step changed."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -2092,6 +2094,16 @@
       "preparationChanges": [
         "Long-press menu keeps read-aloud as the first item and adds one quote item; the per-message action row gains a trailing icon-only quote button; the composer carries a quote chip (sender plus truncated preview, icon-only cancel) cleared on send and on conversation switch; the WS message payload carries reply_to.",
         "Applied after the streaming read-aloud overlay on the harmony platform only; per-file baseSHA256/adaptedSHA256 pairs are computed by the build tool chain."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-bubble-kind-changes.json",
+      "sha256": "254b5289d50f9baf5a397b0b256251595213b13e28e675f7a193f2964c08d896",
+      "origin": "Workspace-authored phone overlay for visual-only ack/body/receipt bubble kinds; same-path replacement anchors on the composed quote-reply sources. Not recovered historical source.",
+      "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
+      "preparationChanges": [
+        "The ack status row gains a dashed light bubble shape, the reply body keeps its standard bubble, and receipt rounds (input source task_result or schedule) gain a left accent bar on a faint accent tint; data-bubble-kind marks the three shapes. No copy, tooltip or control added.",
+        "Applied after the quote-reply overlay on the harmony platform only; per-file baseSHA256/adaptedSHA256 pairs are computed by the build tool chain."
       ]
     },
     {

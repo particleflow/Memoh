@@ -47,6 +47,12 @@ export const STEER_BODY = [
   '追问后的第二段给出了进一步的解释。',
   '追问后的第三段是这轮回答的收尾。',
 ]
+// A receipt round is the turn the server opens from a finished task: every row
+// of that turn carries the task_result input source, and presence never posts
+// an acknowledgement for it (task_result input is ineligible).
+function receiptSource(sessionId) {
+  return { kind: 'task_result', bot_id: BOT_ID, session_id: sessionId, task_kind: 'native_task', task_id: 'task-receipt-0001' }
+}
 
 export function nowIso() { return new Date().toISOString() }
 
@@ -623,7 +629,8 @@ export class StubService {
     await pause(this.startDelay)
     this.send(socket, { type: 'run_accepted', invocation_id: invocation, run_id: runId, session_id: sessionId, turn_id: turnId, turn_position: 10, epoch: state.epoch, seq: state.seq })
 
-    const userTurn = { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10 }
+    const receipt = this.mode === 'receipt' ? receiptSource(sessionId) : null
+    const userTurn = { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, ...(receipt ? { input_source: receipt } : {}) }
     const view = {
       run_id: runId, turn_id: turnId, turn_position: 10, invocation_id: invocation,
       generation: 'gen-1', status: 'running', started_at: nowIso(), updated_at: nowIso(),
@@ -644,7 +651,7 @@ export class StubService {
         metadata: { bot_id: BOT_ID },
       }],
     } : null
-    const blocks = [ackBlock]
+    const blocks = receipt ? [] : [ackBlock]
     const step = async (deltaFor, delay = this.delay) => {
       state.seq += 1
       view.messages = blocks.map(block => ({ ...block }))
@@ -772,9 +779,10 @@ export class StubService {
     state.seq += 1
     this.settledAt = Date.now() - this.t0
     const finalTurns = [
-      { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-u` },
+      { turn_id: turnId, role: 'user', text: message.text ?? '', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-u`, ...(receipt ? { input_source: receipt } : {}) },
       {
         turn_id: turnId, role: 'assistant', timestamp: nowIso(), turn_position: 10, id: `t-${invocation}-a`,
+        ...(receipt ? { input_source: receipt } : {}),
         messages: botImage
           ? [{ id: botImage.id, type: 'attachments', attachments: botImage.attachments.map(attachment => ({ ...attachment })) }]
           : [

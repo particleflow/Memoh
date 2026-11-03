@@ -1,0 +1,26 @@
+{
+  "scope": "Visual-only message kinds on the phone: the fast-reply acknowledgement renders as a light dashed bubble, the reply body keeps the standard bubble, and a receipt round (input source task_result or schedule) carries a left accent bar on a faint accent tint. No copy, tooltip, aria text or control is added; the ack keeps its text, role=status and ephemeral lifetime. Post-override applied after the quote-reply overlay; harmony platform only.",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "f8b7cea5878f431afb11820f77fb2c4d201f7cf610861c5900754212697118db",
+      "adaptedSHA256": "2d5c01b22bf7fbbfa812db337752f5bb5bd3bd8e4e2042ca24fdf7090b0f2342",
+      "replacements": [
+        [
+          "        <div\n          class=\"chat-speech-bubble [--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]\"\n          :data-speech-state=\"speechStatus ?? 'idle'\"\n        >",
+          "        <div\n          class=\"chat-speech-bubble [--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]\"\n          :class=\"receiptTurn ? RECEIPT_BUBBLE_CLASS : undefined\"\n          :data-speech-state=\"speechStatus ?? 'idle'\"\n          :data-bubble-kind=\"receiptTurn ? 'receipt' : 'body'\"\n        >",
+          1
+        ],
+        [
+          "          <div\n            v-if=\"runtimeStatusText\"\n            role=\"status\"\n            class=\"text-sm text-cop-title\"\n          >\n            {{ runtimeStatusText }}\n          </div>",
+          "          <div\n            v-if=\"runtimeStatusText\"\n            role=\"status\"\n            :data-bubble-kind=\"ackStatusVisible ? 'ack' : undefined\"\n            :class=\"ackStatusVisible ? ACK_BUBBLE_CLASS : 'text-sm text-cop-title'\"\n          >\n            {{ runtimeStatusText }}\n          </div>",
+          1
+        ],
+        [
+          "const shouldRenderMessage = computed(() => {",
+          "// Message kinds differ by bubble shape only: no added copy, tooltip or\n// control. The ack keeps its text, role and ephemeral lifetime (cleared once\n// body text exists, dropped with the status block on settle); a receipt round\n// is the turn the server opened from a task result or a schedule fire.\nconst ACK_BUBBLE_CLASS = 'w-fit max-w-full rounded-2xl rounded-tl-md border border-dashed border-border bg-muted/60 px-3 py-1.5 text-sm text-cop-title'\nconst RECEIPT_BUBBLE_CLASS = 'rounded-r-xl border-l-[3px] border-primary/60 bg-primary/[0.05] py-2 pr-2 pl-3 dark:bg-primary/10'\nconst RECEIPT_SOURCE_KINDS = new Set(['task_result', 'schedule'])\n\nconst ackStatusVisible = computed(() => {\n  if (!runtimeStatusText.value || props.message.role !== 'assistant') return false\n  const status = props.message.messages.find(block => block.type === 'status')\n  return status?.type === 'status' && status.name === 'conversation_ack'\n})\n\nconst receiptTurn = computed(() => props.message.role === 'assistant'\n  && RECEIPT_SOURCE_KINDS.has(props.message.inputSource?.kind ?? ''))\n\nconst shouldRenderMessage = computed(() => {",
+          1
+        ]
+      ]
+    }
+  }
+}
