@@ -67,7 +67,7 @@
     },
     {
       "path": "mobile/client/mobile/client_config.py",
-      "sha256": "09cc1d9894c04cfdbb71880a3321ff2e0705162c3276701047f07ceb1cc07884",
+      "sha256": "ded5fac5ed8aafae7dd1cea0a4aee7674dbf011fa3724d0094917de096857557",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -76,7 +76,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
       "urlParityBaseSHA256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc",
@@ -94,29 +95,31 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
-      "sha256": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
+      "sha256": "88d9a9ca1ed46393490c8079618660652648f13cfd6609e056ed970fc95fb95d",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
-      "sha256": "4a01f4a9ebd298003ac5ee7de75a6b4df46371aee6a87adec2ac090a1c0bff5f",
+      "sha256": "296c47d89ea4aeebb4df620955a00abe214c5375321fbd94c84504a141a39b5e",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "D-7 2026-11-03: drop the second full verifyMediaFd of the saved copy after copyMediaBytes; the staged cache passed the same hash at fetch and the upload side owns the end-to-end hash."
       ],
       "endpointScopeBaseSHA256": "d83cb013906eb3e539c6514173d8d43eb42153c5e0aacd7c33db3dbfaadb62e0"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "3d07bd8cad91e87dc1ab2ddc3c9d7decc14fbbedaaaf1a2514318007b9c27a3a",
+      "sha256": "1edb2da40778adc4dbbd7c793750400905a3cbd21e7df09dc6ce8c963e6d35c3",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -125,7 +128,8 @@
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
-        "Hash-only refresh: this entry had drifted since e73239b4a (32-hex upload snapshot handles) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
+        "Hash-only refresh: this entry had drifted since e73239b4a (32-hex upload snapshot handles) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round.",
+        "D-11 2026-11-03: one Web-File bridge hop carries up to 1 MiB (base64 bound 1398104 chars, exactly ceil(1048576/3)*4); a 1 GiB intake needs 1,024 hops instead of 16,384."
       ]
     },
     {
@@ -186,38 +190,41 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "6df136d05d75319a9303e016342db22878e2fe29b899f9be2f3337c7a888f527",
+      "sha256": "bda4d7d4fd8c9dfbc10c076b61cffa4a6278c7dcdba4653daff44147872ea7c7",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "D-11/#143 2026-11-03: local File intake crosses the bridge in 1 MiB chunks (BRIDGE_CHUNK_BYTES 1048576) and the dead pre-#143 source verification phase word is retired."
       ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-config.ts",
-      "sha256": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+      "sha256": "0ab483649c3d91eeee7f06d7a2311518f8a333ee437df1cc2288c2d26d45e089",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "windowsInjectionBaseSHA256": "8b204ff2322d51140e01f2d0ab3e3743b82332db148be3c17d70e1ba5f1f76df"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
-      "sha256": "c1514f910bf94f8bde28c1b260c2a1b5153de494e72eeef554be0bdc97f1ddc8",
+      "sha256": "f1cb07f0e9aa7d90ab8f3b9febee9d9a2717a90e2325dc79c3e20c28ba1b65ef",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f",
       "urlParityBaseSHA256": "f663289a3c65c54a4f950fde438519b509283416927dd15f3c24912a6e271153"
@@ -339,14 +346,15 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_download.cjs",
-      "sha256": "1db3997a6e20df738d05aa995f9b380ab4554441b27a925f9bb402ee9055eb32",
+      "sha256": "d509de763eda74f464f17de7518bad54904cec573a32f14f31e95a37839f1b5e",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs."
       ],
       "endpointScopeBaseSHA256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103",
       "nativeIntegrationBaseSHA256": "925fa30a5a258d3c9b0b3233fa9b6e392f9314bec6a518e912e42cda80644cb9"
@@ -371,7 +379,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "9d2d132451b265b1b9092b283204bc1eae97b58103c48985814867eb75d4ac7f",
+      "sha256": "ee762b8577688105a32e6de208f58ccecd2d7cbe5c7edb41a3b2c6a2c9ee96a9",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -380,36 +388,39 @@
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
-        "Hash-only refresh: this entry had drifted since 43ce9b8e0 (uuid stub device-faithful) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round."
+        "Hash-only refresh: this entry had drifted since 43ce9b8e0 (uuid stub device-faithful) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round.",
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs."
       ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable_frontend.cjs",
-      "sha256": "36febf7d871c929d9c0d47e9cfe6d66dae79a6d7a5b3f2c09038fb0dc874d03e",
+      "sha256": "258ac1f892cfe87caf985ea97e7df112822f6630789b1c6552969b9964dc9101",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs."
       ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable_ui.py",
-      "sha256": "4479011315b557f038204d84ca9439923045718300d86a0cf88fd15bc85fab5b",
+      "sha256": "48d08fd0ebaa73e587ade37bb762c8d05cefd19ca94b7ed2ca2aa6634f206262",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
         "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration."
+        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs."
       ],
       "checkpointSHA256": "0e6338413a318f899f4fc15bf348670a525decdde99373833bf7e09df59c2264"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "f87443182acc5c6695ccea690dbecfc104e1e19e2cd8771ff3cd42f73be5a34d",
+      "sha256": "8574c1fbf435f6be9a8dce2904e1fe8c1d4c892511ba630a264eb2bd243c9390",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -419,7 +430,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ],
       "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
       "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c",
@@ -768,7 +780,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "f087150fa95f73ae2d0609045c17d5eb5b603f0481280eec4904538d78ce01b2",
+      "sha256": "c61d79ef6e4e74359f388a11f028c10f6a023a16d69d514ba4425382b009ded9",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
@@ -780,7 +792,8 @@
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud."
+        "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
+        "#143 residue 2026-11-03: retire the dead pre-#143 source verification phase word from the fixed failure envelope."
       ],
       "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },
@@ -810,14 +823,6 @@
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
       "archiveCheckpointSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0"
-    },
-    {
-      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets",
-      "sha256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
-      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
-      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
-      "archiveOriginalSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
-      "archiveCheckpointSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets",
@@ -1139,7 +1144,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "cc2a590897ede8579566279717ca530fdd62623e56f8e97b6ddba3e6a823609c",
+      "sha256": "bb74dc165666a5909f8674218013b53a4a3d4d42f74c28283b7e06062752fecf",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -1151,7 +1156,8 @@
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
-        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics.",
+        "D-12 2026-11-03: same-hash reuse is proven by one HEAD (ETag is the content hash, Content-Length the stored size); a hit no longer downloads and re-hashes the whole original."
       ]
     },
     {
@@ -1256,7 +1262,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/memoh_upload_preparation_checks.mjs",
-      "sha256": "4b04bd205337dc0b7ac216aa5f6d6b78bd2d522f478b0f33fe60b8b3ebb3a129",
+      "sha256": "01d07aff987dbe20b111d8a511d74ccbdd9ad5f6ec73d0838c7c6c60e50846e2",
       "origin": "Additional source test recovered verbatim from the user-provided 5900 checkpoint; not listed in the old 72-path omission register.",
       "licenseReview": "Clean user-provided project test under existing repository terms; no new license assignment.",
       "archiveOriginalSHA256": "d5fdb140d9318a8f6e9bd6dfbb927a56cf7f75902a96410af3f86c32047bfd6f",
@@ -1265,7 +1271,8 @@
       "preparationChanges": [
         "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration."
+        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs. Add the HEAD stub, the missing harmony-files scope members and the pinned-store prepareAttachmentsForMessage wiring so the adapter paths actually execute."
       ]
     },
     {
@@ -1398,12 +1405,13 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
-      "sha256": "3439209123e86eaa7115f08122b84e83b6b558ee34e802d964e61efee6f2790a",
+      "sha256": "a2ed08a04590f6917ca250b441a926fb4ef9f100d4994292fd9eb5d135d703bc",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
@@ -1418,11 +1426,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/network_policy_config.py",
-      "sha256": "71f6032fd64fb477e93bcdb91c1798cd90ba24158576503fc8e0c9c17995f5bc",
+      "sha256": "87adcbc6c0a8f0c6061fcb7cd72ebe37d907c60c29b6e8e04681c238f5e1d14d",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
       ]
     },
     {
@@ -1913,21 +1922,30 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-upload-failures.ts",
-      "sha256": "dd6281cb39cbbd078934d40c8cfe4ae35f2faae54096bb5cbad6ff6ac719d50e",
+      "sha256": "62105202145b5e8f2208b809084af29b9a39c785f9add30621dbb27dedb38836",
       "origin": "Admitted scoped failure outbox b1173115834fef1143bc8d3b3ae2e6dec8d064ff",
-      "licenseReview": "Project TypeScript source, no SDK binaries/private configuration."
+      "licenseReview": "Project TypeScript source, no SDK binaries/private configuration.",
+      "preparationChanges": [
+        "#143 residue 2026-11-03: retire the dead pre-#143 source verification phase word from the failure envelope."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_endpoint_routing.cjs",
-      "sha256": "cd5b0c709789a239f4b6c322d334123392cd0e33b8d10c711e17c7895649ad73",
+      "sha256": "932ede0a5b913306385491f07a3c6ab1e63ee4d4e1b345ed7aba7c400921b420",
       "origin": "Native RCP endpoint v2 consumer regression for fixed808cf801 contract; real controlled HTTP/files/processes, synthetic-only identity.",
-      "licenseReview": "Project regression source; no SDK binaries/private config."
+      "licenseReview": "Project regression source; no SDK binaries/private config.",
+      "preparationChanges": [
+        "S1 adjudication 2026-11-03 (TF-12 mechanism table): drop the forced-TLS branches (the private-host TLS gate and the policy/https gates) and their dead companions; URL parsing, normalization and origin-lock semantics unchanged; the endpoint routing unit now pins plaintext v1 adoption on LAN hints."
+      ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets",
-      "sha256": "87d8541a1b155d5c6963e6ca968bf070d1a9ba445e59151f5abdac322a140619",
+      "sha256": "e7e2c6d54353d67236281a9759aee89ac1573ed471c06083d8a6b29380ac9ac8",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
-      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
+      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
+      "preparationChanges": [
+        "A-5 2026-11-03: the background entitlement is best effort; a refused begin never fails the command and the transfer proceeds."
+      ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-transfer-lifetime.ts",
@@ -1943,15 +1961,21 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_lifetime.cjs",
-      "sha256": "fc2b019077964d90be4a99a08b45da51b4e1227dac2918c47826bd7db9c8c5ae",
+      "sha256": "ba5eb2d2f3bec251abb2dbed6c0c43662c6e199e63787c4642e54a24ada5c210",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
-      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
+      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
+      "preparationChanges": [
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs. Restore onForeground/onLifecycle, createRandom, AppNetBinding and webNetwork stubs so the real PageHost bridge path runs."
+      ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
-      "sha256": "fdb9fa347ff97e134199cf5368ad776a424836bcde93140e035b5bc0b200f8cd",
+      "sha256": "4b4324b211d5c7e6ec28520f484f26780be5194c473ed3e56bf14b46793b569a",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
-      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
+      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
+      "preparationChanges": [
+        "A-5 2026-11-03: notification publish failure only logs machine-side diagnostics; the never-resetting failure latch and its permanent stopIO chain are gone, and a later begin always retries."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_background_owner.cjs",
@@ -1961,9 +1985,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_transfer_background.cjs",
-      "sha256": "73fdc9b024fc37cefc1e98e34174309051a4d61c2c5c48655c4d62c087c9e3ac",
+      "sha256": "31f852ae53e649d31c22fb7b88365b55ad0b4478b46ac087dcc36a93899afb04",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
-      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
+      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
+      "preparationChanges": [
+        "Deletion family 2026-11-03: re-pin the harness to the adjudicated behavior (no post-save recheck, 1 MiB bridge chunks with the 1048577-byte refusal, HEAD reuse, notification failure never stops a transfer) and restore the drifted stubs."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_background_sdk_types.cjs",

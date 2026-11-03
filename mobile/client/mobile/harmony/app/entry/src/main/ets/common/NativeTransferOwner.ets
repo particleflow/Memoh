@@ -98,7 +98,9 @@ export class NativeTransferOwner {
     if (work && work.key !== key) { throw new Error('UPLOAD_BUSY'); }
     if (!work) {
       const background = this.background, activity = 'upload:' + input.operation;
-      if (background && !background.begin(activity)) { throw new Error('NATIVE_BACKGROUND_UNAVAILABLE'); }
+      // The background entitlement is best effort: without it the transfer
+      // still runs, so a refused begin never fails the command.
+      background?.begin(activity);
       work = { key: key, input: input, pending: this.uploads.upload(input) };
       this.upload = work;
       const current = work;
@@ -125,7 +127,9 @@ export class NativeTransferOwner {
     if (work && work.key !== key) { throw new Error('MEDIA_DOWNLOAD_BUSY'); }
     if (!work) {
       const background = this.background, activity = 'download:' + input.operation;
-      if (background && !background.begin(activity)) { throw new Error('NATIVE_BACKGROUND_UNAVAILABLE'); }
+      // Same best-effort entitlement as uploads: a refused begin never fails
+      // the command, the download runs without the continuous task.
+      background?.begin(activity);
       work = { key: key, input: input, pending: this.downloads.fetch(input) };
       this.download = work;
       const current = work;

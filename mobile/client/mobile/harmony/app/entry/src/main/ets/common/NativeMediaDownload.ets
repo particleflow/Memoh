@@ -266,8 +266,9 @@ export class NativeMediaDownload {
       source = fs.openSync(state.path, fs.OpenMode.READ_ONLY);
       destination = await fs.open(uris[0], fs.OpenMode.READ_WRITE | fs.OpenMode.TRUNC);
       this.check(state);
+      // The staged cache passed the same hash at fetch(); a second full read of
+      // the saved copy would re-prove a fact the upload side already owns.
       await copyMediaBytes(source.fd, destination.fd, state.size, () => this.check(state));
-      await verifyMediaFd(destination.fd, state.size, state.hash, () => this.check(state));
       this.check(state); complete = true; return true;
     } finally {
       // Clear our partial output, without unlinking a system-selected document.

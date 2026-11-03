@@ -45,7 +45,10 @@ binding = {'schemaVersion': 1, 'bundleName': config.DEPLOYMENT_BUNDLE, 'versionC
 check(config.deployment_config({**seed, 'legacyBinding': binding})['legacyBinding'] == binding)
 check('networkPolicy' not in config.deployment_config({'apiOrigin': seed['apiOrigin']}))
 check('networkPolicy' not in json.loads(config.public_deployment_bytes()))
-for value in [{**seed, 'apiOrigin': ''}, {**seed, 'apiOrigin': 'http://nas.example/api'}, {**seed, 'credentials': 'forbidden'}, {**seed, 'networkPolicy': None}]:
+# A plaintext origin may carry LAN address hints (S1 adjudication 2026-11-03);
+# only an unconfigured public template must stay policy-free.
+check(config.deployment_config({**seed, 'apiOrigin': 'http://nas.example/api'})['networkPolicy'] == policy)
+for value in [{**seed, 'apiOrigin': ''}, {**seed, 'credentials': 'forbidden'}, {**seed, 'networkPolicy': None}]:
     try:
         config.deployment_bytes(value, allow_empty=True)
     except ValueError:

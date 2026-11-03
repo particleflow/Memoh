@@ -271,10 +271,12 @@ export class NativeResumableUpload {
     const run = this.copying(operation, authorization);
     try {
       run.phase = 'snapshot-copy';
-      if (!Number.isSafeInteger(offset) || offset !== run.copyOffset || !data || data.length > 87384 ||
+      // One Web→Native hop carries at most 1 MiB of File bytes; its base64
+      // text is exactly 1398104 characters (349526 quartets with padding).
+      if (!Number.isSafeInteger(offset) || offset !== run.copyOffset || !data || data.length > 1398104 ||
         !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(data)) { throw new Error('UPLOAD_REQUEST'); }
       const bytes = new util.Base64Helper().decodeSync(data), j = run.journal as Journal, file = run.copyFile as fs.File;
-      if (!bytes.byteLength || bytes.byteLength > 65536 || offset + bytes.byteLength > j.size) { throw new Error('UPLOAD_REQUEST'); }
+      if (!bytes.byteLength || bytes.byteLength > 1048576 || offset + bytes.byteLength > j.size) { throw new Error('UPLOAD_REQUEST'); }
       let written = 0;
       while (written < bytes.byteLength) {
         this.check(run);

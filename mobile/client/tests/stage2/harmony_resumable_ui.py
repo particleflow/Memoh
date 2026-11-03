@@ -28,7 +28,7 @@ window.begoniaNative={request:async raw=>{const q=JSON.parse(raw);
  if(q.command==='upload.list')return JSON.stringify({ok:true,data:q.handle?window.__staged.filter(f=>f.handle===q.handle):window.__staged});
  if(q.command==='upload.discard'){window.__staged=[];return JSON.stringify({ok:true});}
  if(q.command==='upload.stage.begin'){window.__localIntake={...q,handle:crypto.randomUUID().replaceAll('-',''),bytes:[]};return JSON.stringify({ok:true,data:{handle:window.__localIntake.handle}})}
- if(q.command==='upload.stage.append'){const d=window.__localIntake,b=Uint8Array.from(atob(q.data),c=>c.charCodeAt(0));if(q.offset!==d.bytes.length||b.length>65536)throw Error('bad local chunk');d.bytes.push(...b);return JSON.stringify({ok:true,data:{offset:d.bytes.length}})}
+ if(q.command==='upload.stage.append'){const d=window.__localIntake,b=Uint8Array.from(atob(q.data),c=>c.charCodeAt(0));if(q.offset!==d.bytes.length||b.length>1048576)throw Error('bad local chunk');d.bytes=d.bytes.concat(Array.from(b));return JSON.stringify({ok:true,data:{offset:d.bytes.length}})}
  if(q.command==='upload.stage.finish'){const d=window.__localIntake,hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array(d.bytes)))).map(b=>b.toString(16).padStart(2,'0')).join('');return JSON.stringify({ok:true,data:{handle:d.handle,hash,size:d.size,name:d.name,type:d.type,resumable:true,scope:d.scope}})}
  if(q.command==='upload.run')return JSON.stringify({ok:false,error:'UPLOAD_CREATE_UNCERTAIN'});
  const capture={handle:q.handle,state:'recording',durationMs:1200,peaks:[0.2,0.5],text:'',speechError:''};
