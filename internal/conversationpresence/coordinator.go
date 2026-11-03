@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strings"
 	"time"
-	"unicode"
 	"unicode/utf8"
 
 	"github.com/felinics/memoh/internal/inputsource"
@@ -273,13 +272,5 @@ func canceledOutcome(out Outcome, cause error) Outcome {
 }
 
 func validText(text string, limit int) bool {
-	if text == "" || !utf8.ValidString(text) || utf8.RuneCountInString(text) > limit {
-		return false
-	}
-	for _, char := range text {
-		if unicode.IsControl(char) || char == '<' || char == '>' || char == '\u2028' || char == '\u2029' {
-			return false
-		}
-	}
-	return true
+	return text != "" && utf8.ValidString(text) && utf8.RuneCountInString(text) <= limit
 }
