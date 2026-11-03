@@ -27,7 +27,7 @@ func (s *UploadStore) RetireTaskReceipt(ctx context.Context, owner, bot string, 
 		return err
 	}
 	defer unlock()
-	r, err := s.read(proof.ID)
+	r, err := s.read(proof.ID, true)
 	if errors.Is(err, ErrUploadNotFound) {
 		// A previous unlink may have lost its directory-sync acknowledgment.
 		// Never sweep an unexplained orphan on the strength of missing metadata.

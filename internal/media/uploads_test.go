@@ -675,6 +675,36 @@ func (p *publicationWithoutBarrier) Put(ctx context.Context, key string, reader 
 	return p.Provider.Put(ctx, key, reader)
 }
 
+// Mutation-path journal reads skip the rename-repair barrier: the mutation's
+// own acknowledged save re-establishes it. Receipt reads keep the repair.
+func TestUploadMutationReadSkipsJournalBarrier(t *testing.T) {
+	ctx := t.Context()
+	root := t.TempDir()
+	s := uploadService(t, root, 1024).Uploads()
+	b := []byte("barrier accounting")
+	u := createUpload(ctx, t, s, b)
+	u = appendBytes(ctx, t, s, u, b[:8])
+	dirSyncs := 0
+	s.syncFile = func(f *os.File) error {
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			dirSyncs++
+		}
+		return f.Sync()
+	}
+	if _, err := s.Get(ctx, "owner", "bot", u.ID); err != nil || dirSyncs != 1 {
+		t.Fatal("receipt read lost its barrier repair", err, dirSyncs)
+	}
+	dirSyncs = 0
+	appendBytes(ctx, t, s, u, b[8:])
+	if dirSyncs != 1 {
+		t.Fatalf("mutation paid a read-time barrier: %d directory syncs", dirSyncs)
+	}
+}
+
 func TestRequiredPersistenceRepublishesWithoutBarrierCapability(t *testing.T) {
 	p := &publicationWithoutBarrier{Provider: localfs.NewOriginals(t.TempDir())}
 	s := NewService(nil, p)

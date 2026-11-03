@@ -16,6 +16,9 @@ var (
 	ErrAccessPathUnavailable = errors.New("storage object has no consumer-accessible path")
 	// ErrVerifiedRangeUnsupported retains the full-stream verification fallback.
 	ErrVerifiedRangeUnsupported = errors.New("provider cannot verify ranges")
+	// ErrContentMismatch means the stored or incoming bytes do not hash to the
+	// content hash the storage key declares.
+	ErrContentMismatch = errors.New("content does not match the declared content hash")
 )
 
 // Provider abstracts object storage operations.

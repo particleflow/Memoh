@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/felinics/memoh/internal/storage"
 )
 
 const (
@@ -159,7 +161,7 @@ func syncRootWith(root *os.Root, syncFile func(*os.File) error) error {
 	return syncFile(f)
 }
 
-func (s *UploadStore) read(id string) (uploadRecord, error) {
+func (s *UploadStore) read(id string, repair bool) (uploadRecord, error) {
 	var r uploadRecord
 	f, err := openUploadFile(s.root, id+".json", os.O_RDONLY, 0)
 	if errors.Is(err, os.ErrNotExist) {
@@ -176,13 +178,19 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 		return r, ErrUploadInvalid
 	}
 	// A prior process may have renamed this journal and failed before its
-	// directory fsync. Repair that barrier before GET/ready retry can acknowledge
-	// it, or Sweep can remove the payload on the strength of a terminal state.
-	if err := s.syncFile(f); err != nil {
-		return uploadRecord{}, err
-	}
-	if err := syncRootWith(s.root, s.syncFile); err != nil {
-		return uploadRecord{}, err
+	// directory fsync. Receipt reads and Sweep repair that barrier before the
+	// visible state is acknowledged or acted on: a client resumes from a
+	// reported offset, and collection deletes payloads on the strength of the
+	// state. A mutation's own journal read skips the repair — its acknowledged
+	// save re-establishes the full barrier — so per-chunk appends do not pay
+	// two extra fsyncs.
+	if repair {
+		if err := s.syncFile(f); err != nil {
+			return uploadRecord{}, err
+		}
+		if err := syncRootWith(s.root, s.syncFile); err != nil {
+			return uploadRecord{}, err
+		}
 	}
 	return r, nil
 }
@@ -220,8 +228,8 @@ func (s *UploadStore) remove(name string) error {
 	return err
 }
 
-func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
-	r, err := s.read(id)
+func (s *UploadStore) owned(owner, bot, id string, repair bool) (uploadRecord, error) {
+	r, err := s.read(id, repair)
 	if err != nil {
 		return r, err
 	}
@@ -275,7 +283,7 @@ func (s *UploadStore) Get(ctx context.Context, owner, bot, id string) (Upload, e
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, true)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -293,7 +301,7 @@ func (s *UploadStore) Append(ctx context.Context, owner, bot, id string, offset,
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, false)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -380,7 +388,9 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	// The ready replay below acknowledges a terminal receipt, so this read
+	// repairs a torn rename before returning it.
+	r, err := s.owned(owner, bot, id, true)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -395,21 +405,21 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 		return Upload{}, err
 	}
 	defer func() { _ = f.Close() }()
-	h := sha256.New()
-	n, err := io.CopyBuffer(h, contextReader{ctx, f}, make([]byte, 256<<10))
-	if err != nil {
-		return Upload{}, err
-	}
-	if n != r.SizeBytes || hex.EncodeToString(h.Sum(nil)) != r.SHA256 {
-		return Upload{}, ErrUploadInvalid
-	}
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return Upload{}, err
 	}
 	// Reuse the canonical media publication and deduplication path, without a
-	// second whole-file spool. The durable provider also verifies before rename.
+	// second whole-file spool or a second whole-file read here. Publication is
+	// the single full read that ties the staged bytes to the announced hash:
+	// the durable provider hashes the payload in the same read that writes it
+	// and rejects a mismatch before rename. On a dedup hit the staged bytes are
+	// discarded unverified; every chunk was still checked against its
+	// Upload-SHA256 at Append time.
 	_, err = s.media.persist(ctx, IngestInput{BotID: bot, Mime: r.Mime}, r.SHA256, r.SizeBytes, f)
 	if err != nil {
+		if errors.Is(err, storage.ErrContentMismatch) {
+			return Upload{}, ErrUploadInvalid
+		}
 		return Upload{}, err
 	}
 	r.State = "ready"
@@ -433,7 +443,7 @@ func (s *UploadStore) Cancel(ctx context.Context, owner, bot, id string) (Upload
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, false)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -512,7 +522,7 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 		}
 		err = func() error {
 			defer unlock()
-			r, err := s.read(id)
+			r, err := s.read(id, true)
 			if err != nil {
 				return err
 			}

@@ -17,7 +17,6 @@ import (
 
 const (
 	rangeBlockBytes = 1 << 20
-	rangeIndexLimit = 8 << 20
 	rangeCacheBytes = 16 << 20
 	rangeCacheItems = 128
 )
@@ -194,9 +193,11 @@ func (p *Originals) OpenVerifiedRange(ctx context.Context, key string) (storage.
 	if err != nil {
 		return nil, err
 	}
-	// Large indexes and unsupported OSes use the existing streaming full-hash
-	// path. This bounds auxiliary memory; it does not lower upload size limits.
-	if stamp.size < 0 || stamp.size > int64(rangeIndexLimit/sha256.Size)*rangeBlockBytes {
+	// Indexes that cannot fit the shared range cache (and unsupported OSes) use
+	// the existing streaming full-hash path: an index the cache would evict
+	// immediately saves nothing over streaming, so the boundary is derived from
+	// the cache budget itself rather than a separate size limit.
+	if stamp.size < 0 || stamp.size > int64(rangeCacheBytes/sha256.Size)*rangeBlockBytes {
 		return nil, storage.ErrVerifiedRangeUnsupported
 	}
 	unlock, err := p.ranges.lock(ctx, key)
@@ -234,7 +235,7 @@ func stampFile(f *os.File) (fileStamp, error) {
 }
 
 func (p *Originals) verifyRangeIndex(ctx context.Context, f *os.File, stamp fileStamp, expected string, scan *rangeScan) (*rangeIndex, *rangeScan, error) {
-	if stamp.size < 0 || stamp.size > int64(rangeIndexLimit/sha256.Size)*rangeBlockBytes {
+	if stamp.size < 0 || stamp.size > int64(rangeCacheBytes/sha256.Size)*rangeBlockBytes {
 		return nil, nil, storage.ErrVerifiedRangeUnsupported
 	}
 	if scan == nil {

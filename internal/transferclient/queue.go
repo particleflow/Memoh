@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -157,7 +158,7 @@ func receiptValid(j Job, r Receipt) bool {
 	}
 }
 
-func accept(j *Job, r Receipt, save Save) error {
+func accept(c *Client, j *Job, r Receipt, save Save) error {
 	if !receiptValid(*j, r) {
 		return stop(j, "blocked", "receipt_mismatch", save)
 	}
@@ -168,14 +169,42 @@ func accept(j *Job, r Receipt, save Save) error {
 	}
 	if r.State == "ready" || r.State == "canceled" {
 		next.Attempts, next.ErrorCode, next.NextAttempt = 0, "", time.Time{}
+		c.forgetReceipt(r.ID)
+	} else {
+		c.sawReceipt(r.ID)
 	}
 	return persist(j, next, save)
 }
 
+// receiptState records, per client instance, receipts whose state this process
+// has already received from the server. A fresh client (after a process
+// restart) re-syncs a receipt once before its first chunk PATCH, so a
+// server-confirmed chunk is never retransmitted from a stale local checkpoint.
+var receiptState sync.Map // *Client -> *sync.Map (receipt ID -> struct{})
+
+func (c *Client) receiptKnown(id string) bool {
+	entries, _ := receiptState.LoadOrStore(c, new(sync.Map))
+	_, known := entries.(*sync.Map).Load(id)
+	return known
+}
+
+func (c *Client) sawReceipt(id string) {
+	entries, _ := receiptState.LoadOrStore(c, new(sync.Map))
+	entries.(*sync.Map).Store(id, struct{}{})
+}
+
+func (c *Client) forgetReceipt(id string) {
+	if entries, ok := receiptState.Load(c); ok {
+		entries.(*sync.Map).Delete(id)
+	}
+}
+
 // Advance performs at most one new chunk or completion/cancellation mutation.
-// It always reconciles a known receipt first. Host code owns admission, source
-// freezing, persisted cancel intent, due-job selection and result registration.
-// A nil error means the checkpoint succeeded, not that delivery is ready.
+// It reconciles a known receipt first on every attempt except a clean-journal
+// chunk PATCH by a process that has already received that receipt. Host code
+// owns admission, source freezing, persisted cancel intent, due-job selection
+// and result registration. A nil error means the checkpoint succeeded, not
+// that delivery is ready.
 func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapshot, now time.Time) error {
 	if !job.valid() || save == nil {
 		return ErrInvalid
@@ -235,18 +264,32 @@ func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapsho
 		if !receiptValid(*j, r) || r.State != "uploading" || r.Offset != 0 {
 			return stop(j, "create_unknown", "create_outcome_unknown", save)
 		}
-		return accept(j, r, save)
+		return accept(c, j, r, save)
 	}
-	// No PATCH/complete replay from cached offsets, even after a clean restart.
-	r, err := c.Get(ctx, j.BotID, j.ReceiptID)
-	if err != nil {
-		return fail(j, err, now, save)
-	}
-	if err := accept(j, r, save); err != nil {
-		return err
-	}
-	if j.Phase != "uploading" {
-		return nil
+	// Reconcile a receipt before any mutation, except when the journal is
+	// clean, this process has already received the receipt, and the next step
+	// is a fresh chunk PATCH: that offset was itself the server's last
+	// acknowledgement, so a Get would only repeat it. Unknown outcomes
+	// (Attempts/ErrorCode set), cancel or completion steps, and the first
+	// attempt after a process restart still Get first. A torn-but-clean
+	// journal within one process (a lost save between server ack and local
+	// checkpoint) self-heals because the server rejects a mismatching PATCH
+	// offset before writing and the retried attempt re-syncs from the receipt.
+	var (
+		r   Receipt
+		err error
+	)
+	if j.Attempts > 0 || j.ErrorCode != "" || j.CancelRequested || j.Offset == j.Spec.SizeBytes || !c.receiptKnown(j.ReceiptID) {
+		r, err = c.Get(ctx, j.BotID, j.ReceiptID)
+		if err != nil {
+			return fail(j, err, now, save)
+		}
+		if err := accept(c, j, r, save); err != nil {
+			return err
+		}
+		if j.Phase != "uploading" {
+			return nil
+		}
 	}
 	switch {
 	case j.CancelRequested:
@@ -278,7 +321,7 @@ func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapsho
 	if err != nil {
 		return fail(j, err, now, save)
 	}
-	if err := accept(j, r, save); err != nil {
+	if err := accept(c, j, r, save); err != nil {
 		return err
 	}
 	if j.Phase == "blocked" {
