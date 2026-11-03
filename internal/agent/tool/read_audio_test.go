@@ -2,8 +2,10 @@ package tools
 
 import (
 	"context"
+	"encoding/binary"
 	"strings"
 	"testing"
+	"time"
 
 	sdk "github.com/felinics/twilight/sdk"
 )
@@ -107,26 +109,126 @@ func TestReadAudioUnconfiguredBotReturnsMachineError(t *testing.T) {
 	}
 }
 
-func TestReadAudioExceedingLimitReturnsMachineError(t *testing.T) {
+func TestReadAudioBeyondLegacySizeGateStillTranscribes(t *testing.T) {
 	t.Parallel()
 
-	// The DashScope limit is 10 MB after base64 encoding; with the data URL
-	// prefix the raw budget is (10_000_000 - prefix) / 4 * 3 bytes.
+	// The local size gate is gone (2026-11-03 ruling: no artificial limits
+	// unless unavoidable). A payload larger than the deleted gate — sized as
+	// the old (10 MB encoded - data URL prefix) / 4 * 3 raw budget — flows
+	// to the transcriber whole; the provider's documented encoded-input
+	// limit stays enforced by the shared ASR adapter, not by the read tool.
 	prefix := len("data:audio/mpeg;base64,")
-	maxRaw := (10_000_000 - prefix) / 4 * 3
-	oversized := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, maxRaw)...)
+	legacyMaxRaw := (10_000_000 - prefix) / 4 * 3
+	oversized := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, legacyMaxRaw)...)
 
+	transcriber := &stubReadTranscriber{modelID: "qwen3-asr-flash"}
 	provider := newReadAudioProvider(t, map[string][]byte{
 		"media/long.mp3": oversized,
-	}, &stubReadTranscriber{modelID: "qwen3-asr-flash"})
+	}, transcriber)
 
-	_, err := provider.execRead(context.Background(), SessionContext{BotID: "bot-1"}, readArgs{Path: "/data/media/long.mp3"})
-	if err == nil {
-		t.Fatal("expected error for oversized audio")
+	result, err := provider.execRead(context.Background(), SessionContext{BotID: "bot-1"}, readArgs{Path: "/data/media/long.mp3"})
+	if err != nil {
+		t.Fatalf("execRead() error = %v", err)
 	}
-	if !strings.Contains(err.Error(), "audio exceeds transcription limits (10 MB encoded, 5 minutes)") {
-		t.Fatalf("unexpected error: %v", err)
+	m, ok := result.(map[string]any)
+	if !ok {
+		t.Fatalf("expected map result, got %T", result)
 	}
+	if got := m["ok"]; got != true {
+		t.Fatalf("expected ok=true, got %v", got)
+	}
+	if got := m["content"]; got != "hello from the stub" {
+		t.Fatalf("expected transcription text, got %v", got)
+	}
+	if len(transcriber.gotAudio) != len(oversized) {
+		t.Fatalf("expected the full %d-byte payload to reach the transcriber, got %d bytes", len(oversized), len(transcriber.gotAudio))
+	}
+}
+
+func TestReadAudioTranscribeBudgetScalesWithEstimatedDuration(t *testing.T) {
+	t.Parallel()
+
+	wav := newReadAudioWAVFixture(8000, 24_000) // 3 s at an 8 kB/s byte rate
+	if got, want := readAudioTranscribeBudget(wav), 96*time.Second; got != want {
+		t.Fatalf("wav budget = %v, want %v (90 s base + 2 s per second of 3 s audio)", got, want)
+	}
+	mp4 := newReadAudioMP4Fixture(1000, 2500) // 2.5 s at a 1000 Hz timescale
+	if got, want := readAudioTranscribeBudget(mp4), 95*time.Second; got != want {
+		t.Fatalf("mp4 budget = %v, want %v (90 s base + 2 s per second of 2.5 s audio)", got, want)
+	}
+	// Headerless payloads fall back to the floor data rate: 2000 bytes at
+	// 1 kB/s estimates 2 s of audio.
+	floor := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, 1990)...)
+	if got, want := readAudioTranscribeBudget(floor), 94*time.Second; got != want {
+		t.Fatalf("floor budget = %v, want %v (90 s base + 2 s per second of 2 s estimated audio)", got, want)
+	}
+	// The budget grows with the payload, so longer audio is never cut off
+	// by a fixed number.
+	bigger := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, 10_000)...)
+	if readAudioTranscribeBudget(bigger) <= readAudioTranscribeBudget(floor) {
+		t.Fatal("expected a larger payload to yield a larger transcription budget")
+	}
+}
+
+func TestReadAudioEstimatedSecondsParserFallbacks(t *testing.T) {
+	t.Parallel()
+
+	// A RIFF header truncated before the data chunk falls back to the floor
+	// estimate instead of trusting partial header fields.
+	truncatedWav := newReadAudioWAVFixture(8000, 24_000)[:20]
+	if got, want := readAudioEstimatedSeconds(truncatedWav), 20.0/readAudioFloorBytesPerSecond; got != want {
+		t.Fatalf("truncated wav estimate = %v, want %v", got, want)
+	}
+	// An ISO-BMFF box size pointing beyond the file falls back the same way.
+	wholeMp4 := newReadAudioMP4Fixture(1000, 2500)
+	brokenMp4 := append([]byte{}, wholeMp4[:16]...)       // the ftyp box stays intact
+	brokenMp4 = append(brokenMp4, 0xFF, 0xFF, 0xFF, 0xFF) // moov box size beyond the file
+	brokenMp4 = append(brokenMp4, wholeMp4[20:]...)
+	if got, want := readAudioEstimatedSeconds(brokenMp4), float64(len(brokenMp4))/readAudioFloorBytesPerSecond; got != want {
+		t.Fatalf("broken mp4 estimate = %v, want %v", got, want)
+	}
+}
+
+// newReadAudioWAVFixture builds a minimal RIFF/WAVE payload whose fmt chunk
+// advertises byteRate bytes per second and whose data chunk holds dataBytes
+// payload bytes.
+func newReadAudioWAVFixture(byteRate uint32, dataBytes int) []byte {
+	fmtBody := make([]byte, 16)
+	binary.LittleEndian.PutUint16(fmtBody[0:2], 1) // PCM
+	binary.LittleEndian.PutUint16(fmtBody[2:4], 1) // mono
+	binary.LittleEndian.PutUint32(fmtBody[4:8], byteRate)
+	binary.LittleEndian.PutUint32(fmtBody[8:12], byteRate)
+	binary.LittleEndian.PutUint16(fmtBody[12:14], 1)
+	binary.LittleEndian.PutUint16(fmtBody[14:16], 8)
+	chunk := func(id string, body []byte) []byte {
+		head := make([]byte, 8)
+		copy(head[0:4], id)
+		binary.LittleEndian.PutUint32(head[4:8], uint32(len(body))) //nolint:gosec // G115: fixture chunk sizes are far below 2^32.
+		return append(head, body...)
+	}
+	out := append([]byte("RIFF\x00\x00\x00\x00"), []byte("WAVE")...)
+	out = append(out, chunk("fmt ", fmtBody)...)
+	out = append(out, chunk("data", make([]byte, dataBytes))...)
+	binary.LittleEndian.PutUint32(out[4:8], uint32(len(out)-8)) //nolint:gosec // G115: fixture RIFF size is far below 2^32.
+	return out
+}
+
+// newReadAudioMP4Fixture builds a minimal ftyp+moov/mvhd payload with a v0
+// movie header carrying the given timescale and duration.
+func newReadAudioMP4Fixture(timescale, duration uint32) []byte {
+	box := func(typ string, body []byte) []byte {
+		b := make([]byte, 8+len(body))
+		binary.BigEndian.PutUint32(b[0:4], uint32(len(b))) //nolint:gosec // G115: fixture box sizes are far below 2^32.
+		copy(b[4:8], typ)
+		copy(b[8:], body)
+		return b
+	}
+	mvhdBody := make([]byte, 100)
+	binary.BigEndian.PutUint32(mvhdBody[12:16], timescale)
+	binary.BigEndian.PutUint32(mvhdBody[16:20], duration)
+	out := box("ftyp", []byte("M4A \x00\x00\x00\x00"))
+	out = append(out, box("moov", box("mvhd", mvhdBody))...)
+	return out
 }
 
 func TestReadAudioSurfacesTranscriberFailure(t *testing.T) {
