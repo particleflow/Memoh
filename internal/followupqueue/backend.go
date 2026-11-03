@@ -3,6 +3,7 @@ package followupqueue
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"sort"
 	"strings"
@@ -13,6 +14,13 @@ import (
 
 	runtime "github.com/felinics/memoh/internal/agent/runtime/session"
 )
+
+// queueStatusPromotionUnconfirmed marks an item between the two writes of a
+// promotion to steer: the intent is durable, the steer's acknowledgement is
+// not. It can never be claimed as a follow-up again; cancel is its exit.
+const queueStatusPromotionUnconfirmed = runtime.QueueStatus("unknown")
+
+const queueErrorCodePromotionUnconfirmed = "queue_promotion_unconfirmed"
 
 // Backend decorates the existing single-process live backend. Run ownership,
 // fencing, streams and steer execution remain owned by that backend/manager.
@@ -103,17 +111,39 @@ func (b *Backend) PendingQueues(ctx context.Context, key runtime.Key, limit int)
 	if err != nil {
 		return nil, nil, err
 	}
-	visible := ordered(&state, 0)
+	// A pending row is accepted user input the panel can act on. An item
+	// stranded between the two writes of a promotion ("unknown") is neither
+	// claimable nor editable, so listing it shows a row whose every action is
+	// refused (HAP42); a host receipt carries no user text and renders as a
+	// blank row. Both stay claimable/deliverable where they already were; they
+	// are just not user-facing pending input.
+	visible := make([]runtime.FollowUpItem, 0, len(state.Items))
 	for _, item := range state.Items {
-		if item.Status == "unknown" {
-			visible = append(visible, item)
+		if item.Status != runtime.QueueAccepted || hostReceipt(item.Payload) {
+			continue
 		}
+		visible = append(visible, item)
 	}
 	sort.SliceStable(visible, func(i, j int) bool { return visible[i].Position < visible[j].Position })
 	if limit > 0 && len(visible) > limit {
 		visible = visible[:limit]
 	}
 	return steers, visible, nil
+}
+
+// hostReceipt reports a payload written by the host itself to deliver a result
+// (task receipts, delegation outcomes): it has no user text and carries the
+// internal command instead of the user command.
+func hostReceipt(payload []byte) bool {
+	var body struct {
+		Text            string          `json:"text"`
+		Command         json.RawMessage `json:"command"`
+		InternalCommand json.RawMessage `json:"internal_command"`
+	}
+	if err := json.Unmarshal(payload, &body); err != nil {
+		return false
+	}
+	return strings.TrimSpace(body.Text) == "" && len(body.Command) == 0 && len(body.InternalCommand) > 0
 }
 
 func (b *Backend) ReorderFollowUp(ctx context.Context, key runtime.Key, item, before runtime.FollowUpPendingRef) (out []runtime.FollowUpItem, err error) {
@@ -172,10 +202,15 @@ func (b *Backend) UpdateFollowUp(ctx context.Context, key runtime.Key, id runtim
 func (b *Backend) CancelFollowUp(ctx context.Context, key runtime.Key, id runtime.FollowUpItemID) error {
 	return b.Store.Change(ctx, key, func(state *State) error {
 		item := itemAt(state, id)
-		if item == nil || item.Status != runtime.QueueAccepted {
+		// A promotion stranded between its two writes stays "unknown": it is
+		// not consumable, so cancel is its only exit rather than a pending
+		// violation. Everything else terminal is refused as before.
+		if item == nil || (item.Status != runtime.QueueAccepted && item.Status != queueStatusPromotionUnconfirmed) {
 			return runtime.ErrQueueNotPending
 		}
 		item.Status = runtime.QueueCanceled
+		item.ErrorCode = ""
+		item.Claim = nil
 		return nil
 	})
 }
@@ -296,10 +331,10 @@ func (b *Backend) PromoteFollowUpToSteer(ctx context.Context, key runtime.Key, r
 	var payload []byte
 	var replay bool
 	steerID := uuid.NewString()
-	promotionCode := "queue_promotion_unconfirmed"
+	promotionCode := queueErrorCodePromotionUnconfirmed
 	err = b.Store.Change(ctx, key, func(state *State) error {
 		if original, ok := state.Promotions[string(ref.ItemID)]; ok {
-			if item := itemAt(state, ref.ItemID); item == nil || item.Status == "unknown" {
+			if item := itemAt(state, ref.ItemID); item == nil || item.Status == queueStatusPromotionUnconfirmed {
 				return runtime.ErrQueueNotPending
 			}
 			out = original
@@ -321,7 +356,7 @@ func (b *Backend) PromoteFollowUpToSteer(ctx context.Context, key runtime.Key, r
 			return runtime.ErrQueueSteerUnsupported
 		}
 		payload = bytes.Clone(item.Payload)
-		item.Status = runtime.QueueStatus("unknown")
+		item.Status = queueStatusPromotionUnconfirmed
 		item.ErrorCode = promotionCode
 		return nil
 	})
@@ -334,11 +369,11 @@ func (b *Backend) PromoteFollowUpToSteer(ctx context.Context, key runtime.Key, r
 	steer, e := b.EnqueueSteer(ctx, key, steerID, "promoted:"+string(ref.ItemID), payload)
 	if e != nil {
 		// These live-backend errors prove no steer was accepted. Other outcomes
-		// retain unknown, since loss of acknowledgement is not proof of rejection.
+		// retain unconfirmed, since loss of acknowledgement is not proof of rejection.
 		if errors.Is(e, runtime.ErrQueueNoActiveRun) || errors.Is(e, runtime.ErrQueueSteerUnsupported) || errors.Is(e, runtime.ErrQueueCapacityExceeded) {
 			err = b.Store.Change(ctx, key, func(state *State) error {
 				item := itemAt(state, ref.ItemID)
-				if item == nil || item.Status != "unknown" || item.ErrorCode != promotionCode {
+				if item == nil || item.Status != queueStatusPromotionUnconfirmed || item.ErrorCode != promotionCode {
 					return runtime.ErrQueueInvalidReference
 				}
 				item.Status = runtime.QueueAccepted
@@ -353,7 +388,7 @@ func (b *Backend) PromoteFollowUpToSteer(ctx context.Context, key runtime.Key, r
 	}
 	err = b.Store.Change(ctx, key, func(state *State) error {
 		item := itemAt(state, ref.ItemID)
-		if item == nil || item.Status != "unknown" || item.ErrorCode != promotionCode {
+		if item == nil || item.Status != queueStatusPromotionUnconfirmed || item.ErrorCode != promotionCode {
 			return runtime.ErrQueueInvalidReference
 		}
 		item.Status = runtime.QueueCanceled

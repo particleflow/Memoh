@@ -176,13 +176,85 @@ func TestPostgresFollowUpRestartIdentityAndClaims(t *testing.T) {
 	if err != nil || len(state.Items) != 3 || state.Items[2].Status != "unknown" {
 		t.Fatalf("preservation: %v %v", state, err)
 	}
+	// A promotion stranded between its two writes (HAP42) is preserved but is
+	// not a pending row: every panel action on it would be refused.
 	_, pending, err = b.PendingQueues(ctx, key, 0)
-	if err != nil || len(pending) != 1 || pending[0].Status != "unknown" {
-		t.Fatalf("unknown visibility: %v %v", pending, err)
+	if err != nil || len(pending) != 0 {
+		t.Fatalf("stranded promotion listed as pending: %v %v", pending, err)
+	}
+	// Its exit is cancellation, not a pending violation.
+	if err = b.CancelFollowUp(ctx, key, "unknown-receipt"); err != nil {
+		t.Fatalf("stranded promotion must be cancelable: %v", err)
+	}
+	if err = b.CancelFollowUp(ctx, key, "unknown-receipt"); !errors.Is(err, runtime.ErrQueueNotPending) {
+		t.Fatalf("canceled promotion must refuse a second cancel: %v", err)
 	}
 	_, _, ok, err = b.ClaimNextFollowUp(ctx, key, "different-terminal")
 	if err != nil || ok {
 		t.Fatalf("unknown was replayed: %v %v", ok, err)
+	}
+}
+
+func TestPostgresFollowUpListingHidesHostReceipts(t *testing.T) {
+	dsn := os.Getenv("MEMOH_FOLLOW_UP_TEST_DSN")
+	if dsn == "" {
+		t.Skip("isolated PostgreSQL DSN not supplied")
+	}
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	store, err := New(pool, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := NewBackend(runtime.NewMemoryBackend(), store)
+	key := runtime.Key{BotID: uuid.NewString(), SessionID: uuid.NewString()}
+	defer func() {
+		if _, err := pool.Exec(ctx, `DELETE FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2`, key.BotID, key.SessionID); err != nil {
+			t.Error(err)
+		}
+	}()
+	_, _, err = b.Update(ctx, key, func(s runtime.Snapshot, _ bool) (runtime.Snapshot, bool, error) {
+		s.BotID = key.BotID
+		s.SessionID = key.SessionID
+		s.CurrentRunView = &runtime.CurrentRunView{RunID: uuid.NewString(), Status: runtime.RunStatusRunning}
+		return s, true, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// One row the user typed, one receipt the host enqueued to deliver a task
+	// result: no user text, only the internal command (HAP42 blank rows).
+	user, err := b.EnqueueFollowUp(ctx, key, uuid.NewString(), "user-input", []byte(`{"text":"user row"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	receiptPayload := []byte(`{"text":"","internal_command":{"task_result_receipt":"computer_task:fixture"}}`)
+	if _, err = b.EnqueueFollowUp(ctx, key, uuid.NewString(), "receipt", receiptPayload); err != nil {
+		t.Fatal(err)
+	}
+	_, pending, err := b.PendingQueues(ctx, key, 0)
+	if err != nil || len(pending) != 1 || pending[0].ID != user.ID {
+		t.Fatalf("listing must show only user input: %v %v", pending, err)
+	}
+	// Hidden from the panel must not mean lost: the receipt still claims and
+	// applies in order behind the user row.
+	item, claim, ok, err := b.ClaimNextFollowUp(ctx, key, "terminal-a")
+	if err != nil || !ok || item.ID != user.ID {
+		t.Fatalf("first claim must be the user row: %v %v %v", item, ok, err)
+	}
+	if err = b.ApplyFollowUp(ctx, key, claim); err != nil {
+		t.Fatal(err)
+	}
+	item, claim, ok, err = b.ClaimNextFollowUp(ctx, key, "terminal-b")
+	if err != nil || !ok || item.ID == user.ID || !bytes.Equal(item.Payload, receiptPayload) {
+		t.Fatalf("second claim must deliver the receipt: %v %v %v", item, ok, err)
+	}
+	if err = b.ApplyFollowUp(ctx, key, claim); err != nil {
+		t.Fatal(err)
 	}
 }
 
