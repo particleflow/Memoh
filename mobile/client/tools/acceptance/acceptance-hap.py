@@ -9,12 +9,16 @@ this rewrites a copy of the built HAP instead:
      padded back to its fixed slot length;
   2. rawfile ``assets/index-*.js``: the IPv4 private-address (LAN) test
      ``t===10`` becomes ``t===-1``, so the packaged validator accepts the
-     plain-HTTP gateway ``10.0.2.2``. Same length, no padding;
-  3. ``ets/modules.abc``: the same ``first === 10`` term of the native
-     validator (``ServiceUrl.ets``) becomes an unreachable constant, and the
-     shell's ``setWebDebuggingAccess(false)`` loads ``true`` instead. Both are
-     same-size instruction operands located through ``ark_disasm`` (never a
-     fixed offset); the panda header checksum is recomputed.
+     plain-HTTP gateway ``10.0.2.2``. Same length, no padding. PR #162
+     removed the LAN classification from the composed URL validator, so
+     packages built after it carry no such term -- the plain-HTTP gateway
+     passes natively and this edit is skipped;
+  3. ``ets/modules.abc``: the shell's ``setWebDebuggingAccess(false)`` loads
+     ``true`` instead, and -- only in pre-#162 packages that still classify
+     private IPv4 ranges natively -- the same ``first === 10`` term of the
+     native validator (``ServiceUrl.ets``) becomes an unreachable constant.
+     Both are same-size instruction operands located through ``ark_disasm``
+     (never a fixed offset); the panda header checksum is recomputed.
 
 Byte lengths must stay identical: the shell verifies each packaged resource
 against ``WebResourceManifest.ets`` and refuses a load whose length drifted,
@@ -110,7 +114,7 @@ def disassemble(data: bytes) -> list[tuple[str, str, int, bytes]]:
 
 
 def abc_sites(code: list[tuple[str, str, int, bytes]]) -> dict[str, tuple[int, bytes, bytes]]:
-    """Locate the two acceptance operands; each must be unique."""
+    """Locate the acceptance operands; each patched site must be unique."""
     debug = [code[i - 3] for i in range(3, len(code))
              if code[i][0] == 'callthis1withname' and '"setWebDebuggingAccess"' in code[i][1]
              and code[i - 3][0] in ('ldfalse', 'ldtrue')]
@@ -120,10 +124,16 @@ def abc_sites(code: list[tuple[str, str, int, bytes]]) -> dict[str, tuple[int, b
            and any(c[0] == 'ldai' and c[1] == '0xac' for c in code[i + 2:i + 9])]
     if len(debug) != 1 or debug[0][0] != 'ldfalse':
         raise SystemExit(f'setWebDebuggingAccess(false) site not unique/pristine: {debug}')
-    if len(lan) != 1:
+    sites = {'webDebuggingAccess': (debug[0][2], b'\x03', b'\x02')}
+    # PR #162 deleted the native LAN classification: post-#162 packages carry
+    # no first-octet term and accept the plain-HTTP emulator gateway natively,
+    # so the operand is patched only when the site exists. More than one match
+    # is still an error.
+    if len(lan) > 1:
         raise SystemExit(f'native IPv4 LAN term not unique: {lan}')
-    return {'webDebuggingAccess': (debug[0][2], b'\x03', b'\x02'),
-            'nativeLanFirstOctet': (lan[0][2], bytes.fromhex('620a000000'), bytes.fromhex('62ffffffff'))}
+    if lan:
+        sites['nativeLanFirstOctet'] = (lan[0][2], bytes.fromhex('620a000000'), bytes.fromhex('62ffffffff'))
+    return sites
 
 
 def patch_abc(data: bytes) -> tuple[bytes, dict]:
@@ -139,9 +149,12 @@ def patch_abc(data: bytes) -> tuple[bytes, dict]:
     # Re-read the result: debugging now loads true, the 10/8 term is gone.
     check = disassemble(bytes(patched))
     debug = [code for code in check if code[2] == sites['webDebuggingAccess'][0]]
-    lan = [code for code in check if code[2] == sites['nativeLanFirstOctet'][0]]
-    if not debug or debug[0][0] != 'ldtrue' or not lan or lan[0][3] != sites['nativeLanFirstOctet'][2]:
-        raise SystemExit(f'abc re-read mismatch: {debug} {lan}')
+    if not debug or debug[0][0] != 'ldtrue':
+        raise SystemExit(f'abc re-read mismatch: {debug}')
+    if 'nativeLanFirstOctet' in sites:
+        lan = [code for code in check if code[2] == sites['nativeLanFirstOctet'][0]]
+        if not lan or lan[0][3] != sites['nativeLanFirstOctet'][2]:
+            raise SystemExit(f'abc re-read mismatch: {lan}')
     return bytes(patched), {name: f'0x{offset:x}' for name, (offset, _, _) in sites.items()}
 
 
@@ -174,8 +187,13 @@ def rewrite(hap: Path, out: Path, port: int) -> dict:
                 edits[name] = {'kind': 'abc-operands', 'bytes': size, 'sites': sites}
             target.writestr(entry, data)
     kinds = sorted(edit['kind'] for edit in edits.values())
-    if kinds != ['abc-operands', 'lan-exemption', 'seed']:
-        raise SystemExit(f'expected exactly three acceptance edits, applied {sorted(edits)}')
+    # Pre-#162 packages carry the LAN term in both the web bundle and the abc;
+    # post-#162 packages accept the plain-HTTP emulator gateway natively and
+    # need only the seed and the debugging operand.
+    if kinds not in (['abc-operands', 'lan-exemption', 'seed'], ['abc-operands', 'seed']):
+        raise SystemExit(f'unexpected acceptance edit set {kinds}; expected '
+                         '[abc-operands, lan-exemption, seed] (pre-#162) or '
+                         '[abc-operands, seed] (post-#162)')
     return edits
 
 
@@ -237,9 +255,12 @@ def verify(signed: Path, port: int) -> dict:
     with zipfile.ZipFile(signed) as archive:
         seed = json.loads(archive.read(SEED))
         names = [n for n in archive.namelist() if n.startswith(WEB_PREFIX)]
-        bundle = next(n for n in names if n.endswith('.js') and IPV4_EXEMPT.encode() in archive.read(n))
+        # The exemption string is present after patching a pre-#162 bundle;
+        # post-#162 bundles carry no LAN term at all and pass natively.
+        bundle = next((n for n in names if n.endswith('.js') and IPV4_EXEMPT.encode() in archive.read(n)), None)
         abc = archive.read(ABC)
     return {'seedOrigin': seed['apiOrigin'], 'webFiles': len(names), 'bundle': bundle,
+            'lanExemption': 'patched' if bundle else 'native',
             'abcChecksumOk': struct.unpack('<I', abc[8:12])[0] == zlib.adler32(abc[12:])}
 
 
