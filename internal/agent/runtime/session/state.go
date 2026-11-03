@@ -8,6 +8,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	chatview "github.com/felinics/memoh/internal/agent/view"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 func runtimeDeltaForAgentEvent(event native.StreamEvent, messages []chatview.UIMessage) (RuntimeDelta, bool) {
@@ -258,8 +259,14 @@ func normalizeRunAdmission(admission RunAdmissionView) (RunAdmissionView, error)
 	if err != nil {
 		return RunAdmissionView{}, err
 	}
+	var runSource *inputsource.Source
+	if admission.InputSource != nil {
+		source := *admission.InputSource
+		runSource = &source
+	}
 	return RunAdmissionView{
 		RequestUserTurn: requestUserTurn,
+		InputSource:     runSource,
 		Operation:       operation,
 	}, nil
 }

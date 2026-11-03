@@ -150,16 +150,21 @@ func (s *Service) admitTurnRun(
 			// session on the thread) see what fired the run while it still
 			// executes — the same contract the ws and schedule admissions
 			// already honor. NewRequestUserTurn returns nil for commands that
-			// persist no user message (discuss-shaped, attachment-only), and
-			// those runs stay contentless in the projection.
+			// persist no user message (discuss-shaped, attachment-only, host
+			// result deliveries), and those runs stay contentless in the
+			// projection. A result delivery still owns a turn source, so the
+			// run view carries it directly: without that frame the live receipt
+			// renders as an unknown source until history replaces it.
 			Admission: func(_ context.Context, handle sessionruntime.RunHandle) (sessionruntime.RunAdmissionView, error) {
 				request := chatview.NewRequestUserTurn(cmd, handle.TurnID)
-				if source, ok := inputsource.FromContext(ctx, cmd.BotID, cmd.ThreadID); ok && request != nil {
-					request.InputSource = &source
+				view := sessionruntime.RunAdmissionView{RequestUserTurn: request}
+				if source, ok := inputsource.FromContext(ctx, cmd.BotID, cmd.ThreadID); ok {
+					view.InputSource = &source
+					if request != nil {
+						request.InputSource = &source
+					}
 				}
-				return sessionruntime.RunAdmissionView{
-					RequestUserTurn: request,
-				}, nil
+				return view, nil
 			},
 			Cancel: cancel,
 			// Nil for discuss, which has no reader for steering messages.

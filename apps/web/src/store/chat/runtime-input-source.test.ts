@@ -54,6 +54,34 @@ describe('runtime source through actual projection and transcript normalization'
     expect(settled?.role === 'assistant' && settled.inputSource).toEqual(assistant?.input_source)
   })
 
+  it('attributes a receipt run from the run-level source on its first frame', () => {
+    // A task-result delivery projects no user turn: its user row renders no
+    // bubble, so the server names the turn's provenance on the run view itself.
+    // Before that field the live receipt rendered as an unknown source until
+    // history replaced the projection.
+    const receiptSource: UIInputSource = { kind: 'task_result', ...scope, task_kind: 'bot_delegation', task_id: 'task-7', task_run_id: 'run-7' }
+    const initial = frame()
+    delete initial.snapshot.current_run_view!.request_user_turn
+    initial.snapshot.current_run_view = { ...initial.snapshot.current_run_view!, input_source: receiptSource }
+    const state = reduceRuntimeProjection(createEmptyRuntimeProjection(scope.session_id), initial)
+    expect(state.transcript.turns.find(turn => turn.role === 'user')).toBeUndefined()
+    expect(state.transcript.turns.find(turn => turn.role === 'assistant')?.input_source).toEqual(receiptSource)
+    const actual = transcript()
+    actual.applyRuntimeTranscript(state.transcript)
+    expect(actual.messages.find(turn => turn.role === 'assistant')?.inputSource).toEqual(receiptSource)
+    // A foreign or absent run-level annotation still renders unknown, never a
+    // guess from the message body.
+    const foreign = frame()
+    delete foreign.snapshot.current_run_view!.request_user_turn
+    foreign.snapshot.current_run_view = { ...foreign.snapshot.current_run_view!, input_source: { ...receiptSource, session_id: 'another-session' } }
+    expect(reduceRuntimeProjection(createEmptyRuntimeProjection(scope.session_id), foreign)
+      .transcript.turns.find(turn => turn.role === 'assistant')?.input_source).toEqual(unknown)
+    const missing = frame()
+    delete missing.snapshot.current_run_view!.request_user_turn
+    expect(reduceRuntimeProjection(createEmptyRuntimeProjection(scope.session_id), missing)
+      .transcript.turns.find(turn => turn.role === 'assistant')?.input_source).toEqual(unknown)
+  })
+
   it('uses each exact segment input, never the initial source for a known or unknown steer', () => {
     const initial = frame()
     const first = initial.snapshot.current_run_view!.request_user_turn!

@@ -132,6 +132,7 @@ function cloneRunView(run: RuntimeCurrentRunView): RuntimeCurrentRunView {
   return {
     ...run,
     messages: messages.map(cloneUIMessage),
+    input_source: run.input_source ? { ...run.input_source } : undefined,
     user_turns: run.user_turns?.map(turn => ({
       ...turn,
       input_source: turn.input_source ? { ...turn.input_source } : undefined,
@@ -193,7 +194,17 @@ function transcriptForRun(run: RuntimeCurrentRunView | null, scope?: RuntimeSour
   const userTurns = userTurnsForRun(run).map(turn => ({ ...turn, turn_id: turn.turn_id.trim() || turnId }))
   // A segment belongs to its exact input turn. A missing/foreign annotation
   // stays unknown; it must never fall back to the first request's actor/task.
-  const sourceOf = (id: string) => scopedInputSource(userTurns.find(turn => turn.turn_id === id)?.input_source, scope)
+  // The run's own turn is the exception: receipt-shaped turns project no user
+  // turn at all, so the server names their provenance on the run view from the
+  // first frame and that annotation — scoped like any other — is what the
+  // segment falls back to instead of rendering an unknown source until
+  // history lands.
+  const sourceOf = (id: string) => {
+    const owner = userTurns.find(turn => turn.turn_id === id)
+    if (owner) return scopedInputSource(owner.input_source, scope)
+    if (id === turnId) return scopedInputSource(run.input_source, scope)
+    return scopedInputSource(undefined, scope)
+  }
   // A run spans several turns once a steer opens one (SR-TURN-001), so a
   // segment is numbered by the turn it is filed under, not by the run. The
   // run's own position covers its request turn; a steer's turn arrives
