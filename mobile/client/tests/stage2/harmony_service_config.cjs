@@ -3,7 +3,7 @@ const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_T
 function load(file,imports={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{if(n==='./NativeTransferOwner')return load('mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets',imports);if(n==='./harmony-transfer-lifetime')return load('mobile/memoh/harmony-transfer-lifetime.ts',{});assert.ok(n in imports,n);return imports[n]},URL,Error,JSON,Number,String,Array,Map,Set,Promise,console,TextEncoder,Uint8Array,crypto:require('node:crypto').webcrypto});return m.exports}
 const validator=load('mobile/memoh/harmony-service-url.ts'),{normalizeServiceUrl:normal}=validator
 let checks=0;function check(f){f();checks++}
-for(const value of ['','/api','http://localhost/api','http://127.0.0.1/api','http://10.0.0.2/api','http://[::1]/api','http://[fd00::1]/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/api#x','https://alpha.example/foo/../api','https://alpha.example/%61pi','https://alpha.example//api','ftp://alpha.example/api','https://0x7f000001/api','https://alpha.example./api'])check(()=>assert.throws(()=>normal(value)))
+for(const value of ['','/api','http://localhost/api','http://127.0.0.1/api','http://[::1]/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/api#x','https://alpha.example/foo/../api','https://alpha.example/%61pi','https://alpha.example//api','ftp://alpha.example/api','https://0x7f000001/api','https://alpha.example./api'])check(()=>assert.throws(()=>normal(value)))
 check(()=>assert.equal(normal('http://alpha.example:18000/api/'),'http://alpha.example:18000/api'))
 check(()=>assert.equal(normal('https://alpha.example/'),'https://alpha.example'))
 check(()=>assert.equal(normal('https://alpha.example/service/v1'),'https://alpha.example/service/v1'))
@@ -12,10 +12,11 @@ check(()=>assert.equal(normal('https://download.example/releases',false),'https:
 check(()=>assert.equal(normal('https://download.example/app-1.0.8.hap',false),'https://download.example/app-1.0.8.hap'))
 for (const host of ['192.0.1.1','198.51.1.1','192.0.0.9','192.0.0.10']) check(()=>assert.equal(normal('https://'+host+'/api'),'https://'+host+'/api'))
 for (const host of ['192.0.0.8','192.0.0.11','192.0.2.1','198.51.100.1','198.18.0.1','198.19.255.254']) check(()=>assert.throws(()=>normal('https://'+host+'/api')))
-// Deliberately configured LAN service addresses; transport still validates TLS.
+// Deliberately configured LAN service addresses; plaintext LAN origins are
+// accepted (S1 adjudication 2026-11-03) and normalize like any other origin.
 for(const host of ['10.0.0.2','172.16.0.2','172.31.255.254','192.168.1.1','[fd12::1]','[fc12::2]','nas.lan','nas.local']) {
  check(()=>assert.equal(normal('https://'+host+'/api'),'https://'+host+'/api'))
- check(()=>assert.throws(()=>normal('http://'+host+'/api')))
+ check(()=>assert.equal(normal('http://'+host+'/api'),'http://'+host+'/api'))
 }
 for(const value of ['https://127.0.0.1/api','https://[::1]/api','https://[fe80::1]/api','https://169.254.1.1/api','https://0x0a000002/api','https://167772162/api','https://010.0.0.2/api'])check(()=>assert.throws(()=>normal(value)))
 const cfg=load('mobile/memoh/harmony-service-config.ts',{'./harmony-service-url':validator})

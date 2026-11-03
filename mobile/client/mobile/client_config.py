@@ -123,8 +123,8 @@ def deployment_config(value, allow_empty=False):
             raise ValueError('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
     result = {'apiOrigin': api, 'hapDownloadUrl': download, 'productName': name, 'legacyBinding': binding}
     if 'networkPolicy' in value:
-        if not api or urlsplit(api).scheme != 'https':
-            raise ValueError('NETWORK_POLICY_HTTPS')
+        if not api:
+            raise ValueError('DEPLOYMENT_CONFIG_INVALID')
         result['networkPolicy'] = network_policy(value['networkPolicy'])
     return result
 
