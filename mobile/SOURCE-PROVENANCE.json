@@ -114,7 +114,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "bfe96fc33e8356ba6d1a97e85f92dcca7b943c997bb64e387a83dc73791b1871",
+      "sha256": "3d07bd8cad91e87dc1ab2ddc3c9d7decc14fbbedaaaf1a2514318007b9c27a3a",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -369,7 +369,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "e84b8271aee2e61a7c10f970f0b055d8a9bbf1a6d2c640e013cd1911c2a93112",
+      "sha256": "9d2d132451b265b1b9092b283204bc1eae97b58103c48985814867eb75d4ac7f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -1136,7 +1136,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "a35142b604550d5298885eb7f95246e75ba68dc6cef9d0eb99437084810729e7",
+      "sha256": "cc2a590897ede8579566279717ca530fdd62623e56f8e97b6ddba3e6a823609c",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",

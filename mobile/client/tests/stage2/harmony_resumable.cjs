@@ -8,14 +8,14 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex')
 const diagnostics=[]
 if(process.argv[2]==='worker') worker().catch(e=>{console.log(JSON.stringify({error:e.message,...(process.env.HARMONY_UPLOAD_STAGING_FAILURE_ONLY==='1'?{diagnostics}:{})}));process.exitCode=2});else main().catch(e=>{console.error(e);process.exitCode=1})
 async function worker(){
- const [dir,origin,action,handle='',token='alice',bot='bot-a',scope='session-a']=process.argv.slice(3),positions=new Map();let maxRead=0,maxWrite=0,maxBody=0,samples=0,networkHints=[],onPatch,onJournalSave,onWrite,onRead,sourceMutated=false
+ const [dir,origin,action,handle='',token='alice',bot='bot-a',scope='session-a']=process.argv.slice(3),positions=new Map();let maxRead=0,maxWrite=0,maxBody=0,samples=0,hashBytes=0,networkHints=[],onPatch,onJournalSave,onWrite,onRead
  const io={OpenMode:{READ_ONLY:fs.constants.O_RDONLY,WRITE_ONLY:fs.constants.O_WRONLY,READ_WRITE:fs.constants.O_RDWR,CREATE:fs.constants.O_CREAT,EXCL:fs.constants.O_EXCL,TRUNC:fs.constants.O_TRUNC,NOFOLLOW:fs.constants.O_NOFOLLOW},WhenceType:{SEEK_SET:0},
   accessSync:p=>fs.existsSync(p),mkdirSync:p=>fs.mkdirSync(p),openSync:(p,m)=>{if(action.endsWith('-source-open-fail')&&p===path.join(dir,'source.bin'))throw Object.assign(Error('synthetic denied SECRET_URI'),{code:13900012});return{fd:fs.openSync(p,m)}},closeSync:f=>{let fd=typeof f==='number'?f:f.fd;positions.delete(fd);fs.closeSync(fd)},
-  statSync:p=>typeof p==='number'?fs.fstatSync(p):fs.statSync(p),lseek:(fd,at)=>{if(action.endsWith('-source-verify-fail')&&!sourceMutated){const source=fs.openSync(path.join(dir,'source.bin'),'r+');try{fs.writeSync(source,Buffer.from([0x4f]),0,1,0)}finally{fs.closeSync(source)}sourceMutated=true}positions.set(fd,at)},readTextSync:p=>fs.readFileSync(p,'utf8'),listFileSync:p=>fs.readdirSync(p),renameSync:(a,b)=>{if(action.endsWith('-rename-fail'))throw Object.assign(Error('synthetic journal rename failure'),{code:13900020});fs.renameSync(a,b);const hook=onJournalSave;onJournalSave=undefined;hook?.(b)},unlinkSync:p=>{if(action==='bridge-cleanup-source-verify-fail'&&p.endsWith('.original'))throw Object.assign(Error('synthetic cleanup SECRET_PATH'),{code:13900020});fs.unlinkSync(p)},fsyncSync:fd=>{if(action.endsWith('-dir-sync-fail')&&fs.fstatSync(fd).isDirectory())throw Object.assign(Error('synthetic directory sync failure'),{code:13900020});fs.fsyncSync(fd)},
+  statSync:p=>typeof p==='number'?fs.fstatSync(p):fs.statSync(p),lseek:(fd,at)=>{positions.set(fd,at)},readTextSync:p=>fs.readFileSync(p,'utf8'),listFileSync:p=>fs.readdirSync(p),renameSync:(a,b)=>{if(action.endsWith('-rename-fail'))throw Object.assign(Error('synthetic journal rename failure'),{code:13900020});fs.renameSync(a,b);const hook=onJournalSave;onJournalSave=undefined;hook?.(b)},unlinkSync:p=>fs.unlinkSync(p),fsyncSync:fd=>{if(action.endsWith('-dir-sync-fail')&&fs.fstatSync(fd).isDirectory())throw Object.assign(Error('synthetic directory sync failure'),{code:13900020});fs.fsyncSync(fd)},
   read:async(fd,b,o={})=>{const hook=onRead;onRead=undefined;hook?.();maxRead=Math.max(maxRead,b.byteLength);const at=o.offset??positions.get(fd)??0;let n=await new Promise((res,rej)=>fs.read(fd,new Uint8Array(b),0,o.length??b.byteLength,at,(e,n)=>e?rej(e):res(n)));positions.set(fd,at+n);return n},
   write:async(fd,b,o={})=>{const hook=onWrite;onWrite=undefined;hook?.();maxWrite=Math.max(maxWrite,b.byteLength);const at=o.offset??positions.get(fd)??0;let n=fs.writeSync(fd,new Uint8Array(b),0,o.length??b.byteLength,at);positions.set(fd,at+n);return n},
   writeSync:(fd,b)=>fs.writeSync(fd,new Uint8Array(b))}
- const kitCrypto={cryptoFramework:{createMd:()=>{const h=crypto.createHash('sha256');return{update:async({data})=>{h.update(data)},digest:async()=>({data:new Uint8Array(h.digest())})}},createRandom:()=>({generateRandomSync:len=>({data:new Uint8Array(crypto.randomBytes(len))})})}}
+ const kitCrypto={cryptoFramework:{createMd:()=>{const h=crypto.createHash('sha256');return{update:async({data})=>{hashBytes+=data.byteLength;h.update(data)},digest:async()=>({data:new Uint8Array(h.digest())})}},createRandom:()=>({generateRandomSync:len=>({data:new Uint8Array(crypto.randomBytes(len))})})}}
  class Request{constructor(url,method,headers,content){Object.assign(this,{url,method,headers,content})}}
  class MultipartForm{constructor(fields){this.fields=fields}}
  const rcp={Request,MultipartForm,createSession:()=>{let active,stream;return{cancel:()=>active?.destroy(Error('cancel')),close:()=>{active?.destroy();stream?.destroy()},fetch:r=>new Promise((resolve,reject)=>{
@@ -51,7 +51,7 @@ async function worker(){
    client.register();assert.equal(JSON.parse(await client.request(JSON.stringify({version:1,command:'client.state',state:'ready'}))).ok,true)
    result=JSON.parse(await client.request(JSON.stringify({version:1,command:'upload.select',...input})))
   }
-  else if(['stage','stage-dir-sync-fail','stage-rename-fail','stage-source-open-fail','stage-source-verify-fail','stage-network-fail'].includes(action))result=await native.select(input,path.join(dir,'source.bin'))
+  else if(['stage','stage-dir-sync-fail','stage-rename-fail','stage-source-open-fail','stage-network-fail'].includes(action))result=await native.select(input,path.join(dir,'source.bin'))
   else if(['copy-dir-sync-fail','copy-rename-fail'].includes(action)){
    const bytes=fs.readFileSync(path.join(dir,'source.bin'));await native.stageBegin(input,'synthetic.bin','application/octet-stream',bytes.length)
    for(let at=0;at<bytes.length;at+=65536)await native.stageAppend(input.operation,input.authorization,at,bytes.subarray(at,at+65536).toString('base64'))
@@ -103,7 +103,7 @@ async function worker(){
   else if(action==='pause'){onPatch=()=>setTimeout(()=>native.pause(input.operation),20);result=await native.upload(input)}
   else if(action==='close'){const promise=native.upload(input);setTimeout(()=>native.close(),80);result=await promise}
   else result=await native.upload(input)
-  console.log(JSON.stringify({result,metrics:{baseline,peak,samples,maxRead,maxWrite,maxBody,networkHints,pid:process.pid}}))
+  console.log(JSON.stringify({result,metrics:{baseline,peak,samples,maxRead,maxWrite,maxBody,hashBytes,networkHints,pid:process.pid}}))
  }finally{clearInterval(timer);native.close()}
 }
 async function main(){
@@ -150,7 +150,7 @@ async function main(){
    if(mode==='429'&&!triggered){triggered=true;req.resume();return json(res,429,{})}
    if(mode==='409'&&!triggered){triggered=true;req.resume();return json(res,409,{})}
    if(Number(req.headers['upload-offset'])!==r.offset){req.resume();return json(res,409,{})}
-   let bytes=[];for await(let c of req)bytes.push(c);bytes=Buffer.concat(bytes);assert.equal(bytes.length,Number(req.headers['upload-length']));assert.equal(sha(bytes),req.headers['upload-sha256']);assert.equal(req.headers['content-type'],'application/octet-stream');assert.ok(bytes.length<=262144);maxChunk=Math.max(maxChunk,bytes.length)
+   let bytes=[];for await(let c of req)bytes.push(c);bytes=Buffer.concat(bytes);assert.equal(bytes.length,Number(req.headers['upload-length']));assert.equal(sha(bytes),req.headers['upload-sha256']);assert.equal(req.headers['content-type'],'application/octet-stream');assert.ok(bytes.length<=8388608);maxChunk=Math.max(maxChunk,bytes.length)
    const out=fs.openSync(path.join(dir,id),'r+');fs.writeSync(out,bytes,0,bytes.length,r.offset);fs.fsyncSync(out);fs.closeSync(out);r.offset+=bytes.length;events.push(['PATCH',r.offset]);fs.writeFileSync(path.join(dir,id+'.receipt'),JSON.stringify(r))
    if(mode==='kill'&&r.offset>=1048576){activeChild.kill('SIGKILL');res.destroy();return}
    if(mode==='lost'&&!triggered){triggered=true;res.destroy();return}
@@ -160,7 +160,9 @@ async function main(){
   if(req.method==='POST'&&complete==='complete'){
    completePosts++;if(mode==='complete-lost-before'){res.destroy();return}
    if(r.offset!==size)return json(res,409,{})
-   const hh=crypto.createHash('sha256');for await(let c of fs.createReadStream(path.join(dir,id),{highWaterMark:262144}))hh.update(c);assert.equal(hh.digest('hex'),expected);r.state='ready';r.content_hash=expected;events.push(['COMPLETE',r.offset]);
+   // The server recomputes the durable bytes at Complete and refuses a mismatch;
+   // a client that damaged its own snapshot therefore never reaches ready.
+   const hh=crypto.createHash('sha256');for await(let c of fs.createReadStream(path.join(dir,id),{highWaterMark:262144}))hh.update(c);const durableHash=hh.digest('hex');if(durableHash!==expected)return json(res,400,{});r.state='ready';r.content_hash=expected;events.push(['COMPLETE',r.offset]);
    if(mode==='complete-lost'&&!triggered){triggered=true;res.destroy();return}return json(res,200,r)
   }
   json(res,400,{})
@@ -175,10 +177,9 @@ async function main(){
  try{
   if(process.env.HARMONY_UPLOAD_FAILURE_ENVELOPE_ONLY==='1'){
    const reports=[]
-   for(const [action,phase,sdkCode,code]of [['bridge-source-open-fail','source-open',13900012,'VOICE_UNAVAILABLE'],['bridge-source-verify-fail','source-verify',0,'MEDIA_SHA_MISMATCH'],['bridge-network-fail','limits-read',1007900007,'VOICE_UNAVAILABLE'],['bridge-cleanup-source-verify-fail','source-verify',0,'MEDIA_SHA_MISMATCH']]){
+   for(const [action,phase,sdkCode,code]of [['bridge-source-open-fail','source-open',13900012,'VOICE_UNAVAILABLE'],['bridge-network-fail','limits-read',1007900007,'VOICE_UNAVAILABLE']]){
     const before=Date.now(),reply=(await child(action)).result;assert.ok(reply);assert.equal(reply.ok,false);assert.equal(reply.error,code);assert.equal(reply.failure.version,1);assert.equal(reply.failure.phase,phase);assert.equal(reply.failure.sdkCode,sdkCode);assert.ok(reply.failure.at>=before&&reply.failure.at<=Date.now())
     assert.deepEqual(Object.keys(reply.failure).sort(),['at','phase','sdkCode','version']);assert.ok(!JSON.stringify(reply).includes('SECRET'));assert.ok(!JSON.stringify(reply).includes('Bearer'));reports.push({phase,sdkCode,code})
-    if(action.endsWith('-source-verify-fail')){const original=fs.openSync(source,'r+');try{fs.writeSync(original,block,0,1,0)}finally{fs.closeSync(original)}}
    }
    assert.equal((await child('expired-scope-source-open-fail')).result.expiredFailureHidden,true)
    assert.equal(createPosts,0);assert.equal(completePosts,0);assert.equal(patches,0);assert.equal(legacyPosts,0)
@@ -208,11 +209,10 @@ async function main(){
     assert.deepEqual(fs.readFileSync(path.join(journalDir,prior+'.json')),priorJournal);assert.deepEqual(fs.readFileSync(path.join(journalDir,prior+'.original')),priorSnapshot)
     tests.push(entry+'-'+failure)
    }
-   for(const [action,phase,code,reason]of [['stage-source-open-fail','source-open',13900012,'SDK_ERROR'],['stage-source-verify-fail','source-verify',0,'MEDIA_SHA_MISMATCH'],['stage-network-fail','limits-read',1007900007,'SDK_ERROR']]){
+   for(const [action,phase,code,reason]of [['stage-source-open-fail','source-open',13900012,'SDK_ERROR'],['stage-network-fail','limits-read',1007900007,'SDK_ERROR']]){
     const before=fs.readdirSync(journalDir),reply=await child(action)
     assert.ok(reply.error);assert.deepEqual(reply.diagnostics,[{area:'SYSTEM',component:'attachment-stage',phase,detail:'/code='+code+'/reason='+reason}]);assert.ok(!JSON.stringify(reply.diagnostics).includes('SECRET'))
     assert.deepEqual(fs.readdirSync(journalDir),before);assert.deepEqual(fs.readFileSync(path.join(journalDir,prior+'.json')),priorJournal);assert.deepEqual(fs.readFileSync(path.join(journalDir,prior+'.original')),priorSnapshot)
-    if(action==='stage-source-verify-fail'){assert.equal(reply.error,'MEDIA_SHA_MISMATCH');const original=fs.openSync(source,'r+');try{fs.writeSync(original,block,0,1,0)}finally{fs.closeSync(original)}}
     tests.push(action)
    }
    assert.equal(createPosts,0);assert.equal(completePosts,0);assert.equal(patches,0);assert.equal(legacyPosts,0)
@@ -233,6 +233,21 @@ async function main(){
    mode='original-missing';assert.equal((await child('run',handle)).error,'UPLOAD_ORIGINAL_UNAVAILABLE');assert.deepEqual(journal(handle),saved)
    assert.equal(createPosts,posts);assert.equal(completePosts,completes);assert.equal(events.length,eventCount);assert.ok(fs.existsSync(journalPath(handle).replace(/\.json$/,'.original')))
    console.log(JSON.stringify({readyOriginalHEAD404NoStaleRef:true,noCreateOrReceiptFallback:true,localSnapshotRetained:true,realDisk:true,size,nativeDevice:false}));return
+  }
+  // A chunk is the server-advertised maximum, not a client-sized slice, and the
+  // file is read for hashing only where it carries information: the snapshot hash
+  // that names the content and the per-chunk hash the server compares. Re-reading
+  // the same bytes before/after does not make the upload more correct.
+  {
+   mode='normal';const handle=await stage(),staged=measurements.at(-1)
+   // The owner binding adds one short identity digest, not file bytes.
+   assert.ok(staged.hashBytes>=size&&staged.hashBytes<=size+256,'staging hashes the snapshot once')
+   const before=patches,ready=await child('run',handle),ran=ready.metrics
+   assert.equal(ready.result.content_hash,expected)
+   assert.ok(ran.hashBytes>=size&&ran.hashBytes<=size+256,'upload hashes each byte once for its chunk header')
+   assert.equal(patches-before,Math.ceil(size/8388608),'one PATCH per server chunk')
+   assert.equal(maxChunk,Math.min(size,8388608),'chunk size is the advertised chunk_max_bytes')
+   await discard(handle);tests.push('chunk-is-advertised-max-and-each-byte-hashed-once')
   }
   for(const scenario of ['create-before-send-kill','create-lost-before','create-lost-after','create-kill-after']){
    mode='normal';const handle=await stage(),posts=createPosts,accepted=created;mode=scenario
@@ -288,7 +303,9 @@ async function main(){
    mode=scenario;triggered=false;handle=await stage();ready=await child('run',handle);assert.ok(ready.result,ready.error);assert.equal(ready.result.content_hash,expected);tests.push(scenario);await discard(handle)
   }
   mode='normal';handle=await stage();mode='kill';await child('run',handle);j=JSON.parse(fs.readFileSync(path.join(dir,'memoh-upload-journal-v1',handle+'.json')));receipts.delete(j.uploadId);mode='normal';let c=created;ready=await child('run',handle);assert.equal(ready.error,'UPLOAD_RECEIPT_UNAVAILABLE');assert.equal(created,c);assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir,'memoh-upload-journal-v1',handle+'.json'))),j);tests.push('expired-receipt-retained-no-recreate');await discard(handle)
-  handle=await stage();const local=path.join(dir,'memoh-upload-journal-v1',handle+'.original'),f=fs.openSync(local,'r+');fs.writeSync(f,Buffer.from([1]),0,1,8);fs.closeSync(f);c=created;ready=await child('run',handle);assert.equal(ready.error,'MEDIA_SHA_MISMATCH');assert.equal(created,c);tests.push('same-size-source-mutation');await discard(handle)
+  // A snapshot damaged after staging is still caught: each chunk hashes what it
+  // sends, and Complete recomputes the durable bytes and refuses the mismatch.
+  handle=await stage();const local=path.join(dir,'memoh-upload-journal-v1',handle+'.original'),f=fs.openSync(local,'r+');fs.writeSync(f,Buffer.from([1]),0,1,8);fs.closeSync(f);c=created;ready=await child('run',handle);assert.ok(ready.error);assert.notEqual(ready.result?.content_hash,expected);assert.ok(created<=c+1);tests.push('same-size-snapshot-mutation-refused-at-complete');await discard(handle)
   for(const scenario of ['old','limits404']){mode=scenario;handle=await stage();ready=await child('run',handle);assert.ok(ready.result,ready.error);tests.push(scenario+'-bounded-multipart');await discard(handle)}
   mode='oldlost';handle=await stage();await child('run',handle);before=legacyPosts;ready=await child('run',handle);assert.equal(ready.error,'UPLOAD_LEGACY_UNCERTAIN');assert.equal(legacyPosts,before);tests.push('old-lost-no-blind-repost');await discard(handle)
   mode='normal';handle=await stage();mode='kill';await child('run',handle);mode='normal';

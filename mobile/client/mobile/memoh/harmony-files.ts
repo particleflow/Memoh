@@ -55,8 +55,10 @@ export async function verifyAttachmentReferences(botId: string, attachments: Cha
   for (const attachment of attachments) {
     const ui = attachment as UIAttachment
     if ((ui.bot_id || ui.metadata?.bot_id) && referenceBot(ui) !== botId) throw new Error('附件属于其他 Bot')
-    await originalBlob({ ...ui, bot_id: botId }, signal)
   }
+  // Admission already opens every content_hash on the server, and each reference
+  // carries the Bot that owns it. Re-downloading each original to hash it again
+  // proved the same fact a second time and cost one full read per resent file.
   signal.throwIfAborted()
 }
 
@@ -362,9 +364,9 @@ async function prepareOriginal(botId: string, file: File, signal?: AbortSignal,
       || typeof written.mime !== 'string' || !written.mime.trim()) throw new Error('服务端未确认完整附件')
     attachment.mime = written.mime
     attachment.type = mediaType(written.mime)
-    progress?.({ phase: 'verifying' })
-    await originalBlob(attachment, signal)
-    signal?.throwIfAborted()
+    // POST /media returns the stored content_hash, size and mime, and the native
+    // branch above already treats that as the complete receipt. Downloading the
+    // original back to hash it repeated the same evidence over the whole file.
     uncertainWrites.delete(identity)
     return attachment
   } catch (error) {
