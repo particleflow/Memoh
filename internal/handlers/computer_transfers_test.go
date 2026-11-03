@@ -140,7 +140,7 @@ func TestTaskTransferHTTPUploadAndReceiptIsolation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Repeated admission reuses the persisted receipt, without consuming quota.
+	// Repeated admission reuses the persisted receipt.
 	again, err := client.Create(t.Context(), f.id.Binding.BotID, spec)
 	if err != nil || again.ID != created.ID {
 		t.Fatal("create rebound receipt", err)
@@ -306,13 +306,13 @@ func TestTaskTransferHTTPOriginalRangeAndRevalidation(t *testing.T) {
 	}
 }
 
-func TestTaskTransferHTTPPreservesAccountUploadQuota(t *testing.T) {
+func TestTaskTransferHTTPUploadsWithoutConcurrencyCaps(t *testing.T) {
 	f, verifier, https, _ := taskTransferHTTPFixture(t, false)
 	var clients []*transferclient.Client
 	var receipts []transferclient.Receipt
 	spec := transferclient.Spec{SizeBytes: f.ref.SizeBytes, SHA256: f.ref.ContentHash, Mime: f.ref.Mime}
 	for i := range 5 {
-		key := "quota-" + strconv.Itoa(i)
+		key := "concurrent-" + strconv.Itoa(i)
 		verifier.mu.Lock()
 		p := verifier.grants["one"]
 		p.DeliveryID, p.CredentialID = key, key
@@ -325,22 +325,15 @@ func TestTaskTransferHTTPPreservesAccountUploadQuota(t *testing.T) {
 		t.Cleanup(client.CloseIdleConnections)
 		clients = append(clients, client)
 		r, err := client.Create(t.Context(), f.id.Binding.BotID, spec)
-		if i < 4 {
-			if err != nil {
-				t.Fatal(err)
-			}
-			receipts = append(receipts, r)
-		} else {
-			var status *transferclient.HTTPError
-			if !errors.As(err, &status) || status.Status != 429 {
-				t.Fatal("per-delivery principal bypassed per-account quota", err)
-			}
+		if err != nil {
+			t.Fatal("concurrent same-owner task upload refused by an artificial cap", err)
 		}
+		receipts = append(receipts, r)
 	}
 	if _, err := clients[0].Cancel(t.Context(), f.id.Binding.BotID, receipts[0].ID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := clients[4].Create(t.Context(), f.id.Binding.BotID, spec); err != nil {
-		t.Fatal("definite quota refusal left an unknown-create fence", err)
+		t.Fatal("post-cancel create did not reconcile", err)
 	}
 }

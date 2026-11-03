@@ -35,14 +35,14 @@ integrity verification, then recheck the task before exposing bytes.
 
 Ledger v3 adds a reserved file binding and upload receipt association using the
 existing `SaveComputerDelivery` revision CAS. Reserved means authorized scope,
-not delivered: Resolve projects it as absent. Existing per-account upload quota
-is preserved because the UploadStore owner remains the account ID, not a new
+not delivered: Resolve projects it as absent. Upload receipts stay
+account-scoped because the UploadStore owner remains the account ID, not a new
 per-attempt identity. Cross-delivery receipt reuse is rejected even for the same
 account and content hash. Upload Commit requires its bound receipt to be ready.
 
 Before Create, CAS saves a creation fence. After Media persists a receipt, CAS
 attaches its ID before the response is acknowledged. A known receipt makes a
-repeated scoped Create idempotent. Definite pre-creation quota/validation/busy
+repeated scoped Create idempotent. Definite pre-creation validation/busy
 refusals release the fence. Storage errors, crashes or uncertain DB outcomes
 cannot prove non-creation: they retain an unknown fence and never blindly create
 another receipt. A crash between Media creation and binding still requires

@@ -20,8 +20,6 @@ const (
 	UploadChunkBytes  int64 = 8 << 20
 	UploadTTL               = 24 * time.Hour
 	maxUploadSessions       = 128
-	maxActiveUploads        = 16
-	maxOwnerUploads         = 4
 )
 
 var (
@@ -264,41 +262,6 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 	if err := s.sweep(ctx); err != nil {
 		return Upload{}, err
 	}
-	entries, err := s.entries()
-	if err != nil {
-		return Upload{}, err
-	}
-	var count, active, owned int
-	var reserved int64
-	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".json") {
-			continue
-		}
-		count++
-		r, err := s.read(strings.TrimSuffix(entry.Name(), ".json"))
-		if err != nil {
-			return Upload{}, err
-		}
-		if r.State != "uploading" {
-			// A crash after ready save but before payload unlink must not make
-			// those bytes disappear from reservation accounting.
-			if _, err := s.root.Lstat(r.ID + ".data"); err == nil {
-				reserved += r.SizeBytes
-			} else if !errors.Is(err, os.ErrNotExist) {
-				return Upload{}, err
-			}
-		}
-		if r.State == "uploading" {
-			active++
-			reserved += r.SizeBytes
-			if r.Owner == owner {
-				owned++
-			}
-		}
-	}
-	if count >= maxUploadSessions || active >= maxActiveUploads || owned >= maxOwnerUploads || reserved+in.SizeBytes > 4*s.media.MaxUploadBytes() {
-		return Upload{}, ErrUploadQuota
-	}
 	r := uploadRecord{Upload: Upload{ID: uuid.NewString(), State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256, ProgressLease: progressLease}
 	if err := s.save(r); err != nil {
 		return Upload{}, err
@@ -496,7 +459,7 @@ func (s *UploadStore) entries() ([]os.DirEntry, error) {
 		return nil, err
 	}
 	defer func() { _ = f.Close() }()
-	return f.ReadDir(-1) // bounded receipts/payloads/lock stripes plus the fixed failure journal
+	return f.ReadDir(-1) // receipts/payloads/lock stripes plus the fixed failure journal
 }
 
 func (s *UploadStore) Sweep(ctx context.Context) error {
