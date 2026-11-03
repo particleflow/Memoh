@@ -23,14 +23,22 @@ var updateGolden = flag.Bool("update-golden", false, "add missing codes to testd
 
 const goldenPath = "testdata/codes.golden"
 
-// localeFiles are the Web and IM copy; both carry errors.* for every code.
-var localeFiles = []string{
-	"../../apps/web/src/i18n/locales/en.json",
-	"../../apps/web/src/i18n/locales/zh.json",
-	"../../apps/web/src/i18n/locales/ja.json",
+// imLocaleFiles are the IM copy the server renders for run failures on
+// messaging channels; they carry errors.* for every code.
+var imLocaleFiles = []string{
 	"../i18n/locales/en.json",
 	"../i18n/locales/zh.json",
 	"../i18n/locales/ja.json",
+}
+
+// webLocaleFiles are the Web client's own copy. The client renders an error
+// from its code alone and falls back to generic status copy when it has none
+// for a code, so a code may be absent; a leaf that is present must still
+// belong to a catalog code.
+var webLocaleFiles = []string{
+	"../../apps/web/src/i18n/locales/en.json",
+	"../../apps/web/src/i18n/locales/zh.json",
+	"../../apps/web/src/i18n/locales/ja.json",
 }
 
 // declaredCodes parses error.go and returns every constant declared with type
@@ -131,11 +139,11 @@ func TestCatalogCoversEveryDeclaredCode(t *testing.T) {
 
 // Dotted codes map to nested keys under errors.* in each locale file;
 // dot-less codes are direct children. Every catalog code needs a leaf in every
-// locale, and every leaf under errors.* must belong to a catalog code so stale
-// copy is removed together with its code.
+// IM locale, and every leaf under errors.* must belong to a catalog code so
+// stale copy is removed together with its code.
 func TestLocaleCatalogAlignment(t *testing.T) {
 	t.Parallel()
-	for _, path := range localeFiles {
+	for _, path := range imLocaleFiles {
 		path := path
 		t.Run(filepath.Base(path), func(t *testing.T) {
 			t.Parallel()
@@ -165,6 +173,45 @@ func TestLocaleCatalogAlignment(t *testing.T) {
 					t.Errorf("%s: missing errors.%s", filepath.Base(path), code)
 				}
 			}
+			for leaf := range leaves {
+				if _, ok := catalog[Code(leaf)]; !ok {
+					t.Errorf("%s: errors.%s has no catalog code", filepath.Base(path), leaf)
+				}
+			}
+		})
+	}
+}
+
+// A Web locale may omit a code: the client then shows its generic status copy
+// and still branches on the code. A leaf that is present must belong to a
+// catalog code, so copy retired on the server is retired here too.
+func TestWebLocaleCodesBelongToCatalog(t *testing.T) {
+	t.Parallel()
+	for _, path := range webLocaleFiles {
+		path := path
+		t.Run(filepath.Base(path), func(t *testing.T) {
+			t.Parallel()
+			raw, err := os.ReadFile(path) //nolint:gosec // repo-local locale file
+			if err != nil {
+				t.Fatalf("read %s: %v", path, err)
+			}
+			var root map[string]json.RawMessage
+			if err := json.Unmarshal(raw, &root); err != nil {
+				t.Fatalf("decode %s: %v", path, err)
+			}
+			rawErrors, ok := root["errors"]
+			if !ok {
+				t.Fatalf("%s has no top-level \"errors\" object", path)
+			}
+			var errorsNode map[string]any
+			if err := json.Unmarshal(rawErrors, &errorsNode); err != nil {
+				t.Fatalf("decode %s errors: %v", path, err)
+			}
+			if key, ok := firstUnsortedKey(t, rawErrors, "errors"); ok {
+				t.Errorf("%s: keys under errors are not sorted at %s; sort them so codes added on parallel branches land on different lines", filepath.Base(path), key)
+			}
+			leaves := make(map[string]struct{})
+			collectLeaves(errorsNode, "", leaves)
 			for leaf := range leaves {
 				if _, ok := catalog[Code(leaf)]; !ok {
 					t.Errorf("%s: errors.%s has no catalog code", filepath.Base(path), leaf)

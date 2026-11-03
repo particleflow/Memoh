@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/media"
 )
 
@@ -346,11 +347,17 @@ func (e *Executor) resolveOutboundAttachments(
 	if len(bundles) == 0 {
 		return nil, nil
 	}
-	if allowSameConversationShortcut {
-		return resolveSameConversationAttachments(bundles), nil
+	// The same-conversation shortcut resolves like any other target: an
+	// attachment that cannot be persisted fails the call here, with the code,
+	// instead of answering ok and reporting the failure only to the client
+	// after the turn is already running.
+	resolved, err := e.ResolveAttachments(ctx, botID, bundles)
+	if err != nil {
+		return nil, err
 	}
-	resolved := e.ResolveAttachments(ctx, botID, bundles)
-	resolved = dropUnresolvedDataPathAttachments(resolved)
+	if e.AssetResolver != nil {
+		resolved = dropUnresolvedDataPathAttachments(resolved)
+	}
 	if len(resolved) == 0 {
 		return nil, errors.New("attachments could not be resolved")
 	}
@@ -454,17 +461,6 @@ func dropUnresolvedDataPathAttachments(attachments []Attachment) []Attachment {
 		filtered = append(filtered, att)
 	}
 	return filtered
-}
-
-func resolveSameConversationAttachments(bundles []attachmentpkg.Bundle) []Attachment {
-	if len(bundles) == 0 {
-		return nil
-	}
-	result := make([]Attachment, 0, len(bundles))
-	for _, bundle := range bundles {
-		result = append(result, AttachmentFromBundle(bundle))
-	}
-	return result
 }
 
 // promoteDataPathAttachmentsToAssets converts /data/* attachment references
@@ -592,54 +588,61 @@ func (e *Executor) resolvePlatform(args map[string]any, session SessionContext) 
 }
 
 // ResolveAttachments converts raw attachment arguments into Attachment values.
-func (e *Executor) ResolveAttachments(ctx context.Context, botID string, bundles []attachmentpkg.Bundle) []Attachment {
+// A container-file ingestion that fails fails the whole call with
+// media.ingest_failed: the caller answers the model with the code instead of a
+// silent success with fewer attachments.
+func (e *Executor) ResolveAttachments(ctx context.Context, botID string, bundles []attachmentpkg.Bundle) ([]Attachment, error) {
 	var result []Attachment
 	for _, bundle := range bundles {
-		if att := e.resolveAttachmentBundle(ctx, botID, bundle); att != nil {
+		att, err := e.resolveAttachmentBundle(ctx, botID, bundle)
+		if err != nil {
+			return nil, err
+		}
+		if att != nil {
 			result = append(result, *att)
 		}
 	}
-	return result
+	return result, nil
 }
 
-func (e *Executor) resolveAttachmentBundle(ctx context.Context, botID string, bundle attachmentpkg.Bundle) *Attachment {
+func (e *Executor) resolveAttachmentBundle(ctx context.Context, botID string, bundle attachmentpkg.Bundle) (*Attachment, error) {
 	att := AttachmentFromBundle(bundle)
 	if att.Type == "" {
 		att.Type = AttachmentFile
 	}
 	if strings.TrimSpace(att.ContentHash) != "" {
-		return &att
+		return &att, nil
 	}
 	if attachmentpkg.IsHTTPURL(bundle.URL) {
 		att.URL = bundle.URL
-		return &att
+		return &att, nil
 	}
 	if bundle.Base64 != "" {
 		att.Base64 = bundle.Base64
-		return &att
+		return &att, nil
 	}
 	ref := strings.TrimSpace(bundle.Path)
 	if ref == "" {
 		if strings.TrimSpace(att.PlatformKey) == "" {
-			return nil
+			return nil, nil
 		}
-		return &att
+		return &att, nil
 	}
 	if storageKey := attachmentpkg.ExtractStorageKey(ref); storageKey != "" && e.AssetResolver != nil {
 		asset, err := e.AssetResolver.GetByStorageKey(ctx, botID, storageKey)
 		if err == nil {
-			return AssetMetaToAttachment(asset, botID, string(att.Type), bundle.Name)
+			return AssetMetaToAttachment(asset, botID, string(att.Type), bundle.Name), nil
 		}
 	}
 	if attachmentpkg.IsDataPath(ref) && e.AssetResolver != nil {
 		asset, err := e.AssetResolver.IngestContainerFile(ctx, botID, ref)
-		if err == nil {
-			return AssetMetaToAttachment(asset, botID, string(att.Type), bundle.Name)
+		if err != nil {
+			return nil, apperror.Wrap(apperror.CodeMediaIngestFailed, err, nil)
 		}
-		return nil
+		return AssetMetaToAttachment(asset, botID, string(att.Type), bundle.Name), nil
 	}
 	// att.Path is already set correctly by AttachmentFromBundle (bundle.Path = ref).
-	return &att
+	return &att, nil
 }
 
 // ParseOutboundMessage parses a message from tool call arguments.
