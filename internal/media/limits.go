@@ -7,8 +7,14 @@ import (
 )
 
 const (
-	// MaxAssetBytes is the default HTTP upload limit and the legacy inline limit.
+	// MaxAssetBytes bounds legacy inline and channel attachment fetches that
+	// must buffer a remote body. It is no longer the upload admission default.
 	MaxAssetBytes int64 = 200 * 1024 * 1024
+	// MaxUploadCeilingBytes is the default single-file upload ceiling: the
+	// largest size the configuration and JSON limits can represent (the same
+	// bound files.max_upload_bytes validates). It is a protocol numeric
+	// ceiling, not an artificial throttle.
+	MaxUploadCeilingBytes int64 = (1 << 53) - 1
 )
 
 // ReadAllWithLimit reads from reader and rejects payloads larger than maxBytes.
