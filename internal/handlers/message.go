@@ -884,9 +884,6 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		if _, err := reader.Seek(0, io.SeekStart); err != nil {
 			return err
 		}
-		if err := checkTaskTransferResponse(c); err != nil {
-			return err
-		}
 		cacheControl = "no-store"
 	}
 	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, cacheControl)

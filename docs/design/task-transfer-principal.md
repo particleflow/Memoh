@@ -31,7 +31,7 @@ transactional operation/target/permission checks, and compares all URL/body/file
 selectors. A download cannot select another hash. An upload must match the exact
 file grant. Raw bytes still use Media; no file payload, log or credential is
 saved in the operation row. Range responses use the existing stream and full
-integrity verification, then recheck the task before exposing bytes.
+integrity verification. Authorization is computed once, at request admission.
 
 Ledger v3 adds a reserved file binding and upload receipt association using the
 existing `SaveComputerDelivery` revision CAS. Reserved means authorized scope,
