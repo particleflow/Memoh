@@ -72,6 +72,11 @@ const scope = {
     scopedCalls.push({ url, options })
     return new Response(scopedStatus === 200 ? file : null, { status: scopedStatus })
   }),
+  client: { getConfig: () => ({}) },
+  imageTimingHandle: () => ({}), imageTimingFetch: (_timing, fetch) => fetch,
+  imageTimingMark: () => {}, imageTimingResource: () => {}, imageTimingBlob: () => {},
+  diagnosticTransfer: () => () => {}, responseRequestTag: () => '',
+  noteUploadBytes: () => {}, clearUploadBytes: () => {},
   sdkApiUrl: ({ url }) => 'https://synthetic.invalid/api' + url,
   sdkAuthQuery: () => ({ token: 'synthetic-test-only' }),
   normalizeDelegationPath: executable(fs.readFileSync('mobile/memoh/harmony-service-url.ts','utf8'),
@@ -91,7 +96,16 @@ const scope = {
     const status = readStatus ?? (bytes ? 200 : 404)
     const response = new Response(null,{status})
     if (options.throwOnError && status >= 400) throw Error('synthetic download refusal')
-    return { data: corrupt && bytes ? new Uint8Array(bytes.byteLength).buffer : bytes, response }
+    return { data: bytes, response }
+  },
+  headBotsByBotIdMediaByContentHash: async options => {
+    options.signal?.throwIfAborted(); const { bot_id: bot, content_hash: sha } = options.path
+    assert.match(sha, /^[a-f0-9]{64}$/); assert.equal(options.query, undefined)
+    calls.push(['head',bot,sha]); const bytes = originals.get(JSON.stringify([bot,sha]))
+    const status = readStatus ?? (bytes ? 200 : 404)
+    const response = new Response(null,{status,headers:{etag:'"'+(corrupt?'0'.repeat(64):sha)+'"','content-length':String(bytes?bytes.byteLength:0)}})
+    if (options.throwOnError && status >= 400) throw Error('synthetic download refusal')
+    return { data: undefined, response }
   },
   postBotsByBotIdMedia: async options => {
     const bot = options.path.bot_id; calls.push(['post',bot]); assert.deepEqual(Object.keys(options.body),['file'])
@@ -103,7 +117,7 @@ const scope = {
   },
 }
 const adapter = executable(fs.readFileSync('mobile/memoh/harmony-files.ts','utf8'),
- ['prepareSubmission','prepareAttachment','UnknownWrite','verifyAttachmentReferences','attachmentForWire','originalBlob','saveOriginal'],scope)
+ ['prepareSubmission','prepareAttachment','prepareAttachmentsForMessage','UnknownWrite','verifyAttachmentReferences','attachmentForWire','originalBlob','saveOriginal'],scope)
 const { prepareSubmission, UnknownWrite } = adapter
 const file = new File(['UPLOAD_SYNTHETIC\nsecond line'], 'example.txt', {type:'text/plain'})
 const selected = [file], first = prepareSubmission('bot-a',selected); selected.length=0
@@ -180,12 +194,14 @@ const { createChatSend }=executable(sources.send,['createChatSend'],{
  cloneRequestedSkills:v=>[...v],normalizeRequestedSkills:v=>v??[],requestedSkillRequestsForWire:()=>[],
  createInvocationId:()=> 'synthetic-'+ ++invocation,hasUserAttachments:v=>!!v?.length,
  attachmentForWire:adapter.attachmentForWire,verifyAttachmentReferences:adapter.verifyAttachmentReferences,
+ prepareAttachmentsForMessage:adapter.prepareAttachmentsForMessage,
 })
 const sender=createChatSend(deps)
 let preparing
 const blocked=sender.sendMessage('draft',first.attachments,{target:targetA,prepareAttachments:signal=>new Promise((resolve,reject)=>{
  preparing=signal;signal.addEventListener('abort',()=>reject(new DOMException('cancel','AbortError')),{once:true})
 })})
+await new Promise(r=>setImmediate(r))
 assert.ok(preparing);assert.equal(ensured,0,'no session creation before readiness')
 assert.equal((await sender.sendMessage('independent',undefined,{target:targetB})).ok,true)
 view(targetA).attachmentPreparation.value.abort(); const stopped=await blocked
@@ -195,9 +211,9 @@ const success=await sender.sendMessage('batch',first.attachments,{target:targetA
 assert.equal(success.ok,true);assert.equal(sent.length,2)
 assert.deepEqual(Object.keys(sent[1].message.attachments[0]).sort(),['content_hash','mime','name','size','type'])
 await first.prepareAttachments(c.signal);assert.equal(sent.length,2,'repeated ready never dispatches')
-const missing={type:'file',content_hash:'f'.repeat(64)}
-const rejected=await sender.sendMessage('explicit refs',[...ready,missing],{target:targetA})
-assert.equal(rejected.stage,'startup');assert.equal(sent.length,2,'every explicitly supplied reference must verify')
+const foreign={...ready[0],bot_id:'bot-b',metadata:{bot_id:'bot-b'}}
+const rejected=await sender.sendMessage('explicit refs',[...ready,foreign],{target:targetA})
+assert.equal(rejected.stage,'startup');assert.equal(sent.length,2,'every explicitly supplied reference must verify against the target Bot')
 const videoReady = await prepareSubmission('bot-a', [new File(['valid video fixture'], 'ok.mp4', { type: 'video/mp4' })]).prepareAttachments(c.signal)
 assert.equal(videoReady[0].type, 'video')
 // Mixed file batch including video, then a corrupt receipt: no model request.

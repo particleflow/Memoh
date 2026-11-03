@@ -68,10 +68,10 @@ async function worker(){
     await assert.rejects(native.stageAppend(action==='copy-wrong-operation'?'b'.repeat(32):input.operation,action==='copy-wrong-auth'?'Bearer bob':input.authorization,0,'YQ=='),/UPLOAD_IDENTITY/)
     assert.equal(fs.existsSync(snapshot),false);result={isolated:true}
    }else if(action==='copy-bad-offset'||action==='copy-oversized'){
-    await assert.rejects(native.stageAppend(input.operation,input.authorization,action==='copy-bad-offset'?1:0,Buffer.alloc(action==='copy-oversized'?65537:1).toString('base64')),/UPLOAD_REQUEST/)
+    await assert.rejects(native.stageAppend(input.operation,input.authorization,action==='copy-bad-offset'?1:0,Buffer.alloc(action==='copy-oversized'?1048577:1).toString('base64')),/UPLOAD_REQUEST/)
     assert.equal(fs.existsSync(snapshot),false);result={bounded:true}
    }else{
-    const sourceFd=fs.openSync(source,'r'),buffer=Buffer.alloc(65536);let offset=0
+    const sourceFd=fs.openSync(source,'r'),buffer=Buffer.alloc(1048576);let offset=0
     try{while(offset<size){const n=fs.readSync(sourceFd,buffer,0,Math.min(buffer.length,size-offset),offset)
      if(action==='copy-close-during-write')onWrite=()=>native.close()
      const chunk=native.stageAppend(input.operation,input.authorization,offset,buffer.subarray(0,n).toString('base64'))
@@ -285,7 +285,7 @@ async function main(){
   assert.equal((await child('run',quotaHandle)).error,'UPLOAD_CREATE_UNCERTAIN');assert.equal(quotaCalls,quotaBefore+1);mode='normal';await discard(quotaHandle);tests.push('create-429-no-automatic-POST-retry')
   for(const scenario of ['copy-normal','copy-close-before-chunk','copy-wrong-operation','copy-wrong-auth','copy-bad-offset','copy-oversized','copy-close-during-write','copy-close-during-finish','copy-close-after-save']){
    const posts=createPosts;mode='normal';const result=await child(scenario);assert.ok(result.result,result.error);assert.equal(createPosts,posts)
-   assert.ok(result.metrics.maxWrite<=65536);assert.ok(result.metrics.maxRead<=262144)
+   assert.ok(result.metrics.maxWrite<=1048576);assert.ok(result.metrics.maxRead<=262144)
    if(scenario==='copy-normal'){
     const local=result.result;assert.equal(local.hash,expected);const ready=await child('run',local.handle);assert.equal(ready.result.content_hash,expected);await discard(local.handle)
    }else if(result.result.committed)await discard(result.result.handle)

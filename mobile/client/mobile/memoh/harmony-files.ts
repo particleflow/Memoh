@@ -2,6 +2,7 @@ import {
   postBotsByBotIdMedia,
   getBotsByBotIdMediaLimits,
   getBotsByBotIdMediaByContentHash,
+  headBotsByBotIdMediaByContentHash,
   getBotsByBotIdContainerFsDownload,
   getBotsByBotIdContainerFsRead,
 } from '@memohai/sdk'
@@ -337,12 +338,15 @@ async function prepareOriginal(botId: string, file: File, signal?: AbortSignal,
   }
   sourceFiles.set(attachment, file)
   progress?.({ phase: 'checking' })
-  const existing = await getBotsByBotIdMediaByContentHash({
-    path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: false })
+  // Existence is proven by headers alone: the endpoint's ETag is the content
+  // hash and its Content-Length is the stored size. A hit costs one HEAD,
+  // never a full download and re-hash of the same bytes.
+  const existing = await headBotsByBotIdMediaByContentHash({
+    path: { bot_id: botId, content_hash: hash }, signal, throwOnError: false })
   signal?.throwIfAborted()
   if (existing.response?.status === 200) {
-    if (!(existing.data instanceof ArrayBuffer) || existing.data.byteLength !== file.size
-      || await digest(existing.data) !== hash) throw new Error('原件完整性校验未通过')
+    if (existing.response.headers.get('etag') !== '"' + hash + '"'
+      || existing.response.headers.get('content-length') !== String(file.size)) throw new Error('原件完整性校验未通过')
     signal?.throwIfAborted()
     uncertainWrites.delete(identity)
     // Reuse by hash, even when the selected display filename has changed.

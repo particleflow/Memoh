@@ -6,7 +6,7 @@ export interface NativeAttachment { handle: string; name: string; type: string; 
 export interface NativeUploadReceipt { content_hash: string; size_bytes: number; mime: string }
 export interface NativeUploadFailure { version: 1; phase: string; sdkCode: number; at: number; code: string; operation?: string }
 const failurePhases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
-  'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync']
+  'snapshot-copy', 'snapshot-hash', 'journal-publish', 'journal-dir-sync']
 const failureCodes = ['MEDIA_SHA_MISMATCH', 'MEDIA_SIZE_MISMATCH', 'MEDIA_SHORT_READ', 'MEDIA_SHORT_WRITE',
   'UPLOAD_CANCELLED', 'UPLOAD_REQUEST', 'UPLOAD_IDENTITY', 'UPLOAD_LIMIT_INVALID', 'UPLOAD_JOURNAL_SIZE',
   'UPLOAD_JOURNAL_WRITE', 'UPLOAD_RECEIPT_SIZE', 'UPLOAD_HTTP_413', 'VOICE_UNAVAILABLE']
@@ -109,6 +109,10 @@ if (nativeAttachmentsAvailable) onAuthSessionCleared(() => { void bridge('upload
 // Clipboard, drop and recorded Files enter the same native snapshot/receipt
 // path as the picker. Only bounded local-copy chunks cross this existing bridge;
 // no file bytes enter the chat or a new network endpoint.
+// One 1 MiB binary chunk keeps a bridge frame near 1.33 MiB (base64 + JSON),
+// under the practical ArkWeb proxy payload ceiling, and a 1 GiB intake needs
+// 1,024 hops instead of 16,384.
+const BRIDGE_CHUNK_BYTES = 1048576
 const stagedFiles = new WeakMap<File, Map<string, Promise<NativeAttachment>>>()
 const stageKey = (botId: string, scope: string) => JSON.stringify([botId, scope, authSessionGeneration(), sdkApiUrl({ url: '/users/me' })])
 export async function forgetNativeFile(botId: string, scope: string, file: File, handle: string): Promise<void> {
@@ -138,9 +142,9 @@ export function stageNativeFile(botId: string, scope: string, file: File, signal
       if (!start || !/^[a-f0-9]{32}$/.test(start.handle)) throw new Error('原件暂存身份不完整')
       for (let offset = 0; offset < file.size;) {
         check()
-        const bytes = new Uint8Array(await file.slice(offset, offset + 65536).arrayBuffer())
+        const bytes = new Uint8Array(await file.slice(offset, offset + BRIDGE_CHUNK_BYTES).arrayBuffer())
         check()
-        if (bytes.byteLength !== Math.min(65536, file.size - offset)) throw new Error('原件读取不完整')
+        if (bytes.byteLength !== Math.min(BRIDGE_CHUNK_BYTES, file.size - offset)) throw new Error('原件读取不完整')
         let binary = ''
         for (let at = 0; at < bytes.length; at += 8192) binary += String.fromCharCode(...bytes.subarray(at, at + 8192))
         const reply = await nativeAttachmentCommand<{ offset: number }>('upload.stage.append', botId, scope,

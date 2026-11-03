@@ -80,7 +80,6 @@ export class NativeTransferBackground implements TransferBackgroundControl {
   private leaseCanceled: boolean = false;
   private signature: string = '';
   private disposed: boolean = false;
-  private poisoned: boolean = false;
   private subscribed: boolean = false;
   private phase: string = 'idle';
   private canceled: (info: backgroundTaskManager.ContinuousTaskCancelInfo) => void =
@@ -89,22 +88,22 @@ export class NativeTransferBackground implements TransferBackgroundControl {
   constructor(context: common.UIAbilityContext, stopIO: (reason: string) => void, platform?: TransferBackgroundPlatform) {
     this.platform = platform ?? new SystemTransferBackground(context); this.stopIO = stopIO;
     try { this.platform.onCancel(this.canceled); this.subscribed = true; }
-    catch (error) { this.poisoned = true; this.phase = 'subscription-failed'; this.failure('subscription', error as Error); }
+    catch (error) { this.phase = 'subscription-failed'; this.failure('subscription', error as Error); }
   }
   private failure(phase: string, error: Error): void {
     ClientDiagnostics.failure('SYSTEM', 'transfer-background', phase, error);
   }
   private enqueue(action: () => Promise<void>): void {
     this.work = this.work.then(action).catch((error: Error): void => {
-      this.poisoned = true; this.phase = 'cleanup-unknown'; this.failure('cleanup', error);
+      this.phase = 'cleanup-unknown'; this.failure('cleanup', error);
       this.active.clear(); this.generation++; this.stopIO('background-cleanup-unknown');
     });
   }
   private current(generation: number): boolean {
-    return !this.disposed && !this.poisoned && this.active.size > 0 && generation === this.generation;
+    return !this.disposed && this.active.size > 0 && generation === this.generation;
   }
   begin(key: string): boolean {
-    if (this.disposed || this.poisoned) { return false; }
+    if (this.disposed || !this.subscribed) { return false; }
     if (this.active.has(key)) { return true; }
     const first = this.active.size === 0; this.active.set(key, undefined);
     if (first) {
@@ -115,10 +114,10 @@ export class NativeTransferBackground implements TransferBackgroundControl {
         let lease: backgroundTaskManager.ContinuousTaskNotification;
         try { lease = await this.platform.start(); }
         catch (error) {
-          // A rejected start has no task ID to reconcile. Even if the old
-          // operation ended meanwhile, never acquire a second uncertain grant.
+          // A rejected start has no task ID to reconcile. Stop this pass only;
+          // the next begin retries acquisition instead of poisoning forever.
           const hadWork = this.active.size > 0;
-          this.phase = 'request-failed'; this.poisoned = true; this.failure('request', error as Error);
+          this.phase = 'request-failed'; this.failure('request', error as Error);
           this.active.clear(); this.generation++;
           if (hadWork) { this.stopIO('background-request-failed'); }
           return;
@@ -141,7 +140,7 @@ export class NativeTransferBackground implements TransferBackgroundControl {
   }
   progress(key: string, received: number, total: number): void {
     if (!this.active.has(key) || !Number.isSafeInteger(received) || !Number.isSafeInteger(total) ||
-      total <= 0 || received < 0 || received > total || this.disposed || this.poisoned) { return; }
+      total <= 0 || received < 0 || received > total || this.disposed) { return; }
     const prior = this.active.get(key);
     if (prior && prior.received === received && prior.total === total) { return; }
     this.active.set(key, { received: received, total: total }); this.queueProgress();
@@ -165,10 +164,9 @@ export class NativeTransferBackground implements TransferBackgroundControl {
         await this.platform.publish(lease, Math.floor(100 * received / total));
         this.signature = signature;
       } catch (error) {
-        if (this.current(generation)) {
-          this.phase = 'notification-failed'; this.failure('notification', error as Error);
-          this.reset(); this.stopIO('background-notification-failed');
-        }
+        // Notification progress is presentation only. Its failure is logged
+        // machine-side and must never pause, reset or stop the transfer.
+        this.failure('notification', error as Error);
       }
     });
   }
@@ -185,7 +183,7 @@ export class NativeTransferBackground implements TransferBackgroundControl {
         this.lease = undefined;
         await this.platform.stop(lease, this.leaseCanceled);
       }
-      if (!this.poisoned && !this.disposed && this.active.size === 0) { this.phase = 'idle'; }
+      if (!this.disposed && this.active.size === 0) { this.phase = 'idle'; }
     });
   }
   private systemCanceled(info: backgroundTaskManager.ContinuousTaskCancelInfo): void {

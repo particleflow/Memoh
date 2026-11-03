@@ -194,7 +194,7 @@ export class NativeClient {
       // Optional metadata on the existing error response, not a log/export command.
       // Reconstruct only fixed enums/numbers; never serialize the Error or cause.
       const phases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
-        'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync'];
+        'snapshot-copy', 'snapshot-hash', 'journal-publish', 'journal-dir-sync'];
       const allowed = this.active && this.ready && failure?.version === 1 && phases.includes(failure.phase) &&
         Number.isSafeInteger(failure.sdkCode) && failure.sdkCode >= 0 && failure.sdkCode <= 2147483647 &&
         Number.isSafeInteger(failure.at) && failure.at > 0;
