@@ -82,7 +82,7 @@ func OpenHostConfig(getenv func(string) string) (*HostConfig, error) {
 	if d.Decode(&cfg) != nil || d.Decode(new(any)) != io.EOF || cfg.Version != 1 {
 		return nil, ErrVersion
 	}
-	// Reuse the same HTTPS policy as every client; no alternate TLS path.
+	// Reuse the same scheme policy as every client; no alternate TLS path.
 	c, err := New(cfg.Origin, nil, func(context.Context) (string, error) { return "", ErrAuthorization })
 	if err != nil {
 		return nil, ErrBinding

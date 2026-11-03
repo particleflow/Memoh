@@ -1,15 +1,17 @@
 package transferclient
 
 import (
+	"net/netip"
 	"net/url"
 	"strconv"
 	"strings"
 )
 
-// ValidateAPIBase checks the configured HTTPS API prefix without resolving DNS,
-// reading credentials or normalizing a persisted host binding. Private network
-// names/addresses are allowed as explicit configuration; TLS still validates
-// the configured hostname. This is not endpoint discovery or authorization.
+// ValidateAPIBase checks the configured HTTPS/private-HTTP API prefix without
+// resolving DNS, reading credentials or normalizing a persisted host binding.
+// Plain HTTP is accepted only when the configured host is a private-network IP
+// literal; every other host keeps the HTTPS requirement and TLS hostname
+// validation. This is not endpoint discovery or authorization.
 func ValidateAPIBase(base string) error {
 	_, err := parseAPIBase(base)
 	return err
@@ -28,7 +30,10 @@ func parseAPIBase(base string) (*url.URL, error) {
 		}
 	}
 	u, err := url.Parse(base)
-	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Opaque != "" || strings.HasSuffix(u.Host, ":") {
+	if err != nil || u.Hostname() == "" || u.User != nil || u.Opaque != "" || strings.HasSuffix(u.Host, ":") {
+		return nil, ErrInvalid
+	}
+	if u.Scheme != "https" && (u.Scheme != "http" || !privateNetworkHost(u.Hostname())) {
 		return nil, ErrInvalid
 	}
 	if port := u.Port(); port != "" {
@@ -53,4 +58,13 @@ func parseAPIBase(base string) (*url.URL, error) {
 		}
 	}
 	return u, nil
+}
+
+// privateNetworkHost reports whether host is a private-network IP literal:
+// RFC 1918 IPv4 (10/8, 172.16/12, 192.168/16) or IPv6 unique local fc00::/7.
+// DNS names, loopback and all other addresses do not qualify; they keep the
+// HTTPS requirement.
+func privateNetworkHost(host string) bool {
+	addr, err := netip.ParseAddr(host)
+	return err == nil && addr.Unmap().IsPrivate()
 }

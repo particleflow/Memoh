@@ -12,7 +12,7 @@ not yet adopted the vectors in this change.
 | --- | --- | --- |
 | NAS file routes | `MessageHandler`, reused by the device task adapter | No new routes. Ordinary attachments and device transfers use the same Media service and storage provider. |
 | NAS original location | `Config.Files.OriginalsRoot` -> core providers -> Media/storage | No path or mount changes. `.uploads` derives from this root. Clients use references, never construct the NAS filesystem layout. |
-| Windows transfer API address | Private `transfer.json.origin`, resolved by `OpenHostConfig` | Shared HTTPS API-base validation; existing config version and raw-byte binding remain unchanged. |
+| Windows transfer API address | Private `transfer.json.origin`, resolved by `OpenHostConfig` | Shared HTTPS/private-HTTP API-base validation; existing config version and raw-byte binding remain unchanged. |
 | Windows endpoint configuration | Existing unified `transfer.nasOrigin` and config/state locator | Endpoint owner must allow the API path prefix and align validation with these vectors. No separate transfer settings root or installer is introduced here. |
 | Mobile API address | Existing `apiOrigin` configuration owner | Explicit HTTPS LAN support is present in the mobile increment linked below; automatic route selection and full shared syntax alignment remain with that owner. |
 | Credentials | Existing account/session authorization for mobile; stable device registry and private `device.credential` for PC | No new credential type, per-file pairing, signing or persistent identity. Device requests retain operation/device/attempt/file authorization. |
@@ -44,21 +44,27 @@ already admits explicitly configured HTTPS private-network addresses and support
 the existing `url` download field with delegated scope. Its missing overlay and
 native bridge inputs still prevent complete caller/build verification. It has a
 single API base and no automatic LAN/IPv6 selector. That client also retains
-legacy public HTTP configuration compatibility; this is not encrypted transport
-or a policy adopted by the HTTPS-only PC transfer client. Converging that legacy
-policy requires the mobile owner's explicit compatibility/migration work.
+legacy public HTTP configuration compatibility; the PC transfer client accepts
+plain HTTP only for private-network IP literals, not public hosts. Converging
+that legacy policy requires the mobile owner's explicit compatibility/migration
+work.
 
 ## API base syntax
 
-The existing fields above mean **HTTPS API base**, not necessarily URL origin.
-Examples using synthetic addresses are `https://nas.example.test/api` and
-`https://[2001:db8::10]/api`. A direct Server root or a nested gateway prefix is
+The existing fields above mean **HTTPS API base, or a plain-HTTP API base whose
+host is a private-network IP literal**, not necessarily URL origin.
+Examples using synthetic addresses are `https://nas.example.test/api`,
+`https://[2001:db8::10]/api` and `http://192.168.1.10/api`. A direct Server
+root or a nested gateway prefix is
 also supported. A single trailing slash remains compatible. The client appends
 its existing route namespace without losing the configured prefix.
 
 `transferclient.ValidateAPIBase`, `New` and `NewTask` enforce the same syntax:
 
-- HTTPS, nonempty host, optional port in 1..65535, no userinfo.
+- HTTPS for every host; plain HTTP only when the host is a private-network IP
+  literal (RFC 1918 IPv4 `10/8`, `172.16/12`, `192.168/16`, or IPv6 unique
+  local `fc00::/7`). DNS names, loopback and all other addresses keep the
+  HTTPS requirement. Nonempty host, optional port in 1..65535, no userinfo.
 - No query or fragment, including empty `?` or `#` delimiters; no whitespace,
   control characters, backslashes, percent escapes or IPv6 zone identifiers.
 - Path segments contain ASCII letters/digits or `-._~`; no `.` or `..` segment
@@ -66,12 +72,13 @@ its existing route namespace without losing the configured prefix.
   the internally appended task namespace and two validated IDs (at most 128
   bytes each) do not consume that configuration limit.
 - Explicitly configured private IPv4, private names and ULA IPv6 are accepted.
-  Acceptance performs no DNS lookup, probe or authorization. TLS still verifies
-  the configured hostname/IP against the server certificate. Redirects remain
-  disabled; certificate validation cannot be disabled through this API.
+  Acceptance performs no DNS lookup, probe or authorization. For HTTPS, TLS
+  still verifies the configured hostname/IP against the server certificate.
+  Redirects remain disabled; certificate validation cannot be disabled through
+  this API.
 
 The language-independent
-[`memoh.file-api-base.v1` vectors](../internal/transferclient/testdata/api-base-v1.json)
+[`memoh.file-api-base.v2` vectors](../internal/transferclient/testdata/api-base-v2.json)
 are the common acceptance/rejection examples. This is a syntax-contract version,
 not a new host-config, queue, database or upload-protocol version.
 These vectors describe the transfer layer; they do not remove each endpoint's
@@ -90,7 +97,7 @@ recreate a delivery or discard an unknown outcome.
 
 ## Same NAS identity across network paths
 
-The minimal shared rule is to keep one canonical HTTPS API base, TLS identity,
+The minimal shared rule is to keep one canonical API base, TLS identity,
 authorization scope and persisted owner binding while choosing a network path
 to that same NAS. The endpoint's existing network/configuration owner should
 prefer an approved reachable LAN path and otherwise use the approved external
