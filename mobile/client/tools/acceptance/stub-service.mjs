@@ -457,7 +457,8 @@ export class StubService {
       return
     }
     // E8 upload wire: the browser path confirms the upload limit, probes by
-    // content hash (404 for a new original), POSTs the multipart body through
+    // content hash with HEAD (200 with the ETag/Content-Length identity, 404
+    // for a new original), POSTs the multipart body through
     // the XHR seam whose wire bytes drive the transfer ring, then re-reads the
     // stored original over a paced body so the streamed read - and the ring it
     // feeds - stays observable. Only the file part of the multipart body is the
@@ -467,10 +468,14 @@ export class StubService {
       return
     }
     const mediaMatch = new RegExp(`^/bots/${BOT_ID}/media/([0-9a-f]{64})$`).exec(path)
-    if (mediaMatch && req.method === 'GET') {
+    if (mediaMatch && (req.method === 'GET' || req.method === 'HEAD')) {
       const stored = this.mediaFiles?.get(mediaMatch[1])
       if (!stored) { this.json(res, 404, { title: 'not found' }); return }
-      res.writeHead(200, { 'content-type': stored.mime, 'content-length': String(stored.bytes.length), 'cache-control': 'no-store', 'access-control-allow-origin': '*' })
+      // The production handler serves HEAD through the same headers as GET:
+      // the ETag is the content hash and Content-Length the stored size.
+      const identity = { 'content-type': stored.mime, 'content-length': String(stored.bytes.length), 'etag': `"${mediaMatch[1]}"`, 'cache-control': 'no-store', 'access-control-allow-origin': '*' }
+      if (req.method === 'HEAD') { res.writeHead(200, identity); res.end(); return }
+      res.writeHead(200, identity)
       // A scripted mid-body break: the paced response dies after failAfterChunks
       // writes so the client's verified read rejects part-way through the
       // transfer, exactly like a connection lost mid-download.

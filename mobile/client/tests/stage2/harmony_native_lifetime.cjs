@@ -40,9 +40,9 @@ const rcp = { Request, createSession() {
 const modules = {
   '@kit.CoreFileKit': { fileIo: io, picker: { DocumentSaveOptions: class {}, DocumentViewPicker: class { async save() { pickerCalls++; const target = path.join(dir, 'saved.bin'); fs.writeFileSync(target, ''); return ['file://' + target] } } } },
   '@kit.ArkTS': { url: { URL: { parseURL: v => new URL(v) } }, util: { TextEncoder: class { encodeInto(v) { return new TextEncoder().encode(v) } }, TextDecoder: class { decodeToString(v) { return new TextDecoder().decode(v) } }, Base64Helper: class { decodeSync(v) { return new Uint8Array(Buffer.from(v, 'base64')) } }, generateRandomUUID: () => crypto.randomUUID().replaceAll('-', '') } },
-  '@kit.CryptoArchitectureKit': { cryptoFramework: { createMd() { const h = crypto.createHash('sha256'); return { async update({ data }) { h.update(data) }, async digest() { return { data: new Uint8Array(h.digest()) } } } } } },
+  '@kit.CryptoArchitectureKit': { cryptoFramework: { createMd() { const h = crypto.createHash('sha256'); return { async update({ data }) { h.update(data) }, async digest() { return { data: new Uint8Array(h.digest()) } } } }, createRandom: () => ({ generateRandomSync: len => ({ data: new Uint8Array(crypto.randomBytes(len)) }) }) } },
   '@kit.RemoteCommunicationKit': { rcp }, '@kit.ArkData': { uniformTypeDescriptor: {} }, '@kit.NetworkKit': {},
-  './NativePhotoSelection': { NativePhotoSelection: class {} }, './ClientDiagnostics': { ClientDiagnostics: { event() {}, failure() {} } },
+  './NativePhotoSelection': { NativePhotoSelection: class {} }, './ClientDiagnostics': { ClientDiagnostics: { event() {}, failure() {}, onForeground() {}, onLifecycle() {} } },
   './NativeVoice': { NativeVoice: class { prepare() {} close() {} } },
 }
 function load(name) {
@@ -91,14 +91,14 @@ const server = http.createServer(async (req, res) => {
 })
 const wait = async predicate => { for (let i = 0; i < 300; i++) { if (predicate()) return; await new Promise(r => setTimeout(r, 5)) } assert.fail('fixture did not reach held I/O') }
 const backgroundEnabled = process.env.HARMONY_BACKGROUND_OWNER === '1'
-let background, cancelBackground, backgroundStops = [], backgroundCalls = [], progressReports = []
+let background, cancelBackground, backgroundStops = [], backgroundCalls = [], progressReports = [], failPublish = false
 async function bindBackground() {
   modules['@kit.BackgroundTasksKit'] = {}; modules['@kit.AbilityKit'] = {}; modules['@kit.NotificationKit'] = {}
   const owner = load('NativeTransferOwner').nativeTransferOwner(context)
   let id = 0
   background = new (load('NativeTransferBackground').NativeTransferBackground)(context, reason => { backgroundStops.push(reason); owner.pauseBackground() }, {
     async start() { backgroundCalls.push('start'); return { notificationId: 100 + ++id, continuousTaskId: id, slotType: 4, contentType: 5 } },
-    async publish(_lease, percent) { backgroundCalls.push(['progress', percent]); assert.ok(percent >= 0 && percent <= 100) },
+    async publish(_lease, percent) { assert.ok(percent >= 0 && percent <= 100); if (failPublish) { failPublish = false; backgroundCalls.push(['publish-failed', percent]); throw Error('synthetic notification denial') } backgroundCalls.push(['progress', percent]) },
     async stop() { backgroundCalls.push('stop') }, onCancel(fn) { cancelBackground = () => fn({ id, reason: 0 }) }, offCancel() {},
   })
   const report = background.progress.bind(background)
@@ -125,10 +125,10 @@ function pageHost(client) {
     .map(([a, b]) => source.slice(source.indexOf(a), source.indexOf(b, source.indexOf(a))))
   const m = { exports: {} }, frame = 'begonia-client://app/index.html'
   vm.runInNewContext(ts.transpileModule('export class PageHost { ' + methods.join('\n') + ' }', { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
-    { exports: m.exports, NativeClient: Client, Promise, ImageTimingDump: { detach() {}, bind() {} }, ClientDiagnostics: { event() {} } })
+    { exports: m.exports, NativeClient: Client, Promise, ImageTimingDump: { detach() {}, bind() {} }, ClientDiagnostics: { event() {} }, AppNetBinding: { onRebound() {}, offRebound() {} } })
   return Object.assign(new m.exports.PageHost(), { active: true, nativeClient: client, probeGeneration: 0, context,
     controller: { registerJavaScriptProxy() {}, deleteJavaScriptRegister() {}, getUrl: () => frame, getLastJavascriptProxyCallingFrameUrl: () => frame },
-    photoSelection: { close() {} }, clearClientWait() {}, cancelWebDownloads() {}, releaseKeyboardInsets() {}, prepareWindow: async () => {}, applyChatInsets() {}, attachDownloads() {}, clientState() {}, setClientTheme: async () => {} })
+    photoSelection: { close() {} }, webNetwork: { reset() {}, attach() {} }, clearClientWait() {}, cancelWebDownloads() {}, releaseKeyboardInsets() {}, prepareWindow: async () => {}, applyChatInsets() {}, attachDownloads() {}, clientState() {}, setClientTheme: async () => {} })
 }
 let seq = 0
 const scope = () => ({ operation: (++seq).toString(16).padStart(32, '0'), botId: 'bot-a', scope: 'session-a', authorization: 'Bearer alice' })
@@ -220,7 +220,10 @@ async function main() {
     const journalPath = path.join(dir, 'memoh-upload-journal-v1', local.handle + '.json'), checkpoint = JSON.parse(fs.readFileSync(journalPath))
     assert.ok(checkpoint.uploadId); assert.ok(fs.existsSync(path.join(dir, 'memoh-upload-journal-v1', local.handle + '.original')))
     uploadHeld(); uploadHeld = undefined
+    failPublish = true
     assert.equal((await p.send({ command: 'upload.run', ...scope(), handle: local.handle })).ok, true)
+    assert.ok(backgroundCalls.some(x => Array.isArray(x) && x[0] === 'publish-failed'), 'publish must have been exercised through its failure path')
+    assert.ok(!backgroundStops.includes('background-notification-failed'), 'a notification failure must never stop the transfer')
     assert.equal(events.filter(x => x[0] === 'POST' && x[1].endsWith('/uploads')).length, creates, 'resume must keep the original server receipt')
     assert.equal(JSON.parse(fs.readFileSync(journalPath)).uploadId, checkpoint.uploadId)
     // Download revoke preserves the exact fsynced part and current account scope.
@@ -235,7 +238,7 @@ async function main() {
     const restored = { ...down, operation: scope().operation }; assert.equal((await p.send({ command: 'download.fetch', ...restored })).ok, true)
     assert.equal((await p.send({ command: 'download.abort', operation: restored.operation, botId: restored.botId })).ok, true)
     await p.send({ command: 'client.state', state: 'login-page' }); p.client.close(); await background.settled()
-    console.log(JSON.stringify({ backgroundOwner: true, durableReports: progressReports.length, uploadReceiptPreserved: true, downloadPartPreserved: true, explicitResumeOnly: true, systemRevokeStops: backgroundStops.length, nativeDevice: false }))
+    console.log(JSON.stringify({ backgroundOwner: true, durableReports: progressReports.length, uploadReceiptPreserved: true, downloadPartPreserved: true, explicitResumeOnly: true, notificationFailureNeverStopsTransfer: true, systemRevokeStops: backgroundStops.length, nativeDevice: false }))
   }
   const owner = load('NativeTransferOwner').nativeTransferOwner(context); owner.destroyAbility(); owner.bindAbility({ filesDir: dir }); p = await page(); await p.send({ command: 'client.state', state: 'login-page' }); p.client.close()
   assert.equal(fds.size, 0)

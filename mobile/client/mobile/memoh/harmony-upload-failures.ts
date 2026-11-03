@@ -16,7 +16,7 @@ const active = new Map<string, AbortController>()
 let diskWritable = true
 let currentBinding: string | undefined
 const phases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
-  'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync']
+  'snapshot-copy', 'snapshot-hash', 'journal-publish', 'journal-dir-sync']
 const codes = ['MEDIA_SHA_MISMATCH', 'MEDIA_SIZE_MISMATCH', 'MEDIA_SHORT_READ', 'MEDIA_SHORT_WRITE',
   'UPLOAD_CANCELLED', 'UPLOAD_REQUEST', 'UPLOAD_IDENTITY', 'UPLOAD_LIMIT_INVALID', 'UPLOAD_JOURNAL_SIZE',
   'UPLOAD_JOURNAL_WRITE', 'UPLOAD_RECEIPT_SIZE', 'UPLOAD_HTTP_413', 'VOICE_UNAVAILABLE', 'UNCLASSIFIED']

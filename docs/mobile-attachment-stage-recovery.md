@@ -113,9 +113,9 @@ Do not select or upload the user's attachment again to collect evidence.
 
 New staging failure phases are `owner-read`, `limits-read`, `picker`,
 `source-metadata`, `source-open`, `snapshot-create`, `snapshot-copy`,
-`snapshot-hash`, `source-verify`, `journal-publish`, and `journal-dir-sync`.
-For example, `source-verify` with `MEDIA_SHA_MISMATCH` separates a failed source
-recheck from `source-open` with an SDK permission code; `limits-read` separates
+`snapshot-hash`, `journal-publish`, and `journal-dir-sync`.
+For example, `snapshot-hash` with `MEDIA_SHA_MISMATCH` separates a failed snapshot
+hash from `source-open` with an SDK permission code; `limits-read` separates
 metadata networking from local IO. `journal-dir-sync` means rename returned
 successfully, not that durability or upload completion was confirmed. Some
 startup/finalizer failures occur outside these staged-operation catches; absence

@@ -22,7 +22,8 @@ entries = manifest['entries']
 # The visual-evidence page generator extends200.
 # Two scoped quote-reply composition sources extend201 (overlay + stage2 gate).
 # One visual-only bubble-kind overlay extends203.
-assert len(entries) == 204
+# The dead NativeTransferPolicy constants file (zero references) is deleted; 204 retires to 203.
+assert len(entries) == 203
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
