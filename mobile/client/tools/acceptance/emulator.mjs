@@ -341,14 +341,18 @@ async function main() {
       clicked ? `playing before click=${bubblePlaying}; state after=${afterBubble.join(',') || 'none'}` : 'assistant bubble not found')
 
     // ---------- V3b: typing must not interrupt ----------
+    // The acknowledgement line reads as its own short task, so the state can
+    // legitimately sit between tasks (idle) when the draft is typed mid-gap.
+    // Typing violates the contract only by consuming the session: the read
+    // must resume as the body tasks start, which is what this waits for.
     await coldStart()
     await typeAndSend('继续读')
     const typingStarted = await waitFor(playing, 30000, 200, 'read-aloud playing').then(() => true, () => false)
     await typeAndSend('正在打字的草稿', { submit: false })
-    await sleep(1200)
-    const afterTyping = await speechStates()
-    pass('V3b typing does not stop reading', typingStarted && afterTyping.includes('playing'),
-      `playing before typing=${typingStarted}; state after=${afterTyping.join(',') || 'none'}`)
+    const stateRightAfterTyping = await speechStates()
+    const resumedAfterTyping = await waitFor(playing, 8000, 200, 'read-aloud resumes after typing').then(() => true, () => false)
+    pass('V3b typing does not stop reading', typingStarted && resumedAfterTyping,
+      `playing before typing=${typingStarted}; state right after=${stateRightAfterTyping.join(',') || 'none'}; playing returned=${resumedAfterTyping}`)
 
     // ---------- V3d: a new submit stops reading ----------
     await coldStart()
