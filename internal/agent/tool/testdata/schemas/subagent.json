@@ -18,7 +18,7 @@
         "type": "string"
       },
       "run_in_background": {
-        "description": "If true, return immediately with a task_id. If the agent is busy, the message is queued regardless of this value. Use wait_until(task_id), then get_background_status(task_id) to inspect result.",
+        "description": "Return immediately with a task_id; a busy agent queues the message regardless. Inspect with wait_until(task_id), then get_background_status(task_id).",
         "type": "boolean"
       }
     },
@@ -31,23 +31,23 @@
   "spawn_agent": {
     "properties": {
       "fork": {
-        "description": "If true, inherit the parent model's current message context while keeping the subagent system prompt and tools.",
+        "description": "Inherit the parent's current message context; the subagent prompt and tools stay.",
         "type": "boolean"
       },
       "id": {
-        "description": "Optional memorable agent id. If omitted, an id like agent_1 is assigned. Must be lowercase letters, digits, underscore, or hyphen.",
+        "description": "Optional agent id (lowercase letters, digits, _, -); default agent_N.",
         "type": "string"
       },
       "model_id": {
-        "description": "Optional external model name from the current session's provider. Omit to use the current session model.",
+        "description": "Model name from the session's provider; omit for the session model.",
         "type": "string"
       },
       "provider": {
-        "description": "Optional provider name. Must match the current session's provider.",
+        "description": "Provider name; must be the session's provider.",
         "type": "string"
       },
       "run_in_background": {
-        "description": "If true, return immediately with a task_id. Use wait_until(task_id), then get_background_status(task_id) to inspect result.",
+        "description": "Return immediately with a task_id; inspect with wait_until(task_id), then get_background_status(task_id).",
         "type": "boolean"
       },
       "task": {

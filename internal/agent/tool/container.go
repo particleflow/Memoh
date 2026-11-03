@@ -88,12 +88,12 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 	locationRef, hasLocationTool := available.Ref(ToolListExecutionLocations())
 	if hasLocationTool {
 		parts = append(parts,
-			locationRef+": discover the Server Workspace and connected computers authorized for this Bot. For requests to use a computer (including an unnamed Windows PC), inspect these locations before claiming no computer is configured or looking for a separate cloud computer.",
-			"Check each location's `provider`, `capabilities`, `available` and `status`. Authorization is not availability; an offline target is not an unconfigured account. A missing target means it is not exposed to this Bot, not that no account computer exists. Never substitute another location after a target fails.",
-			"A managed computer advertising `exec_foreground` routes foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`. This capability alone does not promise filesystem or desktop support; inspect its other advertised capabilities. The computer task tools also own configured Herdr/Pi Agent dispatch and durable receipts. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
+			locationRef+": lists the Server Workspace and connected computers authorized for this Bot. Inspect these locations before claiming no computer is configured (including an unnamed Windows PC).",
+			"Check `provider`, `capabilities`, `available`, `status`. Authorization is not availability: an offline target is authorized but unreachable; a missing target is not exposed to this Bot. Never substitute another location after a target fails.",
+			"`exec_foreground` routes foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`. This capability alone does not promise filesystem or desktop support; use only advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
 		)
 		if skillRef, ok := available.Ref(ToolUseSkill()); ok {
-			parts = append(parts, "For a connected-computer or local-agent task, use "+skillRef+" when an available skill covers that workflow. Skills explain usage; they do not grant target or connector access.")
+			parts = append(parts, "For connected-computer or local-agent tasks, use "+skillRef+" when a skill covers the workflow; skills explain usage but grant no target or connector access.")
 		}
 	}
 	if targetID := strings.TrimSpace(session.WorkspaceTargetID); targetID != "" {
@@ -108,7 +108,7 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 		}
 		text := "File and command tools default to the " + targetDescription + " for this turn"
 		if sessionUsesRemoteWorkspaceTarget(session) {
-			text += ". This PC conversation pins every computer tool to this location; other computers cannot be discovered or used"
+			text += ". This PC conversation pins every computer tool to this location; other computers cannot be used"
 		} else {
 			text += ". An explicit `target_id` still takes precedence"
 		}
@@ -141,17 +141,17 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 	}
 	if hasLocationTool && len(available.Refs(ToolRead(), ToolWrite(), ToolList(), ToolEdit(), ToolApplyPatch(), ToolExec())) > 0 {
 		if sessionUsesRemoteWorkspaceTarget(session) {
-			parts = append(parts, "Use "+locationRef+" to check this conversation's selected PC. Omit `target_id` or pass only that PC's returned ID. Other PCs and the Server Workspace are outside this conversation's scope.")
+			parts = append(parts, "Use "+locationRef+" to check this conversation's selected PC. Omit `target_id` or pass only that PC's returned ID; other PCs and the Server Workspace are outside this conversation's scope.")
 		} else {
 			defaultDescription := "the Bot's default"
 			if strings.TrimSpace(session.WorkspaceTargetID) != "" {
 				defaultDescription = "the request-selected default for this turn"
 			}
-			parts = append(parts, "Use "+locationRef+" when the user asks to use a computer, you need a non-default location, availability may have changed, or a target call fails. Pass its `target_id` only to tools supported by that location; omit `target_id` to use "+defaultDescription+". Listing locations does not switch locations or folders. If several locations fit and no selected/default location resolves the user's intent, clarify the destination before executing.")
+			parts = append(parts, "Use "+locationRef+" when the user asks for a computer, a non-default location fits, availability may have changed, or a target call fails. Pass `target_id` only to tools that location supports; omit it to use "+defaultDescription+". Listing does not switch locations or folders; if intent is ambiguous, clarify before executing.")
 		}
 	}
 	if displayRefs := available.Refs(ToolBrowserObserve(), ToolBrowserAction(), ToolBrowserRemoteSession(), ToolComputerObserve(), ToolComputerAction()); len(displayRefs) > 0 {
-		parts = append(parts, "Browser Use and Computer Use ("+strings.Join(displayRefs, ", ")+") control the Server Workspace desktop, not a user's PC. A PC request requires capabilities exposed for that authorized PC; these tools are not a fallback for missing PC GUI support.")
+		parts = append(parts, "Browser Use and Computer Use ("+strings.Join(displayRefs, ", ")+") control the Server Workspace desktop, not a user's PC; they are not a fallback for missing PC GUI support.")
 	}
 	// Workspace links are a Web/Desktop affordance, not a portable channel URL.
 	// Other execution locations must not be advertised as the native workspace.
@@ -160,13 +160,13 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 	// open these links.
 	if (session.CurrentPlatform == "local" || session.CurrentPlatform == "web") && !sessionUsesRemoteWorkspaceTarget(session) {
 		if len(available.Refs(ToolRead(), ToolWrite(), ToolEdit(), ToolApplyPatch())) > 0 {
-			parts = append(parts, "In Memoh Web/Desktop, link to files on the native Server Workspace using Markdown with the real absolute path, for example [View source](/data/project/index.html). Always start the link destination with /; relative destinations such as summary.md or ./out/report.md cannot be opened. Encode spaces in link destinations. Memoh renders link icons; do not add emoji or icon characters to link labels. These links open the workspace file viewer, not a running web page. Do not prefix paths with the Memoh site URL or file://, and do not use this format for files on another computer. When you name a workspace file in prose without linking it, wrap the name in backticks, for example `summary.md`.")
+			parts = append(parts, "In Memoh Web/Desktop, link Server Workspace files as Markdown with the real absolute path, e.g. [View source](/data/project/index.html). Destinations start with / (relative cannot open); encode spaces; no emoji/icons in labels (Memoh renders icons); no Memoh site URL or file:// prefix; not for another computer's files. Links open the workspace file viewer, not a running page. Name unlinked files in backticks (`summary.md`).")
 		}
 		if _, ok := available.Ref(ToolExec()); ok {
-			parts = append(parts, "When delivering a web app running on the native Server Workspace, provide a Markdown link with its verified HTTP localhost URL and explicit port, for example [Try it](http://localhost:5173/). Memoh opens it through its workspace preview proxy; the user does not need to configure port forwarding for this in-app preview. Public HTTP(S) links open in the user's browser. Workspace links are not public share URLs; never invent a proxy address or claim a service is running without checking it.")
+			parts = append(parts, "For a delivered web app, link its verified localhost URL with explicit port, e.g. [Try it](http://localhost:5173/); Memoh previews it in-app, so the user does not need to configure port forwarding. Public HTTP(S) links open in the user's browser. Never invent a proxy address or claim a service is running without checking.")
 		}
 		if len(available.Refs(ToolRead(), ToolWrite(), ToolEdit(), ToolApplyPatch(), ToolExec())) > 0 {
-			parts = append(parts, "Lead with what was delivered. For a simple result, weave Markdown links into one or two natural sentences, using labels such as \"Try it\", \"View source\", or \"Download report\" instead of \"click here\" or bare paths. Include checks and limitations only when useful; only claim checks actually performed. Avoid headings and setup details unless they help the user. Keep preview, source, and download links for the same deliverable in the same sentence by default, not in separate list items. Use a list only when introducing multiple independent deliverables.")
+			parts = append(parts, "Lead with what was delivered: one or two natural sentences, links labeled \"Try it\"/\"View source\"/\"Download report\" (not \"click here\" or bare paths); one deliverable's links stay in one sentence; a list only for multiple independent deliverables. Claim only checks actually performed.")
 		}
 	}
 	return usageSection("Basic Tools", parts)
@@ -184,12 +184,12 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 	targetShape := toolexec.Describe("target_id", workspaceTargetDescription(sess))
 	filePathShape := toolexec.Describe("path", fmt.Sprintf("File path (relative to %s or absolute %s)", wd, workspace.absolutePathDescription))
 
-	readDesc := fmt.Sprintf("Read file content %s. Reads the full file by default; use line_offset and n_lines for pagination. Files up to ~16 MB are supported.", workspace.locationDescription)
+	readDesc := fmt.Sprintf("Read file content %s. Full file by default; line_offset and n_lines paginate. Files up to ~16 MB.", workspace.locationDescription)
 	if sess.SupportsImageInput {
-		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP) — binary images are loaded into model context automatically."
+		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP)."
 	}
-	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files are truncated)."
-	readDesc += " Audio files are transcribed to text (up to 10 MB encoded and 5 minutes) when the Bot has a transcription model configured."
+	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files truncated)."
+	readDesc += " Audio files are transcribed to text (up to 10 MB and 5 minutes) when a transcription model is configured."
 	readDesc += " Video files return a reference (mime, size, content hash) instead of content; hand it to a specialist bot via delegate_to_bot attachments."
 
 	toolList := []toolexec.Tool{
@@ -201,20 +201,20 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 			toolexec.Minimum("line_offset", 1), toolexec.Default("line_offset", 1),
 			toolexec.Minimum("n_lines", 1),
 		),
-		toolexec.Define(ToolWrite().String(), fmt.Sprintf("Write file content %s. Creates parent directories automatically. Handles files of any size.", workspace.locationDescription),
+		toolexec.Define(ToolWrite().String(), fmt.Sprintf("Write file content %s. Creates parent directories; any file size.", workspace.locationDescription),
 			func(ctx *toolexec.ToolExecContext, args writeArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execWrite(ctx.Context, sess, args))
 			},
 			targetShape, filePathShape,
 		),
-		toolexec.Define(ToolList().String(), fmt.Sprintf("List directory entries %s. Supports pagination. Max %d entries per call. In recursive mode, subdirectories with >%d items are collapsed to a summary.", workspace.locationDescription, listMaxEntries, listCollapseThreshold),
+		toolexec.Define(ToolList().String(), fmt.Sprintf("List directory entries %s. Paginated; max %d entries per call. Recursive mode collapses subdirectories with more than %d items to a summary.", workspace.locationDescription, listMaxEntries, listCollapseThreshold),
 			func(ctx *toolexec.ToolExecContext, args listArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execList(ctx.Context, sess, args))
 			},
 			targetShape,
 			toolexec.Describe("path", fmt.Sprintf("Directory path (relative to %s or absolute %s)", wd, workspace.absolutePathDescription)),
 			toolexec.Minimum("offset", 0), toolexec.Default("offset", 0),
-			toolexec.Describe("limit", fmt.Sprintf("Max entries to return per call. Default: %d. Max: %d.", listMaxEntries, listMaxEntries)),
+			toolexec.Describe("limit", fmt.Sprintf("Entries per call; default and max %d.", listMaxEntries)),
 			toolexec.Range("limit", 1, listMaxEntries), toolexec.Default("limit", listMaxEntries),
 		),
 		toolexec.Define(ToolEdit().String(), fmt.Sprintf("Replace exact text in a file %s.", workspace.locationDescription),
@@ -225,48 +225,22 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 		),
 		{
 			Name: ToolApplyPatch().String(),
-			Description: fmt.Sprintf(`Apply a structured patch %s. This is a Memoh/Codex-style patch format, not a standard unified diff or git patch.
+			Description: fmt.Sprintf(`Apply a structured patch %s — not a unified diff. For multi-file edits, structured changes, file creation, deletion, or moves.
 
-Use this tool for multi-file edits, structured code changes, file creation, file deletion, or file moves.
+Grammar:
+- Starts with "*** Begin Patch", ends with "*** End Patch".
+- "*** Add File: path": following content lines each start with "+".
+- "*** Delete File: path".
+- "*** Update File: path"; "*** Move to: new/path" directly after the header renames the file.
+- In update hunks, "@@" or "@@ context line" precedes changed lines; line prefixes: " " unchanged, "-" removed, "+" added; "*** End of File" marks the end of the file.
+- Paths are workspace-relative by default; absolute paths only when the backend allows.
 
-Patch grammar:
-- The patch must start with "*** Begin Patch" and end with "*** End Patch".
-- Add a file with "*** Add File: path". Every following content line for that file must start with "+".
-- Delete a file with "*** Delete File: path".
-- Update a file with "*** Update File: path".
-- Move or rename a file by putting "*** Move to: new/path" immediately after an update header, before any changed lines.
-- Inside update hunks, use "@@" or "@@ context line" before changed lines. The optional context line helps locate the block in the file.
-- Changed lines use a one-character prefix: " " for unchanged context, "-" for removed lines, and "+" for added lines.
-- Use "*** End of File" inside an update hunk when the hunk should match the end of the file.
-- Paths are relative to the workspace by default. Absolute paths are accepted only when the workspace backend allows them.
-
-Examples:
-
-Add a file:
-*** Begin Patch
-*** Add File: docs/notes.md
-+new line
-*** End Patch
-
-Update a file:
+Example:
 *** Begin Patch
 *** Update File: path
 @@
 -old line
 +new line
-*** End Patch
-
-Move a file:
-*** Begin Patch
-*** Update File: old/path.txt
-*** Move to: new/path.txt
-@@
- old content
-*** End Patch
-
-Delete a file:
-*** Begin Patch
-*** Delete File: obsolete.txt
 *** End Patch
 `, workspace.locationDescription),
 			Parameters: toolexec.SchemaFor[applyPatchArgs](targetShape),
@@ -280,16 +254,11 @@ Delete a file:
 
 # Instructions
 %s
-- Use this tool to run shell commands for installing packages, running scripts, building code, running tests, and other system operations.
-- If your command will take a long time (package installs, builds, test suites), set run_in_background to true. The call returns a task ID immediately. You do not need to add '&' at the end of the command when using this parameter.
-- If waiting for a background task, use wait_until(task_id): it returns with a reason (completed/failed/killed/stalled/idle/timeout) and the latest output_tail. Then use get_background_status(task_id) to inspect result.
-- For processes that never exit on their own (dev servers, watch mode), use run_in_background, then wait_until(task_id): once output settles it returns with reason 'idle' — check output_tail for the ready message (e.g. a local URL) and proceed. Do not wait for such processes to complete.
-- You may specify a custom timeout (up to %d seconds) for commands you know will take longer than the default %d seconds. If a foreground command times out, it will be automatically moved to the background; use wait_until(task_id), then get_background_status(task_id).
-- Avoid unnecessary delay commands:
-  - Do not sleep between commands that can run immediately — just run them.
-  - If your command is long running, use run_in_background. No delay needed.
-  - Do not retry failing commands in a delay loop — diagnose the root cause.
-  - If waiting for a background task, use wait_until(task_id).
+- For long commands (installs, builds, test suites) set run_in_background to true; the call returns a task ID immediately (no trailing '&').
+- wait_until(task_id) returns a reason (completed/failed/killed/stalled/idle/timeout) plus the latest output_tail; get_background_status(task_id) inspects the result.
+- For processes that never exit (dev servers, watch mode), run in background and wait_until(task_id): reason 'idle' with a ready message (e.g. a local URL) in output_tail means it is up — proceed, do not wait for completion.
+- timeout (up to %d seconds) raises the default %d-second foreground wait; a command still running past it moves to the background.
+- No delay loops: do not sleep between immediately runnable commands; do not retry failing commands in a loop — diagnose the cause.
 %s`, workspace.shellDescription, workspace.locationDescription, wd, workspace.platformInstructions, background.MaxExecTimeout, background.DefaultExecTimeout, workspace.delayInstruction),
 			func(ctx *toolexec.ToolExecContext, args execArgs) (sdk.ToolOutput, error) {
 				return toolexec.OutputPair(p.execExec(ctx.Context, sess, args))
@@ -298,7 +267,7 @@ Delete a file:
 			toolexec.Describe("command", fmt.Sprintf("Command to run (e.g. %s)", workspace.commandExamples)),
 			toolexec.Describe("work_dir", fmt.Sprintf("Working directory (default: %s)", wd)),
 			toolexec.Describe("description", workspace.descriptionExamples),
-			toolexec.Describe("timeout", fmt.Sprintf("Maximum foreground wait in seconds (default: %d, max: %d). A command still running afterward moves to the background; handoff may happen earlier to preserve max_duration_seconds.", background.DefaultExecTimeout, background.MaxExecTimeout)),
+			toolexec.Describe("timeout", fmt.Sprintf("Foreground wait in seconds (default %d, max %d); a still-running command then moves to the background, possibly earlier to preserve max_duration_seconds.", background.DefaultExecTimeout, background.MaxExecTimeout)),
 			toolexec.Range("timeout", 1, float64(background.MaxExecTimeout)),
 			toolexec.Range("max_duration_seconds", minCommandExecBudgetSeconds, float64(background.MaxBackgroundExecTimeout)),
 			toolexec.EnumStrings("background_mode", []string{"task", "service"}),
@@ -307,12 +276,12 @@ Delete a file:
 	if resolver, ok := p.clients.(workspaceTargetResolver); ok {
 		locationTool := toolexec.Tool{
 			Name: ToolListExecutionLocations().String(),
-			Description: "List the execution locations configured for this Bot for file operations and command execution, with current availability and status. " +
-				"Results follow both Bot grants and conversation scope: a PC conversation lists only its selected PC; a Server Workspace conversation may list its Bot-authorized PCs. " +
-				"Check provider and capabilities before choosing a tool: exec_foreground denotes ledger-managed foreground Bash. Native Runtime may separately advertise filesystem support. " +
-				"The default field identifies the current turn's default (the request-selected target when present, otherwise the Bot's Primary). " +
-				"Use computer_task_submit for managed PC tasks; ordinary exec cannot bypass its durable ledger. Native Runtime file tools keep their existing permissions. Other workspace providers accept target_id on file/command tools. " +
-				"The available field says whether a location can currently be used. This tool does not change the default location or starting folder.",
+			Description: "List this Bot's execution locations for file operations and command execution, with availability and status. " +
+				"A PC conversation lists only its selected PC; a Server Workspace conversation may list its Bot-authorized PCs. " +
+				"Check provider and capabilities before choosing a tool: exec_foreground means foreground Bash goes through computer_task_submit(kind=foreground_bash), not ordinary exec, and alone does not promise filesystem or desktop support. " +
+				"default marks the current turn's default (request-selected target, else the Bot's Primary); available says whether it can currently be used. " +
+				"Managed PC tasks go through computer_task_submit; ordinary exec cannot bypass it. Other workspace providers accept target_id on file/command tools. " +
+				"This tool changes neither the default location nor the starting folder.",
 			Parameters: toolexec.SchemaFromValue(emptyObjectSchema()),
 			Execute: func(ctx *toolexec.ToolExecContext, _ sdk.ToolArguments) (sdk.ToolOutput, error) {
 				ctx.Context = workspaceContextForSession(ctx.Context, sess)
@@ -344,8 +313,8 @@ Delete a file:
 type readArgs struct {
 	TargetID   string `json:"target_id,omitempty"`
 	Path       string `json:"path"`
-	LineOffset *int   `json:"line_offset,omitempty" jsonschema:"Line number to start reading from (1-indexed). Default: 1."`
-	NLines     *int   `json:"n_lines,omitempty" jsonschema:"Number of lines to read. Default: read entire file."`
+	LineOffset *int   `json:"line_offset,omitempty" jsonschema:"First line to read (1-indexed); default 1."`
+	NLines     *int   `json:"n_lines,omitempty" jsonschema:"Lines to read; default entire file."`
 }
 
 type writeArgs struct {
@@ -358,7 +327,7 @@ type listArgs struct {
 	TargetID  string `json:"target_id,omitempty"`
 	Path      string `json:"path"`
 	Recursive bool   `json:"recursive,omitempty" jsonschema:"List recursively"`
-	Offset    *int   `json:"offset,omitempty" jsonschema:"Entry offset to start from (0-indexed). Default: 0."`
+	Offset    *int   `json:"offset,omitempty" jsonschema:"Entry offset (0-indexed); default 0."`
 	Limit     *int   `json:"limit,omitempty"`
 }
 
@@ -371,7 +340,7 @@ type editArgs struct {
 
 type applyPatchArgs struct {
 	TargetID string `json:"target_id,omitempty"`
-	Patch    string `json:"patch" jsonschema:"Patch body using the apply_patch format. Paths are relative to the workspace by default, or absolute paths supported by the workspace backend."`
+	Patch    string `json:"patch" jsonschema:"Patch body in apply_patch format; paths workspace-relative by default."`
 }
 
 type execArgs struct {
@@ -380,9 +349,9 @@ type execArgs struct {
 	WorkDir            string `json:"work_dir,omitempty"`
 	Description        string `json:"description,omitempty"`
 	Timeout            *int   `json:"timeout,omitempty"`
-	MaxDurationSeconds *int   `json:"max_duration_seconds,omitempty" jsonschema:"Total budget for a finite command, including time spent in foreground. Minimum 30 seconds; default 7200; max 86400. Backgrounding does not restart it."`
-	BackgroundMode     string `json:"background_mode,omitempty" jsonschema:"task (default) uses the execution budget; service runs until explicitly stopped or the workspace closes. service requires run_in_background=true and no max_duration_seconds."`
-	RunInBackground    bool   `json:"run_in_background,omitempty" jsonschema:"If true, run the command in the background. Returns immediately with a task ID. Use wait_until(task_id), then get_background_status(task_id) to inspect result. Use for long-running commands (installs, builds, test suites) and for processes that never exit (dev servers, watch mode). You do not need to use '&' at the end of the command."`
+	MaxDurationSeconds *int   `json:"max_duration_seconds,omitempty" jsonschema:"Total budget including foreground time (min 30, default 7200, max 86400); backgrounding does not restart it."`
+	BackgroundMode     string `json:"background_mode,omitempty" jsonschema:"task (default) uses the execution budget; service runs until stopped or the workspace closes (requires run_in_background=true, no max_duration_seconds)."`
+	RunInBackground    bool   `json:"run_in_background,omitempty" jsonschema:"Run in background; returns a task ID immediately (no trailing '&'). For long commands (installs, builds, tests) and non-exiting processes (servers, watch mode). Inspect with wait_until(task_id), then get_background_status(task_id)."`
 }
 
 type toolWorkspace struct {
@@ -478,8 +447,8 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 		absolutePathDescription: "inside the workspace",
 		shellDescription:        "shell",
 		commandExamples:         "ls -la, npm install, python script.py",
-		descriptionExamples:     `Clear, concise description of what this command does in active voice. For simple commands keep it brief (5-10 words): ls -la → "List files with details". For complex commands add enough context: curl -s url | jq '.data[]' → "Fetch JSON and extract data array".`,
-		delayInstruction:        "  - sleep N (N >= 2) in foreground is blocked. If you genuinely need a short delay, keep it under 2 seconds.",
+		descriptionExamples:     `Short active-voice description of the command, e.g. ls -la → "List files with details".`,
+		delayInstruction:        "  - sleep N (N >= 2) in foreground is blocked; keep genuine delays under 2 seconds.",
 	}
 	if strings.EqualFold(info.Backend, bridge.WorkspaceBackendRemote) {
 		workspace.locationDescription = "on the connected remote machine"
@@ -488,9 +457,9 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 			workspace.windows = true
 			workspace.shellDescription = "Windows Command Prompt (cmd.exe)"
 			workspace.commandExamples = "dir, npm install, python script.py"
-			workspace.descriptionExamples = `Clear, concise description of what this command does in active voice. For simple commands keep it brief (5-10 words): dir → "List files and folders". For complex commands add enough context to explain the operation and expected result.`
-			workspace.platformInstructions = `- This remote machine uses Windows Command Prompt (cmd.exe). Use Windows command syntax and commands such as dir, type, and where; do not assume POSIX commands such as ls, cat, pwd, or sleep are installed.
-- Do not use start to detach a command. Use run_in_background so the Runtime retains ownership of the process tree.`
+			workspace.descriptionExamples = `Short active-voice description of the command, e.g. dir → "List files and folders".`
+			workspace.platformInstructions = `- This remote machine uses Windows Command Prompt (cmd.exe). Use Windows syntax (dir, type, where); POSIX commands (ls, cat, pwd, sleep) are not installed.
+- Do not use start to detach a command. Use run_in_background so the process tree stays owned.`
 			workspace.delayInstruction = "  - Do not use timeout /t or ping loops to wait for background work; use wait_until."
 		}
 	}
@@ -500,7 +469,7 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 func workspaceTargetDescription(session SessionContext) string {
 	description := "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn."
 	if sessionUsesRemoteWorkspaceTarget(session) {
-		description = "This PC conversation is restricted to its selected computer: omit this parameter or pass only that computer's target_id. Other PCs and native are rejected. A target_id is a Memoh reference, never a transport deviceId or instanceId."
+		description = "This PC conversation is restricted to its selected computer: omit this parameter or pass only that computer's target_id; other PCs and native are rejected. A target_id is a Memoh reference, never a transport deviceId or instanceId."
 	} else if sessionIsWorkdirBound(session) && strings.TrimSpace(session.WorkspaceTargetID) == "" {
 		description = "This chat has a fixed working directory without a resolved target: omit this parameter."
 	}
