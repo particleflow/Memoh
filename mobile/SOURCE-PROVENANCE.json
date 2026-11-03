@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "823bb7181b106084a33a941b821166d2cc04c8458d8eaa2a2361bc38d2098a85",
+      "sha256": "54539a2b3ef80ca8244ada3ca07aabb19999a26b421e9b9ced4d8b40a62d07d8",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -53,7 +53,8 @@
         "V2/V3 round: thinking is collapsed by default everywhere (live, settled and history) and opens only through the accessible user disclosure; tapping that disclosure never interrupts read-aloud, whose interruptions remain the bubble tap on the row being read and every new-input submission path.",
         "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
         "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
-        "Bubble kinds round (HAP43 candidate): add the sharedBubbleKind overlay pin; every other lock value unchanged."
+        "Bubble kinds round (HAP43 candidate): add the sharedBubbleKind overlay pin; every other lock value unchanged.",
+        "Input-side drop round (PR #177): re-pin the sharedReadAloudStreaming source hash after the four input-drop fixes and the render-regression fix; every other lock value unchanged."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -2048,7 +2049,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "72072ff10ce04e1162eb7a6d59c4c5d7ae9e013e2d59c8fb284e7e5dcfb19983",
+      "sha256": "952f2979bc31afe66fd2372a138b33d8f6ef896c96c355031282c6a3d5075d47",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -2065,7 +2066,8 @@
         "E2/E2c/E2d field round: streaming commit of an unambiguous trailing sentence, failed-task rollback requeue, graceful premature-ended close, AbortError failure-count guard, per-frame timing marks, same-page replay reuse gates (speech-field-acceptance.test.ts drives the composed artifact)",
         "Typecheck repair for the E2/E2c/E2d acceptance tests: .withContext(msg) is not a vitest API, so each message moves into expect(value, msg); fixed-index SENTENCES reads carry a non-null assertion and the write-only rollback probe is read once. Assertions and product sources unchanged; restores the vue-tsc gate of the composed client.",
         "TF-18 field verification round (HAP42 E2, review tip 606a1ec1): on the packaged bundle the first speech POST only left when the reply settled, carrying the whole body, because run_accepted stamping runtimeRunId onto the optimistic reply row was treated as a run replacement (R2) and dropped the row from the live set; the first binding now keeps the row live under its run-qualified revision (cursor and held span move with it), so the first completed sentence reads mid-stream. The ack line, now really spoken, ships as its own ephemeral entry: never cached and never sharing a task with cached body text. The replay cache seals an incremental task source when the task closes, after its audio bytes may already be fully buffered, so a frame-fed body still replays whole. Regression fixtures model optimistic row -> run_accepted -> first sentence -> settled frame, ack task + body replay, and the task-close source seal; R2 for a genuine run replacement is unchanged.",
-        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only."
+        "Queue-bar self-heal (HAP42, PR #151): the follow-up/steer actions treat the server's queue_item_not_pending answer as a resolved stale row (drop it, stay silent and let the regular refresh reconcile) instead of refreshing and surfacing an error, and the list rebuilds from the server when a hidden host becomes visible again. The retired queue_item_not_pending locale strings are removed. Anchored on the composed phone sources after the streaming read-aloud overlay; harmony platform only.",
+        "Input-side drop round (2026-11-04, field forensics docs/field-issues/research/2026-11-04-tts-drop-forensics.md): a revision continues the spoken cursor instead of resetting (prefix continuation through the one open task, the run-scoped cache-key change no longer closes the task and never interrupts the audio in flight), a completion landing inside a loading window or carrying a late run id still settles its tail, the sentence boundary also holds the buffered fragment when the run moves past its text block (a tool or reasoning step is not a sentence boundary; no mid-word cut is sent), the streaming immediate trailing-terminal commit is confined to the speech-text projection (a rendered DOM projection can hide a pending construct and release it as literal text one tick later, which forced a rollback reread the listener heard as repetition), and a queued same-reply delta beats the idle budget before any final frame."
       ]
     },
     {
