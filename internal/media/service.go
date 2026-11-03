@@ -26,14 +26,16 @@ type Service struct {
 	transferNetworkPolicy *TransferNetworkPolicy
 }
 
-// SetMaxUploadBytes configures HTTP attachment admission. Zero keeps the default.
+// SetMaxUploadBytes configures an optional operator-chosen HTTP attachment
+// bound. Zero keeps the protocol-ceiling default; there is no built-in
+// artificial upload cap.
 func (s *Service) SetMaxUploadBytes(limit int64) { s.maxUploadBytes = limit }
 
 func (s *Service) MaxUploadBytes() int64 {
 	if s.maxUploadBytes > 0 {
 		return s.maxUploadBytes
 	}
-	return MaxAssetBytes
+	return MaxUploadCeilingBytes
 }
 
 // SetRequirePersistence makes attachment admission fail if an original cannot
@@ -68,7 +70,7 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 
 	maxBytes := input.MaxBytes
 	if maxBytes <= 0 {
-		maxBytes = MaxAssetBytes
+		maxBytes = MaxUploadCeilingBytes
 	}
 	contentHash, sizeBytes, tempFile, err := spoolAndHashWithLimit(contextReader{ctx, input.Reader}, maxBytes)
 	if err != nil {

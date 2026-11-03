@@ -25,8 +25,10 @@ The service creates a private `.uploads` child of that configured root. No new
 port, credential, permission, database table or migration is required.
 
 `max_upload_bytes` remains authoritative for **both** upload protocols. Omitted
-or zero still means **200 MiB**; this change does not increase production limits.
-The limit is checked at creation; already-admitted receipts retain their size
+or zero means no artificial limit: admission uses the protocol ceiling
+(9007199254740991 bytes), the largest size the configuration and JSON limits
+can represent. An explicit operator value still bounds both protocols; the
+limit is checked at creation and already-admitted receipts retain their size
 when the policy changes. A synthetic 512 MiB test uses an explicit finite value `536870912`. The existing
 `GET /bots/{bot_id}/media/limits` adds `resumable_enabled` and `chunk_max_bytes`.
 Resumable upload is disabled (503) without an independent originals root.

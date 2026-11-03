@@ -71,7 +71,8 @@ type FilesConfig struct {
 	// Empty preserves the legacy workspace-first storage behavior.
 	// Load resolves a non-empty path against the process working directory.
 	OriginalsRoot string `toml:"originals_root"`
-	// MaxUploadBytes bounds each HTTP attachment; zero uses the 200 MiB default.
+	// MaxUploadBytes optionally bounds each HTTP attachment; zero admits any
+	// single file up to the protocol ceiling instead of imposing a cap.
 	MaxUploadBytes int64 `toml:"max_upload_bytes"`
 }
 

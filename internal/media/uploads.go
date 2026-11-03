@@ -247,6 +247,8 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 	if !validPathComponent(owner) || !validPathComponent(bot) || in.SizeBytes <= 0 || !validSHA(in.SHA256) {
 		return Upload{}, ErrUploadInvalid
 	}
+	// Only an operator-configured bound applies; the default ceiling is the
+	// protocol numeric limit, so there is no built-in artificial size cap.
 	if in.SizeBytes > s.media.MaxUploadBytes() {
 		return Upload{}, ErrAssetTooLarge
 	}

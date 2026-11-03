@@ -133,6 +133,18 @@ func TestMediaHTTPUploadConfiguredAbove200MiB(t *testing.T) {
 	}
 }
 
+func TestMediaHTTPDefaultLimitAdmitsAnySingleFile(t *testing.T) {
+	// The unconfigured policy reports the protocol ceiling, not an artificial
+	// per-file cap; only an explicit operator override can lower it.
+	e, _ := mediaTestHTTP(t, localfs.NewOriginals(t.TempDir()), 0, "admin")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/limits", nil))
+	var policy MediaUploadLimitsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &policy); err != nil || policy.MaxUploadBytes != media.MaxUploadCeilingBytes {
+		t.Fatalf("default policy: %s, %v", rec.Body, err)
+	}
+}
+
 func assertNoMediaSpools(t *testing.T, dir string) {
 	t.Helper()
 	matches, err := filepath.Glob(filepath.Join(dir, "memoh-media-*"))
@@ -149,7 +161,6 @@ func TestMediaHTTPStreamingLimitAndAdmission(t *testing.T) {
 	}{
 		{"exact", 1024, 1024, http.StatusCreated},
 		{"over configured", 1024, 1025, http.StatusRequestEntityTooLarge},
-		{"over default 200MiB", 0, media.MaxAssetBytes + 1, http.StatusRequestEntityTooLarge},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			spool := t.TempDir()
