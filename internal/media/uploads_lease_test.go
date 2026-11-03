@@ -191,7 +191,7 @@ func TestTransferUploadUnknownLeasePolicyFailsClosed(t *testing.T) {
 	root := t.TempDir()
 	s := uploadService(t, root, 1024).Uploads()
 	u := createTransferUpload(ctx, t, s, []byte("policy"))
-	r, err := s.read(u.ID)
+	r, err := s.read(u.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}

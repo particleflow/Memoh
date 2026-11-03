@@ -12,6 +12,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/felinics/memoh/internal/storage"
 )
@@ -23,10 +24,25 @@ type Originals struct {
 	syncFile func(*os.File) error
 	ranges   *rangeCache
 	readAt   func(*os.File, []byte, int64) (int, error)
+
+	prefixMu sync.Mutex
+	synced   map[string]bool
 }
 
 func NewOriginals(root string) *Originals {
-	return &Originals{root: root, syncFile: (*os.File).Sync, ranges: newRangeCache(), readAt: (*os.File).ReadAt}
+	return &Originals{root: root, syncFile: (*os.File).Sync, ranges: newRangeCache(), readAt: (*os.File).ReadAt, synced: make(map[string]bool)}
+}
+
+func (p *Originals) prefixSynced(bot, dir string) bool {
+	p.prefixMu.Lock()
+	defer p.prefixMu.Unlock()
+	return p.synced[bot+"/"+dir]
+}
+
+func (p *Originals) markPrefixSynced(bot, dir string) {
+	p.prefixMu.Lock()
+	defer p.prefixMu.Unlock()
+	p.synced[bot+"/"+dir] = true
 }
 
 func mediaKey(key string) (bot, name, hash string, err error) {
@@ -157,14 +173,19 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	}
 	defer func() { _ = root.Close() }()
 	dir := path.Dir(name)
-	// Persist the prefix directory entry only when this call created it. An
-	// existing entry was already synced by the publication that created it.
-	if err := root.Mkdir(dir, 0o750); err != nil {
-		if !errors.Is(err, os.ErrExist) {
+	// Persist the prefix directory entry when this call creates it, and once
+	// per process for a pre-existing entry: a prior publication may have died
+	// between its Mkdir and this sync. Later puts into the same prefix skip
+	// the repeat fsync.
+	mkdirErr := root.Mkdir(dir, 0o750)
+	if mkdirErr != nil && !errors.Is(mkdirErr, os.ErrExist) {
+		return mkdirErr
+	}
+	if mkdirErr == nil || !p.prefixSynced(bot, dir) {
+		if err := p.syncDirectory(root, "."); err != nil {
 			return err
 		}
-	} else if err := p.syncDirectory(root, "."); err != nil {
-		return err
+		p.markPrefixSynced(bot, dir)
 	}
 	temp := dir + "/.pending-" + rand.Text()
 	f, err := root.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)

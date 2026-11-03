@@ -507,7 +507,7 @@ func failJournalDirectorySync(s *UploadStore) error {
 	return failure
 }
 
-func TestUploadJournalRenameFailureNeedsNoReadTimeBarrier(t *testing.T) {
+func TestUploadJournalRenameFailureRequiresReadBarrier(t *testing.T) {
 	ctx := t.Context()
 	root := t.TempDir()
 	s := uploadService(t, root, 1024).Uploads()
@@ -517,13 +517,9 @@ func TestUploadJournalRenameFailureNeedsNoReadTimeBarrier(t *testing.T) {
 	if _, err := s.Append(ctx, "owner", "bot", u.ID, 0, int64(len(b)), digest(b), bytes.NewReader(b)); !errors.Is(err, failure) {
 		t.Fatal(err)
 	}
-	// An uploading-state read no longer repairs a torn rename: the visible
-	// checkpoint is reported, but it is not an acknowledged durable offset.
-	// The offset contract (conflicting PATCH rejected, resend from the receipt)
-	// reconciles it, so durability is restored by the next acknowledged save.
-	status, err := s.Get(ctx, "owner", "bot", u.ID)
-	if err != nil || status.Offset != int64(len(b)) {
-		t.Fatal(status, err)
+	// A visible checkpoint alone is not an acknowledged durable offset.
+	if got, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, failure) || got.ID != "" {
+		t.Fatal(got, err)
 	}
 	restarted := uploadService(t, root, 1024).Uploads()
 	barriers := 0
@@ -537,11 +533,12 @@ func TestUploadJournalRenameFailureNeedsNoReadTimeBarrier(t *testing.T) {
 		}
 		return f.Sync()
 	}
+	status, err := restarted.Get(ctx, "owner", "bot", u.ID)
+	if err != nil || status.Offset != int64(len(b)) || barriers == 0 {
+		t.Fatal(status, err, barriers)
+	}
 	if _, err := restarted.Complete(ctx, "owner", "bot", u.ID); err != nil {
 		t.Fatal(err)
-	}
-	if barriers == 0 {
-		t.Fatal("completion save established no durability barrier")
 	}
 }
 
@@ -659,14 +656,12 @@ func TestUploadProcessDeathAfterJournalRename(t *testing.T) {
 		}
 		return f.Sync()
 	}
-	// The uploading-state read reports the visible checkpoint without repairing
-	// the torn rename; the acknowledged completion save restores the barrier.
 	status, err := s.Get(ctx, "owner", "bot", id)
-	if err != nil || status.Offset != int64(len("crash after rename")) || barriers != 0 {
+	if err != nil || status.Offset != int64(len("crash after rename")) || barriers == 0 {
 		t.Fatal(status, err, barriers)
 	}
-	if _, err := s.Complete(ctx, "owner", "bot", id); err != nil || barriers == 0 {
-		t.Fatal(err, barriers)
+	if _, err := s.Complete(ctx, "owner", "bot", id); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -678,6 +673,36 @@ type publicationWithoutBarrier struct {
 func (p *publicationWithoutBarrier) Put(ctx context.Context, key string, reader io.Reader) error {
 	p.puts++
 	return p.Provider.Put(ctx, key, reader)
+}
+
+// Mutation-path journal reads skip the rename-repair barrier: the mutation's
+// own acknowledged save re-establishes it. Receipt reads keep the repair.
+func TestUploadMutationReadSkipsJournalBarrier(t *testing.T) {
+	ctx := t.Context()
+	root := t.TempDir()
+	s := uploadService(t, root, 1024).Uploads()
+	b := []byte("barrier accounting")
+	u := createUpload(ctx, t, s, b)
+	appendBytes(ctx, t, s, u, b[:8])
+	dirSyncs := 0
+	s.syncFile = func(f *os.File) error {
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			dirSyncs++
+		}
+		return f.Sync()
+	}
+	if _, err := s.Get(ctx, "owner", "bot", u.ID); err != nil || dirSyncs != 1 {
+		t.Fatal("receipt read lost its barrier repair", err, dirSyncs)
+	}
+	dirSyncs = 0
+	appendBytes(ctx, t, s, u, b[8:])
+	if dirSyncs != 1 {
+		t.Fatalf("mutation paid a read-time barrier: %d directory syncs", dirSyncs)
+	}
 }
 
 func TestRequiredPersistenceRepublishesWithoutBarrierCapability(t *testing.T) {

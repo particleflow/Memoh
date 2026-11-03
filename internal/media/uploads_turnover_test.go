@@ -198,7 +198,7 @@ func TestTaskRetirementFaultsNeverAcknowledgeOrEraseUnknown(t *testing.T) {
 					t.Fatal(err)
 				}
 			case "canceled":
-				record, err := s.read(r.ID)
+				record, err := s.read(r.ID, false)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -274,7 +274,7 @@ func TestPriorTaskLeaseUpgradesWithoutExpiryEviction(t *testing.T) {
 			body := []byte("original-task-evidence")
 			r := createTransferUpload(t.Context(), t, s, body)
 			r = appendBytes(t.Context(), t, s, r, body[:1])
-			record, err := s.read(r.ID)
+			record, err := s.read(r.ID, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -291,7 +291,7 @@ func TestPriorTaskLeaseUpgradesWithoutExpiryEviction(t *testing.T) {
 			} else if err := s.Sweep(t.Context()); err != nil {
 				t.Fatal(err)
 			}
-			got, err := s.read(r.ID)
+			got, err := s.read(r.ID, false)
 			if err != nil || got.ProgressLease != 2 || got.Offset != r.Offset || !got.ExpiresAt.Equal(r.ExpiresAt) {
 				t.Fatal("lease migration lost or renewed evidence", err)
 			}

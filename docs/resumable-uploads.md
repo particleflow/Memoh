@@ -109,11 +109,11 @@ time, and the existing original is re-verified and barrier-repaired instead.
 
 Readable files alone are not proof of durable publication. Deduplication repairs
 the canonical file and directory fsync barriers before acknowledging an existing
-original. Journal reads fsync the visible journal and its directory before a
-ready receipt is returned or terminal payload cleanup runs; an uploading-state
-offset read performs no such repair, because the offset protocol reconciles a
-torn checkpoint (a conflicting append is rejected and retried from the receipt)
-and the next acknowledged save restores the barrier.
+original. Receipt reads (Get, the ready replay of Complete, retirement) and
+collection fsync the visible journal and its directory before returning or
+acting on its state; a mutation's own journal read skips that repair because
+its acknowledged save re-establishes the full barrier, so per-chunk appends do
+not pay a read-time fsync pair.
 This repairs a process interruption or lost acknowledgement between rename and
 directory fsync. A failed barrier returns an error and preserves staging until
 recovery; it cannot authorize deleting the only pending copy. These guarantees

@@ -161,7 +161,7 @@ func syncRootWith(root *os.Root, syncFile func(*os.File) error) error {
 	return syncFile(f)
 }
 
-func (s *UploadStore) read(id string) (uploadRecord, error) {
+func (s *UploadStore) read(id string, repair bool) (uploadRecord, error) {
 	var r uploadRecord
 	f, err := openUploadFile(s.root, id+".json", os.O_RDONLY, 0)
 	if errors.Is(err, os.ErrNotExist) {
@@ -178,12 +178,13 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 		return r, ErrUploadInvalid
 	}
 	// A prior process may have renamed this journal and failed before its
-	// directory fsync. Repair that barrier before a terminal state can be
-	// acknowledged or swept. An uploading record needs no read-time repair:
-	// the offset contract reconciles it (Append rejects a mismatching offset
-	// and every acknowledged mutation saves with its own full barrier), so
-	// per-chunk receipt reads do not pay two extra fsyncs.
-	if r.State != "uploading" {
+	// directory fsync. Receipt reads and Sweep repair that barrier before the
+	// visible state is acknowledged or acted on: a client resumes from a
+	// reported offset, and collection deletes payloads on the strength of the
+	// state. A mutation's own journal read skips the repair — its acknowledged
+	// save re-establishes the full barrier — so per-chunk appends do not pay
+	// two extra fsyncs.
+	if repair {
 		if err := s.syncFile(f); err != nil {
 			return uploadRecord{}, err
 		}
@@ -227,8 +228,8 @@ func (s *UploadStore) remove(name string) error {
 	return err
 }
 
-func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
-	r, err := s.read(id)
+func (s *UploadStore) owned(owner, bot, id string, repair bool) (uploadRecord, error) {
+	r, err := s.read(id, repair)
 	if err != nil {
 		return r, err
 	}
@@ -282,7 +283,7 @@ func (s *UploadStore) Get(ctx context.Context, owner, bot, id string) (Upload, e
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, true)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -300,7 +301,7 @@ func (s *UploadStore) Append(ctx context.Context, owner, bot, id string, offset,
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, false)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -387,7 +388,9 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	// The ready replay below acknowledges a terminal receipt, so this read
+	// repairs a torn rename before returning it.
+	r, err := s.owned(owner, bot, id, true)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -440,7 +443,7 @@ func (s *UploadStore) Cancel(ctx context.Context, owner, bot, id string) (Upload
 		return Upload{}, err
 	}
 	defer unlock()
-	r, err := s.owned(owner, bot, id)
+	r, err := s.owned(owner, bot, id, false)
 	if err != nil {
 		return Upload{}, err
 	}
@@ -519,7 +522,7 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 		}
 		err = func() error {
 			defer unlock()
-			r, err := s.read(id)
+			r, err := s.read(id, true)
 			if err != nil {
 				return err
 			}
