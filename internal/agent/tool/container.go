@@ -188,6 +188,7 @@ func (p *ContainerProvider) Tools(ctx context.Context, session SessionContext) (
 	if sess.SupportsImageInput {
 		readDesc += " Also supports reading image files (PNG, JPEG, GIF, WebP) — binary images are loaded into model context automatically."
 	}
+	readDesc += " Spreadsheet (.xlsx) and Word (.docx) files are converted to plain text (large files are truncated)."
 	readDesc += " Audio files are transcribed to text (up to 10 MB encoded and 5 minutes) when the Bot has a transcription model configured."
 
 	toolList := []toolexec.Tool{
@@ -818,6 +819,15 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 			return nil, errors.New("file is a PDF document and the current model has no native PDF input (file-input capability). Ask the user to switch to a PDF-capable model; do not attempt to install PDF readers")
 		}
 		return ReadImageFromContainer(opCtx, client, filePath, defaultReadMediaMaxBytes), nil
+	}
+	// Office containers before the generic binary probe: xlsx/docx are zip
+	// binaries the image lane rejects; parse them into plain text instead.
+	if officeKind, ok := readOfficeContentType(probe[:probeN], filePath); ok {
+		data, readErr := readAllAfterProbe(reader, probe[:probeN])
+		if readErr != nil {
+			return nil, readErr
+		}
+		return readOfficeResult(filePath, officeKind, data)
 	}
 	// Audio before the generic binary probe: an mp3 may carry no NUL byte in
 	// its first 8KB, and audio needs its own 90s transcription budget rather
