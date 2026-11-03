@@ -24,6 +24,7 @@ export function workspaceTargetStatusLabel(target: WorkspaceWorkspaceTarget, t: 
 }
 
 export function workspaceTargetAvailable(target: WorkspaceWorkspaceTarget): boolean {
+  if (target.provider === 'agenvo') return false // Historical snapshots never authorize a new action.
   return target.kind === 'native'
     || (workspaceTargetStatus(target) === 'online' && target.online !== false)
 }
@@ -32,8 +33,4 @@ export function workspaceTargetAvailable(target: WorkspaceWorkspaceTarget): bool
 export function runtimeAvailability(runtime: Pick<UserruntimeRuntime, 'provider' | 'online' | 'availability'>): string {
   if (runtime.provider === 'agenvo') return runtime.availability || (runtime.online ? 'online' : 'connection_unavailable')
   return runtime.online ? 'online' : 'offline'
-}
-
-export function agenvoCapabilityLabel(runtime: Pick<UserruntimeRuntime, 'capabilities'>, t: I18nT): string {
-  return t(runtime.capabilities?.includes('herdr_pi_task') ? 'agenvo.agentCapability' : 'agenvo.capability')
 }
