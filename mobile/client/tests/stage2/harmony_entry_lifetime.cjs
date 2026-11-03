@@ -17,6 +17,7 @@ async function boot(mode) {
   const storage = new Map(mode === 'edit' ? [['edit', '1']] : []), router = { currentRoute: { value: { name: 'Home' } }, afterEach() {} }
   const imports = {
     './harmony-back': { installHarmonyBack() {} },
+    './harmony-ws': { installNativeWebSocket: origin => events.push('ws-bridge:' + origin) },
     './harmony-service-config': {
       SERVICE_CONFIG_KEY: 'config', EDIT_SERVICE_KEY: 'edit',
       async readDeploymentConfig() { if (mode === 'invalid') throw Error('invalid'); return {} }, async applyDeploymentConfig() { return config },
@@ -54,13 +55,15 @@ async function component() {
   release([]); await pending; assert.deepEqual(events, ['release-preview'])
 }
 ;(async () => {
-  assert.deepEqual(await boot('normal'), ['client.configure', 'mounted'])
+  // The socket bridge mounts from boot() with the configured origin, after
+  // client.configure and before main -- only the https origin qualifies.
+  assert.deepEqual(await boot('normal'), ['client.configure', 'ws-bridge:https://nas.example/api', 'mounted'])
   assert.deepEqual(await boot('edit'), ['client.configuration', 'form'])
-  assert.deepEqual(await boot('reset'), ['client.configuration', 'auth-clear', 'client.configure', 'mounted'])
+  assert.deepEqual(await boot('reset'), ['client.configuration', 'auth-clear', 'client.configure', 'ws-bridge:https://nas.example/api', 'mounted'])
   assert.deepEqual(await boot('invalid'), ['client.configuration', 'form'])
   await component()
   const calls = [], router = { currentRoute: { value: { name: 'Home' } }, afterEach() {}, isReady: async () => {} }
-  execute('harmony.ts', { '../router': { __esModule: true, default: router }, './harmony-theme.json': {}, '@/lib/api-client': { sdkAuthQuery: () => ({ token: 'synthetic-current' }) } },
+  execute('harmony.ts', { '../router': { __esModule: true, default: router }, './harmony-theme.json': {}, '@/lib/api-client': { sdkAuthQuery: () => ({ token: 'synthetic-current' }) }, './harmony-diagnostics': { resumeDiagnostics() {}, suspendDiagnostics() {} } },
     { window: { begoniaNative: { async request(raw) { calls.push(JSON.parse(raw)); return '{"ok":true}' } } } })
   await settle(); assert.equal(calls[0].authorization, 'Bearer synthetic-current')
   console.log(JSON.stringify({ actualBootstrap: true, normalReloadRetainsTransfers: true, configurationEditStillRevokes: true, resetBeforeAuthCleanup: true, invalidConfigurationFailsClosed: true, actualComponentUnmountDetaches: true, noLateComponentEmit: true, currentSessionReadyEnvelope: true, renderedUI: false, nativeDevice: false }))
