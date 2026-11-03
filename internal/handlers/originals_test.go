@@ -79,7 +79,11 @@ func TestOriginalOutboundPreservesMetadataAndNeverFallsBackToInlineBytes(t *test
 	if err := os.WriteFile(filepath.Join(root, "bot-blocked"), nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	result = handler.wsIngestAttachments(context.Background(), "bot-blocked", event)
+	// Fresh bytes: ingesting them cannot become a reference to bot-a's
+	// different content, so the blocked store's write failure is the only
+	// possible outcome.
+	blockedEvent := json.RawMessage(`{"type":"attachment_delta","attachments":[{"type":"file","base64":"data:text/plain;base64,ZnJlc2gtYnl0ZXM=","mime":"text/plain","annotation":"keep"}]}`)
+	result = handler.wsIngestAttachments(context.Background(), "bot-blocked", blockedEvent)
 	if len(result) != 1 || !strings.Contains(string(result[0]), `"type":"error"`) ||
 		strings.Contains(string(result[0]), "base64") || strings.Contains(string(result[0]), root) {
 		t.Fatalf("failed original leaked attachment bytes or diagnostic path: %s", result)

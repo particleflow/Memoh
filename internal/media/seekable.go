@@ -20,6 +20,22 @@ type ReadSeekCloser interface {
 	io.Closer
 }
 
+// OpenSeekableFor is the reference-following form of OpenSeekable: a hash the
+// Bot's own directory does not hold opens the owning Bot's verified original.
+// Task input production and delivery verification deliver referenced content
+// this way; OpenSeekable itself stays scoped for HTTP range surfaces.
+func (s *Service) OpenSeekableFor(ctx context.Context, botID, contentHash string) (ReadSeekCloser, Asset, error) {
+	asset, err := s.resolveReference(ctx, botID, contentHash)
+	if err != nil {
+		return nil, Asset{}, err
+	}
+	reader, asset, err := s.OpenSeekable(ctx, asset.BotID, contentHash)
+	if err != nil {
+		return nil, Asset{}, err
+	}
+	return reader, asset, nil
+}
+
 // OpenSeekable uses a provider's explicit verified-range contract when present.
 // Legacy providers retain full-file verification and disk-only spooling.
 func (s *Service) OpenSeekable(ctx context.Context, botID, contentHash string) (ReadSeekCloser, Asset, error) {

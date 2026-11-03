@@ -247,12 +247,30 @@ func (s *Service) WithInputReferences(open InputReferenceOpener) *Service {
 	return s
 }
 
+// DeliveryReferenceAssets is the optional reference-following form of
+// DeliveryAssets: a hash the Bot's own directory does not hold opens the
+// owning Bot's verified original. Ingested bytes another Bot already owns
+// exist only as that owner's copy, so own-session inputs resolve through it.
+type DeliveryReferenceAssets interface {
+	OpenSeekableFor(context.Context, string, string) (media.ReadSeekCloser, media.Asset, error)
+}
+
 func (s *Service) taskInputReader(ctx context.Context, b toolcontext.ComputerBinding, hash string) (media.ReadSeekCloser, string, error) {
 	if s.inputReference != nil {
 		reader, mime, err := s.inputReference(ctx, b, hash)
 		if err != nil || reader != nil {
 			return reader, mime, err
 		}
+	}
+	if reference, ok := s.assets.(DeliveryReferenceAssets); ok {
+		reader, asset, err := reference.OpenSeekableFor(ctx, b.BotID, hash)
+		if err != nil || asset.ContentHash != hash {
+			if reader != nil {
+				_ = reader.Close()
+			}
+			return nil, "", ErrDeliveryAsset
+		}
+		return reader, asset.Mime, nil
 	}
 	assets, ok := s.assets.(DeliveryAssets)
 	if !ok {

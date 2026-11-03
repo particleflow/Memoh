@@ -361,7 +361,21 @@ func (s *DeliveryService) verifyAsset(ctx context.Context, bot string, ref Deliv
 	if s.assets == nil {
 		return ErrDeliveryAsset
 	}
-	reader, asset, err := s.assets.OpenSeekable(ctx, bot, ref.ContentHash)
+	// Bytes another Bot already owns exist only as that owner's copy: a
+	// delivery request for them verifies against the referenced original.
+	// Stores without reference resolution keep the owning-Bot check.
+	byReference := false
+	var (
+		reader media.ReadSeekCloser
+		asset  media.Asset
+		err    error
+	)
+	if reference, ok := s.assets.(DeliveryReferenceAssets); ok {
+		byReference = true
+		reader, asset, err = reference.OpenSeekableFor(ctx, bot, ref.ContentHash)
+	} else {
+		reader, asset, err = s.assets.OpenSeekable(ctx, bot, ref.ContentHash)
+	}
 	if err != nil {
 		return err
 	}
@@ -375,7 +389,8 @@ func (s *DeliveryService) verifyAsset(ctx context.Context, bot string, ref Deliv
 	if closeErr != nil {
 		return closeErr
 	}
-	if asset.BotID != bot || asset.ContentHash != ref.ContentHash || size != ref.SizeBytes {
+	ownedByRequester := byReference || asset.BotID == bot
+	if !ownedByRequester || asset.ContentHash != ref.ContentHash || size != ref.SizeBytes {
 		return ErrDeliveryAsset
 	}
 	return nil
