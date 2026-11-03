@@ -78,6 +78,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-home-admission-final.json')
     files.append(ROOT / 'mobile/memoh/shared-read-aloud-streaming.json')
     files.append(ROOT / 'mobile/memoh/shared-quote-reply-changes.json')
+    files.append(ROOT / 'mobile/memoh/shared-bubble-kind-changes.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -285,6 +286,36 @@ def apply_quote_reply_context(context, overlay, patches):
             target.addfile(entry, io.BytesIO(data))
             seen.add(name)
     assert seen == files.keys() and edited == edits.keys(), 'Quote reply coverage drift'
+    temporary.replace(context)
+
+
+def apply_bubble_kind(context, overlay, patches):
+    """Apply the visual-only ack/body/receipt bubble kinds after the quote reply.
+
+    Same-byte-anchored form as the attachment-progress post-override: the
+    message edits anchor on the composed source and record the adapted result."""
+    edits = overlay.get('existingFiles', {})
+    temporary = context.with_suffix('.bubble-kind.tar')
+    edited = set()
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        last = {item.name: item for item in source.getmembers()}
+        for member in source.getmembers():
+            data = source.extractfile(member).read() if member.isfile() else None
+            entry = copy.copy(member)
+            if member.name in edits and member is last[member.name]:
+                item = edits[member.name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Bubble kind anchor drift'
+                text = data.decode()
+                for before, after, expected in item['replacements']:
+                    assert text.count(before) == expected, 'Bubble kind replacement drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == item['adaptedSHA256'], 'Bubble kind output drift'
+                entry.size = len(data)
+                edited.add(member.name)
+                patches[member.name] = {'upstreamSHA256': item['baseSHA256'], 'adaptedSHA256': item['adaptedSHA256']}
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+    assert edited == edits.keys(), 'Bubble kind source coverage drift'
     temporary.replace(context)
 
 
@@ -1190,6 +1221,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     quote_reply = lock['sharedQuoteReply']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / quote_reply['local']) == quote_reply['sha256'], 'Quote reply source drift'
     quote_reply_sources = json.loads((ROOT / 'mobile/memoh' / quote_reply['local']).read_text())
+    bubble_kind = lock['sharedBubbleKind']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / bubble_kind['local']) == bubble_kind['sha256'], 'Bubble kind source drift'
+    bubble_kind_sources = json.loads((ROOT / 'mobile/memoh' / bubble_kind['local']).read_text())
     for name, addition in fixed_contact_sources['sdkOverlays'].items():
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected task directory SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
@@ -1612,6 +1646,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         apply_read_aloud_streaming(context, streaming_sources, patches)
         apply_attachment_progress(context, attachment_progress_sources, patches)
         apply_quote_reply_context(context, quote_reply_sources, patches)
+        apply_bubble_kind(context, bubble_kind_sources, patches)
     return context, patches
 
 

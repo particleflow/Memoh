@@ -21,7 +21,8 @@ entries = manifest['entries']
 # Four attachment transfer-progress sources (registry, ring, overlay, checks) extend196.
 # The visual-evidence page generator extends200.
 # Two scoped quote-reply composition sources extend201 (overlay + stage2 gate).
-assert len(entries) == 203
+# One visual-only bubble-kind overlay extends203.
+assert len(entries) == 204
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
