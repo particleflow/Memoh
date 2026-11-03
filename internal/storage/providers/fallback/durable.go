@@ -92,21 +92,48 @@ func (p *Durable) ListPrefix(ctx context.Context, prefix string) ([]string, erro
 	return tryListPrefix(ctx, p.legacy, prefix)
 }
 
+// ListPrefixAcrossBots resolves a Bot-independent storage-key prefix against
+// the canonical originals first, mirroring ListPrefix's precedence. The
+// workspace is never contacted: access copies are not ownership.
+func (p *Durable) ListPrefixAcrossBots(ctx context.Context, storageKeyPrefix string) ([]string, error) {
+	keys, err := tryListPrefixAcrossBots(ctx, p.canonical, storageKeyPrefix)
+	if len(keys) > 0 || (err != nil && !errors.Is(err, fs.ErrNotExist)) {
+		return keys, err
+	}
+	return tryListPrefixAcrossBots(ctx, p.legacy, storageKeyPrefix)
+}
+
+func tryListPrefixAcrossBots(ctx context.Context, p storage.Provider, storageKeyPrefix string) ([]string, error) {
+	lister, ok := p.(storage.CrossBotPrefixLister)
+	if !ok {
+		return nil, nil
+	}
+	return lister.ListPrefixAcrossBots(ctx, storageKeyPrefix)
+}
+
 func (p *Durable) EnsureAccessPath(ctx context.Context, key string) (string, error) {
-	source, err := p.Open(ctx, key)
+	return p.MaterializeAccessPath(ctx, key, key)
+}
+
+// MaterializeAccessPath writes the verified original at sourceKey into the
+// workspace under targetKey and returns the target's consumer-visible path.
+// The canonical store is never written: a target in another Bot's namespace is
+// a reading consumer's access copy of a reference, not a second owner of the
+// bytes. Like EnsureAccessPath, the copy is refreshed from the verified
+// original even when one already exists.
+func (p *Durable) MaterializeAccessPath(ctx context.Context, targetKey, sourceKey string) (string, error) {
+	source, err := p.Open(ctx, sourceKey)
 	if err != nil {
 		return "", err
 	}
 	defer func() { _ = source.Close() }()
-	// Refresh from the verified original even if a writable workspace copy
-	// exists: tools may have modified it since the previous materialization.
-	if err := p.workspace.Put(ctx, key, source); err != nil {
+	if err := p.workspace.Put(ctx, targetKey, source); err != nil {
 		return "", fmt.Errorf("materialize media: %w", err)
 	}
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
-	value := strings.TrimSpace(p.workspace.AccessPath(ctx, key))
+	value := strings.TrimSpace(p.workspace.AccessPath(ctx, targetKey))
 	if value == "" {
 		return "", storage.ErrAccessPathUnavailable
 	}

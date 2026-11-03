@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,8 +16,9 @@ import (
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
 )
 
-func TestOriginalAdmissionRejectsFailureCancellationAndOtherBotReference(t *testing.T) {
-	service := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+func TestOriginalAdmissionAcceptsOwnedAndReferencedHashesButNotUnknown(t *testing.T) {
+	root := t.TempDir()
+	service := media.NewService(nil, localfs.NewOriginals(root))
 	service.SetRequirePersistence(true)
 	handler := &LocalChannelHandler{mediaService: service}
 	attachment := turn.Attachment{
@@ -27,8 +29,20 @@ func TestOriginalAdmissionRejectsFailureCancellationAndOtherBotReference(t *test
 	if err != nil || len(prepared) != 1 || prepared[0].ContentHash == "" || prepared[0].Base64 != "" {
 		t.Fatalf("upload was not replaced with an original reference: %+v, %v", prepared, err)
 	}
-	if _, err := handler.ingestWSInboundAttachments(context.Background(), "bot-b", prepared); err == nil {
-		t.Fatal("other bot reference was accepted")
+	// A hash another Bot owns resolves by reference: the message keeps the
+	// hash identity, the owner keeps the only canonical copy, and nothing is
+	// written for the referencing Bot.
+	referenced, err := handler.ingestWSInboundAttachments(context.Background(), "bot-b", prepared)
+	if err != nil || len(referenced) != 1 || referenced[0].ContentHash != prepared[0].ContentHash {
+		t.Fatalf("other Bot's reference was refused: %+v, %v", referenced, err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "bot-b")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("referencing admission wrote canonical bytes: %v", err)
+	}
+	unknown := prepared[0]
+	unknown.ContentHash = strings.Repeat("c", 64)
+	if _, err := handler.ingestWSInboundAttachments(context.Background(), "bot-b", []turn.Attachment{unknown}); err == nil {
+		t.Fatal("unknown hash reference was accepted")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

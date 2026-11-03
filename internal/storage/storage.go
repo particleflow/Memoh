@@ -77,3 +77,21 @@ type ContainerFileOpener interface {
 type PrefixLister interface {
 	ListPrefix(ctx context.Context, prefix string) ([]string, error)
 }
+
+// CrossBotPrefixLister is an optional interface for providers that can list
+// keys matching a Bot-independent storage-key prefix across every Bot's root.
+// It answers where a hash's bytes live — the address a content-hash reference
+// resolves against — without naming a Bot up front. The same metadata-only
+// contract as PrefixLister applies: a listed key is not an integrity,
+// durability, or authorization statement.
+type CrossBotPrefixLister interface {
+	ListPrefixAcrossBots(ctx context.Context, storageKeyPrefix string) ([]string, error)
+}
+
+// AccessPathMaterializer is implemented by providers that can materialize one
+// key's stored bytes into consumer-addressable storage under a different key.
+// The target is a reading consumer's access copy of a reference; providers
+// that keep a canonical store must not write it here.
+type AccessPathMaterializer interface {
+	MaterializeAccessPath(ctx context.Context, targetKey, sourceKey string) (string, error)
+}

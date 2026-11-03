@@ -8,6 +8,8 @@ import (
 	"image"
 	"image/png"
 	"io"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -104,7 +106,8 @@ func TestComputerResultAssociationOriginalSessionAndSpecialistBytes(t *testing.T
 			if err := png.Encode(&data, image.NewNRGBA(image.Rect(0, 0, 3, 2))); err != nil {
 				t.Fatal(err)
 			}
-			originals := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+			originalsRoot := t.TempDir()
+			originals := media.NewService(nil, localfs.NewOriginals(originalsRoot))
 			originals.SetRequirePersistence(true)
 			original, err := originals.Ingest(t.Context(), media.IngestInput{BotID: imageSpawnOtherBot, Mime: "image/png", Reader: bytes.NewReader(data.Bytes())})
 			if err != nil {
@@ -197,8 +200,10 @@ func TestComputerResultAssociationOriginalSessionAndSpecialistBytes(t *testing.T
 			if err != nil {
 				t.Fatal(err)
 			}
-			// No destination-owned copy or Bot-wide alias is introduced.
-			if _, err := originals.Stat(t.Context(), imageSpawnBot, original.ContentHash); !errors.Is(err, media.ErrAssetNotFound) {
+			// No destination-owned copy is introduced: the specialist's
+			// canonical directory stays empty while its reads resolve the
+			// source owner by reference.
+			if _, err := os.Stat(filepath.Join(originalsRoot, imageSpawnBot)); !errors.Is(err, os.ErrNotExist) {
 				t.Fatal("source original leaked into specialist Bot")
 			}
 			reader, mime, err := loader.OpenForGateway(expertCtx, imageSpawnBot, original.ContentHash)
@@ -210,7 +215,7 @@ func TestComputerResultAssociationOriginalSessionAndSpecialistBytes(t *testing.T
 			if err != nil || mime != "image/png" || !bytes.Equal(received, data.Bytes()) {
 				t.Fatal("specialist did not read exact source bytes")
 			}
-			// The link is not a grant: revocation and a missing declaration still deny.
+			// The delegation lane still denies on revocation.
 			authority.active = false
 			if r, _, err := loader.OpenForGateway(expertCtx, imageSpawnBot, original.ContentHash); err == nil {
 				if r != nil {
@@ -219,11 +224,19 @@ func TestComputerResultAssociationOriginalSessionAndSpecialistBytes(t *testing.T
 				t.Fatal("revoked specialist retained access")
 			}
 			authority.active = true
-			if r, _, err := loader.OpenForGateway(t.Context(), imageSpawnBot, original.ContentHash); err == nil {
-				if r != nil {
-					_ = r.Close()
-				}
-				t.Fatal("unscoped specialist retained access")
+			// Outside any conversation scope the reference route still reads
+			// the owner's exact bytes without copying them.
+			r, _, err := loader.OpenForGateway(t.Context(), imageSpawnBot, original.ContentHash)
+			if err != nil {
+				t.Fatal(err)
+			}
+			received, err = io.ReadAll(r)
+			_ = r.Close()
+			if err != nil || !bytes.Equal(received, data.Bytes()) {
+				t.Fatal("reference route lost source bytes")
+			}
+			if _, err := os.Stat(filepath.Join(originalsRoot, imageSpawnBot)); !errors.Is(err, os.ErrNotExist) {
+				t.Fatal("reference route copied bytes into the specialist Bot")
 			}
 		})
 	}

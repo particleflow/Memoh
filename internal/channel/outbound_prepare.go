@@ -232,6 +232,14 @@ func preparePersistedAttachment(
 		applyPreparedSharedAsset(botID, sharedAsset, &item)
 		return item, preparedSharedUploadAttachment(store, botID, item), nil
 	}
+	if asset.BotID != "" && asset.BotID != botID {
+		// The reference route resolved the hash to another Bot's original.
+		// Delivery streams those bytes through the store's own cross-Bot
+		// read; the sender gains no copy and no path into the owner's
+		// workspace.
+		applyPreparedSharedAsset(botID, asset, &item)
+		return item, preparedUploadAttachment(store, botID, item), nil
+	}
 	applyPreparedAsset(ctx, store, asset, botID, &item, sourcePath)
 	return item, preparedUploadAttachment(store, botID, item), nil
 }

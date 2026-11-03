@@ -150,7 +150,10 @@ func TestJSONEditAdmissionAndUnknown(t *testing.T) {
 			payload, _ := json.Marshal(args)
 			result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", string(payload))
 			text := result.Result.String()
-			if mode == "unknown" {
+			// A hash another Bot owns resolves by reference: the edit consumes
+			// the referenced original, so "foreign" dispatches exactly like the
+			// session's own input.
+			if mode == "unknown" || mode == "foreign" {
 				if result.IsError || calls.Load() != 1 || credentials.Load() != 1 || !strings.Contains(text, `"state":"unknown"`) || !strings.Contains(text, `"retryable":false`) || strings.Contains(text, "PRIVATE") || strings.Contains(text, "content_hash") {
 					t.Fatalf("calls=%d result=%s", calls.Load(), text)
 				}

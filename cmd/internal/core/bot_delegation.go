@@ -606,12 +606,34 @@ func (a *delegationAssetLoader) OpenForGateway(ctx context.Context, bot, hash st
 }
 
 func (a *delegationAssetLoader) AccessPathForGateway(ctx context.Context, bot, hash string) (string, error) {
-	set, _, err := a.shared(ctx, bot, hash)
+	set, result, err := a.shared(ctx, bot, hash)
 	if err != nil {
 		return "", err
 	}
 	if set != nil {
-		return "", storage.ErrAccessPathUnavailable
+		// A delegated reference is readable through the consuming Bot's own
+		// container path: the owner's verified bytes materialize as the
+		// reading Bot's access copy. Canonical storage and the owner's
+		// directory are untouched, and a revoked delegation stops answering.
+		return a.delegatedAccessPath(ctx, bot, set, hash, result)
 	}
 	return a.base.AccessPathForGateway(ctx, bot, hash)
+}
+
+func (a *delegationAssetLoader) delegatedAccessPath(ctx context.Context, bot string, set *botdelegation.AttachmentSet, hash string, result bool) (string, error) {
+	owner, err := set.Owner(ctx, hash, result)
+	if err != nil {
+		return "", err
+	}
+	if a.host == nil || a.host.media == nil {
+		return "", storage.ErrAccessPathUnavailable
+	}
+	asset, err := a.host.media.Resolve(ctx, owner, hash)
+	if err != nil {
+		return "", err
+	}
+	if asset.BotID != owner {
+		return "", botdelegation.ErrDenied
+	}
+	return a.host.media.EnsureAccessPathFor(ctx, bot, asset)
 }

@@ -14,6 +14,8 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -127,7 +129,8 @@ func TestDelegatedImageReferenceUsesScopedOriginal(t *testing.T) {
 			original := input.Bytes()
 			originalHash := sha256.Sum256(original)
 			hash := hex.EncodeToString(originalHash[:])
-			store := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+			originalsRoot := t.TempDir()
+			store := media.NewService(nil, localfs.NewOriginals(originalsRoot))
 			store.SetRequirePersistence(true)
 			if _, err := store.Ingest(t.Context(), media.IngestInput{BotID: imageSpawnOtherBot, Mime: "image/png", Reader: bytes.NewReader(original)}); err != nil {
 				t.Fatal(err)
@@ -170,11 +173,16 @@ func TestDelegatedImageReferenceUsesScopedOriginal(t *testing.T) {
 			var posts atomic.Int32
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				posts.Add(1)
-				if !originals.readComplete.Load() {
+				// The delegated lane streams through the wrapper; the
+				// reference route verifies the full hash inside Open instead.
+				if mode != "undeclared" && mode != "missing-scope" && !originals.readComplete.Load() {
 					t.Error("provider dispatched before full authorized input read")
 				}
-				if _, err := store.Stat(req.Context(), imageSpawnBot, hash); !errors.Is(err, media.ErrAssetNotFound) {
-					t.Error("delegated input was copied or aliased into target Bot before output")
+				// Zero copy, probed on the canonical store itself: a read by
+				// reference resolves the owner without aliasing bytes into the
+				// reading Bot's directory.
+				if _, err := os.Stat(filepath.Join(originalsRoot, imageSpawnBot)); !errors.Is(err, os.ErrNotExist) {
+					t.Error("delegated input was copied into the target Bot's canonical store before output")
 				}
 				if req.Method != http.MethodPost || req.URL.Path != "/v1/images/edits" {
 					t.Error("unexpected image dispatch")
@@ -210,7 +218,12 @@ func TestDelegatedImageReferenceUsesScopedOriginal(t *testing.T) {
 				t.Fatalf("tool execution: %v", err)
 			}
 			value := result.Results[0]
-			if mode == "success" || mode == "unknown" || mode == "subagent-scope" {
+			// "undeclared" and "missing-scope" dispatch through the reference
+			// route: finding the owner's original is what a hash reference
+			// grants. "revoked" and "source-unlinked" still fail on the
+			// delegation lane they named.
+			dispatching := mode == "success" || mode == "unknown" || mode == "subagent-scope" || mode == "undeclared" || mode == "missing-scope"
+			if dispatching {
 				if value.IsError || posts.Load() != 1 {
 					t.Fatalf("mode=%s posts=%d result=%s", mode, posts.Load(), value.Result.String())
 				}
@@ -235,9 +248,11 @@ func TestDelegatedImageReferenceUsesScopedOriginal(t *testing.T) {
 			} else if !value.IsError || posts.Load() != 0 {
 				t.Fatalf("scope failure dispatched: posts=%d result=%s", posts.Load(), value.Result.String())
 			}
-			if mode != "success" && mode != "subagent-scope" {
-				if _, err := store.Stat(t.Context(), imageSpawnBot, hash); !errors.Is(err, media.ErrAssetNotFound) {
-					t.Fatalf("input acquired target alias: %v", err)
+			// Modes that never persisted an output keep an empty canonical
+			// directory for the reading Bot: the reference copied nothing.
+			if !dispatching || mode == "unknown" {
+				if _, err := os.Stat(filepath.Join(originalsRoot, imageSpawnBot)); !errors.Is(err, os.ErrNotExist) {
+					t.Fatalf("mode=%s: input acquired a canonical target copy", mode)
 				}
 			}
 		})

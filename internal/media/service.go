@@ -138,11 +138,13 @@ func (s *Service) persist(ctx context.Context, input IngestInput, contentHash st
 }
 
 // Resolve finds an asset by content hash (no stream open). Used to fill mime/storage_key when DB has none.
+// A hash the Bot's own directory does not hold resolves to the owner Bot that
+// backs it: a reference names where the bytes live, not just what they are.
 func (s *Service) Resolve(ctx context.Context, botID, contentHash string) (Asset, error) {
 	if s.provider == nil {
 		return Asset{}, ErrProviderUnavailable
 	}
-	return s.resolveByContentHash(ctx, botID, contentHash)
+	return s.resolveReference(ctx, botID, contentHash)
 }
 
 // Stat returns asset metadata for the given content hash without opening the file.
@@ -153,15 +155,17 @@ func (s *Service) Stat(ctx context.Context, botID, contentHash string) (Asset, e
 
 // Open returns a reader for the media asset identified by content hash.
 // It locates the file by scanning extensions under the hash prefix and derives MIME from the extension.
+// A hash this Bot does not own opens the owner's original where it lives —
+// a read-by-reference, not a copy into this Bot's storage.
 func (s *Service) Open(ctx context.Context, botID, contentHash string) (io.ReadCloser, Asset, error) {
 	if s.provider == nil {
 		return nil, Asset{}, ErrProviderUnavailable
 	}
-	asset, err := s.resolveByContentHash(ctx, botID, contentHash)
+	asset, err := s.resolveReference(ctx, botID, contentHash)
 	if err != nil {
 		return nil, Asset{}, err
 	}
-	routingKey := path.Join(botID, asset.StorageKey)
+	routingKey := path.Join(asset.BotID, asset.StorageKey)
 	reader, err := s.provider.Open(ctx, routingKey)
 	if err != nil {
 		return nil, Asset{}, fmt.Errorf("open storage: %w", err)
