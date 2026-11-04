@@ -109,17 +109,14 @@ func TestReadAudioUnconfiguredBotReturnsMachineError(t *testing.T) {
 	}
 }
 
-func TestReadAudioBeyondLegacySizeGateStillTranscribes(t *testing.T) {
+func TestReadAudioHasNoSizeOrDurationGate(t *testing.T) {
 	t.Parallel()
 
-	// The local size gate is gone (2026-11-03 ruling: no artificial limits
-	// unless unavoidable). A payload larger than the deleted gate — sized as
-	// the old (10 MB encoded - data URL prefix) / 4 * 3 raw budget — flows
-	// to the transcriber whole; the provider's documented encoded-input
-	// limit stays enforced by the shared ASR adapter, not by the read tool.
-	prefix := len("data:audio/mpeg;base64,")
-	legacyMaxRaw := (10_000_000 - prefix) / 4 * 3
-	oversized := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, legacyMaxRaw)...)
+	// 2026-11-03 ruling: no artificial limits unless unavoidable. Neither the
+	// read branch nor the provider adapter carries a size or duration gate, so
+	// 12 MB of raw audio — past the deleted 10 MB encoded / 5 minute numbers —
+	// reaches the transcriber whole.
+	oversized := append([]byte("ID3\x04\x00\x00\x00\x00\x00\x00"), make([]byte, 12*1024*1024)...)
 
 	transcriber := &stubReadTranscriber{modelID: "qwen3-asr-flash"}
 	provider := newReadAudioProvider(t, map[string][]byte{
