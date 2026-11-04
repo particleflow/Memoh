@@ -44,27 +44,23 @@ already admits explicitly configured HTTPS private-network addresses and support
 the existing `url` download field with delegated scope. Its missing overlay and
 native bridge inputs still prevent complete caller/build verification. It has a
 single API base and no automatic LAN/IPv6 selector. That client also retains
-legacy public HTTP configuration compatibility; the PC transfer client accepts
-plain HTTP only for private-network IP literals, not public hosts. Converging
-that legacy policy requires the mobile owner's explicit compatibility/migration
-work.
+legacy public HTTP configuration compatibility; the PC transfer client now
+accepts both schemes for every host on the same terms.
 
 ## API base syntax
 
-The existing fields above mean **HTTPS API base, or a plain-HTTP API base whose
-host is a private-network IP literal**, not necessarily URL origin.
-Examples using synthetic addresses are `https://nas.example.test/api`,
-`https://[2001:db8::10]/api` and `http://192.168.1.10/api`. A direct Server
+The existing fields above mean **an HTTP or HTTPS API base for any host, not
+necessarily URL origin**. Examples using synthetic addresses are
+`https://nas.example.test/api`, `https://[2001:db8::10]/api` and
+`http://nas.begonia.cloud:18068/api`. A direct Server
 root or a nested gateway prefix is
 also supported. A single trailing slash remains compatible. The client appends
 its existing route namespace without losing the configured prefix.
 
 `transferclient.ValidateAPIBase`, `New` and `NewTask` enforce the same syntax:
 
-- HTTPS for every host; plain HTTP only when the host is a private-network IP
-  literal (RFC 1918 IPv4 `10/8`, `172.16/12`, `192.168/16`, or IPv6 unique
-  local `fc00::/7`). DNS names, loopback and all other addresses keep the
-  HTTPS requirement. Nonempty host, optional port in 1..65535, no userinfo.
+- Both `http` and `https` for every host; the scheme and host classification
+  are not restricted. Nonempty host, optional port in 1..65535, no userinfo.
 - No query or fragment, including empty `?` or `#` delimiters; no whitespace,
   control characters, backslashes, percent escapes or IPv6 zone identifiers.
 - Path segments contain ASCII letters/digits or `-._~`; no `.` or `..` segment
@@ -78,7 +74,7 @@ its existing route namespace without losing the configured prefix.
   this API.
 
 The language-independent
-[`memoh.file-api-base.v2` vectors](../internal/transferclient/testdata/api-base-v2.json)
+[`memoh.file-api-base.v3` vectors](../internal/transferclient/testdata/api-base-v3.json)
 are the common acceptance/rejection examples. This is a syntax-contract version,
 not a new host-config, queue, database or upload-protocol version.
 These vectors describe the transfer layer; they do not remove each endpoint's
