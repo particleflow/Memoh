@@ -39,9 +39,7 @@ const (
 
 	// readAudioTranscribeBase is the fixed share of the transcription budget.
 	// It covers the parts that do not scale with audio duration: connection
-	// setup, base64 encoding and uploading the encoded body. The service
-	// accepts up to 10 MB encoded, and that upload stays under 90 s even on a
-	// ~2 Mbps uplink.
+	// setup, base64 encoding and starting the upload.
 	readAudioTranscribeBase = 90 * time.Second
 
 	// readAudioTranscribePerSecond is the per-second-of-audio share of the

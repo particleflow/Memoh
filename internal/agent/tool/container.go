@@ -809,9 +809,9 @@ func (p *ContainerProvider) execRead(ctx context.Context, session SessionContext
 		return readOfficeResult(filePath, officeKind, data)
 	}
 	// Audio before the generic binary probe: an mp3 may carry no NUL byte in
-	// its first 8KB, and audio needs its own 90s transcription budget rather
-	// than the image lane. The probe stream stays for the deferred close; the
-	// audio branch re-opens the file under its own context.
+	// its first 8KB, and audio needs its own content-scaled budget rather than
+	// the image lane. The probe stream stays for the deferred close; the audio
+	// branch re-opens the file under its own context.
 	if audioMime, ok := readAudioContentType(probe[:probeN], filePath); ok {
 		return p.execReadAudio(ctx, client, filePath, audioMime, session)
 	}

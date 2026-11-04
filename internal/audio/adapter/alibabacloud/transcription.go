@@ -22,10 +22,20 @@ import (
 )
 
 const (
-	DefaultBaseURL    = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-	DefaultModel      = "qwen3-asr-flash"
-	maxAudioDataBytes = 10_000_000
-	maxResponseBytes  = 8 * 1024 * 1024
+	DefaultBaseURL   = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+	DefaultModel     = "qwen3-asr-flash"
+	maxResponseBytes = 8 * 1024 * 1024
+
+	// asrBudgetBase covers connection setup and request encoding, the parts of
+	// the call that do not scale with the payload.
+	asrBudgetBase = 90 * time.Second
+
+	// asrBudgetPerKiB is the payload-scaled share of the call deadline. Speech
+	// codecs bottom out near 1 kB of payload per second of audio, and ASR work
+	// grows with duration, so two seconds per KiB stays above a two-times
+	// realtime transcription rate even at the lowest usable bitrate. The
+	// deadline therefore grows linearly with the input and has no fixed cap.
+	asrBudgetPerKiB = 2 * time.Second
 )
 
 type asrRequest struct {
@@ -83,9 +93,17 @@ func New(apiKey, baseURL string) (*Provider, error) {
 		return nil, errors.New("alibaba cloud ASR base URL must be an HTTP(S) API base URL")
 	}
 	return &Provider{apiKey: apiKey, baseURL: baseURL, client: &http.Client{
-		Timeout:       90 * time.Second,
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
 	}}, nil
+}
+
+// asrRequestBudget returns the per-request deadline for an audio payload. It
+// grows linearly with the payload size and carries no fixed cap, so a longer
+// recording is never cut off by a number chosen for a shorter one.
+func asrRequestBudget(audioBytes int) time.Duration {
+	// Round up: a partial KiB still needs its share.
+	kib := (int64(audioBytes) + 1023) / 1024
+	return asrBudgetBase + time.Duration(kib)*asrBudgetPerKiB
 }
 
 // ListModels returns the supported preset catalog; DashScope has no ASR-only model list.
@@ -103,12 +121,7 @@ func (p *Provider) DoTranscribe(ctx context.Context, params sdk.TranscriptionPar
 	if len(params.Audio) == 0 {
 		return nil, errors.New("alibaba cloud ASR requires a non-empty audio file")
 	}
-	// Keep the entire data URL within DashScope's 10 MB encoded input limit.
 	audioPrefix := "data:" + audioContentType(params) + ";base64,"
-	maxAudioBytes := (maxAudioDataBytes - len(audioPrefix)) / 4 * 3
-	if len(params.Audio) > maxAudioBytes {
-		return nil, errors.New("audio file must fit within 10 MB after Base64 encoding")
-	}
 	modelID := DefaultModel
 	if params.Model != nil && strings.TrimSpace(params.Model.ID) != "" {
 		modelID = strings.TrimSpace(params.Model.ID)
@@ -149,7 +162,9 @@ func (p *Provider) DoTranscribe(ctx context.Context, params sdk.TranscriptionPar
 	if err != nil {
 		return nil, &requestError{cause: err}
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.baseURL+"/chat/completions", bytes.NewReader(body))
+	requestCtx, requestCancel := context.WithTimeout(ctx, asrRequestBudget(len(params.Audio)))
+	defer requestCancel()
+	req, err := http.NewRequestWithContext(requestCtx, http.MethodPost, p.baseURL+"/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, &requestError{cause: err}
 	}
