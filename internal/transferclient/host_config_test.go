@@ -114,8 +114,8 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 	write(config, "transfer.json", settings)
 	if h, err := OpenHostConfig(getenv); err != nil {
 		t.Fatal("HTTP origin rejected", err)
-	} else {
-		h.Close()
+	} else if closeErr := h.Close(); closeErr != nil {
+		t.Fatal("close HTTP host config", closeErr)
 	}
 	settings, _ = json.Marshal(hostConfigWire{Version: 1, Origin: "http://fixture.invalid/api/../other", SourceRoot: source})
 	write(config, "transfer.json", settings)
