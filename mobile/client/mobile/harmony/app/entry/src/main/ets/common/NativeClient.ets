@@ -2,7 +2,7 @@ import { webview } from '@kit.ArkWeb';
 import { common } from '@kit.AbilityKit';
 import { NativeVoice } from './NativeVoice';
 import { NativeChatSocket } from './NativeChatSocket';
-import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure, UploadFailure } from './NativeResumableUpload';
+import { NativeResumableUpload, UploadPreview, UploadScope, EnumerateScope, UploadStageFailure, UploadFailure } from './NativeResumableUpload';
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
 import { TransferNetworkPolicy } from './ServiceUrl';
 import { NativeTransferOwner, nativeTransferOwner } from './NativeTransferOwner';
@@ -170,6 +170,12 @@ export class NativeClient {
         } else if (value.command === 'upload.stage.finish') {
           if (typeof value.authorization !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
           return await this.transferReply(this.uploads.stageFinish(value.operation, value.authorization));
+        } else if (value.command === 'upload.enumerate') {
+          // Owner-level restart census: each durable journal names its own bot
+          // and scope, so this frame carries the credential only.
+          if (typeof value.authorization !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
+          const census: EnumerateScope = { operation: value.operation, authorization: value.authorization };
+          return await this.transferReply(this.owner.enumerateUploads(census));
         }
         else {
           if (typeof value.botId !== 'string' || typeof value.scope !== 'string' || typeof value.authorization !== 'string' ||

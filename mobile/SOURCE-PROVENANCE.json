@@ -121,7 +121,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "1edb2da40778adc4dbbd7c793750400905a3cbd21e7df09dc6ce8c963e6d35c3",
+      "sha256": "3c577c3cc6742c3d9b614abc5c41fea7ec82fc8d647da464d55f72fa1ea15eb0",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -131,7 +131,8 @@
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
         "Hash-only refresh: this entry had drifted since e73239b4a (32-hex upload snapshot handles) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round.",
-        "D-11 2026-11-03: one Web-File bridge hop carries up to 1 MiB (base64 bound 1398104 chars, exactly ceil(1048576/3)*4); a 1 GiB intake needs 1,024 hops instead of 16,384."
+        "D-11 2026-11-03: one Web-File bridge hop carries up to 1 MiB (base64 bound 1398104 chars, exactly ceil(1048576/3)*4); a 1 GiB intake needs 1,024 hops instead of 16,384.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -143,13 +144,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/HarmonyAttachments.vue",
-      "sha256": "5a313b36b7a8cb52728d6b66b84258ab0ea1d7a17a5828a4c0c01b2b6dc1f518",
+      "sha256": "364b76f1918218a21a8b0606616dd627357b612bb91f9bf3b08303c0223cbfc5",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -193,14 +195,15 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "bda4d7d4fd8c9dfbc10c076b61cffa4a6278c7dcdba4653daff44147872ea7c7",
+      "sha256": "5f10ecee48fcc267fcb57b54a2bf58ca9255ec963cd6763a54f1752993042550",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "D-11/#143 2026-11-03: local File intake crosses the bridge in 1 MiB chunks (BRIDGE_CHUNK_BYTES 1048576) and the dead pre-#143 source verification phase word is retired."
+        "D-11/#143 2026-11-03: local File intake crosses the bridge in 1 MiB chunks (BRIDGE_CHUNK_BYTES 1048576) and the dead pre-#143 source verification phase word is retired.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -547,7 +550,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "16e4f10c1f3ff56e497e252a4a208c1a7fe1c161f6dfc1f1a48df7b4cd35bf08",
+      "sha256": "5d0ca8d84fe08d43809661cb2e482084ce730aa674d098eb0c6faae249fe33f6",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -581,7 +584,8 @@
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "Hash-only refresh: this entry had drifted since 08738497b (streaming read-aloud v2 overlay) changed the file without updating the manifest; realigned to the committed bytes, no content change in the N1 round.",
         "Bubble kinds round (HAP43 candidate): load the sharedBubbleKind overlay and apply it after the quote-reply post-override in the same byte-anchored form; no other build step changed.",
-        "N1 field fix: pin the new harmony-ws overlay source into the composed client inputs."
+        "N1 field fix: pin the new harmony-ws overlay source into the composed client inputs.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -788,7 +792,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "21f7dcbebf493769cce91ba4453deb3b077daf2cf61d678fbef881504029a086",
+      "sha256": "396c60fc5bf5a64afb58045193c57ad551edc9fd8e5f4c4925e9ebc08986c4fd",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
@@ -802,7 +806,8 @@
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
         "Review round for PR #112: held short spans are released with a retried run or a dropped row (no 0 ms rescheduling); fail() keeps queued-unsent deltas for the next task (discard() for terminal failures); garnet:lifecycle shell event (EntryAbility onBackground/onForeground through ClientDiagnostics.lifecycle and NativeClient) parks and resumes read-aloud.",
         "#143 residue 2026-11-03: retire the dead pre-#143 source verification phase word from the fixed failure envelope.",
-        "N1 field fix: add the ws.open/ws.send/ws.close command family over the native chat socket bridge, close all sockets with the existing reset hook positions, and drain queued failure reports on foreground."
+        "N1 field fix: add the ws.open/ws.send/ws.close command family over the native chat socket bridge, close all sockets with the existing reset hook positions, and drain queued failure reports on foreground.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ],
       "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },
@@ -1191,13 +1196,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony.ts",
-      "sha256": "e5646f683ca50d5602fb6edb010f18ebcf0c96e2f56c0637ac4a64d6b935f849",
+      "sha256": "2ef979b073d7366af0d6cf347225adcf98f72b5825b3ef7a4b3b62dab2e5e405",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
       "archiveCheckpointSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
       "preparationChanges": [
-        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained."
+        "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -1395,14 +1401,15 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_upload_router.cjs",
-      "sha256": "fa28c8a9227dc0f507ee60a2e99b5ebc7c4123fd6f9d30701c4309ffa5365ab3",
+      "sha256": "02aa376494edddb3d487191d239952f3e0bd69e09773aec4ff61a899cefec8e8",
       "origin": "New recovery follow-up test authored in the existing Harmony task; not recovered historical source.",
       "licenseReview": "Project-owned test code; no additional dependency or binary redistributed.",
       "preparationChanges": [
         "Exercise the actual native upload command router and SharedChat file-descriptor preview scope.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Refresh to standalone transfer lifetime/background candidate bytes; original provenance retained.",
-        "N1 field fix: mock the new socket bridge and net-report imports of the native client."
+        "N1 field fix: mock the new socket bridge and net-report imports of the native client.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -1953,11 +1960,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets",
-      "sha256": "e7e2c6d54353d67236281a9759aee89ac1573ed471c06083d8a6b29380ac9ac8",
+      "sha256": "c4926130f5dd0f0c337e5ebcf101b64ccec2b69416d5fe0fac9f95f65d1d1a45",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
       "preparationChanges": [
-        "A-5 2026-11-03: the background entitlement is best effort; a refused begin never fails the command and the transfer proceeds."
+        "A-5 2026-11-03: the background entitlement is best effort; a refused begin never fails the command and the transfer proceeds.",
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
       ]
     },
     {
@@ -1968,9 +1976,12 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_entry_lifetime.cjs",
-      "sha256": "7df94cf63af42988d0d6fdeb30eabadabe7db3a773d07505e3cc52a72989d219",
+      "sha256": "56999115bc0a61170ccfaa0e7a57c675930c7f3e920c97fcd4f9ab3bf4ca39f5",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
-      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
+      "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration.",
+      "preparationChanges": [
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_lifetime.cjs",
@@ -2204,6 +2215,24 @@
         "Exercise the actual NetReport module over the real diagnostics journal and machine-validate every posted body against the server's strict /client/net-report schema, including queue-retry and debounce."
       ],
       "sha256": "8ba53e95d4b81ae833dd3e2c667d1390266588f386722222446d6e209ea9ff80"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-reconcile.ts",
+      "origin": "project client addition developed for TF-4 durable upload recovery",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send. Single-lists fenced and failed items with the existing discard entry."
+      ],
+      "sha256": "650961b8827866d749807ec3177baddbefa9b301261e3371a9a4eb705173a0f0"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_kill_resume.cjs",
+      "origin": "project client stage2 test developed with the TF-4 kill-resume sources",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "TF-4 L1a kill-resume: process death is pause. Owner-level upload.enumerate census over the durable journals; signed-in web reconciliation re-drives them through the unchanged single-task runUpload and stops at ready. No server change, no second queue, no auto-send. Level-2 gate: census semantics plus kill/cancel/expiry/fence/background rides on real ArkTS and the real web modules with real SIGKILL."
+      ],
+      "sha256": "0c7628ab805a11b7459c215c07a054185b9deda9ac568ab1518f04901f5af4ce"
     }
   ],
   "excludedSourcePaths": [],

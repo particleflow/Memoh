@@ -12,6 +12,7 @@ class Uploads {
  async stageAppend(op,auth,offset,data){assert.ok(this.auth());calls.push(['stage.append',op,auth,offset,data]);return{offset:offset+1}}
  async stageFinish(op,auth){assert.ok(this.auth());calls.push(['stage.finish',op,auth]);return{handle:'a'.repeat(32),scope:'session:one'}}
  async list(q){assert.ok(this.auth());calls.push(['list',q]);return[]}
+ async enumerate(q){assert.ok(this.auth());assert.equal('botId' in q,false);calls.push(['enumerate',q]);return[]}
  async upload(q){assert.ok(this.auth());calls.push(['run',q]);return{content_hash:'b'.repeat(64),size_bytes:8,mime:'image/png'}}
  async consume(q){assert.ok(this.auth());calls.push(['consume',q])}
  async discard(q){assert.ok(this.auth());calls.push(['discard',q])}
@@ -34,6 +35,9 @@ const {ResourceHost}=load('export class ResourceHost { active=true; chatReady=tr
  assert.equal((await request('upload.run',q)).ok,false)
  await request('client.configure',{apiOrigin:'https://example.test/api'});await request('client.state',{state:'ready'})
  for(const command of ['select','list','run','consume','discard'])assert.equal((await request('upload.'+command,q)).ok,true)
+ assert.equal((await request('upload.enumerate',{operation:q.operation,authorization:q.authorization})).ok,true)
+ assert.equal(calls.at(-1)[0],'enumerate')
+ assert.equal((await request('upload.enumerate',{operation:q.operation})).error,'NATIVE_REQUEST_INVALID')
  assert.equal((await request('upload.stage.begin',{...q,name:'paste.png',type:'image/png',size:8})).data.handle,q.handle)
  assert.equal((await request('upload.stage.append',{operation:q.operation,authorization:q.authorization,offset:0,data:'YQ=='})).data.offset,1)
  assert.equal((await request('upload.stage.finish',{operation:q.operation,authorization:q.authorization})).data.handle,q.handle)

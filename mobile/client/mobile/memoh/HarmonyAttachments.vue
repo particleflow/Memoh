@@ -10,12 +10,17 @@
       <span class="min-w-0 truncate">{{ file.name }} · {{ Math.ceil(file.size / 1024) }} KiB</span>
       <Button variant="ghost" :disabled="disabled || busy" @click="remove(file)">移除</Button>
     </div>
+    <div v-for="item in recovery" :key="item.handle" class="space-y-1">
+      <span class="min-w-0 truncate">{{ item.name }} · {{ Math.ceil(item.size / 1024) }} KiB · {{ recoveryStatus(item) }}</span>
+      <Button variant="ghost" :disabled="disabled || busy || recoveryBusy" @click="discardRecovery(item)">移除</Button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
+import { computed, ref, watch, onBeforeUnmount, onMounted } from 'vue'
 import { Button } from '@felinic/ui'
 import { nativeAttachmentCommand, nativeAttachmentsAvailable, releaseNativeAttachmentView, validateNativeAttachments, nativeUploadFailure, type NativeAttachment, type NativeUploadFailure } from './harmony-resumable'
+import { discardNativeRecoveryItem, nativeUploadRecovery, type NativeUploadRecovery } from './harmony-reconcile'
 import { restoreNativeUploadFailures } from './harmony-upload-failures'
 import { NATIVE_VIEW_DETACHED } from './harmony-transfer-lifetime'
 import { onAuthSessionCleared } from '@/lib/auth-session'
@@ -66,5 +71,19 @@ async function reopenPreviews() {
 const preview = (file: NativeAttachment) => 'begonia-client://app/upload/' + file.handle
 const select = (photos = false) => action('upload.select', { photos })
 const remove = (file: NativeAttachment) => action('upload.discard', { handle: file.handle }, file.scope)
+// Unfinished uploads paused by process death: single-listed per bot with the
+// existing discard entry; ready originals stay in the per-scope windows.
+const recoveryBusy = ref(false)
+const recovery = computed(() => [...nativeUploadRecovery.values()].filter(item => item.bot === props.botId))
+const recoveryStatus = (item: NativeUploadRecovery) => item.status === 'resuming' ? '正在续传未完成原件'
+  : item.status === 'fenced' ? (item.reason === 'legacy-unknown' ? '写入结果未确认，需先核对原件' : '创建回执未确认，需先核对原件')
+  : item.reason || '续传未完成'
+async function discardRecovery(item: NativeUploadRecovery) {
+  if (recoveryBusy.value || busy.value || props.disabled || !props.botId) return
+  recoveryBusy.value = true; error.value = undefined
+  try { await discardNativeRecoveryItem(item) }
+  catch (cause) { error.value = { message: cause instanceof Error ? cause.message : '原件操作未完成' } }
+  finally { recoveryBusy.value = false }
+}
 defineExpose({ select, busy, error })
 </script>

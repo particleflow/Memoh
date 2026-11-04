@@ -41,10 +41,11 @@ async function component() {
   let exposed, release, commandSignal
   const source = fs.readFileSync(path.join(root, 'mobile/memoh/HarmonyAttachments.vue'), 'utf8').split('<script setup lang="ts">')[1].split('</script>')[0]
   const m = { exports: {} }, imports = {
-    vue: { ref: value => ({ value }), watch: (get, fn) => watch.push(fn), onBeforeUnmount: fn => hooks.push(fn), onMounted() {} },
+    vue: { computed: getter => ({ get value() { return getter() } }), ref: value => ({ value }), watch: (get, fn) => watch.push(fn), onBeforeUnmount: fn => hooks.push(fn), onMounted() {} },
     '@felinic/ui': {}, './harmony-transfer-lifetime': lifecycle,
     './harmony-resumable': { nativeAttachmentsAvailable: true, releaseNativeAttachmentView: async () => events.push('release-preview'), nativeUploadFailure() {}, validateNativeAttachments: v => v,
       nativeAttachmentCommand: (_kind, _bot, _scope, _fields, signal) => { commandSignal = signal; return new Promise(resolve => release = resolve) } },
+    './harmony-reconcile': { discardNativeRecoveryItem: async () => events.push('recovery-discard'), nativeUploadRecovery: new Map() },
     './harmony-upload-failures': { restoreNativeUploadFailures: async () => {} }, '@/lib/auth-session': { onAuthSessionCleared: () => () => {} },
   }
   vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, {
@@ -62,9 +63,12 @@ async function component() {
   assert.deepEqual(await boot('reset'), ['client.configuration', 'auth-clear', 'client.configure', 'ws-bridge:https://nas.example/api', 'mounted'])
   assert.deepEqual(await boot('invalid'), ['client.configuration', 'form'])
   await component()
-  const calls = [], router = { currentRoute: { value: { name: 'Home' } }, afterEach() {}, isReady: async () => {} }
-  execute('harmony.ts', { '../router': { __esModule: true, default: router }, './harmony-theme.json': {}, '@/lib/api-client': { sdkAuthQuery: () => ({ token: 'synthetic-current' }) }, './harmony-diagnostics': { resumeDiagnostics() {}, suspendDiagnostics() {} } },
-    { window: { begoniaNative: { async request(raw) { calls.push(JSON.parse(raw)); return '{"ok":true}' } } } })
+  const calls = [], reconciled = [], router = { currentRoute: { value: { name: 'Home' } }, afterEach() {}, isReady: async () => {} }
+  execute('harmony.ts', { '../router': { __esModule: true, default: router }, './harmony-theme.json': {}, '@/lib/api-client': { sdkAuthQuery: () => ({ token: 'synthetic-current' }) }, './harmony-diagnostics': { resumeDiagnostics: () => Promise.resolve(), suspendDiagnostics() {} }, './harmony-reconcile': { ensureNativeUploadReconciliation: () => reconciled.push('ensure') } },
+    { window: { begoniaNative: { async request(raw) { calls.push(JSON.parse(raw)); return '{"ok":true}' } } }, localStorage: { getItem: () => null } })
   await settle(); assert.equal(calls[0].authorization, 'Bearer synthetic-current')
-  console.log(JSON.stringify({ actualBootstrap: true, normalReloadRetainsTransfers: true, configurationEditStillRevokes: true, resetBeforeAuthCleanup: true, invalidConfigurationFailsClosed: true, actualComponentUnmountDetaches: true, noLateComponentEmit: true, currentSessionReadyEnvelope: true, renderedUI: false, nativeDevice: false }))
+  // The ready publish arms the kill-resume reconciliation hook exactly once
+  // per signed-in session, after the native client accepted the credential.
+  assert.deepEqual(reconciled, ['ensure'])
+  console.log(JSON.stringify({ actualBootstrap: true, normalReloadRetainsTransfers: true, configurationEditStillRevokes: true, resetBeforeAuthCleanup: true, invalidConfigurationFailsClosed: true, actualComponentUnmountDetaches: true, noLateComponentEmit: true, currentSessionReadyEnvelope: true, readyPublishArmsUploadReconciliation: true, renderedUI: false, nativeDevice: false }))
 })().catch(e => { console.error(e); process.exitCode = 1 })

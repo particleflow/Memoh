@@ -50,6 +50,56 @@ export function validateNativeAttachments(value: unknown, scope: string, recover
   }
   return value as NativeAttachment[]
 }
+// The restart census is owner-level: every durable journal names its own bot
+// and scope, and its journal state is the classification the reconciler acts
+// on. It is metadata only; no bytes, verify or receipt read happens here.
+export interface NativeUploadCensus { handle: string; name: string; type: string; size: number; hash: string; bot: string; scope: string; state: string }
+export function validateNativeUploadCensus(value: unknown): NativeUploadCensus[] {
+  if (!Array.isArray(value) || value.length > 1024) throw new Error('原件对账清单不完整')
+  const handles = new Set<string>()
+  for (const item of value as NativeUploadCensus[]) {
+    if (!item || !/^[a-f0-9]{32}$/.test(item.handle) || handles.has(item.handle)
+      || !/^[a-f0-9]{64}$/.test(item.hash) || !Number.isSafeInteger(item.size) || item.size <= 0
+      || typeof item.name !== 'string' || !item.name || typeof item.type !== 'string' || !item.type
+      || typeof item.bot !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(item.bot)
+      || typeof item.scope !== 'string' || !item.scope || item.scope.length > 512
+      || typeof item.state !== 'string' || !item.state || item.state.length > 32) {
+      throw new Error('原件对账身份或范围不一致')
+    }
+    handles.add(item.handle)
+  }
+  return value as NativeUploadCensus[]
+}
+// Same admission shape as nativeAttachmentCommand, minus the bot/scope window:
+// the bridge frame stays owner-level exactly like the native census command.
+export async function enumerateNativeAttachments(signal?: AbortSignal): Promise<NativeUploadCensus[]> {
+  const generation = authSessionGeneration(), token = sdkAuthQuery().token
+  const operation = crypto.randomUUID().replaceAll('-', '')
+  const off = onAuthSessionCleared(() => { void closeNativeAttachments('Bearer ' + token).catch(() => {}) })
+  const check = () => {
+    signal?.throwIfAborted()
+    if (!token || generation !== authSessionGeneration() || token !== sdkAuthQuery().token) {
+      void closeNativeAttachments('Bearer ' + token).catch(() => {})
+      throw new DOMException('账号已变化', 'AbortError')
+    }
+  }
+  try {
+    check()
+    const response = await createApiFetch(async () => {
+      const reply = await bridge('upload.enumerate', { operation, authorization: 'Bearer ' + token })
+      check()
+      if (!reply.ok) {
+        const status = /^UPLOAD_HTTP_(401|403)$/.exec(reply.error ?? '')
+        if (status) return new Response(null, { status: Number(status[1]) })
+        throw new Error(reply.error === 'UPLOAD_BUSY' ? '正在处理另一份原件，请稍后重试' : '原件对账未完成')
+      }
+      return new Response(JSON.stringify(reply.data ?? null), { status: 200 })
+    })(sdkApiUrl({ url: '/users/me' }), { headers: { authorization: 'Bearer ' + token } })
+    check()
+    if (response.status !== 200) throw new Error('附件访问未获授权')
+    return validateNativeUploadCensus(await response.json())
+  } finally { off() }
+}
 // Network uploads read native-owned files. Local File intake uses bounded chunks below.
 // The existing auth response handler
 // remains authoritative for 401; stale replies cannot clear a newer login.

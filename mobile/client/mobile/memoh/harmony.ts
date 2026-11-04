@@ -2,6 +2,7 @@ import router from '../router'
 import uiTheme from './harmony-theme.json'
 import { sdkAuthQuery } from '@/lib/api-client'
 import { resumeDiagnostics, suspendDiagnostics } from './harmony-diagnostics'
+import { ensureNativeUploadReconciliation } from './harmony-reconcile'
 
 // Login, sessions and theme preferences stay in the official router/store.
 const host = window as Window & {
@@ -21,6 +22,10 @@ function publish() {
     let bot = localStorage.getItem('chat-bot-id') ?? ''
     try { const parsed: unknown = JSON.parse(bot); if (typeof parsed === 'string') bot = parsed } catch { /* Existing plain string key. */ }
     void resumeDiagnostics(bot).catch(() => {})
+    // Process death meant pause, not cancel: once signed in, re-drive the
+    // durable upload journals through the existing engine. Resume stops at
+    // ready; sending keeps its existing user gates.
+    ensureNativeUploadReconciliation()
   }).catch(() => {})
 }
 router.afterEach(publish)

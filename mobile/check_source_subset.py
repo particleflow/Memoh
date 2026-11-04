@@ -24,11 +24,14 @@ entries = manifest['entries']
 # One visual-only bubble-kind overlay extends203.
 # The dead NativeTransferPolicy constants file (zero references) is deleted; 204 retires to 203.
 # Five N1 bridge sources (socket bridge, net-report, ws overlay and their stage2 gates) extend203.
-assert len(entries) == 208
+# Two TF-4 kill-resume sources (web reconciliation module + its stage2 gate) extend208.
+assert len(entries) == 210
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets',
+    'mobile/client/mobile/memoh/harmony-reconcile.ts',
+    'mobile/client/tests/stage2/harmony_kill_resume.cjs',
     'mobile/client/mobile/memoh/harmony-transfer-lifetime.ts',
     'mobile/client/tests/stage2/harmony_entry_lifetime.cjs',
     'mobile/client/tests/stage2/harmony_native_lifetime.cjs',

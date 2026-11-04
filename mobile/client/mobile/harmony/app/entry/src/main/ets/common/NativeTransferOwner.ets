@@ -1,5 +1,5 @@
 import { common } from '@kit.AbilityKit';
-import { NativeResumableUpload, UploadScope, UploadLocal, MediaReply } from './NativeResumableUpload';
+import { NativeResumableUpload, UploadScope, EnumerateScope, UploadLocal, UploadCensus, MediaReply } from './NativeResumableUpload';
 import { NativeMediaDownload, MediaDownloadInput, MediaDownloadReady } from './NativeMediaDownload';
 import { TransferBackgroundControl } from './NativeTransferBackground';
 import { MEMOH_ORIGIN } from './MemohClientConfig';
@@ -117,6 +117,14 @@ export class NativeTransferOwner {
   async listUploads(input: UploadScope): Promise<UploadLocal[]> {
     const epoch = await this.authorize(input.authorization);
     const result = this.upload ? this.uploads.activeLocal(input) : await this.uploads.list(input);
+    this.check(epoch); return result;
+  }
+  async enumerateUploads(input: EnumerateScope): Promise<UploadCensus[]> {
+    // Owner-level restart census. It stays read-only and defers to the single
+    // task fence inside the engine: a busy engine reports UPLOAD_BUSY instead
+    // of queuing a second transfer here.
+    const epoch = await this.authorize(input.authorization);
+    const result = await this.uploads.enumerate(input);
     this.check(epoch); return result;
   }
   async fetchDownload(input: MediaDownloadInput): Promise<MediaDownloadReady> {

@@ -11,6 +11,8 @@ import { NativePhotoSelection } from './NativePhotoSelection';
 import { ClientDiagnostics } from './ClientDiagnostics';
 
 export interface UploadScope { operation: string; botId: string; scope: string; authorization: string; handle?: string; photos?: boolean; recoverDrafts?: boolean; }
+export interface EnumerateScope { operation: string; authorization: string; }
+export interface UploadCensus { handle: string; name: string; type: string; size: number; hash: string; bot: string; scope: string; state: string; }
 export interface UploadLocal { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string; }
 interface Limits { max_upload_bytes: number; resumable_enabled?: boolean; chunk_max_bytes?: number; }
 interface Identity { id: string; network_policy?: NativeTransferPolicy; }
@@ -80,9 +82,8 @@ export class NativeResumableUpload {
     const result = new StageError(error, failure, () => this.authorized() && epoch === this.epoch);
     run.failure = result; return result;
   }
-  private start(input: UploadScope): Running {
-    if (!this.authorized() || !/^[a-f0-9]{32}$/.test(input.operation) || !/^[A-Za-z0-9_-]{1,128}$/.test(input.botId) ||
-      !input.scope || input.scope.length > 512 || !/^Bearer [^\s\x00-\x1f]{1,8192}$/.test(input.authorization)) { throw new Error('UPLOAD_REQUEST'); }
+  private admit(operation: string, authorization: string): Running {
+    if (!this.authorized() || !/^[a-f0-9]{32}$/.test(operation) || !/^Bearer [^\s\x00-\x1f]{1,8192}$/.test(authorization)) { throw new Error('UPLOAD_REQUEST'); }
     if (this.running) { throw new Error('UPLOAD_BUSY'); }
     if (!fs.accessSync(this.root)) { fs.mkdirSync(this.root); }
     // Incomplete local snapshot copies have no committed journal and cannot
@@ -91,7 +92,12 @@ export class NativeResumableUpload {
       const match = /^([a-f0-9]{32})(\.original|\.json\.tmp)$/.exec(name);
       if (match && (match[2] === '.json.tmp' || !fs.accessSync(this.path(match[1], '.json')))) { fs.unlinkSync(this.root + '/' + name); }
     }
-    const run = new Running(input, this.epoch); this.running = run; return run;
+    const run = new Running({ operation: operation, botId: '', scope: '', authorization: authorization }, this.epoch); this.running = run; return run;
+  }
+  private start(input: UploadScope): Running {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(input.botId) || !input.scope || input.scope.length > 512) { throw new Error('UPLOAD_REQUEST'); }
+    const run = this.admit(input.operation, input.authorization);
+    run.input = input; return run;
   }
   private end(run: Running): void {
     if (run.ended) { return; }
@@ -347,6 +353,25 @@ export class NativeResumableUpload {
           // An explicit restore opens one bounded window. Sent/removed snapshots
           // leave the journal, so another restore can reveal the next window.
           if (result.length === 16) { break; }
+        }
+      }
+      this.check(run); return result;
+    } finally { this.end(run); }
+  }
+  async enumerate(input: EnumerateScope): Promise<UploadCensus[]> {
+    // The restart census after process death. It is owner-level: each journal
+    // carries its own bot and scope, so no upload window is opened here.
+    const run = this.admit(input.operation, input.authorization);
+    try {
+      const owner = await this.owner(run); const result: UploadCensus[] = [];
+      for (const name of fs.listFileSync(this.root)) {
+        if (!/^[a-f0-9]{32}\.json$/.test(name)) { continue; }
+        const j = this.read(name.slice(0, -5));
+        // Journal-only classification: no snapshot verify and no receipt GET.
+        // Verify stays with list(); offset and state reconciliation stay with
+        // upload(), which also owns every transfer the census may trigger.
+        if (j.owner === owner && j.state !== 'canceled') {
+          result.push({ handle: j.handle, name: j.name, type: j.type, size: j.size, hash: j.hash, bot: j.bot, scope: j.scope, state: j.state });
         }
       }
       this.check(run); return result;
