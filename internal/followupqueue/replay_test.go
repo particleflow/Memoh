@@ -1,6 +1,7 @@
 package followupqueue
 
 import (
+	"errors"
 	"testing"
 
 	runtime "github.com/felinics/memoh/internal/agent/runtime/session"
@@ -38,7 +39,7 @@ func TestReplayFollowUpUpgradeRule(t *testing.T) {
 			item := runtime.FollowUpItem{Status: tc.status, Payload: append([]byte(nil), old...), ErrorCode: "prior-code", Claim: tc.claim}
 			changed, err := replayFollowUp(&item, rebuilt)
 			if !tc.adopt {
-				if err != runtime.ErrQueueInvocationConflict {
+				if !errors.Is(err, runtime.ErrQueueInvocationConflict) {
 					t.Fatalf("want conflict, got changed=%v err=%v", changed, err)
 				}
 				if string(item.Payload) != string(old) || item.Status != tc.status {

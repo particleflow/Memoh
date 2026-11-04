@@ -217,7 +217,9 @@ func TestPostgresFollowUpCanceledItemAdoptsUpgradePayload(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer pool.Close()
-	store, err := New(pool, "")
+	// A production deployment always has the at-rest key available, and a real
+	// receipt payload carries credential-bearing command fields.
+	store, err := New(pool, "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
 	if err != nil {
 		t.Fatal(err)
 	}

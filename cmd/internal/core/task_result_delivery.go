@@ -35,24 +35,24 @@ const (
 	resultScanBackoffCap  = 10 * time.Minute
 )
 
-func resultScanBackoff(base, cap time.Duration, failures int) time.Duration {
+func resultScanBackoff(base, ceiling time.Duration, failures int) time.Duration {
 	if base <= 0 {
 		base = resultScanBackoffBase
 	}
-	if cap < base {
-		cap = base
+	if ceiling < base {
+		ceiling = base
 	}
 	if failures <= 0 {
 		return 0
 	}
 	backoff := base
 	for range failures - 1 {
-		if backoff >= cap {
-			return cap
+		if backoff >= ceiling {
+			return ceiling
 		}
 		backoff *= 2
 	}
-	return min(backoff, cap)
+	return min(backoff, ceiling)
 }
 
 func (h *delegationHost) resultAttemptLimit(e taskresult.Event) int {
