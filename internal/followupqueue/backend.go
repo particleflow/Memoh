@@ -65,14 +65,16 @@ func (b *Backend) EnqueueFollowUp(ctx context.Context, key runtime.Key, itemID, 
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	err = b.Store.Change(ctx, key, func(state *State) error {
-		for _, item := range state.Items {
-			if item.InvocationID == invocation {
-				if !bytes.Equal(item.Payload, payload) {
-					return runtime.ErrQueueInvocationConflict
-				}
-				out = item
-				return nil
+		for i := range state.Items {
+			item := &state.Items[i]
+			if item.InvocationID != invocation {
+				continue
 			}
+			if _, e := replayFollowUp(item, payload); e != nil {
+				return e
+			}
+			out = *item
+			return nil
 		}
 		snapshot, exists, e := b.Load(ctx, key)
 		if e != nil {

@@ -370,6 +370,30 @@ jobs:
           print('Verified saved-result recovery and computer follow-up PostgreSQL contracts without skips')
           PY
       # Additive gate: retain the other contract steps when merging stacked workflows.
+      - name: Require durable follow-up queue upgrade tolerance (no skips)
+        env:
+          MEMOH_FOLLOW_UP_TEST_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: |
+          : "${MEMOH_FOLLOW_UP_TEST_DSN:?Durable follow-up contracts require isolated PostgreSQL}"
+          set -o pipefail
+          go test -json -race -count=1 -timeout 90s ./internal/followupqueue | tee follow-up-queue.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          events = [json.loads(line) for line in Path('follow-up-queue.jsonl').read_text().splitlines()]
+          required = {
+              'TestPostgresFollowUpRestartIdentityAndClaims',
+              'TestPostgresFollowUpCanceledItemAdoptsUpgradePayload',
+              'TestPostgresFollowUpListingHidesHostReceipts',
+              'TestReplayFollowUpUpgradeRule',
+          }
+          passed = {e.get('Test') for e in events if e.get('Action') == 'pass'}
+          missing = required - passed
+          assert not missing, 'required durable follow-up contract did not PASS: ' + ', '.join(sorted(missing))
+          skipped = {e.get('Test') for e in events if e.get('Action') == 'skip'}
+          assert not required & skipped, 'durable follow-up contract skipped: ' + ', '.join(sorted(required & skipped))
+          print('Verified durable follow-up upgrade tolerance without skips')
+          PY
       - name: Require computer operation CAS and RLS (no skips)
         env:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable

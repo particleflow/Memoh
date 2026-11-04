@@ -30,6 +30,99 @@ import (
 	"github.com/felinics/memoh/internal/taskresult"
 )
 
+// One stuck delivery source must not turn the reconciler's periodic wake into
+// an error line per tick: consecutive failures gate the next scan attempt
+// behind a doubling backoff, and a success resets the gate.
+func TestResultDeliveryWakeBacksOffConsecutiveFailures(t *testing.T) {
+	host := &delegationHost{}
+	ctx, cancel := context.WithCancel(context.Background())
+	w := &resultDeliveryWake{ctx: ctx, cancel: cancel, backoffBase: 40 * time.Millisecond, backoffCap: 160 * time.Millisecond}
+	host.resultWake = w
+
+	var mu sync.Mutex
+	scans, fail := 0, true
+	w.scan = func(context.Context) error {
+		mu.Lock()
+		defer mu.Unlock()
+		scans++
+		if fail {
+			return errors.New("scan unavailable")
+		}
+		return nil
+	}
+	signal := func() { host.signalResultDelivery() }
+	awaitScans := func(t *testing.T, want int) {
+		t.Helper()
+		deadline := time.Now().Add(2 * time.Second)
+		for {
+			mu.Lock()
+			got := scans
+			mu.Unlock()
+			if got >= want {
+				return
+			}
+			if time.Now().After(deadline) {
+				t.Fatalf("scans=%d want >=%d", got, want)
+			}
+			time.Sleep(2 * time.Millisecond)
+		}
+	}
+	awaitSettled := func(t *testing.T) {
+		t.Helper()
+		deadline := time.Now().Add(2 * time.Second)
+		for {
+			w.mu.Lock()
+			running := w.running
+			w.mu.Unlock()
+			if !running {
+				return
+			}
+			if time.Now().After(deadline) {
+				t.Fatal("wake worker did not settle")
+			}
+			time.Sleep(2 * time.Millisecond)
+		}
+	}
+
+	signal() // first failure opens the gate window
+	awaitScans(t, 1)
+	awaitSettled(t)
+	for range 10 {
+		signal() // suppressed inside the backoff window
+	}
+	mu.Lock()
+	if scans != 1 {
+		t.Fatalf("backoff window admitted extra scans: %d", scans-1)
+	}
+	w.mu.Lock()
+	if w.failures != 1 {
+		t.Fatalf("failure count = %d", w.failures)
+	}
+	w.mu.Unlock()
+	mu.Unlock()
+
+	time.Sleep(50 * time.Millisecond) // past the 40ms gate
+	signal()
+	awaitScans(t, 2)
+	awaitSettled(t)
+
+	mu.Lock()
+	fail = false // a clean scan must reset the gate
+	mu.Unlock()
+	// The gated wake stays pending until the next signal, exactly like the
+	// reconciler's next periodic tick in production.
+	time.Sleep(90 * time.Millisecond) // past the doubled 80ms gate
+	signal()
+	awaitScans(t, 3)
+	awaitSettled(t)
+	signal() // immediate wake after success runs without a gate
+	awaitScans(t, 4)
+	awaitSettled(t)
+
+	cancel()
+	w.wg.Wait()
+}
+
 // Actual PostgreSQL JSON CAS and fenced history transactions, with a capture
 // port in place of model execution. The separate runtime fixture exercises the
 // real application/model boundary and process crash, not just this port.

@@ -82,8 +82,12 @@ func TestPostgresFollowUpRestartIdentityAndClaims(t *testing.T) {
 	if err != nil || replay.ID != original.ID {
 		t.Fatalf("replay without an active run: %v %v", replay.ID, err)
 	}
-	if _, err = b.EnqueueFollowUp(ctx, key, uuid.NewString(), original.InvocationID, []byte("changed")); !errors.Is(err, runtime.ErrQueueInvocationConflict) {
-		t.Fatalf("conflict: %v", err)
+	// An accepted item nobody claimed adopts a payload rebuilt for the same
+	// invocation by a newer deployment instead of wedging delivery.
+	upgraded := []byte(`{"text":"fixture","command":{"Token":"REBUILT-BY-UPGRADE"}}`)
+	replaced, err := b.EnqueueFollowUp(ctx, key, uuid.NewString(), original.InvocationID, upgraded)
+	if err != nil || replaced.ID != original.ID || !bytes.Equal(replaced.Payload, upgraded) || bytes.Equal(replaced.Payload, payload) {
+		t.Fatalf("upgrade replacement: %#v %v", replaced, err)
 	}
 	var wg sync.WaitGroup
 	claims := make(chan runtime.FollowUpClaimRef, 8)
@@ -128,9 +132,14 @@ func TestPostgresFollowUpRestartIdentityAndClaims(t *testing.T) {
 		t.Fatal(err)
 	}
 	b = newBackend("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
-	replay, err = b.EnqueueFollowUp(ctx, key, uuid.NewString(), original.InvocationID, payload)
+	replay, err = b.EnqueueFollowUp(ctx, key, uuid.NewString(), original.InvocationID, upgraded)
 	if err != nil || replay.Status != runtime.QueueApplied || replay.ID != original.ID {
 		t.Fatalf("terminal replay: %v %v", replay, err)
+	}
+	// A consumed item is the record of what happened: the same invocation now
+	// refuses a different payload again.
+	if _, err = b.EnqueueFollowUp(ctx, key, uuid.NewString(), original.InvocationID, payload); !errors.Is(err, runtime.ErrQueueInvocationConflict) {
+		t.Fatalf("consumed conflict: %v", err)
 	}
 
 	// Revalidate authority at the actual claim, not just at the old HTTP POST.
@@ -192,6 +201,69 @@ func TestPostgresFollowUpRestartIdentityAndClaims(t *testing.T) {
 	_, _, ok, err = b.ClaimNextFollowUp(ctx, key, "different-terminal")
 	if err != nil || ok {
 		t.Fatalf("unknown was replayed: %v %v", ok, err)
+	}
+}
+
+// A canceled item never executed: an upgrade rebuild must still reach it,
+// because otherwise its invocation conflicts on every retry forever.
+func TestPostgresFollowUpCanceledItemAdoptsUpgradePayload(t *testing.T) {
+	dsn := os.Getenv("MEMOH_FOLLOW_UP_TEST_DSN")
+	if dsn == "" {
+		t.Skip("isolated PostgreSQL DSN not supplied")
+	}
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	store, err := New(pool, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := NewBackend(runtime.NewMemoryBackend(), store)
+	key := runtime.Key{BotID: uuid.NewString(), SessionID: uuid.NewString()}
+	defer func() {
+		if _, err := pool.Exec(ctx, `DELETE FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2`, key.BotID, key.SessionID); err != nil {
+			t.Error(err)
+		}
+	}()
+	_, _, err = b.Update(ctx, key, func(s runtime.Snapshot, _ bool) (runtime.Snapshot, bool, error) {
+		s.BotID, s.SessionID = key.BotID, key.SessionID
+		s.CurrentRunView = &runtime.CurrentRunView{RunID: uuid.NewString(), Status: runtime.RunStatusRunning}
+		return s, true, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := []byte(`{"text":"","internal_command":{"task_result_receipt":"native_task:t:event:1"}}`)
+	canceled, err := b.EnqueueFollowUp(ctx, key, uuid.NewString(), "canceled-invocation", old)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = b.CancelFollowUp(ctx, key, canceled.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, ok, err := b.ClaimNextFollowUp(ctx, key, "before-revival"); err != nil || ok {
+		t.Fatalf("canceled item was claimable: ok=%v err=%v", ok, err)
+	}
+	rebuilt := []byte(`{"text":"","internal_command":{"task_result_receipt":"native_task:t:event:1","Token":"REBUILT"}}`)
+	revived, err := b.EnqueueFollowUp(ctx, key, uuid.NewString(), "canceled-invocation", rebuilt)
+	if err != nil || revived.ID != canceled.ID || revived.Status != runtime.QueueAccepted || !bytes.Equal(revived.Payload, rebuilt) {
+		t.Fatalf("canceled revival: %#v %v", revived, err)
+	}
+	item, claim, ok, err := b.ClaimNextFollowUp(ctx, key, "after-revival")
+	if err != nil || !ok || item.ID != canceled.ID || !bytes.Equal(item.Payload, rebuilt) {
+		t.Fatalf("revived item must claim with the rebuilt payload: %#v %v %v", item, ok, err)
+	}
+	if err = b.ApplyFollowUp(ctx, key, claim); err != nil {
+		t.Fatal(err)
+	}
+	// An equal-payload replay never overturns a cancel: the user's decision is
+	// the record of what happened.
+	again, err := b.EnqueueFollowUp(ctx, key, uuid.NewString(), "canceled-invocation", rebuilt)
+	if err != nil || again.Status != runtime.QueueApplied {
+		t.Fatalf("consumed replay: %#v %v", again, err)
 	}
 }
 
