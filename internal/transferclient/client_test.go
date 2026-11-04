@@ -353,10 +353,17 @@ func TestCancellationLossAndPublicationRace(t *testing.T) {
 
 func TestStrictTransportAndBoundedDiagnostics(t *testing.T) {
 	auth := func(context.Context) (string, error) { return syntheticAuth, nil }
-	for _, u := range []string{"http://[::1]", "https://user:secret@example.invalid", "https://example.invalid?token=secret", "https://example.invalid#secret"} {
+	for _, u := range []string{"ftp://example.invalid", "https://user:secret@example.invalid", "https://example.invalid?token=secret", "https://example.invalid#secret", "http://example.invalid/api/../other"} {
 		if _, err := New(u, nil, auth); err == nil {
 			t.Fatalf("accepted unsafe URL: %s", u)
 		}
+	}
+	for _, u := range []string{"http://[::1]", "http://example.invalid/api"} {
+		c, err := New(u, nil, auth)
+		if err != nil {
+			t.Fatalf("rejected valid HTTP base %s: %v", u, err)
+		}
+		c.CloseIdleConnections()
 	}
 	insecure := &tls.Config{InsecureSkipVerify: true} //nolint:gosec // Negative test: the constructor must reject this before any request.
 	if _, err := New("https://example.invalid", &http.Client{Transport: &http.Transport{TLSClientConfig: insecure}}, auth); err == nil {

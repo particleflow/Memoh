@@ -112,8 +112,15 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 	}
 	settings, _ = json.Marshal(hostConfigWire{Version: 1, Origin: "http://fixture.invalid", SourceRoot: source})
 	write(config, "transfer.json", settings)
+	if h, err := OpenHostConfig(getenv); err != nil {
+		t.Fatal("HTTP origin rejected", err)
+	} else {
+		h.Close()
+	}
+	settings, _ = json.Marshal(hostConfigWire{Version: 1, Origin: "http://fixture.invalid/api/../other", SourceRoot: source})
+	write(config, "transfer.json", settings)
 	if _, err := OpenHostConfig(getenv); !errors.Is(err, ErrBinding) {
-		t.Fatal("HTTP accepted", err)
+		t.Fatal("ambiguous HTTP origin accepted", err)
 	}
 	settings, _ = json.Marshal(hostConfigWire{Version: 1, Origin: "https://fixture.invalid", SourceRoot: config})
 	write(config, "transfer.json", settings)
