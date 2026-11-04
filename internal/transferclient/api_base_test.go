@@ -87,7 +87,7 @@ func TestTaskAPIBaseBoundaryPreservesChecks(t *testing.T) {
 // These language-independent vectors are for the existing endpoint/mobile
 // configuration owners too. Acceptance never authorizes or probes a destination.
 func TestAPIBaseContractVectors(t *testing.T) {
-	raw, err := os.ReadFile("testdata/api-base-v2.json")
+	raw, err := os.ReadFile("testdata/api-base-v3.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestAPIBaseContractVectors(t *testing.T) {
 			Accepted bool   `json:"accepted"`
 		} `json:"cases"`
 	}
-	if json.Unmarshal(raw, &fixture) != nil || fixture.Contract != "memoh.file-api-base.v2" || len(fixture.Cases) == 0 {
+	if json.Unmarshal(raw, &fixture) != nil || fixture.Contract != "memoh.file-api-base.v3" || len(fixture.Cases) == 0 {
 		t.Fatal("invalid shared API base vectors")
 	}
 	for _, tc := range fixture.Cases {
