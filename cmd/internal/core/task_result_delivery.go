@@ -26,6 +26,35 @@ import (
 
 var errResultNotReady = errors.New("task result is not ready")
 
+// A failing delivery scan is retried on the next wake, which the terminal
+// reconciler produces every reaper tick. Without a backoff one stuck source
+// turns that cadence into an error line every tick, so consecutive failures
+// gate the next attempt exponentially up to the cap.
+const (
+	resultScanBackoffBase = 10 * time.Second
+	resultScanBackoffCap  = 10 * time.Minute
+)
+
+func resultScanBackoff(base, ceiling time.Duration, failures int) time.Duration {
+	if base <= 0 {
+		base = resultScanBackoffBase
+	}
+	if ceiling < base {
+		ceiling = base
+	}
+	if failures <= 0 {
+		return 0
+	}
+	backoff := base
+	for range failures - 1 {
+		if backoff >= ceiling {
+			return ceiling
+		}
+		backoff *= 2
+	}
+	return min(backoff, ceiling)
+}
+
 func (h *delegationHost) resultAttemptLimit(e taskresult.Event) int {
 	if e.AutomaticAttempts > 0 {
 		return e.AutomaticAttempts
@@ -45,6 +74,14 @@ type resultDeliveryWake struct {
 	running, dirty bool
 	wg             sync.WaitGroup
 	log            *slog.Logger
+	scan           func(context.Context) error
+
+	// failures counts consecutive failed scans; next is the earliest retry.
+	// backoffBase/backoffCap default to the constants; tests shorten them.
+	failures    int
+	next        time.Time
+	backoffBase time.Duration
+	backoffCap  time.Duration
 }
 
 type resultTask struct {
@@ -77,24 +114,43 @@ func (h *delegationHost) signalResultDelivery() {
 	if w.running {
 		return
 	}
+	// During backoff the pending wake stays dirty; the next signal after the
+	// gate opens runs it, so no wake is lost and none floods the log.
+	if w.failures > 0 && time.Now().Before(w.next) {
+		return
+	}
 	w.running = true
 	w.wg.Add(1)
 	go func(lifecycleCtx context.Context) {
 		defer w.wg.Done()
 		for {
 			w.mu.Lock()
-			if !w.dirty || w.ctx.Err() != nil {
+			if !w.dirty || w.ctx.Err() != nil || (w.failures > 0 && time.Now().Before(w.next)) {
 				w.running = false
 				w.mu.Unlock()
 				return
 			}
 			w.dirty = false
+			scan := w.scan
 			w.mu.Unlock()
+			if scan == nil {
+				scan = h.scanResults
+			}
 			ctx, cancel := context.WithTimeout(lifecycleCtx, 30*time.Second)
-			err := h.scanResults(ctx)
+			err := scan(ctx)
 			cancel()
+			w.mu.Lock()
+			if err != nil {
+				w.failures++
+				w.next = time.Now().Add(resultScanBackoff(w.backoffBase, w.backoffCap, w.failures))
+			} else {
+				w.failures = 0
+				w.next = time.Time{}
+			}
+			failures := w.failures
+			w.mu.Unlock()
 			if err != nil && w.log != nil {
-				w.log.Warn("task result delivery remains pending", slog.Any("error", err))
+				w.log.Warn("task result delivery remains pending", slog.Any("error", err), slog.Int("consecutive_failures", failures))
 			}
 		}
 	}(w.ctx)
