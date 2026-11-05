@@ -136,26 +136,26 @@ type Submit struct {
 	BatchOwner string `json:"-"`
 }
 type Details struct {
-	InputPreparationUntil time.Time                        `json:"input_preparation_until,omitzero"`
-	InputPreparation      string                           `json:"input_preparation,omitempty"`
-	TargetSnapshot        *computertarget.Target           `json:"target_snapshot,omitempty"`
-	DefaultWorkDir        string                           `json:"default_work_dir,omitempty"`
-	NativeEvidence        *NativeEvidenceLedger            `json:"native_evidence,omitempty"`
-	Followups             []FollowupRecord                 `json:"followups,omitempty"`
-	Batch                 *BatchDetails                    `json:"batch,omitempty"`
+	InputPreparationUntil time.Time              `json:"input_preparation_until,omitzero"`
+	InputPreparation      string                 `json:"input_preparation,omitempty"`
+	TargetSnapshot        *computertarget.Target `json:"target_snapshot,omitempty"`
+	DefaultWorkDir        string                 `json:"default_work_dir,omitempty"`
+	NativeEvidence        *NativeEvidenceLedger  `json:"native_evidence,omitempty"`
+	Followups             []FollowupRecord       `json:"followups,omitempty"`
+	Batch                 *BatchDetails          `json:"batch,omitempty"`
 	// BatchOwner names the ordered batch this operation advances, when it was
 	// dispatched by one. It is the only marker that keeps a batched item out of
 	// the per-operation result scan: the batch reports once, for all items.
-	BatchOwner string `json:"batch_owner,omitempty"`
-	Kind       string `json:"kind"`
-	Agent                 computertarget.AgentProgress     `json:"agent"`
-	Output                string                           `json:"output,omitempty"`
-	ExitCode              *int                             `json:"exit_code,omitempty"`
-	Truncated             bool                             `json:"truncated"`
-	Observation           *computertarget.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash          string                           `json:"artifact_hash,omitempty"`
-	Phase                 string                           `json:"phase"`
-	Foreground            *computertarget.Result           `json:"foreground,omitempty"`
+	BatchOwner   string                           `json:"batch_owner,omitempty"`
+	Kind         string                           `json:"kind"`
+	Agent        computertarget.AgentProgress     `json:"agent"`
+	Output       string                           `json:"output,omitempty"`
+	ExitCode     *int                             `json:"exit_code,omitempty"`
+	Truncated    bool                             `json:"truncated"`
+	Observation  *computertarget.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash string                           `json:"artifact_hash,omitempty"`
+	Phase        string                           `json:"phase"`
+	Foreground   *computertarget.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
 	Inputs             *InputResult                     `json:"inputs,omitempty"`

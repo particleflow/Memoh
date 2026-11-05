@@ -124,7 +124,7 @@ func (s *Store) ChangeComputerTaskBatch(ctx context.Context, id string, mutate f
 	return tx.Commit(ctx)
 }
 
-func (s *Store) changeComputerTaskBatch(ctx context.Context, queries *dbsqlc.Queries, batchID pgtype.UUID, mutate func(*dbstore.ComputerTaskBatchRecord) error) error {
+func (*Store) changeComputerTaskBatch(ctx context.Context, queries *dbsqlc.Queries, batchID pgtype.UUID, mutate func(*dbstore.ComputerTaskBatchRecord) error) error {
 	row, err := queries.LockComputerTaskBatch(ctx, batchID)
 	if err != nil {
 		return mapQueryErr(err)

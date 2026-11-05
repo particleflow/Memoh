@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/felinics/memoh/internal/computertarget"
-	"github.com/felinics/memoh/internal/mcp"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -55,7 +55,7 @@ func (q *batchQueue) ListSessionComputerTaskBatches(_ context.Context, bot, sess
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	out := []dbstore.ComputerTaskBatchRecord{}
-	for i := len(q.order) - 1; i >= 0 && int32(len(out)) < limit; i-- {
+	for i := len(q.order) - 1; i >= 0 && len(out) < int(limit); i-- {
 		if rec := q.records[q.order[i]]; rec.BotID == bot && rec.SessionID == session && rec.UserID == user {
 			out = append(out, rec)
 		}
@@ -136,7 +136,6 @@ type batchFixture struct {
 	store  *fixtureStore
 	queue  *batchQueue
 	remote *batchTransport
-	ctx    context.Context
 }
 
 func newBatchFixture(t *testing.T) *batchFixture {

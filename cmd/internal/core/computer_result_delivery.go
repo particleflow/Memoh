@@ -235,25 +235,25 @@ func computerResultText(r dbstore.ComputerOperationRecord, d computertask.Detail
 // no volatile progress, keeping the event key stable.
 func computerBatchResultText(rec dbstore.ComputerTaskBatchRecord) string {
 	summary := computertask.BatchSummaryFromRecord(rec)
-	text := "Computer task batch " + summary.ID + " (target " + summary.TargetID + ") finished: " + strconv.Itoa(summary.Total) + " items, " + strconv.Itoa(summary.Succeeded) + " succeeded, " + strconv.Itoa(summary.Failed) + " failed, " + strconv.Itoa(summary.Canceled) + " canceled."
+	var body strings.Builder
+	body.WriteString("Computer task batch " + summary.ID + " (target " + summary.TargetID + ") finished: " + strconv.Itoa(summary.Total) + " items, " + strconv.Itoa(summary.Succeeded) + " succeeded, " + strconv.Itoa(summary.Failed) + " failed, " + strconv.Itoa(summary.Canceled) + " canceled.")
 	items, err := computertask.DecodeBatchItems(rec.Items)
 	if err != nil {
-		return text
+		return body.String()
 	}
 	for i, item := range items {
-		line := "\n#" + strconv.Itoa(i+1) + " " + item.State
+		body.WriteString("\n#" + strconv.Itoa(i+1) + " " + item.State)
 		if item.Outcome != "" {
-			line += " (" + item.Outcome + ")"
+			body.WriteString(" (" + item.Outcome + ")")
 		}
 		if item.Error != "" {
-			line += ": " + item.Error
+			body.WriteString(": " + item.Error)
 		}
 		if item.OperationID != "" {
-			line += " operation " + item.OperationID
+			body.WriteString(" operation " + item.OperationID)
 		}
-		text += line
 	}
-	return text
+	return body.String()
 }
 
 // scanComputerBatches advances every active batch inside the existing scan, then

@@ -239,4 +239,4 @@ func (f *fakeComputerObserver) Observe(_ context.Context, b toolcontext.Computer
 	return computertask.Result{}, nil
 }
 
-func (f *fakeComputerObserver) ScanBatches(context.Context) error { return nil }
+func (*fakeComputerObserver) ScanBatches(context.Context) error { return nil }
