@@ -9,10 +9,12 @@ WHERE source.team_id=public.memoh_current_team_id()
  AND entry.task_data->>'state'<>'queued';
 
 -- Only pi-json batch operations can complete asynchronously; foreground and
--- legacy agent operations finish inside their submitting turn.
+-- legacy agent operations finish inside their submitting turn. Batch-owned
+-- items are excluded: their ordered batch reports once for all of them.
 -- name: ListComputerResultTasks :many
 SELECT id,bot_id,session_id,user_id FROM computer_operations
-WHERE team_id=public.memoh_current_team_id() AND details ? 'batch';
+WHERE team_id=public.memoh_current_team_id() AND details ? 'batch'
+AND NOT (details ? 'batch_owner');
 
 -- Result delivery bookkeeping lives beside the operation receipt, CAS-guarded
 -- exactly like the native/delegation result envelopes.

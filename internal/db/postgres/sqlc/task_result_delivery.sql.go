@@ -14,6 +14,7 @@ import (
 const listComputerResultTasks = `-- name: ListComputerResultTasks :many
 SELECT id,bot_id,session_id,user_id FROM computer_operations
 WHERE team_id=public.memoh_current_team_id() AND details ? 'batch'
+AND NOT (details ? 'batch_owner')
 `
 
 type ListComputerResultTasksRow struct {
@@ -24,7 +25,8 @@ type ListComputerResultTasksRow struct {
 }
 
 // Only pi-json batch operations can complete asynchronously; foreground and
-// legacy agent operations finish inside their submitting turn.
+// legacy agent operations finish inside their submitting turn. Batch-owned
+// items are excluded: their ordered batch reports once for all of them.
 func (q *Queries) ListComputerResultTasks(ctx context.Context) ([]ListComputerResultTasksRow, error) {
 	rows, err := q.db.Query(ctx, listComputerResultTasks)
 	if err != nil {

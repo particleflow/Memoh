@@ -347,7 +347,7 @@ func TestStandardMCPTrustedPCBindingAndSingleTask(t *testing.T) {
 	source, _, f := setup(t)
 	c := standardClient(t, source, "pc-a", false)
 	tools, err := c.ListTools(t.Context(), nil)
-	if err != nil || len(tools.Tools) != 10 {
+	if err != nil || len(tools.Tools) != 13 {
 		t.Fatalf("tools=%v err=%v", tools, err)
 	}
 	listing := invoke(t, c, "computer_targets", map[string]any{}, false)

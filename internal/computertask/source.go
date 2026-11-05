@@ -67,6 +67,9 @@ func (*Source) ListTools(context.Context, mcp.ToolSessionContext) ([]mcp.ToolDes
 		{Name: "computer_task_cancel", Description: "Record cancellation intent. No generation-bound stop is available: never kills or closes a workspace. Only a later verified invocation receipt can establish process_stopped; cancellation intent does not prove termination or task success.", InputSchema: id},
 		{Name: "computer_task_artifact", Description: "Return already ready references for this task; do not collect logs or arbitrary PC files. Declared artifacts use the existing durable queue and NAS file module: only delivered delivery.reference or delivery.files references are committed. Partial means inspect each file; never rerun the task to retry delivery. A successful Pi invocation does not prove artifact delivery or acceptance of the user's objective. Native mode exports a saved bounded terminal sample; optional observation_id selects older evidence, otherwise use the latest saved sample. Repeated exports reuse the historical hash with current_availability not_rechecked. Sample association is not verified per-input ownership.", InputSchema: schema(map[string]any{"operation_id": text("Receipt ID in this conversation."), "observation_id": text("Optional local native_evidence observation_id; not a Herdr execution ID. Native Agent mode only.")}, "operation_id")},
 		{Name: "computer_task_logs", Description: "Explicit diagnostic request only: collect this invocation's complete stdout/stderr into verified NAS media references using bounded reads. Logs can contain private tool content; no raw logs or reasoning are returned here. Collection may need another call and does not decide, change or retry the Pi task outcome. Never required for computer_task_result or ordinary artifact delivery.", InputSchema: id},
+		{Name: "computer_task_batch_submit", Description: "把一批代理任务按数组顺序持久入队，服务端按提交顺序逐个派发，只提交一次，不需要逐项轮询回执。每项的字段与 computer_task_submit 相同（kind 固定 herdr_pi_task，必须带 model），target 全批共用一个。队列对同一会话同一 target 严格先进先出：同一时刻只有一项在途，前一项未到终态时后一项不会派发；不设批量条数上限。单项失败只记该项，不中断后续项。结果未知的项按既有规则继续持槽，批次呈 blocked 并给出 blocked_on，不自动重发。提交时先对本批全部 items 校验一次可用模型列表，未命中整批退回并附当前列表；派发时仍按当次列表逐项复核。整批进入终态后自动向本会话汇报一次聚合结果；单项细节用 computer_task_get 按 operation_id 查阅。同一会话同一 run 重复提交逐字相同的批量请求返回原批次，不产生新任务。取消未派发项用 computer_task_batch_cancel。", InputSchema: schema(map[string]any{"target_id": text("computer_targets 返回的 Memoh 目标 ID；本批所有项共用，必填。"), "label": text("可选的批次标签，仅用于辨识。"), "items": map[string]any{"type": "array", "minItems": 1, "items": map[string]any{"type": "object", "properties": map[string]any{"kind": map[string]any{"type": "string", "enum": []string{"herdr_pi_task"}}, "task": text("代理任务意图，语义同 computer_task_submit 的 task。"), "model": text("本项使用的模型 id，逐字取自可用模型列表。"), "inputs": map[string]any{"type": "array", "maxItems": deliverymeta.MaxArtifacts, "uniqueItems": true, "items": map[string]any{"type": "string", "pattern": "^[a-f0-9]{64}$"}, "description": "本 Bot 已有 NAS 原件的 content_hash 清单，语义同 computer_task_submit。"}, "artifact": artifact, "artifacts": map[string]any{"type": "array", "minItems": 1, "maxItems": deliverymeta.MaxArtifacts, "items": artifact, "description": "可选的有界结果声明，语义同 computer_task_submit；声明工件的项 work_dir 保持默认 '.'。"}, "work_dir": text("根相对工作目录，默认 '.'，语义同 computer_task_submit。")}, "required": []string{"kind", "task", "model"}, "additionalProperties": false}}}, "target_id", "items")},
+		{Name: "computer_task_batch_get", Description: "读取批量通道状态，只读，不派发不重发。按 batch_id 读一个批次；省略 batch_id 则列出本会话最近的批次。返回完整计数（total/succeeded/failed/canceled/queued/in_flight）、当前推进头与未成功项清单（有界，其余用 more_items 计数）；成功项的执行细节用 computer_task_get 按 operation_id 逐个查阅。state=blocked 表示在途项仍未决并持有该 target 的槽，blocked_on 给出其 operation_id：先按 computer_task_result 读回执核实，不重发。", InputSchema: schema(map[string]any{"batch_id": text("computer_task_batch_submit 返回的 batch_id；省略则列出本会话最近批次。")})},
+		{Name: "computer_task_batch_cancel", Description: "取消一个批次中所有尚未派发的项。已派发的在途项不受影响，其取消按 computer_task_cancel 既有语义单独处理。全部项进入终态后批次照常聚合汇报一次。", InputSchema: schema(map[string]any{"batch_id": text("computer_task_batch_submit 返回的 batch_id。")}, "batch_id")},
 	}, nil
 }
 
@@ -171,6 +174,25 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		default:
 			value, err = s.service.observe(ctx, b, input.ID, false)
 		}
+	case "computer_task_batch_submit":
+		var input BatchRequest
+		if err = decodeArguments(args, &input); err == nil {
+			value, err = s.service.BatchSubmit(ctx, b, input)
+		}
+	case "computer_task_batch_get":
+		var input struct {
+			ID string `json:"batch_id"`
+		}
+		if err = decodeArguments(args, &input); err == nil {
+			value, err = s.service.BatchStatus(ctx, b, input.ID)
+		}
+	case "computer_task_batch_cancel":
+		var input struct {
+			ID string `json:"batch_id"`
+		}
+		if err = decodeArguments(args, &input); err == nil {
+			value, err = s.service.BatchCancel(ctx, b, input.ID)
+		}
 	case "computer_task_result", "computer_task_cancel", "computer_task_logs":
 		var input struct {
 			ID string `json:"operation_id"`
@@ -221,11 +243,28 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		value = receipt
 	}
 	if err != nil {
-		if (name == "computer_task_submit" || name == "computer_task_followup") && admissionBlocked(err) {
+		batchSubmit := name == "computer_task_batch_submit"
+		if errors.Is(err, ErrBatchUnavailable) {
+			// The batch lane is simply not wired on this deployment. Every
+			// single-task path stays available, so this states the fact instead
+			// of failing the whole tool.
+			out := mcp.BuildToolSuccessResult(map[string]any{
+				"ok": false, "code": "computer.batches_unavailable", "phase": "configuration",
+				"business_dispatched": false,
+				"retry":               map[string]any{"automatic": false, "requires": "batch queue configured on this server"},
+				"message":             ErrBatchUnavailable.Error(),
+			})
+			out["isError"] = true
+			return out, nil
+		}
+		if (name == "computer_task_submit" || name == "computer_task_followup" || batchSubmit) && admissionBlocked(err) {
 			facts := map[string]any{"ok": false, "code": admissionErrorCode(err), "phase": "admission", "business_dispatched": false, "retry": map[string]any{"automatic": false, "requires": "verified_owner_admission_state"}}
-			if name == "computer_task_submit" {
+			switch {
+			case name == "computer_task_submit":
 				facts["operation_created"] = false
-			} else {
+			case batchSubmit:
+				facts["batch_created"] = false
+			default:
 				facts["request_reserved"] = false
 			}
 			if receipt, ok := value.(Result); ok && receipt.ID != "" {
@@ -235,31 +274,42 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 			out["isError"] = true
 			return out, nil
 		}
-		if name == "computer_task_submit" {
+		if name == "computer_task_submit" || batchSubmit {
 			var selection *ModelSelectionError
 			if errors.As(err, &selection) {
 				// The live catalog is the correction surface: the caller picks
 				// from it. No model is chosen, defaulted or cached here.
-				out := mcp.BuildToolSuccessResult(map[string]any{
+				facts := map[string]any{
 					"ok": false, "code": "computer.model_selection_required", "phase": "validation",
-					"operation_created": false, "business_dispatched": false,
-					"available_models": selection.Models,
-					"message":          selection.Error(),
-					"retry":            map[string]any{"automatic": false, "requires": "model chosen from available_models in this response"},
-				})
+					"business_dispatched": false, "available_models": selection.Models,
+					"message": selection.Error(),
+					"retry":   map[string]any{"automatic": false, "requires": "model chosen from available_models in this response"},
+				}
+				if batchSubmit {
+					facts["batch_created"] = false
+				} else {
+					facts["operation_created"] = false
+				}
+				out := mcp.BuildToolSuccessResult(facts)
 				out["isError"] = true
 				return out, nil
 			}
 		}
-		if name == "computer_task_submit" && errors.Is(err, ErrPreflightUnavailable) {
+		if (name == "computer_task_submit" || batchSubmit) && errors.Is(err, ErrPreflightUnavailable) {
 			// These facts describe this call, not the state of any older task.
 			// Do not use this envelope for uncertain claim/dispatch outcomes.
-			out := mcp.BuildToolSuccessResult(map[string]any{
+			facts := map[string]any{
 				"ok": false, "code": "computer.connection_unavailable", "phase": "preflight",
-				"operation_created": false, "business_dispatched": false,
-				"retry":   map[string]any{"automatic": false, "requires": "verified_connection_recovery"},
-				"message": ErrPreflightUnavailable.Error(),
-			})
+				"business_dispatched": false,
+				"retry":               map[string]any{"automatic": false, "requires": "verified_connection_recovery"},
+				"message":             ErrPreflightUnavailable.Error(),
+			}
+			if batchSubmit {
+				facts["batch_created"] = false
+			} else {
+				facts["operation_created"] = false
+			}
+			out := mcp.BuildToolSuccessResult(facts)
 			out["isError"] = true
 			return out, nil
 		}
@@ -269,6 +319,13 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 			return out, nil
 		}
 		return nil, err
+	}
+	if name == "computer_task_batch_get" {
+		// The batch list is one body, not a single {@code computer} object: an
+		// omitted batch_id returns ranked rows and a batch_id returns one row.
+		if summaries, ok := value.([]BatchSummary); ok {
+			return mcp.BuildToolSuccessResult(map[string]any{"batches": summaries}), nil
+		}
 	}
 	return mcp.BuildToolSuccessResult(map[string]any{"computer": value}), nil
 }
@@ -288,4 +345,14 @@ func (s *Source) Observe(ctx context.Context, b toolcontext.ComputerBinding, id 
 // adapters. The binding must be resolved from persisted ownership by the host.
 func (s *Source) Recover(ctx context.Context, binding toolcontext.ComputerBinding, id string) (Recovery, error) {
 	return s.service.Recover(ctx, binding, id)
+}
+
+// ScanBatches advances the durable batch queue under the scan's own authority
+// rebuild. It never creates a conversation, and every dispatch still goes
+// through the unchanged single-task submit path.
+func (s *Source) ScanBatches(ctx context.Context) error {
+	if s.service == nil {
+		return ErrDenied
+	}
+	return s.service.ScanBatches(ctx)
 }

@@ -238,3 +238,5 @@ func (f *fakeComputerObserver) Observe(_ context.Context, b toolcontext.Computer
 	f.bindings = append(f.bindings, b)
 	return computertask.Result{}, nil
 }
+
+func (*fakeComputerObserver) ScanBatches(context.Context) error { return nil }
