@@ -288,9 +288,10 @@ func TestDirectoryPostgresBatchAndActivityOrder(t *testing.T) {
 		if r.Type != ComputerBatch {
 			continue
 		}
-		if r.ID == batch {
+		switch r.ID {
+		case batch:
 			batchRow = &rows[i]
-		} else if r.ID == unlabeled {
+		case unlabeled:
 			unlabeledRow = &rows[i]
 		}
 	}
