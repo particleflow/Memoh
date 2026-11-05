@@ -4779,6 +4779,8 @@ definitions:
         enum:
         - herdr_pi_task
         type: string
+      model:
+        type: string
       target_id:
         type: string
       task:
@@ -8013,6 +8015,11 @@ definitions:
         $ref: '#/definitions/sessiontask.TaskDestination'
       name:
         type: string
+      progress:
+        description: |-
+          Progress is the batch completion count "succeeded/total". Omitted for
+          every other kind and for a batch whose stored items cannot be read.
+        type: string
       record_id:
         format: uuid
         type: string
@@ -8024,6 +8031,7 @@ definitions:
         enum:
         - native_agent
         - computer_operation
+        - computer_batch
         - bot_delegation
         - schedule_fire
         type: string
@@ -17914,7 +17922,8 @@ paths:
   /bots/{bot_id}/tasks:
     get:
       description: Account-only read of native Agent admissions, computer receipts,
-        incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown
+        batch submissions, incoming/outgoing Bot handoffs and schedule fires. Rows
+        follow recent activity (updated_at), newest first. Includes terminal and unknown
         records and multiple tasks per session. Sessions, configured Agents and ordinary
         chat runs are not tasks. Each source rechecks its existing permissions. Native
         task_id and provider run_id are opaque strings; record_id identifies the durable
@@ -17981,6 +17990,7 @@ paths:
         enum:
         - native_agent
         - computer_operation
+        - computer_batch
         - bot_delegation
         - schedule_fire
         in: path
@@ -19903,6 +19913,24 @@ paths:
       summary: Get channel capabilities and schemas
       tags:
       - channel
+  /client/net-report:
+    post:
+      consumes:
+      - application/json
+      description: Validates a machine-format diagnostic snapshot and appends it to
+        the log stream. No UI, no storage beyond logs.
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Ingest a client network failure report
+      tags:
+      - system
   /connectors/catalog:
     get:
       description: List providers available from the configured Connect-It deployment.

@@ -1131,6 +1131,7 @@
         "accepted": "Accepted; waiting to run",
         "running": "Running",
         "waiting_decision": "Waiting for a decision",
+        "blocked": "Blocked",
         "finishing": "Finishing",
         "completed": "Run completed",
         "failed": "Run failed",
@@ -2055,6 +2056,7 @@
       "types": {
         "native_agent": "Agent task",
         "computer_operation": "Computer task",
+        "computer_batch": "Task batch",
         "bot_delegation": "Delegated task",
         "schedule_fire": "Scheduled task"
       }

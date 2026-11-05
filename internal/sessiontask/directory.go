@@ -2,7 +2,9 @@ package sessiontask
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,10 +15,13 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
-const directoryCursorScope = "bot-task-directory/v1"
+// ComputerBatch names the durable batch queue kind in the directory.
+const ComputerBatch = "computer_batch"
+
+const directoryCursorScope = "bot-task-directory/v2"
 
 func directoryKind(kind string) bool {
-	return kind == "native_agent" || kind == ComputerOperation || kind == "bot_delegation" || kind == "schedule_fire"
+	return kind == "native_agent" || kind == ComputerOperation || kind == ComputerBatch || kind == "bot_delegation" || kind == "schedule_fire"
 }
 
 type DelegationDirectory interface {
@@ -28,17 +33,31 @@ func (s *Service) WithDelegationDirectory(reader DelegationDirectory) *Service {
 	return s
 }
 
+// ComputerBatchDirectory reads one durable batch row through its original
+// conversation binding. Discovery only: no dispatch, scan or wake.
+type ComputerBatchDirectory interface {
+	ReadComputerTaskBatch(context.Context, string, string, string, string) (dbstore.ComputerTaskBatchRecord, error)
+}
+
+func (s *Service) WithComputerBatchDirectory(reader ComputerBatchDirectory) *Service {
+	s.batches = reader
+	return s
+}
+
 // DirectoryTask retains an original typed task ID and its durable occurrence.
 // Native bg IDs are opaque and can recur across process lifetimes. RecordID is
 // the original admission ID (or run ID for legacy occurrences), not a replacement task identity.
 type DirectoryTask struct {
-	TaskType    string           `json:"task_type" validate:"required" enums:"native_agent,computer_operation,bot_delegation,schedule_fire"`
+	TaskType    string           `json:"task_type" validate:"required" enums:"native_agent,computer_operation,computer_batch,bot_delegation,schedule_fire"`
 	TaskID      string           `json:"task_id" validate:"required"`
 	RecordID    string           `json:"record_id" validate:"required" format:"uuid"`
 	Name        string           `json:"name" validate:"required"`
 	State       string           `json:"state" validate:"required"`
 	CreatedAt   time.Time        `json:"created_at" validate:"required"`
 	Destination *TaskDestination `json:"destination,omitempty"`
+	// Progress is the batch completion count "succeeded/total". Omitted for
+	// every other kind and for a batch whose stored items cannot be read.
+	Progress string `json:"progress,omitempty"`
 }
 
 type TaskDestination struct {
@@ -158,7 +177,32 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 		}
 		return item, err
 	}
-	if _, err = s.scope(ctx, bot, user, path); err != nil {
+	selected, err := s.scope(ctx, bot, user, path)
+	if err != nil {
+		return item, err
+	}
+	if row.Type == ComputerBatch {
+		if s.batches == nil {
+			return item, ErrUnavailable
+		}
+		rec, err := s.batches.ReadComputerTaskBatch(ctx, row.RecordID, bot, row.SessionID, user)
+		if errors.Is(err, db.ErrNotFound) {
+			return item, ErrUnavailable
+		}
+		if err != nil {
+			return item, err
+		}
+		if rec.ID != row.RecordID || rec.BotID != bot || rec.UserID != user || rec.SessionID != row.SessionID || (selected != "native" && selected != rec.TargetID) {
+			return item, ErrUnavailable
+		}
+		item.State = rec.State
+		if item.State == "" {
+			item.State = "unknown"
+		}
+		if done, total, ok := batchProgress(rec.Items); ok && total > 0 {
+			item.Progress = fmt.Sprintf("%d/%d", done, total)
+		}
+		item.Destination, err = s.directoryDestination(ctx, bot, row.SessionID, row.RunID, "")
 		return item, err
 	}
 	if row.Type == "native_agent" && (path[0].Type != Subagent || path[0].ParentThreadID != row.SourceSessionID || (!row.QueueAdmission && row.RunID != row.RecordID)) {
@@ -208,7 +252,7 @@ func (s *Service) ListDirectory(ctx context.Context, bot, user string, limit int
 			page.NextCursor, err = s.encodeCursor(c)
 			return page, err
 		}
-		c.Before = dbstore.SessionTaskCandidate{Type: row.Type, ID: row.RecordID, CreatedAt: row.CreatedAt}
+		c.Before = dbstore.SessionTaskCandidate{Type: row.Type, ID: row.RecordID, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt}
 		item, err := s.directoryTask(ctx, bot, user, row, readable, schedules)
 		if errors.Is(err, ErrUnavailable) {
 			continue
@@ -240,4 +284,23 @@ func (s *Service) GetDirectoryTask(ctx context.Context, bot, user, kind, recordI
 		return DirectoryTask{}, ErrUnavailable
 	}
 	return s.directoryTask(ctx, bot, user, rows[0], readable, schedules)
+}
+
+// batchProgress reads only the persisted item states. It shares no batch
+// dispatch code: the directory never advances or validates a batch, and an
+// unreadable array simply omits the count instead of hiding the row.
+func batchProgress(raw []byte) (done, total int, ok bool) {
+	var items []struct {
+		State string `json:"state"`
+	}
+	if len(raw) == 0 || json.Unmarshal(raw, &items) != nil {
+		return 0, 0, false
+	}
+	for _, item := range items {
+		total++
+		if item.State == "succeeded" {
+			done++
+		}
+	}
+	return done, total, true
 }

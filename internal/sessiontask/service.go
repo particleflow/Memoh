@@ -54,6 +54,7 @@ type Service struct {
 	targets      Targets
 	cursorCipher cipher.AEAD
 	delegations  DelegationDirectory
+	batches      ComputerBatchDirectory
 }
 
 func NewService(store dbstore.SessionTaskReader, sessions Sessions, workdirs Workdirs, targets Targets, cursorSecret string) *Service {
@@ -135,7 +136,10 @@ func (s *Service) decodeCursor(raw, bot, user, parent string) (cursor, error) {
 		return c, ErrCursor
 	}
 	data, err = s.cursorCipher.Open(nil, data[:s.cursorCipher.NonceSize()], data[s.cursorCipher.NonceSize():], nil)
-	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || !validCursorType(parent, c.Before.Type) {
+	// The directory pages by activity: its continuations additionally carry the
+	// row's updated_at key, which may legitimately exceed the snapshot when a
+	// task advanced mid-pagination.
+	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (parent == directoryCursorScope && c.Before.UpdatedAt.IsZero()) || !validCursorType(parent, c.Before.Type) {
 		return c, ErrCursor
 	}
 	if _, err := uuid.Parse(c.Before.ID); err != nil {

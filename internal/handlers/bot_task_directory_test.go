@@ -26,8 +26,18 @@ type directoryHTTPFixture struct {
 	denyDuringRead      bool
 }
 
+const taskBatch = "10000000-0000-4000-8000-000000000006"
+
 func (directoryHTTPFixture) ReadBotTaskRun(context.Context, string, string, string) (dbstore.BotTaskRunReference, error) {
 	return dbstore.BotTaskRunReference{BotID: taskBot, SessionID: taskChild, RunID: taskOp, TurnID: taskOp, InvocationID: "subagent:bg_original"}, nil
+}
+
+func (directoryHTTPFixture) ReadComputerTaskBatch(_ context.Context, id, bot, session, user string) (dbstore.ComputerTaskBatchRecord, error) {
+	if id != taskBatch || bot != taskBot || session != taskRoot || user != taskUser {
+		return dbstore.ComputerTaskBatchRecord{}, errors.New("batch binding mismatch")
+	}
+	at := time.Now().Add(-time.Minute)
+	return dbstore.ComputerTaskBatchRecord{ID: id, BotID: bot, SessionID: session, UserID: user, TargetID: taskTarget, Label: "Album export batch", State: "running", Items: dbstore.JSON(`[{"spec":{"kind":"herdr_pi_task","task":"a"},"state":"succeeded"},{"spec":{"kind":"herdr_pi_task","task":"b"},"state":"queued"}]`), CreatedAt: at, UpdatedAt: at}, nil
 }
 
 func (f directoryHTTPFixture) ListBotUserGrantsForUser(ctx context.Context, p sqlc.ListBotUserGrantsForUserParams) ([]sqlc.ListBotUserGrantsForUserRow, error) {
@@ -44,15 +54,22 @@ func (f directoryHTTPFixture) ListBotUserGrantsForUser(ctx context.Context, p sq
 
 func (f directoryHTTPFixture) ListBotTaskDirectoryCandidates(_ context.Context, q dbstore.SessionTaskFilter) ([]dbstore.BotTaskDirectoryCandidate, error) {
 	f.reads++
-	if q.ID != "" && (q.ID != taskOp || q.Type != "native_agent") {
-		return nil, nil
+	at := time.Now().Add(-time.Minute)
+	if q.ID != "" {
+		if q.ID != taskOp || q.Type != "native_agent" {
+			return nil, nil
+		}
+		return []dbstore.BotTaskDirectoryCandidate{{Type: "native_agent", ID: "bg_original", RecordID: taskOp, SessionID: taskChild, SourceSessionID: taskRoot, SourceBotID: taskBot, RunID: taskOp, CreatedAt: at, UpdatedAt: at, State: "unknown", Name: "Original work"}}, nil
 	}
-	return []dbstore.BotTaskDirectoryCandidate{{Type: "native_agent", ID: "bg_original", RecordID: taskOp, SessionID: taskChild, SourceSessionID: taskRoot, SourceBotID: taskBot, RunID: taskOp, CreatedAt: time.Now().Add(-time.Minute), State: "unknown", Name: "Original work"}}, nil
+	return []dbstore.BotTaskDirectoryCandidate{
+		{Type: "native_agent", ID: "bg_original", RecordID: taskOp, SessionID: taskChild, SourceSessionID: taskRoot, SourceBotID: taskBot, RunID: taskOp, CreatedAt: at, UpdatedAt: at, State: "unknown", Name: "Original work"},
+		{Type: sessiontask.ComputerBatch, ID: taskBatch, RecordID: taskBatch, SessionID: taskRoot, SourceBotID: taskBot, RunID: "", CreatedAt: at, UpdatedAt: at, State: "running", Name: "Album export batch"},
+	}, nil
 }
 
 func TestBotTaskDirectoryHTTPAccountRevocationAndNoStore(t *testing.T) {
 	f := directoryHTTPFixture{taskHTTPFixture: &taskHTTPFixture{chat: true}}
-	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, nil, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
+	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, nil, "test-secret").WithComputerBatchDirectory(f), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
@@ -95,6 +112,10 @@ func TestBotTaskDirectoryHTTPAccountRevocationAndNoStore(t *testing.T) {
 		if !strings.Contains(body, "bg_original") || !strings.Contains(body, "unknown") || !strings.Contains(body, taskChild) {
 			t.Fatal(body)
 		}
+	}
+	body := call(account, "GET", path, 200)
+	if !strings.Contains(body, "computer_batch") || !strings.Contains(body, "Album export batch") || !strings.Contains(body, `"progress":"1/2"`) {
+		t.Fatal(body)
 	}
 	reads := f.reads
 	call(account, "GET", path+"?limit=101", 400)

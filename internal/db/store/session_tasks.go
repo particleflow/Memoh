@@ -9,7 +9,10 @@ import (
 type SessionTaskCandidate struct {
 	Type, ID, SessionID string
 	CreatedAt           time.Time
-	Name                string `json:"-"`
+	// UpdatedAt is the activity key of the bot task directory ordering. The
+	// creation-ordered listings leave it zero.
+	UpdatedAt time.Time
+	Name      string `json:"-"`
 }
 
 type SessionTaskFilter struct {

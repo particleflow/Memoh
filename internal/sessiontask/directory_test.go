@@ -20,6 +20,8 @@ type directoryFixture struct {
 	candidates []dbstore.BotTaskDirectoryCandidate
 	handoff    botdelegation.View
 	denied     bool
+	batches    map[string]dbstore.ComputerTaskBatchRecord
+	batchErr   error
 	runs       map[string]dbstore.BotTaskRunReference
 	runErr     error
 }
@@ -35,11 +37,24 @@ func (f *directoryFixture) ReadBotTaskRun(_ context.Context, _, _, run string) (
 	return r, nil
 }
 
+func (f *directoryFixture) ReadComputerTaskBatch(_ context.Context, id, _, _, _ string) (dbstore.ComputerTaskBatchRecord, error) {
+	if f.batchErr != nil {
+		return dbstore.ComputerTaskBatchRecord{}, f.batchErr
+	}
+	rec, ok := f.batches[id]
+	if !ok {
+		return rec, db.ErrNotFound
+	}
+	return rec, nil
+}
+
 func (f *directoryFixture) ListBotTaskDirectoryCandidates(_ context.Context, q dbstore.SessionTaskFilter) ([]dbstore.BotTaskDirectoryCandidate, error) {
 	rows := append([]dbstore.BotTaskDirectoryCandidate{}, f.candidates...)
+	// Mirror the SQL contract: activity order on updated_at with the created
+	// time as the snapshot visibility bound.
 	less := func(a, b dbstore.BotTaskDirectoryCandidate) bool {
-		if !a.CreatedAt.Equal(b.CreatedAt) {
-			return a.CreatedAt.Before(b.CreatedAt)
+		if !a.UpdatedAt.Equal(b.UpdatedAt) {
+			return a.UpdatedAt.Before(b.UpdatedAt)
 		}
 		if a.Type != b.Type {
 			return a.Type < b.Type
@@ -49,7 +64,7 @@ func (f *directoryFixture) ListBotTaskDirectoryCandidates(_ context.Context, q d
 	sort.Slice(rows, func(i, j int) bool { return less(rows[j], rows[i]) })
 	var out []dbstore.BotTaskDirectoryCandidate
 	for _, r := range rows {
-		if r.CreatedAt.After(q.SnapshotAt) || (q.ID != "" && (r.RecordID != q.ID || r.Type != q.Type)) || (q.Before.ID != "" && !less(r, dbstore.BotTaskDirectoryCandidate{Type: q.Before.Type, RecordID: q.Before.ID, CreatedAt: q.Before.CreatedAt})) {
+		if r.CreatedAt.After(q.SnapshotAt) || (q.ID != "" && (r.RecordID != q.ID || r.Type != q.Type)) || (q.Before.ID != "" && !less(r, dbstore.BotTaskDirectoryCandidate{Type: q.Before.Type, RecordID: q.Before.ID, UpdatedAt: q.Before.UpdatedAt})) {
 			continue
 		}
 		out = append(out, r)
@@ -68,15 +83,15 @@ func (f *directoryFixture) DirectoryMetadata(_ context.Context, bot, user, sessi
 }
 
 func directorySetup() (*directoryFixture, *Service) {
-	f := &directoryFixture{fixture: newFixture(), runs: map[string]dbstore.BotTaskRunReference{}}
-	s := NewService(f, f, dirs{f.fixture}, f, "directory-test").WithDelegationDirectory(f)
+	f := &directoryFixture{fixture: newFixture(), runs: map[string]dbstore.BotTaskRunReference{}, batches: map[string]dbstore.ComputerTaskBatchRecord{}}
+	s := NewService(f, f, dirs{f.fixture}, f, "directory-test").WithDelegationDirectory(f).WithComputerBatchDirectory(f)
 	return f, s
 }
 
 func (f *directoryFixture) native(id, state string, at time.Time) dbstore.BotTaskDirectoryCandidate {
 	run := uuid.NewString()
 	f.runs[run] = dbstore.BotTaskRunReference{BotID: "bot", SessionID: f.child, RunID: run, TurnID: uuid.NewString(), InvocationID: "subagent:" + id}
-	return dbstore.BotTaskDirectoryCandidate{Type: "native_agent", ID: id, RecordID: run, RunID: run, SessionID: f.child, SourceSessionID: f.root, SourceBotID: "bot", State: state, Name: "Same name", CreatedAt: at}
+	return dbstore.BotTaskDirectoryCandidate{Type: "native_agent", ID: id, RecordID: run, RunID: run, SessionID: f.child, SourceSessionID: f.root, SourceBotID: "bot", State: state, Name: "Same name", CreatedAt: at, UpdatedAt: at}
 }
 func owner(s thread.Thread) (bool, error) { return s.CreatedByUserID == "user", nil }
 func TestDirectoryPreservesOriginalOccurrencesAndCursorScope(t *testing.T) {
@@ -146,7 +161,7 @@ func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing
 	target := uuid.NewString()
 	f.sessions[target] = thread.Thread{ID: target, BotID: "expert", CreatedByUserID: "user", Type: "chat", Title: "Delegated job"}
 	f.handoff = botdelegation.View{ID: id, TargetBotID: "expert", TargetSessionID: target, State: "unknown"}
-	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: "bot_delegation", ID: id, RecordID: id, SourceBotID: "bot", SourceSessionID: f.root, OwnerUserID: "user", State: "running", CreatedAt: at}, {Type: "schedule_fire", ID: uuid.NewString(), RecordID: uuid.NewString(), SourceBotID: "bot", State: "failed", CreatedAt: at}}
+	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: "bot_delegation", ID: id, RecordID: id, SourceBotID: "bot", SourceSessionID: f.root, OwnerUserID: "user", State: "running", CreatedAt: at, UpdatedAt: at}, {Type: "schedule_fire", ID: uuid.NewString(), RecordID: uuid.NewString(), SourceBotID: "bot", State: "failed", CreatedAt: at, UpdatedAt: at}}
 	run := uuid.NewString()
 	f.candidates[0].RunID = run
 	f.runs[run] = dbstore.BotTaskRunReference{BotID: "expert", SessionID: target, RunID: run, TurnID: uuid.NewString(), InvocationID: "bot-delegation:" + id}
@@ -166,7 +181,7 @@ func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing
 func TestDirectoryComputerUsesOriginalReceiptAndCurrentHistoryPermission(t *testing.T) {
 	f, s := directorySetup()
 	r := f.operations[f.op]
-	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: ComputerOperation, ID: r.ID, RecordID: r.ID, SourceBotID: "bot", SessionID: r.SessionID, RunID: "opaque/provider/run/not-uuid", State: "unknown", CreatedAt: r.CreatedAt}}
+	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: ComputerOperation, ID: r.ID, RecordID: r.ID, SourceBotID: "bot", SessionID: r.SessionID, RunID: "opaque/provider/run/not-uuid", State: "unknown", CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt}}
 	p, err := s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
 	if err != nil || len(p.Items) != 1 || p.Items[0].State != "unknown" || p.Items[0].Destination != nil {
 		t.Fatalf("computer %+v %v", p, err)
@@ -227,5 +242,68 @@ func TestDirectoryExactRunBindingNeverFallsBackToLatest(t *testing.T) {
 				t.Fatalf("invalid run became a history destination: %+v %v", got, err)
 			}
 		})
+	}
+}
+
+func TestDirectoryOrdersByRecentActivity(t *testing.T) {
+	f, s := directorySetup()
+	at := time.Now().Add(-time.Hour).UTC()
+	old := f.native("old-but-busy", "running", at)
+	// Created later yet untouched since: must sort below the older, recently
+	// advanced task.
+	stale := f.native("new-but-idle", "completed", at.Add(30*time.Minute))
+	stale.UpdatedAt = stale.CreatedAt
+	old.UpdatedAt = at.Add(90 * time.Minute)
+	f.candidates = []dbstore.BotTaskDirectoryCandidate{stale, old}
+	p, err := s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 2 || p.Items[0].TaskID != "old-but-busy" || p.Items[1].TaskID != "new-but-idle" {
+		t.Fatalf("activity order %+v %v", p, err)
+	}
+}
+
+func TestDirectoryComputerBatchProgressAndBinding(t *testing.T) {
+	f, s := directorySetup()
+	at := time.Now().Add(-time.Minute).UTC()
+	id := uuid.NewString()
+	run := uuid.NewString()
+	f.batches[id] = dbstore.ComputerTaskBatchRecord{ID: id, BotID: "bot", SessionID: f.root, UserID: "user", TargetID: "pc-a", RunID: run, Label: "Nightly album export", State: "blocked", Items: dbstore.JSON(`[{"spec":{"kind":"herdr_pi_task","task":"first"},"state":"succeeded"},{"spec":{"kind":"herdr_pi_task","task":"second"},"state":"in_flight"},{"spec":{"kind":"herdr_pi_task","task":"third"},"state":"queued"}]`), CreatedAt: at, UpdatedAt: at}
+	f.runs[run] = dbstore.BotTaskRunReference{BotID: "bot", SessionID: f.root, RunID: run, TurnID: uuid.NewString()}
+	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: ComputerBatch, ID: id, RecordID: id, SessionID: f.root, SourceBotID: "bot", RunID: run, State: "running", Name: "Nightly album export", CreatedAt: at, UpdatedAt: at}}
+	p, err := s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 1 {
+		t.Fatalf("batch missing %+v %v", p, err)
+	}
+	item := p.Items[0]
+	if item.TaskType != ComputerBatch || item.State != "blocked" || item.Progress != "1/3" || item.Destination == nil || item.Destination.RunID != run {
+		t.Fatalf("batch projection %+v", item)
+	}
+	// A workdir/session target boundary that no longer matches the batch's
+	// pinned target hides the row, mirroring the computer-operation check.
+	f.sessions[f.root] = thread.Thread{ID: f.root, BotID: "bot", CreatedByUserID: "user", Type: "chat", Metadata: map[string]any{"workspace_target_id": "pc-b"}}
+	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 0 {
+		t.Fatalf("foreign target boundary leaked %+v %v", p, err)
+	}
+	delete(f.sessions[f.root].Metadata, "workspace_target_id")
+	// An unreadable item array keeps the row without a count; a store failure
+	// or missing row hides it; no batch reader hides it too.
+	f.batches[id] = dbstore.ComputerTaskBatchRecord{ID: id, BotID: "bot", SessionID: f.root, UserID: "user", TargetID: "pc-a", RunID: run, State: "running", Items: dbstore.JSON(`not-json`), CreatedAt: at, UpdatedAt: at}
+	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 1 || p.Items[0].Progress != "" || p.Items[0].State != "running" {
+		t.Fatalf("unreadable items hid the row %+v %v", p, err)
+	}
+	f.batchErr = errors.New("storage unavailable")
+	if _, err = s.GetDirectoryTask(t.Context(), "bot", "user", ComputerBatch, id, owner, true); !errors.Is(err, f.batchErr) {
+		t.Fatal("batch read failure concealed", err)
+	}
+	f.batchErr = nil
+	delete(f.batches, id)
+	if _, err = s.GetDirectoryTask(t.Context(), "bot", "user", ComputerBatch, id, owner, true); !errors.Is(err, ErrUnavailable) {
+		t.Fatal("missing batch row concealed", err)
+	}
+	s.batches = nil
+	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 0 {
+		t.Fatalf("batch surfaced without a reader %+v %v", p, err)
 	}
 }

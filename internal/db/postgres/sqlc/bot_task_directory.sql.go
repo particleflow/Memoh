@@ -59,6 +59,15 @@ WITH candidates AS (
   WHERE op.team_id=public.memoh_current_team_id() AND op.bot_id=$10::uuid
     AND op.user_id=$11::uuid
   UNION ALL
+  SELECT 'computer_batch', b.id::text, b.id, b.session_id,
+    b.created_at, b.updated_at, b.state,
+    COALESCE(NULLIF(b.label,''), s.title::text, ''), b.run_id,
+    b.bot_id, b.session_id, NULL::uuid, b.user_id, false
+  FROM computer_task_batches b
+  LEFT JOIN bot_sessions s ON s.team_id=b.team_id AND s.bot_id=b.bot_id AND s.id=b.session_id
+  WHERE b.team_id=public.memoh_current_team_id() AND b.bot_id=$10::uuid
+    AND b.user_id=$11::uuid
+  UNION ALL
   SELECT 'bot_delegation', d.id::text, d.id, d.target_session_id,
     d.created_at, d.updated_at, d.state, COALESCE(target.title,''), d.run_id::text,
     d.source_bot_id, d.source_session_id, NULL::uuid, d.user_id, false
@@ -85,8 +94,8 @@ WHERE created_at<=$1::timestamptz
   AND (NOT $2::boolean OR
     (task_type=$3::text AND record_id=$4::uuid))
   AND (NOT $5::boolean OR
-    (created_at,task_type COLLATE "C",record_id)<($6::timestamptz,$7::text COLLATE "C",$8::uuid))
-ORDER BY created_at DESC,task_type COLLATE "C" DESC,record_id DESC
+    (updated_at,task_type COLLATE "C",record_id)<($6::timestamptz,$7::text COLLATE "C",$8::uuid))
+ORDER BY updated_at DESC,task_type COLLATE "C" DESC,record_id DESC
 LIMIT $9::integer
 `
 
@@ -124,6 +133,9 @@ type ListBotTaskDirectoryCandidatesRow struct {
 // Discovery from original durable task admissions/receipts. A session, a
 // configured Agent or an ordinary conversation run is never a task row.
 // record_id disambiguates native background IDs reused after a process restart.
+// Rows follow recent activity (updated_at), so an advancing task resurfaces at
+// the top; created_at stays the snapshot visibility bound. A task updated
+// mid-pagination can re-rank; the caller's next full read restores the order.
 func (q *Queries) ListBotTaskDirectoryCandidates(ctx context.Context, arg ListBotTaskDirectoryCandidatesParams) ([]ListBotTaskDirectoryCandidatesRow, error) {
 	rows, err := q.db.Query(ctx, listBotTaskDirectoryCandidates,
 		arg.SnapshotAt,
