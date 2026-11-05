@@ -77,6 +77,8 @@ type Service struct {
 	inputReference         InputReferenceOpener
 	terminalObservation    func(context.Context, dbstore.ComputerOperationRecord, Details)
 	piModelList            PiModelList
+	batches                dbstore.ComputerTaskBatchQueue
+	batchContext           func(context.Context, toolcontext.ComputerBinding) (context.Context, error)
 }
 
 // WithDefaultWorkDir injects the existing owned directory selection. It is
@@ -128,6 +130,10 @@ type Submit struct {
 	// current at dispatch time. Required for herdr_pi_task; no default exists.
 	Model   string `json:"model,omitempty"`
 	WorkDir string `json:"work_dir,omitempty"`
+	// BatchOwner is set only by the batch dispatcher. It is excluded from the
+	// request fingerprint so a batched item's replay identity equals a direct
+	// computer_task_submit of the same body.
+	BatchOwner string `json:"-"`
 }
 type Details struct {
 	InputPreparationUntil time.Time                        `json:"input_preparation_until,omitzero"`
@@ -137,7 +143,11 @@ type Details struct {
 	NativeEvidence        *NativeEvidenceLedger            `json:"native_evidence,omitempty"`
 	Followups             []FollowupRecord                 `json:"followups,omitempty"`
 	Batch                 *BatchDetails                    `json:"batch,omitempty"`
-	Kind                  string                           `json:"kind"`
+	// BatchOwner names the ordered batch this operation advances, when it was
+	// dispatched by one. It is the only marker that keeps a batched item out of
+	// the per-operation result scan: the batch reports once, for all items.
+	BatchOwner string `json:"batch_owner,omitempty"`
+	Kind       string `json:"kind"`
 	Agent                 computertarget.AgentProgress     `json:"agent"`
 	Output                string                           `json:"output,omitempty"`
 	ExitCode              *int                             `json:"exit_code,omitempty"`
@@ -392,7 +402,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return Result{}, err
 	}
 	operationID := uuid.NewString()
-	d := Details{Kind: in.Kind}
+	d := Details{Kind: in.Kind, BatchOwner: in.BatchOwner}
 	if target.NativeRuntimeID != "" {
 		snapshot := target
 		d.TargetSnapshot = &snapshot

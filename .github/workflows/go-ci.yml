@@ -357,12 +357,12 @@ jobs:
         run: |
           : "${MEMOH_NATIVE_QUEUE_TEST_DSN:?Saved-result recovery requires isolated PostgreSQL}"
           set -o pipefail
-          go test -json -race -count=1 -run '^Test(SavedResultRecoveryPostgres|ComputerTaskResultFollowUpPostgres)$' ./cmd/internal/core | tee saved-result-recovery.jsonl
+          go test -json -race -count=1 -run '^Test(SavedResultRecoveryPostgres|ComputerTaskResultFollowUpPostgres|ComputerBatchResultPublishesOncePostgres|ComputerBatchResultPrepareIsReceiptBoundPostgres)$' ./cmd/internal/core | tee saved-result-recovery.jsonl
           python3 - <<'PY'
           import json
           from pathlib import Path
           events = [json.loads(line) for line in Path('saved-result-recovery.jsonl').read_text().splitlines()]
-          required = {'TestSavedResultRecoveryPostgres', 'TestComputerTaskResultFollowUpPostgres'}
+          required = {'TestSavedResultRecoveryPostgres', 'TestComputerTaskResultFollowUpPostgres', 'TestComputerBatchResultPublishesOncePostgres', 'TestComputerBatchResultPrepareIsReceiptBoundPostgres'}
           passed = {e.get('Test') for e in events if e.get('Action') == 'pass'}
           missing = required - passed
           assert not missing, 'required saved-result recovery did not PASS: ' + ', '.join(sorted(missing))

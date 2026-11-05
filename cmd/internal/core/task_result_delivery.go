@@ -189,6 +189,9 @@ func (h *delegationHost) scanResults(ctx context.Context) error {
 	if err := h.scanComputerResults(ctx); err != nil {
 		failures = append(failures, err)
 	}
+	if err := h.scanComputerBatches(ctx); err != nil {
+		failures = append(failures, err)
+	}
 	return errors.Join(failures...)
 }
 
@@ -418,6 +421,34 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.save = func(ctx context.Context, old, next []byte) error {
 			_, e := h.store.SaveComputerResultDelivery(ctx, sqlc.SaveComputerResultDeliveryParams{ID: nativeTaskUUID(id), Expected: old, Delivery: next})
+			return e
+		}
+	case "computer_batch":
+		rec, e := h.store.ReadComputerTaskBatch(ctx, id, bot, session, user)
+		if errors.Is(e, db.ErrNotFound) {
+			return t, botdelegation.ErrDenied
+		}
+		if e != nil {
+			return t, e
+		}
+		if rec.State != computertask.BatchCompleted {
+			return t, errResultNotReady
+		}
+		b, routing, e := h.computerResultRouting(ctx, bot, user, session)
+		if e != nil {
+			return t, e
+		}
+		t.state, t.run = "completed", rec.RunID
+		t.originBot, t.originSession = rec.BotID, rec.SessionID
+		t.text = computerBatchResultText(rec)
+		t.cmd = delegationDeliveryCommand(botdelegation.Record{Identity: b}, routing, t.text, nil)
+		t.cmd.DelegationResultID = ""
+		t.raw, e = h.store.ReadComputerTaskBatchDelivery(ctx, id)
+		if e != nil {
+			return t, e
+		}
+		t.save = func(ctx context.Context, old, next []byte) error {
+			_, e := h.store.SaveComputerTaskBatchDelivery(ctx, id, old, next)
 			return e
 		}
 	default:

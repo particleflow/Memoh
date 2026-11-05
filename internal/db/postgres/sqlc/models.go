@@ -602,6 +602,23 @@ type ComputerOperation struct {
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
 }
 
+type ComputerTaskBatch struct {
+	ID             pgtype.UUID        `json:"id"`
+	TeamID         pgtype.UUID        `json:"team_id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	TargetID       pgtype.UUID        `json:"target_id"`
+	RunID          string             `json:"run_id"`
+	Label          string             `json:"label"`
+	Fingerprint    string             `json:"fingerprint"`
+	State          string             `json:"state"`
+	Items          []byte             `json:"items"`
+	ResultDelivery []byte             `json:"result_delivery"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Connector struct {
 	TeamID       pgtype.UUID        `json:"team_id"`
 	BotID        pgtype.UUID        `json:"bot_id"`

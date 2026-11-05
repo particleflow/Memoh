@@ -20,9 +20,11 @@ import (
 
 // computerResultObserver is the trusted host read the scan uses to pull an
 // operation's terminal observation while its conversation is idle. It is the
-// same authorized refresh computer_task_result performs inside a turn.
+// same authorized refresh computer_task_result performs inside a turn. Scan
+// batches advances the durable batch queue under that same rebuilt authority.
 type computerResultObserver interface {
 	Observe(context.Context, toolcontext.ComputerBinding, string) (computertask.Result, error)
+	ScanBatches(context.Context) error
 }
 
 // scanComputerResults extends the existing result scan with PC tasks. The
@@ -136,8 +138,14 @@ func (h *delegationHost) computerDeliveryCommitted(ctx context.Context, r dbstor
 // computerTerminalObserved decides between an automatic reconnect and a
 // covered in-turn read. A runtime fence belongs to a live turn of the owning
 // conversation: that turn already holds the outcome and reports it, so the
-// event is pinned as attention instead of enqueueing a duplicate turn.
+// event is pinned as attention instead of enqueueing a duplicate turn. A
+// batch-owned item is the exception: the batch reports once for all items, so
+// it only wakes the scan and never mints a per-item attention event.
 func (h *delegationHost) computerTerminalObserved(ctx context.Context, r dbstore.ComputerOperationRecord, d computertask.Details) {
+	if d.BatchOwner != "" {
+		h.wakeResults(ctx)
+		return
+	}
 	if _, fenced := runtimefence.FromContext(ctx); fenced {
 		h.markComputerResultAttention(ctx, r, d)
 		return
@@ -219,6 +227,56 @@ func computerResultText(r dbstore.ComputerOperationRecord, d computertask.Detail
 		text += files.String()
 	}
 	return text
+}
+
+// computerBatchResultText is the batch aggregate body: one report for the whole
+// ordered queue, listing every item's terminal state. Item-level receipts stay
+// readable through computer_task_get, so this body carries no output text and
+// no volatile progress, keeping the event key stable.
+func computerBatchResultText(rec dbstore.ComputerTaskBatchRecord) string {
+	summary := computertask.BatchSummaryFromRecord(rec)
+	text := "Computer task batch " + summary.ID + " (target " + summary.TargetID + ") finished: " + strconv.Itoa(summary.Total) + " items, " + strconv.Itoa(summary.Succeeded) + " succeeded, " + strconv.Itoa(summary.Failed) + " failed, " + strconv.Itoa(summary.Canceled) + " canceled."
+	items, err := computertask.DecodeBatchItems(rec.Items)
+	if err != nil {
+		return text
+	}
+	for i, item := range items {
+		line := "\n#" + strconv.Itoa(i+1) + " " + item.State
+		if item.Outcome != "" {
+			line += " (" + item.Outcome + ")"
+		}
+		if item.Error != "" {
+			line += ": " + item.Error
+		}
+		if item.OperationID != "" {
+			line += " operation " + item.OperationID
+		}
+		text += line
+	}
+	return text
+}
+
+// scanComputerBatches advances every active batch inside the existing scan, then
+// surfaces a completed batch through the shared result-delivery path once. Both
+// halves only read or advance already-authorized durable work.
+func (h *delegationHost) scanComputerBatches(ctx context.Context) error {
+	if h.computerSource != nil {
+		if err := h.computerSource.ScanBatches(ctx); err != nil {
+			return err
+		}
+	}
+	rows, err := h.store.ListCompletedComputerTaskBatches(ctx)
+	if err != nil {
+		return err
+	}
+	var failures []error
+	for _, rec := range rows {
+		e := h.reconcileResult(ctx, "computer_batch", rec.ID, rec.BotID, rec.UserID, rec.SessionID)
+		if e != nil && !errors.Is(e, errResultNotReady) && !errors.Is(e, botdelegation.ErrDenied) {
+			failures = append(failures, e)
+		}
+	}
+	return errors.Join(failures...)
 }
 
 // ComputerDeliveryCommitWake exposes the existing result-delivery wake for the

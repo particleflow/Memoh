@@ -50,6 +50,10 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 	// authorized observation read when an endpoint delivery commit wakes it.
 	if host, ok := delegations.Host.(*delegationHost); ok && host != nil {
 		service.WithTerminalObservation(host.computerTerminalObserved)
+		// The batch queue advances inside that same scan. It rebuilds each
+		// batch's own conversation authority from the persisted ledger, exactly
+		// as the result pulls do, and never dispatches on the scan's identity.
+		service.WithComputerBatches(store, computerTaskResumeContext(delegations))
 		host.computerSource = source
 		host.computerResume = computerTaskResumeContext(delegations)
 	}
