@@ -4,7 +4,7 @@
 -- the single existing scan pass. No scheduler and no TTL: batch history is
 -- retained exactly like computer_operations history.
 CREATE TABLE IF NOT EXISTS public.computer_task_batches (
-    id UUID PRIMARY KEY,
+    id UUID NOT NULL,
     team_id UUID NOT NULL DEFAULT public.memoh_current_team_id() REFERENCES public.teams(id),
     bot_id UUID NOT NULL,
     session_id UUID NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.computer_task_batches (
     result_delivery JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT computer_task_batches_team_key UNIQUE (team_id,id),
+    PRIMARY KEY (team_id, id),
     -- One submission identity per run: a replayed tool call returns this row.
     CONSTRAINT computer_task_batches_run_key UNIQUE (team_id,bot_id,session_id,user_id,run_id,fingerprint),
     FOREIGN KEY (team_id, bot_id) REFERENCES public.bots(team_id,id) ON DELETE CASCADE,
@@ -31,7 +31,26 @@ CREATE INDEX IF NOT EXISTS computer_task_batches_lane
     WHERE state IN ('running','blocked');
 ALTER TABLE public.computer_task_batches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.computer_task_batches FORCE ROW LEVEL SECURITY;
+-- Policies follow the team-core convention (four per-command team-only
+-- policies) and are created idempotently: upgrade-path tests step the chain
+-- back and migrate up again, replaying this file over an existing table.
 DROP POLICY IF EXISTS computer_task_batches_team ON public.computer_task_batches;
-CREATE POLICY computer_task_batches_team ON public.computer_task_batches
-    USING (team_id=public.memoh_current_team_id())
-    WITH CHECK (team_id=public.memoh_current_team_id());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'computer_task_batches' AND policyname = 'computer_task_batches_team_select') THEN
+    CREATE POLICY computer_task_batches_team_select ON public.computer_task_batches
+      FOR SELECT USING (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'computer_task_batches' AND policyname = 'computer_task_batches_team_insert') THEN
+    CREATE POLICY computer_task_batches_team_insert ON public.computer_task_batches
+      FOR INSERT WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'computer_task_batches' AND policyname = 'computer_task_batches_team_update') THEN
+    CREATE POLICY computer_task_batches_team_update ON public.computer_task_batches
+      FOR UPDATE USING (team_id = public.memoh_current_team_id())
+      WITH CHECK (team_id = public.memoh_current_team_id());
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'computer_task_batches' AND policyname = 'computer_task_batches_team_delete') THEN
+    CREATE POLICY computer_task_batches_team_delete ON public.computer_task_batches
+      FOR DELETE USING (team_id = public.memoh_current_team_id());
+  END IF;
+END $$;
