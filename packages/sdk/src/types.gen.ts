@@ -2695,6 +2695,7 @@ export type HandlersNativeTaskResumeInput = {
     artifacts?: Array<DeliverymetaArtifact>;
     inputs?: Array<string>;
     kind: 'herdr_pi_task';
+    model?: string;
     target_id?: string;
     task: string;
     work_dir?: string;
@@ -4665,10 +4666,15 @@ export type SessiontaskDirectoryTask = {
     created_at: string;
     destination?: SessiontaskTaskDestination;
     name: string;
+    /**
+     * Progress is the batch completion count "succeeded/total". Omitted for
+     * every other kind and for a batch whose stored items cannot be read.
+     */
+    progress?: string;
     record_id: string;
     state: string;
     task_id: string;
-    task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+    task_type: 'native_agent' | 'computer_operation' | 'computer_batch' | 'bot_delegation' | 'schedule_fire';
 };
 
 export type SessiontaskPage = {
@@ -15656,7 +15662,7 @@ export type GetBotsByBotIdTasksByTaskTypeByRecordIdData = {
         /**
          * Original task type
          */
-        task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+        task_type: 'native_agent' | 'computer_operation' | 'computer_batch' | 'bot_delegation' | 'schedule_fire';
         /**
          * Durable occurrence ID
          */
@@ -17674,6 +17680,31 @@ export type GetChannelsByPlatformResponses = {
 };
 
 export type GetChannelsByPlatformResponse = GetChannelsByPlatformResponses[keyof GetChannelsByPlatformResponses];
+
+export type PostClientNetReportData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/client/net-report';
+};
+
+export type PostClientNetReportErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+};
+
+export type PostClientNetReportError = PostClientNetReportErrors[keyof PostClientNetReportErrors];
+
+export type PostClientNetReportResponses = {
+    /**
+     * No Content
+     */
+    204: string;
+};
+
+export type PostClientNetReportResponse = PostClientNetReportResponses[keyof PostClientNetReportResponses];
 
 export type GetConnectorsCatalogData = {
     body?: never;

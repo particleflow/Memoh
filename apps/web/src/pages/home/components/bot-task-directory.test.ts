@@ -56,3 +56,34 @@ it('does not navigate after logout while execution history authorization is pend
   notifyAuthSessionCleared('logout'); finish({ data: { id: 'execution', bot_id: 'bot' } }); await settle()
   expect(api.push).not.toHaveBeenCalled()
 })
+it('shows batch progress and the live execution signal without paging controls', async () => {
+  api.list.mockResolvedValue({ data: { items: [
+    { task_type: 'computer_batch', task_id: 'batch-1', record_id: 'batch-1', name: 'Album export batch', state: 'running', progress: '2/5', created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution' } },
+    { ...row('decide', 'waiting_decision') },
+  ] } })
+  await mount(); const dialog = document.querySelector('[role="dialog"]')!
+  const rows = dialog.querySelectorAll<HTMLButtonElement>('li > button')
+  expect(rows[0]!.textContent).toContain('2/5'); expect(rows[0]!.textContent).toContain(en.chat.tasks.statuses.running)
+  expect(rows[0]!.querySelector('svg')).not.toBeNull()
+  expect(rows[1]!.textContent).toContain(en.chat.tasks.statuses.waiting_decision)
+  expect(dialog.textContent).not.toContain(en.chat.tasks.next)
+})
+it('appends older rows when the list is scrolled to its bottom', async () => {
+  api.list.mockResolvedValueOnce({ data: { items: [row('run-1')], next_cursor: 'more' } }).mockResolvedValueOnce({ data: { items: [row('run-2')] } })
+  await mount(); const dialog = document.querySelector('[role="dialog"]')!
+  expect(api.list).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ query: { limit: 20, cursor: undefined } }))
+  dialog.querySelector('.overscroll-contain')!.dispatchEvent(new Event('scroll')); await settle()
+  expect(api.list.mock.calls[1]![0]).toMatchObject({ query: { cursor: 'more' } })
+  expect(dialog.querySelectorAll('li > button')).toHaveLength(2)
+})
+it('rebuilds the list after a pull down at the top', async () => {
+  api.list.mockResolvedValue({ data: { items: [row('run-1')] } })
+  await mount(); const scroller = document.querySelector('[role="dialog"]')!.querySelector('.overscroll-contain')!
+  const touch = (type: string, clientY?: number) => { const event = new Event(type); (event as Event & { touches: { clientY: number }[] }).touches = clientY === undefined ? [] : [{ clientY }]; scroller.dispatchEvent(event) }
+  // A downward drag past the threshold rebuilds the list.
+  touch('touchstart', 230); touch('touchmove', 300); touch('touchend'); await settle()
+  expect(api.list).toHaveBeenCalledTimes(2)
+  // A short drag does not.
+  touch('touchstart', 280); touch('touchmove', 300); touch('touchend'); await settle()
+  expect(api.list).toHaveBeenCalledTimes(2)
+})

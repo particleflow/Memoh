@@ -13385,7 +13385,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/tasks": {
             "get": {
-                "description": "Account-only read of native Agent admissions, computer receipts, incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown records and multiple tasks per session. Sessions, configured Agents and ordinary chat runs are not tasks. Each source rechecks its existing permissions. Native task_id and provider run_id are opaque strings; record_id identifies the durable occurrence. Continue nonempty next_cursor even on an empty page. Native tool requests are included from their persisted queue admission, before an execution run exists. No execution, device polling, result text or attachments.",
+                "description": "Account-only read of native Agent admissions, computer receipts, batch submissions, incoming/outgoing Bot handoffs and schedule fires. Rows follow recent activity (updated_at), newest first. Includes terminal and unknown records and multiple tasks per session. Sessions, configured Agents and ordinary chat runs are not tasks. Each source rechecks its existing permissions. Native task_id and provider run_id are opaque strings; record_id identifies the durable occurrence. Continue nonempty next_cursor even on an empty page. Native tool requests are included from their persisted queue admission, before an execution run exists. No execution, device polling, result text or attachments.",
                 "produces": [
                     "application/json"
                 ],
@@ -13477,6 +13477,7 @@ const docTemplate = `{
                         "enum": [
                             "native_agent",
                             "computer_operation",
+                            "computer_batch",
                             "bot_delegation",
                             "schedule_fire"
                         ],
@@ -16092,6 +16093,32 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/net-report": {
+            "post": {
+                "description": "Validates a machine-format diagnostic snapshot and appends it to the log stream. No UI, no storage beyond logs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Ingest a client network failure report",
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -28142,6 +28169,9 @@ const docTemplate = `{
                         "herdr_pi_task"
                     ]
                 },
+                "model": {
+                    "type": "string"
+                },
                 "target_id": {
                     "type": "string"
                 },
@@ -32658,6 +32688,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "progress": {
+                    "description": "Progress is the batch completion count \"succeeded/total\". Omitted for\nevery other kind and for a batch whose stored items cannot be read.",
+                    "type": "string"
+                },
                 "record_id": {
                     "type": "string",
                     "format": "uuid"
@@ -32673,6 +32707,7 @@ const docTemplate = `{
                     "enum": [
                         "native_agent",
                         "computer_operation",
+                        "computer_batch",
                         "bot_delegation",
                         "schedule_fire"
                     ]

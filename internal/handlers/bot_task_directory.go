@@ -54,7 +54,7 @@ func (h *SessionTaskHandler) directoryAuthority(c echo.Context) (string, func(th
 
 // Directory godoc
 // @Summary List original persisted tasks across this Bot's history
-// @Description Account-only read of native Agent admissions, computer receipts, incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown records and multiple tasks per session. Sessions, configured Agents and ordinary chat runs are not tasks. Each source rechecks its existing permissions. Native task_id and provider run_id are opaque strings; record_id identifies the durable occurrence. Continue nonempty next_cursor even on an empty page. Native tool requests are included from their persisted queue admission, before an execution run exists. No execution, device polling, result text or attachments.
+// @Description Account-only read of native Agent admissions, computer receipts, batch submissions, incoming/outgoing Bot handoffs and schedule fires. Rows follow recent activity (updated_at), newest first. Includes terminal and unknown records and multiple tasks per session. Sessions, configured Agents and ordinary chat runs are not tasks. Each source rechecks its existing permissions. Native task_id and provider run_id are opaque strings; record_id identifies the durable occurrence. Continue nonempty next_cursor even on an empty page. Native tool requests are included from their persisted queue admission, before an execution run exists. No execution, device polling, result text or attachments.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"
@@ -89,7 +89,7 @@ func (h *SessionTaskHandler) Directory(c echo.Context) error {
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Directory Bot ID"
-// @Param task_type path string true "Original task type" Enums(native_agent,computer_operation,bot_delegation,schedule_fire)
+// @Param task_type path string true "Original task type" Enums(native_agent,computer_operation,computer_batch,bot_delegation,schedule_fire)
 // @Param record_id path string true "Durable occurrence ID"
 // @Success 200 {object} sessiontask.DirectoryTask
 // @Failure 400,401,403,404,500 {object} server.Problem

@@ -1128,6 +1128,7 @@
         "accepted": "受付済み・実行待ち",
         "running": "実行中",
         "waiting_decision": "判断待ち",
+        "blocked": "ブロック中",
         "finishing": "終了処理中",
         "completed": "実行完了",
         "failed": "実行失敗",
@@ -2023,6 +2024,7 @@
       "types": {
         "native_agent": "Agent タスク",
         "computer_operation": "コンピュータータスク",
+        "computer_batch": "タスクバッチ",
         "bot_delegation": "委任タスク",
         "schedule_fire": "スケジュールタスク"
       }

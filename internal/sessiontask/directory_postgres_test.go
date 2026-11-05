@@ -115,7 +115,7 @@ func TestDirectoryPostgresAllOriginalSourcesAndHistory(t *testing.T) {
 		if r.Type == "schedule_fire" && (r.SessionID != "" || r.RunID != "" || r.State != fireStates[r.ID]) {
 			t.Fatalf("orphan fire lost %+v", r)
 		}
-		filter.Before = dbstore.SessionTaskCandidate{Type: r.Type, ID: r.RecordID, CreatedAt: r.CreatedAt}
+		filter.Before = dbstore.SessionTaskCandidate{Type: r.Type, ID: r.RecordID, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt}
 	}
 	if len(seen) != 9 || kinds["native_agent"] != 3 || kinds["schedule_fire"] != 4 {
 		t.Fatalf("missing history %+v %+v", seen, kinds)
@@ -225,4 +225,106 @@ func TestDirectoryPostgresExactRunReferences(t *testing.T) {
 		t.Fatal("invalid link removed historical tasks", err)
 	}
 	t.Log("exact old/new/cross-session references survive fence changes; schedule occurrence, bidirectional delegation and computer TEXT IDs retain original identity; wrong bot/session/run and reset run rejected; rollback only")
+}
+
+// The directory lists batch submissions and orders every kind by recent
+// activity, paging on the activity key (TF-11/E5 monitoring window contract).
+func TestDirectoryPostgresBatchAndActivityOrder(t *testing.T) {
+	dsn := os.Getenv("TEST_POSTGRES_DSN")
+	if dsn == "" {
+		t.Skip("TEST_POSTGRES_DSN is not set")
+	}
+	ctx := t.Context()
+	conn, err := pgx.Connect(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = conn.Close(context.Background()) }()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = tx.Rollback(context.Background()) }()
+	exec := func(query string, args ...any) {
+		t.Helper()
+		if _, err := tx.Exec(ctx, query, args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	exec("SELECT set_config('memoh.team_id',$1,true)", team.DefaultTeamID)
+	user, bot := uuid.NewString(), uuid.NewString()
+	exec("INSERT INTO users(id,username)VALUES($1::uuid,$1::text)", user)
+	exec("INSERT INTO team_members(user_id)VALUES($1)", user)
+	exec("INSERT INTO bots(id,owner_user_id,name)VALUES($1::uuid,$2,$1::text)", bot, user)
+	root := uuid.NewString()
+	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id,type,title)VALUES($1,$2,$3,'chat','Album pipeline')", root, bot, user)
+	old := time.Now().Add(-time.Hour).UTC()
+	recent := time.Now().Add(-time.Minute).UTC()
+	// Created first, advanced later: must sort first by activity.
+	busy := uuid.NewString()
+	exec("INSERT INTO computer_operations(id,bot_id,session_id,user_id,target_id,run_id,fingerprint,target_fingerprint,state,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,'synthetic','synthetic','submitted',$7,$8)", busy, bot, root, user, uuid.NewString(), "busy-run", old, recent)
+	// Created later, untouched: must sort below the older-but-advancing row.
+	idle := uuid.NewString()
+	exec("INSERT INTO computer_operations(id,bot_id,session_id,user_id,target_id,run_id,fingerprint,target_fingerprint,state,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,'synthetic','synthetic','completed',$7,$7)", idle, bot, root, user, uuid.NewString(), "idle-run", old.Add(30*time.Minute))
+	// A batch with a label beats the session title; an empty label falls back.
+	batch, unlabeled := uuid.NewString(), uuid.NewString()
+	for _, row := range []struct {
+		id    string
+		label string
+		state string
+	}{{batch, "Nightly album export", "blocked"}, {unlabeled, "", "completed"}} {
+		exec("INSERT INTO computer_task_batches(id,bot_id,session_id,user_id,target_id,run_id,label,fingerprint,state,items,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,'synthetic',$8,$9,$10,$10)", row.id, bot, root, user, uuid.NewString(), row.id+"-run", row.label, row.state, `[{"spec":{"kind":"herdr_pi_task","task":"a"},"state":"succeeded"},{"spec":{"kind":"herdr_pi_task","task":"b"},"state":"queued"}]`, old)
+	}
+	store := postgresstore.NewWithQueries(dbsqlc.New(tx))
+	rows, err := store.ListBotTaskDirectoryCandidates(ctx, dbstore.SessionTaskFilter{BotID: bot, UserID: user, SnapshotAt: time.Now().UTC(), Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 4 || rows[0].ID != busy || rows[1].ID != idle {
+		t.Fatalf("activity order %+v", rows)
+	}
+	var batchRow, unlabeledRow *dbstore.BotTaskDirectoryCandidate
+	for i, r := range rows {
+		if r.Type != ComputerBatch {
+			continue
+		}
+		switch r.ID {
+		case batch:
+			batchRow = &rows[i]
+		case unlabeled:
+			unlabeledRow = &rows[i]
+		}
+	}
+	if batchRow == nil || batchRow.Name != "Nightly album export" || batchRow.State != "blocked" || batchRow.SessionID != root {
+		t.Fatalf("labeled batch row %+v", batchRow)
+	}
+	if unlabeledRow == nil || unlabeledRow.Name != "Album pipeline" || unlabeledRow.State != "completed" {
+		t.Fatalf("unlabeled batch row %+v", unlabeledRow)
+	}
+	// Activity-key pagination walks every row exactly once.
+	filter := dbstore.SessionTaskFilter{BotID: bot, UserID: user, SnapshotAt: time.Now().UTC(), Limit: 1}
+	seen := map[string]bool{}
+	for {
+		page, err := store.ListBotTaskDirectoryCandidates(ctx, filter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page) == 0 {
+			break
+		}
+		if seen[page[0].RecordID] {
+			t.Fatalf("repeated row %+v", page[0])
+		}
+		seen[page[0].RecordID] = true
+		filter.Before = dbstore.SessionTaskCandidate{Type: page[0].Type, ID: page[0].RecordID, CreatedAt: page[0].CreatedAt, UpdatedAt: page[0].UpdatedAt}
+	}
+	if len(seen) != 4 {
+		t.Fatalf("activity cursor lost rows %+v", seen)
+	}
+	// A foreign owner sees none of this Bot's batches or operations.
+	foreign, err := store.ListBotTaskDirectoryCandidates(ctx, dbstore.SessionTaskFilter{BotID: bot, UserID: uuid.NewString(), SnapshotAt: time.Now().UTC(), Limit: 10})
+	if err != nil || len(foreign) != 0 {
+		t.Fatalf("foreign owner leak %+v %v", foreign, err)
+	}
+	t.Log("batch rows listed with label/title names, activity order over creation order, cursor walks all rows once, owner isolation holds")
 }

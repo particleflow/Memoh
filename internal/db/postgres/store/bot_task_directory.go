@@ -26,7 +26,9 @@ func (s *Store) ListBotTaskDirectoryCandidates(ctx context.Context, f dbstore.Se
 	}
 	rows, err := s.queries.ListBotTaskDirectoryCandidates(ctx, dbsqlc.ListBotTaskDirectoryCandidatesParams{
 		BotID: ids[0], UserID: ids[1], SnapshotAt: pgtype.Timestamptz{Time: f.SnapshotAt, Valid: true},
-		UseCursor: f.Before.ID != "", BeforeTime: pgtype.Timestamptz{Time: f.Before.CreatedAt, Valid: true}, BeforeType: f.Before.Type, BeforeID: ids[2],
+		// The directory pages by activity; the cursor carries the row's
+		// updated_at as its continuation key.
+		UseCursor: f.Before.ID != "", BeforeTime: pgtype.Timestamptz{Time: f.Before.UpdatedAt, Valid: true}, BeforeType: f.Before.Type, BeforeID: ids[2],
 		UseTask: f.ID != "", TaskType: f.Type, RecordID: ids[3], PageSize: f.Limit,
 	})
 	if err != nil {
