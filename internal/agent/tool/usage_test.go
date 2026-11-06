@@ -236,6 +236,8 @@ func TestBuiltInToolsHaveUsageGuidanceOrExplicitExemption(t *testing.T) {
 		ToolAskUser(): "user-input",
 
 		ToolGenerateImage(): "image-gen",
+
+		ToolQueueAlbumWriteback(): "album write-back",
 	}
 	exempt := map[ToolName]string{
 		ToolWebSearch():       "self-describing one-shot search tool",

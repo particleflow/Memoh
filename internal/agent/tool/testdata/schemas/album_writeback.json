@@ -1,0 +1,26 @@
+{
+  "queue_album_writeback": {
+    "properties": {
+      "content_hashes": {
+        "description": "已处理完成媒体的 content_hash（64 位小写十六进制），一项写回相册一次。",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "name": {
+        "description": "可选：这一批文件在手机上的显示名。",
+        "type": "string"
+      },
+      "pair_key": {
+        "description": "用户为手机相册指定的配对标签，例如 processed-default。",
+        "type": "string"
+      }
+    },
+    "required": [
+      "content_hashes",
+      "pair_key"
+    ],
+    "type": "object"
+  }
+}

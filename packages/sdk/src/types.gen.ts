@@ -384,6 +384,20 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AlbumwritebackItem = {
+    bot_id?: string;
+    content_hash?: string;
+    created_at?: string;
+    mime?: string;
+    name?: string;
+    pair_key?: string;
+    size_bytes?: number;
+};
+
+export type AlbumwritebackPendingResponse = {
+    items?: Array<AlbumwritebackItem>;
+};
+
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
 
 export type ApplicationUserInputRecoveryResult = {
@@ -3630,6 +3644,11 @@ export type HandlersOauthDiscoverRequest = {
 export type HandlersOauthExchangeRequest = {
     code?: string;
     state?: string;
+};
+
+export type HandlersPhoneAlbumWritebackWrittenRequest = {
+    content_hash?: string;
+    pair_key?: string;
 };
 
 export type HandlersPlaybackConfigResponse = {
@@ -20586,6 +20605,76 @@ export type PutUsersMeResponses = {
 };
 
 export type PutUsersMeResponse = PutUsersMeResponses[keyof PutUsersMeResponses];
+
+export type GetUsersMeAlbumWritebacksData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Only `pending` is defined
+         */
+        state?: string;
+    };
+    url: '/users/me/album-writebacks';
+};
+
+export type GetUsersMeAlbumWritebacksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeAlbumWritebacksError = GetUsersMeAlbumWritebacksErrors[keyof GetUsersMeAlbumWritebacksErrors];
+
+export type GetUsersMeAlbumWritebacksResponses = {
+    /**
+     * OK
+     */
+    200: AlbumwritebackPendingResponse;
+};
+
+export type GetUsersMeAlbumWritebacksResponse = GetUsersMeAlbumWritebacksResponses[keyof GetUsersMeAlbumWritebacksResponses];
+
+export type PostUsersMeAlbumWritebacksWrittenData = {
+    /**
+     * Written report
+     */
+    body: HandlersPhoneAlbumWritebackWrittenRequest;
+    path?: never;
+    query?: never;
+    url: '/users/me/album-writebacks/written';
+};
+
+export type PostUsersMeAlbumWritebacksWrittenErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeAlbumWritebacksWrittenError = PostUsersMeAlbumWritebacksWrittenErrors[keyof PostUsersMeAlbumWritebacksWrittenErrors];
+
+export type PostUsersMeAlbumWritebacksWrittenResponses = {
+    /**
+     * OK
+     */
+    200: AlbumwritebackItem;
+};
+
+export type PostUsersMeAlbumWritebacksWrittenResponse = PostUsersMeAlbumWritebacksWrittenResponses[keyof PostUsersMeAlbumWritebacksWrittenResponses];
 
 export type GetUsersMeChannelIdentitiesData = {
     body?: never;

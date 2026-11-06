@@ -864,6 +864,21 @@ type NativeProfileCutoverIntent struct {
 	NewDir        string        `json:"new_dir"`
 }
 
+type PhoneAlbumWriteback struct {
+	TeamID      pgtype.UUID        `json:"team_id"`
+	ID          pgtype.UUID        `json:"id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	PairKey     string             `json:"pair_key"`
+	BotID       pgtype.UUID        `json:"bot_id"`
+	ContentHash string             `json:"content_hash"`
+	SizeBytes   pgtype.Int8        `json:"size_bytes"`
+	Mime        string             `json:"mime"`
+	Name        string             `json:"name"`
+	State       string             `json:"state"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	WrittenAt   pgtype.Timestamptz `json:"written_at"`
+}
+
 type Provider struct {
 	ID                 pgtype.UUID        `json:"id"`
 	ProviderTemplateID pgtype.UUID        `json:"provider_template_id"`

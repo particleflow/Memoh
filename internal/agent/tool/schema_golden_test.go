@@ -11,6 +11,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/albumwriteback"
 	pgstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/messaging"
 	"github.com/felinics/memoh/internal/searchproviders"
@@ -46,13 +47,14 @@ var schemaGoldenTools = map[string]func(t *testing.T) []toolexec.Tool{
 	"message": providerTools(&MessageProvider{exec: &messaging.Executor{
 		Sender: goldenMessaging{}, Reactor: goldenMessaging{}, Resolver: goldenMessaging{},
 	}}),
-	"container":  providerTools(NewContainerProvider(nil, nil, nil, "/data")),
-	"memory":     func(*testing.T) []toolexec.Tool { return (&MemoryProvider{}).writeTools(goldenSession, nil) },
-	"tts":        func(*testing.T) []toolexec.Tool { return (&TTSProvider{}).speakTools(goldenSession) },
-	"transcribe": func(*testing.T) []toolexec.Tool { return (&TranscriptionProvider{}).transcribeTools(goldenSession) },
-	"image_gen":  func(*testing.T) []toolexec.Tool { return (&ImageGenProvider{}).imageTools(goldenSession, "") },
-	"video_gen":  func(*testing.T) []toolexec.Tool { return (&VideoGenProvider{}).videoTools(goldenSession) },
-	"browser":    func(*testing.T) []toolexec.Tool { return (&BrowserProvider{}).browserTools(goldenSession) },
+	"container":       providerTools(NewContainerProvider(nil, nil, nil, "/data")),
+	"memory":          func(*testing.T) []toolexec.Tool { return (&MemoryProvider{}).writeTools(goldenSession, nil) },
+	"tts":             func(*testing.T) []toolexec.Tool { return (&TTSProvider{}).speakTools(goldenSession) },
+	"transcribe":      func(*testing.T) []toolexec.Tool { return (&TranscriptionProvider{}).transcribeTools(goldenSession) },
+	"image_gen":       func(*testing.T) []toolexec.Tool { return (&ImageGenProvider{}).imageTools(goldenSession, "") },
+	"video_gen":       func(*testing.T) []toolexec.Tool { return (&VideoGenProvider{}).videoTools(goldenSession) },
+	"browser":         func(*testing.T) []toolexec.Tool { return (&BrowserProvider{}).browserTools(goldenSession) },
+	"album_writeback": providerTools(NewAlbumWritebackProvider(nil, &albumwriteback.Service{})),
 }
 
 func providerTools(provider ToolProvider) func(t *testing.T) []toolexec.Tool {
