@@ -7,16 +7,16 @@ import (
 	"github.com/felinics/memoh/internal/agent/sessionmode"
 )
 
-// The baselines and the pre-Round-6 anchors both include the TF-16 section
-// 4.3 attachment reference sentence (~73 tokens per mode); the pre-Round-6
-// markers shifted by the same delta so "still slimmer than before Round 6"
-// keeps comparing like for like.
+// The baselines include the TF-16 attachment reference sentence (the
+// reference-row fact plus the per-tool coverage pointer). The pre-Round-6
+// anchors keep the size they had when they were recorded, so "still slimmer
+// than before Round 6" keeps comparing like for like.
 const (
 	staticPromptTokenHeadroom           = 4
-	staticPromptChatBaselineTokens      = 1285
-	staticPromptDiscussBaselineTokens   = 1354
-	staticPromptScheduleBaselineTokens  = 1293
-	staticPromptSubagentBaselineTokens  = 670
+	staticPromptChatBaselineTokens      = 1259
+	staticPromptDiscussBaselineTokens   = 1328
+	staticPromptScheduleBaselineTokens  = 1267
+	staticPromptSubagentBaselineTokens  = 644
 	staticPromptChatPreRound6Tokens     = 1297
 	staticPromptDiscussPreRound6Tokens  = 1370
 	staticPromptSchedulePreRound6Tokens = 1299

@@ -42,14 +42,13 @@ func TestGenerateSystemPromptOmitsVolatileCurrentTime(t *testing.T) {
 	}
 }
 
-// attachmentReferenceSentence is the TF-16 design section 4.3 sentence: with the
+// attachmentReferenceSentence is the TF-16 system-prompt sentence: with the
 // inline content channels closed, attachments reach the model as reference
-// rows only, the read tool fetches content on demand, and the formal reply
-// leads with the result instead of restating the acknowledgement's plan.
-const attachmentReferenceSentence = "Attachments arrive as reference rows (path/metadata), not inline content. " +
-	"When a reply depends on an attachment, call the read tool on its path first. " +
-	"Start the formal reply with what you found or the answer itself; " +
-	"do not restate plans to look at files the user has already been told about."
+// rows only, and each file tool's own description states what it can decode.
+// It states that coverage fact and nothing about how a reply should be worded.
+const attachmentReferenceSentence = "Attachments arrive as reference rows (path and metadata), not inline content; " +
+	"read a path when you need the file's content. " +
+	"Each file tool's description states the formats it can decode."
 
 func TestSystemCommonAttachmentReferenceSentence(t *testing.T) {
 	t.Parallel()
@@ -77,19 +76,20 @@ func TestSystemCommonAttachmentReferenceSentence(t *testing.T) {
 	}
 }
 
-// TestFormalReplyAntiRestatementRule pins the anti-restatement half of the
-// section 5 wording division: the formal-reply rule text lives in the system
-// prompt (results first, no restated plans) for every session type.
-func TestFormalReplyAntiRestatementRule(t *testing.T) {
+// TestSystemCommonAttachmentSectionStatesNoWordingRule pins the 2026-11-06
+// ruling: the attachment section states the reference-row fact only. A reply
+// is written by the model, so the prompt must not prescribe results-first
+// openings or pre-empt the wording of a plan it may or may not have stated.
+func TestSystemCommonAttachmentSectionStatesNoWordingRule(t *testing.T) {
 	t.Parallel()
 
-	for _, sessionType := range allPromptSessionTypes() {
-		prompt := GenerateSystemPrompt(SystemPromptParams{SessionType: sessionType, Timezone: "UTC"})
-		if !strings.Contains(prompt, "Start the formal reply with what you found or the answer itself") {
-			t.Fatalf("%s prompt lost the results-first rule:\n%s", sessionType, prompt)
-		}
-		if !strings.Contains(prompt, "do not restate plans to look at files the user has already been told about") {
-			t.Fatalf("%s prompt lost the do-not-restate clause:\n%s", sessionType, prompt)
+	for _, banned := range []string{
+		"Start the formal reply with what you found",
+		"do not restate plans",
+		"results first",
+	} {
+		if strings.Contains(systemCommonTmpl, banned) {
+			t.Fatalf("system_common.md still orders reply wording (%q):\n%s", banned, systemCommonTmpl)
 		}
 	}
 }
@@ -328,10 +328,9 @@ func TestGenerateSystemPromptDoesNotEnumerateConditionalTools(t *testing.T) {
 				Timezone:                  "UTC",
 				PlatformIdentitiesSection: "## Platform Identities\n\n<identity channel=\"telegram\" username=\"@memoh\"/>",
 			})
-			// The approved TF-16 section 4.3 attachment sentence names the read
-			// tool by design ("call the read tool on its path first"); it is a
-			// fixed functional sentence, not a conditional-tool enumeration.
-			prompt = strings.ReplaceAll(prompt, attachmentReferenceSentence, "")
+			// No carve-out: the attachment section states the reference-row fact
+			// and defers format coverage to each file tool's own description, so
+			// it names no conditional tool.
 			for _, name := range conditionalTools {
 				if promptEnumeratesTool(prompt, name) {
 					t.Fatalf("system prompt for %s must not statically enumerate conditional tool %q; put its usage in ToolUsage gated by registration", sessionType, name)
