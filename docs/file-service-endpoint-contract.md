@@ -52,7 +52,7 @@ accepts both schemes for every host on the same terms.
 The existing fields above mean **an HTTP or HTTPS API base for any host, not
 necessarily URL origin**. Examples using synthetic addresses are
 `https://nas.example.test/api`, `https://[2001:db8::10]/api` and
-`http://nas.begonia.cloud:18068/api`. A direct Server
+`http://nas.example.test:18068/api`. A direct Server
 root or a nested gateway prefix is
 also supported. A single trailing slash remains compatible. The client appends
 its existing route namespace without losing the configured prefix.
