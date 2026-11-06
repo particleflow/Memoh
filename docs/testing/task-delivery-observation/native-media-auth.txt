@@ -1,0 +1,24 @@
+=== RUN   TestMediaHTTPRangesAndFullIntegrity
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/full
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/prefix
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/seek
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/suffix
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/if_range_matches
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/if_range_differs
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/unsatisfiable
+=== RUN   TestMediaHTTPRangesAndFullIntegrity/head
+--- PASS: TestMediaHTTPRangesAndFullIntegrity (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/full (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/prefix (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/seek (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/suffix (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/if_range_matches (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/if_range_differs (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/unsatisfiable (0.00s)
+    --- PASS: TestMediaHTTPRangesAndFullIntegrity/head (0.00s)
+=== RUN   TestMediaHTTPRangeSeekFailureAndAuthorization
+--- PASS: TestMediaHTTPRangeSeekFailureAndAuthorization (0.00s)
+=== RUN   TestMediaRangeWarmCacheStillRequiresHTTPAuthorization
+--- PASS: TestMediaRangeWarmCacheStillRequiresHTTPAuthorization (0.02s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.045s

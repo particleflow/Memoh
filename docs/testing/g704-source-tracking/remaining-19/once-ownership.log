@@ -1,0 +1,6 @@
+../g704-investigation/ownership-probe/probe.go:53:30: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	ctx, _ := context.WithCancel(parent)
+	                            ^
+../g704-investigation/ownership-probe/probe.go:69:33: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	_, cancel := context.WithCancel(parent)
+	                               ^

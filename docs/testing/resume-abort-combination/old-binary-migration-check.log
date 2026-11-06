@@ -1,0 +1,2 @@
+time=2026-10-25T21:12:52.770Z level=INFO msg="migration log" detail="error: no migration found for version 177: read down for version 177 .: file does not exist"
+migrate: migrate up: no migration found for version 177: read down for version 177 .: file does not exist

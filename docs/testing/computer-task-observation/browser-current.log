@@ -1,0 +1,13 @@
+PASS actual Web → authenticated task HTTP → PostgreSQL ownership → synthetic MCP metadata: working identity visible
+PASS native done does not change the original submitted task or assert business completion
+PASS offline is explicit; reused pane with changed terminal is mismatch, never silently reattached
+PASS disconnected view clears, reconnect restores through polling; no replay
+PASS synthetic old-route 404 is unavailable, polling stops, explicit refresh recovers
+file://<fixture>/browser.mjs:54
+ await context.setViewportSize({width:390,height:844})
+               ^
+
+TypeError: context.setViewportSize is not a function
+    at file://<fixture>/browser.mjs:54:16
+
+Node.js v24.19.0

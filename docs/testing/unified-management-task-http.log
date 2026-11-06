@@ -1,0 +1,24 @@
+=== RUN   TestSubagentUsesOwnRunAndVisibleText
+--- PASS: TestSubagentUsesOwnRunAndVisibleText (0.00s)
+=== RUN   TestSubagentTextProjectionIsBoundedAndNotRawLogs
+--- PASS: TestSubagentTextProjectionIsBoundedAndNotRawLogs (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	0.014s
+=== RUN   TestBotDelegationJWTSubmitObserveOriginalAndRevocation
+--- PASS: TestBotDelegationJWTSubmitObserveOriginalAndRevocation (0.00s)
+=== RUN   TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch
+--- PASS: TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.026s

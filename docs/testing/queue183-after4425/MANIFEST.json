@@ -1,0 +1,47 @@
+{
+  "base": "4425e3c5f5940d71d65c98b0ba2290db14b97b43",
+  "source_commits": [
+    "efac3b837b6c5291c09a714dddb4b73251367361",
+    "f13f0ea09374788ea028c02168f7d99874c43570"
+  ],
+  "composition_commits": [
+    "2d088f39c1a943d5b6c7d5f927ec3ea21df3160d",
+    "e173d94b09501e0bb6aab263065895637a6702ae"
+  ],
+  "presence182_unchanged": true,
+  "queue_migration": 183,
+  "SQLC_generated": "v1.31.1 using module-selected officialGo1.26.10",
+  "forward_verification": {
+    "credential_free_without_key": true,
+    "credential_write_without_key_rejected_atomically": true,
+    "dirty": false,
+    "down_or_force": false,
+    "encrypted_unknown_and_claim_preserved": true,
+    "existing_synthetic_capability_encrypted_read": true,
+    "from": 182,
+    "presence_claim_receipt_unknown_history_unchanged": true,
+    "presence_forced_RLS": true,
+    "real_key_read_created_or_configured": false,
+    "repeated_up_changes_ciphertext": false,
+    "retained_tables": 8,
+    "to": 183
+  },
+  "vet_exit": 0,
+  "web_sdk_harmony_product_changes": false,
+  "workspace_rebuild_required": false,
+  "new_HAP_required": false,
+  "source_CI": "next exact head natural CI only; not yet pushed",
+  "new_image_dispatches": 0,
+  "field_actions": 0,
+  "fixture_incident": "C18; development DB advanced168->182, not restored, NAS untouched",
+  "files": {
+    "development-target-current-state.json": "5b7ad100c360d859f99f67efd09454f730f5e88a8eebf1a2da56b669603e92a9",
+    "initial-source-filter-error.log.txt": "0fc0c3f40d1bd134569992aeb62cd3460cfb3ffc862f99cddde7e9b7d35b67ca",
+    "wrong-target-full-source-error.log.txt": "674d44ac280e0ea1a927da311662f8eaa728d09e94415a9dc5b685c1d5aadb82",
+    "forward-fixture.go.txt": "fd268e3e6a24fc8045bdccd7abf221e538ff82934dfdbbb9a7dca14d2533d330",
+    "forward-182-183.log.txt": "d0aed79535aa9fcff46c80d5f90386a46a9403f096842019e4db3d6c1846edc3",
+    "cleanup-readback.json": "95ecf2cbfc7a58c2397e3cd3cd7450818ffde0b43636d959fa8662b32f588ebe",
+    "README.md": "a34e7767e5e80752dff03c7725520a7531c29ed632826bfac37824fd5f14e3c2",
+    "original-counterexample-green.log.txt": "77fbb532b284f1bccbb3c4d7adbc8afc1a6fab8aa3a035ce54ee1b5647f8bc5c"
+  }
+}

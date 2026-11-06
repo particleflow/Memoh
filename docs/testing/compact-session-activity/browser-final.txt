@@ -1,0 +1,1 @@
+PASS current shared UI: compact desktop/mobile navigation rows, terminal/unknown omitted, history collapsed, exact real specialist session HTTP200, metadata reconnect same identities, zero business/native-observation calls

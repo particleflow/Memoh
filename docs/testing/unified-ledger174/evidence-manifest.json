@@ -1,0 +1,130 @@
+[
+  {
+    "file": "affected-race.txt",
+    "source_sha256": "fe1dcc291489919a476a149df7e62adf5bd6bff5c5468e76a112c5df40df9247",
+    "published_sha256": "93f200ad97df2c4fe284b51eb0b3c697df3e53fdc21a401f881718f18cb7fe45",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "pass": 820
+    }
+  },
+  {
+    "file": "postgres.txt",
+    "source_sha256": "4ebc6f16bc4958437a8cad16e039003e0c4e17f46beca74a7f9b50ed2f833ca4",
+    "published_sha256": "b233a7c3c9410633a5ca1c382368212a1ff646dcd0261a622d2baf3a8258e027",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "pass": 32
+    }
+  },
+  {
+    "file": "http.txt",
+    "source_sha256": "06e3181f48a9336960eaa802de7cc694c2439af0363cef814c52d80104512cd1",
+    "published_sha256": "b341439858dc3bef8e3899e51837a66972c4691726acce2e4472159258bda89c",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {}
+  },
+  {
+    "file": "http-fixed.txt",
+    "source_sha256": "bb869a71ae60b4d5fcddce90cf534ecf5a34763999f37e8c934c01a6520ce13d",
+    "published_sha256": "de91545453c1870fea52f13a62b73d797082537bcce216e794b8d029237206dc",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "pass": 8
+    }
+  },
+  {
+    "file": "http-final.txt",
+    "source_sha256": "0a5801d16dcb6e57e024b7207a353e985b1e10b6813ce8dae63f111f9b5a3a15",
+    "published_sha256": "f39134ade8e47c792622e3bd1aabc3732f3831971460f729ce714474be958869",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "pass": 8
+    }
+  },
+  {
+    "file": "http-postgres.txt",
+    "source_sha256": "6c5cde0a1e0504d902c3e09c6df46cfe0c12c8d5b79a9bc3f4aa5326f55ab5dc",
+    "published_sha256": "4fd4142fee7820e3ea74de635ef4708052d49ae8faff79691d7ea70f6278a421",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {}
+  },
+  {
+    "file": "http-postgres-fixed.txt",
+    "source_sha256": "3fbcdc11336003b5eba76d5d96378cf7042b028fea921a01953112070e03593a",
+    "published_sha256": "98a100e6fb56983e7a1077b9ab4ece7551f2d1b595b30676a1c04c1ac5d35c05",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "fail": 3
+    }
+  },
+  {
+    "file": "http-postgres-routed.txt",
+    "source_sha256": "cd825c73ffa5d084c2cae3b38c70466d2086a2c94f4da8af71303dcff6a081e0",
+    "published_sha256": "a7be6c8cc3960b0a0e6e9317fb5226f8df88f77378c6ab80e9cc8516eef5a987",
+    "transform": "decoded Go Output fields in original order; known checkout prefixes normalized; not byte-identical JSONL",
+    "counts": {
+      "pass": 3
+    }
+  },
+  {
+    "file": "ui.log",
+    "source_sha256": "945c77a57b62b1ce555a75a451bd1be17c84d4dd546e3e61a6eb16421220fae0",
+    "published_sha256": "945c77a57b62b1ce555a75a451bd1be17c84d4dd546e3e61a6eb16421220fae0",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "ui-node22.log",
+    "source_sha256": "7b9d4f820379b571941d7c88ec28449cd6205b0b0debd804c3e5653007fbe062",
+    "published_sha256": "7b9d4f820379b571941d7c88ec28449cd6205b0b0debd804c3e5653007fbe062",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "sdk-type.log",
+    "source_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "published_sha256": "0bfb375565d7960f6ab73dc9bebc46c1c2ec320f133f03888a4185b90ec6bff8",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "web-type.log",
+    "source_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "published_sha256": "7ccbddbbc4ede565d3cbf8fbafbeb3beac710ca011c76ec521279f95397d4c11",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "web-build.log",
+    "source_sha256": "9ba242d7f29e3a0547c732972f6ee9f2186376a63cc329c9efe8b54b977499ed",
+    "published_sha256": "00defc4ce7b994e7f0ff69131d853a9ecc935b332fceb30fa625f0b4a65d92e0",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "build.log",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "vet.log",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "browser.log",
+    "source_sha256": "db82c960c3e00baf03c070f52d648414f73fe0cab446d61cfe0cd49143b5f93b",
+    "published_sha256": "db82c960c3e00baf03c070f52d648414f73fe0cab446d61cfe0cd49143b5f93b",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "runtime-proof.json",
+    "source_sha256": "b5401c292595736792e38cc71618505642a22a8de54035e33ef8c340fbf88a6a",
+    "published_sha256": "b5401c292595736792e38cc71618505642a22a8de54035e33ef8c340fbf88a6a",
+    "transform": "known checkout prefixes normalized"
+  },
+  {
+    "file": "browser-proof.json",
+    "source_sha256": "fcab08afe49cae403235d0a3a5b7f27d336cbc7dd7c2bad0b48522f8e9d9429d",
+    "published_sha256": "fcab08afe49cae403235d0a3a5b7f27d336cbc7dd7c2bad0b48522f8e9d9429d",
+    "transform": "known checkout prefixes normalized"
+  }
+]

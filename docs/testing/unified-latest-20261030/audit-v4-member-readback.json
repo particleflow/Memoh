@@ -1,0 +1,13 @@
+{
+  "library_file_id": "libfile_34f4bd2b7acc8191b0bb1fa7d506eb4f",
+  "version": 4,
+  "local_retained_archive": "/workspace/hc04-final-source-review/input-0.zip",
+  "archive_bytes": 269215,
+  "archive_sha256": "a58d0e441a02fe8b0ef0ef3732d9587ba3819ebacf9be5db491edf9f5b773a42",
+  "member": "composition-admission.json",
+  "member_bytes": 3577,
+  "member_sha256": "4895063e2b37953d03010cd5e0c0ff11ba46f65f8dd0150647e23a757df9c4b9",
+  "member_matches_internal_manifest": true,
+  "extracted_copy_matches_archive": true,
+  "new_transfer_attempts": 0
+}

@@ -1,0 +1,141 @@
+{
+  "base": "24f65a6cff9cb12b901be0a14beb06b258aa8cd0",
+  "operations_before": 369,
+  "operations_after": 369,
+  "request_and_success_response_contracts_unchanged": true,
+  "definitions_unchanged": true,
+  "changed_operation_count": 15,
+  "only_documented_auth_responses_added": [
+    {
+      "method": "GET",
+      "path": "/providers",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/providers",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/count",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/providers/from-template",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/name/{name}",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/{id}",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/providers/{id}",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/providers/{id}",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/providers/{id}/import-models",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/{id}/models",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/{id}/oauth/authorize",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/providers/{id}/oauth/poll",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/providers/{id}/oauth/status",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/providers/{id}/oauth/token",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/providers/{id}/test",
+      "documented_responses_added": [
+        "401",
+        "403"
+      ]
+    }
+  ],
+  "unchanged_paths": [
+    "internal/agent/runtime",
+    "internal/contextview",
+    "packages/runtime",
+    "internal/auth",
+    "internal/server",
+    "cmd/agent/http_providers.go",
+    "internal/handlers/provider_media_catalog.go",
+    "internal/handlers/provider_media_catalog_scope_test.go"
+  ],
+  "exit_code": 0
+}

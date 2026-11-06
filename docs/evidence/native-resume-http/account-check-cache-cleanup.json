@@ -1,0 +1,22 @@
+{
+  "before_available": 236208128,
+  "after_available": 767545344,
+  "removed": [
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/c5/c5b6c7362f7193cfae52f95e7c226333de17dabee8bbacf468d7829ab02396c9-d",
+      "bytes": 177011766,
+      "sha256": "c5b6c7362f7193cfae52f95e7c226333de17dabee8bbacf468d7829ab02396c9"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/0d/0d4288b823a3c9788a78a66058eff3d8866de4dafc93c714853e59a9c9212106-d",
+      "bytes": 177242044,
+      "sha256": "0d4288b823a3c9788a78a66058eff3d8866de4dafc93c714853e59a9c9212106"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/94/945a6af794a83a7c0417b8ff4e1f05163b50e2eedea93e3de0bce2eda5f61536-d",
+      "bytes": 177078700,
+      "sha256": "945a6af794a83a7c0417b8ff4e1f05163b50e2eedea93e3de0bce2eda5f61536"
+    }
+  ],
+  "scope": "only pre-turn task-owned regenerable Go cache archives; no active compiler; all current binaries, logs, sources and databases retained"
+}

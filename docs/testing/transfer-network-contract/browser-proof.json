@@ -1,0 +1,20 @@
+{
+  "realServer": true,
+  "realPG": true,
+  "readOnly": true,
+  "mutations": 0,
+  "deviceRequests": 0,
+  "pageErrors": [],
+  "requests": [],
+  "actualBrowserOffline": true,
+  "sameConfiguredAuthority": true,
+  "sameBot": true,
+  "authSessionRetained": true,
+  "existingPolicyKeys": [
+    "chunk_max_bytes",
+    "max_upload_bytes",
+    "resumable_enabled"
+  ],
+  "centralNetworkPolicyPresent": false,
+  "routingSelectionProven": false
+}

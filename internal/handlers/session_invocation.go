@@ -1,0 +1,134 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"time"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/felinics/memoh/internal/agent/runtime/session/ledger"
+	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/httpx"
+)
+
+// sessionInvocationLookup is the read-only slice of the session run ledger
+// the invocation endpoint needs; satisfied by ledger.Store.
+type sessionInvocationLookup interface {
+	GetByInvocation(ctx context.Context, sessionID, invocationID string) (ledger.Run, error)
+}
+
+// SetInvocationLookup installs the session run ledger used to answer what
+// happened to a client invocation after its acknowledgement was lost.
+func (h *SessionHandler) SetInvocationLookup(lookup sessionInvocationLookup) {
+	h.invocations = lookup
+}
+
+// sessionInvocationResponse reports whether an invocation was admitted into a
+// session and, when it was, the run it became. Only the identity a client
+// already holds and the run's durable state are exposed: never the input,
+// its fingerprint, or ownership/fencing internals.
+type sessionInvocationResponse struct {
+	// Found is false when the session has no run for this invocation, which
+	// is an ordinary answer (never admitted, or not yet) rather than an error.
+	Found        bool   `json:"found"`
+	InvocationID string `json:"invocation_id"`
+	SessionID    string `json:"session_id"`
+	RunID        string `json:"run_id,omitempty"`
+	TurnID       string `json:"turn_id,omitempty"`
+	TurnPosition int64  `json:"turn_position,omitempty"`
+	// State is the durable run state as the ledger records it, e.g.
+	// accepted, running, waiting_decision, finishing, completed, aborted,
+	// failed or lost.
+	State string `json:"state,omitempty"`
+	// AbortRequestedAt is durable runtime intent. Missing means unknown, not
+	// proof that no cancellation occurred. Old records are never backfilled.
+	AbortRequestedAt *time.Time `json:"abort_requested_at,omitempty"`
+	// AbortControl is the earliest observed incoming request, not necessarily
+	// the request that caused runtime intent. Delivery to storage is best effort.
+	// Its client_reason is client-reported, never an authenticated actor.
+	AbortControl *sessionAbortControlResponse `json:"abort_control,omitempty"`
+}
+
+// GetSessionInvocation godoc
+// @Summary Look up the run admitted for a client invocation
+// @Description Read-only. Lets a client that lost the acknowledgement of a send learn whether the invocation was admitted and what state its run is in. An unknown invocation returns 200 with found=false.
+// @Tags sessions
+// @Param bot_id path string true "Bot ID"
+// @Param session_id path string true "Session ID"
+// @Param invocation_id path string true "Client invocation ID"
+// @Success 200 {object} sessionInvocationResponse
+// @Failure 400 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 404 {object} server.Problem
+// @Failure 500 {object} server.Problem
+// @Router /bots/{bot_id}/sessions/{session_id}/invocations/{invocation_id} [get].
+func (h *SessionHandler) GetSessionInvocation(c echo.Context) error {
+	channelIdentityID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	botID, err := httpx.RequiredParam(c, "bot_id")
+	if err != nil {
+		return err
+	}
+	sessionID, err := httpx.RequiredParam(c, "session_id")
+	if err != nil {
+		return err
+	}
+	invocationID, err := httpx.RequiredParam(c, "invocation_id")
+	if err != nil {
+		return err
+	}
+	// Echo routes RawPath when present; otherwise Param already comes from the
+	// decoded URL.Path. Decode only the former, exactly once, so literal percent
+	// sequences and plus signs remain part of the opaque invocation identity.
+	if c.Request().URL.RawPath != "" {
+		invocationID, err = url.PathUnescape(invocationID)
+		if err != nil {
+			return apperror.FieldInvalid("invocation_id", err)
+		}
+	}
+	// Same gate as reading the session itself, so a caller who cannot read
+	// the session learns nothing more here than from GetSession.
+	_, _, sess, err := h.authorizeSession(c, channelIdentityID, botID, sessionID)
+	if err != nil {
+		return err
+	}
+	if h.invocations == nil {
+		return apperror.New(apperror.CodeInternal, nil)
+	}
+	resp := sessionInvocationResponse{InvocationID: invocationID, SessionID: sess.ID}
+	// The lookup is always scoped to the authorized session, so an invocation
+	// id admitted into another session can never resolve here.
+	run, err := h.invocations.GetByInvocation(c.Request().Context(), sess.ID, invocationID)
+	switch {
+	case errors.Is(err, ledger.ErrRunNotFound):
+		return c.JSON(http.StatusOK, resp)
+	case err != nil:
+		return apperror.Wrap(apperror.CodeInternal, err, nil)
+	case run.SessionID != sess.ID:
+		// Defensive: a store that ignored the session scope must not leak a
+		// foreign run through this endpoint.
+		return c.JSON(http.StatusOK, resp)
+	}
+	resp.Found = true
+	resp.RunID = run.RunID
+	resp.TurnID = run.TurnID
+	resp.TurnPosition = run.TurnPosition
+	resp.State = string(run.State)
+	if !run.AbortRequestedAt.IsZero() {
+		resp.AbortRequestedAt = &run.AbortRequestedAt
+	}
+	resp.AbortControl, err = h.readAbortControl(c.Request().Context(), botID, sess.ID, run.RunID)
+	if err != nil {
+		// Optional diagnostics cannot hide the authoritative invocation result.
+		if h.logger != nil {
+			h.logger.WarnContext(c.Request().Context(), "read abort control observation failed", slog.String("run_id", run.RunID))
+		}
+	}
+	return c.JSON(http.StatusOK, resp)
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "file": "targeted-go.log",
+    "original_sha256": "02611ffdb6a276986b4844f16e3460ee40eecdb8b191b14c95ebed21816a3f2e",
+    "published_sha256": "02611ffdb6a276986b4844f16e3460ee40eecdb8b191b14c95ebed21816a3f2e",
+    "original_bytes": 15134,
+    "published_bytes": 15134,
+    "processing": "unchanged"
+  },
+  {
+    "file": "postgres-gate.log",
+    "original_sha256": "5069220ccd845c3f6a585687385385d195c80e75103299980b82460d0f61d318",
+    "published_sha256": "7e373caaf428bcd5750b3360028b48106dd1137726228f4f6326c3bfe1e3ee49",
+    "original_bytes": 4096,
+    "published_bytes": 3826,
+    "processing": "path normalization only"
+  },
+  {
+    "file": "server-build.log",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "published_bytes": 0,
+    "processing": "unchanged"
+  },
+  {
+    "file": "core-boundary.log",
+    "original_sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+    "published_sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+    "original_bytes": 95,
+    "published_bytes": 95,
+    "processing": "unchanged"
+  },
+  {
+    "file": "browser.log",
+    "original_sha256": "89513b8b0a3f40aa40e22cbc1f80427e5f49923785e9702e840e65931040f6cf",
+    "published_sha256": "89513b8b0a3f40aa40e22cbc1f80427e5f49923785e9702e840e65931040f6cf",
+    "original_bytes": 158,
+    "published_bytes": 158,
+    "processing": "unchanged"
+  },
+  {
+    "file": "browser-first-locator-failure.log",
+    "original_sha256": "fd9c66f32bfeb9cfed2d48eafb34219cfa6a67832646506be29df46a6c42a263",
+    "published_sha256": "e5854e3ae74ca1b6c1b197e2a87a0d57d8ec91d27adea7b81f9f7ed81c006bf7",
+    "original_bytes": 448,
+    "published_bytes": 433,
+    "processing": "path normalization only"
+  },
+  {
+    "file": "browser-proof.json",
+    "original_sha256": "66d1cf4a447a276c67f83169d84458f7007de47121543993401999561b8e37b5",
+    "published_sha256": "66d1cf4a447a276c67f83169d84458f7007de47121543993401999561b8e37b5",
+    "original_bytes": 159,
+    "published_bytes": 159,
+    "processing": "unchanged"
+  },
+  {
+    "file": "before-ledger.json",
+    "original_sha256": "7bf8ad6c4b82011f94103bdb64177af2fd86724535913a40fa92d74d0287a39b",
+    "published_sha256": "7bf8ad6c4b82011f94103bdb64177af2fd86724535913a40fa92d74d0287a39b",
+    "original_bytes": 385,
+    "published_bytes": 385,
+    "processing": "unchanged"
+  },
+  {
+    "file": "after-ledger.json",
+    "original_sha256": "77b4219085ffe0dc17414ff4f57e1d1b81d766c06da941d0be612bbe462b0f97",
+    "published_sha256": "77b4219085ffe0dc17414ff4f57e1d1b81d766c06da941d0be612bbe462b0f97",
+    "original_bytes": 386,
+    "published_bytes": 386,
+    "processing": "unchanged"
+  },
+  {
+    "file": "combined-unknown-task.png",
+    "original_sha256": "fb41ec6638991894dbb54efabde392bcb6e869c2e2be3e3ea8724b73fba6558d",
+    "published_sha256": "fb41ec6638991894dbb54efabde392bcb6e869c2e2be3e3ea8724b73fba6558d",
+    "original_bytes": 109331,
+    "published_bytes": 109331,
+    "processing": "unchanged"
+  }
+]

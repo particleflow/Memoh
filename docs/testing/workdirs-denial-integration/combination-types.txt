@@ -1,0 +1,2 @@
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json

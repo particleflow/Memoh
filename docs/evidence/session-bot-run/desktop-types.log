@@ -1,0 +1,8 @@
+
+> @memohai/desktop@0.22.0 typecheck:web <repository>/apps/desktop
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+
+sh: 1: vue-tsc: not found
+<repository>/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/desktop@0.22.0 typecheck:web: `vue-tsc --noEmit -p tsconfig.web.json --composite false`
+spawn ENOENT

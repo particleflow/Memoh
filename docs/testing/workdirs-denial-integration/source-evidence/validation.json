@@ -1,0 +1,39 @@
+{
+  "base": "f3654de4bad74a9873e08b326a5d802826e28ba0",
+  "product_patch_sha256": "feb4cc922be576bfdab2f9819944320466c370244337d47c5f1b657c6cccea74",
+  "product_files": {
+    "apps/web/src/store/workdirs.ts": "98190755e13fedfb458a3b493b1148220ed95064ec96296ce96954383b61ecbb",
+    "apps/web/src/store/workdirs.test.ts": "30439f59df00c5198ea7fedbfacaa6653326f47f4b8795e64bc061c6365e1267"
+  },
+  "scoped_unique_tests": 129,
+  "new_workdir_cases": 6,
+  "frozen_dependency_new_cases_passed": 6,
+  "full_web_typecheck_exit": 0,
+  "affected_eslint_exit": 0,
+  "ui_contract_exit": 0,
+  "ui_contract_existing_warnings": 3,
+  "real_http_pagination_pages": [
+    0,
+    20,
+    1
+  ],
+  "real_browser_visible_pages": [
+    1,
+    20,
+    1
+  ],
+  "byte_transfers_in_increment": 0,
+  "business_posts": 0,
+  "model_calls": 0,
+  "page_errors_before": 3,
+  "page_errors_after": 0,
+  "final_dependency_runtime_page_errors": 0,
+  "final_dependency_web_url": "http://127.0.0.1:18584",
+  "server_url": "http://127.0.0.1:18580",
+  "original_checkout_clean": true,
+  "remote_writes_attempted": false,
+  "field_access_attempted": false,
+  "frozen_install_pnpm": "10.28.2",
+  "frozen_install_scripts": "ignored; patched-deps guard explicitly passed",
+  "lockfile_changed": false
+}

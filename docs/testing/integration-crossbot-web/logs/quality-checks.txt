@@ -1,0 +1,130 @@
+===== integration-final-web-typecheck.log =====
+
+> @memohai/web@0.22.0 typecheck <repo>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/components/dockview/panel-asset.delegation.test.ts(9,148): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type '(substring: string, ...args: any[]) => string'.
+      Type 'undefined' is not assignable to type '(substring: string, ...args: any[]) => string'.
+src/pages/home/components/dockview/panel-asset.delegation.test.ts(9,187): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type '(substring: string, ...args: any[]) => string'.
+      Type 'undefined' is not assignable to type '(substring: string, ...args: any[]) => string'.
+src/pages/home/components/dockview/panel-asset.vue(91,23): error TS2345: Argument of type '{ content_hash: string; metadata: { delegation_url: string; }; }' is not assignable to parameter of type 'UIAttachment'.
+  Property 'type' is missing in type '{ content_hash: string; metadata: { delegation_url: string; }; }' but required in type 'UIAttachment'.
+<repo>/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2
+
+===== integration-final-web-typecheck-final.log =====
+
+> @memohai/web@0.22.0 typecheck <repo>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+
+===== integration-final-sdk-typecheck-final.log =====
+
+> @memohai/sdk@0.22.0 typecheck <repo>/packages/sdk
+> tsc --noEmit -p tsconfig.json
+
+
+===== integration-final-desktop-typecheck-final.log =====
+
+> @memohai/desktop@0.22.0 typecheck <repo>/apps/desktop
+> pnpm run typecheck:node && pnpm run typecheck:web
+
+
+> @memohai/desktop@0.22.0 typecheck:node <repo>/apps/desktop
+> pnpm run prepare:runtime && tsc --noEmit -p tsconfig.node.json --composite false
+
+
+> @memohai/desktop@0.22.0 prepare:runtime <repo>/apps/desktop
+> pnpm --filter @memohai/runtime build
+
+
+> @memohai/runtime@0.22.0 build <repo>/packages/runtime
+> node scripts/build.mjs && tsc -p tsconfig.build.json && node scripts/copy-proto.mjs
+
+
+> @memohai/desktop@0.22.0 typecheck:web <repo>/apps/desktop
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+
+
+===== integration-final-eslint-final.log =====
+
+<repo>/apps/web/src/components/computer/connect-computer-dialog.test.ts
+  27:29  warning  There is more than one component in this file  vue/one-component-per-file
+  37:32  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/bots/components/model-options.test.ts
+  32:13  warning  Prop "viewportAttrs" should define at least its type  vue/require-prop-types
+  32:30  warning  Prop "layout" should define at least its type         vue/require-prop-types
+
+<repo>/apps/web/src/pages/bots/components/schedule-editor.test.ts
+  19:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+
+<repo>/apps/web/src/pages/bots/new-progress.test.ts
+  107:25  warning  There is more than one component in this file  vue/one-component-per-file
+  141:25  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/home/commands/workspace-keyboard.integration.test.ts
+  122:19  warning  There is more than one component in this file  vue/one-component-per-file
+  177:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/home/components/message-item.test.ts
+  20:39  warning  Prop 'text' requires default value to be set        vue/require-default-prop
+  24:14  warning  Prop 'onEdit' requires default value to be set      vue/require-default-prop
+  32:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+
+<repo>/apps/web/src/pages/keyboard-shortcuts/components/KeyCaptureDialog.test.ts
+   32:19  warning  There is more than one component in this file  vue/one-component-per-file
+   68:19  warning  There is more than one component in this file  vue/one-component-per-file
+   90:19  warning  There is more than one component in this file  vue/one-component-per-file
+  112:19  warning  There is more than one component in this file  vue/one-component-per-file
+  128:19  warning  There is more than one component in this file  vue/one-component-per-file
+  149:19  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 18 problems (0 errors, 18 warnings)
+
+
+===== integration-final-ui-contract-final.log =====
+
+⚠ UI contract — 3 warning(s):
+  packages/ui/src/components/sidebar/Sidebar.vue:66  raw shadow utility (use an elevation token or shadow-none) → group-data-[variant=floating]:shadow-sm
+  packages/ui/src/components/sidebar/SidebarInset.vue:15  raw shadow utility (use an elevation token or shadow-none) → md:peer-data-[variant=inset]:shadow-sm
+  apps/web/src/pages/bots/components/mcp-server-detail.vue:275  possible hand-rolled SettingsRow (min-h-[3.75rem]/min-h-15 outside the owner) — compose <SettingsRow>, or mark ui-allow-shape if it is a genuinely different row → min-h-[3.75rem]
+
+ℹ px baseline: 112 grandfathered px violation(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ app-injection baseline: 134 grandfathered injection(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ hand-spun-loader baseline: 10 grandfathered loader(s) remaining — adopt a loading-ladder rung per cluster, then re-run with --write-baseline
+ℹ alpha baseline: 146 grandfathered hand-written alpha value(s) remaining — burn down per cluster, then re-run with --write-baseline
+✓ UI contract OK (3 warning(s))
+
+===== integration-final-web-build.log =====
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.87s
+
+===== integration-final-server-build.log =====
+
+===== integration-final-browser.log =====
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+20 !== 2
+
+    at /tmp/integration-final-browser.cjs:31:8 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 20,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+===== integration-final-browser-retry.log =====
+{"verified":["real login","Bot create draft","Bot settings","located/unavailable memory refs","real file preview","narrow dark memory","PG-seeded handoff real HTTP list/detail","execution vs return delivery state","delegation second page remains independent of original tasks","reader back navigation"],"pageErrors":[],"apiRequests":210}
+

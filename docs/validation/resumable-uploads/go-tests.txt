@@ -1,0 +1,5 @@
+ok  	github.com/felinics/memoh/internal/media	5.695s
+ok  	github.com/felinics/memoh/internal/handlers	3.893s
+ok  	github.com/felinics/memoh/cmd/internal/core	0.049s
+ok  	github.com/felinics/memoh/internal/apperror	2.360s
+ok  	github.com/felinics/memoh/internal/server	(cached)

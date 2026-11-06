@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 2 skipped (3)
+   Start at  12:57:50
+   Duration  12.34s (transform 9.37s, setup 0ms, import 11.67s, tests 74ms, environment 446ms)
+

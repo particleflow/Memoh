@@ -1,0 +1,86 @@
+Combined excerpts, not a byte-identical original log. Original files remain private. All paths are task/toolchain paths; fixtures contain no real credentials or NAS addresses.
+
+--- workspace-storage-web-typecheck-final.txt (diagnostic excerpt) ---
+
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/workspace-storage/index.vue(36,77): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/pages/workspace-storage/index.vue(45,77): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/pages/workspace-storage/index.vue(56,72): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/pages/workspace-storage/index.vue(66,60): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+ ELIFECYCLE  Command failed with exit code 2.
+
+--- workspace-storage-go-lint.txt (diagnostic excerpt) ---
+internal/handlers/user_runtime_storage.go:33:1: Comment should end in a period (godot)
+// @Router /users/me/runtimes/{id}/workspace-storage [get]
+^
+internal/handlers/user_runtime_storage.go:58:1: Comment should end in a period (godot)
+// @Router /users/me/runtimes/{id}/workspace-storage/directories [post]
+^
+internal/handlers/user_runtime_storage.go:87:1: Comment should end in a period (godot)
+// @Router /users/me/runtimes/{id}/workspace-storage [put]
+^
+internal/userruntime/workspace_storage_test.go:146:66: `ther` is a misspelling of `there` (misspell)
+	for _, relative := range []string{"../other", "/absolute", `C:\other`, `\\other\share`, "a/../b", "a\x00b"} {
+	                                                                ^
+
+--- workspace-storage-core-build.txt (diagnostic excerpt) ---
+# github.com/felinics/memoh/cmd/internal/core
+cmd/internal/core/module.go:31:2: "github.com/felinics/memoh/internal/userruntime" imported and not used
+
+--- workspace-storage-error-packages-terminal.txt (diagnostic excerpt) ---
+--- FAIL: TestCatalogGolden (0.00s)
+    catalog_guard_test.go:300: new codes are not recorded in testdata/codes.golden; append these lines (or run with -update-golden):
+        workspace.storage_unavailable	503
+--- FAIL: TestLocaleCatalogAlignment (0.00s)
+    --- FAIL: TestLocaleCatalogAlignment/en.json#01 (0.00s)
+        catalog_guard_test.go:165: en.json: missing errors.workspace.storage_unavailable
+    --- FAIL: TestLocaleCatalogAlignment/en.json (0.01s)
+        catalog_guard_test.go:159: en.json: keys under errors are not sorted at errors.workspace.storage_unavailable; sort them so codes added on parallel branches land on different lines
+    --- FAIL: TestLocaleCatalogAlignment/zh.json#01 (0.00s)
+        catalog_guard_test.go:165: zh.json: missing errors.workspace.storage_unavailable
+    --- FAIL: TestLocaleCatalogAlignment/ja.json#01 (0.00s)
+        catalog_guard_test.go:165: ja.json: missing errors.workspace.storage_unavailable
+    --- FAIL: TestLocaleCatalogAlignment/zh.json (0.00s)
+        catalog_guard_test.go:159: zh.json: keys under errors are not sorted at errors.workspace.storage_unavailable; sort them so codes added on parallel branches land on different lines
+    --- FAIL: TestLocaleCatalogAlignment/ja.json (0.01s)
+        catalog_guard_test.go:159: ja.json: keys under errors are not sorted at errors.workspace.storage_unavailable; sort them so codes added on parallel branches land on different lines
+FAIL
+FAIL	github.com/felinics/memoh/internal/apperror	1.081s
+ok  	github.com/felinics/memoh/internal/server	0.041s
+FAIL
+
+--- workspace-storage-postgres.txt (diagnostic excerpt) ---
+# github.com/felinics/memoh/internal/db.test
+/workspace/.memoh-cloud/go/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device
+FAIL	github.com/felinics/memoh/internal/db [build failed]
+FAIL
+
+--- workspace-storage-browser-final.txt (diagnostic excerpt) ---
+=== RUN   TestWorkspaceStoragePostgresHTTPPreservesRegistration
+    workspace_storage_integration_test.go:145: Web exercise: exit status 1
+        node:internal/modules/run_main:107
+            triggerUncaughtException(
+            ^
+        
+        locator.waitFor: Timeout 30000ms exceeded.
+        Call log:
+        [2m  - waiting for getByLabel('新建目录', { exact: true }) to be hidden[22m
+        [2m    63 × locator resolved to visible <input data-slot="input" data-size="default" id="nas-directory-name" class="w-full min-w-0 rounded-md tracking-[0.01em] py-2 text-control font-medium text-foreground h-9 px-3 outline-none [&:read-only:not(:disabled)]:bg-muted [&:read-only:not(:disabled)]:text-muted-foreground [&:read-only:not(:disabled)]:cursor-not-allowed disabled:pointer-events-none disabled:opacity-40 file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-body file:font-medium"/>[22m
+        
+            at /tmp/memoh-candidate-7bcb-review/docs/testing/computer-workspace-storage/browser.mjs:67:50 {
+          log: [
+            "  - waiting for getByLabel('新建目录', { exact: true }) to be hidden",
+            '    63 × locator resolved to visible <input data-slot="input" data-size="default" id="nas-directory-name" class="w-full min-w-0 rounded-md tracking-[0.01em] py-2 text-control font-medium text-foreground h-9 px-3 outline-none [&:read-only:not(:disabled)]:bg-muted [&:read-only:not(:disabled)]:text-muted-foreground [&:read-only:not(:disabled)]:cursor-not-allowed disabled:pointer-events-none disabled:opacity-40 file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-body file:font-medium"/>'
+          ],
+          name: 'TimeoutError'
+        }
+        
+        Node.js v25.9.0
+--- FAIL: TestWorkspaceStoragePostgresHTTPPreservesRegistration (40.59s)
+FAIL

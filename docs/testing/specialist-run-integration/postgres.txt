@@ -1,0 +1,7 @@
+Verified existing isolated loopback database; test creates/cleans only its own unique temporary database.
+COMMAND: go test -p=2 -tags=integration -count=1 -v ./internal/db -run ^TestBotDelegationPostgresClaimIsolationAndDescendantAssets$ -timeout=180s
+=== RUN   TestBotDelegationPostgresClaimIsolationAndDescendantAssets
+    bot_delegation_postgres_integration_test.go:28: freshMigratedDB applied the official full migration chain: version=174 dirty=false
+--- PASS: TestBotDelegationPostgresClaimIsolationAndDescendantAssets (1.86s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	1.873s

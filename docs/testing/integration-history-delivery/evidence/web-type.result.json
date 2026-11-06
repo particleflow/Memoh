@@ -1,0 +1,12 @@
+{
+  "check": "web-type",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@memohai/web",
+    "typecheck"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:00:05Z",
+  "elapsed_seconds": 29.689
+}

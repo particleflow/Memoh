@@ -1,0 +1,11 @@
+{
+  "parent_commit": "a68a237d7530acbdc5cc538cc2e151ef320f8b5f",
+  "tested_sources": {
+    "internal/botdelegation/attachments.go": "bb503930fc0936c07548aa0835b9d44338f1f3e010cb07c35fbd1fb20aed221a",
+    "internal/handlers/message.go": "dcfbb23ff4718d543817f3df0edce7be56edc74eab0f1fe80ac4facf04161cc0",
+    "internal/handlers/bot_delegations.go": "30ef62f8903427082a4f7b0de8928dd9e1cdfd057b734118c47afef2efacef1c",
+    "scripts/acceptance/delegation_fixture.py": "f8658b0657b9a42915fd5bc44690fb15ef91178e45ecd07943f5c4a5740cb358",
+    "scripts/acceptance/bot_delegation.py": "6b766e93a0f0508cb83f9c5eccff701f0ee5d6c94ffe5b743340a6b6129b7474",
+    "scripts/acceptance/delegation-fixture.toml.in": "974f0ef3122195eb61ad0c39802133ef984287c4fe3eea6e88f10cb64f6dcc2f"
+  }
+}

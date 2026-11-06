@@ -1,0 +1,12 @@
+Initial implementation check outcomes (2d67c5ae), 2026-10-21:
+PASS golangci-lint 2.10.1 run --new-from-rev=origin/main ./internal/media/... ./internal/handlers/... ./cmd/internal/core/... (exit 0, no findings)
+PASS go vet ./internal/media ./internal/handlers ./cmd/internal/core (exit 0)
+PASS go build -p 3 ./cmd/agent
+PASS go generate ./internal/handlers
+PASS pnpm run generate-sdk
+PASS pnpm --filter @memohai/sdk typecheck
+PASS codegen configuration standalone TypeScript check (--ignoreConfig, bundler resolution)
+PASS selected Web API/SSE error suites: 2 files, 123 tests
+PASS git diff --check
+PASS no changes under internal/agent or db/postgres relative to main base
+PASS runtime/context/contextview zero diff against bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046

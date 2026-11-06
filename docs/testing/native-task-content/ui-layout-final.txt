@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  17:55:50
+   Duration  6.47s (transform 4.41s, setup 0ms, import 5.71s, tests 231ms, environment 397ms)

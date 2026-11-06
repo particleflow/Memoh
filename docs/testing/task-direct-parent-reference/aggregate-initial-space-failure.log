@@ -1,0 +1,22 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (bded42b9)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 5 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.69s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/db ./internal/handlers ./internal/sessiontask ./spec
+[hooks] Go package selection: 0.20s
+[hooks] Go lint: golangci-lint run --concurrency=2 /tmp/memoh-candidate-7bcb-review/internal/db /tmp/memoh-candidate-7bcb-review/internal/handlers /tmp/memoh-candidate-7bcb-review/internal/sessiontask /tmp/memoh-candidate-7bcb-review/spec
+internal/handlers/acl.go:1: : write /tmp/web-observation-reconnect/go-cache/d6/d6d5db26e1c1465ebe0a51169793428e2276ce900115291f0f103f11c8e9f02a-d: no space left on device (typecheck)
+package handlers
+[hooks] Go lint: 26.72s
+[hooks] Go lint failed (1)

@@ -1,0 +1,88 @@
+{
+  "measuredSourceHashes": {
+    "chat-read-aloud.ts": "55927314cc78b0a0bd8a76abc553e9b8536114c69bc7ff5176a561f620ab8156",
+    "useChatReadAloud.ts": "8ebfdac5725165a6c5ce6d132b0b4b488c9a8a02ae7d8c56859315884486dae2",
+    "speech-sentence-boundary.ts": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+    "speech-replay-cache.ts": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+    "speech-audio-stream.ts": "ae5d84ccbb1a833bef1c34bbb7c91dae16af507fc99977ec6c5f16237bf984ad"
+  },
+  "origin": "http://127.0.0.1:39061",
+  "browser": "154.0.8037.57",
+  "providerCalls": 0,
+  "physicalAudibleMeasurement": false,
+  "profile": "normal",
+  "samplerMaxPollGapMS": 51.19999999925494,
+  "underruns": 0,
+  "firstNonzeroMS": 490.80000000074506,
+  "gapsMS": [],
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 470.19999999925494,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:39061/f46ca0b0-263a-4925-a750-513600052bf0"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 477.3999999985099,
+      "time": 0.006095,
+      "src": "blob:http://127.0.0.1:39061/f46ca0b0-263a-4925-a750-513600052bf0"
+    },
+    {
+      "type": "pause",
+      "trusted": true,
+      "ms": 2916.5,
+      "time": 2.455507,
+      "src": "blob:http://127.0.0.1:39061/f46ca0b0-263a-4925-a750-513600052bf0"
+    },
+    {
+      "type": "ended",
+      "trusted": true,
+      "ms": 2917.099999997765,
+      "time": 2.455507,
+      "src": "blob:http://127.0.0.1:39061/f46ca0b0-263a-4925-a750-513600052bf0"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 2918.599999997765,
+      "time": 0,
+      "src": "http://127.0.0.1:39061/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 2918.89999999851,
+      "time": 0,
+      "src": "http://127.0.0.1:39061/"
+    }
+  ],
+  "playCalls": [
+    {
+      "ms": 467.8999999985099,
+      "active": true,
+      "ever": true,
+      "src": "blob:http://127.0.0.1:39061/f46ca0b0-263a-4925-a750-513600052bf0",
+      "outcome": "fulfilled"
+    }
+  ],
+  "requests": [
+    {
+      "text": "First sentence.",
+      "relativeStartMS": 0,
+      "index": 0
+    },
+    {
+      "text": "Second sentence.",
+      "relativeStartMS": 656.204422,
+      "index": 1
+    }
+  ],
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "errors": []
+}

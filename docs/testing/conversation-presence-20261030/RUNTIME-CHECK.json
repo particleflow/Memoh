@@ -1,0 +1,129 @@
+{
+  "recorded_at_utc": "2026-10-30T13:22:40.807225+00:00",
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "scope": "local isolated PostgreSQL plus httptest; not production acceptance",
+  "race": {
+    "top_level_pass_count": 18,
+    "tests": [
+      "TestAcknowledgementIsNaturalAndTypedNotAFixedFallback",
+      "TestFormalFirstAndCancelRejectProviderThatIgnoresCancellation",
+      "TestStartDoesNotWaitForAuxiliaryStoreOrGeneration",
+      "TestHotConversationAndForeignActorDoNotGenerate",
+      "TestFormalBeforeClaimAndEpisodeReplayDoNotGenerate",
+      "TestFailureCapacityAndWrongPhaseNeverPublishOrRetry",
+      "TestContinuityUsesStateInsteadOfAClockAlone",
+      "TestOnlyTrustedDirectSourceIsEligible",
+      "TestThinkingPrefersOffThenLowWithoutModelNames",
+      "TestConversationPresenceIsTransientTypedStatus",
+      "TestConversationPresenceNativeWSAndHistory",
+      "TestConversationPresencePostgresClaimPublishAndRestart",
+      "TestConversationPresencePostgresCloseBeforePrepare",
+      "TestConversationPresencePostgresRejectsStaleAndRevoked",
+      "TestConversationPresencePostgresAbortRejectsPublication",
+      "TestConversationPresenceRuntimeSameModelParallelAndFormalFirst",
+      "TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites",
+      "TestPresenceSDKRejectsWrongSelectionAndInvalidOutput"
+    ],
+    "packages": [
+      {
+        "Package": "github.com/felinics/memoh/internal/conversationpresence",
+        "Action": "pass",
+        "Elapsed": 1.016
+      },
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/view",
+        "Action": "pass",
+        "Elapsed": 1.037
+      },
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/application",
+        "Action": "pass",
+        "Elapsed": 1.995
+      }
+    ]
+  },
+  "main_regressions": {
+    "top_level_pass_count": 17,
+    "tests": [
+      "TestDirectChatWithoutCallerDeadlineUsesBoundedNonStreamingClient",
+      "TestDirectChatCallerDeadlineWinsOverNonStreamingClientTimeout",
+      "TestDirectChatMintsRunAndPersistsCompletedLifecycleAfterAssistant",
+      "TestDirectChatProviderFailurePersistsFailedProviderLifecycle",
+      "TestAdmittedStreamCancellationPersistsAbortedLifecycle",
+      "TestAdmittedStreamWithholdsTerminalWhenHistoryPersistenceFails",
+      "TestPostgresWSStepHistorySuccess",
+      "TestPostgresWSStepHistoryStop",
+      "TestPostgresWSStepHistoryFailureWithoutSteps",
+      "TestPostgresWSStepHistoryFailureWithAnyCode",
+      "TestPostgresWSStepHistoryUnfencedFailure",
+      "TestPostgresWSStepHistoryUnfencedStop",
+      "TestPostgresWSStepHistoryUncodedFailure",
+      "TestPostgresWSStepHistoryFailureAfterPartialOutput",
+      "TestPostgresWSStepHistoryFailureAfterCommittedStep",
+      "TestPostgresWSStepHistoryFailureAfterCommittedStepWithoutText",
+      "TestPostgresWSStepHistoryIdleTimeout"
+    ],
+    "packages": [
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/application",
+        "Action": "pass",
+        "Elapsed": 4.291
+      }
+    ]
+  },
+  "recovered_toolchain_original_reasoning_tests": {
+    "top_level_pass_count": 3,
+    "tests": [
+      "TestAlwaysOnModelIsSupportedWithoutAControl",
+      "TestResolveConfigAgreesWithOffReachability",
+      "TestResolveConfigHonorsProjectedOffDeclarations"
+    ],
+    "packages": [
+      {
+        "Package": "github.com/felinics/memoh/internal/reasoning",
+        "Action": "pass",
+        "Elapsed": 1.018
+      }
+    ]
+  },
+  "go_core_config_view_tests_passed": true,
+  "server_and_bridge_build_passed": true,
+  "web_build_passed": true,
+  "web_typecheck_passed": true,
+  "target_eslint_passed": true,
+  "ui_copy_policy_passed": true,
+  "ui_contract_passed_with_preexisting_warnings": 3,
+  "browser": {
+    "scope": "actual Vite chat page authenticated against real Go backend; controlled in-memory chat state fixture, not a full WS/browser/model e2e",
+    "checks": [
+      "natural ack rendered once on existing status surface",
+      "light zh",
+      "dark narrow zh",
+      "formal text suppresses stale ack even if status clear has not arrived",
+      "terminal/history status hidden"
+    ],
+    "page_errors": [],
+    "screenshots": [
+      "ack-light-zh.png",
+      "ack-dark-narrow-zh.png",
+      "formal-clears-ack.png"
+    ],
+    "human_qa": false,
+    "real_model_calls": 0
+  },
+  "deployment_count": 0,
+  "remote_push_or_upload_count": 0,
+  "production_credentials_used": false,
+  "successful_real_model_generation_count": 0,
+  "default_upstream_attempt_from_failed_fixture": {
+    "target": "https://api.openai.com/v1",
+    "api_key": "absent",
+    "arrival_or_response": "unknown",
+    "observed": "agent_start and retries, intended httptest request count zero, no model result",
+    "fixed": "persistent provider local URL plus local-host-only transport; final test asserts zero blocked external hosts"
+  },
+  "production_ttfa_ttft_cost_measured": false,
+  "tts_integration": false,
+  "human_qa": false
+}

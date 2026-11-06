@@ -1,0 +1,5 @@
+Restarted only current isolated development Server; same executable, PG and configuration.
+PASS real Server/PG owner location GET/PUT, anonymous 401/no-store, injection rejection, stale config conflict, actual Server restart persistence, live-pause config rejection; existing task UI retained original revision/fingerprint and unknown outcome.
+RESTORED original synthetic owner locator; no host program invocation or stop permission.
+PASS full existing operation snapshot unchanged; native methods: ["workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list"]
+RESTORED original synthetic MCP URL; temporary read-only peer stopped. No credential, production, task dispatch or Windows change.

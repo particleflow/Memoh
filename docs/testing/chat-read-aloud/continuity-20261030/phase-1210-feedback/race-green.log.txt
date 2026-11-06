@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 8 skipped (9)
+   Start at  12:43:00
+   Duration  828ms (transform 108ms, setup 0ms, import 230ms, tests 11ms, environment 443ms)

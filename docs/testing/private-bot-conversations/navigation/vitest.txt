@@ -1,0 +1,10 @@
+✓ patched dependencies verified against installed content
+
+ RUN  v4.1.10 /workspace/contact-lifecycle/apps/web
+
+
+ Test Files  3 passed (3)
+      Tests  266 passed (266)
+   Start at  13:56:24
+   Duration  5.55s (transform 5.17s, setup 0ms, import 7.74s, tests 1.14s, environment 1ms)
+

@@ -1,0 +1,108 @@
+{
+  "measuredSourceHashes": {
+    "chat-read-aloud.ts": "71262ce639ab73a1eee4960c713491b07d3c9a963bb66d8881df8d4808dbffb9",
+    "useChatReadAloud.ts": "c9b45e99c05cff099c8a775ecd14836900383d58c7ece82278d04d2c18883216",
+    "speech-sentence-boundary.ts": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+    "speech-replay-cache.ts": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+    "speech-audio-stream.ts": "ae5d84ccbb1a833bef1c34bbb7c91dae16af507fc99977ec6c5f16237bf984ad"
+  },
+  "origin": "http://127.0.0.1:38211",
+  "browser": "154.0.8037.57",
+  "providerCalls": 0,
+  "physicalAudibleMeasurement": false,
+  "profile": "intentional-underrun",
+  "samplerMaxPollGapMS": 43.19999999925494,
+  "underruns": 1,
+  "firstNonzeroMS": 491.1000000014901,
+  "gapsMS": [
+    {
+      "from": 1690.8999999985099,
+      "to": 3107.5,
+      "durationMS": 1416.6000000014901
+    }
+  ],
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 462.1000000014901,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 465.69999999925494,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 1682.300000000745,
+      "time": 1.21576,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 3064,
+      "time": 1.21576,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "pause",
+      "trusted": true,
+      "ms": 4302.699999999255,
+      "time": 2.455508,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "ended",
+      "trusted": true,
+      "ms": 4303.60000000149,
+      "time": 2.455508,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 4305.300000000745,
+      "time": 0,
+      "src": "http://127.0.0.1:38211/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 4305.39999999851,
+      "time": 0,
+      "src": "http://127.0.0.1:38211/"
+    }
+  ],
+  "playCalls": [
+    {
+      "ms": 460.3999999985099,
+      "active": true,
+      "ever": true,
+      "src": "blob:http://127.0.0.1:38211/36105c94-6eec-4172-b0ab-9e83473dd7ae",
+      "outcome": "fulfilled"
+    }
+  ],
+  "requests": [
+    {
+      "text": "First sentence.",
+      "relativeStartMS": 0,
+      "index": 0
+    },
+    {
+      "text": "Second sentence.",
+      "relativeStartMS": 654.1327880000001,
+      "index": 1
+    }
+  ],
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "errors": []
+}

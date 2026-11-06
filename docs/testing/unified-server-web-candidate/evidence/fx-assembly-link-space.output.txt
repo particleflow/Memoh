@@ -1,0 +1,10 @@
+=== RUN   TestFXOptionsValidate
+=== RUN   TestFXOptionsValidate/device-transfers
+--- PASS: TestFXOptionsValidate/device-transfers (0.04s)
+=== RUN   TestFXOptionsValidate/split
+--- PASS: TestFXOptionsValidate/split (0.03s)
+=== RUN   TestFXOptionsValidate/embedded
+--- PASS: TestFXOptionsValidate/embedded (0.03s)
+--- PASS: TestFXOptionsValidate (0.10s)
+PASS
+ok  	github.com/felinics/memoh/cmd/agent	1.169s

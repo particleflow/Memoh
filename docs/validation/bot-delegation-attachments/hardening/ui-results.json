@@ -1,0 +1,25 @@
+{
+  "downloads": [
+    {
+      "sha256": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+      "bytes": 31
+    },
+    {
+      "sha256": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+      "bytes": 40
+    }
+  ],
+  "browser_scoped_range": {
+    "status": 206,
+    "content_range": "bytes 2-6/31",
+    "cache": "no-store",
+    "bytes": [
+      108,
+      101,
+      103,
+      97,
+      116
+    ]
+  },
+  "preview_reload": true
+}

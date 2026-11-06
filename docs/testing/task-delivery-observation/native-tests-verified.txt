@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 <worktree>
+
+
+ Test Files  6 passed (6)
+      Tests  95 passed (95)
+   Start at  15:58:27
+   Duration  9.67s (transform 9.97s, setup 0ms, import 14.76s, tests 2.90s, environment 1.89s)
+

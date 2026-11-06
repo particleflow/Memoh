@@ -1,0 +1,53 @@
+[
+  {
+    "sequence": 1,
+    "role": "supervisor",
+    "tool": "delegate_to_bot",
+    "result_ids": []
+  },
+  {
+    "sequence": 2,
+    "role": "supervisor",
+    "tool": null,
+    "result_ids": [
+      "delegate-management"
+    ]
+  },
+  {
+    "sequence": 3,
+    "role": "specialist",
+    "tool": "spawn_agent",
+    "result_ids": []
+  },
+  {
+    "sequence": 4,
+    "role": "child",
+    "tool": null,
+    "result_ids": []
+  },
+  {
+    "sequence": 5,
+    "role": "specialist",
+    "tool": "send",
+    "result_ids": [
+      "spawn-management"
+    ]
+  },
+  {
+    "sequence": 6,
+    "role": "specialist",
+    "tool": null,
+    "result_ids": [
+      "spawn-management",
+      "return-original"
+    ]
+  },
+  {
+    "sequence": 7,
+    "role": "followup",
+    "tool": null,
+    "result_ids": [
+      "delegate-management"
+    ]
+  }
+]

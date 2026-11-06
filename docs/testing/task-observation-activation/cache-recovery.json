@@ -1,0 +1,45 @@
+{
+  "removed_regenerable_cache_only": [
+    {
+      "cache": "7d204e9ef36188d877bba58c68958cc87a7031554241f06d53cb72a613ef5493-d",
+      "bytes": 185270504
+    },
+    {
+      "cache": "f6267b6b221975dcc5d69122a87e40df3cb75de46bf747053e44f4901a76f61e-d",
+      "bytes": 170409588
+    },
+    {
+      "cache": "ebfdadf302587e12c813b2b95139a81c6d3761ebd4ea81a08fda7d20ccd5e137-d",
+      "bytes": 170459524
+    },
+    {
+      "cache": "46471c90ddd535f65523f8d4f540bf0c670b05b88b51bac22df14e24bed07e6f-d",
+      "bytes": 185338902
+    },
+    {
+      "cache": "34a8bb8379dde30030f63d764ea283b33fd11f1d1974c99a044608018ef65079-d",
+      "bytes": 170462018
+    },
+    {
+      "cache": "3dc2860f9fd0ded87afc4ffaebcb7cee180827ce8555834f5d424c7e48039463-d",
+      "bytes": 173750000
+    },
+    {
+      "cache": "10e1150ce7ef657ace0d37fc83ac768f0df3a9f8ce4373df05e0724f44ba4cd6-d",
+      "bytes": 188878576
+    },
+    {
+      "cache": "5dffd5c35575b6b57bae19c325e4212e1b99b7db6afc9e82c377e8577cedebee-d",
+      "bytes": 173752786
+    },
+    {
+      "cache": "eb450ae657c2bd20b740e89aa110f996900e3eff054909afa24ce1c4a9af0d62-d",
+      "bytes": 188878678
+    },
+    {
+      "cache": "d6d5db26e1c1465ebe0a51169793428e2276ce900115291f0f103f11c8e9f02a-d",
+      "bytes": 173752888
+    }
+  ],
+  "total_bytes": 1780953464
+}

@@ -1,0 +1,8 @@
+Go vet final: exit 0 (no diagnostics)
+Vue typecheck: exit 0 (no diagnostics)
+Final reviewed server build: exit 0 (no diagnostics)
+git diff --check: exit 0
+UI copy policy OK (2033 reviewed surfaces; no unreviewed additions)
+Agent runtime and contextview match official baseline bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046
+Reviewed runtime cleanup: Server session exit 0; Vite session exit 143 after normal SIGTERM; provider original session exit 130; listeners 28080/28083/28089 closed. Original denied Vite cleanup on 28082 remains pending. PostgreSQL and all fixture/history records retained.
+Final golangci-lint 2.10.1 scoped to all seven changed Go packages with --new-from-rev=HEAD after staging: exit 0, no new issues. Initial unfiltered scan included an existing unused modelID parameter in createWSChatSession; retained in go-lint-initial.log.

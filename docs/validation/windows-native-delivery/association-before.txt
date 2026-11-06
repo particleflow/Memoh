@@ -1,0 +1,10 @@
+--- FAIL: TestAssociationReviewTimeoutIsUnknownAndRecoverable (0.02s)
+    --- FAIL: TestAssociationReviewTimeoutIsUnknownAndRecoverable/context_deadline_exceeded (0.01s)
+        association_review_test.go:20: ambiguous context failure became permanently blocked
+    --- FAIL: TestAssociationReviewTimeoutIsUnknownAndRecoverable/context_canceled (0.01s)
+        association_review_test.go:20: ambiguous context failure became permanently blocked
+--- FAIL: TestAssociationReviewCancelMustReconcileLostCommit (0.01s)
+    association_review_test.go:35: cancel hid an already committed result instead of reconciling it
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.037s
+FAIL

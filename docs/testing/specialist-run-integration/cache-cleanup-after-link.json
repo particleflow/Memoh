@@ -1,0 +1,327 @@
+{
+  "reason": "Observed linker ENOSPC; finished test binary cache and bounded old Go cache only",
+  "files": [
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/10/107f3beba478cf16894f7bb29a079af9b6329012349ceeb9ab01e82887d8b779-d",
+      "bytes": 166899846,
+      "mtime": 1792901999.3973165
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/b9/b9f00ae6424d62ad8f426ab24de8eaa560cf366c8ed04d7e18383475f6063709-d",
+      "bytes": 10417658,
+      "mtime": 1792870117.1913555
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/8f/8f5c3fa2606e890dfc7dbf4007adf36e76c8897b8c3b9fdd8ebcd39218996d3e-d",
+      "bytes": 10366970,
+      "mtime": 1792844972.8796144
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/2e/2ed4165ce861a8d67c58dd1efe55d86a5b8f9c16e98fde8206f84c47b17ddfad-d",
+      "bytes": 10366970,
+      "mtime": 1792846213.1266735
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/1b/1b4e3ecd882bd74f8c5833fe3431708d0f134965a471c4fba229a2be7e45a6cf-d",
+      "bytes": 10366730,
+      "mtime": 1792861396.5865598
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/ba/ba9e6e58eeb29ab324795793a5646222efe0c729a164c56518835490094064c1-d",
+      "bytes": 10366724,
+      "mtime": 1792830024.2886467
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/99/9917efdf532f617a5e6cb396c9febd8d312bdddfe16b5a6f36ff88362a518dfb-d",
+      "bytes": 10366724,
+      "mtime": 1792844769.1287572
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/70/70a587824380db9b7e9e56bc5e37dedb8143d7ad278a34c30c0f7fdc1b03a062-d",
+      "bytes": 10366724,
+      "mtime": 1792839311.2216742
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/38/38494a8f7163a851c17457783cbf21e33bd8fdbb15dd8cd1c069ece1fda18950-d",
+      "bytes": 10366724,
+      "mtime": 1792846085.7019897
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/3f/3fa1dae36ecdd2f085deff87cd6cd96ece5e0a62df8440afeedf8a5a349b5bf3-d",
+      "bytes": 10347762,
+      "mtime": 1792844961.3812833
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/03/03112ea05f34b8162a08fa710b7640d81b5c69c26975060a1fb8ac38d95f7a4a-d",
+      "bytes": 10347762,
+      "mtime": 1792846203.8191156
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/59/592c678bae33e36239b48d38c0ae56ff1abbe63d4840abfd637da4307cc95873-d",
+      "bytes": 10347442,
+      "mtime": 1792839304.8190296
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/2c/2ce7e29bbf2ad52962cb9d7dd7908768e9cf7d72b810161a6b344871d60dd0ea-d",
+      "bytes": 10347442,
+      "mtime": 1792844755.0609746
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/21/2128295d47da27f6bd68432a8b8c5d8cf22238451d695a7dd695e0b9c44cccc0-d",
+      "bytes": 10347442,
+      "mtime": 1792846078.2773178
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/f9/f9596a759fe0a6b4412aa9ca1cb6ec437940d0357090ee003019e5024478fbac-d",
+      "bytes": 10143062,
+      "mtime": 1792839241.7374291
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/5d/5d6248c9601d4443974e9aee98fea7a056c2c63e8a77a2522e6336e106417927-d",
+      "bytes": 10089084,
+      "mtime": 1792861606.692658
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/21/2175f80763f6ee873372327249b0e5895564b464763192a33186c15b1d97b5e8-d",
+      "bytes": 9970658,
+      "mtime": 1792870117.189252
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/1d/1d2e36e5e81614d6012aad04c4050d0968740eb9597a3a9afed1ed3436c13bde-d",
+      "bytes": 9740982,
+      "mtime": 1792833034.6038852
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/1c/1c8091cc0376eafa292c6ebace224a78e0fdd5b5c71b9c2f2c8048653120a0fb-d",
+      "bytes": 9602606,
+      "mtime": 1792833026.4438512
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/4d/4d6cc94ea92fb12f1aa487428195188edcea5aaee23b3602c745f452e235277a-d",
+      "bytes": 9600992,
+      "mtime": 1792867268.1554613
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/55/5581d0290c24c121ff6479d2407e87b9747fc433f5fdc3a47a68c7a8d1a2e74c-d",
+      "bytes": 9546676,
+      "mtime": 1792844829.2827432
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/a5/a530d26ef166171cb321b1f060ee57a0d376dcf5a427ddacad53e7289ff5d906-d",
+      "bytes": 9545432,
+      "mtime": 1792867268.1184325
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/bb/bb5ec04ffb4d67f571bab5805eaa27290d2e4e2ec8163e109b486aec57949ee1-d",
+      "bytes": 9162644,
+      "mtime": 1792833022.970459
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/10/10b1718a9f680935324509510368970e19f4208afe14243d9a78fde7ba1de02d-d",
+      "bytes": 8974938,
+      "mtime": 1792833022.2995908
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/35/35e15d30fc05e51cd16d14ec958de1e28d42ec005f1e4923da6e513cc42d6f94-d",
+      "bytes": 8828270,
+      "mtime": 1792833020.3891084
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/df/df1b037bf51c8e9450f2e4a285e16d23ec7b023e3b64f8b1c6a77fcc3381135c-d",
+      "bytes": 8664016,
+      "mtime": 1792833020.3826823
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/73/73c0becde4f7362f67997f48c247f514cc5d54b88a9c5c8ac961b295829c9e00-d",
+      "bytes": 8661182,
+      "mtime": 1792833019.641078
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/41/4155219b1362dce25c0c0398bfffef46e72d3f44576d3f587924564d211e0cf6-d",
+      "bytes": 8625370,
+      "mtime": 1792861606.7326403
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/1a/1a91813a2069bafe8f925fbdaab8f53005545fdf9e2fd3fb0f86ba0eee156a6b-d",
+      "bytes": 8596658,
+      "mtime": 1792833024.3128574
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/cb/cb8c546bee236cdf5c30dee943e1b0d12fe49fc0b74292d14024360e472f34a3-d",
+      "bytes": 8564566,
+      "mtime": 1792861606.6916459
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/2e/2e66e3a63c73fe75984308961c4d416a0eab17cb868edb269d4e501af157ac7c-d",
+      "bytes": 8546086,
+      "mtime": 1792832914.4403687
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/bf/bf3391140a4ddbf5f1eba92f82f852c5e204523cc6ee2bab1b489e2e8d107b25-d",
+      "bytes": 8152022,
+      "mtime": 1792861606.6833286
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/1e/1e7e6fd4f2a9c34b1a003d70ab570e73a2d05b38cfb16f06a9aa2b28c4dd90a6-d",
+      "bytes": 8008106,
+      "mtime": 1792861606.6803677
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/f0/f0a6437588d8ed2692b2e22581883513ff5a0d2102b66907822a404cf7d7a6be-d",
+      "bytes": 7952344,
+      "mtime": 1792867268.1373959
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/b8/b8aa9b96380451db319ea6c4db7ac8b28a8e3efc6623285d310bbaccdb2685ca-d",
+      "bytes": 7876940,
+      "mtime": 1792861606.6802757
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/5c/5c7824a9be99e9395cab79d0863a69b7686f7e89354b89ee4faddb0e6ffe4462-d",
+      "bytes": 7779982,
+      "mtime": 1792861606.671157
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/b1/b19a5651e25805d9241a336b4298f52bf5893cdf6da6e112c7b086d04d28786c-d",
+      "bytes": 7764130,
+      "mtime": 1792870117.1566813
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/8a/8a7f6ef85a4e7b080cd8a658c8d9471c513150a2cbcc9db85f03a98c1cfd784b-d",
+      "bytes": 7697476,
+      "mtime": 1792861606.673639
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/05/051713a75319bc27794f9b7dd709a628dea6f01d221a7cb6871f0f464640c897-d",
+      "bytes": 7667570,
+      "mtime": 1792861606.685562
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/65/65d1cd5004c46f062630d9db0c38fe4f62419abf28cce52a3f2354bd7e354c71-d",
+      "bytes": 7419144,
+      "mtime": 1792870117.1698782
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/e1/e17b6a0aa0d08cee1abb3667a869defbd006877ff4b962f4d02e111f689a9b0b-d",
+      "bytes": 7398984,
+      "mtime": 1792867447.0643108
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/0f/0f46a01cd7cc811f923e99d97bff56a8b6fffec3a15e979edbf6a4239937e987-d",
+      "bytes": 7371866,
+      "mtime": 1792844752.3251715
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/2e/2eef2aeec6968e3a11a0d99a2a004cb7ac94d1eb48192c16f7193fdf4fcd62d6-d",
+      "bytes": 7351896,
+      "mtime": 1792849030.5367227
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/23/2394f38b2fcf8869440c96452d44e99864c8e1a6e2b5ae725cd498ca4b3a8111-d",
+      "bytes": 7343158,
+      "mtime": 1792867275.3538227
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/13/13949bce874b292deef70f5e9fba691d20df17407d5a60ba7a27e4d3e9fe75f0-d",
+      "bytes": 7236488,
+      "mtime": 1792867268.1261816
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/b2/b2dd6c87eb3fd7462387929e83e32be13368ae898bf046d9230056e9f9615737-d",
+      "bytes": 7192454,
+      "mtime": 1792849052.9426835
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/06/0697565c411b23682df2d1c23f8176147f01ebb9e205d13d47b78090cad04b14-d",
+      "bytes": 7192384,
+      "mtime": 1792832954.704889
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/29/29cd67e646a69697787bf7d715295a7fcdece1c60d30f939ceb308eaf171afce-d",
+      "bytes": 7192208,
+      "mtime": 1792849088.76245
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/f3/f3245ad4146520602445d19aa55e5d5801cfca53cfa186e74ccc921dd93c166f-d",
+      "bytes": 7192200,
+      "mtime": 1792846122.092475
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/8c/8c3ccd84596ed4ecb7b5efff09238b22644571960afdce6d1a9e97c447ea8220-d",
+      "bytes": 7192200,
+      "mtime": 1792839248.8957696
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/22/22941a86a35385b7d901f53e56658014ba1e8c582c88b537ed1be309f493e533-d",
+      "bytes": 7192200,
+      "mtime": 1792844842.398658
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/20/20f08ce33f282f6efdf9be361d6f131884e51d0482c1c0d998582846101602b8-d",
+      "bytes": 7192200,
+      "mtime": 1792832949.373675
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/a0/a0235341294db429e72aa18e006a35163d080106f88dcf5588f35500c671e8b4-d",
+      "bytes": 7058136,
+      "mtime": 1792833030.7003343
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/db/db0066d78bf71585ff0af594010f2408b76dc5f757aa012ade3c9283358674ea-d",
+      "bytes": 7032024,
+      "mtime": 1792867268.1426334
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/c0/c0141b8c29b8532ba0df0ca4a6c08a36e4c70e06bffe9968b8886e3f80a6f3cd-d",
+      "bytes": 7032024,
+      "mtime": 1792844830.7669542
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/ab/ab0ff7d251b817e9b966cdf6503f1c055d8878c94d1ae9c32f650d44dc50ef6a-d",
+      "bytes": 7032024,
+      "mtime": 1792839239.6115088
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/71/713057a085597fd1eb76881d122213b309efb69b81bd5d69fdc66ff51d5567ef-d",
+      "bytes": 7019342,
+      "mtime": 1792849050.5994093
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/7e/7efb73c2502e029b375cf0363cc6888e6e3ca6ef5be1a69517f8f2728be15adf-d",
+      "bytes": 6959330,
+      "mtime": 1792844753.4227545
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/60/60e56314a1246671a1a4824185b9280802c4ee716ff3ed385fab66f96c31b3c9-d",
+      "bytes": 6959330,
+      "mtime": 1792839304.7962494
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/26/26885f661291276426374b4c4f617ac1c9a502601f404bc72ed3bf11fba6344f-d",
+      "bytes": 6959330,
+      "mtime": 1792870117.176492
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/fe/feb00fdbae3445373090303c57ad7ad6f1b44a77fc8b58e16272f2ecc229e4c9-d",
+      "bytes": 6883192,
+      "mtime": 1792867268.1920834
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/27/272e3356206bbf8a79f288794a2749211ae03240d8c5dcde35d9f13be3683681-d",
+      "bytes": 6864252,
+      "mtime": 1792833021.1268237
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/01/0174513904fbed925a79dd74e06c250b2ef10d06791b96ee44fad25063f7a82a-d",
+      "bytes": 6784182,
+      "mtime": 1792833017.268858
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/06/06d03e42b54fddad2200baad6c016a4ce96b2c44f8a71e4b85c9777d0697d8d4-d",
+      "bytes": 6757922,
+      "mtime": 1792849642.0946002
+    }
+  ],
+  "removed": true,
+  "removed_bytes": 699193182
+}

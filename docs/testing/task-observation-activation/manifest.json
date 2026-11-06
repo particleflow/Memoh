@@ -1,0 +1,174 @@
+{
+  "base": "b932464363c97ba56331b53f968b14eec202768a",
+  "normalization": "Published text removes ANSI escapes, trailing spaces and surplus final blank lines. Paths in logs replace the task checkout with <repo> and scratch directory with <evidence>. Original local bytes and hashes are retained in this manifest; published text is not byte-for-byte raw output. JSON and screenshots are unchanged. No production data used. Toolchain paths in the later aggregate log are also normalized to <toolchain>.",
+  "files": [
+    {
+      "name": "red.log",
+      "original_bytes": 4094,
+      "original_sha256": "10244a813246f907c2ec67c74bc51ee9282dc18799a35735015381c9a7a2cec3",
+      "published_bytes": 4067,
+      "published_sha256": "e77f7a70822872150ed81cfabc7dd0b82f17e9ac213433d0072ce0e5b2da957c"
+    },
+    {
+      "name": "gateway-red.log",
+      "original_bytes": 345,
+      "original_sha256": "deefce7ce6d937d9a01675591fe84082d03075b896fa06ebe96fb898ce19f1a0",
+      "published_bytes": 345,
+      "published_sha256": "deefce7ce6d937d9a01675591fe84082d03075b896fa06ebe96fb898ce19f1a0"
+    },
+    {
+      "name": "entry.log",
+      "original_bytes": 327,
+      "original_sha256": "65cacd5bdf71e4474a8310cd418da336ea5af71d6cff6e7261dd9f6d8a880046",
+      "published_bytes": 300,
+      "published_sha256": "35015fa344f42680cf16c0b177519e1b8b936017d10b69d01d1131d2c7d3cd09"
+    },
+    {
+      "name": "ui.log",
+      "original_bytes": 336,
+      "original_sha256": "5e17903a158958505454987e992fdac2577ce634d3f8bc1bef1d1c4261cd65a1",
+      "published_bytes": 309,
+      "published_sha256": "da226dd0ebb94c876975fc4cd4dc4351393a271ed5516767e753d3df837bec3c"
+    },
+    {
+      "name": "gateway.log",
+      "original_bytes": 56,
+      "original_sha256": "f13ec41433294f02ef268ebaa4115ece18f1a77d3124302d2db41ee7f86613df",
+      "published_bytes": 56,
+      "published_sha256": "f13ec41433294f02ef268ebaa4115ece18f1a77d3124302d2db41ee7f86613df"
+    },
+    {
+      "name": "oauth.log",
+      "original_bytes": 51,
+      "original_sha256": "eaa94a37570058aca59b8022f1e8319120b6183c74724bb143a5d6c42910362c",
+      "published_bytes": 51,
+      "published_sha256": "eaa94a37570058aca59b8022f1e8319120b6183c74724bb143a5d6c42910362c"
+    },
+    {
+      "name": "observation-backend.log",
+      "original_bytes": 170,
+      "original_sha256": "a095481383eb247e01f7130b35ca266b6e6856f538f532711d1e39c3a0f57943",
+      "published_bytes": 170,
+      "published_sha256": "a095481383eb247e01f7130b35ca266b6e6856f538f532711d1e39c3a0f57943"
+    },
+    {
+      "name": "observation-backend-initial-space-failure.log",
+      "original_bytes": 527,
+      "original_sha256": "a8a2d4881ed8df108bd182990edffae4f02b87b2dc1ab1e2fd9abd5b8ed5f7a0",
+      "published_bytes": 527,
+      "published_sha256": "a8a2d4881ed8df108bd182990edffae4f02b87b2dc1ab1e2fd9abd5b8ed5f7a0"
+    },
+    {
+      "name": "aggregate-initial-space-failure.log",
+      "original_bytes": 1207,
+      "original_sha256": "c38aab0557ce1924f1b86bb83a70cc54c91d83a10974ce0046c026852be8c934",
+      "published_bytes": 1155,
+      "published_sha256": "8a294ad1562615212583e31fba7dd6da896cb62b2f2df51fce729fe6ea7c79b3"
+    },
+    {
+      "name": "aggregate-lint-failure.log",
+      "original_bytes": 2620,
+      "original_sha256": "1b70abea1ce8f88aaeec2bc8e3cc89d9e2b4d3baec4c3c8553c64a19ea88316b",
+      "published_bytes": 2568,
+      "published_sha256": "d9477638071ebba8cb6a6a2e163484d01b34a4d7c2992695084f7a594ba35f38"
+    },
+    {
+      "name": "web-types.log",
+      "original_bytes": 116,
+      "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "published_bytes": 89,
+      "published_sha256": "e420de8eb5fe76487e319f1c3eb3dc28453c47e1b9cb53f92c8763b45ab7e6ca"
+    },
+    {
+      "name": "web-build.log",
+      "original_bytes": 76365,
+      "original_sha256": "fdb1f913ae28023638305dde94d128917b69672734e095c2efbd6c50cc594a77",
+      "published_bytes": 76338,
+      "published_sha256": "a535ed00073c762964c64c177997786bf6388e26eac7c401a8e2e47921529d83"
+    },
+    {
+      "name": "ui-contract.log",
+      "original_bytes": 1169,
+      "original_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "published_bytes": 1169,
+      "published_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec"
+    },
+    {
+      "name": "browser-initial-label-timeout.log",
+      "original_bytes": 845,
+      "original_sha256": "c053ab2f6f7bca5c5f932468281b6ac03eb7c23c2b0fb8da572d5bd03ea2b1a5",
+      "published_bytes": 819,
+      "published_sha256": "9f4acc7ff43756a324d197912d35ce3963a9ed41202fc834224c96d1cb8f38b4"
+    },
+    {
+      "name": "browser.log",
+      "original_bytes": 391,
+      "original_sha256": "19affd02fd82a750e07faff313074d056e9cd3ec1aded6c4070413f4b2744c0b",
+      "published_bytes": 391,
+      "published_sha256": "19affd02fd82a750e07faff313074d056e9cd3ec1aded6c4070413f4b2744c0b"
+    },
+    {
+      "name": "browser-proof.json",
+      "original_bytes": 4618,
+      "original_sha256": "b80f79c7c285a308fdead8b5d346abb266e807a8e452ff6289adec578d734d48",
+      "published_bytes": 4618,
+      "published_sha256": "b80f79c7c285a308fdead8b5d346abb266e807a8e452ff6289adec578d734d48"
+    },
+    {
+      "name": "summary.png",
+      "original_bytes": 102300,
+      "original_sha256": "f45738135dcbdeb8cc0c25933d2c6fa33deab3d809acbca9fc5e6b9d7435af35",
+      "published_bytes": 102300,
+      "published_sha256": "f45738135dcbdeb8cc0c25933d2c6fa33deab3d809acbca9fc5e6b9d7435af35"
+    },
+    {
+      "name": "auth-paused.png",
+      "original_bytes": 109389,
+      "original_sha256": "1e240a2e4a96c6dab70394efcc93f44ce0cddbf0bc696a1f46fed9a36fa59eaf",
+      "published_bytes": 109389,
+      "published_sha256": "1e240a2e4a96c6dab70394efcc93f44ce0cddbf0bc696a1f46fed9a36fa59eaf"
+    },
+    {
+      "name": "reconnected.png",
+      "original_bytes": 125130,
+      "original_sha256": "eb763af0bb4da243d553bd1741fc7eca25d6aeef32bb2c781d678092f1356187",
+      "published_bytes": 125130,
+      "published_sha256": "eb763af0bb4da243d553bd1741fc7eca25d6aeef32bb2c781d678092f1356187"
+    },
+    {
+      "name": "cache-recovery.json",
+      "original_bytes": 1304,
+      "original_sha256": "cf0013c7726d804c1d2f3b543d5ec90c6cec9f8917093bf7aec1c3a9375cfeba",
+      "published_bytes": 1304,
+      "published_sha256": "cf0013c7726d804c1d2f3b543d5ec90c6cec9f8917093bf7aec1c3a9375cfeba"
+    },
+    {
+      "name": "aggregate-test-space-failure.log",
+      "original_bytes": 12642,
+      "original_sha256": "25524da4aacd61f4bafb8fbb1954e06371a4dd73ed289ecfac7b2aa465efc224",
+      "published_bytes": 12030,
+      "published_sha256": "4cb09bcf2b6a3920cdf31e12790c7aa77adc2974a46c6e288528e79bc5a8f9ab"
+    },
+    {
+      "name": "aggregate-test.log",
+      "original_bytes": 644,
+      "original_sha256": "4d7db3518b180d20e9a8e682d1da1e5d90f022de017b16212f4878c7d4c0a24b",
+      "published_bytes": 592,
+      "published_sha256": "8641fea7f8d34facdeaac06c07d0c4cac1cdfa78ce68d98a5ce1d1053562a1c5"
+    },
+    {
+      "name": "error-ui.log",
+      "original_bytes": 343,
+      "original_sha256": "d76937545209e2f775813590279abd2b0c08187058b49a09666651dbea632d84",
+      "published_bytes": 316,
+      "published_sha256": "8a8cfef3025f78626858dcc851474a3f9dda4f56b7c86031b7f62b0ed7586ab9"
+    },
+    {
+      "name": "error-boundary.log",
+      "original_bytes": 110,
+      "original_sha256": "ee256f85f322f587be87a6ed6b4e6f01f3452fcb74dab9a9258ea8da806a47f1",
+      "published_bytes": 110,
+      "published_sha256": "ee256f85f322f587be87a6ed6b4e6f01f3452fcb74dab9a9258ea8da806a47f1"
+    }
+  ]
+}

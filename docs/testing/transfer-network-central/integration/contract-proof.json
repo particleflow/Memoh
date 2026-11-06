@@ -1,0 +1,13 @@
+{
+  "base": "391adba82a2347123f02f29fdbd289cde84d26cb",
+  "source_tree": "43aeb687500632161ad13e2229f89ebea4c8c77d",
+  "api_operations_unchanged": 371,
+  "integration_delta_from_source": [
+    "internal/config/transfer_network_test.go",
+    "internal/handlers/transfer_network_test.go",
+    "internal/media/transfer_network_test.go",
+    "internal/transferclient/central_network_test.go"
+  ],
+  "migration_changes": [],
+  "protected_changes": []
+}

@@ -1,0 +1,46 @@
+PASS synthetic input uploaded under original owner
+PASS Bot-owned upload without session/admitted input is rejected
+PASS initial supervisor completes and disconnects before specialist
+PASS authoritative owner/fence and current input admitted before history transaction persists
+PASS native delegate_to_bot accepts a same-turn new attachment exactly once
+PASS second real supervisor turn is blocked inside local model
+PASS specialist completes and delivery is accepted
+PASS busy supervisor has exactly one persisted pending follow-up
+PASS original remains intact after busy server+Valkey restart 05e4f2914ef7
+PASS original remains intact after busy server+Valkey restart ea9ec1e51bc4
+PASS automatic recovery completes exactly the original queued follow-up
+PASS recovered source and target queues are drained
+PASS specialist run identity remains unchanged through busy server restart
+PASS 16 concurrent delivery attempts preserve task identity
+PASS exactly one original follow-up invocation exists
+PASS ledger contains exactly one reference to each original and output
+PASS one supervisor assistant message contains both attachments exactly once
+PASS one specialist business and one follow-up model execution; interrupted parent counted separately
+PASS initial completion: five-second terminal/empty-queue observation with stable runs and model calls
+PASS same request after reopening preserves original task
+PASS after restart/retry/reopen: five-second terminal/empty-queue observation with stable runs and model calls
+PASS scoped original exact bytes and no-store 05e4f2914ef7
+PASS scoped Range exact bytes/Content-Range/no-store bytes=2-6
+PASS scoped Range exact bytes/Content-Range/no-store bytes=-4
+PASS scoped Range exact bytes/Content-Range/no-store bytes=31-
+PASS matching If-Range resumes original
+PASS mismatching If-Range returns full original
+PASS scoped HEAD reports original length without body
+PASS anonymous scoped Range rejected without caching
+PASS scoped original exact bytes and no-store ea9ec1e51bc4
+PASS scoped Range exact bytes/Content-Range/no-store bytes=2-6
+PASS scoped Range exact bytes/Content-Range/no-store bytes=-4
+PASS scoped Range exact bytes/Content-Range/no-store bytes=40-
+PASS matching If-Range resumes original
+PASS mismatching If-Range returns full original
+PASS scoped HEAD reports original length without body
+PASS anonymous scoped Range rejected without caching
+PASS original owner separation 05e4f2914ef7 expected 200
+PASS original media Range exact bytes and Content-Range
+PASS original owner separation 05e4f2914ef7 expected 404
+PASS original owner separation ea9ec1e51bc4 expected 200
+PASS original media Range exact bytes and Content-Range
+PASS original owner separation ea9ec1e51bc4 expected 404
+PASS live specialist grant revocation rejects scoped Range without caching
+PASS live specialist grant revocation rejects scoped Range without caching
+PASS restored explicit grant restores access to original

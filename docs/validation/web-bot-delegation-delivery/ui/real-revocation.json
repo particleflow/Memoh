@@ -1,0 +1,9 @@
+{
+  "post": {
+    "status": 404,
+    "code": "session.not_found"
+  },
+  "old_content_cleared": true,
+  "retry_hidden": true,
+  "server_grant_revoked_before_post_forwarded": true
+}

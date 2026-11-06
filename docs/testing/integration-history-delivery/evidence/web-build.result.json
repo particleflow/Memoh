@@ -1,0 +1,16 @@
+{
+  "check": "web-build",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@memohai/web",
+    "exec",
+    "vite",
+    "build",
+    "--outDir",
+    "/tmp/memoh-history-web-dist"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:01:03Z",
+  "elapsed_seconds": 5.445
+}

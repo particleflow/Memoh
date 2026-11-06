@@ -1,0 +1,6 @@
+=== RUN   TestWSAbortOtherUsersSessionDoesNotObserveOrCancel
+--- PASS: TestWSAbortOtherUsersSessionDoesNotObserveOrCancel (0.00s)
+=== RUN   TestWSAbortMismatchedRunDoesNotObserveOrCancel
+--- PASS: TestWSAbortMismatchedRunDoesNotObserveOrCancel (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.019s

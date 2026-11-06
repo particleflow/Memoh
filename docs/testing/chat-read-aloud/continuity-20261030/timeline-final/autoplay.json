@@ -1,0 +1,56 @@
+{
+  "blocked": [
+    {
+      "ms": 529.9000000022352,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    }
+  ],
+  "resumed": [
+    {
+      "ms": 529.9000000022352,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    },
+    {
+      "ms": 605.7000000029802,
+      "active": true,
+      "ever": true,
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419",
+      "outcome": "fulfilled"
+    }
+  ],
+  "stateAfterClick": {
+    "key": "",
+    "status": "idle"
+  },
+  "media": [
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 615.8000000007451,
+      "time": 0.007961,
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 682.7000000029802,
+      "time": 0,
+      "src": "http://127.0.0.1:43865/?policy-only"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 682.8000000007451,
+      "time": 0,
+      "src": "http://127.0.0.1:43865/?policy-only"
+    }
+  ]
+}

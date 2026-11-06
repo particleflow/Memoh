@@ -1,0 +1,253 @@
+{
+  "sdkCalls": {
+    "listStatus": 200,
+    "detailStatus": 200,
+    "listed": 2
+  },
+  "syntheticDatabaseSeed": true,
+  "mockedAPI": false,
+  "healthMethod": "HEAD",
+  "healthStatus": 200,
+  "pageErrors": [],
+  "operationRowsUnchanged": true,
+  "businessSubmissions": 0,
+  "uiDoesNotInventFollowupOrResumeAction": true,
+  "details": [
+    {
+      "kind": "native",
+      "status": "submitted",
+      "business_state": "unknown",
+      "summary": "Pi receipt recorded; current history continuity and business completion are unverified."
+    },
+    {
+      "kind": "batch",
+      "status": "not_started",
+      "business_state": "unknown",
+      "summary": "Pi receipt recorded; current history continuity and business completion are unverified."
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/integration-memory",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/workdirs",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container",
+      "status": 404,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/ping",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/providers",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/agents",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/model-preference-seed",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/models",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/skills/catalog",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container/fs/list",
+      "status": 503,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/workspace-targets",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/events",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/starter-prompts",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/messages",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/queue",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/messages",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/status",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container/fs/list",
+      "status": 503,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks/computer_operation/330093e4-807b-55f6-b443-c97ef4979719",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks/computer_operation/5e6e119e-91c9-586b-aaad-45f9665ea41a",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations/e3a54ce6-9493-597a-ad29-a6f25c1e1cb7",
+      "status": 200,
+      "method": "GET",
+      "hasBearer": true
+    }
+  ]
+}

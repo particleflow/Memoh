@@ -1,0 +1,37 @@
+{
+  "parents": [
+    "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+    "0d5e045ca00fb42e031092f00c63a045e4bac98f"
+  ],
+  "pg_required_test_count": 17,
+  "pg_required_tests": [
+    "TestComputerAdmissionDurabilityCoverageAndReservations",
+    "TestComputerAdmissionPauseSerializesWithClaims",
+    "TestComputerAdmissionPreservesAlreadyReservedFollowup",
+    "TestComputerAdmissionRLSAndUnknownMapping",
+    "TestComputerAdmissionRollbackRefusesLivePause",
+    "TestComputerOperationAdmissionCASPreservesScopeAndDelivery",
+    "TestComputerOperationAdmissionConcurrentReservationsAndRLS",
+    "TestComputerOperationAdmissionSerializesPauseAndCancellation",
+    "TestComputerOperationsMigrationAndDurableIsolation",
+    "TestNativeHerdrAdmissionPersistsAndFencesNewWork",
+    "TestNativeHerdrAdmissionRLSAndRollback",
+    "TestNativeHerdrCanonicalAdmissionDefinition",
+    "TestNativeHerdrConfigAndTransferOwnership",
+    "TestNativeHerdrDeliveryUsesTransactionalRegistry",
+    "TestNativeHerdrPauseSerializesWithClaims",
+    "TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit",
+    "TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths"
+  ],
+  "local_go_top_level_pass": 20,
+  "local_go_pass_including_subtests": 82,
+  "local_go_skip": [
+    "TestPowerShellCLITransportPreservesChildBytesAndExit: no PowerShell on Linux"
+  ],
+  "windows_job_budget_minutes": 35,
+  "windows_aggregate_go_timeout_minutes": 10,
+  "schema": 176,
+  "migration_changes": 0,
+  "web_sdk_spec_changes": 0,
+  "official_core_changes": 0
+}

@@ -1,0 +1,8 @@
+
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/composables/useSessionTasks.native-reconnect.test.ts(16,7): error TS2741: Property 'summary' is missing in type '{ task_type: "computer_operation"; task_id: string; session_id: string; parent_session_id: string; created_at: string; updated_at: string; status: "submitted"; content_available: false; attachments_available: false; }' but required in type 'SessiontaskTask'.
+/tmp/memoh-candidate-7bcb-review/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

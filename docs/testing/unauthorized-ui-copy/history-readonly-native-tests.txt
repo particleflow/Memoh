@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/Memoh-harmony/mobile/client/tests/.isolated/ci-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:57:49
+   Duration  10.10s (transform 7.23s, setup 0ms, import 9.18s, tests 345ms, environment 430ms)

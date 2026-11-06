@@ -1,0 +1,8 @@
+{
+  "unchanged": {
+    "apps/web/src/pages/home/index.vue": "2396809c9f4e989961c9bde4e7ad89b510cd67654d3bf1524cd274a10360b84b",
+    "apps/web/src/pages/home/components/chat-workspace.vue": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+    "apps/web/src/pages/home/composables/chat-workspace-visibility.ts": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7"
+  },
+  "chat_pane_enabled_predicate": "same as959; only renderer-root callbacks added"
+}

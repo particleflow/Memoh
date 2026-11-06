@@ -1,0 +1,49 @@
+{
+  "methods": [
+    "workspace.list",
+    "workspace.list",
+    "workspace.list",
+    "pane.get",
+    "agent.get",
+    "agent.get",
+    "agent.read",
+    "workspace.list",
+    "agent.get",
+    "workspace.list",
+    "agent.prompt",
+    "agent.get",
+    "agent.read",
+    "workspace.list",
+    "pane.get",
+    "agent.get",
+    "agent.read",
+    "agent.get",
+    "workspace.list",
+    "agent.get",
+    "workspace.list",
+    "agent.prompt",
+    "agent.get",
+    "agent.read",
+    "workspace.list",
+    "workspace.list",
+    "workspace.list",
+    "pane.get",
+    "agent.get",
+    "agent.get",
+    "agent.read"
+  ],
+  "synthetic_prompts": 2,
+  "real_pc_or_provider_calls": 0,
+  "previous_operation_unchanged": true,
+  "connection_and_profile_restored": true,
+  "new_operation_state": "submitted",
+  "new_operation_revision": 6,
+  "followups": [
+    {
+      "state": "accepted"
+    },
+    {
+      "state": "unknown"
+    }
+  ]
+}

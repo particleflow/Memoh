@@ -1,0 +1,27 @@
+Base cefdf0; production commit 1f021c94d08ac5617a8ae2489103d4036a11d51b
+
+Targeted tests: new bootstrap-history-runtime.test.ts + affected bootstrap-contact.test.ts.
+Final 20 passed: 6 new lifecycle cases + 14 existing contact cases.
+Old observer 8/4/3 contracts, prior field samples and full builds not rerun.
+
+Changed-file ESLint: pass, no diagnostics.
+Web vue-tsc: pass.
+
+> @memohai/web@0.22.0 typecheck /workspace/memoh-hydration-cef/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+
+UI copy policy:
+UI copy policy OK (2033 reviewed surfaces; no unreviewed additions)
+
+UI contract:
+
+ℹ px baseline: 102 grandfathered px violation(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ app-injection baseline: 131 grandfathered injection(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ hand-spun-loader baseline: 10 grandfathered loader(s) remaining — adopt a loading-ladder rung per cluster, then re-run with --write-baseline
+ℹ alpha baseline: 146 grandfathered hand-written alpha value(s) remaining — burn down per cluster, then re-run with --write-baseline
+✓ UI contract OK (3 warning(s))
+
+Three existing contract warnings were emitted for sidebar shadow and mcp-server-detail shape; none is in the changed files.
+No running application/browser/screenshot, production acceptance, new paid model, DB, service, HAP build or physical ArkWeb test performed here.
+All foreground test commands ended; no detached fixture was started. Old C05 cleanup untouched.

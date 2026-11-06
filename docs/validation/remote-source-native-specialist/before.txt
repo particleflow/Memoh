@@ -1,0 +1,6 @@
+--- FAIL: TestDelegationNativeCallbackRequiresSourceLinkedOriginal (0.01s)
+    --- FAIL: TestDelegationNativeCallbackRequiresSourceLinkedOriginal/remote_source_native_specialist (0.01s)
+        bot_delegation_callback_test.go:229: linked source failed: session.not_found
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.022s
+FAIL

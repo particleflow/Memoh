@@ -1,0 +1,234 @@
+{
+  "source_sha": "2030c2d522695f52a227f12421800fe075760813",
+  "base_sha": "9601ac062a3b65477db8db76bcaa521265ba7ee2",
+  "dependency_source_count": 73,
+  "changed_dependency_files": [],
+  "transferclient_tree": "2826aa1a9fbb0f735a74e713a2869d39358e9ba1",
+  "workflow_changed": false,
+  "go_mod_sum_changed": false,
+  "baseline": {
+    "job": 121125119422,
+    "run": 40178766778,
+    "package_seconds": 123.499,
+    "conclusion": "success"
+  },
+  "failed_attempt": {
+    "job": 121160882054,
+    "run": 40190700957,
+    "package_seconds": 300.06,
+    "conclusion": "failure",
+    "reason": "whole Go package 5-minute deadline expired; no prior assertion failure",
+    "current_test": "TestWindowsNativePublicationNeverOverwritesTarget",
+    "current_test_elapsed_seconds": 2
+  },
+  "same_runner_image": "windows-2025-vs2026 20261021.278.1",
+  "go_version": "1.25.7",
+  "comparison": [
+    {
+      "test": "TestWindowsNativePublicationPublishCancelRace",
+      "baseline_seconds": 10.32,
+      "failed_attempt_seconds": 77.04,
+      "delta": 66.72
+    },
+    {
+      "test": "TestWindowsNativePublicationBucketBudget",
+      "baseline_seconds": 39.27,
+      "failed_attempt_seconds": 74.83,
+      "delta": 35.56
+    },
+    {
+      "test": "TestWindowsNativePublicationMigrationProcessCrash",
+      "baseline_seconds": 23.19,
+      "failed_attempt_seconds": 47.85,
+      "delta": 24.66
+    },
+    {
+      "test": "TestWindowsNativePublicationExplicitMigration",
+      "baseline_seconds": 3.46,
+      "failed_attempt_seconds": 16.87,
+      "delta": 13.41
+    },
+    {
+      "test": "TestWindowsNativePublicationReceiptBoundary",
+      "baseline_seconds": 13.04,
+      "failed_attempt_seconds": 21.21,
+      "delta": 8.17
+    },
+    {
+      "test": "TestWindowsNativePublicationProcessCrash",
+      "baseline_seconds": 2.9,
+      "failed_attempt_seconds": 7.16,
+      "delta": 4.26
+    },
+    {
+      "test": "TestWindowsNativePublicationRejectsLinksAndReplacement",
+      "baseline_seconds": 2.47,
+      "failed_attempt_seconds": 6.42,
+      "delta": 3.95
+    },
+    {
+      "test": "TestWindowsNativeBudgetPublicationRecovery",
+      "baseline_seconds": 6.05,
+      "failed_attempt_seconds": 9.4,
+      "delta": 3.35
+    },
+    {
+      "test": "TestWindowsNativePublicationMigrationBusyAndPermanentLock",
+      "baseline_seconds": 2.53,
+      "failed_attempt_seconds": 5.62,
+      "delta": 3.09
+    },
+    {
+      "test": "TestWindowsNativeProducerFeedback",
+      "baseline_seconds": 4.19,
+      "failed_attempt_seconds": 7.15,
+      "delta": 2.96
+    },
+    {
+      "test": "TestWindowsNativePublicationRetainedBytesDoNotUseQueueBudget",
+      "baseline_seconds": 1.42,
+      "failed_attempt_seconds": 4.07,
+      "delta": 2.65
+    },
+    {
+      "test": "TestWindowsNativePublicationDirectoryIdentity",
+      "baseline_seconds": 0.71,
+      "failed_attempt_seconds": 1.94,
+      "delta": 1.23
+    },
+    {
+      "test": "TestWindowsNativePublicationRenameCollision",
+      "baseline_seconds": 0.79,
+      "failed_attempt_seconds": 1.78,
+      "delta": 0.99
+    },
+    {
+      "test": "TestWindowsNativeProducerInvalidManifest",
+      "baseline_seconds": 1.9,
+      "failed_attempt_seconds": 2.78,
+      "delta": 0.88
+    },
+    {
+      "test": "TestWindowsNativePublicationFiniteHerdrAction",
+      "baseline_seconds": 0.94,
+      "failed_attempt_seconds": 1.82,
+      "delta": 0.88
+    },
+    {
+      "test": "TestWindowsNativePublicationRoundTrip",
+      "baseline_seconds": 0.86,
+      "failed_attempt_seconds": 1.57,
+      "delta": 0.71
+    },
+    {
+      "test": "TestWindowsNativeLifecycle",
+      "baseline_seconds": 0.74,
+      "failed_attempt_seconds": 1.44,
+      "delta": 0.7
+    },
+    {
+      "test": "TestWindowsNativeQueueReleaseProcessCrash",
+      "baseline_seconds": 1.71,
+      "failed_attempt_seconds": 2.31,
+      "delta": 0.6
+    },
+    {
+      "test": "TestWindowsNativeAdmissionCancelAndRetire",
+      "baseline_seconds": 1,
+      "failed_attempt_seconds": 1.47,
+      "delta": 0.47
+    },
+    {
+      "test": "TestWindowsNativeProducerMultiple",
+      "baseline_seconds": 0.96,
+      "failed_attempt_seconds": 1.3,
+      "delta": 0.34
+    },
+    {
+      "test": "TestWindowsNativeTLSUploadOutboxAndDownload",
+      "baseline_seconds": 0.47,
+      "failed_attempt_seconds": 0.63,
+      "delta": 0.16
+    },
+    {
+      "test": "TestWindowsNativePublicationFenceReopenAndRevocation",
+      "baseline_seconds": 0.86,
+      "failed_attempt_seconds": 1.01,
+      "delta": 0.15
+    },
+    {
+      "test": "TestWindowsNativeProducerClosedManifest",
+      "baseline_seconds": 0.35,
+      "failed_attempt_seconds": 0.47,
+      "delta": 0.12
+    },
+    {
+      "test": "TestWindowsNativePrivacyAndPathBinding",
+      "baseline_seconds": 0.08,
+      "failed_attempt_seconds": 0.19,
+      "delta": 0.11
+    },
+    {
+      "test": "TestWindowsNativeQueueReleaseCapacity",
+      "baseline_seconds": 0.64,
+      "failed_attempt_seconds": 0.74,
+      "delta": 0.1
+    },
+    {
+      "test": "TestWindowsNativeSnapshotSharingAndSourceGuard",
+      "baseline_seconds": 0.13,
+      "failed_attempt_seconds": 0.22,
+      "delta": 0.09
+    },
+    {
+      "test": "TestWindowsNativeProducerMissingSource",
+      "baseline_seconds": 0.38,
+      "failed_attempt_seconds": 0.45,
+      "delta": 0.07
+    },
+    {
+      "test": "TestWindowsNativeQueueReleaseUnknown",
+      "baseline_seconds": 0.28,
+      "failed_attempt_seconds": 0.34,
+      "delta": 0.06
+    },
+    {
+      "test": "TestWindowsNativeConfiguredHost",
+      "baseline_seconds": 0.14,
+      "failed_attempt_seconds": 0.16,
+      "delta": 0.02
+    },
+    {
+      "test": "TestWindowsNativeReleaseUsesJournalIdentity",
+      "baseline_seconds": 0,
+      "failed_attempt_seconds": 0,
+      "delta": 0
+    },
+    {
+      "test": "TestWindowsNativeCrossProcessLocks",
+      "baseline_seconds": 0.06,
+      "failed_attempt_seconds": 0.05,
+      "delta": -0.01
+    },
+    {
+      "test": "TestWindowsNativeRejectsLinksAndTraversal",
+      "baseline_seconds": 0.02,
+      "failed_attempt_seconds": 0.01,
+      "delta": -0.01
+    }
+  ],
+  "retry": {
+    "job": 121164532053,
+    "run": 40190700957,
+    "source_unchanged": true,
+    "assertions_unchanged": true,
+    "timeout_unchanged": true,
+    "status": "success",
+    "all_job_steps_succeeded": true,
+    "step7_summary": [
+      "2026-10-25T12:18:05.0653457Z ok  \tgithub.com/felinics/memoh/internal/transferclient\t168.011s"
+    ],
+    "url": "https://github.com/particleflow/Memoh/actions/runs/40190700957/attempts/2"
+  },
+  "inference": "Runner/storage timing variation is consistent with unchanged dependency/workflow bytes and widespread passed-test slowdowns; exact transient I/O cause is not proven."
+}

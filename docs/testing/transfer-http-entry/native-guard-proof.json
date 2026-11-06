@@ -1,0 +1,37 @@
+{
+  "sourceCommit": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+  "sourceBlob": "8cf45ba09d9392f4c019ce072832ab3b029c47fc",
+  "sourcePath": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+  "scope": "Exact SharedWebPolicy predicate using standard URL Kit adapter; not ArkWeb or RCP runtime",
+  "rows": [
+    {
+      "target": "https://logical.fixture.test/api/bots/synthetic/media/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": true,
+      "allowed": true
+    },
+    {
+      "target": "http://logical.fixture.test/api/bots/synthetic/media/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": false,
+      "allowed": false
+    },
+    {
+      "target": "http://fast.fixture.test:18683/api/bots/synthetic/media/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": false,
+      "allowed": false
+    },
+    {
+      "target": "https://foreign.fixture.test/api/bots/synthetic/media/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": false,
+      "allowed": false
+    },
+    {
+      "target": "https://logical.fixture.test/api/bots/synthetic/media/%252faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": false,
+      "allowed": false
+    }
+  ],
+  "cases": 5,
+  "passed": true,
+  "nativeProductChanged": false,
+  "rebuiltOrPackaged": false
+}

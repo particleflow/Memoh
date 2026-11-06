@@ -1,0 +1,96 @@
+{
+  "branch": "integrate/native-followup-pi-history",
+  "manual_workflow_dispatch": false,
+  "new_pr": false,
+  "push_trigger_inspection": [
+    {
+      "workflow": "contribution-policy-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "docker.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "electron-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "eslint.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "go-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "install-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "migrations.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "release.yml",
+      "push_branches": [],
+      "push_tags": [
+        "v*"
+      ],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "runtime-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "rust-ci.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    },
+    {
+      "workflow": "sync-labels.yml",
+      "push_branches": [
+        "main"
+      ],
+      "push_tags": [],
+      "integration_branch_eligible": false
+    }
+  ],
+  "scope": "parsed workflow trigger headers only; not full workflow syntax validation"
+}

@@ -1,0 +1,32 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (a89b00ea)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 4 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.44s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./cmd/agent ./cmd/internal/core ./internal/config ./internal/handlers ./internal/media ./internal/transferclient ./spec
+[hooks] Go package selection: 0.46s
+[hooks] Go lint: golangci-lint run --concurrency=2 /tmp/memoh-candidate-7bcb-review/cmd/agent /tmp/memoh-candidate-7bcb-review/cmd/internal/core /tmp/memoh-candidate-7bcb-review/internal/config /tmp/memoh-candidate-7bcb-review/internal/handlers /tmp/memoh-candidate-7bcb-review/internal/media /tmp/memoh-candidate-7bcb-review/internal/transferclient /tmp/memoh-candidate-7bcb-review/spec
+internal/transferclient/central_network_test.go:58:52: unused-parameter: parameter 'network' seems to be unused, consider removing or renaming it as _ (revive)
+	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+	                                                  ^
+internal/transferclient/central_network_test.go:140:20: "GET" can be replaced by http.MethodGet (usestdlibvars)
+				if r.Method != "GET" {
+				               ^
+internal/transferclient/central_network_test.go:142:20: "500" can be replaced by http.StatusInternalServerError (usestdlibvars)
+					w.WriteHeader(500)
+					              ^
+internal/transferclient/central_network_test.go:146:20: "403" can be replaced by http.StatusForbidden (usestdlibvars)
+					w.WriteHeader(403)
+					              ^
+[hooks] Go lint: 167.38s
+[hooks] Go lint failed (1)

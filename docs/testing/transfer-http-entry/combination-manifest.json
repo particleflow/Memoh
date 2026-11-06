@@ -1,0 +1,59 @@
+{
+  "base": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "shared_product": "808cf8010a50b5f7d291221249591d000e7d85aa",
+  "shared_evidence": [
+    "9e968f8cd0e21bea78339f206585a66a3ca281ef",
+    "d1f2c0b943423c5899b18e28b3fd5d9bb56143a1"
+  ],
+  "web_entry_product_and_evidence": "68c01296981f2d0c173226c5a3590ca4ad59e0fa",
+  "native_owner_input": {
+    "commit": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+    "product_patch": "docs/testing/harmony-rcp-endpoint-20261029/native-product.patch",
+    "patch_git_blob": "b4047c9befaec39516519f384ddbb3e122473795",
+    "owner_source_parent": "61355f0da2cf78b7b687132136983e5d2a6b11e2",
+    "files": [
+      "NativeMediaDownload.ets",
+      "NativeResumableUpload.ets",
+      "NativeTransferNetwork.ets"
+    ],
+    "before_blob_prefixes": [
+      "244e5c6ba",
+      "52e7a7fce",
+      "da8fb8476"
+    ],
+    "after_blob_prefixes": [
+      "479cd7b95",
+      "30ed5399e",
+      "2c149090b"
+    ],
+    "combination": "Use the owner packet or existing reviewed native branch with all prerequisites. a158c alone is the final v1-adoption correction, not the complete three-file implementation; do not reset mobile to the Web base or transplant unrelated diagnostic WIP.",
+    "packaged": false
+  },
+  "shared_contract": {
+    "version": 2,
+    "endpoint": [
+      "logical_origin",
+      "physical_origin"
+    ],
+    "optional": "lan_addresses",
+    "identity": "original API base/owner/bot/operation/journal/receipt remain logical; dispatch only maps scheme/host/port"
+  },
+  "schema_migration": false,
+  "real_credential_or_site_activation": false,
+  "http_browser_full_persistent_transfer_compatible": false,
+  "blockers": [
+    {
+      "action": "Use ordinary public HTTP page as a replacement for the existing persistent browser media uploader",
+      "target": "media-transfer-storage.ts original Web Locks and OPFS, and origin-scoped IDB/OPFS",
+      "status": "observed incompatible in controlled Chromium",
+      "reason": "Web Locks/OPFS undefined in nonsecure HTTP context; original HTTPS store unavailable at new page origin although logical key matches",
+      "next": "Keep existing app origin/persistence and compose original native RCP. Current native owner must join generic fetch/resource mapping below logical identity guard; no protocol/storage rewrite or browser security exception."
+    },
+    {
+      "action": "Activate current NAS authenticated HTTP API/CORS/site/port settings",
+      "target": "existing NAS deployment",
+      "status": "not attempted here; parent/single writer owns activation",
+      "reason": "This delegated task is synthetic isolated source/route validation only"
+    }
+  ]
+}

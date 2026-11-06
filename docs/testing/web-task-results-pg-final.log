@@ -1,0 +1,4 @@
+=== RUN   TestSessionTasksPostgresLatestChildRunAndMessage
+--- PASS: TestSessionTasksPostgresLatestChildRunAndMessage (0.03s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	0.047s

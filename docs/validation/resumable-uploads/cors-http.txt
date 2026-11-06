@@ -1,0 +1,2 @@
+PASS real OPTIONS authorization,content-type,upload-offset,upload-length,upload-sha256 status 204 explicit_allowed_headers accept,authorization,content-type,idempotency-key,origin,upload-length,upload-offset,upload-sha256,x-request-id origin_policy=* credentials_header=absent
+PASS real OPTIONS x-unrelated status 204 explicit_allowed_headers accept,authorization,content-type,idempotency-key,origin,upload-length,upload-offset,upload-sha256,x-request-id origin_policy=* credentials_header=absent

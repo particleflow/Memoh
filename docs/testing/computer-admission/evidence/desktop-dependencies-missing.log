@@ -1,0 +1,47 @@
+
+> @memohai/desktop@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm run typecheck:node && pnpm run typecheck:web
+
+
+> @memohai/desktop@0.22.0 typecheck:node /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm run prepare:runtime && tsc --noEmit -p tsconfig.node.json --composite false
+
+
+> @memohai/desktop@0.22.0 prepare:runtime /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm --filter @memohai/runtime build
+
+
+> @memohai/runtime@0.22.0 build /tmp/memoh-candidate-7bcb-review/packages/runtime
+> node scripts/build.mjs && tsc -p tsconfig.build.json && node scripts/copy-proto.mjs
+
+node:internal/modules/package_json_reader:301
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esbuild' imported from /tmp/memoh-candidate-7bcb-review/packages/runtime/scripts/build.mjs
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+    at packageResolve (node:internal/modules/esm/resolve:764:81)
+    at moduleResolve (node:internal/modules/esm/resolve:855:18)
+    at defaultResolve (node:internal/modules/esm/resolve:988:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:697:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:714:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:746:52)
+    at #resolve (node:internal/modules/esm/loader:679:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:599:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:162:33) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v25.9.0
+/tmp/memoh-candidate-7bcb-review/packages/runtime:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/runtime@0.22.0 build: `node scripts/build.mjs && tsc -p tsconfig.build.json && node scripts/copy-proto.mjs`
+Exit status 1
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?
+ ELIFECYCLE  Command failed with exit code 1.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?
+ ELIFECYCLE  Command failed with exit code 1.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?
+/tmp/memoh-candidate-7bcb-review/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/desktop@0.22.0 typecheck: `pnpm run typecheck:node && pnpm run typecheck:web`
+Exit status 1
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?

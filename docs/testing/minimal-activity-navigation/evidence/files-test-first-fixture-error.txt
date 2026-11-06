@@ -1,0 +1,109 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not fetch a hidden cloud file tree or emit its workspace failure into the chat/task list
+[Vue warn]: Unhandled error during execution of setup function 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not fetch a hidden cloud file tree or emit its workspace failure into the chat/task list
+[Vue warn]: Cannot unmount an app that is not mounted. 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > reads the cloud Bot when Files is explicitly opened and retains its real workspace error
+[Vue warn]: Unhandled error during execution of setup function 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > reads the cloud Bot when Files is explicitly opened and retains its real workspace error
+[Vue warn]: Cannot unmount an app that is not mounted. 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not retry or toast a delayed failure after leaving Files, and reads afresh on return
+[Vue warn]: Unhandled error during execution of setup function 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not retry or toast a delayed failure after leaving Files, and reads afresh on return
+[Vue warn]: Cannot unmount an app that is not mounted. 
+  at <FilesPane botId="cloud-bot" active=false > 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not carry a delayed failure from another Bot into the selected cloud Bot
+[Vue warn]: Unhandled error during execution of setup function 
+  at <FilesPane botId="cloud-bot" active=true > 
+  at <App>
+[Vue warn]: Unhandled error during execution of setup function 
+  at <FilesPane botId="cloud-bot" active=true > 
+  at <App>
+[Vue warn]: Unhandled error during execution of component update 
+  at <App>
+
+stderr | src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not carry a delayed failure from another Bot into the selected cloud Bot
+[Vue warn]: Cannot unmount an app that is not mounted. 
+  at <FilesPane botId="cloud-bot" active=true > 
+  at <App>
+
+ ❯ |web| src/components/sidebar/files-pane.test.ts (4 tests | 4 failed) 26ms
+     × does not fetch a hidden cloud file tree or emit its workspace failure into the chat/task list 18ms
+     × reads the cloud Bot when Files is explicitly opened and retains its real workspace error 2ms
+     × does not retry or toast a delayed failure after leaving Files, and reads afresh on return 2ms
+     × does not carry a delayed failure from another Bot into the selected cloud Bot 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not fetch a hidden cloud file tree or emit its workspace failure into the chat/task list
+ FAIL  |web| src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > reads the cloud Bot when Files is explicitly opened and retains its real workspace error
+ FAIL  |web| src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not retry or toast a delayed failure after leaving Files, and reads afresh on return
+ FAIL  |web| src/components/sidebar/files-pane.test.ts > file tree reads belong to the visible Files panel > does not carry a delayed failure from another Bot into the selected cloud Bot
+TypeError: Cannot read properties of null (reading 'effect')
+ ❯ storeToRefs ../../../../workspace/Memoh/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1920:19
+ ❯ setup src/components/sidebar/files-pane.vue:399:22
+    397| const workspaceTabs = useWorkspaceTabsStore()
+    398| const chatStore = useChatStore()
+    399| const { activeId } = storeToRefs(workspaceTabs)
+       |                      ^
+    400| const { fsChangedAt } = storeToRefs(chatStore)
+    401| const canWrite = computed(() => props.canWrite)
+ ❯ callWithErrorHandling ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ setupStatefulComponent ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8151:25
+ ❯ setupComponent ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8113:36
+ ❯ mountComponent ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6023:7
+ ❯ processComponent ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5989:9
+ ❯ patch ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5494:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] ../../../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6137:11
+ ❯ ReactiveEffect.run ../../../../workspace/Memoh/node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.cjs.js:268:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: Cannot read properties of null (reading 'effect')
+ ❯ storeToRefs ../../workspace/Memoh/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1920:19
+ ❯ setup apps/web/src/components/sidebar/files-pane.vue:399:22
+ ❯ callWithErrorHandling ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ setupStatefulComponent ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8151:25
+ ❯ setupComponent ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8113:36
+ ❯ mountComponent ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6023:7
+ ❯ processComponent ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5989:9
+ ❯ patch ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5494:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] ../../workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6137:11
+ ❯ ReactiveEffect.run ../../workspace/Memoh/node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.cjs.js:268:19
+
+This error originated in "apps/web/src/components/sidebar/files-pane.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+     Errors  1 error
+   Start at  15:05:14
+   Duration  8.72s (transform 6.01s, setup 0ms, import 7.97s, tests 26ms, environment 515ms)
+

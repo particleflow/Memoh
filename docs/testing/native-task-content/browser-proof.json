@@ -1,0 +1,23 @@
+{
+  "realServer": true,
+  "postgres": true,
+  "nativePeer": "synthetic loopback MCP",
+  "posts": [
+    {
+      "http": 200,
+      "state": "accepted"
+    },
+    {
+      "http": 200,
+      "state": "unknown"
+    }
+  ],
+  "contents": [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "pageErrors": []
+}

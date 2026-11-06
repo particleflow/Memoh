@@ -1,0 +1,152 @@
+[hooks] Hook regression tests: /workspace/.memoh-cloud/tooling/node_modules/node/bin/node --test scripts/hook-checks.test.mjs
+✔ frontend (1.802035ms)
+✔ hook test script (0.200542ms)
+✔ docs (0.087351ms)
+✔ Go package (0.19296ms)
+✔ deduplicate (0.122645ms)
+✔ embedded prompt (0.096685ms)
+✔ template (0.089825ms)
+✔ mixed (0.946616ms)
+✔ workspace Dockerfile (0.165109ms)
+✔ OpenAPI contract (0.164168ms)
+✔ display assets (0.100632ms)
+✔ runtime configuration (0.070286ms)
+✔ dependency (0.090706ms)
+✔ SQL inputs (0.049094ms)
+✔ deleted package (0.033661ms)
+✔ rename old and new paths (0.031678ms)
+✔ UI submodule (0.027622ms)
+✔ toolchain (0.113952ms)
+✔ frontend configuration (0.042384ms)
+✔ root Go package (0.106881ms)
+✔ explicit full checks (0.081783ms)
+✔ only staged files select checks; spaces are preserved (51.84033ms)
+✔ file size uses the index, not a smaller working copy (52.957144ms)
+✔ large generated Swagger artifacts retain their package checks (182.244467ms)
+✔ ordinary oversized file remains rejected: spec/notes.json (55.015081ms)
+✔ ordinary oversized file remains rejected: spec/nested/swagger.json (54.61679ms)
+✔ ordinary oversized file remains rejected: docs/swagger.json (52.819081ms)
+✔ ordinary oversized file remains rejected: packages/sdk/src/other.gen.ts (55.233294ms)
+✔ ordinary oversized file remains rejected: uploads/large.bin (53.141761ms)
+✔ ordinary file at the unchanged 1 MiB boundary is accepted (53.122873ms)
+✔ frontend calls lint-staged without Go (79.071667ms)
+✖ Go package checks run sequentially and failures stop the chain (144.986439ms)
+✔ timeout fails rather than silently skipping checks (1188.868004ms)
+✖ full mode runs all three checks even without staged changes (198.12045ms)
+✔ deleted resource still selects its package through the index (69.351978ms)
+✔ build-excluded packages do not invoke lint or test (98.271426ms)
+✖ packages that remain after build selection still run checks (158.643916ms)
+✔ ordinary package failures are not hidden by selection (150.430094ms)
+✔ real Go build constraints skip tag-only packages and honor GOFLAGS (840.23032ms)
+✔ manual checks from a subdirectory select and run packages at the root (128.254671ms)
+✔ dependency-only commits explicitly require CI without invoking Go (62.376142ms)
+✔ lint rejects import paths even when Go accepts them (161.037918ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 39
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3968.540771
+
+✖ failing tests:
+
+test at scripts/hook-checks.test.mjs:144:1
+✖ Go package checks run sequentially and failures stop the chain (144.986439ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /CALLED go \["test","-p=2","-timeout=180s","\.\/internal\/a"\]/. Input:
+  
+  '[hooks] Web: no relevant staged changes\n' +
+    '[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/a\n' +
+    '[hooks] Go package selection: 0.03s\n' +
+    '[hooks] Go lint: golangci-lint run --concurrency=2 ./internal/a\n' +
+    'CWD /tmp/memoh-hook-test-V0Y8cr\n' +
+    'CALLED golangci-lint ["run","--concurrency=2","./internal/a"]\n' +
+    '[hooks] Go lint: 0.03s\n' +
+    '[hooks] Go test: go test -p=2 -timeout=600s ./internal/a\n' +
+    'CWD /tmp/memoh-hook-test-V0Y8cr\n' +
+    'CALLED go ["test","-p=2","-timeout=600s","./internal/a"]\n' +
+    '[hooks] Go test: 0.03s\n' +
+    '[hooks] Total: 0.09s\n'
+  
+      at TestContext.<anonymous> (file:///tmp/memoh-candidate-7bcb-review/scripts/hook-checks.test.mjs:150:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '[hooks] Web: no relevant staged changes\n[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/a\n[hooks] Go package selection: 0.03s\n[hooks] Go lint: golangci-lint run --concurrency=2 ./internal/a\nCWD /tmp/memoh-hook-test-V0Y8cr\nCALLED golangci-lint ["run","--concurrency=2","./internal/a"]\n[hooks] Go lint: 0.03s\n[hooks] Go test: go test -p=2 -timeout=600s ./internal/a\nCWD /tmp/memoh-hook-test-V0Y8cr\nCALLED go ["test","-p=2","-timeout=600s","./internal/a"]\n[hooks] Go test: 0.03s\n[hooks] Total: 0.09s\n',
+    expected: /CALLED go \["test","-p=2","-timeout=180s","\.\/internal\/a"\]/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at scripts/hook-checks.test.mjs:166:1
+✖ full mode runs all three checks even without staged changes (198.12045ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /CALLED go \["test","-p=2","-timeout=900s","\.\/\.\.\."\]/. Input:
+  
+  '[hooks] Web lint: pnpm exec eslint .\n' +
+    'CWD /tmp/memoh-hook-test-MOz2C7\n' +
+    'CALLED pnpm ["exec","eslint","."]\n' +
+    '[hooks] Web lint: 0.05s\n' +
+    '[hooks] Go lint: golangci-lint run --concurrency=2 ./...\n' +
+    'CWD /tmp/memoh-hook-test-MOz2C7\n' +
+    'CALLED golangci-lint ["run","--concurrency=2","./..."]\n' +
+    '[hooks] Go lint: 0.03s\n' +
+    '[hooks] Go test: go test -p=2 -timeout=600s ./...\n' +
+    'CWD /tmp/memoh-hook-test-MOz2C7\n' +
+    'CALLED go ["test","-p=2","-timeout=600s","./..."]\n' +
+    '[hooks] Go test: 0.04s\n' +
+    '[hooks] Total: 0.12s\n'
+  
+      at TestContext.<anonymous> (file:///tmp/memoh-candidate-7bcb-review/scripts/hook-checks.test.mjs:172:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '[hooks] Web lint: pnpm exec eslint .\nCWD /tmp/memoh-hook-test-MOz2C7\nCALLED pnpm ["exec","eslint","."]\n[hooks] Web lint: 0.05s\n[hooks] Go lint: golangci-lint run --concurrency=2 ./...\nCWD /tmp/memoh-hook-test-MOz2C7\nCALLED golangci-lint ["run","--concurrency=2","./..."]\n[hooks] Go lint: 0.03s\n[hooks] Go test: go test -p=2 -timeout=600s ./...\nCWD /tmp/memoh-hook-test-MOz2C7\nCALLED go ["test","-p=2","-timeout=600s","./..."]\n[hooks] Go test: 0.04s\n[hooks] Total: 0.12s\n',
+    expected: /CALLED go \["test","-p=2","-timeout=900s","\.\/\.\.\."\]/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at scripts/hook-checks.test.mjs:194:1
+✖ packages that remain after build selection still run checks (158.643916ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /CALLED go \["test","-p=2","-timeout=180s","\.\/internal\/a"\]/. Input:
+  
+  '[hooks] Web: no relevant staged changes\n' +
+    '[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/a ./internal/tagged\n' +
+    '[hooks] Go package selection: 0.03s\n' +
+    '[hooks] Go lint: golangci-lint run --concurrency=2 ./internal/a\n' +
+    'CWD /tmp/memoh-hook-test-FAoVjg\n' +
+    'CALLED golangci-lint ["run","--concurrency=2","./internal/a"]\n' +
+    '[hooks] Go lint: 0.03s\n' +
+    '[hooks] Go test: go test -p=2 -timeout=600s ./internal/a\n' +
+    'CWD /tmp/memoh-hook-test-FAoVjg\n' +
+    'CALLED go ["test","-p=2","-timeout=600s","./internal/a"]\n' +
+    '[hooks] Go test: 0.03s\n' +
+    '[hooks] Total: 0.10s\n'
+  
+      at TestContext.<anonymous> (file:///tmp/memoh-candidate-7bcb-review/scripts/hook-checks.test.mjs:200:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '[hooks] Web: no relevant staged changes\n[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/a ./internal/tagged\n[hooks] Go package selection: 0.03s\n[hooks] Go lint: golangci-lint run --concurrency=2 ./internal/a\nCWD /tmp/memoh-hook-test-FAoVjg\nCALLED golangci-lint ["run","--concurrency=2","./internal/a"]\n[hooks] Go lint: 0.03s\n[hooks] Go test: go test -p=2 -timeout=600s ./internal/a\nCWD /tmp/memoh-hook-test-FAoVjg\nCALLED go ["test","-p=2","-timeout=600s","./internal/a"]\n[hooks] Go test: 0.03s\n[hooks] Total: 0.10s\n',
+    expected: /CALLED go \["test","-p=2","-timeout=180s","\.\/internal\/a"\]/,
+    operator: 'match',
+    diff: 'simple'
+  }
+[hooks] Hook regression tests: 4.01s
+[hooks] Hook regression tests failed (1)

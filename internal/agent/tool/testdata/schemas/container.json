@@ -1,0 +1,173 @@
+{
+  "apply_patch": {
+    "properties": {
+      "patch": {
+        "description": "Patch body in apply_patch format; paths workspace-relative by default.",
+        "type": "string"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "patch"
+    ],
+    "type": "object"
+  },
+  "edit": {
+    "properties": {
+      "new_text": {
+        "description": "Replacement text",
+        "type": "string"
+      },
+      "old_text": {
+        "description": "Exact text to find",
+        "type": "string"
+      },
+      "path": {
+        "description": "File path (relative to /data or absolute inside the workspace)",
+        "type": "string"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "old_text",
+      "new_text"
+    ],
+    "type": "object"
+  },
+  "exec": {
+    "properties": {
+      "background_mode": {
+        "description": "task (default) uses the execution budget; service runs until stopped or the workspace closes (requires run_in_background=true, no max_duration_seconds).",
+        "enum": [
+          "task",
+          "service"
+        ],
+        "type": "string"
+      },
+      "command": {
+        "description": "Command to run (e.g. ls -la, npm install, python script.py)",
+        "type": "string"
+      },
+      "description": {
+        "description": "Short active-voice description of the command, e.g. ls -la → \"List files with details\".",
+        "type": "string"
+      },
+      "max_duration_seconds": {
+        "description": "Total budget including foreground time (min 30, default 7200, max 86400); backgrounding does not restart it.",
+        "maximum": 86400,
+        "minimum": 30,
+        "type": "integer"
+      },
+      "run_in_background": {
+        "description": "Run in background; returns a task ID immediately (no trailing '\u0026'). For long commands (installs, builds, tests) and non-exiting processes (servers, watch mode). Inspect with wait_until(task_id), then get_background_status(task_id).",
+        "type": "boolean"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      },
+      "timeout": {
+        "description": "Foreground wait in seconds (default 30, max 600); a still-running command then moves to the background, possibly earlier to preserve max_duration_seconds.",
+        "maximum": 600,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "work_dir": {
+        "description": "Working directory (default: /data)",
+        "type": "string"
+      }
+    },
+    "required": [
+      "command"
+    ],
+    "type": "object"
+  },
+  "list": {
+    "properties": {
+      "limit": {
+        "default": 200,
+        "description": "Entries per call; default and max 200.",
+        "maximum": 200,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "offset": {
+        "default": 0,
+        "description": "Entry offset (0-indexed); default 0.",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "path": {
+        "description": "Directory path (relative to /data or absolute inside the workspace)",
+        "type": "string"
+      },
+      "recursive": {
+        "description": "List recursively",
+        "type": "boolean"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "type": "object"
+  },
+  "read": {
+    "properties": {
+      "line_offset": {
+        "default": 1,
+        "description": "First line to read (1-indexed); default 1.",
+        "minimum": 1,
+        "type": "integer"
+      },
+      "n_lines": {
+        "description": "Lines to read; default entire file.",
+        "minimum": 1,
+        "type": "integer"
+      },
+      "path": {
+        "description": "File path (relative to /data or absolute inside the workspace)",
+        "type": "string"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "type": "object"
+  },
+  "write": {
+    "properties": {
+      "content": {
+        "description": "File content",
+        "type": "string"
+      },
+      "path": {
+        "description": "File path (relative to /data or absolute inside the workspace)",
+        "type": "string"
+      },
+      "target_id": {
+        "description": "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "content"
+    ],
+    "type": "object"
+  }
+}

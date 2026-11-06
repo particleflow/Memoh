@@ -1,0 +1,6 @@
+{"ImportPath":"github.com/felinics/memoh/cmd/agent.test","Action":"build-output","Output":"# github.com/felinics/memoh/cmd/agent.test\n"}
+{"ImportPath":"github.com/felinics/memoh/cmd/agent.test","Action":"build-output","Output":"<cloud-go>/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device\n"}
+{"ImportPath":"github.com/felinics/memoh/cmd/agent.test","Action":"build-fail"}
+{"Time":"2026-10-23T04:39:47.103927712Z","Action":"start","Package":"github.com/felinics/memoh/cmd/agent"}
+{"Time":"2026-10-23T04:39:47.10399293Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Output":"FAIL\tgithub.com/felinics/memoh/cmd/agent [build failed]\n"}
+{"Time":"2026-10-23T04:39:47.104008954Z","Action":"fail","Package":"github.com/felinics/memoh/cmd/agent","Elapsed":0,"FailedBuild":"github.com/felinics/memoh/cmd/agent.test"}

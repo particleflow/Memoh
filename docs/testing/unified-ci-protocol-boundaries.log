@@ -1,0 +1,80 @@
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/settings_failure
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_model
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/model_query_failure
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_provider
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/provider_query_failure
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution (0.08s)
+    --- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/settings_failure (0.00s)
+    --- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_model (0.02s)
+    --- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/model_query_failure (0.02s)
+    --- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_provider (0.04s)
+    --- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/provider_query_failure (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/null
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"unsupported","model_mode":"omit"}
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"openai-images","model_mode":"omit"}
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/null
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"unsupported","model_mode":"omit"}
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"openai-images","model_mode":"omit"}
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution (0.01s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/null (0.00s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"unsupported","model_mode":"omit"} (0.00s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"openai-images","model_mode":"omit"} (0.00s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/null (0.00s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"unsupported","model_mode":"omit"} (0.00s)
+    --- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"openai-images","model_mode":"omit"} (0.00s)
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules/no_reply_target
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules/subagent
+--- PASS: TestAttachmentShortcutKeepsExistingSessionRules (0.09s)
+    --- PASS: TestAttachmentShortcutKeepsExistingSessionRules/no_reply_target (0.03s)
+    --- PASS: TestAttachmentShortcutKeepsExistingSessionRules/subagent (0.05s)
+=== RUN   TestEditDisabledBeforeHTTP
+--- PASS: TestEditDisabledBeforeHTTP (0.00s)
+=== RUN   TestDeniedConversationDoesNotOpenExistingHash
+--- PASS: TestDeniedConversationDoesNotOpenExistingHash (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider
+=== RUN   TestModelArgumentsCannotChooseProvider/base_url
+=== RUN   TestModelArgumentsCannotChooseProvider/endpoint
+=== RUN   TestModelArgumentsCannotChooseProvider/api_key
+=== RUN   TestModelArgumentsCannotChooseProvider/protocol
+=== RUN   TestModelArgumentsCannotChooseProvider/model
+=== RUN   TestModelArgumentsCannotChooseProvider/model_mode
+=== RUN   TestModelArgumentsCannotChooseProvider/bot_id
+=== RUN   TestModelArgumentsCannotChooseProvider/session_id
+--- PASS: TestModelArgumentsCannotChooseProvider (0.01s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/base_url (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/endpoint (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/api_key (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/protocol (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/model (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/model_mode (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/bot_id (0.00s)
+    --- PASS: TestModelArgumentsCannotChooseProvider/session_id (0.00s)
+=== RUN   TestEditMultipartConfiguredModelAndMask
+--- PASS: TestEditMultipartConfiguredModelAndMask (0.03s)
+=== RUN   TestTimeoutIsUnknownWithoutRetry
+--- PASS: TestTimeoutIsUnknownWithoutRetry (0.05s)
+=== RUN   TestGenerateBytesAndAttachment
+=== RUN   TestGenerateBytesAndAttachment/omit
+    provider_test.go:163: mode=omit POST=1 original_sha256=9dd42cb5b6cf10108a0d444072c822e7d827890f20f6a3fcc7561651754cc809 persisted_bytes=77
+=== RUN   TestGenerateBytesAndAttachment/configured
+    provider_test.go:163: mode=configured POST=1 original_sha256=9dd42cb5b6cf10108a0d444072c822e7d827890f20f6a3fcc7561651754cc809 persisted_bytes=77
+--- PASS: TestGenerateBytesAndAttachment (0.03s)
+    --- PASS: TestGenerateBytesAndAttachment/omit (0.01s)
+    --- PASS: TestGenerateBytesAndAttachment/configured (0.02s)
+=== RUN   TestInvalidInputsNeverDispatch
+=== RUN   TestInvalidInputsNeverDispatch/null
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":"synthetic","model":"override"}
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":""}
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":"synthetic","mode":"edit"}
+--- PASS: TestInvalidInputsNeverDispatch (0.01s)
+    --- PASS: TestInvalidInputsNeverDispatch/null (0.00s)
+    --- PASS: TestInvalidInputsNeverDispatch/{"prompt":"synthetic","model":"override"} (0.00s)
+    --- PASS: TestInvalidInputsNeverDispatch/{"prompt":""} (0.00s)
+    --- PASS: TestInvalidInputsNeverDispatch/{"prompt":"synthetic","mode":"edit"} (0.00s)
+=== RUN   TestStorageFailureDoesNotRegenerate
+--- PASS: TestStorageFailureDoesNotRegenerate (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/imagecapability	1.456s

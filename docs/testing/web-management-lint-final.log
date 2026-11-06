@@ -1,0 +1,7 @@
+
+/workspace/Memoh/apps/web/src/pages/home/components/session-tasks.test.ts
+   49:33  warning  There is more than one component in this file  vue/one-component-per-file
+  132:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 2 problems (0 errors, 2 warnings)
+

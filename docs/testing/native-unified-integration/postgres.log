@@ -1,0 +1,53 @@
+Existing task-owned isolated loopback PG; each fixture creates and removes its own uniquely named database. No production DB or credentials.
+COMMAND: go test -p=1 -tags=integration -count=1 -v -timeout=180s -run ^Test(NativeHerdr.*|NativeRuntimeCutover.*|ComputerAdmission.*|ComputerOperationsMigrationAndDurableIsolation|PiBatchHistory.*)$ ./internal/db
+=== RUN   TestComputerAdmissionDurabilityCoverageAndReservations
+--- PASS: TestComputerAdmissionDurabilityCoverageAndReservations (1.92s)
+=== RUN   TestComputerAdmissionPreservesAlreadyReservedFollowup
+--- PASS: TestComputerAdmissionPreservesAlreadyReservedFollowup (1.98s)
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/pause
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/claim
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/pause_followup
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/followup
+--- PASS: TestComputerAdmissionPauseSerializesWithClaims (8.45s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/pause (1.93s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/claim (1.99s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/pause_followup (2.29s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/followup (2.23s)
+=== RUN   TestComputerAdmissionRollbackRefusesLivePause
+--- PASS: TestComputerAdmissionRollbackRefusesLivePause (2.05s)
+=== RUN   TestComputerAdmissionRLSAndUnknownMapping
+--- PASS: TestComputerAdmissionRLSAndUnknownMapping (2.04s)
+=== RUN   TestComputerAdmissionEndpointConfigurationPreservesUnknownOperation
+    computer_endpoint_integration_test.go:81: PASS original unknown operation/revision/fingerprint/recovery-reader unchanged; same claim deduplicated; owner configuration persisted; stale/foreign CAS and paused mutation rejected
+--- PASS: TestComputerAdmissionEndpointConfigurationPreservesUnknownOperation (2.05s)
+=== RUN   TestComputerOperationsMigrationAndDurableIsolation
+--- PASS: TestComputerOperationsMigrationAndDurableIsolation (2.07s)
+=== RUN   TestNativeHerdrDeliveryUsesTransactionalRegistry
+    native_herdr_delivery_integration_test.go:156: native registry + forced RLS transaction: original task/run/operation and delivery replay preserved; foreign PC, changed instance/fingerprint and revoked runtime denied; dedicated synthetic transfer credential rotated/revoked without MCP
+--- PASS: TestNativeHerdrDeliveryUsesTransactionalRegistry (2.03s)
+=== RUN   TestNativeHerdrAdmissionPersistsAndFencesNewWork
+--- PASS: TestNativeHerdrAdmissionPersistsAndFencesNewWork (1.82s)
+=== RUN   TestNativeHerdrConfigAndTransferOwnership
+--- PASS: TestNativeHerdrConfigAndTransferOwnership (1.83s)
+=== RUN   TestNativeHerdrAdmissionRLSAndRollback
+--- PASS: TestNativeHerdrAdmissionRLSAndRollback (1.88s)
+=== RUN   TestNativeHerdrPauseSerializesWithClaims
+=== RUN   TestNativeHerdrPauseSerializesWithClaims/pause
+=== RUN   TestNativeHerdrPauseSerializesWithClaims/claim
+=== RUN   TestNativeHerdrPauseSerializesWithClaims/pause_followup
+=== RUN   TestNativeHerdrPauseSerializesWithClaims/followup
+--- PASS: TestNativeHerdrPauseSerializesWithClaims (7.96s)
+    --- PASS: TestNativeHerdrPauseSerializesWithClaims/pause (1.95s)
+    --- PASS: TestNativeHerdrPauseSerializesWithClaims/claim (2.04s)
+    --- PASS: TestNativeHerdrPauseSerializesWithClaims/pause_followup (1.93s)
+    --- PASS: TestNativeHerdrPauseSerializesWithClaims/followup (2.03s)
+=== RUN   TestNativeHerdrCanonicalAdmissionDefinition
+--- PASS: TestNativeHerdrCanonicalAdmissionDefinition (0.83s)
+=== RUN   TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths
+    native_runtime_cutover_integration_test.go:198: MCP inactive + native primary: owner/target listings, selected inventory, expired OAuth status and cached/restarted federation routes made zero old transport/OAuth calls; native route worked; unknown operation, bound workdir/session and synthetic credentials unchanged
+--- PASS: TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths (2.10s)
+=== RUN   TestPiBatchHistoryPriorEvidenceIsScopedAndLatest
+--- PASS: TestPiBatchHistoryPriorEvidenceIsScopedAndLatest (2.15s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	41.184s

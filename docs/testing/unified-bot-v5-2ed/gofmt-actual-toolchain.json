@@ -1,0 +1,40 @@
+{
+  "commit": "673bb95dd10d2125cb53e2fc08a18870974b3660",
+  "tool_path": "/workspace/.memoh-cloud/go/bin/gofmt",
+  "tool_sha256": "b8230896caf954318f5b6965cd35e7a5f63a0d3153edc22565e66aff71765c9a",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "go_version_exit": 0,
+  "command_arguments": [
+    "-l",
+    "cmd/internal/core/task_result_delivery.go",
+    "cmd/internal/core/task_result_delivery_test.go",
+    "internal/agent/application/delegation.go",
+    "internal/agent/application/task_result.go",
+    "internal/agent/application/task_result_test.go",
+    "internal/taskresult/delivery.go"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "file_hashes_before": {
+    "cmd/internal/core/task_result_delivery.go": "701b4f08e4f7d99eea3abf104d5476c180ad99b5b45d9076d88986f0746e548b",
+    "cmd/internal/core/task_result_delivery_test.go": "36fcbe37d59b8843e357ec499e22bdeed94dc5e9d8fcfb128b3ea8190f73349f",
+    "internal/agent/application/delegation.go": "6a35f09a3c46264537dfd7cd0e156595c4d30189b61f18e3dbfae46e533f66b7",
+    "internal/agent/application/task_result.go": "680312cba68535c3d413f089bf232f6d7310dc8fb8b29ab98f2f29e59a58d917",
+    "internal/agent/application/task_result_test.go": "f6d8e42b3cd5d4d3169283f4cc99ca495dca82630e5b8bfaa4e0581b9e4849fd",
+    "internal/taskresult/delivery.go": "665456f92161edd6c79a09a6dda9b04574a935ef2d94a6cdc9ed853ed2331bb1"
+  },
+  "file_hashes_after": {
+    "cmd/internal/core/task_result_delivery.go": "701b4f08e4f7d99eea3abf104d5476c180ad99b5b45d9076d88986f0746e548b",
+    "cmd/internal/core/task_result_delivery_test.go": "36fcbe37d59b8843e357ec499e22bdeed94dc5e9d8fcfb128b3ea8190f73349f",
+    "internal/agent/application/delegation.go": "6a35f09a3c46264537dfd7cd0e156595c4d30189b61f18e3dbfae46e533f66b7",
+    "internal/agent/application/task_result.go": "680312cba68535c3d413f089bf232f6d7310dc8fb8b29ab98f2f29e59a58d917",
+    "internal/agent/application/task_result_test.go": "f6d8e42b3cd5d4d3169283f4cc99ca495dca82630e5b8bfaa4e0581b9e4849fd",
+    "internal/taskresult/delivery.go": "665456f92161edd6c79a09a6dda9b04574a935ef2d94a6cdc9ed853ed2331bb1"
+  },
+  "source_unchanged": true,
+  "passed": true,
+  "deleted_objects": [],
+  "new_container_started": false,
+  "tests_build_ci": false
+}

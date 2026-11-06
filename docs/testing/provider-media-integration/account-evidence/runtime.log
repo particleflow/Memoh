@@ -1,0 +1,3 @@
+PASS combined native Web: active account save/reload/probe/catalog read and name restoration; masked key never resubmitted; no browser errors. No model request.
+PASS combined actual Server/PG/Web: 1 catalog GET + 1 connection-probe GET, 0 upstream POST; anonymous 401 and real foreign-team 404 made no upstream request; provider rows unchanged except expected fixture updated_at; model/operation rows unchanged; owner locator response unchanged.
+Removed only the two fixtures created by this script and their synthetic team; stopped temporary catalog peer. No model call, PC dispatch, credentials or production change.

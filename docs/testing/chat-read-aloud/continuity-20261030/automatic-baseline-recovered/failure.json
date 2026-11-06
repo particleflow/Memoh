@@ -1,0 +1,23 @@
+{
+  "source": "28ac9393c7e20db34b804ad3ece63680eecded8c + Home visibility candidate",
+  "syntheticServerAndWav": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "Home",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [],
+  "observations": [],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "failureBody": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n朗读交互模拟验证\n\nread-aloud-synthetic · 来源未知\n\n正在朗读此回复\n\nHome 边界合成回复第1段。\n\nread-aloud-synthetic · 来源未知\n\nHome 边界合成回复第2段。\n\nSynthetic\n云端电脑\nMemoh\n任务\nBots"
+}

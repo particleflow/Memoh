@@ -1,0 +1,24 @@
+{
+  "realServer": true,
+  "existingSyntheticPG": true,
+  "mutations": 0,
+  "detailHTTP": [
+    200,
+    503,
+    200,
+    200
+  ],
+  "targetSessionHTTP": [
+    200,
+    200
+  ],
+  "targetHistoryHTTP": [
+    200,
+    200
+  ],
+  "otherErrorHTTP": {
+    "404": 3,
+    "503": 6
+  },
+  "pageErrors": []
+}

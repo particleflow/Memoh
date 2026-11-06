@@ -1,0 +1,8 @@
+$ bash scripts/check-agent-core-boundary.sh
+Agent runtime and contextview match official baseline bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046
+exit_code=0
+$ git diff --exit-code be686249 -- internal/agent/runtime internal/contextview packages/runtime db/postgres/migrations spec packages/sdk apps/web internal/transferclient
+exit_code=0
+$ git diff --exit-code 2c2f6f0c -- db/postgres/queries/computer_operations.sql internal/db/postgres/sqlc/computer_operations.sql.go
+exit_code=0
+All prior PostgreSQL workflow steps byte-value-equivalent; both independent no-skip scripts retained once

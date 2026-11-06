@@ -1,0 +1,14 @@
+
+> @memohai/monorepo@0.22.0 test /tmp/memoh-candidate-7bcb-review
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/attachment-block.test.ts apps/web/src/pages/home/composables/useBotDelegationDownload.test.ts apps/web/src/lib/media-transfer.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  4 passed (4)
+      Tests  48 passed (48)
+   Start at  05:42:23
+   Duration  8.81s (transform 6.76s, setup 0ms, import 9.62s, tests 2.05s, environment 954ms)
+

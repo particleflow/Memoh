@@ -1,0 +1,4 @@
+PASS actual Server/JWT/PG task identity -> native agent.get/read -> escaped unverified terminal sample
+PASS parent task 503 clears native content and prevents child reads while authorization is unavailable
+PASS same operation resumes already-opened sample after fresh parent response; no open click or business dispatch
+PASS close/reopen requires explicit sample opening; narrow/dark rendering has no horizontal overflow

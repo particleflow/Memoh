@@ -1,0 +1,13 @@
+{
+  "accepted": [
+    {
+      "type": "file",
+      "content_hash": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af",
+      "mime": "application/octet-stream",
+      "name": "durable-real-bytes.bin",
+      "size": 3145747
+    }
+  ],
+  "synthetic_message_confirmation": true,
+  "real_model_requests": 0
+}

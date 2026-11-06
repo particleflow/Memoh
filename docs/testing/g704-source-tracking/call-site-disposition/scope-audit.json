@@ -1,0 +1,15 @@
+{
+  "base": "1369312252d0f55cd6e35a058927f921a80a753b",
+  "unchanged_policy_files": [
+    ".golangci.yml",
+    "eslint.config.mjs",
+    ".github/workflows/go-ci.yml",
+    "mise.toml"
+  ],
+  "production_change": "Exactly one local G704 annotation and supporting comments at the existing Do call; no executable statements changed.",
+  "new_gosec_directives": 1,
+  "suppressed_rule": "G704",
+  "suppressed_call": "internal/imagecapability/protocol.go:oneShot.Do(req)",
+  "new_eslint_exemptions": 0,
+  "old_882_scope": "One G704 annotation plus four Node builtin require-import allowances; the latter remain removed."
+}

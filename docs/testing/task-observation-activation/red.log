@@ -1,0 +1,128 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <repo>
+
+ ❯ |web| src/pages/home/components/session-task-observation-entry.test.ts (7 tests | 1 failed | 6 skipped) 113ms
+     × reads persisted summary, relationships and attachments without any native call 111ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-observation-entry.test.ts > shared task summary and explicit live observation > reads persisted summary, relationships and attachments without any native call
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 4 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        "cache": "no-store",
+        "path": Object {
+          "bot_id": "synthetic-bot",
+          "session_id": "root",
+          "task_id": "original-operation",
+          "task_type": "computer_operation",
+        },
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+        "throwOnError": true,
+      },
+    ]
+
+  2nd vi.fn() call:
+
+    Array [
+      Object {
+        "cache": "no-store",
+        "path": Object {
+          "bot_id": "synthetic-bot",
+          "session_id": "root",
+          "task_id": "original-operation",
+          "task_type": "computer_operation",
+        },
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+        "throwOnError": true,
+      },
+    ]
+
+  3rd vi.fn() call:
+
+    Array [
+      Object {
+        "cache": "no-store",
+        "path": Object {
+          "bot_id": "synthetic-bot",
+          "session_id": "root",
+          "task_id": "original-operation",
+          "task_type": "computer_operation",
+        },
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+        "throwOnError": true,
+      },
+    ]
+
+  4th vi.fn() call:
+
+    Array [
+      Object {
+        "cache": "no-store",
+        "path": Object {
+          "bot_id": "synthetic-bot",
+          "session_id": "root",
+          "task_id": "original-operation",
+          "task_type": "computer_operation",
+        },
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+        "throwOnError": true,
+      },
+    ]
+
+
+Number of calls: 4
+
+ ❯ src/pages/home/components/session-task-observation-entry.test.ts:55:33
+     53|     expect(root.textContent).toContain('Session’s direct parentroot')
+     54|     expect(api.deliveries).toHaveBeenCalled()
+     55|     expect(api.observation).not.toHaveBeenCalled(); expect(api.content…
+       |                                 ^
+     56|   })
+     57|   it('starts visible polling only from the existing button and reconne…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  08:32:19
+   Duration  6.37s (transform 4.39s, setup 0ms, import 5.71s, tests 113ms, environment 408ms)

@@ -1,0 +1,11 @@
+Selected package outcomes and failing test assertions only; unrelated synthetic test diagnostics omitted.
+ok  	github.com/felinics/memoh/internal/computertask	10.534s
+--- FAIL: TestMediaHTTPUploadConfiguredAbove200MiB (0.37s)
+    media_upload_test.go:108: upload: 500 {"type":"urn:memoh:error:internal","status":500,"detail":"Something went wrong on the server. Please try again.","code":"internal","args":{},"fault":"server"}
+--- FAIL: TestMediaHTTPStreamingLimitAndAdmission (0.38s)
+    --- FAIL: TestMediaHTTPStreamingLimitAndAdmission/over_default_200MiB (0.38s)
+        media_upload_test.go:164: status=500: {"type":"urn:memoh:error:internal","status":500,"detail":"Something went wrong on the server. Please try again.","code":"internal","args":{},"fault":"server"}
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	3.171s
+?   	github.com/felinics/memoh/spec	[no test files]
+FAIL

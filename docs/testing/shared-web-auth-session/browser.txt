@@ -1,0 +1,4 @@
+PASS actual login form/store + existing authenticated Server reads: late anonymous 401 retains the new login
+PASS real user-store login with the same token: prior 401 cannot clear the new generation or selection
+PASS normal reload retains authenticated application access after both stale responses
+PASS current-session 401 still clears identity and routes to the real login page

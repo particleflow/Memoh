@@ -1,0 +1,81 @@
+name: Native delivery fixtures
+on:
+  pull_request:
+    paths:
+      - 'internal/transferclient/**'
+      - 'internal/nativeherdr/**'
+      - 'internal/computertarget/**'
+      - 'cmd/transferqueue/**'
+      - 'contrib/herdr/memoh-delivery/**'
+      - 'scripts/build-transferqueue-bundle.py'
+      - '.github/workflows/delivery-native.yml'
+      - 'internal/db/computer_delivery_native_windows_test.go'
+      - 'internal/db/computer_transfer_principal_integration_test.go'
+      - 'internal/userruntime/transfer*.go'
+      - 'internal/db/postgres/store/runtime_transfer.go'
+      - 'internal/db/postgres/sqlc/runtime_transfer_credentials.sql.go'
+      - 'internal/handlers/runtime_transfer_credentials.go'
+      - 'internal/server/server.go'
+      - 'internal/computertask/delivery*.go'
+      - 'internal/computertask/transfer_principal*.go'
+      - 'internal/handlers/computer_transfers*.go'
+      - 'internal/handlers/media*.go'
+      - 'internal/handlers/message.go'
+      - 'scripts/test-native-delivery-postgres.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows:
+    name: Windows NTFS isolated fixtures
+    runs-on: windows-2025
+    # Source contracts and the packaged native replay both perform real NTFS
+    # flushes. Publication/catalog aggregates exhausted 5m on two runners.
+    # Allow 10m for each source/package aggregate and retain the existing
+    # overall headroom; other groups keep their original process deadlines.
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify native Herdr CLI bytes through Windows PowerShell
+        run: go test -count=1 -v -timeout=3m ./internal/nativeherdr
+      - name: Verify native batch stdin through Windows PowerShell
+        run: go test -count=1 -v -timeout=3m -run '^TestNativeBatchLauncherWindowsPowerShell$' ./internal/computertarget
+      # Filesystem durability/catalog tests can exceed one package's aggregate
+      # five-minute budget. These disjoint selectors retain every test once,
+      # including both the shared progress test and its native wrapper.
+      # The non-Windows-name aggregate exhausted 10m on NTFS while individual
+      # publication cases were passing. Keep every case once and the same
+      # process deadline; isolate that durable publication family instead.
+      - name: Execute transfer contracts except Windows, publication and journal progress
+        run: go test -count=1 -v -timeout=10m -skip '^Test(Windows|PublicationMetadata|ActiveJournalBoundedAcrossProgress$)' ./internal/transferclient
+      - name: Execute publication metadata durability contracts
+        run: go test -count=1 -v -timeout=10m -run '^TestPublicationMetadata' ./internal/transferclient
+      - name: Execute active journal progress contract
+        run: go test -count=1 -v -timeout=5m -run '^TestActiveJournalBoundedAcrossProgress$' ./internal/transferclient
+      - name: Execute Windows active journal contracts
+        run: go test -count=1 -v -timeout=5m -run '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+      - name: Execute remaining Windows-prefixed transfer contracts
+        run: go test -count=1 -v -timeout=10m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+      - name: Execute complete CLI contracts
+        run: go test -count=1 -v -timeout=5m ./cmd/transferqueue
+      - name: Execute native publication with PostgreSQL
+        run: ./scripts/test-native-delivery-postgres.ps1
+      - name: Build reviewed binary bundle
+        run: python scripts/build-transferqueue-bundle.py --output '${{ runner.temp }}/delivery-windows-amd64'
+      - name: Verify packaged executable
+        run: "& '${{ runner.temp }}/delivery-windows-amd64/verify-fixtures.ps1'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: delivery-windows-amd64
+          path: ${{ runner.temp }}/delivery-windows-amd64
+          retention-days: 7
+          if-no-files-found: error

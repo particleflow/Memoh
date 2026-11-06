@@ -1,0 +1,15 @@
+internal/sessiontask/subagent_test.go:43:85: comparing with != will fail on wrapped errors. Use errors.Is to check for a specific error (errorlint)
+	if _, err := f.service.Get(t.Context(), "bot", "user", f.root, Subagent, f.child); err != ErrUnavailable {
+	                                                                                   ^
+internal/db/postgres/store/session_tasks.go:6:1: File is not properly formatted (gci)
+	"github.com/jackc/pgx/v5"
+^
+internal/db/postgres/store/session_tasks.go:5:1: File is not properly formatted (gofumpt)
+	"errors"
+^
+internal/handlers/session_tasks_test.go:289:7: unused-receiver: method receiver 'f' is not referenced in method's body, consider removing or renaming it as _ (revive)
+func (f *taskHTTPFixture) ReadSubagentRun(context.Context, string, string) (dbstore.SubagentRun, error) {
+      ^
+internal/sessiontask/service_test.go:415:54: unused-parameter: parameter 'bot' seems to be unused, consider removing or renaming it as _ (revive)
+func (f *fixture) ReadSubagentRun(_ context.Context, bot, session string) (dbstore.SubagentRun, error) {
+                                                     ^

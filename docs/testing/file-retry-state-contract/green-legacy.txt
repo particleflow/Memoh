@@ -1,0 +1,4 @@
+=== RUN   TestRetryContractLegacyAssociationPauseIsExplicit
+--- PASS: TestRetryContractLegacyAssociationPauseIsExplicit (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	0.018s

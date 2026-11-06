@@ -1,0 +1,5 @@
+--- FAIL: TestNativeRegistrationBindsDistinctBotsAndReconstructsScope (0.00s)
+    native_registration_test.go:74: native bind={SourceSelection: TeamID: UserID: SourceBotID: SourceSessionID: SourceRootID: TargetBotID: TargetSessionID:} "" delegation is unavailable in this conversation
+FAIL
+FAIL	github.com/felinics/memoh/internal/botdelegation	0.013s
+FAIL

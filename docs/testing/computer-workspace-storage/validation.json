@@ -1,0 +1,90 @@
+{
+  "base": "4d23244c683aca4c436efec4db375921fdf60472",
+  "branch": "feat/computer-workspace-storage",
+  "schema": 177,
+  "migration": false,
+  "api_operations": {
+    "before": 368,
+    "after": 371,
+    "removed": 0
+  },
+  "checks": {
+    "domain_and_config": {
+      "exit": 0,
+      "top_level_tests": 5
+    },
+    "account_http": {
+      "exit": 0,
+      "cases": 18
+    },
+    "error_framework": {
+      "exit": 0,
+      "packages": [
+        "internal/apperror",
+        "internal/server"
+      ]
+    },
+    "real_postgres_http_contract": {
+      "exit": 0,
+      "seconds": 2.412,
+      "skip": 0
+    },
+    "actual_shared_browser": {
+      "exit": 0,
+      "seconds": 10.426,
+      "windows_share": "controlled existing-RPC fixture",
+      "forwarding": "only this new namespace to synthetic fresh-PG account",
+      "latest_path_reference": "saved WindowsPath correction checked after browser by current domain and real PG; not a rendered field"
+    },
+    "web_error_and_module_tests": {
+      "exit": 0,
+      "tests": 128,
+      "module_tests_included": 5
+    },
+    "routes": {
+      "exit": 0,
+      "tests": 17,
+      "run_with_initial4moduletests": true
+    },
+    "existing_folder_picker": {
+      "exit": 0,
+      "tests": 4
+    },
+    "web_types": {
+      "exit": 0
+    },
+    "sdk_types": {
+      "exit": 0
+    },
+    "web_build": {
+      "exit": 0,
+      "existing_chunk_warning": true
+    },
+    "eslint": {
+      "exit": 0
+    },
+    "core_build": {
+      "exit": 0
+    },
+    "latest_scoped_go_lint": {
+      "exit": 1,
+      "reason": "typecheck cache ENOSPC",
+      "source_diagnostics": "earlier4comment/test diagnostics fixed; prior3-package lint passed before final error-contract changes; current full check requires CI"
+    }
+  },
+  "evidence_processing": "Named successful logs copied verbatim after credential/address review. initial-failures-excerpts.txt is explicitly concatenated/truncated and not an original raw log. Screenshots are synthetic account/computer data from actual app. No production data.",
+  "not_done": [
+    "combined remote CI",
+    "actual NAS root/share mapping and share permissions",
+    "real Windows UNC/LAN and picker acceptance",
+    "default execution-root consumption via existing fresh setup/profile",
+    "arbitrary NAS/Bot folders outside owned computer namespace",
+    "HAP packaging/signing and physical acceptance",
+    "image performance remedy"
+  ],
+  "human_qa": false,
+  "production_writes": 0,
+  "real_model_calls": 0,
+  "image_publication": false,
+  "deployment": false
+}

@@ -1,0 +1,10 @@
+{
+  "operation_session_is_child": true,
+  "child_parent_is_observed_root": true,
+  "same_bot": true,
+  "state": "submitted",
+  "revision": 6,
+  "recorded_workspace": true,
+  "recorded_pane": true,
+  "recorded_terminal": true
+}

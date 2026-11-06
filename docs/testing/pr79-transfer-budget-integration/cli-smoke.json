@@ -1,0 +1,29 @@
+{
+  "synthetic_only": true,
+  "network_requests": 0,
+  "payload_bytes": 0,
+  "configured_bytes": 8589934592,
+  "original_locator_bytes": 268435456,
+  "locator_version": 4,
+  "steps": [
+    {
+      "action": "probe",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "storage unavailable\n"
+    },
+    {
+      "action": "migrate-budget",
+      "exit_code": 0,
+      "stdout": "{\"budget_migration\":\"complete\"}\n",
+      "stderr": ""
+    },
+    {
+      "action": "probe",
+      "exit_code": 0,
+      "stdout": "{\"storage\":\"available\",\"device_configuration\":\"required\",\"profile\":\"native-profile-v1\"}\n",
+      "stderr": ""
+    }
+  ],
+  "harness_failure": "Initial harness assumed rejected probe emitted JSON. Existing probe intentionally emits fixed stderr; corrected reader preserves stdout and stderr. The same synthetic queue was retained; no product code change."
+}

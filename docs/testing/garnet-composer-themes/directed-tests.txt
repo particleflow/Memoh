@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/Memoh
+
+
+ Test Files  7 passed (7)
+      Tests  55 passed (55)
+   Start at  10:06:48
+   Duration  1.73s (transform 852ms, setup 0ms, import 1.38s, tests 268ms, environment 1.39s)

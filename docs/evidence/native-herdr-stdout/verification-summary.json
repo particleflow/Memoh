@@ -1,0 +1,60 @@
+{
+  "verified_at_utc": "2026-10-25T16:36:03.780435+00:00",
+  "base_head": "79047657f2cecef4b11bed7189c54ef82c91b10a",
+  "source_sha256": "f0eb0b5a7946ea73496aac6b12fe52f11724a1189e0c1dfe979f5dbde32d016e",
+  "exec_go_sha256": "61576094a551188292291ed492457caadb1f4290f5dab8bad5a923349475e50a",
+  "binary_sha256": "956db4e5f305f446fe6496586a5fbd9fee889bcbc78999351163e340bbd35d88",
+  "environment": {
+    "web": "http://127.0.0.1:58083",
+    "backend": "http://127.0.0.1:58080",
+    "health_head_status": 200,
+    "postgres": "isolated memoh-herdr-ui-pg / loopback 58432",
+    "pgvector": "isolated memoh-herdr-ui-vector / loopback 58433",
+    "startup": "Current modified Go binary plus existing Vite; mise unavailable."
+  },
+  "interactions": [
+    "Viewed existing native computer in Settings / Computers.",
+    "Selected synthetic owned native unknown receipt session.",
+    "Opened real Tasks / Computer task detail.",
+    "Used existing Refresh computer read action."
+  ],
+  "task": {
+    "task_type": "computer_operation",
+    "task_id": "70000000-0000-4000-8000-000000000005",
+    "session_id": "60000000-0000-4000-8000-000000000005",
+    "parent_session_id": "60000000-0000-4000-8000-000000000005",
+    "created_at": "2026-10-25T16:33:31.898211Z",
+    "updated_at": "2026-10-25T16:33:31.898211Z",
+    "status": "unknown",
+    "summary": "Pi receipt recorded; current history continuity and business completion are unverified.",
+    "content_available": false,
+    "attachments_available": false,
+    "target_id": "e76bd2c0-260b-4a1d-b05e-ea7ac0cea597",
+    "operation_kind": "herdr_pi_task",
+    "revision": "0",
+    "cancel_requested": false,
+    "process_state": "unknown",
+    "pi_result": "unknown",
+    "business_state": "unknown"
+  },
+  "checks": {
+    "native_target_present": true,
+    "same_operation_id": true,
+    "execution_unknown": true,
+    "business_unknown": true,
+    "session_and_operation_rows_unchanged": true,
+    "operation_count_before": 2,
+    "operation_count_after": 2,
+    "oauth_rows": 0,
+    "task_write_requests": [],
+    "browser_page_errors": []
+  },
+  "snapshot_sha256": "917c5fe2ccd6eb6f13bf5d5f5ba56480b5693b5736046287b08a43a83a037d55",
+  "limitations": [
+    "Synthetic isolated data only; no real credential, OAuth authorization/refresh, Runtime enrollment, Windows connection or production deployment.",
+    "The native computer is deliberately offline; the real UI reports connection unavailable and the existing workspace unavailable toast.",
+    "These checks verify current application startup, receipt reading and unknown/no-replay presentation. They do not execute the Windows PowerShell wrapper; that regression is verified separately by the assigned test agent.",
+    "Browser verification is agent-driven, not human QA."
+  ],
+  "local_raw_evidence_directory": "/workspace/native-herdr-verification/stdout-hotfix"
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/web-management-checks/results-file-route.py", line 22, in <module>
+    sql("INSERT INTO users(id,username) VALUES('"+user+"','web-result-owner-"+user+"');INSERT INTO team_members(user_id) VALUES('"+user+"');UPDATE bots SET owner_user_id='"+user+"' WHERE id='"+s['target']+"'")
+  File "/tmp/web-management-checks/results-file-route.py", line 11, in sql
+    if r.returncode:raise RuntimeError('isolated PG fixture command failed')
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: isolated PG fixture command failed

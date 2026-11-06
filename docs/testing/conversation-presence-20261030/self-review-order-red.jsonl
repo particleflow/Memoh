@@ -1,0 +1,9 @@
+{"Time":"2026-10-30T13:33:20.81570725Z","Action":"start","Package":"github.com/felinics/memoh/internal/agent/application"}
+{"Time":"2026-10-30T13:33:20.892049921Z","Action":"run","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude"}
+{"Time":"2026-10-30T13:33:20.892094437Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Output":"=== RUN   TestConversationPresencePrioritizesFormalBehindReadyPrelude\n"}
+{"Time":"2026-10-30T13:33:20.89234595Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Output":"    conversation_presence_runtime_test.go:184: pending acknowledgement could precede formal text behind a ready prelude\n"}
+{"Time":"2026-10-30T13:33:20.892417125Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Output":"--- FAIL: TestConversationPresencePrioritizesFormalBehindReadyPrelude (0.00s)\n"}
+{"Time":"2026-10-30T13:33:20.892438998Z","Action":"fail","Package":"github.com/felinics/memoh/internal/agent/application","Test":"TestConversationPresencePrioritizesFormalBehindReadyPrelude","Elapsed":0}
+{"Time":"2026-10-30T13:33:20.893659148Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Output":"FAIL\n"}
+{"Time":"2026-10-30T13:33:20.897401079Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Output":"FAIL\tgithub.com/felinics/memoh/internal/agent/application\t0.081s\n"}
+{"Time":"2026-10-30T13:33:20.897420949Z","Action":"fail","Package":"github.com/felinics/memoh/internal/agent/application","Elapsed":0.082}

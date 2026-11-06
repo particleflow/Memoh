@@ -1,0 +1,44 @@
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/user
+    input_source_test.go:82: captured provider wire: {"kind":"user","bot_id":"bdf910ec-8dfa-4bb1-8cba-cd20e23c17e1","session_id":"25771a69-5bf0-4d1b-a71f-fd12a5b81f52","user_id":"460f563d-b3d5-4203-9693-b5c28c546103","channel":"web"}; body retained in user role
+    input_source_test.go:82: captured provider wire: {"kind":"user","bot_id":"66af77f3-b9b6-46af-a141-ba1d6e962b7a","session_id":"46d05ffc-6b0a-45e3-b87f-1f3dc2b47166","user_id":"60fa692e-4c11-4950-ab48-e95f258988a9","channel":"web"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/schedule
+    input_source_test.go:82: captured provider wire: {"kind":"schedule","bot_id":"9840a8fd-5e05-470c-99a2-966a667a4ba0","session_id":"2a295b29-9d64-47b8-9a2c-3ba1701dd99d","task_kind":"schedule","task_id":"40c2af06-5533-4dd3-9775-171bdbf4141e","origin_bot_id":"991d1816-f328-4f9d-b8a6-8febf3669c02","origin_session_id":"e0753021-4041-400f-acae-282d913a727e"}; body retained in user role
+    input_source_test.go:82: captured provider wire: {"kind":"schedule","bot_id":"2bf5d73b-20a5-4d8d-bae3-b949590f1be9","session_id":"67fc6541-b0e7-494c-813d-d91d7170bbfb","task_kind":"schedule","task_id":"90523e04-c85c-4460-b028-6a6286ab847a","origin_bot_id":"f9c88f1d-01b8-4b00-9a54-78e13a395ef2","origin_session_id":"0023f2f9-be40-4594-94c5-c972bd9e9654"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation
+    input_source_test.go:82: captured provider wire: {"kind":"bot_delegation","bot_id":"7471c086-d4ee-458d-b2df-e717fbadfed7","session_id":"c8ff145f-2308-4376-99f7-07e8734680da","task_kind":"bot_delegation","task_id":"101180e9-c878-4b19-b196-eb322050f158","origin_bot_id":"f932f038-1306-47b5-8d08-77401125302e","origin_session_id":"804248e7-5912-48cf-b3ba-fd25421066ec"}; body retained in user role
+    input_source_test.go:82: captured provider wire: {"kind":"bot_delegation","bot_id":"83d51dcb-03f9-46a7-bfc4-152f3dae91f3","session_id":"ab9e8ca9-ea23-44d6-a31e-7ce246d38ac9","task_kind":"bot_delegation","task_id":"30ac527f-7592-4373-8f92-6d62a42b0834","origin_bot_id":"a2e7b7d1-d27f-46f0-b907-5a1df14343e4","origin_session_id":"9f60dc25-e6fe-4a55-bd99-50214c6a7021"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/task_result
+    input_source_test.go:82: captured provider wire: {"kind":"task_result","bot_id":"fdd1e047-61a9-4dfe-aa01-436dea6f35ce","session_id":"2f0bbf20-11e6-48f6-96e5-d9c4eda00ca3","task_kind":"task_result","task_id":"4896c964-76aa-4587-bf2d-906ab991e243","origin_bot_id":"af0b2901-21ed-47ae-80f9-737ce7e5a487","origin_session_id":"83e5df2c-a7ff-47b5-bfe6-877636ff1b86"}; body retained in user role
+    input_source_test.go:82: captured provider wire: {"kind":"task_result","bot_id":"45d89cab-7b6f-4dec-91de-26bda8181cb2","session_id":"73013595-3092-4add-86cf-49ebc5b0da70","task_kind":"task_result","task_id":"90baa695-88aa-4d70-ba30-b1277f48c6f4","origin_bot_id":"38de3292-945f-4ea9-9081-f946eb63ebbe","origin_session_id":"c959c2dc-0f69-40f1-95f9-02e2b628a416"}; body retained in user role
+--- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots (0.06s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/user (0.02s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/schedule (0.02s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation (0.01s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/task_result (0.01s)
+=== RUN   TestInputSourceScheduleTriggerAndRestart
+    input_source_test.go:124: captured provider wire: {"kind":"schedule","bot_id":"22222222-2222-4222-8222-222222222222","session_id":"33333333-3333-4333-8333-333333333333","task_kind":"schedule","task_id":"3229b3cc-29b8-4eca-9be0-13cf0953b761","task_run_id":"11111111-1111-4111-8111-111111111111","occurrence_id":"3e517ee4-e21a-4caf-bad8-b8d172de4d88"}; body retained in user role
+--- PASS: TestInputSourceScheduleTriggerAndRestart (0.01s)
+=== RUN   TestInputSourceUnknownHistoryAndRetryNeverGuess
+--- PASS: TestInputSourceUnknownHistoryAndRetryNeverGuess (0.00s)
+=== RUN   TestInputSourceCancellationKeepsOriginalActor
+    input_source_test.go:198: captured provider wire: {"kind":"user","bot_id":"0c0c2aa2-48d1-478b-8aad-c3d665297f80","session_id":"da517bf6-1e29-44c9-901b-18ae1ee8f799","user_id":"ac375e08-a9d7-4632-9b8b-8434a06542e0","channel":"web"}; body retained in user role
+--- PASS: TestInputSourceCancellationKeepsOriginalActor (0.00s)
+=== RUN   TestInputSourceUnattributedMidTurnInputDoesNotBorrowOriginalActor
+--- PASS: TestInputSourceUnattributedMidTurnInputDoesNotBorrowOriginalActor (0.00s)
+=== RUN   TestSubagentStepCommitRequiresHandleAndFence
+--- PASS: TestSubagentStepCommitRequiresHandleAndFence (0.00s)
+=== RUN   TestSubagentStepCommitPersistsStepsInOrder
+--- PASS: TestSubagentStepCommitPersistsStepsInOrder (0.00s)
+=== RUN   TestSubagentStepCommitSkipsEmptyStepWithoutPersisting
+--- PASS: TestSubagentStepCommitSkipsEmptyStepWithoutPersisting (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	1.180s
+=== RUN   TestInputSourceDelegationRebuiltFromAuthorizedLedger
+--- PASS: TestInputSourceDelegationRebuiltFromAuthorizedLedger (0.00s)
+=== RUN   TestInputSourceNativeTaskHostPortsAndProviderWire
+    input_source_test.go:120: native provider and persisted source match: {"kind":"native_task","bot_id":"845cd707-61dd-4f13-ba27-46dd7fb8c327","session_id":"89f099c7-91dc-4831-9764-6bc8913acd7b","task_kind":"native_task","task_id":"e0a92031-21e4-4cdc-8ece-d236f61d37fe","task_run_id":"784433f3-7188-476c-b7f1-ef3b5248b1a1","origin_bot_id":"b657a8c1-495f-425e-8892-71b2acab6401","origin_session_id":"63e0411b-c4f4-4d76-aaca-f83e7a46e5de"}
+    input_source_test.go:120: native provider and persisted source match: {"kind":"native_task","bot_id":"327cc7ec-2d00-4325-88e2-bf621e9c1c23","session_id":"16d9613a-0e44-4aa1-baf8-b0a62aaaee92","task_kind":"native_task","task_id":"92cdfd94-11e4-4a13-89a5-dbcf02fa7e96","task_run_id":"05abac17-ac43-437c-9371-fe964947ffe7","origin_bot_id":"696830da-e169-4da9-8dad-9e483983d453","origin_session_id":"a4c2a974-e230-4edb-9ad8-e9a387d9896f"}
+--- PASS: TestInputSourceNativeTaskHostPortsAndProviderWire (0.00s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	1.072s

@@ -1,0 +1,19 @@
+PASS actual-rejection: real persisted original call, explicit one POST, exact arguments/operation, no model/device/new run; actual Server400/no-store
+PASS submitted: real persisted original call, explicit one POST, exact arguments/operation, no model/device/new run; UI fixture acknowledgement boundary and reload no-repeat
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByText('Synthetic explicit batch continuation', { exact: true }).first()[22m
+
+    at run (/tmp/native-resume-ui/browser.mjs:33:49)
+    at async file:///tmp/native-resume-ui/browser.mjs:55:58 {
+  log: [
+    "  - waiting for getByText('Synthetic explicit batch continuation', { exact: true }).first()"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

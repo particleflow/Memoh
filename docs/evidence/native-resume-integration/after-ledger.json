@@ -1,0 +1,14 @@
+{
+  "computer_operations": {
+    "sha256": "c94c3081188fdfd2ca9047144e858bf95a7bc527f810a5ef1fb8c467e73b9712",
+    "count": 9
+  },
+  "bot_sessions": {
+    "sha256": "45b54eb224b7ca8917b352a40f86c63cbc9aabf58b258986e46ab85fc693cad9",
+    "count": 18
+  },
+  "bot_history_messages": {
+    "sha256": "cea1ddf138def64b627a9941d22596f2ecf0f076ddf2e9b553837715629cce68",
+    "count": 29
+  }
+}

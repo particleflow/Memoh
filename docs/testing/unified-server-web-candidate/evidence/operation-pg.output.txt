@@ -1,0 +1,5 @@
+=== RUN   TestComputerOperationsMigrationAndDurableIsolation
+--- PASS: TestComputerOperationsMigrationAndDurableIsolation (2.66s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.705s
+Required computer operation PostgreSQL CAS/ownership/RLS test passed without skips

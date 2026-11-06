@@ -1,0 +1,5 @@
+{
+  "files": [],
+  "bytes": 0,
+  "reason": "Retain package archives while removing only rebuildable cached executable outputs to fit final verification"
+}

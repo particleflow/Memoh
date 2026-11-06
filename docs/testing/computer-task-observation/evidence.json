@@ -1,0 +1,80 @@
+[
+  {
+    "file": "go-final.log",
+    "original_sha256": "54c83ac4589ce5e3ceafc09b9d9ffa86b2f0732ad78cdded69f8ea2c7ce43918",
+    "published_sha256": "54c83ac4589ce5e3ceafc09b9d9ffa86b2f0732ad78cdded69f8ea2c7ce43918",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "ui-tests-final.log",
+    "original_sha256": "244420901525ffd209b07ea8c1c934dbc290def94fa9c9fcb1ae4b6895281143",
+    "published_sha256": "a48b330f6a8450e8cfb29d65727de62585bf95d7fd6053958fe83104e42b67f9",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "ui-tests-fixed.log",
+    "original_sha256": "35c97224520406facd7247f0cd5df4cada4b54c91061cb8e0cbd6e6fd3547519",
+    "published_sha256": "5dc56ed6830d1bcd46e53b71f1fb366cfccfbf9bd8c6943c2cdf470d612d78c4",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "typecheck-final.log",
+    "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "published_sha256": "7ccbddbbc4ede565d3cbf8fbafbeb3beac710ca011c76ec521279f95397d4c11",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "typecheck-sdk.log",
+    "original_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "published_sha256": "0bfb375565d7960f6ab73dc9bebc46c1c2ec320f133f03888a4185b90ec6bff8",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "lint-final.log",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "ui-contract.log",
+    "original_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "published_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "build-web.log",
+    "original_sha256": "31392f4dd4681eca492a6e5e1c3db3f4d571c5a47a967c13e12573aec69ae6b7",
+    "published_sha256": "f5684748b242dcc064e72efa62f31d810432e02f8fcbee1232a93ade968f5fae",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "browser-current.log",
+    "original_sha256": "0042520c0845ed19e709c90dcec2a8b015fa280a3471e1c90e9674f5e4fb693d",
+    "published_sha256": "a97432ddbadf3f09325324e6165e1a64bdf7186aa40f931816d7747ce12b6304",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "browser-narrow-final.log",
+    "original_sha256": "490f24236923b76a562c6cd90ce2f5b90c272fe89c98482b68c6757666b7e571",
+    "published_sha256": "490f24236923b76a562c6cd90ce2f5b90c272fe89c98482b68c6757666b7e571",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "native-api-proof.json",
+    "original_sha256": "975b7513fa552324efed9167b45784c3912ee8cae24546b19431f6cae69667aa",
+    "published_sha256": "975b7513fa552324efed9167b45784c3912ee8cae24546b19431f6cae69667aa",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "browser-narrow-proof.json",
+    "original_sha256": "45e11a0ee7eac6320338d30b73bb20e9fa8c82975ae0889368609a3552f83d5f",
+    "published_sha256": "45e11a0ee7eac6320338d30b73bb20e9fa8c82975ae0889368609a3552f83d5f",
+    "normalization": "repository/fixture directory tokens only; content and earlier harness failure retained"
+  },
+  {
+    "file": "lint-complete.log",
+    "original_sha256": "7f78c143ba4515190a4af6aa3d6e71390cda6a7cdd2498cba6e30b71fa21c54d",
+    "published_sha256": "ad29232fc11f16ec517b852076981ea0971a3f70cc75c85f428016476763dde9",
+    "normalization": "repository directory token only; complete affected-file lint, exit 0, six test-component warnings"
+  }
+]

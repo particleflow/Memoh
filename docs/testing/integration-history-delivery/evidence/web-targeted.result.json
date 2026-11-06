@@ -1,0 +1,22 @@
+{
+  "check": "web-targeted",
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2",
+    "--testTimeout=15000",
+    "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts",
+    "apps/web/src/pages/home/composables/useBotDelegations.test.ts",
+    "apps/web/src/pages/home/composables/useSessionTasks.test.ts",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts",
+    "apps/web/src/pages/home/components/session-tasks.test.ts",
+    "apps/web/src/lib/api-client.test.ts",
+    "apps/web/src/utils/api-error.test.ts",
+    "apps/web/src/composables/api/sse-error.test.ts"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T22:58:21Z",
+  "elapsed_seconds": 8.704
+}

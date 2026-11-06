@@ -1,0 +1,42 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/store/chat/realtime.test.ts (15 tests | 1 failed) 19ms
+     × aborts only a connected websocket for the matching bot 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/chat/realtime.test.ts > chat realtime controller > aborts only a connected websocket for the matching bot
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'run-1', 'session-1', 'control-1' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "run-1",
+    "session-1",
+    "control-1",
++   undefined,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/store/chat/realtime.test.ts:203:38
+    201|       'control-1',
+    202|     )).toBe(true)
+    203|     expect(sockets[0]!.socket.abort).toHaveBeenCalledWith(
+       |                                      ^
+    204|       'run-1',
+    205|       'session-1',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  21:30:20
+   Duration  585ms (transform 291ms, setup 0ms, import 423ms, tests 19ms, environment 0ms)
+

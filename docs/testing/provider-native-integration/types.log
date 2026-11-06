@@ -1,0 +1,7 @@
+
+> @memohai/web@0.22.0 typecheck <repo>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+
+> @memohai/sdk@0.22.0 typecheck <repo>/packages/sdk
+> tsc --noEmit -p tsconfig.json

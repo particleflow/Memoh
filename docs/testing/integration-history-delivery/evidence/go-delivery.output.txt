@@ -1,0 +1,21 @@
+testing: warning: no tests to run
+PASS
+ok  	github.com/felinics/memoh/internal/botdelegation	1.037s [no tests to run]
+=== RUN   TestAuthorizedDeliveryWakesIdleSupervisorAndSurvivesQueueRestart
+--- PASS: TestAuthorizedDeliveryWakesIdleSupervisorAndSurvivesQueueRestart (0.01s)
+=== RUN   TestAuthorizedDeliveryBusyQueueRechecksRevocation
+=== RUN   TestAuthorizedDeliveryBusyQueueRechecksRevocation/deliver
+--- PASS: TestAuthorizedDeliveryBusyQueueRechecksRevocation/deliver (0.01s)
+=== RUN   TestAuthorizedDeliveryBusyQueueRechecksRevocation/revoked
+--- PASS: TestAuthorizedDeliveryBusyQueueRechecksRevocation/revoked (0.01s)
+--- PASS: TestAuthorizedDeliveryBusyQueueRechecksRevocation (0.02s)
+=== RUN   TestAuthorizedDeliveryIdleToBusyRaceQueuesSameInvocation
+--- PASS: TestAuthorizedDeliveryIdleToBusyRaceQueuesSameInvocation (0.00s)
+=== RUN   TestDelegationFinalAssetsRequireHostIdentity
+--- PASS: TestDelegationFinalAssetsRequireHostIdentity (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	1.112s
+=== RUN   TestBotDelegationJWTSubmitObserveOriginalAndRevocation
+--- PASS: TestBotDelegationJWTSubmitObserveOriginalAndRevocation (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.087s

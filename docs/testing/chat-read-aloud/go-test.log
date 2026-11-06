@@ -1,0 +1,22 @@
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading github.com/creack/pty v1.1.24
+=== RUN   TestBotPlaybackUsesConfiguredModelAndEphemeralAudio
+=== PAUSE TestBotPlaybackUsesConfiguredModelAndEphemeralAudio
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis
+=== PAUSE TestBotPlaybackFailsClosedBeforeSynthesis
+=== CONT  TestBotPlaybackUsesConfiguredModelAndEphemeralAudio
+=== CONT  TestBotPlaybackFailsClosedBeforeSynthesis
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis/no_identity
+--- PASS: TestBotPlaybackUsesConfiguredModelAndEphemeralAudio (0.00s)
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis/permission_denied
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis/empty
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis/Unicode_limit
+=== RUN   TestBotPlaybackFailsClosedBeforeSynthesis/missing_model
+--- PASS: TestBotPlaybackFailsClosedBeforeSynthesis (0.00s)
+    --- PASS: TestBotPlaybackFailsClosedBeforeSynthesis/no_identity (0.00s)
+    --- PASS: TestBotPlaybackFailsClosedBeforeSynthesis/permission_denied (0.00s)
+    --- PASS: TestBotPlaybackFailsClosedBeforeSynthesis/empty (0.00s)
+    --- PASS: TestBotPlaybackFailsClosedBeforeSynthesis/Unicode_limit (0.00s)
+    --- PASS: TestBotPlaybackFailsClosedBeforeSynthesis/missing_model (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.022s

@@ -1,0 +1,39 @@
+--- a/docs/testing/compatibility-incident-register.md
++++ b/docs/testing/compatibility-incident-register.md
+@@ -62,0 +63 @@
++| C12 | Scoped Go build cache: no space left on device | Task cache cleaned; final scoped lint passed |
+@@ -156,0 +158,9 @@
++  The dedicated input-source owner separately received errno 13 reading
++  `/proc/27592/cwd`; that read and old Vite cleanup were stopped without a retry
++  or alternate metadata access. Old launcher/child 27589/27592 on local 28082
++  remain an environment-maintenance handoff, not verified cleanup. Later local
++  source-test Server/Vite/provider processes had separate original startup
++  receipts and unique absolute binary/config/script arguments; normal SIGTERM
++  closed their test listeners. Managed terminal Ctrl-C alone did not reliably
++  stop those child processes. Full local evidence and unresolved boundaries:
++  [input-source workstream](session-input-source-20261030/README.md).
+@@ -281,0 +292,24 @@
++## C12 — Task-local Go build cache exhausts temporary disk
++
++- **Platform / signature:** Input-source workstream final scoped Go lint failed
++  typechecking with `write /tmp/memoh-input-source-gocache/...: no space left on
++  device`. The command exited 1; it was not an approval or access denial.
++- **Cause:** The task-specific Go build cache occupied 5.3 GB on the 8.8 GB
++  temporary filesystem after repeated compilation/lint work. No product or
++  database corruption was observed or inferred.
++- **Validated handling:** Confirm the failed lint has exited and no valid build
++  still uses that task cache; run `go clean -cache` with GOCACHE explicitly set
++  to that same disposable task directory. Preserve test logs, screenshots,
++  source, private configuration and all database/history records. Do not clean
++  shared or unidentified caches.
++- **Result / unresolved boundary:** Available space increased to 5.7 GB. The
++  original scoped lint was rerun with staged changes and exited 0, with no new
++  issues. This does not waive inherited lint findings, production validation,
++  or the independent C05 process-metadata denial.
++- **Original evidence:** Dedicated input-source workstream,
++  [disk-full result](session-input-source-20261030/go-lint-disk-full.log),
++  [final checks](session-input-source-20261030/checks.txt), and its README.
++- **New condition before another attempt:** Confirm the prior command exited,
++  the exact cache is disposable and task-owned, and adequate space was recovered.
++  Retry only the affected check; do not repeat unrelated paid calls or builds.
++

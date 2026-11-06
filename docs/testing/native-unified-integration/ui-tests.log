@@ -1,0 +1,14 @@
+
+> @memohai/monorepo@0.22.0 test <checkout>
+> vitest --run apps/web/src/utils/workspace-target.test.ts apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts apps/web/src/pages/home/composables/useSessionTasks.test.ts apps/web/src/pages/home/components/session-tasks.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <checkout>
+
+
+ Test Files  4 passed (4)
+      Tests  80 passed (80)
+   Start at  12:14:08
+   Duration  12.58s (transform 6.81s, setup 0ms, import 9.20s, tests 3.97s, environment 1.62s)
+

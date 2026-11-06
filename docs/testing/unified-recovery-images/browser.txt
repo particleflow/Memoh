@@ -1,0 +1,19 @@
+PASS combined real Provider form: PUT 200; explicit reference capability persisted; refreshed display cache has new value and no key
+PASS real GET and hard reload retain reference setting, protocol and sibling policies; credential/address unchanged
+PASS anonymous PUT 401; existing configuration unchanged
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByRole('button').filter({ hasText: '6ccf3710' })
+
+    at <evidence-directory>/browser.mjs:87:84 {
+  log: [
+    "  - waiting for getByRole('button').filter({ hasText: '6ccf3710' })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0

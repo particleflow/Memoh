@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 15 skipped (16)
+   Start at  12:42:50
+   Duration  9.58s (transform 5.85s, setup 0ms, import 7.59s, tests 1.36s, environment 477ms)

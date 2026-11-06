@@ -1,0 +1,222 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/limits",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 232,
+    "status": 200,
+    "ttfb_ms": 10.387735999756842,
+    "duration_ms": 10.617922000164981
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/limits",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 232,
+    "status": 200,
+    "ttfb_ms": 4.439854999873205,
+    "duration_ms": 4.583621000165294
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 112,
+    "response_bytes": 158,
+    "status": 201,
+    "ttfb_ms": 24.889102000088315,
+    "duration_ms": 25.06972399987717
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/1b161f20-a2f0-4ad6-bf52-edbe761f1dc7",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 95,
+    "response_bytes": 159,
+    "status": 200,
+    "ttfb_ms": 41.79180400024052,
+    "duration_ms": 41.976151000199025
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/1b161f20-a2f0-4ad6-bf52-edbe761f1dc7/complete",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 237,
+    "status": 200,
+    "ttfb_ms": 22.006269000030443,
+    "duration_ms": 22.23305999996228
+  },
+  {
+    "method": "HEAD",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 200,
+    "ttfb_ms": 3.49539500030005,
+    "duration_ms": 3.692992000196682
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 95,
+    "status": 206,
+    "ttfb_ms": 4.8566310001660895,
+    "duration_ms": 5.049281000083283
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 95,
+    "status": 200,
+    "ttfb_ms": 6.541364999975485,
+    "duration_ms": 6.834075999904599
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/upload",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 338,
+    "response_bytes": 49,
+    "status": 200,
+    "ttfb_ms": 12.56577100002687,
+    "duration_ms": 12.693733999640244
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/upload",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 360,
+    "response_bytes": 50,
+    "status": 200,
+    "ttfb_ms": 12.052538999796525,
+    "duration_ms": 12.827373999698466
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/upload",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 65902,
+    "response_bytes": 53,
+    "status": 200,
+    "ttfb_ms": 20.442602999992232,
+    "duration_ms": 20.64682999980505
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/list?path=%2Fdata",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 1969,
+    "status": 200,
+    "ttfb_ms": 4.053243999806,
+    "duration_ms": 4.235217999848828
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/list?path=%2Fdata",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 0,
+    "response_bytes": 1969,
+    "status": 200,
+    "ttfb_ms": 12.800313999832724,
+    "duration_ms": 13.862840999991022
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download?path=%2Fdata%2Fconnection-route-a.bin",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 9,
+    "status": 200,
+    "ttfb_ms": 7.861188999868318,
+    "duration_ms": 8.367769999949815
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download?path=%2Fdata%2Fconnection-route-a.bin",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 9,
+    "status": 200,
+    "ttfb_ms": 5.827636000049097,
+    "duration_ms": 6.10386100015603
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download?path=%2Fdata%2Fconnection-route-b.txt",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 31,
+    "status": 200,
+    "ttfb_ms": 7.60696099996494,
+    "duration_ms": 7.792269999754353
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download?path=%2Fdata%2Fconnection-route-c.bin",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 65573,
+    "status": 200,
+    "ttfb_ms": 12.376941999718838,
+    "duration_ms": 12.703703999704885
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/archive",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 104,
+    "response_bytes": 805,
+    "status": 200,
+    "ttfb_ms": 15.65234200006671,
+    "duration_ms": 16.037882000091486
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/upload",
+    "has_query_credential": false,
+    "has_bearer": true,
+    "request_bytes": 341,
+    "response_bytes": 0,
+    "status": 307,
+    "ttfb_ms": 0.032388999898103066,
+    "duration_ms": 0.08540899989384343
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f?fixture_redirect=1",
+    "has_query_credential": true,
+    "has_bearer": false,
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 307,
+    "ttfb_ms": 0.03976900006819051,
+    "duration_ms": 0.15040600010252092
+  }
+]

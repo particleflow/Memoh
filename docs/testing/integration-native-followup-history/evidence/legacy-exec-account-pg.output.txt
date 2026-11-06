@@ -1,0 +1,4 @@
+=== RUN   TestPostgresAccountAndBotAuthorization
+--- PASS: TestPostgresAccountAndBotAuthorization (0.06s)
+PASS
+ok  	github.com/felinics/memoh/internal/legacy-exec	1.090s

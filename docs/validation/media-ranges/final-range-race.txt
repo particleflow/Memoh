@@ -1,0 +1,2 @@
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	2.347s
+ok  	github.com/felinics/memoh/internal/handlers	1.325s

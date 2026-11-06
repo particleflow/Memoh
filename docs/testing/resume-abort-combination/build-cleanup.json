@@ -1,0 +1,17 @@
+{
+  "removed": [
+    {
+      "path": "/tmp/native-resume-http/server",
+      "bytes": 131965220,
+      "sha256": "7874ff55bff9cb24f48ed8b95e00ba0af8c115f13035ed226dfd285afca2aa59",
+      "reason": "obsolete own synthetic build; current account-boundary rollback binary and source/logs retained"
+    },
+    {
+      "path": "/tmp/native-resume-integration/server",
+      "bytes": 168788020,
+      "sha256": "941f43cc5e4d887e2866ad41260ad5c620764d16edbb10a39781b56c5854a71e",
+      "reason": "obsolete own synthetic build; current account-boundary rollback binary and source/logs retained"
+    }
+  ],
+  "bytes_reclaimed": 300753240
+}

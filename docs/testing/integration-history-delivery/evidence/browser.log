@@ -1,0 +1,1 @@
+{"syntheticSeed":true,"mockedAPI":false,"heldActualPOSTResponse":true,"posts":1,"requestProof":{"method":"POST","emptyBody":true,"sameLogin":true},"response":{"status":200,"execution":"completed","delivery":"accepted"},"runLedgerUnchanged":true,"runCount":1,"runStatuses":["failed"],"readonlyHost":{"buttons":0,"apiRequests":0},"pageErrors":[]}

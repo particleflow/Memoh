@@ -1,0 +1,2 @@
+{"version": "a68a237d7530acbdc5cc538cc2e151ef320f8b5f", "status": 200, "content_range": null, "no_store": true, "body_hex": "64656c65676174696f6e2072656772657373696f6e206f726967696e616c0a", "bytes": 31, "expected_bytes_hex": "6c65676174"}
+{"version": "working-tree-hardening", "status": 206, "content_range": "bytes 2-6/31", "no_store": true, "body_hex": "6c65676174", "bytes": 5, "expected_bytes_hex": "6c65676174"}

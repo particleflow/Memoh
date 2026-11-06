@@ -1,0 +1,35 @@
+{
+  "url": "http://127.0.0.1:18082/bot/task-agent-qa?session=63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+  "target_sessions": {
+    "a": "63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "b": "0420c5bd-3c0d-470d-a118-4271843aab15"
+  },
+  "session_reads": [
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+  ],
+  "api_writes": [],
+  "page_errors": [],
+  "status_source": "synthetic scoped task GET only; original sessions, authentication and UI use real local Server/PostgreSQL/Vite"
+}

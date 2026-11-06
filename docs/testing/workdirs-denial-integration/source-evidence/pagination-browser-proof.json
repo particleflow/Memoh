@@ -1,0 +1,174 @@
+{
+  "pages": [
+    {
+      "cursor": null,
+      "status": 200,
+      "ids": [],
+      "next": "rkEhSMn-8wpC4a6Jk0gG3XAK2caMl_lZMi_mVf1kK2wmWYVyY1m2wlJKDfbw0c1tS-BvFdRbTlJWf1hao6cuiQ1Hs12mvTwTxPWsPOTIXojCiOdBCZ_dh-TQVfCJ0laNxqbuFttMM9gpJwYjCNr1noLxtaHzGhQda58NtdNzchYNZEJsBUeo9GJakwIRMeyrF66SgVKj0loRlzNdhfZkZrFkH75-FE85Yc3U1cGh3pM2k-8oH0r99Bk9_7CP1XE1etijt02XKJ8uHTcZtZy0DmwFVhddVLZR-u-ujot1gupH8rF1Z7rm6mNUTG6W5UFqPGH7esGKWNy3F5VPBwBfipznNudKRu2o2YjinoS6elmH3gOATiRuB7Sp_bXIaDR2JU0aoLYCyObkrKkj4E_1ElpWCALBlJxV7w7xeUUUk0_CbWnIgchiP45dziE",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "rkEhSMn-8wpC4a6Jk0gG3XAK2caMl_lZMi_mVf1kK2wmWYVyY1m2wlJKDfbw0c1tS-BvFdRbTlJWf1hao6cuiQ1Hs12mvTwTxPWsPOTIXojCiOdBCZ_dh-TQVfCJ0laNxqbuFttMM9gpJwYjCNr1noLxtaHzGhQda58NtdNzchYNZEJsBUeo9GJakwIRMeyrF66SgVKj0loRlzNdhfZkZrFkH75-FE85Yc3U1cGh3pM2k-8oH0r99Bk9_7CP1XE1etijt02XKJ8uHTcZtZy0DmwFVhddVLZR-u-ujot1gupH8rF1Z7rm6mNUTG6W5UFqPGH7esGKWNy3F5VPBwBfipznNudKRu2o2YjinoS6elmH3gOATiRuB7Sp_bXIaDR2JU0aoLYCyObkrKkj4E_1ElpWCALBlJxV7w7xeUUUk0_CbWnIgchiP45dziE",
+      "status": 200,
+      "ids": [],
+      "next": null,
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": null,
+      "status": 200,
+      "ids": [],
+      "next": "ouooSPf_98Jl76Z7KDedCi10sNc1_i1XZYu_6cX2ZDns0uhI5VV7zmgvdvPkCRbOMyAk1yW4We8SaMx4Ri1SdNC6jjdBHK3G61R7wuf8afK2gZRM3uoUlE6zWYatxNfSxid13qbK44_x8oX8F1FOMuBPF9cN1zSvwgzrhvgYXETT-2xWNcipDzXXdQ1QeT6xrc1wxYT7gS6zN6zTFEljkOxEyOEEOFH606kFq1K8vCZZFMXQTHmy9fBp2dPulI4-dxTLwNSDecKTJHABB0yGRMlKxrfHlhaKs_REoZ4pM5JSMjVyXgrzNhV3R3QW3TyOWMzUMDFO5_Lv0wZWi4JoS1Isg37Dv2Qmtdi1IE0wtHrm4AsRT5CAX1AHrkKBo5lLapgn40tQvpjKJAT8u4soMbRF73gGkkoHlMeXLKHv37EXYLdqf8Ld2KvZx0o",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "ouooSPf_98Jl76Z7KDedCi10sNc1_i1XZYu_6cX2ZDns0uhI5VV7zmgvdvPkCRbOMyAk1yW4We8SaMx4Ri1SdNC6jjdBHK3G61R7wuf8afK2gZRM3uoUlE6zWYatxNfSxid13qbK44_x8oX8F1FOMuBPF9cN1zSvwgzrhvgYXETT-2xWNcipDzXXdQ1QeT6xrc1wxYT7gS6zN6zTFEljkOxEyOEEOFH606kFq1K8vCZZFMXQTHmy9fBp2dPulI4-dxTLwNSDecKTJHABB0yGRMlKxrfHlhaKs_REoZ4pM5JSMjVyXgrzNhV3R3QW3TyOWMzUMDFO5_Lv0wZWi4JoS1Isg37Dv2Qmtdi1IE0wtHrm4AsRT5CAX1AHrkKBo5lLapgn40tQvpjKJAT8u4soMbRF73gGkkoHlMeXLKHv37EXYLdqf8Ld2KvZx0o",
+      "status": 200,
+      "ids": [],
+      "next": null,
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": null,
+      "status": 200,
+      "ids": [
+        "9c597537-9e73-45a1-abc1-6d7a78ad62c8"
+      ],
+      "next": "nMq-IU_UQkgDJofhOIym4jVEUud8vFB90RV1leJZ5V0fw0mlx5MybWQQ1dzSR3QwdpupS0i4GXekWAv-94mgFZKnf54nAmjWDCaljdO_wmK7xWM598s3oYfvPKK47uUPHSv2p3nmRSoWjNum_YkfO-bijGyIE_5v38B02sy4DLnNelTBUhb7SRPbaKC-2UZDwLVqZNmAkmBcT6Jck3cxDhmV_hBaJnRaPUS1C5ccyUL4mYs9wt2YavobqiFNIa5xkL1CQddiaNWYw2eqAdWQqpgnrGSLuPxM5O10x1k7AMRmg6T75aGh_gcDffXylXXKBBJnvABYXYJOC9BMqx_5fRbBWesCg5Suk7mHWLh8bS9QMPxIRcwPAKIuaMHtuQP78UpePsIEP7wMWR1nBkPbqr1wPeW5rqUIqiLjmEH5sdKLuiH1mCTvhRjE8XA",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "nMq-IU_UQkgDJofhOIym4jVEUud8vFB90RV1leJZ5V0fw0mlx5MybWQQ1dzSR3QwdpupS0i4GXekWAv-94mgFZKnf54nAmjWDCaljdO_wmK7xWM598s3oYfvPKK47uUPHSv2p3nmRSoWjNum_YkfO-bijGyIE_5v38B02sy4DLnNelTBUhb7SRPbaKC-2UZDwLVqZNmAkmBcT6Jck3cxDhmV_hBaJnRaPUS1C5ccyUL4mYs9wt2YavobqiFNIa5xkL1CQddiaNWYw2eqAdWQqpgnrGSLuPxM5O10x1k7AMRmg6T75aGh_gcDffXylXXKBBJnvABYXYJOC9BMqx_5fRbBWesCg5Suk7mHWLh8bS9QMPxIRcwPAKIuaMHtuQP78UpePsIEP7wMWR1nBkPbqr1wPeW5rqUIqiLjmEH5sdKLuiH1mCTvhRjE8XA",
+      "status": 200,
+      "ids": [
+        "a0000000-0000-0000-0000-000000000015",
+        "a0000000-0000-0000-0000-000000000014",
+        "a0000000-0000-0000-0000-000000000013",
+        "a0000000-0000-0000-0000-000000000012",
+        "a0000000-0000-0000-0000-000000000011",
+        "a0000000-0000-0000-0000-000000000010",
+        "a0000000-0000-0000-0000-00000000000f",
+        "a0000000-0000-0000-0000-00000000000e",
+        "a0000000-0000-0000-0000-00000000000d",
+        "a0000000-0000-0000-0000-00000000000c",
+        "a0000000-0000-0000-0000-00000000000b",
+        "a0000000-0000-0000-0000-00000000000a",
+        "a0000000-0000-0000-0000-000000000009",
+        "a0000000-0000-0000-0000-000000000008",
+        "a0000000-0000-0000-0000-000000000007",
+        "a0000000-0000-0000-0000-000000000006",
+        "a0000000-0000-0000-0000-000000000005",
+        "a0000000-0000-0000-0000-000000000004",
+        "a0000000-0000-0000-0000-000000000003",
+        "a0000000-0000-0000-0000-000000000002"
+      ],
+      "next": "Gc5NVoUvY9I0hRwURs5lNqGKjiNZ5i8pJRzB4NC3UvJNsI-P3LiRThOLstHoFwWiBI0PAFZ084Wk9tbKdANY2WXbQ1sV_cr8XJyI85r5aP4wZPeo3hggjVdRN4r-e0b1BfzPyZLic5ehA1eJUNLpl-qKyvshehar8rDBTlaohV52cnqqm_PDTO5fESi0oRQaVtkUG12Lll5EsAb_PmxteuHlroixhGRw_zxx_ykzd6jP9kLLalk6zJ77Dyk9-7dsTVFHMc0fa1_weuLJ6PxCXNY-0dkwIEmiaiVWhL9IauwWan28nwxom9bl3tCKtxQsIIf0x-2obGRMfs9L9fEsfbkkzQ2Z3zGg1Qtm-gK1Jj1_iFYIw3BDxF_IoB9qy8u8Pkq85nloFgOgge_rnJEPhhwQCWEE_PKU8rwVr1V3-XmXytLdVUTmGBc5wqU",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "Gc5NVoUvY9I0hRwURs5lNqGKjiNZ5i8pJRzB4NC3UvJNsI-P3LiRThOLstHoFwWiBI0PAFZ084Wk9tbKdANY2WXbQ1sV_cr8XJyI85r5aP4wZPeo3hggjVdRN4r-e0b1BfzPyZLic5ehA1eJUNLpl-qKyvshehar8rDBTlaohV52cnqqm_PDTO5fESi0oRQaVtkUG12Lll5EsAb_PmxteuHlroixhGRw_zxx_ykzd6jP9kLLalk6zJ77Dyk9-7dsTVFHMc0fa1_weuLJ6PxCXNY-0dkwIEmiaiVWhL9IauwWan28nwxom9bl3tCKtxQsIIf0x-2obGRMfs9L9fEsfbkkzQ2Z3zGg1Qtm-gK1Jj1_iFYIw3BDxF_IoB9qy8u8Pkq85nloFgOgge_rnJEPhhwQCWEE_PKU8rwVr1V3-XmXytLdVUTmGBc5wqU",
+      "status": 200,
+      "ids": [
+        "a0000000-0000-0000-0000-000000000001"
+      ],
+      "next": null,
+      "cacheControl": "no-store"
+    }
+  ],
+  "errors": [],
+  "posts": [],
+  "byteRequests": [],
+  "seededMetadata": true,
+  "underlyingOriginals": 1,
+  "filteredFirstText": "Tasks\nExecution tasks\nSpecialist Bot handoffs\n\nAuthorized Bot handoffs from this conversation. Execution and return delivery have separate states.\n\nNo accessible tasks on this page. Continue to the next page.\n\nNext page",
+  "filteredFirst": {
+    "cursor": null,
+    "status": 200,
+    "ids": [],
+    "next": "ouooSPf_98Jl76Z7KDedCi10sNc1_i1XZYu_6cX2ZDns0uhI5VV7zmgvdvPkCRbOMyAk1yW4We8SaMx4Ri1SdNC6jjdBHK3G61R7wuf8afK2gZRM3uoUlE6zWYatxNfSxid13qbK44_x8oX8F1FOMuBPF9cN1zSvwgzrhvgYXETT-2xWNcipDzXXdQ1QeT6xrc1wxYT7gS6zN6zTFEljkOxEyOEEOFH606kFq1K8vCZZFMXQTHmy9fBp2dPulI4-dxTLwNSDecKTJHABB0yGRMlKxrfHlhaKs_REoZ4pM5JSMjVyXgrzNhV3R3QW3TyOWMzUMDFO5_Lv0wZWi4JoS1Isg37Dv2Qmtdi1IE0wtHrm4AsRT5CAX1AHrkKBo5lLapgn40tQvpjKJAT8u4soMbRF73gGkkoHlMeXLKHv37EXYLdqf8Ld2KvZx0o",
+    "cacheControl": "no-store"
+  },
+  "filteredTail": {
+    "cursor": "ouooSPf_98Jl76Z7KDedCi10sNc1_i1XZYu_6cX2ZDns0uhI5VV7zmgvdvPkCRbOMyAk1yW4We8SaMx4Ri1SdNC6jjdBHK3G61R7wuf8afK2gZRM3uoUlE6zWYatxNfSxid13qbK44_x8oX8F1FOMuBPF9cN1zSvwgzrhvgYXETT-2xWNcipDzXXdQ1QeT6xrc1wxYT7gS6zN6zTFEljkOxEyOEEOFH606kFq1K8vCZZFMXQTHmy9fBp2dPulI4-dxTLwNSDecKTJHABB0yGRMlKxrfHlhaKs_REoZ4pM5JSMjVyXgrzNhV3R3QW3TyOWMzUMDFO5_Lv0wZWi4JoS1Isg37Dv2Qmtdi1IE0wtHrm4AsRT5CAX1AHrkKBo5lLapgn40tQvpjKJAT8u4soMbRF73gGkkoHlMeXLKHv37EXYLdqf8Ld2KvZx0o",
+    "status": 200,
+    "ids": [],
+    "next": null,
+    "cacheControl": "no-store"
+  },
+  "grantRestored": true,
+  "visiblePages": [
+    {
+      "cursor": null,
+      "status": 200,
+      "ids": [
+        "9c597537-9e73-45a1-abc1-6d7a78ad62c8"
+      ],
+      "next": "nMq-IU_UQkgDJofhOIym4jVEUud8vFB90RV1leJZ5V0fw0mlx5MybWQQ1dzSR3QwdpupS0i4GXekWAv-94mgFZKnf54nAmjWDCaljdO_wmK7xWM598s3oYfvPKK47uUPHSv2p3nmRSoWjNum_YkfO-bijGyIE_5v38B02sy4DLnNelTBUhb7SRPbaKC-2UZDwLVqZNmAkmBcT6Jck3cxDhmV_hBaJnRaPUS1C5ccyUL4mYs9wt2YavobqiFNIa5xkL1CQddiaNWYw2eqAdWQqpgnrGSLuPxM5O10x1k7AMRmg6T75aGh_gcDffXylXXKBBJnvABYXYJOC9BMqx_5fRbBWesCg5Suk7mHWLh8bS9QMPxIRcwPAKIuaMHtuQP78UpePsIEP7wMWR1nBkPbqr1wPeW5rqUIqiLjmEH5sdKLuiH1mCTvhRjE8XA",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "nMq-IU_UQkgDJofhOIym4jVEUud8vFB90RV1leJZ5V0fw0mlx5MybWQQ1dzSR3QwdpupS0i4GXekWAv-94mgFZKnf54nAmjWDCaljdO_wmK7xWM598s3oYfvPKK47uUPHSv2p3nmRSoWjNum_YkfO-bijGyIE_5v38B02sy4DLnNelTBUhb7SRPbaKC-2UZDwLVqZNmAkmBcT6Jck3cxDhmV_hBaJnRaPUS1C5ccyUL4mYs9wt2YavobqiFNIa5xkL1CQddiaNWYw2eqAdWQqpgnrGSLuPxM5O10x1k7AMRmg6T75aGh_gcDffXylXXKBBJnvABYXYJOC9BMqx_5fRbBWesCg5Suk7mHWLh8bS9QMPxIRcwPAKIuaMHtuQP78UpePsIEP7wMWR1nBkPbqr1wPeW5rqUIqiLjmEH5sdKLuiH1mCTvhRjE8XA",
+      "status": 200,
+      "ids": [
+        "a0000000-0000-0000-0000-000000000015",
+        "a0000000-0000-0000-0000-000000000014",
+        "a0000000-0000-0000-0000-000000000013",
+        "a0000000-0000-0000-0000-000000000012",
+        "a0000000-0000-0000-0000-000000000011",
+        "a0000000-0000-0000-0000-000000000010",
+        "a0000000-0000-0000-0000-00000000000f",
+        "a0000000-0000-0000-0000-00000000000e",
+        "a0000000-0000-0000-0000-00000000000d",
+        "a0000000-0000-0000-0000-00000000000c",
+        "a0000000-0000-0000-0000-00000000000b",
+        "a0000000-0000-0000-0000-00000000000a",
+        "a0000000-0000-0000-0000-000000000009",
+        "a0000000-0000-0000-0000-000000000008",
+        "a0000000-0000-0000-0000-000000000007",
+        "a0000000-0000-0000-0000-000000000006",
+        "a0000000-0000-0000-0000-000000000005",
+        "a0000000-0000-0000-0000-000000000004",
+        "a0000000-0000-0000-0000-000000000003",
+        "a0000000-0000-0000-0000-000000000002"
+      ],
+      "next": "Gc5NVoUvY9I0hRwURs5lNqGKjiNZ5i8pJRzB4NC3UvJNsI-P3LiRThOLstHoFwWiBI0PAFZ084Wk9tbKdANY2WXbQ1sV_cr8XJyI85r5aP4wZPeo3hggjVdRN4r-e0b1BfzPyZLic5ehA1eJUNLpl-qKyvshehar8rDBTlaohV52cnqqm_PDTO5fESi0oRQaVtkUG12Lll5EsAb_PmxteuHlroixhGRw_zxx_ykzd6jP9kLLalk6zJ77Dyk9-7dsTVFHMc0fa1_weuLJ6PxCXNY-0dkwIEmiaiVWhL9IauwWan28nwxom9bl3tCKtxQsIIf0x-2obGRMfs9L9fEsfbkkzQ2Z3zGg1Qtm-gK1Jj1_iFYIw3BDxF_IoB9qy8u8Pkq85nloFgOgge_rnJEPhhwQCWEE_PKU8rwVr1V3-XmXytLdVUTmGBc5wqU",
+      "cacheControl": "no-store"
+    },
+    {
+      "cursor": "Gc5NVoUvY9I0hRwURs5lNqGKjiNZ5i8pJRzB4NC3UvJNsI-P3LiRThOLstHoFwWiBI0PAFZ084Wk9tbKdANY2WXbQ1sV_cr8XJyI85r5aP4wZPeo3hggjVdRN4r-e0b1BfzPyZLic5ehA1eJUNLpl-qKyvshehar8rDBTlaohV52cnqqm_PDTO5fESi0oRQaVtkUG12Lll5EsAb_PmxteuHlroixhGRw_zxx_ykzd6jP9kLLalk6zJ77Dyk9-7dsTVFHMc0fa1_weuLJ6PxCXNY-0dkwIEmiaiVWhL9IauwWan28nwxom9bl3tCKtxQsIIf0x-2obGRMfs9L9fEsfbkkzQ2Z3zGg1Qtm-gK1Jj1_iFYIw3BDxF_IoB9qy8u8Pkq85nloFgOgge_rnJEPhhwQCWEE_PKU8rwVr1V3-XmXytLdVUTmGBc5wqU",
+      "status": 200,
+      "ids": [
+        "a0000000-0000-0000-0000-000000000001"
+      ],
+      "next": null,
+      "cacheControl": "no-store"
+    }
+  ],
+  "ids": [
+    "9c597537-9e73-45a1-abc1-6d7a78ad62c8",
+    "a0000000-0000-0000-0000-000000000015",
+    "a0000000-0000-0000-0000-000000000014",
+    "a0000000-0000-0000-0000-000000000013",
+    "a0000000-0000-0000-0000-000000000012",
+    "a0000000-0000-0000-0000-000000000011",
+    "a0000000-0000-0000-0000-000000000010",
+    "a0000000-0000-0000-0000-00000000000f",
+    "a0000000-0000-0000-0000-00000000000e",
+    "a0000000-0000-0000-0000-00000000000d",
+    "a0000000-0000-0000-0000-00000000000c",
+    "a0000000-0000-0000-0000-00000000000b",
+    "a0000000-0000-0000-0000-00000000000a",
+    "a0000000-0000-0000-0000-000000000009",
+    "a0000000-0000-0000-0000-000000000008",
+    "a0000000-0000-0000-0000-000000000007",
+    "a0000000-0000-0000-0000-000000000006",
+    "a0000000-0000-0000-0000-000000000005",
+    "a0000000-0000-0000-0000-000000000004",
+    "a0000000-0000-0000-0000-000000000003",
+    "a0000000-0000-0000-0000-000000000002",
+    "a0000000-0000-0000-0000-000000000001"
+  ],
+  "detail": "Task details\n\nAuthorized Bot handoffs from this conversation. Execution and return delivery have separate states.\n\nTarget Bot 22b2cf77 · a0000000\n\nExecution · Execution completed\n\nReturn delivery · Accepted\n\nDelivery was accepted; this does not confirm that the supervisor has processed the result.\n\nSpecialist session run\n\nNo verified native run is available for this handoff.\n\nView downstream tasks\nFinal visible reply\n\nSeeded result 001; not executed\n\nDownload result f1bd6ec269b2",
+  "overflow": false,
+  "complete": true
+}

@@ -1,0 +1,13 @@
+⚠ Skipping backup because `--diff` was used.
+
+⋯ Preparing lint-staged…
+✔ Done preparing lint-staged!
+⋯ Running tasks for changed files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 16 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for changed files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!

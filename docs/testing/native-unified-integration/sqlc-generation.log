@@ -1,0 +1,1 @@
+go: github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1: github.com/sqlc-dev/sqlc@v1.31.1 requires go >= 1.26.0 (running go 1.25.7; GOTOOLCHAIN=local)

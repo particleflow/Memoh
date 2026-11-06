@@ -1,0 +1,202 @@
+{
+  "task_only_visible_disabled": true,
+  "multi_rows": 4,
+  "disabled_rows": [
+    0,
+    3
+  ],
+  "denial_and_changed_relation_no_navigation": true,
+  "bound_task_destinations": {
+    "a": "63d3edd3-8b2b-42bd-9695-e1ef076d8f94",
+    "b": "0420c5bd-3c0d-470d-a118-4271843aab15"
+  },
+  "reads": [
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/00000000-0000-4000-8000-000000000999"
+    },
+    {
+      "kind": "task",
+      "root": "b6362f3d-0e9b-426a-9165-00a4f0019162",
+      "id": "a",
+      "mode": "denied"
+    },
+    {
+      "kind": "task",
+      "root": "b6362f3d-0e9b-426a-9165-00a4f0019162",
+      "id": "a",
+      "mode": "changed"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/00000000-0000-4000-8000-000000000999"
+    },
+    {
+      "kind": "task",
+      "root": "b6362f3d-0e9b-426a-9165-00a4f0019162",
+      "id": "a",
+      "mode": "ok"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/events"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/b6362f3d-0e9b-426a-9165-00a4f0019162"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/63d3edd3-8b2b-42bd-9695-e1ef076d8f94"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/00000000-0000-4000-8000-000000000999"
+    },
+    {
+      "kind": "task",
+      "root": "b6362f3d-0e9b-426a-9165-00a4f0019162",
+      "id": "b",
+      "mode": "ok"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    },
+    {
+      "kind": "session",
+      "path": "/bots/89c93d5d-ca78-4aea-a361-63a675335760/sessions/0420c5bd-3c0d-470d-a118-4271843aab15"
+    }
+  ],
+  "api_writes": [],
+  "page_errors": [],
+  "source": "Actual current Vite/Go/PostgreSQL/auth/session GET. Only task list/detail and onboarding metadata intercepted; no subagent list rows and no native/model execution."
+}

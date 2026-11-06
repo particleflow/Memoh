@@ -1,0 +1,205 @@
+2026-10-25T14:00:45.1444927Z ##[group]Run go test -count=1 -v -timeout=5m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+2026-10-25T14:00:45.1445840Z [36;1mgo test -count=1 -v -timeout=5m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient[0m
+2026-10-25T14:00:45.1506578Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-25T14:00:45.1506893Z ##[endgroup]
+2026-10-25T14:00:46.0527553Z === RUN   TestWindowsNativeBudgetPublicationRecovery
+2026-10-25T14:00:46.0528021Z === RUN   TestWindowsNativeBudgetPublicationRecovery/budget_after_base
+2026-10-25T14:00:47.5647115Z === RUN   TestWindowsNativeBudgetPublicationRecovery/budget_after_gate
+2026-10-25T14:00:49.2871570Z === RUN   TestWindowsNativeBudgetPublicationRecovery/budget_after_publication
+2026-10-25T14:00:50.9494952Z === RUN   TestWindowsNativeBudgetPublicationRecovery/budget_after_commit
+2026-10-25T14:00:52.5063891Z --- PASS: TestWindowsNativeBudgetPublicationRecovery (6.45s)
+2026-10-25T14:00:52.5064447Z     --- PASS: TestWindowsNativeBudgetPublicationRecovery/budget_after_base (1.51s)
+2026-10-25T14:00:52.5065113Z     --- PASS: TestWindowsNativeBudgetPublicationRecovery/budget_after_gate (1.72s)
+2026-10-25T14:00:52.5065624Z     --- PASS: TestWindowsNativeBudgetPublicationRecovery/budget_after_publication (1.66s)
+2026-10-25T14:00:52.5066145Z     --- PASS: TestWindowsNativeBudgetPublicationRecovery/budget_after_commit (1.56s)
+2026-10-25T14:00:52.5066701Z === RUN   TestWindowsNativePrivacyAndPathBinding
+2026-10-25T14:00:52.5860857Z --- PASS: TestWindowsNativePrivacyAndPathBinding (0.08s)
+2026-10-25T14:00:52.5861366Z === RUN   TestWindowsNativeSnapshotSharingAndSourceGuard
+2026-10-25T14:00:52.7203905Z --- PASS: TestWindowsNativeSnapshotSharingAndSourceGuard (0.13s)
+2026-10-25T14:00:52.7204580Z === RUN   TestWindowsNativeCrossProcessLocks
+2026-10-25T14:00:52.7913087Z --- PASS: TestWindowsNativeCrossProcessLocks (0.07s)
+2026-10-25T14:00:52.7913611Z === RUN   TestWindowsNativeAdmissionCancelAndRetire
+2026-10-25T14:00:53.8848470Z --- PASS: TestWindowsNativeAdmissionCancelAndRetire (1.09s)
+2026-10-25T14:00:53.8849050Z === RUN   TestWindowsNativeTLSUploadOutboxAndDownload
+2026-10-25T14:00:54.5382481Z --- PASS: TestWindowsNativeTLSUploadOutboxAndDownload (0.65s)
+2026-10-25T14:00:54.5382888Z === RUN   TestWindowsNativeRejectsLinksAndTraversal
+2026-10-25T14:00:54.5504631Z === RUN   TestWindowsNativeRejectsLinksAndTraversal/reparse
+2026-10-25T14:00:54.5748620Z --- PASS: TestWindowsNativeRejectsLinksAndTraversal (0.04s)
+2026-10-25T14:00:54.5749478Z     --- PASS: TestWindowsNativeRejectsLinksAndTraversal/reparse (0.02s)
+2026-10-25T14:00:54.5750548Z === RUN   TestWindowsNativeConfiguredHost
+2026-10-25T14:00:54.7002009Z --- PASS: TestWindowsNativeConfiguredHost (0.13s)
+2026-10-25T14:00:54.7002569Z === RUN   TestWindowsNativeProducerClosedManifest
+2026-10-25T14:00:55.2288466Z --- PASS: TestWindowsNativeProducerClosedManifest (0.53s)
+2026-10-25T14:00:55.2288950Z === RUN   TestWindowsNativeProducerMissingSource
+2026-10-25T14:00:56.0544130Z --- PASS: TestWindowsNativeProducerMissingSource (0.83s)
+2026-10-25T14:00:56.0544670Z === RUN   TestWindowsNativeQueueReleaseCapacity
+2026-10-25T14:00:56.0545013Z === RUN   TestWindowsNativeQueueReleaseCapacity/1
+2026-10-25T14:00:56.6100796Z === RUN   TestWindowsNativeQueueReleaseCapacity/2
+2026-10-25T14:00:57.5851496Z --- PASS: TestWindowsNativeQueueReleaseCapacity (1.53s)
+2026-10-25T14:00:57.5852201Z     --- PASS: TestWindowsNativeQueueReleaseCapacity/1 (0.56s)
+2026-10-25T14:00:57.5852838Z     --- PASS: TestWindowsNativeQueueReleaseCapacity/2 (0.97s)
+2026-10-25T14:00:57.5853365Z === RUN   TestWindowsNativeQueueReleaseUnknown
+2026-10-25T14:00:57.9015315Z --- PASS: TestWindowsNativeQueueReleaseUnknown (0.32s)
+2026-10-25T14:00:57.9016066Z === RUN   TestWindowsNativeQueueReleaseProcessCrash
+2026-10-25T14:00:57.9016624Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_intent
+2026-10-25T14:00:58.5453031Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_payload
+2026-10-25T14:00:58.8057401Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_receipt
+2026-10-25T14:00:59.4480334Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_truncate
+2026-10-25T14:00:59.8042219Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_compact
+2026-10-25T14:01:00.5822940Z === RUN   TestWindowsNativeQueueReleaseProcessCrash/after_finish
+2026-10-25T14:01:01.0832302Z --- PASS: TestWindowsNativeQueueReleaseProcessCrash (3.18s)
+2026-10-25T14:01:01.0833034Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_intent (0.64s)
+2026-10-25T14:01:01.0833764Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_payload (0.26s)
+2026-10-25T14:01:01.0834507Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_receipt (0.64s)
+2026-10-25T14:01:01.0835337Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_truncate (0.36s)
+2026-10-25T14:01:01.0836115Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_compact (0.78s)
+2026-10-25T14:01:01.0836853Z     --- PASS: TestWindowsNativeQueueReleaseProcessCrash/after_finish (0.50s)
+2026-10-25T14:01:01.0837447Z === RUN   TestWindowsNativeReleaseUsesJournalIdentity
+2026-10-25T14:01:01.0837975Z --- PASS: TestWindowsNativeReleaseUsesJournalIdentity (0.00s)
+2026-10-25T14:01:01.0838488Z === RUN   TestWindowsNativeProducerMultiple
+2026-10-25T14:01:02.8166416Z --- PASS: TestWindowsNativeProducerMultiple (1.73s)
+2026-10-25T14:01:02.8166803Z === RUN   TestWindowsNativeProducerFeedback
+2026-10-25T14:01:02.9623053Z === RUN   TestWindowsNativeProducerFeedback/slots-1-denied-0
+2026-10-25T14:01:04.6984508Z === RUN   TestWindowsNativeProducerFeedback/slots-1-denied-1
+2026-10-25T14:01:05.7582498Z === RUN   TestWindowsNativeProducerFeedback/slots-2-denied-0
+2026-10-25T14:01:07.2504227Z === RUN   TestWindowsNativeProducerFeedback/slots-2-denied-1
+2026-10-25T14:01:09.0372179Z --- PASS: TestWindowsNativeProducerFeedback (6.22s)
+2026-10-25T14:01:09.0372865Z     --- PASS: TestWindowsNativeProducerFeedback/slots-1-denied-0 (1.74s)
+2026-10-25T14:01:09.0373482Z     --- PASS: TestWindowsNativeProducerFeedback/slots-1-denied-1 (1.06s)
+2026-10-25T14:01:09.0374121Z     --- PASS: TestWindowsNativeProducerFeedback/slots-2-denied-0 (1.49s)
+2026-10-25T14:01:09.0374721Z     --- PASS: TestWindowsNativeProducerFeedback/slots-2-denied-1 (1.78s)
+2026-10-25T14:01:09.0375281Z === RUN   TestWindowsNativeProducerInvalidManifest
+2026-10-25T14:01:09.0375786Z === RUN   TestWindowsNativeProducerInvalidManifest/oversize
+2026-10-25T14:01:09.5514556Z === RUN   TestWindowsNativeProducerInvalidManifest/malformed
+2026-10-25T14:01:09.9637658Z === RUN   TestWindowsNativeProducerInvalidManifest/name-mismatch
+2026-10-25T14:01:10.4177404Z === RUN   TestWindowsNativeProducerInvalidManifest/root-mismatch
+2026-10-25T14:01:10.9270039Z === RUN   TestWindowsNativeProducerInvalidManifest/trusted-plan
+2026-10-25T14:01:11.5010754Z --- PASS: TestWindowsNativeProducerInvalidManifest (2.46s)
+2026-10-25T14:01:11.5012267Z     --- PASS: TestWindowsNativeProducerInvalidManifest/oversize (0.51s)
+2026-10-25T14:01:11.5012978Z     --- PASS: TestWindowsNativeProducerInvalidManifest/malformed (0.41s)
+2026-10-25T14:01:11.5013692Z     --- PASS: TestWindowsNativeProducerInvalidManifest/name-mismatch (0.45s)
+2026-10-25T14:01:11.5014726Z     --- PASS: TestWindowsNativeProducerInvalidManifest/root-mismatch (0.51s)
+2026-10-25T14:01:11.5015493Z     --- PASS: TestWindowsNativeProducerInvalidManifest/trusted-plan (0.57s)
+2026-10-25T14:01:11.5016381Z === RUN   TestWindowsNativeLifecycle
+2026-10-25T14:01:11.5016658Z === RUN   TestWindowsNativeLifecycle/mixed
+2026-10-25T14:01:11.7236788Z === RUN   TestWindowsNativeLifecycle/recovery
+2026-10-25T14:01:11.7237805Z === RUN   TestWindowsNativeLifecycle/recovery/torn
+2026-10-25T14:01:11.7775726Z === RUN   TestWindowsNativeLifecycle/recovery/checkpoint
+2026-10-25T14:01:11.8357801Z === RUN   TestWindowsNativeLifecycle/recovery/corrupt
+2026-10-25T14:01:11.9194283Z === RUN   TestWindowsNativeLifecycle/empty-busy
+2026-10-25T14:01:11.9760934Z === RUN   TestWindowsNativeLifecycle/fair
+2026-10-25T14:01:12.2038537Z === RUN   TestWindowsNativeLifecycle/invalid-task
+2026-10-25T14:01:12.2981385Z === RUN   TestWindowsNativeLifecycle/corrupt-blocks
+2026-10-25T14:01:12.3832509Z --- PASS: TestWindowsNativeLifecycle (0.88s)
+2026-10-25T14:01:12.3833253Z     --- PASS: TestWindowsNativeLifecycle/mixed (0.22s)
+2026-10-25T14:01:12.3833859Z     --- PASS: TestWindowsNativeLifecycle/recovery (0.20s)
+2026-10-25T14:01:12.3834560Z         --- PASS: TestWindowsNativeLifecycle/recovery/torn (0.05s)
+2026-10-25T14:01:12.3835339Z         --- PASS: TestWindowsNativeLifecycle/recovery/checkpoint (0.06s)
+2026-10-25T14:01:12.3836178Z         --- PASS: TestWindowsNativeLifecycle/recovery/corrupt (0.08s)
+2026-10-25T14:01:12.3836937Z     --- PASS: TestWindowsNativeLifecycle/empty-busy (0.06s)
+2026-10-25T14:01:12.3837557Z     --- PASS: TestWindowsNativeLifecycle/fair (0.23s)
+2026-10-25T14:01:12.3838219Z     --- PASS: TestWindowsNativeLifecycle/invalid-task (0.09s)
+2026-10-25T14:01:12.3838904Z     --- PASS: TestWindowsNativeLifecycle/corrupt-blocks (0.09s)
+2026-10-25T14:01:12.3839522Z === RUN   TestWindowsNativePublicationFiniteHerdrAction
+2026-10-25T14:01:13.7246220Z --- PASS: TestWindowsNativePublicationFiniteHerdrAction (1.34s)
+2026-10-25T14:01:13.7246756Z === RUN   TestWindowsNativePublicationRenameCollision
+2026-10-25T14:01:14.9720393Z --- PASS: TestWindowsNativePublicationRenameCollision (1.25s)
+2026-10-25T14:01:14.9720927Z === RUN   TestWindowsNativePublicationRejectsLinksAndReplacement
+2026-10-25T14:01:14.9721406Z === RUN   TestWindowsNativePublicationRejectsLinksAndReplacement/hardlink
+2026-10-25T14:01:15.8295763Z === RUN   TestWindowsNativePublicationRejectsLinksAndReplacement/symlink
+2026-10-25T14:01:16.7679871Z === RUN   TestWindowsNativePublicationRejectsLinksAndReplacement/same-content-replacement
+2026-10-25T14:01:17.6510465Z --- PASS: TestWindowsNativePublicationRejectsLinksAndReplacement (2.68s)
+2026-10-25T14:01:17.6511524Z     --- PASS: TestWindowsNativePublicationRejectsLinksAndReplacement/hardlink (0.86s)
+2026-10-25T14:01:17.6512568Z     --- PASS: TestWindowsNativePublicationRejectsLinksAndReplacement/symlink (0.94s)
+2026-10-25T14:01:17.6513952Z     --- PASS: TestWindowsNativePublicationRejectsLinksAndReplacement/same-content-replacement (0.88s)
+2026-10-25T14:01:17.6514820Z === RUN   TestWindowsNativePublicationDirectoryIdentity
+2026-10-25T14:01:18.7152538Z --- PASS: TestWindowsNativePublicationDirectoryIdentity (1.06s)
+2026-10-25T14:01:18.7153329Z === RUN   TestWindowsNativePublicationFenceReopenAndRevocation
+2026-10-25T14:01:20.0427428Z --- PASS: TestWindowsNativePublicationFenceReopenAndRevocation (1.33s)
+2026-10-25T14:01:20.0428291Z === RUN   TestWindowsNativePublicationReceiptBoundary
+2026-10-25T14:01:34.9308281Z --- PASS: TestWindowsNativePublicationReceiptBoundary (14.89s)
+2026-10-25T14:01:34.9308834Z === RUN   TestWindowsNativePublicationBucketBudget
+2026-10-25T14:03:24.6536466Z --- PASS: TestWindowsNativePublicationBucketBudget (109.72s)
+2026-10-25T14:03:24.6540445Z === RUN   TestWindowsNativePublicationRetainedBytesDoNotUseQueueBudget
+2026-10-25T14:03:28.6488051Z --- PASS: TestWindowsNativePublicationRetainedBytesDoNotUseQueueBudget (3.99s)
+2026-10-25T14:03:28.6488798Z === RUN   TestWindowsNativePublicationProcessCrash
+2026-10-25T14:03:28.6489229Z === RUN   TestWindowsNativePublicationProcessCrash/after_prepare
+2026-10-25T14:03:32.5405404Z === RUN   TestWindowsNativePublicationProcessCrash/after_rename
+2026-10-25T14:03:36.8554090Z === RUN   TestWindowsNativePublicationProcessCrash/after_commit
+2026-10-25T14:03:39.2879838Z --- PASS: TestWindowsNativePublicationProcessCrash (10.64s)
+2026-10-25T14:03:39.2880770Z     --- PASS: TestWindowsNativePublicationProcessCrash/after_prepare (3.89s)
+2026-10-25T14:03:39.2881642Z     --- PASS: TestWindowsNativePublicationProcessCrash/after_rename (4.31s)
+2026-10-25T14:03:39.2882786Z     --- PASS: TestWindowsNativePublicationProcessCrash/after_commit (2.43s)
+2026-10-25T14:03:39.2883539Z === RUN   TestWindowsNativePublicationPublishCancelRace
+2026-10-25T14:04:08.2714784Z --- PASS: TestWindowsNativePublicationPublishCancelRace (28.98s)
+2026-10-25T14:04:08.2715595Z === RUN   TestWindowsNativePublicationExplicitMigration
+2026-10-25T14:05:02.4294752Z --- PASS: TestWindowsNativePublicationExplicitMigration (54.16s)
+2026-10-25T14:05:02.4298157Z === RUN   TestWindowsNativePublicationMigrationProcessCrash
+2026-10-25T14:05:02.4298977Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_after_locator_backup
+2026-10-25T14:05:13.7260005Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_after_migration_gate
+2026-10-25T14:05:22.1653361Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_before_target_sync
+2026-10-25T14:05:28.2963382Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_after_target_sync
+2026-10-25T14:05:33.2327686Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/metadata_after_usage_sync
+2026-10-25T14:05:40.6708217Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_before_legacy_remove
+2026-10-25T14:05:45.7542897Z === RUN   TestWindowsNativePublicationMigrationProcessCrash/publication_after_legacy_remove
+2026-10-25T14:05:46.0605131Z panic: test timed out after 5m0s
+2026-10-25T14:05:46.0605610Z 	running tests:
+2026-10-25T14:05:46.0606103Z 		TestWindowsNativePublicationMigrationProcessCrash (44s)
+2026-10-25T14:05:46.0606940Z 		TestWindowsNativePublicationMigrationProcessCrash/publication_after_legacy_remove (0s)
+2026-10-25T14:05:46.0607487Z
+2026-10-25T14:05:46.0607660Z goroutine 1225 [running]:
+2026-10-25T14:05:46.0608030Z testing.(*M).startAlarm.func1()
+2026-10-25T14:05:46.0609071Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2682 +0x345
+2026-10-25T14:05:46.0610113Z created by time.goFunc
+2026-10-25T14:05:46.0610606Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/time/sleep.go:215 +0x2d
+2026-10-25T14:05:46.0610946Z
+2026-10-25T14:05:46.0611126Z goroutine 1 [chan receive]:
+2026-10-25T14:05:46.0611915Z testing.(*T).Run(0xc000086700, {0x7ff71e25a503?, 0x7ff9c19e3410?}, 0x7ff71e269f48)
+2026-10-25T14:05:46.0613010Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2005 +0x469
+2026-10-25T14:05:46.0613588Z testing.runTests.func1(0xc000086700)
+2026-10-25T14:05:46.0614201Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2477 +0x37
+2026-10-25T14:05:46.0614753Z testing.tRunner(0xc000086700, 0xc00012fc70)
+2026-10-25T14:05:46.0615338Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1934 +0xc3
+2026-10-25T14:05:46.0616259Z testing.runTests(0xc0000941b0, {0x7ff71e601dc0, 0x79, 0x79}, {0x7?, 0xc000092b00?, 0x7ff71e606360?})
+2026-10-25T14:05:46.0617065Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2475 +0x4b4
+2026-10-25T14:05:46.0617651Z testing.(*M).Run(0xc000090820)
+2026-10-25T14:05:46.0618192Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2337 +0x63a
+2026-10-25T14:05:46.0618710Z main.main()
+2026-10-25T14:05:46.0619008Z 	_testmain.go:287 +0x9b
+2026-10-25T14:05:46.0619223Z
+2026-10-25T14:05:46.0619384Z goroutine 1182 [chan receive]:
+2026-10-25T14:05:46.0619861Z testing.(*T).Run(0xc000003a40, {0x7ff71e24e699?, 0x3f?}, 0xc000256690)
+2026-10-25T14:05:46.0620521Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:2005 +0x469
+2026-10-25T14:05:46.0621512Z github.com/felinics/memoh/internal/transferclient.TestWindowsNativePublicationMigrationProcessCrash(0xc000003a40)
+2026-10-25T14:05:46.0622410Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_migration_windows_test.go:291 +0x2fa
+2026-10-25T14:05:46.0622853Z testing.tRunner(0xc000003a40, 0x7ff71e269f48)
+2026-10-25T14:05:46.0623281Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1934 +0xc3
+2026-10-25T14:05:46.0646901Z created by testing.(*T).Run in goroutine 1
+2026-10-25T14:05:46.0647749Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1997 +0x44b
+2026-10-25T14:05:46.0648042Z
+2026-10-25T14:05:46.0648140Z goroutine 1224 [syscall]:
+2026-10-25T14:05:46.0648511Z syscall.SyscallN(0x0?, {0xc0001bf3b0?, 0xc0001bf300?, 0x7ff71ddf3000?})
+2026-10-25T14:05:46.0649331Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/runtime/syscall_windows.go:500 +0x1e
+2026-10-25T14:05:46.0649963Z golang.org/x/sys/windows.FlushFileBuffers(0x688)
+2026-10-25T14:05:46.0650704Z 	C:/Users/runneradmin/go/pkg/mod/golang.org/x/sys@v0.47.0/windows/zsyscall_windows.go:2202 +0x5b
+2026-10-25T14:05:46.0651565Z github.com/felinics/memoh/internal/transferclient.syncQueueDir(0xc0001f1408?)
+2026-10-25T14:05:46.0652311Z 	D:/a/Memoh/Memoh/internal/transferclient/durable_windows.go:284 +0x85
+2026-10-25T14:05:46.0653301Z github.com/felinics/memoh/internal/transferclient.seedEmptyPublicationUsage(0xc00030efc8)
+2026-10-25T14:05:46.0653863Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:166 +0x11e
+2026-10-25T14:05:46.0654515Z github.com/felinics/memoh/internal/transferclient.(*publicationMetadata).initialize(0xc000008078, {0x7ff71e304ae8, 0xc0004a6310}, 0x1)
+2026-10-25T14:05:46.0655149Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_metadata.go:109 +0x217
+2026-10-25T14:05:46.0656502Z github.com/felinics/memoh/internal/transferclient.(*DiskQueue).openNativePublication(0xc0000bab00, {0x7ff71e304ae8, 0xc0004a6310}, 0x7ff71e26a2e0, 0x0, 0x0)
+2026-10-25T14:05:46.0657450Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_windows.go:103 +0x6ec
+2026-10-25T14:05:46.0658148Z github.com/felinics/memoh/internal/transferclient.(*DiskQueue).OpenNativePublication(0xc0000bab00, 0x7ff71e26a2e0)
+2026-10-25T14:05:46.0658725Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_windows.go:36 +0x78
+2026-10-25T14:05:46.0659454Z github.com/felinics/memoh/internal/transferclient.legacyNativePublication(0xc000395500, 0x1)
+2026-10-25T14:05:46.0660050Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_migration_windows_test.go:94 +0x1a7
+2026-10-25T14:05:46.0660756Z github.com/felinics/memoh/internal/transferclient.TestWindowsNativePublicationMigrationProcessCrash.func4(0xc000395500)
+2026-10-25T14:05:46.0661743Z 	D:/a/Memoh/Memoh/internal/transferclient/publication_migration_windows_test.go:292 +0x9d
+2026-10-25T14:05:46.0662194Z testing.tRunner(0xc000395500, 0xc000256690)
+2026-10-25T14:05:46.0662588Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1934 +0xc3
+2026-10-25T14:05:46.0663096Z created by testing.(*T).Run in goroutine 1182
+2026-10-25T14:05:46.0663442Z 	C:/hostedtoolcache/windows/go/1.25.7/x64/src/testing/testing.go:1997 +0x44b
+2026-10-25T14:05:46.0690476Z FAIL	github.com/felinics/memoh/internal/transferclient	300.030s
+2026-10-25T14:05:46.0710758Z FAIL
+2026-10-25T14:05:46.2149586Z ##[error]Process completed with exit code 1.

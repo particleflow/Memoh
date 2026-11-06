@@ -1,0 +1,32 @@
+Restarted only current isolated development Server; same executable, PG and configuration.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+[TypeError: fetch failed] {
+  [cause]: SocketError: other side closed
+      at Socket.onHttpSocketEnd (node:internal/deps/undici/undici:7700:26)
+      at Socket.emit (node:events:521:24)
+      at endReadableNT (node:internal/streams/readable:1729:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '127.0.0.1',
+      localPort: 55700,
+      remoteAddress: undefined,
+      remotePort: undefined,
+      remoteFamily: undefined,
+      timeout: undefined,
+      bytesWritten: 1463,
+      bytesRead: 872
+    }
+  }
+}
+
+Node.js v25.9.0
+RESTORED original synthetic MCP URL; temporary read-only peer stopped. No credential, production, task dispatch or Windows change.
+Traceback (most recent call last):
+  File "/tmp/computer-admission/runtime-restart-check.py", line 35, in <module>
+    assert result.returncode==0,'Browser verification failed; original logs retained'
+           ^^^^^^^^^^^^^^^^^^^^
+AssertionError: Browser verification failed; original logs retained

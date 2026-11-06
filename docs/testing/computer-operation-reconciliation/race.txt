@@ -1,0 +1,27 @@
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords (1.12s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00 (0.13s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication (0.13s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection (0.09s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing (0.09s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session (0.11s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/missing
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/legacy
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/mismatch
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/cancel

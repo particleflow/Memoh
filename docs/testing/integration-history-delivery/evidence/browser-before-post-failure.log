@@ -1,0 +1,29 @@
+ERROR:  column "id" does not exist
+LINE 1: ...(json_agg(x ORDER BY id)::text,'[]') FROM (SELECT id,session...
+                                                             ^
+Error: Command failed: docker exec memoh-dev-postgres psql -U memoh -d integration_web_types -At -v ON_ERROR_STOP=1 -c SET memoh.team_id='00000000-0000-0000-0000-000000000001'; SELECT coalesce(json_agg(x ORDER BY id)::text,'[]') FROM (SELECT id,session_id,invocation_id,state,fencing_token FROM session_runs) x;
+ERROR:  column "id" does not exist
+LINE 1: ...(json_agg(x ORDER BY id)::text,'[]') FROM (SELECT id,session...
+                                                             ^
+
+    at genericNodeError (node:internal/errors:998:15)
+    at wrappedFn (node:internal/errors:543:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at Object.execFileSync (node:child_process:961:15)
+    at ledger (/tmp/integration-history-checks/browser.cjs:4:30)
+    at /tmp/integration-history-checks/browser.cjs:13:14 {
+  status: 1,
+  signal: null,
+  output: [
+    null,
+    'SET\n',
+    'ERROR:  column "id" does not exist\n' +
+      "LINE 1: ...(json_agg(x ORDER BY id)::text,'[]') FROM (SELECT id,session...\n" +
+      '                                                             ^\n'
+  ],
+  pid: 594408,
+  stdout: 'SET\n',
+  stderr: 'ERROR:  column "id" does not exist\n' +
+    "LINE 1: ...(json_agg(x ORDER BY id)::text,'[]') FROM (SELECT id,session...\n" +
+    '                                                             ^\n'
+}

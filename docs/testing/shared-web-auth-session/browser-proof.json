@@ -1,0 +1,19 @@
+{
+  "realWeb": true,
+  "existingSyntheticServerAndPG": true,
+  "loginResponseIntercepted": true,
+  "loginRequests": 1,
+  "actualWrites": 0,
+  "taskSubmissions": 0,
+  "late401Cases": [
+    "anonymous request before login: new identity retained",
+    "same-token new login generation: identity and fresh selection retained"
+  ],
+  "current401Cleared": true,
+  "pageErrors": [],
+  "readStatuses": {
+    "200": 45,
+    "401": 1,
+    "503": 3
+  }
+}

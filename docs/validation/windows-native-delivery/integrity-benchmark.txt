@@ -1,0 +1,24 @@
+goos: linux
+goarch: amd64
+pkg: github.com/felinics/memoh/internal/transferclient
+cpu: INTEL(R) XEON(R) PLATINUM 8573C
+BenchmarkSealedSnapshotTransfer/1MiB-4         	       1	   1652991 ns/op	 634.35 MB/s	     512 B/op	      10 allocs/op
+BenchmarkSealedSnapshotTransfer/1MiB-4         	       1	   1318116 ns/op	 795.51 MB/s	     512 B/op	      10 allocs/op
+BenchmarkSealedSnapshotTransfer/1MiB-4         	       1	   1073869 ns/op	 976.45 MB/s	     512 B/op	      10 allocs/op
+BenchmarkSealedSnapshotTransfer/64MiB-4        	       1	  67122613 ns/op	 999.80 MB/s	   16384 B/op	     464 allocs/op
+BenchmarkSealedSnapshotTransfer/64MiB-4        	       1	  68050826 ns/op	 986.16 MB/s	   16384 B/op	     464 allocs/op
+BenchmarkSealedSnapshotTransfer/64MiB-4        	       1	  65885174 ns/op	1018.57 MB/s	   16384 B/op	     464 allocs/op
+BenchmarkSealedSnapshotTransfer/512MiB-4       	       1	 645019123 ns/op	 832.33 MB/s	  180224 B/op	    5248 allocs/op
+BenchmarkSealedSnapshotTransfer/512MiB-4       	       1	 563569680 ns/op	 952.63 MB/s	  180224 B/op	    5248 allocs/op
+BenchmarkSealedSnapshotTransfer/512MiB-4       	       1	 576519776 ns/op	 931.23 MB/s	  180224 B/op	    5248 allocs/op
+BenchmarkSnapshotAdmission/1MiB-4              	       1	   2522749 ns/op	 415.65 MB/s	 1049736 B/op	      28 allocs/op
+BenchmarkSnapshotAdmission/1MiB-4              	       1	   2099497 ns/op	 499.44 MB/s	 1049752 B/op	      28 allocs/op
+BenchmarkSnapshotAdmission/1MiB-4              	       1	   1747669 ns/op	 599.99 MB/s	 1049736 B/op	      28 allocs/op
+BenchmarkSnapshotAdmission/64MiB-4             	       1	 133329154 ns/op	 503.33 MB/s	 1049744 B/op	      29 allocs/op
+BenchmarkSnapshotAdmission/64MiB-4             	       1	 121459521 ns/op	 552.52 MB/s	 1049760 B/op	      29 allocs/op
+BenchmarkSnapshotAdmission/64MiB-4             	       1	 449137224 ns/op	 149.42 MB/s	 1049744 B/op	      29 allocs/op
+BenchmarkSnapshotAdmission/512MiB-4            	       1	1280965875 ns/op	 419.11 MB/s	 1049776 B/op	      29 allocs/op
+BenchmarkSnapshotAdmission/512MiB-4            	       1	1012551176 ns/op	 530.22 MB/s	 1050064 B/op	      33 allocs/op
+BenchmarkSnapshotAdmission/512MiB-4            	       1	1042314323 ns/op	 515.08 MB/s	 1050064 B/op	      33 allocs/op
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	13.667s

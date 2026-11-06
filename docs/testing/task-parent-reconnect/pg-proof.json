@@ -1,0 +1,23 @@
+{
+  "operation_unchanged": true,
+  "configuration_restored": true,
+  "native_methods": [
+    "workspace.list",
+    "workspace.list",
+    "workspace.list",
+    "pane.get",
+    "agent.get",
+    "agent.get",
+    "agent.read",
+    "agent.get",
+    "workspace.list",
+    "agent.read",
+    "pane.get",
+    "agent.get",
+    "workspace.list",
+    "pane.get",
+    "agent.get"
+  ],
+  "business_dispatches": 0,
+  "real_pc_calls": 0
+}

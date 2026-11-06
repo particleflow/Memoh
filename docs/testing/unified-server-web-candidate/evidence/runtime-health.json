@@ -1,0 +1,9 @@
+{
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "binary_sha256": "0d5743d12745c5e594aa52034e69b10775a0730e946b838091f1ba52d1af72b7",
+  "health_method": "HEAD",
+  "health_status": 200,
+  "isolated_database": true,
+  "existing_fixture_config_reused": true,
+  "migration_run": false
+}

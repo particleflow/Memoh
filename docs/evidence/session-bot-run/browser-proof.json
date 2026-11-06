@@ -1,0 +1,19 @@
+{
+  "realWeb": true,
+  "realServerPG": true,
+  "syntheticPersistedRun": true,
+  "mutations": 0,
+  "nativeDeviceReads": 0,
+  "wsSent": [
+    "runtime_subscribe",
+    "runtime_subscribe",
+    "runtime_subscribe"
+  ],
+  "runStatuses": [
+    "aborted",
+    "aborted",
+    "aborted"
+  ],
+  "pageErrors": [],
+  "passed": true
+}

@@ -1,0 +1,42 @@
+[hooks] Web: no relevant staged changes
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/computertask ./internal/transferclient
+[hooks] Go package selection: 0.11s
+[hooks] Go lint: golangci-lint run --concurrency=2 /tmp/memoh-candidate-7bcb-review/internal/computertask /tmp/memoh-candidate-7bcb-review/internal/transferclient
+internal/transferclient/source_unix.go:8:1: File is not properly formatted (gci)
+	"github.com/felinics/memoh/internal/deliverymeta"
+^
+internal/transferclient/source_unix_test.go:18:1: File is not properly formatted (gci)
+	"github.com/felinics/memoh/internal/deliverymeta"
+^
+internal/transferclient/source_test.go:235:4: ifElseChain: rewrite if-else to switch statement (gocritic)
+			if strings.HasPrefix(kind, "feedback-") {
+			^
+internal/transferclient/source_test.go:140:22: G304: Potential file inclusion via variable (gosec)
+	configBytes, err := os.ReadFile(configPath)
+	                    ^
+internal/transferclient/source_test.go:164:18: G304: Potential file inclusion via variable (gosec)
+	if kept, err := os.ReadFile(filepath.Join(root, closed.ManifestName())); err != nil || !bytes.Equal(kept, raw) {
+	                ^
+internal/transferclient/source_test.go:193:20: G304: Potential file inclusion via variable (gosec)
+	unchanged, err := os.ReadFile(configPath)
+	                  ^
+internal/transferclient/source_test.go:194:23: G304: Potential file inclusion via variable (gosec)
+	source, sourceErr := os.ReadFile(filepath.Join(root, closed.Artifact.SourceRef))
+	                     ^
+internal/transferclient/source_unix.go:38:25: G115: integer overflow conversion int -> uintptr (gosec)
+	f := os.NewFile(uintptr(fd), name)
+	                       ^
+internal/transferclient/source_unix_test.go:154:12: G302: Expect file permissions to be 0600 or less (gosec)
+	if err := os.Chmod(queuePath, 0o770); err != nil {
+	          ^
+internal/transferclient/source_unix_test.go:157:21: G302: Expect file permissions to be 0600 or less (gosec)
+	defer func() { _ = os.Chmod(queuePath, 0o700) }()
+	                   ^
+internal/transferclient/source_test.go:312:12: `hardlinked` is a misspelling of `hardline` (misspell)
+		t.Fatal("hardlinked source accepted")
+		         ^
+internal/transferclient/source_test.go:198:62: unused-parameter: parameter 'path' seems to be unused, consider removing or renaming it as _ (revive)
+	_ = filepath.WalkDir(getenv("HERDR_PLUGIN_STATE_DIR"), func(path string, entry os.DirEntry, err error) error {
+	                                                            ^
+[hooks] Go lint: 27.35s
+[hooks] Go lint failed (1)

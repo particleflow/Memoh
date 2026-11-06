@@ -1,0 +1,183 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/Memoh
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains a real computer task without a subagent as a disabled row, never a false empty list or Bot link
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains multiple tasks and historical states and opens each recorded owning Agent without requiring subagent rows
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (401)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (403)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (404)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (401)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (403)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (404)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (401)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (403)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (404)
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task task_id instead of jumping to another object
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task task_type instead of jumping to another object
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task parent_session_id instead of jumping to another object
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task session_id instead of jumping to another object
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+stderr | src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rechecks that the owning session is still an Agent before routing a computer task
+Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent.
+
+ ❯ |web| src/components/sidebar/session-activity-trigger.test.ts (31 tests | 16 failed) 1134ms
+     × retains a real computer task without a subagent as a disabled row, never a false empty list or Bot link 33ms
+     × retains multiple tasks and historical states and opens each recorded owning Agent without requiring subagent rows 26ms
+     × retains an authorized task row if its old owning Agent cannot be read (401) 27ms
+     × retains an authorized task row if its old owning Agent cannot be read (403) 25ms
+     × retains an authorized task row if its old owning Agent cannot be read (404) 37ms
+     × does not route a computer task after original task permission is denied (401) 24ms
+     × does not route a computer task after original task permission is denied (403) 23ms
+     × does not route a computer task after original task permission is denied (404) 22ms
+     × does not route a computer task after Agent session permission is denied (401) 20ms
+     × does not route a computer task after Agent session permission is denied (403) 18ms
+     × does not route a computer task after Agent session permission is denied (404) 19ms
+     × rejects a changed computer task task_id instead of jumping to another object 20ms
+     × rejects a changed computer task task_type instead of jumping to another object 51ms
+     × rejects a changed computer task parent_session_id instead of jumping to another object 19ms
+     × rejects a changed computer task session_id instead of jumping to another object 20ms
+     × rechecks that the owning session is still an Agent before routing a computer task 19ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains a real computer task without a subagent as a disabled row, never a false empty list or Bot link
+AssertionError: expected 'TasksNo subagent or computer tasks ar…' not to contain 'No subagent or computer tasks are rec…'
+
+Expected: "No subagent or computer tasks are recorded."
+Received: "TasksNo subagent or computer tasks are recorded."
+
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:105:36
+    103|     await mount()
+    104|     const dialog = document.querySelector('[role="dialog"]')!
+    105|     expect(dialog.textContent).not.toContain(en.chat.tasks.empty)
+       |                                    ^
+    106|     expect(dialog.textContent).toContain(en.chat.tasks.statuses.submit…
+    107|     expect(dialog.textContent).not.toContain('PRIVATE')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains multiple tasks and historical states and opens each recorded owning Agent without requiring subagent rows
+AssertionError: expected [] to have a length of 4 but got +0
+
+- Expected
++ Received
+
+- 4
++ 0
+
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:119:18
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (401)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (403)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > retains an authorized task row if its old owning Agent cannot be read (404)
+AssertionError: expected  to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:134:18
+    132|     const dialog = document.querySelector('[role="dialog"]')!
+    133|     const rows = dialog.querySelectorAll<HTMLButtonElement>('li > butt…
+    134|     expect(rows).toHaveLength(1); expect(rows[0]!.disabled).toBe(true)
+       |                  ^
+    135|     expect(dialog.textContent).not.toContain(en.chat.tasks.empty)
+    136|     expect(dialog.textContent).toContain(en.chat.tasks.statuses.submit…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (401)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (403)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after original task permission is denied (404)
+TypeError: Cannot read properties of null (reading 'click')
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:142:77
+    140|     api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', …
+    141|     await mount(); api.task.mockRejectedValue({ status }); api.session…
+    142|     document.querySelector<HTMLButtonElement>('[role="dialog"] li > bu…
+       |                                                                             ^
+    143|     expect(api.task).toHaveBeenCalledOnce(); expect(api.session).not.t…
+    144|     expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (401)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (403)
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > does not route a computer task after Agent session permission is denied (404)
+TypeError: Cannot read properties of null (reading 'click')
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:149:77
+    147|     api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', …
+    148|     await mount(); api.session.mockRejectedValue({ status })
+    149|     document.querySelector<HTMLButtonElement>('[role="dialog"] li > bu…
+       |                                                                             ^
+    150|     expect(api.task).toHaveBeenCalledOnce()
+    151|     expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task task_id instead of jumping to another object
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task task_type instead of jumping to another object
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task parent_session_id instead of jumping to another object
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rejects a changed computer task session_id instead of jumping to another object
+TypeError: Cannot read properties of null (reading 'click')
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:156:77
+    154|     api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', …
+    155|     await mount(); api.task.mockResolvedValue({ data: { ...computer('p…
+    156|     document.querySelector<HTMLButtonElement>('[role="dialog"] li > bu…
+       |                                                                             ^
+    157|     expect(api.task).toHaveBeenCalledOnce(); expect(api.session).not.t…
+    158|     expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+ FAIL  |web| src/components/sidebar/session-activity-trigger.test.ts > conversation monitor entry > rechecks that the owning session is still an Agent before routing a computer task
+TypeError: Cannot read properties of null (reading 'click')
+ ❯ src/components/sidebar/session-activity-trigger.test.ts:163:77
+    161|     api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', …
+    162|     await mount(); api.session.mockResolvedValue({ data: { ...sessions…
+    163|     document.querySelector<HTMLButtonElement>('[role="dialog"] li > bu…
+       |                                                                             ^
+    164|     expect(api.task).toHaveBeenCalledOnce()
+    165|     expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  16 failed | 15 passed (31)
+   Start at  16:48:38
+   Duration  10.41s (transform 6.37s, setup 0ms, import 8.40s, tests 1.13s, environment 644ms)

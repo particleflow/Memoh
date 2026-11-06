@@ -1,0 +1,20 @@
+
+> @memohai/desktop@0.22.0 typecheck <repo>/apps/desktop
+> pnpm run typecheck:node && pnpm run typecheck:web
+
+
+> @memohai/desktop@0.22.0 typecheck:node <repo>/apps/desktop
+> pnpm run prepare:runtime && tsc --noEmit -p tsconfig.node.json --composite false
+
+
+> @memohai/desktop@0.22.0 prepare:runtime <repo>/apps/desktop
+> pnpm --filter @memohai/runtime build
+
+
+> @memohai/runtime@0.22.0 build <repo>/packages/runtime
+> node scripts/build.mjs && tsc -p tsconfig.build.json && node scripts/copy-proto.mjs
+
+
+> @memohai/desktop@0.22.0 typecheck:web <repo>/apps/desktop
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+

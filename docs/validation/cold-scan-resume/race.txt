@@ -1,0 +1,12 @@
+?   	github.com/felinics/memoh/internal/storage	[no test files]
+ok  	github.com/felinics/memoh/internal/storage/providers/containerfs	(cached)
+ok  	github.com/felinics/memoh/internal/storage/providers/fallback	1.047s
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	4.165s
+ok  	github.com/felinics/memoh/internal/media	9.521s
+# github.com/felinics/memoh/internal/handlers
+# [github.com/felinics/memoh/internal/handlers]
+vet: open internal/handlers/media_cold_scan_test.go: no such file or directory
+FAIL	github.com/felinics/memoh/internal/handlers [build failed]
+ok  	github.com/felinics/memoh/internal/server	(cached)
+ok  	github.com/felinics/memoh/cmd/internal/core	1.201s
+FAIL

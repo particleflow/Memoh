@@ -1,0 +1,16 @@
+{
+  "check": "web-full",
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--project",
+    "web",
+    "--maxWorkers=2",
+    "--testTimeout=15000"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T22:58:29Z",
+  "elapsed_seconds": 95.43
+}

@@ -1,0 +1,1 @@
+PASS actual combined Server/PG/Web: existing compatible provider and same synthetic model retain native parameter schema/language/format after refresh; zero writes/import/test/discovery/transcription/model requests

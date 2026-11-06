@@ -1,0 +1,20 @@
+package conversationpresence
+
+import (
+ "testing"
+ "time"
+ "github.com/felinics/memoh/internal/inputsource"
+)
+
+// The non-user fixture values are returned by the exact SQL query against
+// temporary PostgreSQL tables; this test exercises the actual classifier.
+func TestIndependentFirstDirectAfterTrustedMachineHistory(t *testing.T) {
+ source:=inputsource.Source{Kind:inputsource.User,BotID:"fixture-bot",SessionID:"fixture-session",UserID:"fixture-actor"}
+ for _, tc:=range []struct{name string; previous int}{
+  {"empty_control",0}, {"only_known_schedule_history",1}, {"only_known_result_history",1},
+ } { t.Run(tc.name,func(t *testing.T){
+  facts:=Facts{Admitted:true,FirstDirectInput:tc.previous==0,HistoryAvailable:true,PreviousSettled:true,Now:time.Unix(1000,0)}
+  got:=Classify(source,source.BotID,source.SessionID,facts,ContinuityPolicy{IdleAfter:15*time.Minute,IdleStartsEpisode:true})
+  if got.Temperature!=Cold {t.Fatalf("first actual direct user input was suppressed by trusted non-user rows: got=%+v want=cold",got)}
+ }) }
+}

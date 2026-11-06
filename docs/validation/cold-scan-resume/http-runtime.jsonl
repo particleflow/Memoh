@@ -1,0 +1,8 @@
+{"size_bytes": 209715200, "phase": "abort-before-reading-headers", "wait_seconds": 0.05, "runtime_scan_progress": "not instrumented; bounded progress verified separately"}
+{"size_bytes": 209715200, "phase": "cold-after-restart", "status": 206, "response_bytes": 65536, "server_read_syscall_bytes": "unavailable: cloud permission denied; no privilege escalation", "headers_seconds": 0.984194, "total_seconds": 0.984852, "server_rss_kib": 86192}
+{"size_bytes": 209715200, "phase": "warm-resume", "status": 206, "response_bytes": 65536, "server_read_syscall_bytes": "unavailable: cloud permission denied; no privilege escalation", "headers_seconds": 0.006421, "total_seconds": 0.006843, "server_rss_kib": 87216}
+{"size_bytes": 209715200, "phase": "disconnect-and-resume-full-sha", "sha_matches": true}
+{"size_bytes": 536870912, "phase": "abort-before-reading-headers", "wait_seconds": 0.05, "runtime_scan_progress": "not instrumented; bounded progress verified separately"}
+{"size_bytes": 536870912, "phase": "cold-after-restart", "status": 206, "response_bytes": 65536, "server_read_syscall_bytes": "unavailable: cloud permission denied; no privilege escalation", "headers_seconds": 2.298242, "total_seconds": 2.300637, "server_rss_kib": 90508}
+{"size_bytes": 536870912, "phase": "warm-resume", "status": 206, "response_bytes": 65536, "server_read_syscall_bytes": "unavailable: cloud permission denied; no privilege escalation", "headers_seconds": 0.024636, "total_seconds": 0.025311, "server_rss_kib": 89304}
+{"size_bytes": 536870912, "phase": "disconnect-and-resume-full-sha", "sha_matches": true}

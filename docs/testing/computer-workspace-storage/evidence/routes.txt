@@ -1,0 +1,10 @@
+✓ patched dependencies verified against installed content
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review/apps/web
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  18:01:55
+   Duration  1.20s (transform 460ms, setup 0ms, import 647ms, tests 103ms, environment 550ms)
+

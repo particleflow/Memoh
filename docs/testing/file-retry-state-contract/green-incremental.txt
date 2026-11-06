@@ -1,0 +1,8 @@
+=== RUN   TestRetryContractAssociationUnknownSurvivesFailuresAndRestart
+    retry_contract_test.go:174: commit=1 resolve=16 failures=16 child_inspection=true cancel=true same_reference=true
+--- PASS: TestRetryContractAssociationUnknownSurvivesFailuresAndRestart (0.06s)
+=== RUN   TestRetryContractDownloadCounterAndAssociationClock
+    retry_contract_test.go:395: download_failures=15 requests=17 commit=1 bytes=43 hash=28c70ab1474324df940bba2399cbb475c01735f4c97f68ff7dc681f4dc150e8a
+--- PASS: TestRetryContractDownloadCounterAndAssociationClock (0.04s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	0.108s

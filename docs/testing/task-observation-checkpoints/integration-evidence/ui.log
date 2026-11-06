@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  5 passed (5)
+      Tests  89 passed (89)
+   Start at  07:25:01
+   Duration  10.60s (transform 9.62s, setup 0ms, import 13.70s, tests 4.38s, environment 1.83s)
+

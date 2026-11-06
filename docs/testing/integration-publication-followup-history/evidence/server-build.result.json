@@ -1,0 +1,15 @@
+{
+  "check": "server-build",
+  "command": [
+    "go",
+    "build",
+    "-p",
+    "1",
+    "-o",
+    "/tmp/memoh-publication-combined-server",
+    "./cmd/agent"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T00:11:51Z",
+  "elapsed_seconds": 5.553
+}

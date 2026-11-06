@@ -1,0 +1,101 @@
+{
+  "receipt": "44de950b-2310-4825-9183-5f1a57d531dd",
+  "state": "ready",
+  "remoteHash": "45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+  "bytes": 12582949,
+  "hash": "45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+  "durationMs": 1344.9000000001397,
+  "firstDataTtfbMs": 8.600000000093132,
+  "logicalOrigin": "http://127.0.0.1:18683/api",
+  "observations": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18683/api/users/me",
+      "ttfbMs": 80.19999999995343
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+      "ttfbMs": 22.5
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18683/api/users/me",
+      "ttfbMs": 16.699999999953434
+    },
+    {
+      "method": "HEAD",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 18.5
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 8.600000000093132
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 8.400000000139698
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 9.900000000139698
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 18.699999999953434
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 8.100000000093132
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 8.5
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 7.100000000093132
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 7.100000000093132
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 11.800000000046566
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 8.600000000093132
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 11.699999999953434
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 6.399999999906868
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+      "ttfbMs": 5.899999999906868
+    }
+  ],
+  "errors": [],
+  "serverRestart": true,
+  "freshBrowserStorage": true,
+  "actualTlsBypass": false
+}

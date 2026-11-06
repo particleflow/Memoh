@@ -1,0 +1,21 @@
+{
+  "actual_combined_server": true,
+  "actual_isolated_PG": true,
+  "schema": 177,
+  "dirty": false,
+  "existing_provider_reused": true,
+  "original_provider_type_preserved": true,
+  "native_transcription_list_and_model_HTTP": 200,
+  "native_parameter_fields": [
+    "language",
+    "prompt",
+    "temperature",
+    "response_format"
+  ],
+  "same_model_config_preserved": true,
+  "chat_provider_not_exposed_as_synthesis": true,
+  "anonymous_metadata_HTTP": 401,
+  "all_provider_rows_unchanged": true,
+  "all_original_model_rows_unchanged": true,
+  "upstream_requests": 0
+}

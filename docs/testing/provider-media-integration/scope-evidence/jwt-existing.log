@@ -1,0 +1,7 @@
+go: downloading github.com/stretchr/testify v1.12.1
+=== RUN   TestJWTMiddlewareRejectsInactiveAccountSession
+--- PASS: TestJWTMiddlewareRejectsInactiveAccountSession (0.00s)
+=== RUN   TestJWTMiddlewareDoesNotValidateChatRouteTokenAsAccount
+--- PASS: TestJWTMiddlewareDoesNotValidateChatRouteTokenAsAccount (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/auth	0.003s

@@ -1,0 +1,3 @@
+internal/handlers/acl.go:1: : # github.com/felinics/memoh/internal/handlers [github.com/felinics/memoh/internal/handlers.test]
+compile: writing output: write $WORK/b1043/_pkg_.a: no space left on device (typecheck)
+package handlers

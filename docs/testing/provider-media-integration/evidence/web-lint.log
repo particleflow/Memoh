@@ -1,0 +1,22 @@
+
+/tmp/memoh-candidate-7bcb-review/apps/web/src/pages/providers/components/provider-form-images.test.ts
+  24:40  warning  There is more than one component in this file       vue/one-component-per-file
+  28:33  warning  There is more than one component in this file       vue/one-component-per-file
+  29:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+  36:34  warning  There is more than one component in this file       vue/one-component-per-file
+  37:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+  44:34  warning  There is more than one component in this file       vue/one-component-per-file
+  52:38  warning  There is more than one component in this file       vue/one-component-per-file
+  53:14  warning  Prop 'value' requires default value to be set       vue/require-default-prop
+  92:41  warning  There is more than one component in this file       vue/one-component-per-file
+
+/tmp/memoh-candidate-7bcb-review/apps/web/src/pages/providers/components/provider-media-catalog.test.ts
+  10:32  warning  There is more than one component in this file        vue/one-component-per-file
+  12:29  warning  There is more than one component in this file        vue/one-component-per-file
+  15:34  warning  There is more than one component in this file        vue/one-component-per-file
+  15:45  warning  Prop 'label' requires default value to be set        vue/require-default-prop
+  15:60  warning  Prop 'description' requires default value to be set  vue/require-default-prop
+  26:19  warning  There is more than one component in this file        vue/one-component-per-file
+
+✖ 15 problems (0 errors, 15 warnings)
+

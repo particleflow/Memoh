@@ -1,0 +1,10 @@
+[hooks] Web: no relevant staged changes
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/computertask ./internal/transferclient
+[hooks] Go package selection: 0.11s
+[hooks] Go lint: golangci-lint run --concurrency=2 /tmp/memoh-candidate-7bcb-review/internal/computertask /tmp/memoh-candidate-7bcb-review/internal/transferclient
+[hooks] Go lint: 4.87s
+[hooks] Go test: go test -p=2 -timeout=600s /tmp/memoh-candidate-7bcb-review/internal/computertask /tmp/memoh-candidate-7bcb-review/internal/transferclient
+ok  	github.com/felinics/memoh/internal/computertask	11.746s
+ok  	github.com/felinics/memoh/internal/transferclient	6.730s
+[hooks] Go test: 13.17s
+[hooks] Total: 18.15s

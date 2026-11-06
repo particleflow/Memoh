@@ -1,0 +1,10 @@
+ESLint: exit 0, no diagnostics
+Vue app project: vue-tsc --noEmit -p apps/web/tsconfig.app.json, exit 0
+UI copy policy: passed, 2033 reviewed surfaces
+UI contract: passed, three inherited warnings
+Agent runtime/contextview official boundary: passed (bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046)
+Backend source, SQL, SDK/API schema and resume v4: unchanged
+Original 105/race/PostgreSQL/model captures: retained/reused, not rerun
+Runtime cleanup: original Server exec session exited 0; original Vite exec session exited 143 after normal SIGTERM; local 28080/28083 listeners closed. PostgreSQL/data/history retained; old denied process/contact actions untouched.
+runtime-projection.ts SHA256: ab58cbde69ca7aa00613c7edbb142b83c2e6f8759762e5917b03e6b4cf5c5900
+runtime-client.ts SHA256: 10b2ee5fd4f679e458efc3d2653b852fd51b3272a5a28349a541a9b250b85e59

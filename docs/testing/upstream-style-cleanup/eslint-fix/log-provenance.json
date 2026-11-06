@@ -1,0 +1,23 @@
+{
+  "local-before.log": {
+    "raw_sha256": "eeb9efe44344fe0db1c1130393014a74fb406e4ef432352a6fa2ed00a906e0c9",
+    "raw_bytes": 533,
+    "published_sha256": "70f1a6f04e2ac1dcb26ed8a5c22341514d4526167c1dae668c2b3d35afbb379b",
+    "published_bytes": 532,
+    "transformation": "Remove surplus blank lines at EOF only; private original retained."
+  },
+  "full-lint.log": {
+    "raw_sha256": "790eb990b801746b35a80770ca7617332d29754df0dbcfe0c19a53e836b92e15",
+    "raw_bytes": 2747,
+    "published_sha256": "22d5dddf5adf8ea955ec7e43c88847971f0cdb3f41439c78c027b6806ee7fadb",
+    "published_bytes": 2746,
+    "transformation": "Remove surplus blank lines at EOF only; private original retained."
+  },
+  "browser.log": {
+    "raw_sha256": "c6ffa0c04e9edf349ef133d14ea6403fb3fb759ade960245ee991405c8ba73de",
+    "raw_bytes": 76,
+    "published_sha256": "c6ffa0c04e9edf349ef133d14ea6403fb3fb759ade960245ee991405c8ba73de",
+    "published_bytes": 76,
+    "transformation": "Remove surplus blank lines at EOF only; private original retained."
+  }
+}

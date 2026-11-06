@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  5 passed (5)
+      Tests  81 passed (81)
+   Start at  03:14:04
+   Duration  8.61s (transform 8.32s, setup 0ms, import 12.07s, tests 2.71s, environment 1.77s)
+

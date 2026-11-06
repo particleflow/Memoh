@@ -1,0 +1,18 @@
+{
+  "eae_source": "eae24523bfe711d631758316073c24e3bd50335b",
+  "parent": "f523c815a30630ed67723674b93be04d0dddf16c",
+  "tree": "965ef0c7c024246af4092ff620998815456ed9dd",
+  "production_patch_sha256": "c5633a42269242e0a6253f6700b5b22a0c02234f264864c215685f1924a096d2",
+  "same_v12_wav_bytes": true,
+  "patched_source_hashes_match_author": true,
+  "new_case_count_reused": 9,
+  "combined_new_seam_cases_passed": 2,
+  "old_MP3_MSE_helper_byte_identical": true,
+  "current_Playback_account_and_bot_auth_prefix_byte_identical": true,
+  "SDK_four_files_byte_identical_to959": true,
+  "new_cloud_calls": 0,
+  "new_controls": 0,
+  "field_ArkWeb_audible500ms": "not verified; afterdeployment acceptance, not source admission prerequisite",
+  "PCM_regression": "not proven and no additional gate",
+  "source_admission": "PASS: demonstrated WAV regression closed; include2b9+23fd+existingfab+eae selectively, not branch wholesale"
+}

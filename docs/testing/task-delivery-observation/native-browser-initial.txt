@@ -1,0 +1,21 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'result-00.txt'
+- 'result-00'
+            ^
+
+    at file://<evidence>/browser-native.mjs:34:9 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'result-00.txt',
+  expected: 'result-00',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

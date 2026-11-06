@@ -1,0 +1,2 @@
+PASS two existing PG operations: authenticated real recovery exposes exact string revision/fingerprint; missing receipt remains unknown; anonymous 401/no-store
+PASS actual task detail -> owner-scoped observation GET with additive reconciliation; zero API mutations/page errors; unavailable synthetic peer is not claimed as Windows recovery

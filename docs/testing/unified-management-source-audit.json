@@ -1,0 +1,30 @@
+{
+  "base": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+  "candidate": "3ce1f27cb4ea5c5c1be3be92245ef4008625b518",
+  "tree": "9c913cf6406bc17d623526e834f0442a841fae13",
+  "sources": {
+    "PR69": "3ec5d309a8c8e6dd8917fd4599d6d526d397037d",
+    "PR71": "91149ad7ab5c0d24a57f10e7d9ff1df4b71cf51c",
+    "PR70": "6ace867cd87936347ea8f65f007030fdd6965249",
+    "PR72": "7a79c48cce892811b92d9b3396cc8118869795a3",
+    "PR72_wording": "6ccbafa225d7d2988f68b40152bacced13e21785",
+    "PR73": "24ee5414b4d277e1462212655d6c2655ee36083e"
+  },
+  "official_core_trees": {
+    "internal/agent/runtime": "b21040a32c089642c2d0fdd312b19635e72fb38a",
+    "internal/contextview": "7ef779cf08a7117978de05ab75425897ad61928e",
+    "packages/runtime": "49f09a39168dd07e2759f0a3b6449eb8684b125b"
+  },
+  "component_identity": {
+    "web_sdk_task_projection": "PR72 wording head byte-identical",
+    "transfer_and_prefix_roundtrip_tests": "PR73 byte-identical",
+    "migrations": "dfc byte-identical"
+  },
+  "openapi_operations": {
+    "base": 360,
+    "candidate": 360,
+    "removed": [],
+    "added": []
+  },
+  "required_pg_gates": "operation CAS/RLS, Pi latest-history and child-run PASS guard retained; no CI execution claimed"
+}

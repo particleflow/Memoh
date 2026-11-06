@@ -1,0 +1,24 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/review-hardcoding-integration-3f
+
+ ✓ |web| src/pages/home/composables/speech-independent-review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId retained 2ms
+ ✓ |web| src/pages/home/composables/speech-independent-review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId omitted 0ms
+ ✓ |web| src/pages/home/composables/speech-independent-review.test.ts > independent cache coverage through final reconciliation > keeps completed cache replayable with runtimeRunId retained 33ms
+ ✓ |web| src/pages/home/composables/speech-independent-review.test.ts > independent cache coverage through final reconciliation > keeps completed cache replayable with runtimeRunId omitted 2ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > same Bot/session, different run: stops during authorization and never restores the old queue after admission 116ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cross Bot/session: stops during authorization and never restores the old queue after admission 18ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > denied: stays silent under the error mask, then returns to the actual primary contact path 19ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > expired: stays silent under the error mask, then returns to the actual primary contact path 15ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > wrong-run: stays silent under the error mask, then returns to the actual primary contact path 15ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > ignores a late task admission after returning to the primary contact without restoring old audio 13ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cancels pending synthesis before anchor delivery and discards the response after returning to contact 12ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > stops the old pane when an invalid history URL is rejected before a task request starts 12ms
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  16:06:06
+   Duration  2.70s (transform 1.44s, setup 0ms, import 2.04s, tests 260ms, environment 544ms)
+
+
+exit=0

@@ -1,0 +1,160 @@
+{
+  "scope": "Parse workflow header before jobs only; not a whole-workflow YAML validity check",
+  "initial_full_parse": "Stopped on existing tab in an unrelated workflow env mapping; no workflow edits",
+  "push": {
+    ".github/workflows/contribution-policy-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        ".github/**",
+        "CONTRIBUTING.md",
+        "AGENTS.md"
+      ]
+    },
+    ".github/workflows/docker.yml": {
+      "branches": [
+        "main"
+      ]
+    },
+    ".github/workflows/electron-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "apps/desktop/**",
+        "apps/web/**",
+        "packages/**",
+        "pnpm-lock.yaml",
+        ".github/workflows/electron-ci.yml"
+      ]
+    },
+    ".github/workflows/eslint.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        ".husky/**",
+        "scripts/hook-checks.test.mjs",
+        "scripts/display-prepare.sh",
+        "apps/**/*.js",
+        "apps/**/*.cjs",
+        "apps/**/*.mjs",
+        "apps/**/*.ts",
+        "apps/**/*.tsx",
+        "apps/**/*.vue",
+        "docker/**",
+        "packages/**",
+        "packages/**/*.js",
+        "packages/**/*.ts",
+        "packages/**/*.tsx",
+        "packages/**/*.vue",
+        "scripts/**/*.mjs",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "eslint.config.mjs",
+        "tsconfig.json",
+        "vitest.config.ts",
+        ".github/workflows/eslint.yml",
+        ".github/workflows/release.yml"
+      ]
+    },
+    ".github/workflows/go-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "**/*.go",
+        "go.mod",
+        "go.sum",
+        "go.work*",
+        ".golangci.*",
+        "internal/**",
+        "cmd/**",
+        "db/**",
+        "templates/**",
+        "conf/**",
+        "docker/**",
+        "spec/**",
+        "scripts/**",
+        "mise.toml",
+        ".github/workflows/go-ci.yml"
+      ]
+    },
+    ".github/workflows/install-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "conf/app.docker.toml",
+        "docker-compose.yml",
+        "scripts/install.sh",
+        "scripts/test-install-*.sh",
+        ".github/workflows/install-ci.yml"
+      ]
+    },
+    ".github/workflows/migrations.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        ".github/workflows/migrations.yml",
+        "sqlc.yaml",
+        "db/postgres/migrations/**",
+        "db/postgres/queries/**",
+        "db/pgvector/migrations/**",
+        "db/pgvector/queries/**",
+        "internal/db/postgres/sqlc/**",
+        "internal/db/pgvector/**",
+        "internal/db/*migration*_test.go",
+        "internal/db/team_*_integration_test.go",
+        "internal/db/*postgres_integration_test.go",
+        "internal/chat/message/*postgres_integration_test.go",
+        "internal/agent/view/*postgres_integration_test.go",
+        "internal/workspacedeps/*integration_test.go"
+      ]
+    },
+    ".github/workflows/release.yml": {
+      "tags": [
+        "v*"
+      ]
+    },
+    ".github/workflows/runtime-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "packages/runtime/**",
+        "internal/workspace/bridgepb/bridge.proto",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        ".github/workflows/runtime-ci.yml"
+      ]
+    },
+    ".github/workflows/rust-ci.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/**",
+        ".github/workflows/rust-ci.yml"
+      ]
+    },
+    ".github/workflows/sync-labels.yml": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        ".github/labels.json",
+        ".github/scripts/sync-labels.mjs",
+        ".github/workflows/sync-labels.yml"
+      ]
+    }
+  },
+  "notes": []
+}

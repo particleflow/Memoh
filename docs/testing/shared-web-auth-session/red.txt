@@ -1,0 +1,40 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/lib/api-client.test.ts (17 tests | 4 failed | 13 skipped) 197ms
+       × ignores a delayed anonymous request after a new login 185ms
+       × ignores a delayed same-token request after a new login 3ms
+       × ignores a delayed anonymous request after a new login 5ms
+       × ignores a delayed same-token request after a new login 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/api-client.test.ts > setupApiClient auth handling > REST response ownership > ignores a delayed anonymous request after a new login
+ FAIL  |web| src/lib/api-client.test.ts > setupApiClient auth handling > REST response ownership > ignores a delayed same-token request after a new login
+ FAIL  |web| src/lib/api-client.test.ts > setupApiClient auth handling > SSE response ownership > ignores a delayed anonymous request after a new login
+ FAIL  |web| src/lib/api-client.test.ts > setupApiClient auth handling > SSE response ownership > ignores a delayed same-token request after a new login
+AssertionError: expected null to be 'synthetic-token' // Object.is equality
+
+- Expected:
+"synthetic-token"
+
++ Received:
+null
+
+ ❯ src/lib/api-client.test.ts:232:45
+    230|       await request
+    231|
+    232|       expect(localStorage.getItem('token')).toBe('synthetic-token')
+       |                                             ^
+    233|       expect(localStorage.getItem('chat-bot-id')).toBe('new-login-bot')
+    234|       expect(mockedNotifyAuthSessionCleared).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 13 skipped (17)
+   Start at  03:32:22
+   Duration  411ms (transform 128ms, setup 0ms, import 65ms, tests 197ms, environment 0ms)
+

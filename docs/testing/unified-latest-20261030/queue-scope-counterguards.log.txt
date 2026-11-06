@@ -1,0 +1,8 @@
+=== RUN   TestIndependentEscapedInvocationScope
+=== RUN   TestIndependentEscapedInvocationScope/literal_percent_slash_is_not_decoded_twice
+=== RUN   TestIndependentEscapedInvocationScope/encoded_slash_does_not_escape_authorized_session
+--- PASS: TestIndependentEscapedInvocationScope (0.00s)
+    --- PASS: TestIndependentEscapedInvocationScope/literal_percent_slash_is_not_decoded_twice (0.00s)
+    --- PASS: TestIndependentEscapedInvocationScope/encoded_slash_does_not_escape_authorized_session (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.024s

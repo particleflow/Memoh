@@ -1,0 +1,12 @@
+{
+  "fixture_setup_posts": 1,
+  "provider_count": 0,
+  "model_count": 0,
+  "delivery_state_observed_after_script_error": "accepted",
+  "runs_after_setup": {
+    "failed": 1
+  },
+  "specialist_runs": 0,
+  "fixture_error": "status column absent; actual session_runs.state queried read-only, no repeated setup POST",
+  "business_not_verified": true
+}

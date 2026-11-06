@@ -1,0 +1,26 @@
+{
+  "issues": 18,
+  "files": {
+    "internal/db/computer_delivery_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/computer_transfer_principal_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/computer_transfer_registry_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/grok_build_runtime_migration_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/session_model_preference_migration_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/team_schema_guard_integration_test.go": {
+      "unchanged_from_834": true
+    },
+    "internal/db/team_view_rls_integration_test.go": {
+      "unchanged_from_834": true
+    }
+  }
+}

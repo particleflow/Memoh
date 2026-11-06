@@ -1,0 +1,192 @@
+=== RUN   TestActiveJournalPreservesUnknownAssociation
+=== RUN   TestActiveJournalPreservesUnknownAssociation/create_unknown
+=== RUN   TestActiveJournalPreservesUnknownAssociation/association_unknown
+--- PASS: TestActiveJournalPreservesUnknownAssociation (0.01s)
+    --- PASS: TestActiveJournalPreservesUnknownAssociation/create_unknown (0.00s)
+    --- PASS: TestActiveJournalPreservesUnknownAssociation/association_unknown (0.00s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable (0.09s)
+    --- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline (0.05s)
+    --- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled (0.04s)
+=== RUN   TestAssociationReviewCancelMustReconcileLostCommit
+--- PASS: TestAssociationReviewCancelMustReconcileLostCommit (0.04s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit (0.10s)
+    --- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit (0.05s)
+    --- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve (0.05s)
+=== RUN   TestAssociationReviewRetryPauseCanBeReconciled
+--- PASS: TestAssociationReviewRetryPauseCanBeReconciled (0.22s)
+=== RUN   TestAssociationReviewCancelWithoutFenceRemainsUnknown
+--- PASS: TestAssociationReviewCancelWithoutFenceRemainsUnknown (0.05s)
+=== RUN   TestAssociationReviewCancelBeforeCommitDoesNotRegister
+--- PASS: TestAssociationReviewCancelBeforeCommitDoesNotRegister (0.04s)
+=== RUN   TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing
+--- PASS: TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing (0.04s)
+=== RUN   TestAssociationReviewProcessCrashAfterInFlight
+--- PASS: TestAssociationReviewProcessCrashAfterInFlight (0.05s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/200
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/499
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/401
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/403
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization (0.91s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/200 (0.06s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/499 (0.35s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/401 (0.25s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/403 (0.25s)
+=== RUN   TestHTTP499DownloadRetainsRangeAndHash
+--- PASS: TestHTTP499DownloadRetainsRangeAndHash (0.01s)
+=== RUN   TestDownloadResumeAndValidation
+=== RUN   TestDownloadResumeAndValidation/ok
+=== RUN   TestDownloadResumeAndValidation/wrong-prefix
+=== RUN   TestDownloadResumeAndValidation/full-on-resume
+=== RUN   TestDownloadResumeAndValidation/wrong-range
+=== RUN   TestDownloadResumeAndValidation/wrong-etag
+=== RUN   TestDownloadResumeAndValidation/truncated
+=== RUN   TestDownloadResumeAndValidation/revoked
+=== RUN   TestDownloadResumeAndValidation/disk-full
+=== RUN   TestDownloadResumeAndValidation/checkpoint-failure
+--- PASS: TestDownloadResumeAndValidation (0.07s)
+    --- PASS: TestDownloadResumeAndValidation/ok (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-prefix (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/full-on-resume (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-range (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-etag (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/truncated (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/revoked (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/disk-full (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/checkpoint-failure (0.01s)
+=== RUN   TestDownloadMetadataDoesNotReservePayloadOrBacklog
+--- PASS: TestDownloadMetadataDoesNotReservePayloadOrBacklog (0.00s)
+=== RUN   TestDownloadDiskPressureRetainsCheckpointAndWorkerBound
+--- PASS: TestDownloadDiskPressureRetainsCheckpointAndWorkerBound (0.25s)
+=== RUN   TestDownloadDiskPressureKeepsUnknownAssociation
+--- PASS: TestDownloadDiskPressureKeepsUnknownAssociation (0.02s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/cancel
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/unknown
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/revoke
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/budget
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation (0.34s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/cancel (0.00s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/unknown (0.01s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/revoke (0.11s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/budget (0.21s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change (0.00s)
+=== RUN   TestBlockedDownloadCanCancelWithoutNetwork
+--- PASS: TestBlockedDownloadCanCancelWithoutNetwork (0.01s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/resume
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/revoke
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/corrupt
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization (0.04s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/resume (0.01s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/revoke (0.01s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/corrupt (0.02s)
+=== RUN   TestProducerClosedManifestRestartAndLostAssociation
+--- PASS: TestProducerClosedManifestRestartAndLostAssociation (0.10s)
+=== RUN   TestPublicationMetadataMigrationPreservesCompleteHistory
+=== RUN   TestPublicationMetadataMigrationPreservesCompleteHistory/4096
+=== RUN   TestPublicationMetadataMigrationPreservesCompleteHistory/0
+--- PASS: TestPublicationMetadataMigrationPreservesCompleteHistory (0.12s)
+    --- PASS: TestPublicationMetadataMigrationPreservesCompleteHistory/4096 (0.06s)
+    --- PASS: TestPublicationMetadataMigrationPreservesCompleteHistory/0 (0.06s)
+=== RUN   TestPublicationMetadataMigrationConflictPreservesBothCopies
+--- PASS: TestPublicationMetadataMigrationConflictPreservesBothCopies (0.00s)
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_before_target_sync
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_after_target_sync
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_before_legacy_remove
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_after_legacy_remove
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies (0.12s)
+    --- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_before_target_sync (0.03s)
+    --- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_after_target_sync (0.02s)
+    --- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_before_legacy_remove (0.03s)
+    --- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_after_legacy_remove (0.03s)
+=== RUN   TestPublicationMetadataMigrationMissingDurableTarget
+--- PASS: TestPublicationMetadataMigrationMissingDurableTarget (0.04s)
+=== RUN   TestPublicationMetadataBeyond128AndReplay
+--- PASS: TestPublicationMetadataBeyond128AndReplay (0.91s)
+=== RUN   TestPublicationMetadataByteBudgetAndStateTransitions
+--- PASS: TestPublicationMetadataByteBudgetAndStateTransitions (0.02s)
+=== RUN   TestPublicationMetadataDirtyRecovery
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_dirty
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_journal_sync
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_usage_sync
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_clean
+--- PASS: TestPublicationMetadataDirtyRecovery (0.06s)
+    --- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_dirty (0.01s)
+    --- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_journal_sync (0.02s)
+    --- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_usage_sync (0.02s)
+    --- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_clean (0.02s)
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/empty-journal
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-frame
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-usage
+--- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence (0.03s)
+    --- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/empty-journal (0.01s)
+    --- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-frame (0.01s)
+    --- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-usage (0.01s)
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/directory
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/bucket
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/usage
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/empty-bucket
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent (0.06s)
+    --- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/directory (0.01s)
+    --- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/bucket (0.02s)
+    --- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/usage (0.02s)
+    --- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/empty-bucket (0.02s)
+=== RUN   TestPublicationMetadataMissingJournalNeverMeansAbsent
+--- PASS: TestPublicationMetadataMissingJournalNeverMeansAbsent (0.02s)
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/usage-torn
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/missing-journal
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/corrupt-witness
+--- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership (0.03s)
+    --- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/usage-torn (0.01s)
+    --- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/missing-journal (0.01s)
+    --- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/corrupt-witness (0.01s)
+=== RUN   TestPublicationMetadataUntrackedJournalFailsClosed
+--- PASS: TestPublicationMetadataUntrackedJournalFailsClosed (0.01s)
+=== RUN   TestPublicationMetadataFreshInitializationNeverRepairsExistingState
+--- PASS: TestPublicationMetadataFreshInitializationNeverRepairsExistingState (0.01s)
+=== RUN   TestDownloadFullCheckpointRechecksAuthorization
+--- PASS: TestDownloadFullCheckpointRechecksAuthorization (0.01s)
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/1
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/2
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity (0.08s)
+    --- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/1 (0.04s)
+    --- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/2 (0.04s)
+=== RUN   TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered
+--- PASS: TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered (0.05s)
+=== RUN   TestQueueReleaseProcessCrash
+=== RUN   TestQueueReleaseProcessCrash/after_intent
+=== RUN   TestQueueReleaseProcessCrash/after_payload
+=== RUN   TestQueueReleaseProcessCrash/after_receipt
+=== RUN   TestQueueReleaseProcessCrash/after_truncate
+=== RUN   TestQueueReleaseProcessCrash/after_compact
+=== RUN   TestQueueReleaseProcessCrash/after_finish
+--- PASS: TestQueueReleaseProcessCrash (0.27s)
+    --- PASS: TestQueueReleaseProcessCrash/after_intent (0.05s)
+    --- PASS: TestQueueReleaseProcessCrash/after_payload (0.05s)
+    --- PASS: TestQueueReleaseProcessCrash/after_receipt (0.05s)
+    --- PASS: TestQueueReleaseProcessCrash/after_truncate (0.04s)
+    --- PASS: TestQueueReleaseProcessCrash/after_compact (0.04s)
+    --- PASS: TestQueueReleaseProcessCrash/after_finish (0.04s)
+=== RUN   TestQueueReleaseReceiptCatalogBound
+--- PASS: TestQueueReleaseReceiptCatalogBound (0.48s)
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/cancel
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit (0.07s)
+    --- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/cancel (0.03s)
+    --- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit (0.04s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	5.821s

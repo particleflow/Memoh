@@ -1,0 +1,33 @@
+{
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "sourceCommitsInOrder": [
+    "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+    "ba44c06261fb3be30557160840bc25e339cab650"
+  ],
+  "sourceHeadTree": "b38fb15c22262d77dcc9ad964f6b25df442895c1",
+  "branch": "fix/chat-continuous-read-aloud-20261030",
+  "normalCommitChecks": "passed, HUSKY explicitly unset after initialized environment default0 was found; frontend lint, package-scoped Go lint/test4 packages",
+  "incrementalUniqueCases": 32,
+  "affectedExistingControllerCases": 20,
+  "actualRendererSelectedCases": 1,
+  "newReadOnlyConfigJWTVariants": 22,
+  "existingGeneratedSDKOperationsUnchanged": 383,
+  "nativeMeasuredSourceHashesMatchFinal": {
+    "chat-read-aloud.ts": true,
+    "useChatReadAloud.ts": true,
+    "speech-sentence-boundary.ts": true,
+    "speech-replay-cache.ts": true,
+    "speech-audio-stream.ts": true
+  },
+  "combinedProductPatchSHA256": "f823c48bdf90e9d48047a01b1fd167394ff46a47c6ccac2cb6b7ec0da990916a",
+  "realProviderCalls": 0,
+  "builtSignedDeployedInstalled": false,
+  "humanQA": false,
+  "acceptance": "all four complaints unresolved pending actual affected client and listening",
+  "remainingCapability": "same-session incremental-text synthesis not implemented in pinned public adapter; completed semantic units remain separate contexts",
+  "remainingField": [
+    "actual configured provider/model/protocol and MIME not read back",
+    "actual voice intonation and spoken word completeness",
+    "ArkWeb trusted activation, MSE MIME, interruption, old queue fence, single bubble/accessibility and native foreground/background lifecycle"
+  ]
+}

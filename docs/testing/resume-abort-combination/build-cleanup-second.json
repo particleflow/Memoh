@@ -1,0 +1,6 @@
+{
+  "path": "/tmp/native-resume-http/server-account-boundary",
+  "bytes": 131965220,
+  "sha256": "97886dff09f35bf57766bb54ac870a2f9471a2afc62d683e5f67f5b7a80a69d0",
+  "reason": "previous task-built Server is stopped; source checkpoint retained; combined Server now healthy"
+}

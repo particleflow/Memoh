@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <repository>
+
+
+ Test Files  8 passed (8)
+      Tests  170 passed (170)
+   Start at  15:31:28
+   Duration  15.09s (transform 23.34s, setup 0ms, import 33.48s, tests 4.21s, environment 1.81s)

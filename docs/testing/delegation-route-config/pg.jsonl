@@ -1,0 +1,9 @@
+{"Time":"2026-10-24T12:29:37.348978215Z","Action":"start","Package":"github.com/felinics/memoh/internal/db"}
+{"Time":"2026-10-24T12:29:37.361296209Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestBotDelegationPostgresClaimIsolationAndDescendantAssets"}
+{"Time":"2026-10-24T12:29:37.361313214Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestBotDelegationPostgresClaimIsolationAndDescendantAssets","Output":"=== RUN   TestBotDelegationPostgresClaimIsolationAndDescendantAssets\n"}
+{"Time":"2026-10-24T12:29:39.238571337Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestBotDelegationPostgresClaimIsolationAndDescendantAssets","Output":"    bot_delegation_postgres_integration_test.go:28: freshMigratedDB applied the official full migration chain: version=173 dirty=false\n"}
+{"Time":"2026-10-24T12:29:39.301760823Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestBotDelegationPostgresClaimIsolationAndDescendantAssets","Output":"--- PASS: TestBotDelegationPostgresClaimIsolationAndDescendantAssets (1.94s)\n"}
+{"Time":"2026-10-24T12:29:39.301789747Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestBotDelegationPostgresClaimIsolationAndDescendantAssets","Elapsed":1.94}
+{"Time":"2026-10-24T12:29:39.301805961Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"PASS\n"}
+{"Time":"2026-10-24T12:29:39.303068584Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"ok  \tgithub.com/felinics/memoh/internal/db\t1.954s\n"}
+{"Time":"2026-10-24T12:29:39.303091849Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Elapsed":1.954}

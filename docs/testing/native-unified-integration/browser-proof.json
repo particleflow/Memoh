@@ -1,0 +1,12 @@
+{
+  "realCombinedServer": true,
+  "realIsolatedPG": true,
+  "fixtureDeviceConnected": false,
+  "pcDispatches": 0,
+  "pageErrors": [],
+  "listStatuses": [
+    200
+  ],
+  "savedIdentity": true,
+  "offlineVisible": true
+}

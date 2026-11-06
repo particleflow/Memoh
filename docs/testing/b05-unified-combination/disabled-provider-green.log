@@ -1,0 +1,40 @@
+=== RUN   TestSharedChatProviderTranscription
+=== RUN   TestSharedChatProviderTranscription/openai-completions
+=== RUN   TestSharedChatProviderTranscription/openai-completions/success
+    shared_provider_transcription_test.go:149: mode=success POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-completions/forbidden
+    shared_provider_transcription_test.go:149: mode=forbidden POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-completions/lost_response
+    shared_provider_transcription_test.go:149: mode=lost_response POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-completions/malformed_response
+    shared_provider_transcription_test.go:149: mode=malformed_response POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-responses
+=== RUN   TestSharedChatProviderTranscription/openai-responses/success
+    shared_provider_transcription_test.go:149: mode=success POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-responses/forbidden
+    shared_provider_transcription_test.go:149: mode=forbidden POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-responses/lost_response
+    shared_provider_transcription_test.go:149: mode=lost_response POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+=== RUN   TestSharedChatProviderTranscription/openai-responses/malformed_response
+    shared_provider_transcription_test.go:149: mode=malformed_response POST=1 automatic_retry=0 audio_sha256=66b9300313a043b613ee87eac79b6b394ee1e7a5ff1441f9deba49cb1db14134 model_ID_preserved=true DB_writes=0
+--- PASS: TestSharedChatProviderTranscription (0.00s)
+    --- PASS: TestSharedChatProviderTranscription/openai-completions (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-completions/success (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-completions/forbidden (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-completions/lost_response (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-completions/malformed_response (0.00s)
+    --- PASS: TestSharedChatProviderTranscription/openai-responses (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-responses/success (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-responses/forbidden (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-responses/lost_response (0.00s)
+        --- PASS: TestSharedChatProviderTranscription/openai-responses/malformed_response (0.00s)
+=== RUN   TestSharedTranscriptionDoesNotRegisterChatOrSynthesis
+--- PASS: TestSharedTranscriptionDoesNotRegisterChatOrSynthesis (0.00s)
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-completions
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-responses
+--- PASS: TestSharedTranscriptionRejectsDisabledProvider (0.00s)
+    --- PASS: TestSharedTranscriptionRejectsDisabledProvider/openai-completions (0.00s)
+    --- PASS: TestSharedTranscriptionRejectsDisabledProvider/openai-responses (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio	0.008s

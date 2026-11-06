@@ -1,0 +1,51 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/speech-continuity.test.ts (2 tests | 2 failed) 39ms
+   × automatically reads a live reply which settles before the post-render watcher runs, without reading baseline history 20ms
+   × does not split an unfinished sentence at commas, character counts or elapsed flush intervals 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-continuity.test.ts > automatically reads a live reply which settles before the post-render watcher runs, without reading baseline history
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/pages/home/composables/speech-continuity.test.ts:30:26
+     28|     messages.value[messages.value.length - 1] = reply('Fresh complete …
+     29|     await settle()
+     30|     expect(api.playback).toHaveBeenCalledOnce()
+       |                          ^
+     31|     expect(api.playback.mock.calls[0]![0].body.text).toBe('Fresh compl…
+     32|     draft.value = 'interrupt'; await settle()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-continuity.test.ts > does not split an unfinished sentence at commas, character counts or elapsed flush intervals
+AssertionError: expected [ { key: 'turn', …(1) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "turn",
++     "text": "We keep this sentence together, ",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-continuity.test.ts:42:51
+     40|   const live = new LiveSpeechReplies()
+     41|   const text = 'We keep this sentence together, including a longer cla…
+     42|   expect(live.update([reply(text)], true, false)).toEqual([])
+       |                                                   ^
+     43|   expect(live.update([reply(text + '.')], true, false)).toEqual([{ key…
+     44|   expect(live.update([reply(text + '. Next sentence is unfinished')], …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  11:51:32
+   Duration  903ms (transform 106ms, setup 0ms, import 226ms, tests 39ms, environment 477ms)

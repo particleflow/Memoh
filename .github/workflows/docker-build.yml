@@ -1,0 +1,347 @@
+name: Docker build
+on:
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+      image_scope:
+        type: string
+        default: all
+      source_sha:
+        type: string
+        default: ''
+
+env:
+  PUSH: ${{ inputs.publish }}
+  REGISTRY: ghcr.io
+
+jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      web: ${{ steps.filter.outputs.web }}
+      workspace: ${{ steps.filter.outputs.workspace }}
+      source_sha: ${{ steps.selection.outputs.source_sha }}
+      workflow_sha: ${{ steps.selection.outputs.workflow_sha }}
+      build_matrix: ${{ steps.selection.outputs.build_matrix }}
+      publish_matrix: ${{ steps.selection.outputs.publish_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+          fetch-depth: 0
+      - name: Validate source and select image matrices
+        id: selection
+        env:
+          IMAGE_SCOPE: ${{ inputs.image_scope }}
+          REQUESTED_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          case "$IMAGE_SCOPE" in all|web|server|server-web) ;; *) exit 1 ;; esac
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          selected_source="${REQUESTED_SOURCE_SHA:-$GITHUB_SHA}"
+          [[ "$selected_source" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "${selected_source}^{commit}"
+          if [[ "$selected_source" != "$GITHUB_SHA" ]]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$PUSH" = true
+            test "$IMAGE_SCOPE" = web
+            git merge-base --is-ancestor "$selected_source" "$GITHUB_SHA"
+            git diff --no-ext-diff --no-renames --name-only -z "$selected_source" "$GITHUB_SHA" > "$RUNNER_TEMP/selected-source-files"
+            while IFS= read -r -d '' path; do
+              case "$path" in
+                .github/workflows/docker.yml|.github/workflows/docker-build.yml) ;;
+                *) printf 'Source differs outside release workflows: %q\n' "$path" >&2; exit 1 ;;
+              esac
+            done < "$RUNNER_TEMP/selected-source-files"
+          fi
+          printf 'source_sha=%s\nworkflow_sha=%s\n' "$selected_source" "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          printf 'Workflow commit: `%s`\n\nSource commit: `%s`\n\nImage scope: `%s`\n' "$GITHUB_SHA" "$selected_source" "$IMAGE_SCOPE" >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          scope = os.environ['IMAGE_SCOPE']
+          images = ['server', 'web', 'workspace'] if scope == 'all' else ['server', 'web'] if scope == 'server-web' else [scope]
+          build, publish = [], []
+          for image in images:
+              variant = 'debian' if image == 'workspace' else ''
+              publish.append({'image': image, 'artifact_key': image + ('-' + variant if variant else ''), 'variant': variant})
+              for arch, runner in [('amd64', 'ubuntu-latest'), ('arm64', 'ubuntu-24.04-arm')]:
+                  build.append({'image': image, 'variant': variant, 'platform': 'linux/' + arch, 'runner': runner, 'dockerfile': 'docker/Dockerfile.' + image})
+          print('build_matrix=' + json.dumps({'include': build}, separators=(',', ':')))
+          print('publish_matrix=' + json.dumps({'include': publish}, separators=(',', ':')))
+          PY
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # Tags, releases, and workflow_dispatch always build everything
+          predicate-quantifier: some
+          filters: |
+            server:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
+              - '**/*.go'
+              - 'go.mod'
+              - 'go.sum'
+              - 'cmd/**'
+              - 'internal/**'
+              - 'docker/Dockerfile.server'
+              - 'docker/server-entrypoint.sh'
+              - 'templates/workspace/**'
+              - 'conf/providers/**'
+              - 'spec/**'
+            web:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
+              - 'apps/web/**'
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'docker/Dockerfile.web'
+              - 'docker/nginx.conf'
+            workspace:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
+              - 'docker/Dockerfile.workspace'
+              - 'docker/toolkit/**'
+              - 'crates/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'scripts/desktop-install.sh'
+              - 'scripts/desktop-style.sh'
+              - 'scripts/display-apply-style.sh'
+              - 'scripts/display-prepare.sh'
+  build:
+    name: build ${{ matrix.image }}${{ matrix.variant != '' && format(' ({0})', matrix.variant) || '' }} ${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+    needs: detect-changes
+    env:
+      SOURCE_SHA: ${{ needs.detect-changes.outputs.source_sha }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.build_matrix) }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check if build is needed
+        id: should-build
+        run: |
+          FORCE="false"
+          if [[ "${{ github.ref }}" == refs/tags/* ]] || \
+             [[ "${{ github.event_name }}" == "release" ]] || \
+             [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            FORCE="true"
+          fi
+          IMAGE="${{ matrix.image }}"
+          CHANGED="false"
+          case "$IMAGE" in
+            server)  CHANGED="${{ needs.detect-changes.outputs.server }}" ;;
+            web)     CHANGED="${{ needs.detect-changes.outputs.web }}" ;;
+            workspace) CHANGED="${{ needs.detect-changes.outputs.workspace }}" ;;
+          esac
+          if [[ "$FORCE" == "true" || "$CHANGED" == "true" ]]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping $IMAGE build — no relevant files changed"
+          fi
+
+      - name: Checkout
+        if: steps.should-build.outputs.skip != 'true'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+          ref: ${{ needs.detect-changes.outputs.source_sha }}
+
+      - name: Verify checked-out source
+        if: steps.should-build.outputs.skip != 'true'
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - name: Set up Docker Buildx
+        if: steps.should-build.outputs.skip != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Test toolkit wrapper assembly
+        if: steps.should-build.outputs.skip != 'true' && matrix.image == 'workspace' && matrix.platform == 'linux/amd64'
+        run: sh docker/toolkit/install-wrappers.test.sh
+
+      - name: Set up Go
+        if: steps.should-build.outputs.skip != 'true' && matrix.image == 'server'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Pre-warm Go mod cache
+        if: steps.should-build.outputs.skip != 'true' && matrix.image == 'server'
+        run: |
+          mkdir -p .go-cache
+          GOMODCACHE=$(pwd)/.go-cache go mod download
+
+      - name: Login to GitHub Container Registry
+        if: steps.should-build.outputs.skip != 'true' && env.PUSH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve artifact key
+        id: resolve
+        if: steps.should-build.outputs.skip != 'true'
+        run: |
+          VARIANT="${{ matrix.variant }}"
+          if [ -n "$VARIANT" ]; then
+            ARTIFACT_KEY="${{ matrix.image }}-${VARIANT}"
+          else
+            ARTIFACT_KEY="${{ matrix.image }}"
+          fi
+          echo "artifact_key=${ARTIFACT_KEY}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push by digest
+        id: build
+        if: steps.should-build.outputs.skip != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platform }}
+          load: ${{ env.PUSH != 'true' && matrix.image == 'workspace' && matrix.platform == 'linux/amd64' }}
+          # A local tag is only needed by the PR smoke-test; digest pushes must not include it.
+          tags: ${{ env.PUSH != 'true' && matrix.image == 'workspace' && matrix.platform == 'linux/amd64' && 'memoh-ci-workspace:debian' || '' }}
+          outputs: ${{ env.PUSH == 'true' && format('type=image,"name={0}/{1}/{2}",push-by-digest=true,name-canonical=true,push=true,compression=zstd', env.REGISTRY, github.repository_owner, matrix.image) || '' }}
+          build-contexts: ${{ matrix.image == 'server' && format('gomodcache={0}/.go-cache', github.workspace) || '' }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.detect-changes.outputs.source_sha }}
+          build-args: |
+            VERSION=${{ github.ref_name }}
+            COMMIT_HASH=${{ needs.detect-changes.outputs.source_sha }}
+            VITE_API_URL=/api
+            VITE_AGENT_URL=/agent
+          cache-from: |
+            type=gha,scope=${{ steps.resolve.outputs.artifact_key }}-${{ matrix.platform }}
+            ${{ env.PUSH == 'true' && format('type=registry,ref={0}/{1}/{2}:buildcache-{3}-{4}', env.REGISTRY, github.repository_owner, matrix.image, steps.resolve.outputs.artifact_key, matrix.platform == 'linux/amd64' && 'amd64' || 'arm64') || '' }}
+          cache-to: |
+            type=gha,scope=${{ steps.resolve.outputs.artifact_key }}-${{ matrix.platform }},mode=max,ignore-error=true
+            ${{ env.PUSH == 'true' && format('type=registry,ref={0}/{1}/{2}:buildcache-{3}-{4},mode=max,compression=zstd,ignore-error=true', env.REGISTRY, github.repository_owner, matrix.image, steps.resolve.outputs.artifact_key, matrix.platform == 'linux/amd64' && 'amd64' || 'arm64') || '' }}
+
+      - name: Smoke-test workspace image
+        if: steps.should-build.outputs.skip != 'true' && env.PUSH != 'true' && matrix.image == 'workspace' && matrix.platform == 'linux/amd64'
+        run: |
+          docker run --rm memoh-ci-workspace:debian sh -eux -c '
+            ldd --version >/dev/null
+            node --version
+            python3 --version
+            uv --version
+            flock -n -E 75 /tmp/memoh-workspace-lock-check true
+            test -x /opt/memoh/toolkit/display/bin/a11y-cli
+            sh -n /opt/memoh/scripts/display-prepare.sh
+            sh -n /opt/memoh/scripts/display-apply-style.sh
+            sh -n /opt/memoh/scripts/desktop-style.sh
+          '
+
+      - name: Export digest
+        if: steps.should-build.outputs.skip != 'true' && env.PUSH == 'true'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        if: steps.should-build.outputs.skip != 'true' && env.PUSH == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests__${{ steps.resolve.outputs.artifact_key }}__${{ strategy.job-index }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: publish ${{ matrix.image }}${{ matrix.variant != '' && format(' ({0})', matrix.variant) || '' }}
+    runs-on: ubuntu-latest
+    if: inputs.publish
+    needs: [detect-changes, build]
+    env:
+      SOURCE_SHA: ${{ needs.detect-changes.outputs.source_sha }}
+      WORKFLOW_SHA: ${{ needs.detect-changes.outputs.workflow_sha }}
+    strategy:
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.publish_matrix) }}
+    steps:
+      - name: Check if publish is needed
+        id: should-publish
+        run: |
+          FORCE="false"
+          if [[ "${{ github.ref }}" == refs/tags/* ]] || \
+             [[ "${{ github.event_name }}" == "release" ]] || \
+             [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            FORCE="true"
+          fi
+          IMAGE="${{ matrix.image }}"
+          CHANGED="false"
+          case "$IMAGE" in
+            server)  CHANGED="${{ needs.detect-changes.outputs.server }}" ;;
+            web)     CHANGED="${{ needs.detect-changes.outputs.web }}" ;;
+            workspace) CHANGED="${{ needs.detect-changes.outputs.workspace }}" ;;
+          esac
+          if [[ "$FORCE" == "true" || "$CHANGED" == "true" ]]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping $IMAGE publish — no relevant files changed"
+          fi
+
+      - name: Download digests
+        if: steps.should-publish.outputs.skip != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests__${{ matrix.artifact_key }}__*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        if: steps.should-publish.outputs.skip != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.should-publish.outputs.skip != 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish candidate manifest
+        if: steps.should-publish.outputs.skip != 'true'
+        working-directory: /tmp/digests
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          SOURCE_URL: https://github.com/${{ github.repository }}
+        run: |
+          sources=()
+          for digest in *; do
+            [[ "$digest" =~ ^[a-f0-9]{64}$ ]] || exit 1
+            sources+=("${IMAGE}@sha256:${digest}")
+          done
+          docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.source=${SOURCE_URL}" \
+            --annotation "index:org.opencontainers.image.revision=${SOURCE_SHA}" \
+            -t "${IMAGE}:sha-${SOURCE_SHA}" "${sources[@]}"
+          manifest_digest=$(docker buildx imagetools inspect "${IMAGE}:sha-${SOURCE_SHA}" | awk '$1 == "Digest:" {print $2; exit}')
+          [[ "$manifest_digest" =~ ^sha256:[a-f0-9]{64}$ ]] || exit 1
+          mkdir -p /tmp/release
+          jq -n --arg image "$IMAGE" --arg digest "$manifest_digest" --arg commit "$SOURCE_SHA" --arg workflow_commit "$WORKFLOW_SHA" \
+            '{image: $image, digest: $digest, commit: $commit, workflow_commit: $workflow_commit}' > /tmp/release/${{ matrix.image }}.json
+          printf '%s@%s (source %s, workflow %s)\n' "$IMAGE" "$manifest_digest" "$SOURCE_SHA" "$WORKFLOW_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save candidate image reference
+        if: steps.should-publish.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-${{ matrix.image }}
+          path: /tmp/release/${{ matrix.image }}.json
+          if-no-files-found: error
+          retention-days: 30

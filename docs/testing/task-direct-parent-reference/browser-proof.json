@@ -1,0 +1,15 @@
+{
+  "realWeb": true,
+  "realServerAndPostgresTaskResponses": true,
+  "syntheticSessions": true,
+  "taskPaths": [
+    "/api/bots/11111111-2222-4333-8444-555555555555/sessions/9b41b2e6-5c82-4f7a-ad5c-b80091ed15df/tasks",
+    "/api/bots/11111111-2222-4333-8444-555555555555/sessions/9b41b2e6-5c82-4f7a-ad5c-b80091ed15df/tasks/subagent/f44ded5e-3ff8-40a8-af6b-037736921790",
+    "/api/bots/11111111-2222-4333-8444-555555555555/sessions/9b41b2e6-5c82-4f7a-ad5c-b80091ed15df/tasks",
+    "/api/bots/11111111-2222-4333-8444-555555555555/sessions/9b41b2e6-5c82-4f7a-ad5c-b80091ed15df/tasks/subagent/f44ded5e-3ff8-40a8-af6b-037736921790"
+  ],
+  "mutations": 0,
+  "deviceCalls": 0,
+  "pageErrors": [],
+  "passed": true
+}

@@ -1,0 +1,6 @@
+=== RUN   TestMediaHTTPUploadConfiguredAbove200MiB
+    media_upload_test.go:108: upload: 500 {"type":"urn:memoh:error:internal","status":500,"detail":"Something went wrong on the server. Please try again.","code":"internal","args":{},"fault":"server"}
+--- FAIL: TestMediaHTTPUploadConfiguredAbove200MiB (0.74s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.760s
+FAIL

@@ -1,0 +1,12 @@
+
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/components/sidebar/session-activity.vue(28,33): error TS2345: Argument of type 'ComputedRef<(string | undefined)[]>' is not assignable to parameter of type 'Ref<string[], string[]>'.
+  Types of property 'value' are incompatible.
+    Type '(string | undefined)[]' is not assignable to type 'string[]'.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+/tmp/memoh-candidate-7bcb-review/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

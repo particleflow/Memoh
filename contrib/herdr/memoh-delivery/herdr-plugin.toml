@@ -1,0 +1,60 @@
+id = "memoh.delivery"
+name = "Memoh delivery storage"
+version = "0.10.1"
+min_herdr_version = "0.9.5"
+description = "Finite native delivery queue using a configured reusable device identity"
+platforms = ["windows"]
+
+[[actions]]
+id = "verify-storage"
+title = "Verify native delivery storage"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "probe"]
+
+[[actions]]
+id = "advance-delivery"
+title = "Advance one due delivery"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "advance-results"]
+
+[[actions]]
+id = "fixture-check"
+title = "Run isolated delivery fixtures"
+contexts = ["workspace"]
+command = ["./transferqueue.test.exe", "-test.run=^TestWindowsNative", "-test.v", "-test.timeout=5m"]
+
+[[actions]]
+id = "collect-result"
+title = "Collect one closed task result"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "collect-result"]
+
+[[actions]]
+id = "advance-snapshots"
+title = "Advance one retained upload snapshot"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "advance-snapshots"]
+
+[[actions]]
+id = "lifecycle-summary"
+title = "Read delivery lifecycle summary"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "lifecycle-summary"]
+
+[[actions]]
+id = "migrate-history"
+title = "Migrate delivery history"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "migrate-history"]
+
+[[actions]]
+id = "migrate-publications"
+title = "Migrate publication metadata"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "migrate-publications"]
+
+[[actions]]
+id = "migrate-budget"
+title = "Apply increased delivery byte budget"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "migrate-budget"]

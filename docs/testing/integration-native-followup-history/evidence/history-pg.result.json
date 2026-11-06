@@ -1,0 +1,10 @@
+{
+  "check": "history-pg",
+  "command": [
+    "bash",
+    "scripts/test-pi-batch-history-postgres.sh"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T00:00:59Z",
+  "elapsed_seconds": 6.345
+}

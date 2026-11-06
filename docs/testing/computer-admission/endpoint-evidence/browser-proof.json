@@ -1,0 +1,9 @@
+{
+  "realServer": true,
+  "realSyntheticPG": true,
+  "modelCalls": 0,
+  "pcDispatches": 0,
+  "pageErrors": [],
+  "serverRestartRetainedExactConfiguration": true,
+  "existingUnknownTaskObservedWithSameRevision": true
+}

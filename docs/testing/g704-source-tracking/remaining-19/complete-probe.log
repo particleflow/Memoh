@@ -1,0 +1,24 @@
+../g704-investigation/ownership-probe/bounds.go:37:31: G115: integer overflow conversion rune -> byte (gosec)
+		result = append(result, byte(r))
+		                            ^
+../g704-investigation/ownership-probe/bounds.go:45:15: G115: integer overflow conversion int32 -> uint32 (gosec)
+	return uint32(size)
+	             ^
+../g704-investigation/ownership-probe/bounds.go:51:15: G602: slice index out of range (gosec)
+	return values[2]
+	             ^
+../g704-investigation/ownership-probe/bounds.go:55:52: G115: integer overflow conversion int64 -> int16 (gosec)
+func UnsafeNarrow(value int64) int16 { return int16(value) }
+                                                   ^
+../g704-investigation/ownership-probe/indirect.go:11:35: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	ctx, cancel := context.WithCancel(parent)
+	                                 ^
+../g704-investigation/ownership-probe/indirect.go:32:33: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	_, cancel := context.WithCancel(parent)
+	                               ^
+../g704-investigation/ownership-probe/probe.go:53:30: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	ctx, _ := context.WithCancel(parent)
+	                            ^
+../g704-investigation/ownership-probe/probe.go:69:33: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	_, cancel := context.WithCancel(parent)
+	                               ^

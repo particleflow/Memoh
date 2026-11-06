@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/Memoh-files-next
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  10:32:17
+   Duration  1.06s (transform 378ms, setup 0ms, import 533ms, tests 18ms, environment 382ms)

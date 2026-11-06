@@ -1,0 +1,28 @@
+{
+  "realServer": true,
+  "realSyntheticPG": true,
+  "modelCalls": 0,
+  "pcDispatches": 0,
+  "api": [
+    {
+      "batch": true,
+      "status": 200,
+      "anonymousStatus": 401,
+      "exactRevision": true,
+      "exactFingerprint": true,
+      "receiptState": "missing",
+      "nativeAvailability": "connection_unavailable"
+    },
+    {
+      "batch": false,
+      "status": 200,
+      "anonymousStatus": 401,
+      "exactRevision": true,
+      "exactFingerprint": true,
+      "receiptState": "not_applicable",
+      "nativeAvailability": "connection_unavailable"
+    }
+  ],
+  "pageErrors": [],
+  "apiMutations": 0
+}

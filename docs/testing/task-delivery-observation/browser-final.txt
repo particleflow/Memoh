@@ -1,0 +1,3 @@
+PASS actual Web + JWT server + PG: all 18 seeded records automatically read; pending/failed distinct; no unauthorized download link
+PASS real browser offline -> same selected detail and file records automatically recover, no task dispatch
+PASS synthetic old-route 404 is unavailable, does not poll; explicit reload recovers against real backend

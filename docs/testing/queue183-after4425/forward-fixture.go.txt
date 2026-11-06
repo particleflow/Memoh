@@ -1,0 +1,220 @@
+// Temporary combination fixture. It creates and removes only its own database.
+package main
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"maps"
+	"os"
+	"strconv"
+	"strings"
+	"testing/fstest"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	runtime "github.com/felinics/memoh/internal/agent/runtime/session"
+	"github.com/felinics/memoh/internal/config"
+	memohdb "github.com/felinics/memoh/internal/db"
+	"github.com/felinics/memoh/internal/followupqueue"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	ctx := context.Background()
+	cfg, err := pgxpool.ParseConfig(os.Getenv("TEST_POSTGRES_DSN"))
+	if err != nil {
+		return err
+	}
+	if cfg.ConnConfig.Host != "127.0.0.1" && cfg.ConnConfig.Host != "localhost" {
+		return errors.New("fixture requires loopback")
+	}
+	admin, err := pgx.ConnectConfig(ctx, cfg.ConnConfig.Copy())
+	if err != nil {
+		return err
+	}
+	defer admin.Close(ctx)
+	name := "memoh_queue183_review_" + uuid.NewString()[:8]
+	if _, err = admin.Exec(ctx, "CREATE DATABASE "+pgx.Identifier{name}.Sanitize()); err != nil {
+		return err
+	}
+	defer func() {
+		_, e := admin.Exec(ctx, "DROP DATABASE "+pgx.Identifier{name}.Sanitize())
+		if e != nil {
+			fmt.Fprintln(os.Stderr, "owned fixture cleanup failed:", e)
+		}
+	}()
+	cfg.ConnConfig.Database = name
+	dsn := memohdb.DSN(config.PostgresConfig{Host: cfg.ConnConfig.Host, Port: int(cfg.ConnConfig.Port), User: cfg.ConnConfig.User, Password: cfg.ConnConfig.Password, Database: name, SSLMode: "disable"})
+	preflight, e := pgx.Connect(ctx, dsn)
+	if e != nil {
+		return e
+	}
+	var actual string
+	var empty bool
+	e = preflight.QueryRow(ctx, "SELECT current_database(),to_regclass('public.schema_migrations') IS NULL").Scan(&actual, &empty)
+	_ = preflight.Close(ctx)
+	if e != nil || actual != name || !empty {
+		return errors.New("fixture DSN target failed isolated empty database check")
+	}
+	base, err := os.ReadFile(os.Getenv("TEST_QUEUE_BASE_SCHEMA"))
+	if err != nil {
+		return err
+	}
+	baseline := fstest.MapFS{}
+	entries, e := os.ReadDir("db/postgres/migrations")
+	if e != nil {
+		return e
+	}
+	for _, entry := range entries {
+		n, parseErr := strconv.Atoi(strings.SplitN(entry.Name(), "_", 2)[0])
+		if parseErr != nil || n > 182 || !strings.HasSuffix(entry.Name(), ".sql") {
+			continue
+		}
+		raw, readErr := os.ReadFile("db/postgres/migrations/" + entry.Name())
+		if readErr != nil {
+			return readErr
+		}
+		if entry.Name() == "0001_init.up.sql" {
+			raw = base
+		}
+		baseline[entry.Name()] = &fstest.MapFile{Data: raw}
+	}
+	target := memohdb.MigrationTarget{Driver: memohdb.DriverPostgres, DSN: dsn}
+	if err = memohdb.RunMigrateTarget(nil, target, baseline, "up", nil); err != nil {
+		return err
+	}
+	cfg.AfterConnect = memohdb.SetDefaultTeamOnConnect
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	var version int
+	var dirty, exists bool
+	if err = pool.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 182 || dirty {
+		return fmt.Errorf("baseline status %d %v: %w", version, dirty, err)
+	}
+	if err = pool.QueryRow(ctx, "SELECT to_regclass('session_follow_up_queues') IS NOT NULL").Scan(&exists); err != nil || exists {
+		return errors.New("182 baseline already has queue table")
+	}
+	owner, bot, session, runID := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+	exec := func(query string, args ...any) error { _, e := pool.Exec(ctx, query, args...); return e }
+	for _, q := range []struct {
+		sql  string
+		args []any
+	}{
+		{"INSERT INTO users(id,username) VALUES($1,'queue183-fixture')", []any{owner}},
+		{"INSERT INTO team_members(user_id) VALUES($1)", []any{owner}},
+		{"INSERT INTO bots(id,owner_user_id,name) VALUES($1,$2,'queue183-fixture')", []any{bot, owner}},
+		{"INSERT INTO bot_sessions(id,bot_id) VALUES($1,$2)", []any{session, bot}},
+		{"INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,'original-invocation',$4,1,'aborted','{}','original')", []any{runID, bot, session, uuid.NewString()}},
+		{"INSERT INTO bot_history_messages(bot_id,session_id,role,content) VALUES($1,$2,'assistant','{\"role\":\"assistant\",\"content\":\"fixture original\"}')", []any{bot, session}},
+		{"INSERT INTO computer_operations(id,bot_id,session_id,user_id,target_id,run_id,fingerprint,target_fingerprint,state,details) VALUES($1,$2,$3,$4,$5,$6,'original','original','unknown','{\"receipt\":\"original-receipt\"}')", []any{uuid.NewString(), bot, session, owner, uuid.NewString(), runID}},
+		{"INSERT INTO conversation_presence(bot_id,session_id,run_id,invocation_id,actor_id,episode_id,generation,live_generation,fencing_token,temperature,state,claimed_at,piece) VALUES($1,$2,$3,'claim-original',$4,$5,'g','live',1,'cold','claimed',now(),NULL)", []any{bot, session, runID, owner, uuid.NewString()}},
+		{"INSERT INTO conversation_presence(bot_id,session_id,run_id,invocation_id,actor_id,episode_id,generation,live_generation,fencing_token,temperature,state,claimed_at,piece) VALUES($1,$2,$3,'receipt-original',$4,$5,'g','live',1,'cold','published',now(),'{\"receipt\":\"retained\"}')", []any{bot, session, runID, owner, uuid.NewString()}},
+	} {
+		if err = exec(q.sql, q.args...); err != nil {
+			return err
+		}
+	}
+	snapshot := func() (map[string]string, error) {
+		out := map[string]string{}
+		for _, table := range []string{"users", "team_members", "bots", "bot_sessions", "session_runs", "bot_history_messages", "computer_operations", "conversation_presence"} {
+			var raw string
+			q := "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY to_jsonb(r)::text),'[]'::jsonb)::text FROM " + pgx.Identifier{table}.Sanitize() + " r"
+			if e := pool.QueryRow(ctx, q).Scan(&raw); e != nil {
+				return nil, e
+			}
+			out[table] = raw
+		}
+		return out, nil
+	}
+	before, err := snapshot()
+	if err != nil {
+		return err
+	}
+	if err = memohdb.RunMigrateTarget(nil, target, os.DirFS("db/postgres/migrations"), "up", nil); err != nil {
+		return err
+	}
+	if err = pool.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 183 || dirty {
+		return fmt.Errorf("forward status %d %v: %w", version, dirty, err)
+	}
+	after, err := snapshot()
+	if err != nil || !maps.Equal(before, after) {
+		return errors.New("forward migration changed retained history/claim/receipt/unknown")
+	}
+	var forced bool
+	if err = pool.QueryRow(ctx, "SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid='conversation_presence'::regclass").Scan(&forced); err != nil || !forced {
+		return errors.New("presence forced RLS not retained")
+	}
+	plain, err := followupqueue.New(pool, "")
+	if err != nil {
+		return err
+	}
+	key := runtime.Key{BotID: bot, SessionID: session}
+	if err = plain.Change(ctx, key, func(s *followupqueue.State) error {
+		s.Items = []runtime.FollowUpItem{{ID: "retained-unknown", Status: "unknown", ErrorCode: "original-unresolved", Payload: []byte(`{"command":{"UserID":"fixture","Token":""}}`)}}
+		return nil
+	}); err != nil {
+		return err
+	}
+	state, err := plain.Read(ctx, key)
+	if err != nil || len(state.Items) != 1 || state.Items[0].Status != "unknown" {
+		return errors.New("credential-free retained row unreadable")
+	}
+	if err = plain.Change(ctx, key, func(s *followupqueue.State) error {
+		s.Items = append(s.Items, runtime.FollowUpItem{ID: "must-not-write", Payload: []byte(`{"command":{"Token":"fixture-only"}}`)})
+		return nil
+	}); err == nil {
+		return errors.New("missing capability accepted credential write")
+	}
+	state, err = plain.Read(ctx, key)
+	if err != nil || len(state.Items) != 1 {
+		return errors.New("failed credential write damaged original state")
+	}
+	// Reuse the public source test's synthetic capability; no real key is read,
+	// generated, installed, logged or stored in server configuration.
+	encrypted, err := followupqueue.New(pool, "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
+	if err != nil {
+		return err
+	}
+	if err = encrypted.Change(ctx, key, func(s *followupqueue.State) error {
+		s.Items = append(s.Items, runtime.FollowUpItem{ID: "retained-encrypted", Status: runtime.QueueClaimed, Payload: []byte(`{"command":{"Token":"fixture-only"}}`)})
+		return nil
+	}); err != nil {
+		return err
+	}
+	var raw []byte
+	if err = pool.QueryRow(ctx, "SELECT envelope FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2", bot, session).Scan(&raw); err != nil {
+		return err
+	}
+	if !bytes.HasPrefix(raw, []byte("v1e:")) || bytes.Contains(raw, []byte("fixture-only")) {
+		return errors.New("credential envelope is not protected")
+	}
+	if _, err = plain.Read(ctx, key); err == nil {
+		return errors.New("missing capability decoded encrypted row")
+	}
+	state, err = encrypted.Read(ctx, key)
+	if err != nil || len(state.Items) != 2 || state.Items[0].Status != "unknown" || state.Items[1].Status != runtime.QueueClaimed {
+		return errors.New("existing capability did not preserve original states")
+	}
+	if err = memohdb.RunMigrateTarget(nil, target, os.DirFS("db/postgres/migrations"), "up", nil); err != nil {
+		return err
+	}
+	var repeated []byte
+	if err = pool.QueryRow(ctx, "SELECT envelope FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2", bot, session).Scan(&repeated); err != nil || !bytes.Equal(raw, repeated) {
+		return errors.New("no-change migration altered encrypted queue")
+	}
+	return json.NewEncoder(os.Stdout).Encode(map[string]any{"from": 182, "to": 183, "dirty": dirty, "retained_tables": len(before), "presence_claim_receipt_unknown_history_unchanged": true, "presence_forced_RLS": forced, "credential_free_without_key": true, "credential_write_without_key_rejected_atomically": true, "existing_synthetic_capability_encrypted_read": true, "encrypted_unknown_and_claim_preserved": true, "repeated_up_changes_ciphertext": false, "down_or_force": false, "real_key_read_created_or_configured": false})
+}

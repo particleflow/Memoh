@@ -1,0 +1,95 @@
+{
+  "environment": "Current actual Vite/Go/PostgreSQL/Chromium; non-loopback HTTP browser origin mapped to isolated local service",
+  "documentOrigin": "http://fast.fixture.test:18683",
+  "secureContext": false,
+  "logicalIdentity": "https://logical.fixture.test/api",
+  "physicalOrigin": "http://fast.fixture.test:18683",
+  "sdkApiBase": "https://logical.fixture.test/api",
+  "originalOriginJournalVisible": false,
+  "capabilities": {
+    "locks": "undefined",
+    "opfs": "undefined",
+    "indexedDB": "object"
+  },
+  "downloadStatus": 200,
+  "durationMs": 54.299999999813735,
+  "previewWidth": 8,
+  "previewSameOrigin": true,
+  "resumedUploadFailure": {
+    "name": "TypeError",
+    "message": "Cannot read properties of undefined (reading 'request')"
+  },
+  "sourceFileJournalKey": "946d3d62d1eb467c97d4c6a15982a350d38bfdfe066766510f932ca4d1c706b6",
+  "journalsBefore": 0,
+  "journalsAfter": 0,
+  "bytes": 65573,
+  "hashes": {
+    "download": "7e5381cf6023e0c5129f2e10a337b58c5c6812ebf9849369173d20a950ab980d",
+    "preview": "5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f"
+  },
+  "logicalFixtureRequests": 26,
+  "originalSecureOriginStoragePreserved": true,
+  "noNewMediaReceipt": true,
+  "pageErrors": [],
+  "mixedContentMessages": [],
+  "securityBypass": false,
+  "publicNasOrPhone": false,
+  "noNewService": true
+}
+node:internal/process/promises:332
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+TargetClosedError2: "route.fetch: Request context disposed.
+Call log:
+  - → GET http://127.0.0.1:18680/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/sessions/events
+    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36
+    - accept: */*
+    - accept-encoding: gzip,deflate,br
+    - authorization: Bearer SYNTHETIC_REDACTED
+    - origin: http://fast.fixture.test:18683
+    - referer: http://fast.fixture.test:18683/
+    - sec-ch-ua: "Not A(Brand";v="99", "Chromium";v="154"
+    - sec-ch-ua-mobile: ?0
+    - sec-ch-ua-platform: "Linux"
+  - ← 200 OK
+    - access-control-allow-origin: *
+    - access-control-expose-headers: X-Request-Id
+    - cache-control: no-cache
+    - connection: keep-alive
+    - content-type: text/event-stream
+    - vary: Origin
+    - x-accel-buffering: no
+    - x-request-id: 983273f6-dcb9-4054-994a-a9cd970730b7
+    - date: Thu, 29 Oct 2026 15:35:23 GMT
+    - transfer-encoding: chunked
+" while running route callback.
+Consider awaiting `await page.unrouteAll({ behavior: 'ignoreErrors' })`
+before the end of the test to ignore remaining routes in flight.
+    at /workspace/scratch/fast-transfer-path/http-origin/browser.mjs:23:34 {
+  log: [
+    '  - → GET http://127.0.0.1:18680/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/sessions/events',
+    '    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36',
+    '    - accept: */*',
+    '    - accept-encoding: gzip,deflate,br',
+    '    - authorization: Bearer SYNTHETIC_REDACTED',
+    '    - origin: http://fast.fixture.test:18683',
+    '    - referer: http://fast.fixture.test:18683/',
+    '    - sec-ch-ua: "Not A(Brand";v="99", "Chromium";v="154"',
+    '    - sec-ch-ua-mobile: ?0',
+    '    - sec-ch-ua-platform: "Linux"',
+    '  - ← 200 OK',
+    '    - access-control-allow-origin: *',
+    '    - access-control-expose-headers: X-Request-Id',
+    '    - cache-control: no-cache',
+    '    - connection: keep-alive',
+    '    - content-type: text/event-stream',
+    '    - vary: Origin',
+    '    - x-accel-buffering: no',
+    '    - x-request-id: 983273f6-dcb9-4054-994a-a9cd970730b7',
+    '    - date: Thu, 29 Oct 2026 15:35:23 GMT',
+    '    - transfer-encoding: chunked'
+  ]
+}
+
+Node.js v25.9.0

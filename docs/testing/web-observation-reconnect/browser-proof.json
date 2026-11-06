@@ -1,0 +1,503 @@
+{
+  "realBackend": true,
+  "realPG": true,
+  "reusedExistingSyntheticTask": true,
+  "newModelCalls": 0,
+  "businessDispatches": 0,
+  "realBrowserOffline": true,
+  "syntheticHTTPFailures": [
+    503,
+    403
+  ],
+  "sameTaskResumed": true,
+  "pausedReadsHeld": true,
+  "denialRetiresNavigation": true,
+  "pageErrors": [],
+  "requests": [
+    {
+      "path": "/api/users/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/web-management-supervisor",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workdirs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/ping",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/model-preference-seed",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET"
+    },
+    {
+      "path": "/api/acp/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/agents",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/skills/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/models",
+      "method": "GET"
+    },
+    {
+      "path": "/api/providers",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workspace-targets",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/starter-prompts",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/events",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/queue",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/tasks",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET"
+    },
+    {
+      "path": "/api/acp/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/agents",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workspace-targets",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/skills/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/status",
+      "method": "GET"
+    },
+    {
+      "path": "/api/models",
+      "method": "GET"
+    },
+    {
+      "path": "/api/providers",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET"
+    }
+  ],
+  "responses": [
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/web-management-supervisor",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workdirs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/model-preference-seed",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/agents",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/skills/catalog",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "method": "GET",
+      "status": 503
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workspace-targets",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/events",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/starter-prompts",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/queue",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/tasks",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "method": "GET",
+      "status": 503
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/agents",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/skills/catalog",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workspace-targets",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 503
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 503
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/54244e5c-ec17-450d-822b-6e5e50bc2f40/tasks/subagent/92487015-c2c7-4611-be09-2a5d24c67129",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/6bbefc12-dc26-4ad6-9dc5-8d867bf90f70/delegations/6881ccd2-6aa6-4884-9806-f70c80c93095",
+      "method": "GET",
+      "status": 403
+    }
+  ]
+}

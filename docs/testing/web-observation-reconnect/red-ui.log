@@ -1,0 +1,48 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/pages/home/components/session-tasks.test.ts (25 tests | 2 failed | 23 skipped) 382ms
+     × resumes the same downstream detail after a transient parent read failure without redispatch 277ms
+     × resumes the same downstream detail after a transient parent read failure without redispatch 104ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure without redispatch
+AssertionError: expected ' TasksTask detailsAuthorized Bot hand…' to contain 'Specialist Bot tasks'
+
+Expected: "Specialist Bot tasks"
+Received: " TasksTask detailsAuthorized Bot handoffs from this conversation. Execution and return delivery have separate states.Network connection failed. Check your connection and try again.Reload view"
+
+ ❯ src/pages/home/components/session-tasks.test.ts:141:39
+    139|     api.delegationDetail.mockRejectedValue(cause)
+    140|     await vi.advanceTimersByTimeAsync(5000); await settled()
+    141|     expect(document.body.textContent).toContain(en.chat.delegations.do…
+       |                                       ^
+    142|     expect(document.body.textContent).not.toContain(text)
+    143|     expect(document.body.textContent).not.toContain('PRIVATE_')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure without redispatch
+AssertionError: expected ' TasksTask detailsAuthorized Bot hand…' to contain 'Specialist Bot tasks'
+
+Expected: "Specialist Bot tasks"
+Received: " TasksTask detailsAuthorized Bot handoffs from this conversation. Execution and return delivery have separate states.Something went wrong on the server. Please try again.Reload view"
+
+ ❯ src/pages/home/components/session-tasks.test.ts:141:39
+    139|     api.delegationDetail.mockRejectedValue(cause)
+    140|     await vi.advanceTimersByTimeAsync(5000); await settled()
+    141|     expect(document.body.textContent).toContain(en.chat.delegations.do…
+       |                                       ^
+    142|     expect(document.body.textContent).not.toContain(text)
+    143|     expect(document.body.textContent).not.toContain('PRIVATE_')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 23 skipped (25)
+   Start at  08:17:37
+   Duration  7.40s (transform 5.03s, setup 0ms, import 6.42s, tests 382ms, environment 456ms)
+

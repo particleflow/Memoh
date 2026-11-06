@@ -1,0 +1,8 @@
+✓ patched dependencies verified against installed content
+
+  VITE v8.1.5  ready in 1607 ms
+
+  ➜  Local:   http://127.0.0.1:18595/
+12:49:50 PM [vite] (client) [optimizer] bundling dependencies...
+12:49:52 PM [vite] (client) dependency optimized: qrcode
+12:49:52 PM [vite] (client) optimized dependencies changed. reloading

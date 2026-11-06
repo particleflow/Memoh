@@ -1,0 +1,43 @@
+{
+  "mode": "busy-service",
+  "original_parent": {
+    "run_id": "415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+    "state": "lost",
+    "invocation_id": "8ac95a3b-1beb-4807-b406-2d96f623d2a3",
+    "error_code": "session_runtime.interrupted"
+  },
+  "resumed_parents": [
+    {
+      "run_id": "17b16dd0-f343-48c3-b596-c6cfe99f474f",
+      "state": "completed",
+      "invocation_id": "resume:415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+      "error_code": null
+    }
+  ],
+  "specialist": {
+    "run_id": "6822b7f1-8af8-4783-b22e-33aa1e942815",
+    "state": "completed",
+    "invocation_id": "bot-delegation:3253de77-475d-4ed5-a8c5-204751a834aa",
+    "error_code": null
+  },
+  "followup": {
+    "run_id": "0af41a7d-5015-47f7-93b7-bf9088e2585d",
+    "state": "completed",
+    "invocation_id": "follow-up:2944f12c-0de8-57a9-a2ab-e1347846a6c9",
+    "error_code": null
+  },
+  "queue_item_id": "2944f12c-0de8-57a9-a2ab-e1347846a6c9",
+  "model_phase_counts": {
+    "initial": 2,
+    "specialist": 3,
+    "held_parent": 2,
+    "followup": 1
+  },
+  "old_pid": 116926,
+  "new_pid": 117403,
+  "queue_restarted": true,
+  "specialist_replayed": false,
+  "unknown_parent_marked_success": false,
+  "final_asset_links": 2,
+  "final_messages_with_assets": 1
+}

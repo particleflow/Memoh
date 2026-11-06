@@ -1,0 +1,66 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/limits",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 10.505
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/upload",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 65906,
+    "ttfbMs": 15.952
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/limits",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 5.0649999999999995
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/list",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 8.533999999999999
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/list",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 15.613000000000001
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 107.25
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 4.449
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "status": 200,
+    "sameOriginWithPage": true,
+    "bodyBytes": 0,
+    "ttfbMs": 8.448
+  }
+]

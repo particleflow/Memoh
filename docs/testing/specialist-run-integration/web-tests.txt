@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  5 passed (5)
+      Tests  124 passed (124)
+   Start at  04:13:54
+   Duration  9.48s (transform 8.96s, setup 0ms, import 12.93s, tests 3.60s, environment 1.33s)
+

@@ -1,0 +1,19 @@
+{
+  "file": "connection-route-a.bin",
+  "bytes": 9,
+  "sha256": "60035a672152b36664f265c5c7f58904084a95c8e0baeb102b4bf3a0e6247958",
+  "actualFileViewerDownload": true,
+  "routes": [
+    {
+      "origin": "http://127.0.0.1:18684",
+      "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/list",
+      "method": "GET"
+    },
+    {
+      "origin": "http://127.0.0.1:18684",
+      "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/container/fs/download",
+      "method": "GET"
+    }
+  ],
+  "errors": []
+}

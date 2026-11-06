@@ -1,0 +1,8 @@
+[
+  {
+    "method": "GET",
+    "path": "/foreign.png",
+    "query_credential": false,
+    "authorization": false
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "environment": "actual current Web/Go/PG/Chromium, isolated synthetic account",
+  "preview": {
+    "physicalOrigin": "http://127.0.0.1:18684",
+    "attachmentUnchanged": true,
+    "decodedWidth": 8,
+    "hash": "5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f",
+    "bytes": 95
+  },
+  "files": [
+    {
+      "name": "connection-route-a.bin",
+      "bytes": 9,
+      "sha256": "60035a672152b36664f265c5c7f58904084a95c8e0baeb102b4bf3a0e6247958"
+    },
+    {
+      "name": "connection-route-b.txt",
+      "bytes": 31,
+      "sha256": "a674b383482f24bb0653daddea6e78a1999a62b6d8ac0d502b29c54433b5bfc8"
+    },
+    {
+      "name": "connection-route-c.bin",
+      "bytes": 65573,
+      "sha256": "9c22ff0abf0b141c98f625853fa9d064424144b2168facdfa6749a9ad7534c6b"
+    }
+  ],
+  "anchorDownloadHash": "60035a672152b36664f265c5c7f58904084a95c8e0baeb102b4bf3a0e6247958",
+  "archiveStatus": 200,
+  "archiveBytes": 805,
+  "sdkRedirectRefused": true,
+  "oldQueryIdentityRefused": true,
+  "pendingSdkIdentityRefused": true,
+  "rawImageRedirect": [
+    {
+      "method": "GET",
+      "path": "/foreign.png",
+      "query_credential": false,
+      "authorization": false
+    }
+  ],
+  "errors": [],
+  "modelCalls": 0
+}

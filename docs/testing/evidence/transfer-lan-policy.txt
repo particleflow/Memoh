@@ -1,0 +1,27 @@
+=== RUN   TestHostNetworkPolicyKeepsOriginalQueueBinding
+    host_network_test.go:49: route policy added/changed; original transfer.json bytes, HostBinding, task/attempt/delivery and source metadata unchanged
+--- PASS: TestHostNetworkPolicyKeepsOriginalQueueBinding (0.00s)
+=== RUN   TestHostNetworkPolicyValidation
+--- PASS: TestHostNetworkPolicyValidation (0.00s)
+=== RUN   TestHostNetworkPolicyRejectsProxyConflict
+--- PASS: TestHostNetworkPolicyRejectsProxyConflict (0.00s)
+=== RUN   TestConfiguredLANPreferenceAndIPv6Resume
+    network_policy_test.go:59: configured_ipv4_first tcp_families=[4] http_ipv4=1 http_ipv6=0 unchanged_authority_and_scope=true
+    network_policy_test.go:66: configured_ipv6_first tcp_families=[6] http_ipv4=1 http_ipv6=1 unchanged_authority_and_scope=true
+    network_policy_test.go:80: lan_refused_ipv6_fallback tcp_families=[4 6] http_ipv4=5 http_ipv6=2 unchanged_authority_and_scope=true
+    network_policy_test.go:96: all_routes_refused tcp_families=[4 6] http_ipv4=5 http_ipv6=4 unchanged_authority_and_scope=true
+    network_policy_test.go:103: lan_restored_preferred_again tcp_families=[4] http_ipv4=6 http_ipv6=4 unchanged_authority_and_scope=true
+    network_policy_test.go:114: ready bytes=16 create=1 patch=4 complete=1 same_task_attempt_receipt=true hash_match=true
+--- PASS: TestConfiguredLANPreferenceAndIPv6Resume (0.14s)
+=== RUN   TestConfiguredLANPostConnectFailureDoesNotFallback
+=== RUN   TestConfiguredLANPostConnectFailureDoesNotFallback/trusted_wrong_hostname
+    network_policy_test.go:151: trusted_wrong_hostname tcp_families=[4] http_ipv4=0 http_ipv6=0 unchanged_authority_and_scope=true
+=== RUN   TestConfiguredLANPostConnectFailureDoesNotFallback/authorization_403
+    network_policy_test.go:151: authorization_403 tcp_families=[4] http_ipv4=1 http_ipv6=0 unchanged_authority_and_scope=true
+--- PASS: TestConfiguredLANPostConnectFailureDoesNotFallback (0.06s)
+    --- PASS: TestConfiguredLANPostConnectFailureDoesNotFallback/trusted_wrong_hostname (0.03s)
+    --- PASS: TestConfiguredLANPostConnectFailureDoesNotFallback/authorization_403 (0.03s)
+=== RUN   TestConfiguredLANContextCancellation
+--- PASS: TestConfiguredLANContextCancellation (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.247s

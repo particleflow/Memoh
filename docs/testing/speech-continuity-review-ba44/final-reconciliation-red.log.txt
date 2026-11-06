@@ -1,0 +1,41 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/review-hardcoding-integration-3f
+
+ ✓ |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId retained 2ms
+ × |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId omitted 7ms
+   → expected [ { key: 'original-turn', …(2) } ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId omitted
+AssertionError: expected [ { key: 'original-turn', …(2) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "key": "original-turn",
++     "messageId": "same-render-row",
++     "text": " Delayed tail.",
++   },
++ ]
+
+ ❯ src/pages/home/composables/speech-continuity-independent.review.test.ts:25:66
+     23|       // MutationObserver, post-render collection and final snapshot c…
+     24|       // observe the same settled row. None is a new reply or text del…
+     25|       expect(live.update([final], true, false, false, rendered)).toEqu…
+       |                                                                  ^
+     26|     })
+     27|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  14:17:59
+   Duration  417ms (transform 111ms, setup 0ms, import 242ms, tests 11ms, environment 0ms)
+

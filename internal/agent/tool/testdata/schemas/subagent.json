@@ -1,0 +1,63 @@
+{
+  "list_agents": {
+    "properties": {},
+    "type": "object"
+  },
+  "list_models": {
+    "properties": {},
+    "type": "object"
+  },
+  "send_message": {
+    "properties": {
+      "id": {
+        "description": "Existing agent id returned when the agent was created or listed.",
+        "type": "string"
+      },
+      "message": {
+        "description": "Follow-up instruction for the agent.",
+        "type": "string"
+      },
+      "run_in_background": {
+        "description": "Return immediately with a task_id; a busy agent queues the message regardless. Inspect with wait_until(task_id), then get_background_status(task_id).",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "id",
+      "message"
+    ],
+    "type": "object"
+  },
+  "spawn_agent": {
+    "properties": {
+      "fork": {
+        "description": "Inherit the parent's current message context; the subagent prompt and tools stay.",
+        "type": "boolean"
+      },
+      "id": {
+        "description": "Optional agent id (lowercase letters, digits, _, -); default agent_N.",
+        "type": "string"
+      },
+      "model_id": {
+        "description": "Model name from the session's provider; omit for the session model.",
+        "type": "string"
+      },
+      "provider": {
+        "description": "Provider name; must be the session's provider.",
+        "type": "string"
+      },
+      "run_in_background": {
+        "description": "Return immediately with a task_id; inspect with wait_until(task_id), then get_background_status(task_id).",
+        "type": "boolean"
+      },
+      "task": {
+        "description": "Task instruction for the new agent.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ],
+    "type": "object"
+  }
+}

@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  12:38:06
+   Duration  524ms (transform 217ms, setup 0ms, import 488ms, tests 166ms, environment 1ms)

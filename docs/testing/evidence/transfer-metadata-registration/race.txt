@@ -1,0 +1,3 @@
+ok  	github.com/felinics/memoh/internal/transferclient	30.150s
+ok  	github.com/felinics/memoh/internal/deliverymeta	1.052s
+ok  	github.com/felinics/memoh/cmd/transferqueue	8.461s

@@ -1,0 +1,81 @@
+{
+  "generated_at_utc": "2026-10-30T07:12:54.500483+00:00",
+  "source_only_pass": [
+    "HC-01",
+    "HC-02",
+    "HC-03",
+    "HC-04",
+    "HC-05",
+    "HC-06"
+  ],
+  "blocked": [],
+  "all_chain_approval": false,
+  "integrated_tree_or_tests_performed": false,
+  "relationships": [
+    {
+      "scope": [
+        "HC-01",
+        "HC-02"
+      ],
+      "repo": "Memoh",
+      "commit": "bbdb0e2748bb5611827803daffa1302e67a2c624",
+      "tree": "b31d0d9a7832131f25b49d95d6162bed89edb733",
+      "parent": "212ae2445fe7a5fbe95479a4f2024069bf83332b",
+      "admission": "source counterexamples pass; producer build/pin and complete-journal downgrade gate remain"
+    },
+    {
+      "scope": [
+        "HC-04"
+      ],
+      "repo": "Memoh",
+      "commit": "8780822c02bb2a49dbbabc8ddc945329af727f36",
+      "tree": "f920febb4040e2c3abfee8528401507bcc4c10ba",
+      "base": "046023913592b00951d7f28fe54842080c5cdc51",
+      "admission": "terminal-proof gap independently passes; source-only may compose with the other5; PG/UI andfield pending",
+      "input": "bundle includes exact dd10 +8780 commit objects on046; use both in order if dd10 not already included",
+      "previous_source_review": {
+        "commit": "dd10c889631405f7e6a94c937f3efc8614df054b",
+        "tree": "177e55aebe91a5030ee9c27c8c4baa1c96859c33",
+        "admission": "BLOCK: Anthropic missing has_more terminal proof"
+      },
+      "parent": "dd10c889631405f7e6a94c937f3efc8614df054b"
+    },
+    {
+      "scope": [
+        "HC-03",
+        "HC-05"
+      ],
+      "repo": "Memoh",
+      "commit": "9533ca002621f15250989978bd157833f2c98e7d",
+      "tree": "c4aa3dfc0605800baf1fbd7966bd69db7165b4ba",
+      "parent": "42f6c002ba4c5c1c2eee82183db3a37f6c357a2d",
+      "base": "51ccf9222ed9e2312aa3ddfaad03084cfeaacaa3",
+      "admission": "source counterexamples pass; same-source matched package and true device/TLS remaining"
+    },
+    {
+      "scope": [
+        "HC-06"
+      ],
+      "repo": "windows-endpoint",
+      "commit": "c12e63533fdfb0255a47809db89022820968ef41",
+      "tree": "874e03b1689086b0bc5ff8ebc584ee607e2e79a1",
+      "parent": "c879d1622eeadcf02ec4b16590ade2cee6e1ac85",
+      "admission": "source counterexamples pass; no Windows/PC57/producer qualification"
+    }
+  ],
+  "unified_requirements": [
+    "Consume exact revisions via existing original branches/owners; these are separate changes, not one verified integrated tree.",
+    "HC04 dd10→8780822c源码反例已通过；统一必须实际组合这两个有依赖的提交，并验证准确合版；不能只摘取末端补丁或把源审当现场通过。",
+    "Keep original Bot target/result, HTTPS, certificate, retirement, speech owners and live evidence boundaries; no duplicate audit/development.",
+    "Preserve full queue journals, unknown/cancellation/history and credentials; do not strip a requested Windows policy or Harmony cooldown for rollback.",
+    "Only original sole writer may deploy and perform field validation after normal required qualifications."
+  ],
+  "field_interfaces": "field-evidence-interfaces.json",
+  "existing_file_upgrade_contract": "hc01-hc02-review/upgrade-compatibility.json",
+  "unified_reported_local_candidate": {
+    "short_revision": "9cccd100",
+    "source": "parent delegation",
+    "description": "文件合版，未由本审计读取或复验；不推定已包含HC04或代表整体版本"
+  },
+  "source_only_closed_findings_note": "All6 known counterexamples pass in exact reviewed revisions. This is not a zero-hardcoding certification or integrated/deployed acceptance."
+}

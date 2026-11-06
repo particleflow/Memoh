@@ -1,0 +1,10 @@
+{
+  "required_computer_gate_tests": 13,
+  "pg_top_level_passes": 15,
+  "pg_subtest_passes": 8,
+  "skips": 0,
+  "exit_code": 0,
+  "elapsed_seconds": 41.184,
+  "history_separate_gate_unchanged": true,
+  "note": "Local non-race PG execution; original remote gate remains race enabled."
+}

@@ -1,0 +1,35 @@
+{
+  "sourceParent": "eae24523bfe711d631758316073c24e3bd50335b",
+  "currentUnifiedSourceReadOnly": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "currentInputSourceMatchesEae": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": true,
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": true,
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": true,
+    "internal/handlers/bot_tts.go": true
+  },
+  "productionPatchAppliesToUnified": true,
+  "patchedFilesEqualExecutedSource": true,
+  "productSHA256": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+    "internal/handlers/bot_tts.go": "57e7fa5e9ef795f7518df5bab5329a90e5e2d2c3d2556f011ad5feb8ebbfcde0",
+    "apps/web/src/pages/home/composables/speech-timing.ts": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+    "internal/handlers/bot_tts_timing.go": "bccb16297d88baf48f891100dc1c197a20f90bcc4b7c00ad158afe36ed5d9a75"
+  },
+  "productionPatchSHA256": "d1beebf75d457692379d9ceca7480970b1c436be19a81fa0321df87ccd9c886c",
+  "timedClientSourceHashesMatchCurrent": true,
+  "allFourServerClientIDsCorrelated": true,
+  "serverObservationKeysWhitelisted": true,
+  "privateContentLogged": false,
+  "realCloudCalls": 0,
+  "newLocalMeasurements": "Four deliberate channel-delay profiles; actual HTTP/generated SDK/composable/Audio; not a new timed Alibaba wire measurement",
+  "tests": "Two targeted Go tests -race; six new timing tests; lint; scoped product/new-test types; no old 14/19/7/9 suites",
+  "physicalAcousticOnset": "UNMEASURED",
+  "phoneDeltaFrom500MS": null,
+  "normalPlaybackSample": "PENDING passive next normal user operation; no extra synthesis authorized by this delivery",
+  "deployedOrHAPBuilt": false,
+  "sourceAdmission": "Candidate for unified independent review",
+  "productionPatchCompression": "gzip; decompress before git apply; normal context retained",
+  "productionPatchGzipSHA256": "52f03a23e40e8ddcfe0f9a4244a0684042decfbb81652bbbe0d2baa3a51c79d0"
+}

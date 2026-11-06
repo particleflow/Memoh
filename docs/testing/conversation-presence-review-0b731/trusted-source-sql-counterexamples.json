@@ -1,0 +1,28 @@
+[
+  {
+    "case": "known-schedule",
+    "prior_source": {
+      "kind": "schedule",
+      "bot_id": "66666666-6666-4666-8666-666666666666",
+      "session_id": "11111111-1111-4111-8111-111111111111",
+      "task_id": "77777777-7777-4777-8777-777777777777",
+      "task_kind": "schedule"
+    },
+    "exit": 1,
+    "error": "ERROR: trusted non-user history suppresses first direct input: previous_inputs=1, last_direct_input=<NULL> (expected 0,NULL) (SQLSTATE P0001)",
+    "permanent_writes": 0
+  },
+  {
+    "case": "known-task-result",
+    "prior_source": {
+      "kind": "task_result",
+      "bot_id": "66666666-6666-4666-8666-666666666666",
+      "session_id": "11111111-1111-4111-8111-111111111111",
+      "task_id": "77777777-7777-4777-8777-777777777777",
+      "task_kind": "bot_delegation"
+    },
+    "exit": 1,
+    "error": "ERROR: trusted non-user history suppresses first direct input: previous_inputs=1, last_direct_input=<NULL> (expected 0,NULL) (SQLSTATE P0001)",
+    "permanent_writes": 0
+  }
+]

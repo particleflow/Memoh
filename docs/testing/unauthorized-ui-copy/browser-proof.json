@@ -1,0 +1,670 @@
+{
+  "environment": "Current source; real Go server and isolated PostgreSQL; no response interception",
+  "web": "http://127.0.0.1:18183",
+  "api": "http://127.0.0.1:18180",
+  "checks": [
+    "light: real task directory has no return-latest control",
+    "light: genuine browser offline failure remains visible",
+    "light: task directory recovers after connection restored",
+    "light: appearance labels/controls remain; help text absent",
+    "light: profile title-model label remains without explanation",
+    "dark: real task directory has no return-latest control",
+    "dark: genuine browser offline failure remains visible",
+    "dark: task directory recovers after connection restored",
+    "dark: appearance labels/controls remain; help text absent",
+    "dark: profile title-model label remains without explanation"
+  ],
+  "errors": [],
+  "responses": [
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/copy-audit",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/container",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/agents",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/skills/catalog",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/channels",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/channel-identities",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/dingtalk",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/discord",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/matrix",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/line",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/misskey",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/feishu",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/qq",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/telegram",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/wechatoa",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/slack",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/wecom",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/weixin",
+      "status": 404
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/copy-audit",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/container",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/agents",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/skills/catalog",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/queue",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/1bcd401d-9d82-404f-9f5f-e9f5fa538be3/status",
+      "status": 200
+    },
+    {
+      "path": "/api/channels",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me/channel-identities",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/discord",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/dingtalk",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/feishu",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/matrix",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/line",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/misskey",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/qq",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/slack",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/wechatoa",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/telegram",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/wecom",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/channel/weixin",
+      "status": 404
+    }
+  ],
+  "modelCalls": 0,
+  "deviceCalls": 0
+}

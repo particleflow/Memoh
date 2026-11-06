@@ -1,0 +1,208 @@
+=== RUN   TestAdmissionDeadlineCanResumeSameID
+--- PASS: TestAdmissionDeadlineCanResumeSameID (0.00s)
+=== RUN   TestPartialAdmissionCancelReleasesCapacity
+--- PASS: TestPartialAdmissionCancelReleasesCapacity (0.00s)
+=== RUN   TestAdmissionBoundedLargeFileAndIdempotency
+--- PASS: TestAdmissionBoundedLargeFileAndIdempotency (1.70s)
+=== RUN   TestAdmissionDeadlineProgressAndRetryStorageBound
+--- PASS: TestAdmissionDeadlineProgressAndRetryStorageBound (0.41s)
+=== RUN   TestAdmissionCrashAfterCheckpoint
+--- PASS: TestAdmissionCrashAfterCheckpoint (0.29s)
+=== RUN   TestAdmissionTornSlotAndChangedSource
+=== RUN   TestAdmissionTornSlotAndChangedSource/torn-latest
+=== RUN   TestAdmissionTornSlotAndChangedSource/changed-tail
+=== RUN   TestAdmissionTornSlotAndChangedSource/tree-tamper
+=== RUN   TestAdmissionTornSlotAndChangedSource/cancel
+--- PASS: TestAdmissionTornSlotAndChangedSource (0.53s)
+    --- PASS: TestAdmissionTornSlotAndChangedSource/torn-latest (0.21s)
+    --- PASS: TestAdmissionTornSlotAndChangedSource/changed-tail (0.11s)
+    --- PASS: TestAdmissionTornSlotAndChangedSource/tree-tamper (0.12s)
+    --- PASS: TestAdmissionTornSlotAndChangedSource/cancel (0.08s)
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/9
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/15
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume (0.26s)
+    --- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/9 (0.08s)
+    --- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/15 (0.12s)
+=== RUN   TestHerdrEnqueueDeadlineReportsResumableReservation
+--- PASS: TestHerdrEnqueueDeadlineReportsResumableReservation (0.14s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly (0.04s)
+    --- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt (0.01s)
+    --- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy (0.01s)
+    --- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity (0.01s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable (0.11s)
+    --- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline (0.06s)
+    --- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled (0.05s)
+=== RUN   TestAssociationReviewCancelMustReconcileLostCommit
+--- PASS: TestAssociationReviewCancelMustReconcileLostCommit (0.05s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit (0.12s)
+    --- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit (0.06s)
+    --- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve (0.06s)
+=== RUN   TestAssociationReviewRetryPauseCanBeReconciled
+--- PASS: TestAssociationReviewRetryPauseCanBeReconciled (0.24s)
+=== RUN   TestAssociationReviewCancelWithoutFenceRemainsUnknown
+--- PASS: TestAssociationReviewCancelWithoutFenceRemainsUnknown (0.06s)
+=== RUN   TestAssociationReviewCancelBeforeCommitDoesNotRegister
+--- PASS: TestAssociationReviewCancelBeforeCommitDoesNotRegister (0.04s)
+=== RUN   TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing
+--- PASS: TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing (0.04s)
+=== RUN   TestAssociationReviewProcessCrashAfterInFlight
+--- PASS: TestAssociationReviewProcessCrashAfterInFlight (0.07s)
+=== RUN   TestLostPatchAndCompleteRecoverFromDurableReceipt
+--- PASS: TestLostPatchAndCompleteRecoverFromDurableReceipt (0.03s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/lost-response
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails
+--- PASS: TestUnknownCreateNeverBlindlyRepeats (0.03s)
+    --- PASS: TestUnknownCreateNeverBlindlyRepeats/lost-response (0.01s)
+    --- PASS: TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save (0.01s)
+    --- PASS: TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/quota
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/revoked
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/expired
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/source-change
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/checksum
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/size-limit
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange (0.16s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/quota (0.09s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/revoked (0.01s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/expired (0.01s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/source-change (0.01s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch (0.01s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/checksum (0.01s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/size-limit (0.01s)
+=== RUN   TestCancellationLossAndPublicationRace
+=== RUN   TestCancellationLossAndPublicationRace/false
+=== RUN   TestCancellationLossAndPublicationRace/true
+--- PASS: TestCancellationLossAndPublicationRace (0.03s)
+    --- PASS: TestCancellationLossAndPublicationRace/false (0.02s)
+    --- PASS: TestCancellationLossAndPublicationRace/true (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics
+=== RUN   TestStrictTransportAndBoundedDiagnostics/redirect
+=== RUN   TestStrictTransportAndBoundedDiagnostics/large-json
+=== RUN   TestStrictTransportAndBoundedDiagnostics/private-error
+=== RUN   TestStrictTransportAndBoundedDiagnostics/untrusted-cert
+2026/10/22 04:34:51 http: TLS handshake error from 127.0.0.1:42822: remote error: tls: bad certificate
+--- PASS: TestStrictTransportAndBoundedDiagnostics (0.13s)
+    --- PASS: TestStrictTransportAndBoundedDiagnostics/redirect (0.01s)
+    --- PASS: TestStrictTransportAndBoundedDiagnostics/large-json (0.02s)
+    --- PASS: TestStrictTransportAndBoundedDiagnostics/private-error (0.01s)
+    --- PASS: TestStrictTransportAndBoundedDiagnostics/untrusted-cert (0.09s)
+=== RUN   TestDownloadResumeAndValidation
+=== RUN   TestDownloadResumeAndValidation/ok
+=== RUN   TestDownloadResumeAndValidation/wrong-prefix
+=== RUN   TestDownloadResumeAndValidation/full-on-resume
+=== RUN   TestDownloadResumeAndValidation/wrong-range
+=== RUN   TestDownloadResumeAndValidation/wrong-etag
+=== RUN   TestDownloadResumeAndValidation/truncated
+=== RUN   TestDownloadResumeAndValidation/revoked
+=== RUN   TestDownloadResumeAndValidation/disk-full
+=== RUN   TestDownloadResumeAndValidation/checkpoint-failure
+--- PASS: TestDownloadResumeAndValidation (0.08s)
+    --- PASS: TestDownloadResumeAndValidation/ok (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-prefix (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/full-on-resume (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-range (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/wrong-etag (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/truncated (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/revoked (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/disk-full (0.01s)
+    --- PASS: TestDownloadResumeAndValidation/checkpoint-failure (0.01s)
+=== RUN   TestVerifyBoundsAndCancellation
+--- PASS: TestVerifyBoundsAndCancellation (0.00s)
+=== RUN   TestDiskQueueRestartSnapshotAndOutbox
+--- PASS: TestDiskQueueRestartSnapshotAndOutbox (0.07s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hash
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/quota
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/torn
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/corrupt
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/symlink
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hardlink
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/locator
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/revision
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/journal-full
+--- PASS: TestDiskQueueAdmissionAndJournalFailures (0.09s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/hash (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/quota (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/torn (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/corrupt (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/symlink (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/hardlink (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/locator (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/revision (0.00s)
+    --- PASS: TestDiskQueueAdmissionAndJournalFailures/journal-full (0.07s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/cancel
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/unknown
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/revoke
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/budget
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation (0.39s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/cancel (0.00s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/unknown (0.02s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/revoke (0.14s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/budget (0.22s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change (0.01s)
+=== RUN   TestBlockedDownloadCanCancelWithoutNetwork
+--- PASS: TestBlockedDownloadCanCancelWithoutNetwork (0.01s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/resume
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/revoke
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/corrupt
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization (0.07s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/resume (0.03s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/revoke (0.02s)
+    --- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/corrupt (0.02s)
+=== RUN   TestDiskQueueProcessCrashReleasesLock
+--- PASS: TestDiskQueueProcessCrashReleasesLock (0.03s)
+=== RUN   TestFrozenPR8RealStoreRestartAndBidirectionalTransfer
+--- PASS: TestFrozenPR8RealStoreRestartAndBidirectionalTransfer (0.11s)
+=== RUN   TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins
+--- PASS: TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins (0.01s)
+=== RUN   TestCancellationBeforeAdmission
+--- PASS: TestCancellationBeforeAdmission (0.00s)
+=== RUN   TestDownloadFullCheckpointRechecksAuthorization
+--- PASS: TestDownloadFullCheckpointRechecksAuthorization (0.01s)
+=== RUN   TestCreateQuotaRejectionCanRetryButUnknownCannot
+--- PASS: TestCreateQuotaRejectionCanRetryButUnknownCannot (0.02s)
+=== RUN   TestSealedSnapshotLinearReadsAcrossReopen
+    snapshot_test.go:78: 64 MiB, 8 reopened chunk handles: data=67108864 proof=12288 bytes; plus one 32-byte root check per open
+--- PASS: TestSealedSnapshotLinearReadsAcrossReopen (0.64s)
+=== RUN   TestSnapshotSchemaRejectsLegacyWithoutFallback
+--- PASS: TestSnapshotSchemaRejectsLegacyWithoutFallback (0.00s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1048593
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/3145745
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads (0.06s)
+    --- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1 (0.00s)
+    --- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1048593 (0.02s)
+    --- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/3145745 (0.04s)
+=== RUN   TestSealedSnapshotTamperAndIdentity
+=== RUN   TestSealedSnapshotTamperAndIdentity/data
+=== RUN   TestSealedSnapshotTamperAndIdentity/proof
+=== RUN   TestSealedSnapshotTamperAndIdentity/root
+=== RUN   TestSealedSnapshotTamperAndIdentity/identity
+--- PASS: TestSealedSnapshotTamperAndIdentity (0.08s)
+    --- PASS: TestSealedSnapshotTamperAndIdentity/data (0.02s)
+    --- PASS: TestSealedSnapshotTamperAndIdentity/proof (0.02s)
+    --- PASS: TestSealedSnapshotTamperAndIdentity/root (0.02s)
+    --- PASS: TestSealedSnapshotTamperAndIdentity/identity (0.02s)
+=== RUN   TestSnapshotDeadlinePreservesUploadResume
+--- PASS: TestSnapshotDeadlinePreservesUploadResume (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	7.214s

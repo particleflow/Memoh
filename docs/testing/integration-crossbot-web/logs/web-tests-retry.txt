@@ -1,0 +1,14 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <repo>
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  258 passed (258)
+      Tests  2464 passed (2464)
+   Start at  22:06:48
+   Duration  96.74s (transform 23.27s, setup 0ms, import 74.31s, tests 41.33s, environment 40.97s)
+

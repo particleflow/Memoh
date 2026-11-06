@@ -1,0 +1,62 @@
+[
+  {
+    "file": "http.txt",
+    "bytes": 215,
+    "sha256": "0b54159daae5182cdc17577bbb537a56450879c6e93260c924cd6f58d126d0b0"
+  },
+  {
+    "file": "postgres.txt",
+    "bytes": 662,
+    "sha256": "34e106a189ddaefec881ca255e4dd2abdb3b5ff31ea05c7c8b2ec95c819d6045"
+  },
+  {
+    "file": "lint.txt",
+    "bytes": 418,
+    "sha256": "457a79074a1a8d111d85e498e27d6739cfc0d882937e7e8050443648b70ba34c"
+  },
+  {
+    "file": "lint-final.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "aggregate.txt",
+    "bytes": 1766,
+    "sha256": "cbb1a3a09984e2d3d360e279ca553748cf761665e6f56aa6c893a163d940db53"
+  },
+  {
+    "file": "sdk-types.txt",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "file": "web-types.txt",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  },
+  {
+    "file": "build.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "runtime.txt",
+    "bytes": 775,
+    "sha256": "5d6ed5f6db9d8be343d36781e2e757ed1c19e56b15cd55556deda5af99c937d2"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 218,
+    "sha256": "65c95ae86a8467f56967e05ab1545bc9b419245247c8fb798036c94524c4ba8f"
+  },
+  {
+    "file": "original-task-observation.png",
+    "bytes": 105240,
+    "sha256": "37c53a516c0d372ad9dccacd9eaba59a4a32c0a3344a05f2718eca3e4d982e6e"
+  },
+  {
+    "file": "unit-final.txt",
+    "bytes": 11679,
+    "sha256": "c2983cb74d8e04d2b09c3bf93e2f2faf23dced75c6463bf3fcac2fe47aa3991a"
+  }
+]

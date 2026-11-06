@@ -1,0 +1,45 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 <repository>
+
+(node:320776) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:320777) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ |web| src/pages/home/components/session-task-results.test.ts (8 tests | 8 failed) 10ms
+     × uses the same scoped reader and shared body, without requiring a DialogRoot 5ms
+     × uses the same scoped reader and shared body, without requiring a DialogRoot 1ms
+     × uses the reader Bot and native preview/download, hides pending refs and clears on denial 1ms
+     × reuses the media lightbox inside the host, then retires it on a scope change 0ms
+     × uses the reader Bot and native preview/download, hides pending refs and clears on denial 0ms
+     × reuses the media lightbox inside the host, then retires it on a scope change 0ms
+     × keeps native status separate from the task outcome and clears unavailable identity 0ms
+     × keeps native status separate from the task outcome and clears unavailable identity 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > shared task files in web host > uses the same scoped reader and shared body, without requiring a DialogRoot
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > shared task files in native host > uses the same scoped reader and shared body, without requiring a DialogRoot
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > uses the reader Bot and native preview/download, hides pending refs and clears on denial
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > reuses the media lightbox inside the host, then retires it on a scope change
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > uses the reader Bot and native preview/download, hides pending refs and clears on denial
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > reuses the media lightbox inside the host, then retires it on a scope change
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > computer observation in web host > keeps native status separate from the task outcome and clears unavailable identity
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > computer observation in native host > keeps native status separate from the task outcome and clears unavailable identity
+TypeError: localStorage.setItem is not a function
+ ❯ src/pages/home/components/session-task-results.test.ts:25:16
+     23|   vi.useFakeTimers()
+     24|   client.setConfig({ baseUrl: '/api' })
+     25|   localStorage.setItem('token', 'synthetic-token')
+       |                ^
+     26|   vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) =>…
+     27|   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 3 passed (11)
+   Start at  19:29:32
+   Duration  6.41s (transform 8.32s, setup 0ms, import 11.29s, tests 276ms, environment 876ms)
+

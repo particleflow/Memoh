@@ -1,0 +1,330 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/Memoh
+
+ ❯ |web| src/store/chat/runtime-input-source.test.ts (14 tests | 13 failed) 25ms
+     × preserves the admitted user source on snapshot and delta assistant output 7ms
+     × preserves the admitted schedule source on snapshot and delta assistant output 1ms
+     × preserves the admitted bot_delegation source on snapshot and delta assistant output 1ms
+     × preserves the admitted native_task source on snapshot and delta assistant output 0ms
+     × preserves the admitted task_result source on snapshot and delta assistant output 1ms
+     × preserves the admitted unknown source on snapshot and delta assistant output 1ms
+     × uses each exact segment input, never the initial source for a known or unknown steer 4ms
+     × rejects foreign or missing provenance instead of guessing from body or sign-in ({"kind":"schedule","bot_id":"another-bot","session_id":"schedule-review","task_id":"plan-review","task_run_id":"run-review","occurrence_id":"fire-review"}) 1ms
+     × rejects foreign or missing provenance instead of guessing from body or sign-in ({"kind":"schedule","bot_id":"bot-review","session_id":"another-session","task_id":"plan-review","task_run_id":"run-review","occurrence_id":"fire-review"}) 0ms
+     × rejects foreign or missing provenance instead of guessing from body or sign-in (undefined) 2ms
+     × replaces source with the exact upsert and new run, and keeps prior frame values immutable 1ms
+     × preserves source through the real runtime client animation-frame delta batch 4ms
+     × uses the exact edit replacement input when the legacy request field is absent 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted user source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'user', …(3) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "user",
+  "session_id": "schedule-review",
+  "user_id": "actual-actor",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted schedule source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'schedule', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "schedule",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted bot_delegation source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'bot_delegation', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "bot_delegation",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted native_task source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'native_task', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "native_task",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted task_result source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'task_result', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "task_result",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves the admitted unknown source on snapshot and delta assistant output
+AssertionError: expected undefined to deeply equal { kind: 'unknown', …(2) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "unknown",
+  "session_id": "schedule-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:45:37
+     43|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     44|     const assistant = state.transcript.turns.find(turn => turn.role ==…
+     45|     expect(assistant?.input_source).toEqual(inputSource)
+       |                                     ^
+     46|     const next = reduceRuntimeProjection(state, delta({ message_append…
+     47|     const actual = transcript()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > uses each exact segment input, never the initial source for a known or unknown steer
+AssertionError: expected [ [ 'turn-review', undefined ], …(2) ] to deeply equal [ [ 'turn-review', …(1) ], …(2) ]
+
+- Expected
++ Received
+
+  [
+    [
+      "turn-review",
+-     {
+-       "bot_id": "bot-review",
+-       "kind": "schedule",
+-       "occurrence_id": "fire-review",
+-       "session_id": "schedule-review",
+-       "task_id": "plan-review",
+-       "task_run_id": "run-review",
+-     },
++     undefined,
+    ],
+    [
+      "steer-known",
+-     {
+-       "bot_id": "bot-review",
+-       "kind": "user",
+-       "session_id": "schedule-review",
+-       "user_id": "different-actor",
+-     },
++     undefined,
+    ],
+    [
+      "steer-unknown",
+-     {
+-       "bot_id": "bot-review",
+-       "kind": "unknown",
+-       "session_id": "schedule-review",
+-     },
++     undefined,
+    ],
+  ]
+
+ ❯ src/store/chat/runtime-input-source.test.ts:70:125
+     68|     }
+     69|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     70|     expect(state.transcript.turns.filter(turn => turn.role === 'assist…
+       |                                                                                                                             ^
+     71|       ['turn-review', source], ['steer-known', steerSource], ['steer-u…
+     72|     ])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > rejects foreign or missing provenance instead of guessing from body or sign-in ({"kind":"schedule","bot_id":"another-bot","session_id":"schedule-review","task_id":"plan-review","task_run_id":"run-review","occurrence_id":"fire-review"})
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > rejects foreign or missing provenance instead of guessing from body or sign-in ({"kind":"schedule","bot_id":"bot-review","session_id":"another-session","task_id":"plan-review","task_run_id":"run-review","occurrence_id":"fire-review"})
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > rejects foreign or missing provenance instead of guessing from body or sign-in (undefined)
+AssertionError: expected undefined to deeply equal { kind: 'unknown', …(2) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "unknown",
+  "session_id": "schedule-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:85:90
+     83|     if (!inputSource) delete initial.snapshot.current_run_view!.reques…
+     84|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+     85|     expect(state.transcript.turns.find(turn => turn.role === 'assistan…
+       |                                                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > replaces source with the exact upsert and new run, and keeps prior frame values immutable
+AssertionError: expected undefined to deeply equal { kind: 'schedule', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "schedule",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:95:90
+     93|     const nextSource: UIInputSource = { kind: 'task_result', ...scope,…
+     94|     const changed = reduceRuntimeProjection(state, delta({ user_turn_u…
+     95|     expect(state.transcript.turns.find(turn => turn.role === 'assistan…
+       |                                                                                          ^
+     96|     expect(changed.transcript.turns.find(turn => turn.role === 'assist…
+     97|     const removed = reduceRuntimeProjection(changed, delta({ user_turn…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > preserves source through the real runtime client animation-frame delta batch
+AssertionError: expected undefined to deeply equal { kind: 'schedule', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "schedule",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:116:82
+    114|     expect(scheduled).toHaveLength(1)
+    115|     scheduled.shift()!()
+    116|     expect(actual.messages.find(turn => turn.role === 'assistant')?.in…
+       |                                                                                  ^
+    117|   })
+    118|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  |web| src/store/chat/runtime-input-source.test.ts > runtime source through actual projection and transcript normalization > uses the exact edit replacement input when the legacy request field is absent
+AssertionError: expected undefined to deeply equal { kind: 'schedule', …(5) }
+
+- Expected:
+{
+  "bot_id": "bot-review",
+  "kind": "schedule",
+  "occurrence_id": "fire-review",
+  "session_id": "schedule-review",
+  "task_id": "plan-review",
+  "task_run_id": "run-review",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/runtime-input-source.test.ts:125:90
+    123|     initial.snapshot.current_run_view!.operation = { kind: 'edit', rep…
+    124|     const state = reduceRuntimeProjection(createEmptyRuntimeProjection…
+    125|     expect(state.transcript.turns.find(turn => turn.role === 'assistan…
+       |                                                                                          ^
+    126|   })
+    127|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  13 failed | 1 passed (14)
+   Start at  10:22:46
+   Duration  1.57s (transform 983ms, setup 0ms, import 1.34s, tests 25ms, environment 1ms)

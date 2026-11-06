@@ -1,0 +1,11 @@
+{
+  "candidate": "65649801a58946993d2824f3963255750661eb2a",
+  "parent": "9270da0252128a296d9a641235cdfd32ab44cfda",
+  "tree": "66b2c7a91c189782716e577c7ac282f577091d7e",
+  "sha256": {
+    "apps/web/src/store/chat/runtime-projection.ts": "e6d5337a66851d23b84a0b4fb418702d3f86860a5310b7a0b9e26c43c839273e",
+    "apps/web/src/store/chat/transcript-history.ts": "b0d9a10de95297b84ebd1f79185f30f99b2babdf8a109ff5d5f3c933b0a3104d",
+    "apps/web/src/pages/home/components/message-item.vue": "9c9b264989f8b166376e7770003f628cae025c4bc6aeaba64fe879e0838bf1dd",
+    "internal/agent/application/session_resume.go": "9cf883803c4afe160ad164be43203cd73212901573ec24478c46b4375c3d2318"
+  }
+}

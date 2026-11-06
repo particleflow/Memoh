@@ -1,0 +1,125 @@
+{
+  "upstream_source": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
+  "official_binary_sha256": "14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d",
+  "scope": "isolated official Linux Herdr and synthetic shell/TUI; known agent label is synthetic; no real model/field/Windows acceptance",
+  "text_comparison": [
+    {
+      "command": [
+        "pane",
+        "read",
+        "w1:p1"
+      ],
+      "elapsed_ms": 4,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 795,
+      "stderr_bytes": 0,
+      "complete_frame": false,
+      "stdout_sha256": "728c7a6b708f9a0520b6c2c2f95404a15f50ea26a53fcc7359dffde2aa62936e",
+      "source": "recent-unwrapped",
+      "lines": 8,
+      "mode": "normal"
+    },
+    {
+      "command": [
+        "pane",
+        "read",
+        "w1:p1"
+      ],
+      "elapsed_ms": 2,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 2959,
+      "stderr_bytes": 0,
+      "complete_frame": true,
+      "stdout_sha256": "f099b52b69aec7452e676f82782c2b3b4b2ff6fd6467ebf7c039c9f8be7f5bf0",
+      "source": "recent-unwrapped",
+      "lines": 64,
+      "mode": "normal"
+    },
+    {
+      "command": [
+        "pane",
+        "read",
+        "w2:p1"
+      ],
+      "elapsed_ms": 5112,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 22,
+      "stderr_bytes": 0,
+      "complete_frame": false,
+      "stdout_sha256": "e05c003c6c101cbfe304e1d46aa927e5cc03ba1ce138641e8e0525e89530d22d",
+      "source": "recent-unwrapped",
+      "lines": 64,
+      "mode": "alt"
+    },
+    {
+      "command": [
+        "pane",
+        "read",
+        "w2:p1"
+      ],
+      "elapsed_ms": 2,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 102,
+      "stderr_bytes": 0,
+      "complete_frame": false,
+      "stdout_sha256": "1dfced8de76c0ec6b5739dee6d78bfd0ed0879fdf2930bde183b61206ff4c6db",
+      "source": "visible",
+      "lines": 64,
+      "mode": "alt"
+    }
+  ],
+  "ansi_verified": [
+    {
+      "command": [
+        "pane",
+        "read",
+        "w1:p1"
+      ],
+      "elapsed_ms": 2,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 2961,
+      "stderr_bytes": 0,
+      "complete_frame": true,
+      "stdout_sha256": "bf9701b79cb95bda1399d85599f787d2952f709a50a7f223ab8ca6dc61bc5fe5",
+      "format": "ansi",
+      "same_nonce_frames": 1,
+      "decoded_bytes": 2048,
+      "decoded_sha256": "1d1801f753ccd9fa57966c46f360585caf83337a394a5f238d4e4e7d6005788d",
+      "expected_synthetic_bytes_match": true,
+      "source": "recent-unwrapped",
+      "lines": 64,
+      "mode": "normal"
+    },
+    {
+      "command": [
+        "pane",
+        "read",
+        "w2:p1"
+      ],
+      "elapsed_ms": 1,
+      "exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 24,
+      "stderr_bytes": 0,
+      "complete_frame": false,
+      "stdout_sha256": "bf60bb4c2d9bda79c12aa832e3cfb02b73dca0f05815da1ebda73b2b32b1e929",
+      "format": "ansi",
+      "same_nonce_frames": 0,
+      "source": "recent-unwrapped",
+      "lines": 64,
+      "mode": "alt"
+    }
+  ],
+  "negative_empty_poll_loop": {
+    "attempts": 196,
+    "max_call_ms": 5,
+    "timed_out_calls": 0,
+    "complete_frames": 0,
+    "single_20s_cli_hang_reproduced": false
+  }
+}

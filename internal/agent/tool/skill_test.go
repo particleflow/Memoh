@@ -1,0 +1,149 @@
+package tools
+
+import (
+	"context"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/skills"
+)
+
+func TestWindowsComputerSkillIsOptInAndLoadsThroughNativeTool(t *testing.T) {
+	raw, err := os.ReadFile("../../../contrib/bot-skills/windows-computer/SKILL.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed := skills.ParseFile(string(raw), "")
+	if parsed.Name != "windows-computer" || parsed.Description == "" {
+		t.Fatal("invalid skill metadata")
+	}
+	p := NewSkillProvider(nil)
+	uninstalled, err := p.Tools(t.Context(), SessionContext{})
+	if err != nil || len(uninstalled) != 0 {
+		t.Fatalf("uninstalled skill registered tools: %v", err)
+	}
+	installed, err := p.Tools(t.Context(), SessionContext{Skills: map[string]SkillDetail{
+		parsed.Name: {Description: parsed.Description, Content: parsed.Content, Path: skills.ManagedDir() + "/" + parsed.Name + "/SKILL.md"},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	use := toolByNameForTest(t, installed, ToolUseSkill())
+	out, err := use.Execute(nil, toolexec.ArgumentsFromValue(map[string]any{"skillName": parsed.Name, "reason": "Use the connected Windows computer"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	value := toolexec.OutputValue(out).(map[string]any)
+	if value["success"] != true || value["content"] != parsed.Content {
+		t.Fatal("native activation did not preserve instructions")
+	}
+	for _, boundary := range []string{"foreground_bash", "computer_task_submit", "Ordinary `exec` cannot dispatch managed PC commands", "agent.start", "agent.get", "agent.read", "model list current at dispatch time", "Memoh subagent", "unknown", "not permissions"} {
+		if !strings.Contains(parsed.Content, boundary) {
+			t.Errorf("missing workflow boundary %q", boundary)
+		}
+	}
+	missing, err := use.Execute(nil, toolexec.ArgumentsFromValue(map[string]any{"skillName": "not-installed", "reason": "test isolation"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if toolexec.OutputValue(missing).(map[string]any)["success"] != false {
+		t.Fatal("unregistered skill was activated")
+	}
+}
+
+func TestListSkillReturnsSortedSummaries(t *testing.T) {
+	provider := NewSkillProvider(nil)
+
+	toolset, err := provider.Tools(context.Background(), SessionContext{
+		Skills: map[string]SkillDetail{
+			"zeta": {
+				Description: "Zeta instructions",
+				Content:     "Do not include this full content.",
+				Path:        "/data/skills/zeta",
+			},
+			"alpha": {
+				Description: "Alpha instructions",
+				Content:     "Do not include this full content either.",
+				Path:        "/data/skills/alpha",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Tools returned error: %v", err)
+	}
+	if len(toolset) != 2 {
+		t.Fatalf("expected 2 tools, got %d", len(toolset))
+	}
+	if got := toolset[0].Name; got != "list_skills" {
+		t.Fatalf("first tool = %q, want list_skills", got)
+	}
+
+	result, err := toolset[0].Execute(nil, toolexec.ArgumentsFromValue(nil))
+	if err != nil {
+		t.Fatalf("Execute returned error: %v", err)
+	}
+
+	payload, ok := toolexec.OutputValue(result).(map[string]any)
+	if !ok {
+		t.Fatalf("result type = %T, want map[string]any", result)
+	}
+	if got := payload["count"]; got != float64(2) {
+		t.Fatalf("count = %#v, want 2", got)
+	}
+	rawItems, ok := payload["skills"].([]any)
+	if !ok {
+		t.Fatalf("skills type = %T, want []any", payload["skills"])
+	}
+	items := make([]map[string]any, 0, len(rawItems))
+	for _, item := range rawItems {
+		entry, _ := item.(map[string]any)
+		items = append(items, entry)
+	}
+	if got := items[0]["name"]; got != "alpha" {
+		t.Fatalf("first skill name = %#v, want alpha", got)
+	}
+	if got := items[1]["name"]; got != "zeta" {
+		t.Fatalf("second skill name = %#v, want zeta", got)
+	}
+	if _, ok := items[0]["content"]; ok {
+		t.Fatalf("list_skills should not return full skill content")
+	}
+}
+
+func TestUseSkillReturnsPath(t *testing.T) {
+	provider := NewSkillProvider(nil)
+
+	toolset, err := provider.Tools(context.Background(), SessionContext{
+		Skills: map[string]SkillDetail{
+			"pdf": {
+				Description: "Read PDF instructions",
+				Content:     "Use a PDF-aware workflow.",
+				Path:        "/data/.agents/skills/pdf",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Tools returned error: %v", err)
+	}
+	if len(toolset) != 2 {
+		t.Fatalf("expected 2 tools, got %d", len(toolset))
+	}
+
+	result, err := toolset[1].Execute(nil, toolexec.ArgumentsFromValue(map[string]any{
+		"skillName": "pdf",
+		"reason":    "Need to process a PDF attachment",
+	}))
+	if err != nil {
+		t.Fatalf("Execute returned error: %v", err)
+	}
+
+	payload, ok := toolexec.OutputValue(result).(map[string]any)
+	if !ok {
+		t.Fatalf("result type = %T, want map[string]any", result)
+	}
+	if got := payload["path"]; got != "/data/.agents/skills/pdf" {
+		t.Fatalf("path = %#v, want %q", got, "/data/.agents/skills/pdf")
+	}
+}

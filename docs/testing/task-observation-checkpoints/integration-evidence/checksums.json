@@ -1,0 +1,87 @@
+[
+  {
+    "file": "ui.log",
+    "bytes": 336,
+    "sha256": "b0e400b07baa7379f18f09bc14448698202bbed29d968896179c678e00662667"
+  },
+  {
+    "file": "web-types.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  },
+  {
+    "file": "sdk-types.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "file": "build.log",
+    "bytes": 76364,
+    "sha256": "d78b7225b530afc4656f84e306f7db3f7cde7b15c788d3e3e1c448e39635cc7a"
+  },
+  {
+    "file": "contract.log",
+    "bytes": 1169,
+    "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec"
+  },
+  {
+    "file": "aggregate.log",
+    "bytes": 532,
+    "sha256": "a80bad65783c5a2d23a9f2e90e126140f11fc4762af3bf642d8f0b3315551a71"
+  },
+  {
+    "file": "browser-first.log",
+    "bytes": 423,
+    "sha256": "8cb23fee1bb32f7732af0bf4927b794c9afbe171cd9c357431b3b09fb41a28e5"
+  },
+  {
+    "file": "browser-network-first.log",
+    "bytes": 379,
+    "sha256": "4ed9835351b719bc84775f37f9e510303bf5d0ff98178ccf230470c14b10ae3f"
+  },
+  {
+    "file": "browser-locale-first.log",
+    "bytes": 670,
+    "sha256": "9c9bd4f7553ed78f9a992090ebbd8707d11ba63f2ce0c5ad2e5f49888ff0dd10"
+  },
+  {
+    "file": "browser-theme-first.log",
+    "bytes": 652,
+    "sha256": "a71c20cbac0424214628de8fa26378f0350f70a864fb6857ab74a4139465a3e1"
+  },
+  {
+    "file": "browser.log",
+    "bytes": 389,
+    "sha256": "f0b913ab06994a81c7106fab1482af16a99249bf65cdb0f2f86b42b14f0d63bf"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 668,
+    "sha256": "58f734ca03a02ee33f4c09d2b876ba2b442acc9ff1d59adeaa4ce6ad0668f0b1"
+  },
+  {
+    "file": "receipt.png",
+    "bytes": 123585,
+    "sha256": "d335c5ce7e1117d82ab72c7ec265d11a9b92874c8772e94e304dd43d0472eba5"
+  },
+  {
+    "file": "collection.png",
+    "bytes": 104863,
+    "sha256": "5d7a5e55f43fee421bf499b40f60e891304315dfffb4297b22b933967fae9bad"
+  },
+  {
+    "file": "denied.png",
+    "bytes": 89309,
+    "sha256": "b94af9fa8d04813327a2ba3d151bff20107d620b490f5d477ec9c830f36bfeba"
+  },
+  {
+    "file": "narrow-zh.png",
+    "bytes": 47584,
+    "sha256": "048d346de1097f4f522386d278539fed73e4aef24561618df73c6ab05ad9a5c9"
+  },
+  {
+    "file": "browser.mjs",
+    "bytes": 8484,
+    "sha256": "0e35900b2d66b88f3f9ed84e22f3122f8937451b600be327cacc1e6ff83a2d27"
+  }
+]

@@ -1,0 +1,88 @@
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords (1.20s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00 (0.12s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication (0.13s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline (0.10s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing (0.13s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing (0.11s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch (0.16s)
+    --- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session (0.12s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/missing
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/legacy
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/mismatch
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/cancel
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/invalid_identity
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt (0.66s)
+    --- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/missing (0.13s)
+    --- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/legacy (0.15s)
+    --- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/mismatch (0.11s)
+    --- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/cancel (0.13s)
+    --- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/invalid_identity (0.14s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/bot
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/user
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/session
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/target
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/revoked
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/fingerprint
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation (0.12s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/bot (0.00s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/user (0.00s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/session (0.00s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/target (0.00s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/revoked (0.00s)
+    --- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/fingerprint (0.00s)
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_only
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/summary_ready
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/all_cached
+--- PASS: TestBatchCompletedControlRestartRecoveryBoundary (3.76s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected (0.94s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_only (0.95s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/summary_ready (0.98s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/all_cached (0.89s)
+=== RUN   TestRecoveryReconcilesPersistedBatchWithoutGrantingStop
+=== RUN   TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/receipt_missing
+=== RUN   TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/receipt_only
+=== RUN   TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/result_ready
+=== RUN   TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/logs_recorded
+--- PASS: TestRecoveryReconcilesPersistedBatchWithoutGrantingStop (1.04s)
+    --- PASS: TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/receipt_missing (0.09s)
+    --- PASS: TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/receipt_only (0.10s)
+    --- PASS: TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/result_ready (0.13s)
+    --- PASS: TestRecoveryReconcilesPersistedBatchWithoutGrantingStop/logs_recorded (0.72s)
+=== RUN   TestRecoveryRejectsConcurrentRevisionChange
+--- PASS: TestRecoveryRejectsConcurrentRevisionChange (0.11s)
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/receipt
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/file_hash
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/offset
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/ready_hash
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/duplicate
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/partial
+=== RUN   TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/empty
+--- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints (0.76s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/receipt (0.12s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/file_hash (0.13s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/offset (0.10s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/ready_hash (0.10s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/duplicate (0.11s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/partial (0.10s)
+    --- PASS: TestReconciliationRejectsMismatchedOrDuplicateFileCheckpoints/empty (0.10s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	8.747s

@@ -1,0 +1,4 @@
+
+> @memohai/sdk@0.22.0 typecheck <repository>/packages/sdk
+> tsc --noEmit -p tsconfig.json
+

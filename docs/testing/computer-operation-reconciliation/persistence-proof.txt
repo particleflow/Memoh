@@ -1,0 +1,1 @@
+PASS all six existing synthetic operation records byte-identical after real API and browser observation; zero database writes.

@@ -1,0 +1,23 @@
+{
+  "postgres-race.jsonl": {
+    "pass_events": 14,
+    "top_level": [
+      "TestPostgresPrivateChatIsolationAndConcurrentReuse",
+      "TestPostgresPrivateChatLifecycle"
+    ],
+    "fail": [],
+    "skip": []
+  },
+  "http-race.jsonl": {
+    "pass_events": 19,
+    "top_level": [
+      "TestThreadCoordinatorGetActiveReadsRouteThenThread",
+      "TestThreadCoordinatorGetActiveWithoutSelectionReturnsNoRows",
+      "TestThreadCoordinatorCreateNewPreservesBestEffortActivation",
+      "TestPrivateChatHTTPReauthorizesChangedDescriptor",
+      "TestPrivateChatHTTPUsesOnlyAuthenticatedAccount"
+    ],
+    "fail": [],
+    "skip": []
+  }
+}

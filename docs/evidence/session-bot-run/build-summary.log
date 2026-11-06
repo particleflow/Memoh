@@ -1,0 +1,12 @@
+dist/assets/chunk-KEIR6QF5-Dj-OpFgW.js                                  662.68 kB │ gzip: 143.23 kB
+dist/assets/exports-HkXSPgmK.js                                         686.79 kB │ gzip: 221.94 kB
+dist/assets/emacs-lisp-C9PiwqqW.js                                      779.84 kB │ gzip: 197.53 kB
+dist/assets/index-Bz-GKCMV.js                                         1,471.89 kB │ gzip: 397.77 kB
+dist/assets/editor.api-D6sAzvK8.js                                    2,264.58 kB │ gzip: 579.91 kB
+
+✓ built in 4.94s
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

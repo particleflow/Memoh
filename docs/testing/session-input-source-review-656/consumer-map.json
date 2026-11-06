@@ -1,0 +1,20 @@
+{
+  "source": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+  "source_parent": "65649801a58946993d2824f3963255750661eb2a",
+  "production_files_match_source": true,
+  "harmony_current_package_contains_change": false,
+  "files": {
+    "apps/web/src/composables/api/useChat.types.ts": "bd1f0a4aec4b98340a3dbf67d967c68b1e7d9cea799641249960eb2cc38c0459",
+    "apps/web/src/i18n/locales/en.json": "62cd346c0a7e4b1e742afe77157db045c794a84ca73639920c804043229cc213",
+    "apps/web/src/i18n/locales/ja.json": "3d591c46ff767d6a36a2557bfbbbd046162d64279b2f5cdf10561ca63ce3ebe0",
+    "apps/web/src/i18n/locales/zh.json": "6c0f9b84fc5a6afe80c73fa9ab8c2479dcc72e11c30d7e2c8273676897833016",
+    "apps/web/src/pages/home/components/message-item.vue": "9c9b264989f8b166376e7770003f628cae025c4bc6aeaba64fe879e0838bf1dd",
+    "apps/web/src/store/chat-list.normalize.ts": "db1f1b1d1a88319968337472cc0b773143c911ae6d18ee28dfc7d996880c4c23",
+    "apps/web/src/store/chat/runtime-client.ts": "10b2ee5fd4f679e458efc3d2653b852fd51b3272a5a28349a541a9b250b85e59",
+    "apps/web/src/store/chat/runtime-projection.ts": "ab58cbde69ca7aa00613c7edbb142b83c2e6f8759762e5917b03e6b4cf5c5900",
+    "apps/web/src/store/chat/transcript-history.ts": "b0d9a10de95297b84ebd1f79185f30f99b2babdf8a109ff5d5f3c933b0a3104d",
+    "apps/web/src/store/chat/types.ts": "19c9944b1ebaa1e97d4b6c1738127e1f6830a5e06fc11a2f56001469bcb92d85",
+    "packages/sdk/src/index.ts": "805db7cda66ad67a9bae80b88b057a53c473366336773be5a1f4bd890f6de62f",
+    "packages/sdk/src/types.gen.ts": "eaaca02e1ef65612fe13bb6dc3b6de3e8fff4ce8b00123e91085716afe1d3d65"
+  }
+}

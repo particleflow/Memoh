@@ -1,0 +1,19 @@
+{
+  "realServer": true,
+  "postgres": true,
+  "syntheticNativePeer": true,
+  "contentHTTP": [
+    200,
+    200
+  ],
+  "detailHTTP": [
+    200,
+    503,
+    503,
+    503,
+    200,
+    200
+  ],
+  "taskMutations": 0,
+  "pageErrors": []
+}

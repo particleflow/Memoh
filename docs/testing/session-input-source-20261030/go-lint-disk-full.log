@@ -1,0 +1,2 @@
+internal/handlers/acl.go:1: : write /tmp/memoh-input-source-gocache/9c/9c88e4eb986faf63842dd7e7faf8d99323434219c3beb696efa00f29e95c36c7-d: no space left on device (typecheck)
+package handlers

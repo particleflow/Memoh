@@ -1,0 +1,81 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+assets/
+!templates/workspace/**/*.md
+!templates/workspace/*.md
+
+# IDE
+.vscode/
+.cursor/
+.idea/
+
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+.claude/
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+out/
+target/
+.cache/
+.toolkit/
+/agent
+
+# Logs
+*.log
+logs/
+
+# Environment
+**/.env
+**/.env.*
+!apps/desktop/.env.example
+
+# Private deployment configuration; keep conf/app.*.toml and OAuth examples.
+/config.toml
+/config.toml.*
+/conf/oauth-clients.toml
+/conf/oauth-clients.toml.*
+/certs/
+/secrets/
+/.workdocs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# Test
+coverage/
+.nyc_output/
+
+# Mise
+.mise.toml.local
+mise.local.toml
+
+# Data
+data/
+*.db
+*.sqlite
+
+# Docker
+docker-compose.override.yml
+docker-compose.override.yaml
+compose.override.yml
+compose.override.yaml

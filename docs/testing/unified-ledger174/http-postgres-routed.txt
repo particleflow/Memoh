@@ -1,0 +1,10 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages/session-http-pages
+    computer_delivery_pages_integration_test.go:143: real Server+JWT+PG/RLS HTTP delivery pages=17 metadata=257; no device call; GET revision unchanged
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages/session-http-pages (0.13s)
+    computer_delivery_integration_test.go:229: ledger metadata=257 pages=17 operation_json_bytes=512 elapsed=579.758533ms; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages (0.62s)
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (3.44s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	4.491s

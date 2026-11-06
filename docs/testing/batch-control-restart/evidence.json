@@ -1,0 +1,23 @@
+[
+  {
+    "file": "regression.txt",
+    "bytes": 1235,
+    "sha256": "a27f821b9abfeb3f811f686f6cb95f537e3c5e6f69bd357d643fb95bc464db16",
+    "processing": "none",
+    "exit_code": 0
+  },
+  {
+    "file": "lint.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "exit_code": 0
+  },
+  {
+    "file": "format.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "exit_code": 0
+  }
+]

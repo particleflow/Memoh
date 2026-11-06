@@ -1,0 +1,7 @@
+{
+  "scope": "/tmp/web-observation-reconnect/go-cache",
+  "reason": "task-owned regenerable cache entries older than two hours; no active Go/lint process",
+  "bytes": 672522135,
+  "files_removed": 679,
+  "source_database_originals_evidence_removed": false
+}

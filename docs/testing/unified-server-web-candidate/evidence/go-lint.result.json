@@ -1,0 +1,14 @@
+{
+  "check": "go-lint",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "command": [
+    "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+    "run",
+    "--concurrency=2",
+    "--new-from-rev=a3849eb027d86788780d3ac6b6adc92bbf122db7",
+    "./internal/handlers"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T04:41:30Z",
+  "elapsed_seconds": 130.385
+}

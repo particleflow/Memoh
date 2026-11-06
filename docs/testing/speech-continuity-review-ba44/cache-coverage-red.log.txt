@@ -1,0 +1,34 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/review-hardcoding-integration-3f
+
+ ↓ |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId retained
+ ↓ |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent final DOM coverage after history reconciliation > emits a late tail once with runtimeRunId omitted
+ ✓ |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent cache coverage through final reconciliation > keeps completed cache replayable with runtimeRunId retained 33ms
+ × |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent cache coverage through final reconciliation > keeps completed cache replayable with runtimeRunId omitted 6ms
+   → expected 'changed' to be 'ready' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-continuity-independent.review.test.ts > independent cache coverage through final reconciliation > keeps completed cache replayable with runtimeRunId omitted
+AssertionError: expected 'changed' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "changed"
+
+ ❯ src/pages/home/composables/speech-continuity-independent.review.test.ts:53:79
+     51|         await new Response(audio.stream).arrayBuffer()
+     52|       }
+     53|       expect(cache.status('principal/Bot/session/row/original-run', vi…
+       |                                                                               ^
+     54|     })
+     55|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 2 skipped (4)
+   Start at  14:20:52
+   Duration  452ms (transform 111ms, setup 0ms, import 247ms, tests 40ms, environment 1ms)
+

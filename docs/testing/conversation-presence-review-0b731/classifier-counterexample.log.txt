@@ -1,0 +1,13 @@
+=== RUN   TestIndependentFirstDirectAfterTrustedMachineHistory
+=== RUN   TestIndependentFirstDirectAfterTrustedMachineHistory/empty_control
+=== RUN   TestIndependentFirstDirectAfterTrustedMachineHistory/only_known_schedule_history
+    independent_review_test.go:18: first actual direct user input was suppressed by trusted non-user rows: got={Temperature:uncertain Reason:continuity_unresolved} want=cold
+=== RUN   TestIndependentFirstDirectAfterTrustedMachineHistory/only_known_result_history
+    independent_review_test.go:18: first actual direct user input was suppressed by trusted non-user rows: got={Temperature:uncertain Reason:continuity_unresolved} want=cold
+--- FAIL: TestIndependentFirstDirectAfterTrustedMachineHistory (0.00s)
+    --- PASS: TestIndependentFirstDirectAfterTrustedMachineHistory/empty_control (0.00s)
+    --- FAIL: TestIndependentFirstDirectAfterTrustedMachineHistory/only_known_schedule_history (0.00s)
+    --- FAIL: TestIndependentFirstDirectAfterTrustedMachineHistory/only_known_result_history (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/conversationpresence	0.005s
+FAIL

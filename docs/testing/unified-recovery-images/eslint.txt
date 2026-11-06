@@ -1,0 +1,14 @@
+
+<repository>/apps/web/src/pages/providers/components/provider-form-images.test.ts
+  22:40  warning  There is more than one component in this file       vue/one-component-per-file
+  26:33  warning  There is more than one component in this file       vue/one-component-per-file
+  27:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+  34:34  warning  There is more than one component in this file       vue/one-component-per-file
+  35:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+  42:34  warning  There is more than one component in this file       vue/one-component-per-file
+  50:38  warning  There is more than one component in this file       vue/one-component-per-file
+  51:14  warning  Prop 'value' requires default value to be set       vue/require-default-prop
+  90:41  warning  There is more than one component in this file       vue/one-component-per-file
+
+✖ 9 problems (0 errors, 9 warnings)
+

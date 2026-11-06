@@ -1,0 +1,14 @@
+{
+  "baseline": "58e39866057bf798b0789053d3215ddf4600c612",
+  "status": 404,
+  "cache_control": "no-store",
+  "body": {
+    "type": "urn:memoh:error:http.not_found",
+    "status": 404,
+    "detail": "The requested resource was not found.",
+    "code": "http.not_found",
+    "args": {},
+    "fault": "client",
+    "request_id": "e8e5b2b0-7b47-4cb5-88e9-e75af7b1c68b"
+  }
+}

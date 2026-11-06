@@ -1,0 +1,30 @@
+{
+  "implemented_and_isolated_verified": [
+    {
+      "path": "internal/transferclient/host_network.go",
+      "coverage": "all original task/device upload/download/receipt/association HTTP dispatches using this client; stable base and HostBinding"
+    },
+    {
+      "path": "apps/web/src/lib/media-transfer.ts",
+      "coverage": "original media upload, hash/Range file download and delegated download paths using MediaIdentity.fetch"
+    }
+  ],
+  "remaining_connection_consumers": [
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
+      "reason": "current owner native source must adopt v2 below identity guard; no stale-source overwrite or HAP rebuild performed"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useMediaGallery.ts:36",
+      "reason": "raw img/video/audio src builder still uses original SDK logical URL; separate synchronous URL consumer, not mediaIdentity.fetch"
+    },
+    {
+      "path": "apps/web/src/components/sidebar/files-pane.vue:1070",
+      "reason": "workspace FS paths use direct fetch/anchor and original SDK URL; not the durable media task transfer client"
+    },
+    {
+      "path": "direct external provider/cloud download into NAS",
+      "reason": "not the NAS client endpoint; no upstream speed evidence from this increment"
+    }
+  ]
+}

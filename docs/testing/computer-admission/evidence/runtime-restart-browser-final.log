@@ -1,0 +1,4 @@
+Restarted only current isolated development Server; same executable, PG and configuration.
+PASS real Server/PG owner GET/PUT, duplicate pause, stale/foreign resume conflict, anonymous 401/no-store; existing task UI observation and original revision preserved while admission paused.
+PASS full existing operation snapshot unchanged; native methods: ["workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list", "workspace.list"]
+RESTORED original synthetic MCP URL; temporary read-only peer stopped. No credential, production, task dispatch or Windows change.

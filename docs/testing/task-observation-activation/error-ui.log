@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  2 passed (2)
+      Tests  123 passed (123)
+   Start at  08:52:42
+   Duration  459ms (transform 402ms, setup 0ms, import 571ms, tests 29ms, environment 1ms)

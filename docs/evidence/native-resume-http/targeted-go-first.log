@@ -1,0 +1,30 @@
+=== RUN   TestResumeNativeHostUsesOriginalRunWithoutModelTurn
+--- PASS: TestResumeNativeHostUsesOriginalRunWithoutModelTurn (0.01s)
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/unbound
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/wrong-owner
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/wrong-run
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/empty-operation
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/injected-resume
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/changed-task
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/changed-directory
+=== RUN   TestResumeNativeHostRejectsUntrustedAndChangedInput/revoked
+--- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput (0.03s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/unbound (0.01s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/wrong-owner (0.00s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/wrong-run (0.01s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/empty-operation (0.00s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/injected-resume (0.00s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/changed-task (0.00s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/changed-directory (0.00s)
+    --- PASS: TestResumeNativeHostRejectsUntrustedAndChangedInput/revoked (0.01s)
+=== RUN   TestResumeNativeHostDisconnectedPreservesOriginalOperation
+--- PASS: TestResumeNativeHostDisconnectedPreservesOriginalOperation (0.00s)
+=== RUN   TestResumeNativeHostUnknownNeverReplaysPrompt
+--- PASS: TestResumeNativeHostUnknownNeverReplaysPrompt (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.073s
+# github.com/felinics/memoh/internal/handlers.test
+/workspace/.memoh-cloud/go/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device
+FAIL	github.com/felinics/memoh/internal/handlers [build failed]
+FAIL

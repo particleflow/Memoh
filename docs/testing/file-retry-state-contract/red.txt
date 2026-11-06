@@ -1,0 +1,29 @@
+=== RUN   TestRetryContractServerDeadline
+=== RUN   TestRetryContractServerDeadline/3600
+    retry_contract_test.go:33: server deadline shortened: header=3600 due=2026-10-30 06:05:52.350934548 +0000 UTC want>=2026-10-30 07:00:51.350934548 +0000 UTC
+=== RUN   TestRetryContractServerDeadline/Fri,_30_Oct_2026_07:00:52_GMT
+    retry_contract_test.go:33: server deadline shortened: header=Fri, 30 Oct 2026 07:00:52 GMT due=2026-10-30 06:05:52.351029675 +0000 UTC want>=2026-10-30 07:00:51.351029675 +0000 UTC
+=== RUN   TestRetryContractServerDeadline/Wed,_01_Jan_3000_00:00:00_GMT
+    retry_contract_test.go:33: server deadline shortened: header=Wed, 01 Jan 3000 00:00:00 GMT due=2026-10-30 06:05:52.351085389 +0000 UTC want>=3000-01-01 00:00:00 +0000 UTC
+--- FAIL: TestRetryContractServerDeadline (0.00s)
+    --- FAIL: TestRetryContractServerDeadline/3600 (0.00s)
+    --- FAIL: TestRetryContractServerDeadline/Fri,_30_Oct_2026_07:00:52_GMT (0.00s)
+    --- FAIL: TestRetryContractServerDeadline/Wed,_01_Jan_3000_00:00:00_GMT (0.00s)
+=== RUN   TestRetryContractInspectChild
+    retry_contract_test.go:56: subprocess only
+--- SKIP: TestRetryContractInspectChild (0.00s)
+=== RUN   TestRetryContractTransferSurvivesFailuresAndRestart
+    retry_contract_test.go:79: recoverable transfer terminated: {Task:{UserID: SessionID: TargetID: RunID: Attempt: Generation:} HostBinding: Version:1 DeliveryID:delivery-1 BotID:bot-1 OperationID:operation-1 SnapshotID:delivery-1 LocatorRevision:revision-1 Spec:{SizeBytes:32 SHA256:16231252a03f3d5df8678c98e1fab3356124a9128b24165f669e33f4c091713d Mime:application/octet-stream} Phase:blocked ReceiptID:receipt-1 Offset:0 ExpiresAt:2026-10-31 06:00:52.356118163 +0000 UTC ChunkBytes:4 CancelRequested:false Attempts:11 NextAttempt:0001-01-01 00:00:00 +0000 UTC ErrorCode:retry_budget Ready:<nil>}
+--- FAIL: TestRetryContractTransferSurvivesFailuresAndRestart (0.04s)
+=== RUN   TestRetryContractAssociationUnknownSurvivesFailuresAndRestart
+    retry_contract_test.go:120: unknown stopped or recommitted: {Recovery:<nil> Version:4 Registered:false Activated:false Source:<nil> LastRun:2026-10-30 06:24:22.405265261 +0000 UTC PayloadState: Direction:upload Job:{Task:{UserID: SessionID: TargetID: RunID: Attempt: Generation:} HostBinding: Version:1 DeliveryID:delivery-1 BotID:bot-1 OperationID:operation-1 SnapshotID:delivery-1 LocatorRevision:revision-1 Spec:{SizeBytes:6 SHA256:f6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68 Mime:application/octet-stream} Phase:ready ReceiptID:receipt-1 Offset:6 ExpiresAt:2026-10-31 06:00:52.399597246 +0000 UTC ChunkBytes:4 CancelRequested:false Attempts:0 NextAttempt:0001-01-01 00:00:00 +0000 UTC ErrorCode: Ready:0xc00045f020} Seal:0xc0002714c0 AdmissionVersion:1 Admitted:true Associated:false AssociationError:transient AssociationState:unknown AssociationAttempts:12 AssociationDue:2026-10-30 06:24:22.405265261 +0000 UTC AssociationBlocked:true} commits=1 resolves=11
+--- FAIL: TestRetryContractAssociationUnknownSurvivesFailuresAndRestart (0.04s)
+=== RUN   TestRetryContractAssociationCommitAndAuthorization
+    retry_contract_test.go:181: retry_commit was count-terminated: {Recovery:<nil> Version:4 Registered:false Activated:false Source:<nil> LastRun:2026-10-30 06:24:22.441318957 +0000 UTC PayloadState: Direction:upload Job:{Task:{UserID: SessionID: TargetID: RunID: Attempt: Generation:} HostBinding: Version:1 DeliveryID:delivery-1 BotID:bot-1 OperationID:operation-1 SnapshotID:delivery-1 LocatorRevision:revision-1 Spec:{SizeBytes:6 SHA256:f6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68 Mime:application/octet-stream} Phase:ready ReceiptID:receipt-1 Offset:6 ExpiresAt:2026-10-31 06:00:52.435855744 +0000 UTC ChunkBytes:4 CancelRequested:false Attempts:0 NextAttempt:0001-01-01 00:00:00 +0000 UTC ErrorCode: Ready:0xc00045e480} Seal:0xc000487a40 AdmissionVersion:1 Admitted:true Associated:false AssociationError:transient AssociationState:retry_commit AssociationAttempts:12 AssociationDue:2026-10-30 06:24:22.441318957 +0000 UTC AssociationBlocked:true} 6/6
+--- FAIL: TestRetryContractAssociationCommitAndAuthorization (0.07s)
+=== RUN   TestRetryContractLegacyBlockedUnknownAndCancel
+    retry_contract_test.go:224: canceled advance persisted
+--- FAIL: TestRetryContractLegacyBlockedUnknownAndCancel (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.153s
+FAIL

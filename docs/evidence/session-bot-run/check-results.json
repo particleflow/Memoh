@@ -1,0 +1,44 @@
+{
+  "product_checkpoint": "ed450430c119b54e5a673910f75145a98b07ca67",
+  "combined_web": {
+    "files": 8,
+    "tests": 170,
+    "exit": 0
+  },
+  "runtime_integration": {
+    "files": 1,
+    "tests": 5,
+    "exit": 0
+  },
+  "web_typecheck_exit": 0,
+  "sdk_typecheck_exit": 0,
+  "desktop_types_existing_compiler_exit": 0,
+  "desktop_package_script_exit": 1,
+  "web_build_exit": 0,
+  "web_lint": {
+    "exit": 0,
+    "errors": 0,
+    "warnings": 39
+  },
+  "ui_contract": {
+    "exit": 0,
+    "warnings": 3
+  },
+  "changed_web_lint_staged_exit": 0,
+  "pg_retirement": {
+    "exit": 0,
+    "skip": 0,
+    "duration_seconds": 3.177
+  },
+  "ordinary_db_lint_exit": 0,
+  "additional_integration_tag_db_lint": {
+    "exit": 1,
+    "diagnostics": 19,
+    "changed_reported_files": 0,
+    "baseline_rerun": false
+  },
+  "existing_server_api_unchanged_from": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "isolated_browser_exit": 0,
+  "production_or_device_validation": false,
+  "remote_ci": "pending push"
+}

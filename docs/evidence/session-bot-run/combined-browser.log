@@ -1,0 +1,3 @@
+PASS real Web/native WebSocket/PG restores the exact aborted Bot run and persisted generate_image call; no receipt is labeled unconfirmed, not pending or delivered
+PASS browser refresh restores the same persisted run/call without executing a task
+PASS narrow dark shared page; zero business mutation, zero PC observation/content reads; only existing runtime subscription messages

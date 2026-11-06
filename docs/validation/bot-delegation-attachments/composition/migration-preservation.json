@@ -1,0 +1,26 @@
+{
+  "0171_computer_delivery_guard.up.sql": {
+    "unchanged": true,
+    "source": "83483850061f4c908c28ff5ef340209cf9e718d5"
+  },
+  "0171_computer_delivery_guard.down.sql": {
+    "unchanged": true,
+    "source": "83483850061f4c908c28ff5ef340209cf9e718d5"
+  },
+  "0172_runtime_transfer_credentials.up.sql": {
+    "unchanged": true,
+    "source": "83483850061f4c908c28ff5ef340209cf9e718d5"
+  },
+  "0172_runtime_transfer_credentials.down.sql": {
+    "unchanged": true,
+    "source": "83483850061f4c908c28ff5ef340209cf9e718d5"
+  },
+  "0173_bot_delegations.up.sql": {
+    "unchanged": true,
+    "source": "cec5f22d0931f63b97d8d27a1eccf0873c51b734"
+  },
+  "0173_bot_delegations.down.sql": {
+    "unchanged": true,
+    "source": "cec5f22d0931f63b97d8d27a1eccf0873c51b734"
+  }
+}

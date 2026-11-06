@@ -1,0 +1,16 @@
+Verified existing isolated loopback database; test creates/cleans only its own unique temporary database.
+COMMAND: go test -p=2 -tags=integration -count=1 -v ./internal/db -run ^TestComputerAdmission -timeout=180s
+=== RUN   TestComputerAdmissionDurabilityCoverageAndReservations
+--- PASS: TestComputerAdmissionDurabilityCoverageAndReservations (1.90s)
+=== RUN   TestComputerAdmissionPreservesAlreadyReservedFollowup
+--- PASS: TestComputerAdmissionPreservesAlreadyReservedFollowup (1.77s)
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/pause
+=== RUN   TestComputerAdmissionPauseSerializesWithClaims/claim
+--- PASS: TestComputerAdmissionPauseSerializesWithClaims (3.51s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/pause (1.81s)
+    --- PASS: TestComputerAdmissionPauseSerializesWithClaims/claim (1.70s)
+=== RUN   TestComputerAdmissionRollbackRefusesLivePause
+--- PASS: TestComputerAdmissionRollbackRefusesLivePause (1.92s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	9.121s

@@ -1,0 +1,10 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery
+    computer_delivery_integration_test.go:232: file=0 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: file=1 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: file=2 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: CLI killed after durable offset=16777216, local checkpoint=8388608; reopened NAS modules; transient rejections=2; two independent files committed before recovery; original receipt and ledger replay preserved
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (24.29s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery (14.93s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	25.468s

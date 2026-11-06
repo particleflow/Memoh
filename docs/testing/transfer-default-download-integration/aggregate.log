@@ -1,0 +1,25 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (9db6809f)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 1 file
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 1.30s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./cmd/transferqueue ./internal/db ./internal/transferclient
+[hooks] Go package selection: 0.12s
+[hooks] Go lint: golangci-lint run --concurrency=2 <repo>/cmd/transferqueue <repo>/internal/db <repo>/internal/transferclient
+[hooks] Go lint: 4.77s
+[hooks] Go test: go test -p=2 -timeout=180s <repo>/cmd/transferqueue <repo>/internal/db <repo>/internal/transferclient
+ok  	github.com/felinics/memoh/cmd/transferqueue	0.493s
+ok  	github.com/felinics/memoh/internal/db	(cached)
+ok  	github.com/felinics/memoh/internal/transferclient	6.485s
+[hooks] Go test: 10.99s
+[hooks] Total: 17.18s

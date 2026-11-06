@@ -1,0 +1,5 @@
+--- FAIL: TestRequestFieldNamesAreLiterals (0.50s)
+    field_guard_test.go:95: ../../internal/handlers/session_user_input_recovery.go:72:33: apperror.FieldInvalid names its field with name; write the field as a string literal
+FAIL
+FAIL	github.com/felinics/memoh/internal/apperror	0.500s
+FAIL

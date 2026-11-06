@@ -1,0 +1,19 @@
+{
+  "check": "computer-routing",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "240s",
+    "./internal/computertask"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T04:35:27Z",
+  "elapsed_seconds": 22.785
+}

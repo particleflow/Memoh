@@ -1,0 +1,35 @@
+{
+  "candidate_branch": "integrate/unified-server-web-candidate",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "source_tree": "1dd2eee0cb03cdb44614b27974eb00eaad3cfb20",
+  "base_pr68": "a3849eb027d86788780d3ac6b6adc92bbf122db7",
+  "base_tree": "4116f93ff9ce272946da3e81078a9df0e15440f1",
+  "inherited_pr65": "9aac398c670b356ddbd8243ce1d9b5ca85175b77",
+  "frozen_combination": "f5b162633016ab1e0e594f1fb22217855433791f",
+  "pr66_evidence_head": "892efee385b8b505b5a8d8a7aaf95fb5bfa384d3",
+  "pr66_selected_patch": "a3386436a764cf1535919ada689b746b50836b0f",
+  "imported_paths": [
+    "internal/handlers/bot_delegations_test.go",
+    "internal/handlers/computer_transfers_test.go"
+  ],
+  "schema": "171/172/173 blobs preserved; no migration run or migration change for this increment",
+  "readiness": {
+    "server_web": "local candidate verification only; no release or image",
+    "windows_pr5": "parent reports red CI awaiting logs; not rerun or verified here",
+    "harmony_pr67": "parent reports complete source build not delivered; not verified here",
+    "oauth": "parent coordinates existing-connection recovery separately; no action here",
+    "legacy_media_p1": "unresolved hold; denied repair not retried",
+    "actions": "settings 403 not retried, no dispatch, remote validation not claimed"
+  },
+  "excluded": [
+    "real PC dispatch",
+    "paid provider requests",
+    "production changes",
+    "new credentials",
+    "Agent core changes",
+    "PR creation",
+    "ready",
+    "main merge",
+    "image publication"
+  ]
+}

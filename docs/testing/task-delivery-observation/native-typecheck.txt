@@ -1,0 +1,9 @@
+
+> @memohai/web@0.22.0 typecheck <worktree>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/components/session-task-results.vue(194,31): error TS2322: Type 'string' is not assignable to type 'number'.
+src/pages/home/components/session-tasks.test.ts(97,69): error TS2339: Property 'openUnavailable' does not exist on type '{ title: string; empty: string; unsupported: string; loadFailed: string; upload: string; download: string; states: { pending: string; reserved: string; committed: string; canceled: string; failed: string; unknown: string; }; }'.
+<worktree>/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

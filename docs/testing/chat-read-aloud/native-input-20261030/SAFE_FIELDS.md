@@ -1,0 +1,13 @@
+# Minimum existing-provider readback — unique writer only
+
+Native-input source is still an unfinished isolated candidate. This is the concrete missing production snapshot; do not infer it from a vendor/model display name, historical voice clone task, Web/Windows delivery channel or a mock fixture. No provider call is needed.
+
+Run [SAFE_FIELDS.sql](SAFE_FIELDS.sql) through the existing authorized team DB read workflow, with the already selected Bot UUID as psql variable `bot_id`. It selects bots.tts_model_id → models(type=speech) → providers, following `db/postgres/queries/models.sql:GetSpeechModelWithProvider` and settings joins. It does not select full config, API key, voice ID or voice sample. Credential and voice are booleans only; URL userinfo/query/fragment are not returned, and path is classified rather than printed. Do not set/bypass team/RLS context, request full `/providers`, export secrets or create a test synthesis to fill the snapshot.
+
+Example parameter form within that existing authorized connection: `psql ... -v bot_id='<already-selected-bot-uuid>' -f SAFE_FIELDS.sql`. The task does not provide or request DB credentials. If existing access cannot execute this projection, report that exact limitation rather than broadening access.
+
+Also retain the actual Content-Type of an already-authorized natural Playback response if one exists. Configured format is not that wire MIME. If none exists, keep actual MIME unknown; do not POST another paid test. No installation/deployment is implied.
+
+Protocol selection: existing registry explicitly declares `alibabacloud-speech` as the CosyVoice run-task/continue-task/finish-task family. Only that explicit factory gains the optional input capability. Other providers/model names do not. The adapter honors configured model and voice, requires native MP3 MSE support on the client, rejects incremental SSML, verifies remote TLS, and uses connection close for cancellation instead of assuming the region/model-specific finish-cancel command is supported. Endpoint override must still speak that declared protocol; a name is not proof.
+
+Upstream actually inspected: pinned Twilight `v0.7.2-0.20261002230120-f6d0ce1a0e8c`, and release `v0.9.0`/origin `0ee7c270912f58f3b9d21ec1430366e106c5139c` via normal module download. Both public SpeechParams still accept one Text string; both private CosyVoice stream functions send one continue then finish. No dependency upgrade was made. Official native contract: https://www.alibabacloud.com/help/en/model-studio/cosyvoice-client-events . SSML is single-input; multi-continue, finish and regional cancellation constraints are documented there. This is not a claim that all Qwen endpoints have this contract.

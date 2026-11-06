@@ -1,0 +1,9 @@
+file:///workspace/memoh-speech-continuity/docs/testing/chat-read-aloud/continuity-20261030/automatic-browser.mjs:81
+    throw new Error(`Timed out: ${label}`)
+          ^
+
+Error: Timed out: ordinary primary chat mounted
+    at poll (file:///workspace/memoh-speech-continuity/docs/testing/chat-read-aloud/continuity-20261030/automatic-browser.mjs:81:11)
+    at async file:///workspace/memoh-speech-continuity/docs/testing/chat-read-aloud/continuity-20261030/automatic-browser.mjs:169:3
+
+Node.js v24.19.0

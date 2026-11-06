@@ -1,0 +1,21 @@
+Current isolated verification (all exit status 0):
+NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run --project web apps/web/src/lib/file-network.test.ts apps/web/src/lib/api-client.test.ts apps/web/src/pages/home/composables/useMediaGallery.test.ts apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts apps/web/src/components/sidebar/files-pane.upload.test.ts apps/web/src/pages/home/components/attachment-block.test.ts apps/web/src/components/file-manager/file-viewer.save.test.ts --testTimeout=15000 --maxWorkers=3
+Result: 7 files / 71 tests passed. See final-entry-tests.txt.
+
+After the final platform-owned pending-request guard:
+NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run --project web apps/web/src/lib/file-network.test.ts --testTimeout=15000 --maxWorkers=3
+Result: 1 file / 8 tests passed. See final-platform-tests.txt.
+pnpm --filter @memohai/web typecheck
+Result: passed, see types.txt.
+pnpm exec eslint <changed Web TS/Vue and fixture MJS files>
+Result: passed, empty eslint-current.txt is successful no-diagnostic output.
+node scripts/check-ui-copy-policy.mjs
+Result: passed, see copy-policy.txt.
+node scripts/check-ui-contract.mjs
+Result: passed with 3 pre-existing warnings, see ui-contract.txt.
+
+Actual current Web/Go/PostgreSQL/Chromium integration:
+node /workspace/scratch/fast-transfer-path/entry-coverage/browser.mjs
+node /workspace/scratch/fast-transfer-path/entry-coverage/file-viewer-browser.mjs
+Result: byte/hash, redirect, account-switch and browser mixed-content assertions passed.
+No NAS/production credentials, real device, SDK/HAP build or native owner's tests run here.

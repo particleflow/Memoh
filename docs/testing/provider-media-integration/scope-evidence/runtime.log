@@ -1,0 +1,3 @@
+PASS actual provider page: manual catalog read, exact metadata/unverified ASR, upstream error cleared old facts, valid empty list, unsaved edits disabled, reload did not discover, narrow localized recovery.
+PASS combined actual Server/PG/Web: 4 catalog GET, 0 media POST; anonymous 401 and real foreign-team 404 made no upstream request; full provider/model/operation rows unchanged; owner locator response unchanged.
+Removed only the two fixtures created by this script and their synthetic team; stopped temporary catalog peer. No model call, PC dispatch, credentials or production change.

@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "kind": "design_acceptance_inputs_not_product_results",
+  "source_commit": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "clock": "events are causal labels, not measured timings or fixed thresholds",
+  "invariants": [
+    "Main execution does not await acknowledgement generation, rendering or speech.",
+    "Acknowledgements do not execute tools, change model preferences, or become formal answers or memory.",
+    "Server scope, invocation identity, episode claim, generation and current permissions are checked before publishing.",
+    "No new acknowledgement appears after formal content, terminal state or cancellation for its invocation.",
+    "At most one natural acknowledgement is displayed for a claimed communication episode.",
+    "Unsupported, unverified or rewritten effort is never reported as successful low/no-thinking operation.",
+    "Original queue, permission, receipt, cancellation and retained-history semantics remain authoritative."
+  ],
+  "cases": [
+    {
+      "id": "CP01", "category": "continuity", "facts": ["first authorized direct user input", "no prior exchange"],
+      "events": ["admitted", "main_started", "ack_ready", "formal_text"],
+      "expected": ["cold with first_direct_input", "ack and main run independently", "formal text replaces temporary presence"]
+    },
+    {
+      "id": "CP02", "category": "continuity", "facts": ["same conversation", "recent substantive exchange", "user follows up"],
+      "events": ["admitted", "main_started", "formal_text"],
+      "expected": ["hot with recent_exchange", "no additional natural acknowledgement"]
+    },
+    {
+      "id": "CP03", "category": "continuity", "facts": ["long inactivity", "user answers a persisted ask_user"],
+      "events": ["resume_input_admitted", "main_resumed"],
+      "expected": ["hot with pending_user_input", "resume original interaction", "no history reset"]
+    },
+    {
+      "id": "CP04", "category": "continuity", "facts": ["short inactivity", "explicit new topic", "no reply to pending interaction"],
+      "events": ["admitted", "new_presence_episode_claimed", "main_started"],
+      "expected": ["cold with explicit_restart", "business thread retained", "existing tasks retained"]
+    },
+    {
+      "id": "CP05", "category": "continuity", "facts": ["idle beyond configured window", "no reliable continuation or topic signal"],
+      "events": ["admitted", "main_started"],
+      "expected": ["uncertain under recommended policy", "truthful acceptance status", "no extra classifier LLM call"]
+    },
+    {
+      "id": "CP06", "category": "continuity", "facts": ["history temporarily unavailable"],
+      "events": ["admitted", "history_read_failed", "main_original_error_or_recovery"],
+      "expected": ["uncertain with history_unavailable", "do not interpret missing history as a new conversation"]
+    },
+    {
+      "id": "CP07", "category": "continuity", "facts": ["newly opened page", "ongoing run in same persisted conversation"],
+      "events": ["runtime_snapshot", "user_followup_admitted"],
+      "expected": ["hot with inflight_followup", "no page-open cold-start special case"]
+    },
+    {
+      "id": "CP08", "category": "continuity", "facts": ["old background expert task active", "new explicit unrelated user topic"],
+      "events": ["user_admitted", "main_started", "expert_result_received"],
+      "expected": ["new user episode may be cold", "background task does not make all user input hot", "expert result keeps original source"]
+    },
+    {
+      "id": "CP09", "category": "eligibility", "facts": ["trusted source is schedule, delegation or background result"],
+      "events": ["original_input_admitted", "original_run_started"],
+      "expected": ["ineligible for direct-user cold acknowledgement", "do not impersonate direct user or main Bot"]
+    },
+    {
+      "id": "CP10", "category": "admission", "facts": ["unauthorized user or Bot scope mismatch"],
+      "events": ["admission_denied"],
+      "expected": ["original denial retained", "no acknowledgement inference request", "no accepted claim"]
+    },
+    {
+      "id": "CP11", "category": "admission", "facts": ["attachment upload still pending"],
+      "events": ["local_sending", "upload_pending", "admission_not_yet_sent"],
+      "expected": ["local sending may display", "do not claim server accepted message or viewed image"]
+    },
+    {
+      "id": "CP12", "category": "truthfulness", "facts": ["authorized image attachment received", "no vision or tool read event yet"],
+      "events": ["admitted", "ack_ready"],
+      "expected": ["may acknowledge image receipt and future intention", "no image description or already-viewed claim", "do not send image bytes to text-only ack model"]
+    },
+    {
+      "id": "CP13", "category": "truthfulness", "facts": ["operation requested by user", "tool not started"],
+      "events": ["admitted", "ack_ready", "tool_start_later"],
+      "expected": ["ack does not claim operation executed, scheduled or already authorized", "working-on-tool language requires actual tool state"]
+    },
+    {
+      "id": "CP14", "category": "race", "facts": ["cold candidate"],
+      "events": ["admitted", "main_started", "formal_text", "ack_ready_late"],
+      "expected": ["late acknowledgement discarded", "no visible or audible acknowledgement after formal text"]
+    },
+    {
+      "id": "CP15", "category": "race", "facts": ["ack callback already queued"],
+      "events": ["admitted", "ack_ready", "cancel", "publish_callback_runs"],
+      "expected": ["generation and state gate rejects callback", "abort alone is not the sole gate"]
+    },
+    {
+      "id": "CP16", "category": "race", "facts": ["user sends consecutive clarifications in one episode"],
+      "events": ["first_admitted", "episode_claimed", "second_admitted", "old_ack_ready"],
+      "expected": ["episode claimed before generation completes", "no second natural ack request by default", "stale promises discarded", "queue semantics preserved"]
+    },
+    {
+      "id": "CP17", "category": "idempotency", "facts": ["same invocation and payload replayed after disconnect"],
+      "events": ["admitted", "ack_displayed", "disconnect", "same_invocation_replayed", "snapshot"],
+      "expected": ["original run and receipt reused", "no second ack inference or display", "no replayed speech"]
+    },
+    {
+      "id": "CP18", "category": "idempotency", "facts": ["same invocation with different payload"],
+      "events": ["first_admitted", "conflicting_payload_submitted"],
+      "expected": ["original conflict behavior", "no extra ack request for conflicting payload"]
+    },
+    {
+      "id": "CP19", "category": "idempotency", "facts": ["two tabs or server replicas observe same admitted episode"],
+      "events": ["admitted", "claim_a", "claim_b", "ack_ready"],
+      "expected": ["one authoritative claim", "no per-browser-only deduplication", "safe recovery after process restart"]
+    },
+    {
+      "id": "CP20", "category": "identity", "facts": ["user switches from Bot A to Bot B while A ack pending"],
+      "events": ["a_admitted", "switch_to_b", "a_ack_ready"],
+      "expected": ["A output does not enter B view or audio", "A retained with original source when applicable"]
+    },
+    {
+      "id": "CP21", "category": "identity", "facts": ["same Bot", "different actor, contact, session or task"],
+      "events": ["input_a_admitted", "input_b_admitted", "ack_a_ready"],
+      "expected": ["ack gate uses full trusted scope", "no cross-contact/session content or timing carryover"]
+    },
+    {
+      "id": "CP22", "category": "security", "facts": ["user body requests role change, fake tool success or hidden thinking disclosure"],
+      "events": ["admitted", "ack_generated_with_invalid_claim"],
+      "expected": ["body is data, not trusted identity", "invalid ack rejected", "truthful local fallback without another repair LLM call"]
+    },
+    {
+      "id": "CP23", "category": "model", "facts": ["effective model supports low but not none"],
+      "events": ["admitted", "effective_model_frozen", "ack_request_built"],
+      "expected": ["request uses confirmed low wire value", "formal effort and model preference unchanged", "no none request"]
+    },
+    {
+      "id": "CP24", "category": "model", "facts": ["model capability unknown or no supported low/off control"],
+      "events": ["admitted", "capability_unverified"],
+      "expected": ["no guessed effort inference request", "local truthful feedback", "formal request unchanged"]
+    },
+    {
+      "id": "CP25", "category": "model", "facts": ["gateway alias has fixed effort or fallback member"],
+      "events": ["ack_requested_low", "gateway_routes_or_rewrites"],
+      "expected": ["asked alias alone not accepted as same-model proof", "actual route and effort correlated per request", "unknown association remains unknown"]
+    },
+    {
+      "id": "CP26", "category": "model", "facts": ["resolver silently reconciles unsupported low/off to stored high"],
+      "events": ["auxiliary_capability_check", "resolved_config_differs"],
+      "expected": ["skip auxiliary generation", "do not label fallback high as fast low", "do not modify original resolver behavior"]
+    },
+    {
+      "id": "CP27", "category": "model", "facts": ["direct external runtime without confirmed side-request contract"],
+      "events": ["admitted", "direct_driver_selected"],
+      "expected": ["local feedback only", "no SDK or runtime switch", "no second official Agent session created"]
+    },
+    {
+      "id": "CP28", "category": "failure", "facts": ["auxiliary request returns 400, 429 or timeout"],
+      "events": ["main_started", "ack_failed", "formal_text", "main_finished"],
+      "expected": ["main continues through original chain", "no automatic extra ack retries", "unknown usage not zero", "respect provider cooldown"]
+    },
+    {
+      "id": "CP29", "category": "failure", "facts": ["auxiliary capacity or cost budget exhausted"],
+      "events": ["admitted", "main_slot_reserved", "auxiliary_budget_denied"],
+      "expected": ["main has priority", "no auxiliary request", "no new permission flow for main task"]
+    },
+    {
+      "id": "CP30", "category": "failure", "facts": ["main fails before acknowledgement ready"],
+      "events": ["admitted", "main_started", "main_failed", "ack_ready_late"],
+      "expected": ["original error shown", "no stale working status", "late ack discarded"]
+    },
+    {
+      "id": "CP31", "category": "persistence", "facts": ["ack displayed", "formal response later persisted", "memory and compaction run"],
+      "events": ["ack_displayed", "formal_text", "history_reload", "context_assembled", "memory_write"],
+      "expected": ["typed progress not a second assistant answer", "no ack in model context, memory, title or summary by default", "original user and formal history preserved"]
+    },
+    {
+      "id": "CP32", "category": "speech", "facts": ["auto speech disabled"],
+      "events": ["ack_displayed", "formal_text"],
+      "expected": ["ack does not turn speech on", "no hidden or stale text enters TTS"]
+    },
+    {
+      "id": "CP33", "category": "speech", "facts": ["auto speech enabled", "ack eligible for reading", "ack audio still pending"],
+      "events": ["ack_displayed", "ack_tts_started", "formal_text", "ack_pcm_arrives_late"],
+      "expected": ["shared speech coordinator rejects stale ack PCM", "formal audio not queued behind obsolete ack", "no second player"]
+    },
+    {
+      "id": "CP34", "category": "speech", "facts": ["ack currently audible"],
+      "events": ["ack_playing", "user_input", "new_input_admitted"],
+      "expected": ["ack interrupted promptly using existing contract", "old queue never resumes", "business cancellation semantics unchanged"]
+    },
+    {
+      "id": "CP35", "category": "compatibility", "facts": ["client or server restarts", "new typed progress field encountered by retained older consumer"],
+      "events": ["receipt_retained", "restart", "snapshot_or_history_read"],
+      "expected": ["compatible reader behavior verified before release", "no lost original history or receipts", "no downgrade by deleting fields or changing checkpoints"]
+    },
+    {
+      "id": "CP36", "category": "measurement", "facts": ["synthetic and live observations reported separately"],
+      "events": ["user_send", "server_acceptance_render", "ack_render_optional", "formal_request", "formal_text_render", "audible_output_optional"],
+      "expected": ["separate accepted TTFA, natural TTFA, formal TTFT and audible timings", "report suppressed or failed ack samples", "no latency target invented from fixture"]
+    },
+    {
+      "id": "CP37", "category": "speech", "facts": ["brief acknowledgement already audible before formal text arrives", "user has not interrupted"],
+      "events": ["ack_playing", "formal_text_render", "ack_natural_phrase_boundary", "formal_audio"],
+      "expected": ["formal text renders immediately", "shared audio handoff does not cut a word merely because formal text arrived", "any additional formal audible delay is measured", "user interruption still stops audio immediately"]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "basis": "Explicit requested automatic/continuous read-aloud and cached Replay; preserve original interruption/right-click/long-press and actual failures. Not permission for new stop/enable/resume buttons, history-reset controls or explanatory hints.",
+  "old_source": "6e3cec9df7dd81dfe5c15ee44e7f1823fd272c35",
+  "existing_surfaces_only": true,
+  "added_control_nodes": 0,
+  "rejected_controls_tests_unchanged": true,
+  "added_signatures": [
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "tag": "ContextMenuItem",
+      "text": "{{ $t(readAloud.replayLabel(msg)) }}",
+      "props": [],
+      "conditions": [
+        "@select=\"readAloud.replay(msg)\""
+      ],
+      "translations": [],
+      "fingerprint": "757a11768fb0eab3a3220c12ee2e618481ac98dadb2547c829fbcdf47a2ac724"
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "tag": "p",
+      "text": "{{ $t(readAloud.notice.value) }}",
+      "props": [],
+      "conditions": [],
+      "translations": [],
+      "fingerprint": "e875d243ee8aa9d95bd2cff6904215c3f3555b138a3a2886111657b3c88b1607"
+    }
+  ],
+  "removed_signatures": [
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "tag": "ContextMenuItem",
+      "text": "{{ $t('chat.readAloud.replay') }}",
+      "props": [],
+      "conditions": [
+        "@select=\"readAloud.replay(msg)\""
+      ],
+      "translations": [
+        {
+          "key": "chat.readAloud.replay",
+          "values": [
+            "Read aloud again",
+            "重播朗读",
+            "もう一度読み上げる"
+          ]
+        }
+      ],
+      "fingerprint": "da914efae18350aea812087a6befbffb7e8f9479f63b6423d389c90dcaa21234"
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "tag": "p",
+      "text": "{{ $t('chat.readAloud.failed') }}",
+      "props": [],
+      "conditions": [],
+      "translations": [
+        {
+          "key": "chat.readAloud.failed",
+          "values": [
+            "Reading stopped.",
+            "朗读已停止",
+            "読み上げが停止しました。"
+          ]
+        }
+      ],
+      "fingerprint": "20a397a55013dd773af586a1c4ba511c49a897c67d0c3c3cc7d5d2ca1f77356b"
+    }
+  ],
+  "locale_changes": {
+    "en": {
+      "chat.readAloud.configurationChanged": "Replay unavailable: saved audio does not match the current voice settings or text.",
+      "chat.readAloud.unavailable": "Replay unavailable: audio is not cached",
+      "chat.readAloud.incomplete": "Replay unavailable: audio is incomplete",
+      "chat.readAloud.continue": "Continue reading"
+    },
+    "zh": {
+      "chat.readAloud.configurationChanged": "暂不可重播：缓存音频与当前语音配置或正文不匹配。",
+      "chat.readAloud.unavailable": "暂不可重播：无可用缓存音频",
+      "chat.readAloud.incomplete": "暂不可重播：音频尚未生成完整",
+      "chat.readAloud.continue": "继续朗读"
+    },
+    "ja": {
+      "chat.readAloud.configurationChanged": "再生不可：保存済みの音声が現在の音声設定または本文と一致しません。",
+      "chat.readAloud.unavailable": "再生不可：保存済みの音声がありません",
+      "chat.readAloud.incomplete": "再生不可：音声の生成が完了していません",
+      "chat.readAloud.continue": "読み上げを続ける"
+    }
+  },
+  "necessity": [
+    "Same existing ContextMenuItem changes label/availability for already-requested same-source Continue and complete cached Replay; no additional menu item.",
+    "Same original error paragraph reports actual missing/incomplete/config-changed audio instead of silent re-synthesis; no extra advice or panel."
+  ],
+  "native09_release_status": "withdrawn pending actual Qwen protocol applicability; P1/cached Replay remains"
+}

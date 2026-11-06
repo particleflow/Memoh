@@ -1,0 +1,8 @@
+=== RUN   TestQwenAudio31DocumentedDuplexProtocol
+=== RUN   TestQwenAudio31DocumentedDuplexProtocol/mp3
+=== RUN   TestQwenAudio31DocumentedDuplexProtocol/wav
+--- PASS: TestQwenAudio31DocumentedDuplexProtocol (0.00s)
+    --- PASS: TestQwenAudio31DocumentedDuplexProtocol/mp3 (0.00s)
+    --- PASS: TestQwenAudio31DocumentedDuplexProtocol/wav (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio/adapter/cosyvoiceinput	0.012s

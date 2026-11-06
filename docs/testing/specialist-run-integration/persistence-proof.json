@@ -1,0 +1,13 @@
+{
+  "state": "completed",
+  "delivery_state": "accepted",
+  "run_id_unchanged": true,
+  "native_state": "completed",
+  "delegation_count": 25,
+  "active_runs": 0,
+  "all_existing_delegation_rows_unchanged": true,
+  "existing_fixture_schema": {
+    "version": 174,
+    "dirty": false
+  }
+}

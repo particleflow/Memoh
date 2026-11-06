@@ -1,0 +1,13 @@
+{
+  "candidate": "3ce1f27cb4ea5c5c1be3be92245ef4008625b518",
+  "reused_server_product_commit": "ff0f1736676f35f72753c4b313c57104a4c205aa",
+  "changed_production_go_files": [
+    "internal/db/postgres/sqlc/session_tasks.sql.go",
+    "internal/transferclient/api_base.go",
+    "internal/transferclient/client.go"
+  ],
+  "generated_store_change": "comments only",
+  "transferclient_in_server_dependencies": false,
+  "server_rebuilt_for_combination": false,
+  "web_sdk_identical_to_PR72": true
+}

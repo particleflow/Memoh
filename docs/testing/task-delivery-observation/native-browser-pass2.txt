@@ -1,0 +1,6 @@
+PASS native browser download: full bytes/hash match the original NAS media fixture
+PASS original media lightbox opens the native uploaded PNG inside the task host
+PASS actual Web + JWT server + PG: all 19 seeded records automatically read; pending/failed distinct; 17 native download links only for committed references
+PASS real browser offline -> same selected detail and file records automatically recover, no task dispatch
+PASS synthetic old-route 404 is unavailable, does not poll; explicit reload recovers against real backend
+PASS attachment uses existing asset dock and dismisses task dialog; source has no original filename, native fallback offers download

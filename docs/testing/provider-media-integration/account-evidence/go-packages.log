@@ -1,0 +1,5 @@
+ok  	github.com/felinics/memoh/internal/auth	1.005s
+ok  	github.com/felinics/memoh/internal/providers	0.103s
+ok  	github.com/felinics/memoh/internal/handlers	4.196s
+ok  	github.com/felinics/memoh/internal/apperror	0.974s
+ok  	github.com/felinics/memoh/internal/server	0.039s

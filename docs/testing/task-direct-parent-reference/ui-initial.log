@@ -1,0 +1,32 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/pages/home/components/session-task-relations.test.ts (2 tests | 2 failed) 249ms
+     × shows three levels and ownership across pages without inventing missing nodes 168ms
+     × shows three levels and ownership across pages without inventing missing nodes 79ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-relations.test.ts > persisted session references in web host > shows three levels and ownership across pages without inventing missing nodes
+ FAIL  |web| src/pages/home/components/session-task-relations.test.ts > persisted session references in native host > shows three levels and ownership across pages without inventing missing nodes
+AssertionError: expected 'Owning sessiongrandchild-sessionSessi…' not to contain 'child-session'
+
+Expected: "child-session"
+Received: "Owning sessiongrandchild-sessionSession’s direct parentNo reference providedRequested conversation rootquery-root"
+
+ ❯ src/pages/home/components/session-task-relations.test.ts:49:42
+     47|     detail.value = { ...operation, direct_parent_session_id: undefined…
+     48|     expect(relationship.textContent).toContain('Session’s direct paren…
+     49|     expect(relationship.textContent).not.toContain('child-session')
+       |                                          ^
+     50|     detail.value = { ...operation, direct_parent_session_id: '<img src…
+     51|     expect(relationship.textContent).toContain('<img src=x onerror=ale…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 81 passed (83)
+   Start at  07:37:54
+   Duration  13.63s (transform 17.93s, setup 0ms, import 26.44s, tests 4.68s, environment 2.46s)

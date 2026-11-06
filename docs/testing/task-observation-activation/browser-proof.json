@@ -1,0 +1,99 @@
+{
+  "realWeb": true,
+  "realServerPersistedTaskReads": true,
+  "nativeObservationTransport": "synthetic browser interception; no OAuth or MCP transport invoked",
+  "taskResponses": [
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/a8d0cca3-1689-454d-a6bb-53ba4eea2048/tasks/computer_operation/fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72/deliveries",
+      "status": 200
+    }
+  ],
+  "observationIDs": [
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72",
+    "fb37f0c3-cd7e-4c6c-9a5e-9865a022cc72"
+  ],
+  "contentCalls": 0,
+  "mutations": 0,
+  "deviceCalls": 0,
+  "pageErrors": [],
+  "passed": true
+}

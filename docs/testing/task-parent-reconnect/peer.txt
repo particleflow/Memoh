@@ -1,0 +1,2 @@
+READY existing isolated PG operation with same identity; synthetic native GET/read only
+PASS original operation byte-for-byte unchanged; synthetic configuration restored; no prompt/start/run/close

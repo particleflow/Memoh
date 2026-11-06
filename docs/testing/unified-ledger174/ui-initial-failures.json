@@ -1,0 +1,126 @@
+{
+  "passed": 26,
+  "failed": 30,
+  "failures": [
+    {
+      "test": "task detail identity and rendering boundary opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'This server does not support task obs\u2026'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe\u2026'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'You do not have permission to perform\u2026'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'Sign in to continue.'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your\u2026'",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary does not invent a specialist session for an accepted handoff without one",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after relation-denied",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after relation-unauthorized",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after relation-forbidden",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after relation-changed",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after logout",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary retires downstream content and ignores a late response after scope-changed",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary wires the shared retry action through the existing SDK and never reports supervisor completion",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary opens the specialist group without polling the hidden execution group",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary keeps delegation page two and execution task cursors separate across tab round trips",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary keeps the Web shell description and restores trigger focus on Escape",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary closes specialist detail and ignores its late reply after same-tab logout",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary projects the child own completed run, then removes its output when the next run is pending",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary renders HTML, Markdown and URLs literally without active elements",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary invalidates pending detail when another tab replaces the identity token",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary closes and aborts on login before any token update or parent unmount",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary closes and aborts on logout before any token update or parent unmount",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary closes and aborts on unauthorized before any token update or parent unmount",
+      "error": "TypeError: localStorage.clear is not a function"
+    },
+    {
+      "test": "task detail identity and rendering boundary closes and aborts on token-cleared before any token update or parent unmount",
+      "error": "TypeError: localStorage.clear is not a function"
+    }
+  ]
+}

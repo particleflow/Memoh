@@ -1,0 +1,3 @@
+PASS actual combined Web: four groups, exact string revision, offline separated from persisted success, zero/recorded bytes without download URLs
+PASS 403 clears checkpoints and stops polling; explicit read and browser reconnection restore the same operation without mutations
+PASS omitted evidence stays unknown; reloaded same identity, 390px Chinese dark mode has no horizontal overflow

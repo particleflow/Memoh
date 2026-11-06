@@ -1,0 +1,11 @@
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-completions
+    shared_provider_transcription_test.go:201: disabled provider result=&{Text:must not be requested Language: DurationSeconds:0 Words:[] ProviderMetadata:map[]} err=<nil> HTTP calls=1; want refusal before HTTP
+=== RUN   TestSharedTranscriptionRejectsDisabledProvider/openai-responses
+    shared_provider_transcription_test.go:201: disabled provider result=&{Text:must not be requested Language: DurationSeconds:0 Words:[] ProviderMetadata:map[]} err=<nil> HTTP calls=1; want refusal before HTTP
+--- FAIL: TestSharedTranscriptionRejectsDisabledProvider (0.00s)
+    --- FAIL: TestSharedTranscriptionRejectsDisabledProvider/openai-completions (0.00s)
+    --- FAIL: TestSharedTranscriptionRejectsDisabledProvider/openai-responses (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/audio	0.006s
+FAIL

@@ -1,0 +1,166 @@
+[
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/lost",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/timeout",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/malformed",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/reservation_save",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/ready_save",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/revoked_after_create",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates/left_creating",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderUnknownCreationNeverRecreates",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderOnlyCASWinnerCreates",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderReadOnlyGetDoesNotCreate",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderDoesNotTreatOtherIdentityErrorsAsRestart",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderChangedIdentityAndRevocationPreserveProgress/identity",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReadTracePreservesSentinelIdentity",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked_after_get",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderChangedIdentityAndRevocationPreserveProgress",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderReceiptAndHashValidationRemainOriginal/receipt_attempt",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderReceiptAndHashValidationRemainOriginal/completion_hash",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderReceiptAndHashValidationRemainOriginal/diagnostic_hash",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderReceiptAndHashValidationRemainOriginal",
+    "result": "pass"
+  },
+  {
+    "test": "TestBatchReaderPageRereadDoesNotDuplicateCommittedChunks",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/43",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/44",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/80",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/240",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchDelayedFramesWithinVendorLimits",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation",
+    "result": "pass"
+  },
+  {
+    "test": "TestStandardMCPPiBatchCompleteReceiptBudgetWithLongNativeIDs",
+    "result": "pass"
+  },
+  {
+    "test": "TestCompactResultIndependentOfLogStorageAndSurvivesRestart",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/success",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/native_first",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/native_second",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/short_second",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/bad_base64",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/parse",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/reader_not_ready",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/reader_save",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch/frame_deadline",
+    "result": "pass"
+  },
+  {
+    "test": "TestResultReadTracePreservesErrorsAndDispatch",
+    "result": "pass"
+  }
+]

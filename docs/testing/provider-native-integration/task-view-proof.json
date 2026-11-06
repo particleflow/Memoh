@@ -1,0 +1,9 @@
+{
+  "realServer": true,
+  "postgres": true,
+  "syntheticTask": true,
+  "taskDetail": true,
+  "contentRequests": 0,
+  "followupPosts": 0,
+  "errors": []
+}

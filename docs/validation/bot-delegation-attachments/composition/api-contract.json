@@ -1,0 +1,12 @@
+{
+  "source_parents": [
+    "cec5f22d0931f63b97d8d27a1eccf0873c51b734",
+    "83483850061f4c908c28ff5ef340209cf9e718d5"
+  ],
+  "openapi_operations_preserved": 360,
+  "sdk_exports_preserved": 360,
+  "missing_operations": [],
+  "missing_sdk_exports": [],
+  "sdk_generated": true,
+  "sdk_typecheck_exit": 0
+}

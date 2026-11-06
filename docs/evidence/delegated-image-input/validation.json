@@ -1,0 +1,78 @@
+{
+  "base": "4d23244c683aca4c436efec4db375921fdf60472",
+  "product_files": [
+    "internal/imagecapability/provider.go",
+    "cmd/internal/core/image_capability.go",
+    "cmd/internal/core/providers.go"
+  ],
+  "baseline_regression": {
+    "exit_code": 1,
+    "authorized_reference": "rejected before fix",
+    "images_http_posts": 0
+  },
+  "imagecapability_tests": {
+    "command": "go test -json ./internal/imagecapability",
+    "exit_code": 0,
+    "passed_test_and_subtest_events": 103,
+    "failed": 0,
+    "skipped": 0
+  },
+  "core_affected_tests": {
+    "command": "go test -json ./cmd/internal/core -run '^Test(ImageCapability|DelegatedImage)' -count=1",
+    "exit_code": 0,
+    "passed_test_and_subtest_events": 17,
+    "failed": 0,
+    "skipped": 0
+  },
+  "new_delegation_boundary_cases": 8,
+  "race": {
+    "command": "go test -race ./cmd/internal/core -run '^TestDelegatedImageReferenceUsesScopedOriginal$' -count=1",
+    "exit_code": 0
+  },
+  "vet": {
+    "command": "go vet ./internal/imagecapability ./cmd/internal/core",
+    "exit_code": 0
+  },
+  "incremental_lint": {
+    "command": "golangci-lint run --new-from-merge-base=4d23244c683aca4c436efec4db375921fdf60472 ./internal/imagecapability/... ./cmd/internal/core/...",
+    "exit_code": 0
+  },
+  "unfiltered_package_lint": {
+    "exit_code": 1,
+    "baseline_reproduced": true,
+    "baseline_exit_code": 1,
+    "remaining_issue": "cmd/internal/core/computer_tasks_preflight_test.go:91 unusedwrite DeviceID",
+    "file_unchanged": true
+  },
+  "aggregate": {
+    "command": "node .husky/checks.mjs",
+    "exit_code": 1,
+    "stopped_at": "same pre-existing unfiltered lint issue",
+    "aggregate_tests_ran": false,
+    "web": "no staged changes"
+  },
+  "prior_fixture_errors": {
+    "preserved": true,
+    "details": [
+      "initial fixture lacked explicit native source selection",
+      "additional fixture initially used a variable before declaration",
+      "parallel lint rejected by tool lock; sequential rerun passed"
+    ]
+  },
+  "field_operations": 0,
+  "real_model_calls": 0,
+  "provider_configuration_writes": 0,
+  "agent_core_changes": 0,
+  "media_alias_writes": 0,
+  "migration": false,
+  "api_sdk_changes": false,
+  "actual_incident_root_cause": "not confirmed; actual delegation arguments/reading error not obtained",
+  "ui_runtime_acceptance": "not performed; this is source/isolated validation only",
+  "ci": "not run on this branch",
+  "deployment": "not performed",
+  "official_agent_boundary": {
+    "command": "bash scripts/check-agent-core-boundary.sh",
+    "exit_code": 0,
+    "official_baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046"
+  }
+}

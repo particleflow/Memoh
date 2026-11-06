@@ -1,0 +1,493 @@
+{
+  "api": "synthetic intercepted API; no real PG/model/device",
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/supervisor"
+    },
+    {
+      "method": "GET",
+      "path": "/bots"
+    },
+    {
+      "method": "GET",
+      "path": "/bots"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/container"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workdirs"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/33333333-3333-4333-8333-333333333333/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/contact"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/ping"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/queue"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/status"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/agents"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workspace-targets"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/skills/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/models"
+    },
+    {
+      "method": "GET",
+      "path": "/providers"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/status"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/supervisor"
+    },
+    {
+      "method": "GET",
+      "path": "/bots"
+    },
+    {
+      "method": "GET",
+      "path": "/bots"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/container"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workdirs"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/33333333-3333-4333-8333-333333333333/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/contact"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/ping"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/queue"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/status"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/agents"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workspace-targets"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/skills/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/models"
+    },
+    {
+      "method": "GET",
+      "path": "/providers"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/status"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/status"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/queue"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/settings"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/33333333-3333-4333-8333-333333333333/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workdirs"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+    },
+    {
+      "method": "GET",
+      "path": "/ping"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/workspace-targets"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/status"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/queue"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/media/limits"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events"
+    }
+  ],
+  "runtime_subscriptions": [
+    "{\"type\":\"runtime_subscribe\",\"session_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\"}",
+    "{\"type\":\"runtime_subscribe\",\"session_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\"}",
+    "{\"type\":\"runtime_unsubscribe\",\"session_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\"}",
+    "{\"type\":\"runtime_subscribe\",\"session_id\":\"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee\"}",
+    "{\"type\":\"runtime_subscribe\",\"session_id\":\"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee\"}"
+  ],
+  "page_errors": []
+}

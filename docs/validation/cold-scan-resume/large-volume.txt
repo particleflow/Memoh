@@ -1,0 +1,10 @@
+=== RUN   TestColdScanLargeResumeReadVolume
+=== RUN   TestColdScanLargeResumeReadVolume/200MiB
+    cold_scan_linux_test.go:349: size=209715200 attempts=4 scan_and_response_read_bytes=210763776; cancellation every 64 MiB; response=64 KiB
+=== RUN   TestColdScanLargeResumeReadVolume/512MiB
+    cold_scan_linux_test.go:349: size=536870912 attempts=9 scan_and_response_read_bytes=537919488; cancellation every 64 MiB; response=64 KiB
+--- PASS: TestColdScanLargeResumeReadVolume (6.19s)
+    --- PASS: TestColdScanLargeResumeReadVolume/200MiB (1.66s)
+    --- PASS: TestColdScanLargeResumeReadVolume/512MiB (4.53s)
+PASS
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	6.197s

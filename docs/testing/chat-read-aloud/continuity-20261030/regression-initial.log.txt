@@ -1,0 +1,26 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/chat-read-aloud.streaming.test.ts (10 tests | 1 failed) 202ms
+     × manual replay uses bounded requests and cancels a pending streaming request synchronously 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/chat-read-aloud.streaming.test.ts > incremental native decoder input > manual replay uses bounded requests and cancels a pending streaming request synchronously
+AssertionError: expected 500 to be less than or equal to 80
+ ❯ src/pages/home/composables/chat-read-aloud.streaming.test.ts:108:61
+    106|     const speech = new ChatReadAloud({ synthesize, createPlayer: () =>…
+    107|     speech.replay({ key: 'manual', text: '正文'.repeat(300) })
+    108|     expect(Array.from(synthesize.mock.calls[0]![0]).length).toBeLessTh…
+       |                                                             ^
+    109|     speech.stop(); expect(synthesize.mock.calls[0]![1].aborted).toBe(t…
+    110|     resolve(new Blob(['late'], { type: 'audio/mpeg' })); await tick()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 30 passed (31)
+   Start at  11:55:24
+   Duration  1.78s (transform 483ms, setup 0ms, import 1.40s, tests 362ms, environment 2.19s)

@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  2 passed (2)
+      Tests  123 passed (123)
+   Start at  07:01:05
+   Duration  468ms (transform 383ms, setup 0ms, import 566ms, tests 36ms, environment 1ms)
+

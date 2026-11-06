@@ -1,0 +1,31 @@
+{
+  "base": "9c361d60371703c157d344dcebfd439acc6d78de",
+  "test": "TestBotPlaybackAccountBoundary",
+  "command": "go test -p=2 ./internal/handlers -run '^TestBotPlaybackAccountBoundary$' -count=1 -v",
+  "red": {
+    "exit_code": 1,
+    "chat_route_cases_that_unexpectedly_synthesized": 10
+  },
+  "green": {
+    "exit_code": 0,
+    "subcases_passed": 22,
+    "allowed_account_subcases": 4,
+    "denied_subcases": 18,
+    "denied_synthesis_calls": 0
+  },
+  "jwt_middleware": "server.NewServerWithSessionValidator -> auth.JWTMiddleware",
+  "account_validation": "accounts.Service.ValidateSession with in-memory AccountStore",
+  "bot_authorization": "SetPlaybackAccess -> AuthorizeBotAccessWithPermission -> bots.Service",
+  "legacy_synthesize_function_sha256_unchanged": "68929d9a5eedc85c130fe3fec87fe39c28e13e014cc1e4f9f70d990cf2052dcc",
+  "prior_15_ui_media_tests_rerun": false,
+  "real_paid_model_calls": 0,
+  "deployment_or_signing_attempted": false,
+  "current_harmony_source_reported_by_integration_owner": "87477f61",
+  "current_harmony_generated_context_verified": false,
+  "real_browser_autoplay_rejection_verified": false,
+  "arkweb_verified": false,
+  "lint": {
+    "command": "golangci-lint run --concurrency=2 ./internal/handlers",
+    "exit_code": 0
+  }
+}

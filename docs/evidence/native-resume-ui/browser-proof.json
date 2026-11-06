@@ -1,0 +1,17 @@
+{
+  "currentServer": true,
+  "realPG": true,
+  "syntheticHistory": true,
+  "realNativeExecution": false,
+  "scenarios": [
+    {
+      "mode": "unknown",
+      "language": "zh",
+      "posts": 1,
+      "unexpectedMutations": 0,
+      "deviceReads": 0,
+      "pageErrors": [],
+      "response": "synthetic network abort"
+    }
+  ]
+}

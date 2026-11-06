@@ -1,0 +1,40 @@
+{
+  "candidate": "ba44c06261fb3be30557160840bc25e339cab650",
+  "candidate_tree": "b38fb15c22262d77dcc9ad964f6b25df442895c1",
+  "first_product": "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+  "first_product_parent": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "last_product_parent": "043da08717c12a59f16814830318dda9759c9509",
+  "evidence": "d90f0536e52ad782f0436abccb26994ad4d1bb3a",
+  "current_unified": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+  "merge_preflight_tree_only": "a21f58acdcadf9e90f3c19ac90488d74625d32a2",
+  "admission": "blocked by confirmed final reconciliation duplicate-tail/cache coverage P1",
+  "product_patch_sha256": "f823c48bdf90e9d48047a01b1fd167394ff46a47c6ccac2cb6b7ec0da990916a",
+  "product_files": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "fc66a005b0d50f4b65c88552d5e56f84830643692d76edb6e37cd5090ab50493",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "ffb6911465f94687dba18df3a923c42f43e9bbeb4fb51c708326eb8598cec6c5",
+    "apps/web/src/pages/home/composables/speech-replay-cache.ts": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+    "internal/audio/service.go": "b00011b02568a0db65e5894f46e8084891fefda3c31f69036f1abad5e4bfda19",
+    "internal/handlers/bot_tts.go": "0862f42253d929f0001cd4b53be0576d3666bf82918d8ab15100d2089427de9b",
+    "internal/server/server.go": "cf2c94a250f2a4f15fa2ffc4e5a3807b6c57f7bd1bcd59f49690166fa9ab7b2a"
+  },
+  "checks": [
+    {
+      "name": "final DOM cursor",
+      "passed": 1,
+      "failed": 1,
+      "exit": 1
+    },
+    {
+      "name": "cache coverage",
+      "passed": 1,
+      "failed": 1,
+      "not_rerun_existing_cases": 2,
+      "exit": 1
+    }
+  ],
+  "paid_calls": 0,
+  "new_builds": 0,
+  "CI_dispatch": 0,
+  "release": false,
+  "production_or_HAP_changed": false
+}

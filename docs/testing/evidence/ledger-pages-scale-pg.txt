@@ -1,0 +1,15 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages
+    computer_delivery_integration_test.go:226: ledger metadata=10000 pages=626 operation_json_bytes=512 elapsed=12.216954633s; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip
+    computer_delivery_integration_test.go:232: real HTTPS Server/PG/filesystem: CLI upload 9800163 bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at 8394902, full content/hash match; CLI Linux publication unavailable; byte/job budgets and attempt/revoke checks enforced
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (19.47s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages (12.22s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip (5.00s)
+=== RUN   TestComputerDeliveryPostgresUpgradeFrom170
+    computer_delivery_upgrade_integration_test.go:139: 170 -> 174, repeat-up, down/up: old receipt/unknown payloads and operation revision retained; old writer and lossy rollback rejected
+--- PASS: TestComputerDeliveryPostgresUpgradeFrom170 (2.01s)
+=== RUN   TestComputerDeliveryPostgresCanonicalTransferSchema
+--- PASS: TestComputerDeliveryPostgresCanonicalTransferSchema (0.53s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	22.029s

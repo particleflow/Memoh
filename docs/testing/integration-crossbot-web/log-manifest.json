@@ -1,0 +1,481 @@
+{
+  "product_commit": "47434be1505c68290bab9e06e266422b1d395ccf",
+  "product_tests_rerun": false,
+  "source_prefix": "integration-final-",
+  "rules": [
+    "Allowlisted existing local test/check logs only; no server, config, environment or production logs.",
+    "Replace /workspace/Memoh with <repo> and /workspace/.memoh-cloud/go with <cloud-go-toolchain>. No other text replacements.",
+    "Go files keep every JSON event and Output string; no Output decoding or event filtering. Only the above literal path substitutions can differ from raw JSONL bytes.",
+    "quality-checks.txt concatenates full selected outputs with source headers, except web-build retains only its final warning/success tail. It is an assembled excerpt, not a raw log.",
+    "Empty server-build output has no independent exit-status proof; previously observed exit status is recorded in the checkpoint narrative."
+  ],
+  "sources": [
+    {
+      "source": "integration-final-go-service.log",
+      "raw_sha256": "74745346c172babde4b314ae110b8d53ec0ecc6b9e66cee2f0fef3e6fdda975d",
+      "raw_bytes": 205631,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/go-service.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "74745346c172babde4b314ae110b8d53ec0ecc6b9e66cee2f0fef3e6fdda975d",
+      "published_bytes": 205631,
+      "events": 897,
+      "test_events": {
+        "pass": 222
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/botdelegation",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/computertask",
+          "action": "pass"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-go-host-retry2.log",
+      "raw_sha256": "703159c9031ae8cced176085dc8811121633e34f5939c8a58ec7a4bc3659800b",
+      "raw_bytes": 62069,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/go-host-retry2.jsonl",
+      "transform": "literal cloud/repository path normalization",
+      "published_sha256": "f035321dc18fa6897cb2ad6a295bda438f7fef1b2a2d2656929805e1383ad31c",
+      "published_bytes": 62057,
+      "events": 288,
+      "test_events": {
+        "pass": 62
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/handlers",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/agent/application",
+          "action": "fail"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/agent/tool",
+          "action": "fail"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-go-host-retry3.log",
+      "raw_sha256": "9adc3bcd2e0afbdbc0c33d0c48789308e3e16691895990cfa218283b1df22231",
+      "raw_bytes": 115488,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/go-host-retry3.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "9adc3bcd2e0afbdbc0c33d0c48789308e3e16691895990cfa218283b1df22231",
+      "published_bytes": 115488,
+      "events": 514,
+      "test_events": {
+        "pass": 86
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/agent/application",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/agent/tool",
+          "action": "pass"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-pg-memory.log",
+      "raw_sha256": "8d23d79aa9ff32dd15c43ba87494cbe4cc72a76334c7464c19b964ccc38049da",
+      "raw_bytes": 354250,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/pg-memory.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "8d23d79aa9ff32dd15c43ba87494cbe4cc72a76334c7464c19b964ccc38049da",
+      "published_bytes": 354250,
+      "events": 1714,
+      "test_events": {
+        "pass": 233
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/memory/adapters",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/memllm",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/migrate",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/adapters/builtin",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/slug",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/storefs",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/segment",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/memory/wikistore",
+          "action": "pass"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-pg-delivery-retry.log",
+      "raw_sha256": "63b65f6f70d48e3ab68abed3c06b1d37c3952a3d9e21f2ed5c6521c2f076cc30",
+      "raw_bytes": 28741,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/pg-delivery-retry.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "63b65f6f70d48e3ab68abed3c06b1d37c3952a3d9e21f2ed5c6521c2f076cc30",
+      "published_bytes": 28741,
+      "events": 116,
+      "test_events": {
+        "pass": 26
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/db",
+          "action": "pass"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-pg-delivery.log",
+      "raw_sha256": "f8304f5007ea78f791ebe54da63f475c4e461ba872d3a6184432e2b29a21d56d",
+      "raw_bytes": 28989,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/pg-delivery.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "f8304f5007ea78f791ebe54da63f475c4e461ba872d3a6184432e2b29a21d56d",
+      "published_bytes": 28989,
+      "events": 117,
+      "test_events": {
+        "pass": 20,
+        "fail": 6
+      },
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/db",
+          "action": "fail"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-go-host.log",
+      "raw_sha256": "030938273dfa10e0cdd10a85c0302c0ffea7d4143387e1e903cef51c18fa2690",
+      "raw_bytes": 1701,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/go-host.jsonl",
+      "transform": "none; byte-for-byte copy",
+      "published_sha256": "030938273dfa10e0cdd10a85c0302c0ffea7d4143387e1e903cef51c18fa2690",
+      "published_bytes": 1701,
+      "events": 9,
+      "test_events": {},
+      "package_terminal_events": [
+        {
+          "package": "github.com/felinics/memoh/internal/handlers",
+          "action": "fail"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/agent/application",
+          "action": "fail"
+        },
+        {
+          "package": "github.com/felinics/memoh/internal/agent/tool",
+          "action": "fail"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-go-host-retry.log",
+      "raw_sha256": "d9981435dbac425b5f0a31111cb38cd3def0f9136bf485c0c571268c37ba102c",
+      "raw_bytes": 474,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/go-host-retry.jsonl",
+      "transform": "literal cloud/repository path normalization",
+      "published_sha256": "22ad6f6e90649576680cc86dbccc2a805b46d8dbf3dae28c969e3db9bbea5620",
+      "published_bytes": 464,
+      "events": 6,
+      "test_events": {},
+      "package_terminal_events": [
+        {
+          "package": ".",
+          "action": "fail"
+        }
+      ]
+    },
+    {
+      "source": "integration-final-web-tests.log",
+      "raw_sha256": "eb631d5fc42f07334d1a1bdfe77918faa663bd822cffa29e0bb0cfe1a619832a",
+      "raw_bytes": 16112,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/web-tests.txt",
+      "transform": "literal cloud/repository path normalization",
+      "published_sha256": "c5c07decbd048ab1c5610c38f43c45ca5abbf543bff2316a2a073bcdc38500c2",
+      "published_bytes": 16102
+    },
+    {
+      "source": "integration-final-web-tests-retry.log",
+      "raw_sha256": "9cb25561cef5f0f02b0ffbf0ba0c93cbb7348129256d3d09b03146fdb5bc6f6e",
+      "raw_bytes": 731,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "published": "logs/web-tests-retry.txt",
+      "transform": "literal cloud/repository path normalization",
+      "published_sha256": "757b30aec720648aa2941f442151aeca73484b07339bdb460e0f41c2756162e3",
+      "published_bytes": 721
+    },
+    {
+      "source": "integration-final-web-typecheck.log",
+      "raw_sha256": "8fb1b48c66dcd6ef430aa5e5034746d443a62df409461bc1225a94579181da88",
+      "raw_bytes": 1391,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        17
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "3e1f63f79098c5cf87f92345d9c7ad70d27048c25c1b96654663d01ef45c109a"
+    },
+    {
+      "source": "integration-final-web-typecheck-final.log",
+      "raw_sha256": "2825b2d730754d45b501c4f141702e8a35d722710342ff383286d8cd317af729",
+      "raw_bytes": 100,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        4
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "7ccbddbbc4ede565d3cbf8fbafbeb3beac710ca011c76ec521279f95397d4c11"
+    },
+    {
+      "source": "integration-final-sdk-typecheck-final.log",
+      "raw_sha256": "6f2a9a3ae6dee0b3e1a59a2954340e4df29c85dc1666ae226ddcbf102050a73c",
+      "raw_bytes": 96,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        4
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "0bfb375565d7960f6ab73dc9bebc46c1c2ec320f133f03888a4185b90ec6bff8"
+    },
+    {
+      "source": "integration-final-desktop-typecheck-final.log",
+      "raw_sha256": "7c6d5f11126a97df720015dbd3514025333455750631bdbccbaf49f31960d8dd",
+      "raw_bytes": 673,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        20
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "150efd619ddd6605dafc7d53dcbb4deaf1b9602b3b0799f2b4ac9ee753a12e3c"
+    },
+    {
+      "source": "integration-final-eslint-final.log",
+      "raw_sha256": "a04cf1ec8c89b1a5372f14f7e2949fa2b61232fb6a20a7128187673585d9f549",
+      "raw_bytes": 2280,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        35
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "1217cd68e8f206c53acad454f202193f2bffa9688a48ee3356d523ed09fbca68"
+    },
+    {
+      "source": "integration-final-ui-contract-final.log",
+      "raw_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "raw_bytes": 1169,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        11
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec"
+    },
+    {
+      "source": "integration-final-web-build.log",
+      "raw_sha256": "07a0d40e75f46da4d017f587fc7a56e2baf74e1ab6b2f657cc5ee6e7ec9c4c68",
+      "raw_bytes": 105539,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        784,
+        789
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "9aed37a26e3f9ba6fbe77680eee8e2449b7934c4b698a340be0f0d6528ec5238"
+    },
+    {
+      "source": "integration-final-server-build.log",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_bytes": 0,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "integration-final-browser.log",
+      "raw_sha256": "448852f360fc2507ef7a5dd74a6e96062009a7e6e246520f0adededa427eee2c",
+      "raw_bytes": 256,
+      "matches_prior_manifest": false,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        12
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "448852f360fc2507ef7a5dd74a6e96062009a7e6e246520f0adededa427eee2c"
+    },
+    {
+      "source": "integration-final-browser-retry.log",
+      "raw_sha256": "837e2d6d7244a3f95cea0ad08bab502c8fa8f16bf74287caa28914c2b146ec6e",
+      "raw_bytes": 338,
+      "matches_prior_manifest": true,
+      "safety_review": "synthetic test/check output; no credential values, private network addresses, user files or production data; public documentation URLs only",
+      "selected_raw_lines_inclusive": [
+        1,
+        1
+      ],
+      "published": "logs/quality-checks.txt",
+      "transform": "selected output decoded as UTF-8; literal cloud/repository path normalization; section header appended",
+      "selected_text_sha256": "837e2d6d7244a3f95cea0ad08bab502c8fa8f16bf74287caa28914c2b146ec6e"
+    },
+    {
+      "source": "integration-go-key.log",
+      "raw_sha256": "4b4006b78291681f254ab0222727cfe1919404fc5ca3c070cb950fb2b30d5af4",
+      "raw_bytes": 612797,
+      "matches_prior_manifest": "first checkpoint results.json",
+      "published": "logs/first-checkpoint-skips.jsonl",
+      "transform": "Selected all events belonging to each skipped named test; parsed JSON and reserialized with source and source_line envelope. Not raw JSONL and not the complete first-stage command. Output strings remain unchanged.",
+      "selected_raw_lines": [
+        392,
+        393,
+        394,
+        395,
+        396,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        1697,
+        1698,
+        1699,
+        1700,
+        1701,
+        1702,
+        1703,
+        1704,
+        1705,
+        1706,
+        2105,
+        2106,
+        2107,
+        2108,
+        2109
+      ],
+      "test_skip_names": [
+        "TestPostgresMemoryFileReferenceLifecycle",
+        "TestPostgresMemoryLifecycleAuthoredMarkdownForget",
+        "TestPostgresMemoryLifecycleDeleteHealthyRebuild",
+        "TestPostgresMemoryLifecycleDeleteOutageMustNotResurrect",
+        "TestPostgresMemoryLifecycleUnreadableProjection",
+        "TestPostgresUpsertNodeConcurrentlyUnionsSourceRefs",
+        "TestPostgresUpsertNodeRejectsConflictingBotScope",
+        "TestSeekableReadVolume"
+      ],
+      "safety_review": "synthetic tests only; skip reasons are opt-in/DSN environment variable names without values"
+    },
+    {
+      "source": "integration-go-boundaries.log",
+      "raw_sha256": "6084a6428d59d237b9c171c61d15b39da00d2b7caf0cf0aaf4b10c81d995544f",
+      "raw_bytes": 1409436,
+      "matches_prior_manifest": "first checkpoint results.json",
+      "published": "logs/first-checkpoint-skips.jsonl",
+      "transform": "Selected all events belonging to each skipped named test; parsed JSON and reserialized with source and source_line envelope. Not raw JSONL and not the complete first-stage command. Output strings remain unchanged.",
+      "selected_raw_lines": [
+        174,
+        175,
+        176,
+        177,
+        178
+      ],
+      "test_skip_names": [
+        "TestColdScanLargeResumeReadVolume"
+      ],
+      "safety_review": "synthetic tests only; skip reasons are opt-in/DSN environment variable names without values"
+    },
+    {
+      "source": "integration-final-browser/proof.json",
+      "raw_sha256": "4492ccd617c56e9951f6554b51895aa327735470f3dae2ed626d77f6715d653d",
+      "raw_bytes": 30886,
+      "published": "logs/browser-observation.json",
+      "transform": "Whitelist metadata and group existing response records by method/status/path class; omit individual paths, fixture identities and cursor-presence values. No new browser run.",
+      "published_sha256": "3415ac5211de9449ce5a3fe471e3d19beee52ceae79b6b5f4c2b2b1c5bfc68c4",
+      "safety_review": "only synthetic run metadata and aggregate HTTP responses; no production data or credentials"
+    }
+  ],
+  "assembled_quality_sha256": "2e41ce20e1ecb445f33af833b172d03719d65192c092963ccc52ad1676e4f231",
+  "first_checkpoint_skips_sha256": "6a6db42cbc803836bcf34ec2b01490f31b66907b904c4c49fd07b846176c0907"
+}

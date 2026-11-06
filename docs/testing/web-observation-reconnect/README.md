@@ -1,0 +1,131 @@
+# Resume downstream task observation after a transient read failure
+
+Base: `7bcbba5ac85a2ba0769b48ed8d4334db4b7806f7` (PR #76 candidate).
+This follow-up changes only the Web observer and its tests. It does not change
+backend authorization, task records, runtime/contextview, provider behavior,
+attachments or deployment configuration.
+
+## Defect and behavior
+
+The supervisor's Tasks dialog already opens a specialist delegation and that
+specialist session's downstream tasks. Previously **any** error from the
+parent-delegation polling request erased downstream navigation. A short network
+failure or 503 forced the user to reopen the child list and task after recovery.
+The two new red regressions reproduced that loss on the unchanged base
+([output](red-ui.log), exit 1, 2 failed and 23 filtered tests).
+
+The observer now retains only the selected task/page identifiers during a
+transient parent-read error. It immediately clears child content, aborts pending
+reads and pauses child polling. It resumes the same selection with a fresh GET
+only after the original parent relation is fetched successfully and still names
+the same delegation, target Bot and target session. Automatic recovery and
+explicit Reload both revalidate the parent first. A 401/403/404, unsupported
+route, changed relation, identity/scope change or closed view still retires the
+navigation. Generation checks reject late results even if abort is ignored.
+Nothing resubmits execution or requests a delivery retry.
+
+This remains five-second polling while the view is visible, not streaming logs.
+Closing the dialog or switching away still resets navigation; the change does
+not introduce durable navigation or a new task queue.
+
+## Existing functionality and remaining boundaries
+
+The baseline already implements delegation list/detail, child-session task
+list/detail, separate execution/delivery states, visible assistant summaries,
+and a scoped attachment download action. Existing evidence is in
+[management drilldown](../web-management-task-drilldown.md) and
+[task results/downloads](../web-task-results-and-downloads.md). Those historical
+runs are not new tests for this patch. Bot creation/settings and downloads were
+not rerun here because their code/contracts are unchanged.
+
+A subagent run being completed is not business acceptance. The current endpoint
+does not expose live tool logs, a runnable queue position or immutable results
+for every follow-up. Unknown/accepted/waiting states remain visible. No new
+cancel, execution retry or download shortcut was added. Production OAuth and
+legacy media P1 holds remain, as do real PC/provider/mobile acceptance needs.
+
+## Verification performed
+
+All commands ran in the same selected cloud environment using a temporary
+checkout because `/workspace` was full and contained unrelated uncommitted work.
+That work, database/original files and historical evidence were not cleared.
+Existing dependency directories were reused; lockfile and dependency-source
+contracts match the base. Node 25.9.0, pnpm 10.27.0, Go 1.25.7.
+
+| Check | Result / evidence |
+| --- | --- |
+| `NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run --project web apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/composables/useSessionTasks.test.ts apps/web/src/pages/home/composables/useBotDelegations.test.ts --maxWorkers=2` | Exit 0; **86 passed**, 3 files, no skips ([log](ui-final.log)). |
+| `pnpm --filter @memohai/web typecheck` | Exit 0 ([log](web-typecheck-final.log)). |
+| `pnpm --filter @memohai/sdk typecheck` | Exit 0 ([log](sdk-typecheck.log)). |
+| `pnpm exec eslint` on the four changed Web source/test files | Exit 0; 2 inherited `vue/one-component-per-file` test warnings ([log](eslint.log)). |
+| `node scripts/check-ui-contract.mjs` | Exit 0; 3 inherited contract warnings ([log](ui-contract.log)). |
+| `pnpm --filter @memohai/web exec vite build --outDir /tmp/web-observation-reconnect/web-dist` | Exit 0; chunk-size warning retained ([log](web-build.log)). |
+| `bash scripts/check-agent-core-boundary.sh` | Exit 0, official `bf0318c5` runtime/contextview boundary ([log](core-boundary.log)). |
+
+The 86 tests include four network/503 × automatic/manual recovery cases,
+waiting-decision state after recovery, no child reads while the parent is
+unavailable, late success/rejection after abort, page retention, scope reset,
+401/403/404, changed relation, logout and existing cross-tab/identity/cursor
+checks. These are synthetic SDK/component tests, not real device execution.
+
+### Real server, PostgreSQL and browser
+
+The source backend was built and started against the **existing isolated
+synthetic** PostgreSQL database at clean schema 173. HEAD health and normal login
+returned 200. Vite served this changed checkout. No migration, business message,
+model invocation, PC command or task creation was performed. The browser reused
+an existing synthetic supervisor → specialist → child task generated by the
+previous documented deterministic-model run. Its reads used the real current
+HTTP handlers and PG records, not mocked successful task responses.
+
+The [browser script](browser-reconnect.mjs) verified:
+
+1. Open the real delegation and child task detail (`completed`, visible final
+   synthetic text; business state remains unverified).
+2. Set the actual browser network offline, observe the task-dialog error and
+   cleared content, and verify child reads remain paused for another poll.
+3. Restore connectivity and observe the same selected detail resume
+   automatically without reopening the list.
+4. Inject **only** a parent-GET 503, verify child reads pause, remove the
+   injection, and use Reload to recover the same detail.
+5. Inject a parent-GET 403 and verify downstream navigation/content are retired.
+
+The 503/403 are browser transport fixtures, **not** a production outage or real
+permission-revocation test. Normal responses still come from the real server.
+The request trace contains only GETs; there were no page errors, model calls or
+business redispatches ([proof](browser-proof.json), [exit-0 output](browser-final.log)).
+All screenshots below were opened and inspected:
+
+- [Offline: content cleared, selection retained](browser-offline.png)
+- [Recovered: same task detail read afresh](browser-recovered.png)
+- [Denied: downstream navigation retired](browser-denied.png)
+
+The script requires `OBSERVATION_EVIDENCE_DIR` containing a private token and
+synthetic fixture-state file. Those inputs are deliberately excluded. Its
+Playwright import path describes this cloud environment, not a product
+installation requirement. Do not point it at production conversations.
+
+### Failures and environment limitations retained
+
+The first browser observer found a **global** network toast before the task
+poll failed, then checked task text too early ([original exit-1 output](browser-first.log)).
+The correction scopes error assertions to the actual task dialog. No product
+change was needed for that observer error; the later run above passed.
+
+The first backend build could not create its module cache because the restored
+environment's cache symlink target was absent. A scratch cache under `/tmp`
+allowed the same source build to finish (exit 0). A brief executor transport
+disconnect then prevented one observer-command launch; recovery checks confirmed
+it had not run, retained the source/old processes, and collected the already
+completed Web build instead of rerunning it. No environment replacement,
+global prune, dependency upgrade or fixture database cleanup was performed.
+
+Unrelated workspace requests can still fail in this restored fixture, which has
+no running workspace bridge. They are retained in the browser response trace;
+this patch does not claim default workspace bootstrap or a new Bot creation
+acceptance. Human QA and production/device testing remain unperformed.
+
+[manifest.json](manifest.json) records exact bytes/hashes of the selected logs,
+trace, observer and screenshots. Fixture secrets were checked before copying;
+private configuration, tokens and full server logs are excluded. Published test
+outputs are unchanged, including the initial failure and inherited warnings.

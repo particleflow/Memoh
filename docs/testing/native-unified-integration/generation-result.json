@@ -1,0 +1,7 @@
+{
+  "swagger": "go generate ./internal/handlers",
+  "sdk": "pnpm run generate-sdk",
+  "sqlc": "existing sqlc v1.31.1 binary generate",
+  "generated_diff": [],
+  "initial_sqlc_go_run": "failed: required Go >=1.26.0, local1.25.7; no dependency change"
+}

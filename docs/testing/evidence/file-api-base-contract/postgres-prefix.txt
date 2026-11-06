@@ -1,0 +1,7 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix
+    computer_delivery_integration_test.go:232: configured /api preserved for limits/create/status/append/complete/commit/resolve; real device verifier, PG and file store; same upload receipt and committed reference
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (7.78s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix (0.68s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	8.853s

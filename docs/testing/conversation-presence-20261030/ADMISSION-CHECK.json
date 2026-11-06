@@ -1,0 +1,105 @@
+{
+  "recorded_at_utc": "2026-10-30T15:12:58.038357+00:00",
+  "source_commit": "45c27c6e5f8aeb214a15cc1c9b4eeae1412ce294",
+  "base_review_commit": "0b731eb9e72de5abf6c6cf28b87a608360efedf3",
+  "scope": "forward admission seam corrections for unified integration; not production acceptance",
+  "red": {
+    "top_level_passed": [],
+    "subcases_passed": 10,
+    "failed": [
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory/schedule",
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory/task_result",
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory/delegation",
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory/native_task",
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel/copilot_automatic_member",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel/empty_selection",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel/whitespace_selection",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel",
+      "github.com/felinics/memoh/internal/agent/application"
+    ],
+    "package_results": [
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/application",
+        "Action": "fail",
+        "Elapsed": 1.3940000000000001
+      }
+    ]
+  },
+  "green": {
+    "top_level_passed": [
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel"
+    ],
+    "subcases_passed": 20,
+    "failed": [],
+    "package_results": [
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/application",
+        "Action": "pass",
+        "Elapsed": 2.621
+      }
+    ]
+  },
+  "focused_race": {
+    "top_level_passed": [
+      "TestConversationPresenceNativeWSAndHistory",
+      "TestConversationPresencePostgresClaimPublishAndRestart",
+      "TestConversationPresencePostgresCloseBeforePrepare",
+      "TestConversationPresencePostgresRejectsStaleAndRevoked",
+      "TestConversationPresencePostgresAbortRejectsPublication",
+      "TestConversationPresencePostgresRevocationStillClosesFeedback",
+      "TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory",
+      "TestConversationPresenceUnknownHistoryNeedsTrustedAnchor",
+      "TestConversationPresenceRuntimeSameModelParallelAndFormalFirst",
+      "TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites",
+      "TestPresenceAdmissionRequiresPinnedEffectiveModel"
+    ],
+    "subcases_passed": 36,
+    "failed": [],
+    "package_results": [
+      {
+        "Package": "github.com/felinics/memoh/internal/agent/application",
+        "Action": "pass",
+        "Elapsed": 3.775
+      }
+    ]
+  },
+  "migration_0182_and_all_migration_files_unchanged": true,
+  "receipts_or_claims_reset": false,
+  "server_build_and_local_readiness": true,
+  "browser": {
+    "source_commit": "45c27c6e5f8aeb214a15cc1c9b4eeae1412ce294",
+    "scope": "actual Vite chat page authenticated against real Go backend; controlled in-memory chat state fixture, not a full WS/browser/model e2e",
+    "checks": [
+      "natural ack rendered once on existing status surface",
+      "light zh",
+      "dark narrow zh",
+      "formal text suppresses stale ack even if status clear has not arrived",
+      "terminal/history status hidden"
+    ],
+    "page_errors": [],
+    "screenshots": [
+      "ack-light-zh.png",
+      "ack-dark-narrow-zh.png",
+      "formal-clears-ack.png"
+    ],
+    "human_qa": false,
+    "real_model_calls": 0
+  },
+  "real_inference_or_tts_calls_in_this_followup": 0,
+  "no_model_request_in_new_gate_tests": true,
+  "new_schema_or_public_api": false,
+  "generated_sqlc_version": "v1.31.1",
+  "no_hand_edit_of_generated_go": true,
+  "earlier_suites_reused_not_rerun": true,
+  "deployment_count": 0,
+  "human_qa": false,
+  "limitations": [
+    "opaque upstream routing/fallback remains unverified",
+    "real latency/cost unmeasured",
+    "ack audio not integrated",
+    "history provenance aggregation not long-history benchmarked",
+    "browser uses controlled transcript state"
+  ]
+}

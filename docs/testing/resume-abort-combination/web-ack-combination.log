@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  1 passed | 2 skipped (3)
+      Tests  4 passed | 173 skipped (177)
+   Start at  21:06:13
+   Duration  7.81s (transform 6.56s, setup 0ms, import 8.58s, tests 45ms, environment 1ms)
+

@@ -1,0 +1,60 @@
+=== RUN   TestColdScanResumesAcrossRequestDeadlines
+    cold_scan_linux_test.go:44: complete after 5 bounded attempts; scan offsets=[0 1048576 2097152 3145728]; read bytes=4568576
+--- PASS: TestColdScanResumesAcrossRequestDeadlines (0.26s)
+=== RUN   TestColdScanChangedIdentityDiscardsProgress
+=== RUN   TestColdScanChangedIdentityDiscardsProgress/restored-mtime
+=== RUN   TestColdScanChangedIdentityDiscardsProgress/replacement
+=== RUN   TestColdScanChangedIdentityDiscardsProgress/root-replacement
+=== RUN   TestColdScanChangedIdentityDiscardsProgress/mode
+=== RUN   TestColdScanChangedIdentityDiscardsProgress/hardlink
+--- PASS: TestColdScanChangedIdentityDiscardsProgress (0.46s)
+    --- PASS: TestColdScanChangedIdentityDiscardsProgress/restored-mtime (0.09s)
+    --- PASS: TestColdScanChangedIdentityDiscardsProgress/replacement (0.15s)
+    --- PASS: TestColdScanChangedIdentityDiscardsProgress/root-replacement (0.09s)
+    --- PASS: TestColdScanChangedIdentityDiscardsProgress/mode (0.08s)
+    --- PASS: TestColdScanChangedIdentityDiscardsProgress/hardlink (0.04s)
+=== RUN   TestColdScanReadFailureAndMutationDuringPauseDiscardWork
+=== RUN   TestColdScanReadFailureAndMutationDuringPauseDiscardWork/read-error
+=== RUN   TestColdScanReadFailureAndMutationDuringPauseDiscardWork/mutation-at-cancel
+=== RUN   TestColdScanReadFailureAndMutationDuringPauseDiscardWork/full-sha-mismatch
+--- PASS: TestColdScanReadFailureAndMutationDuringPauseDiscardWork (0.21s)
+    --- PASS: TestColdScanReadFailureAndMutationDuringPauseDiscardWork/read-error (0.06s)
+    --- PASS: TestColdScanReadFailureAndMutationDuringPauseDiscardWork/mutation-at-cancel (0.07s)
+    --- PASS: TestColdScanReadFailureAndMutationDuringPauseDiscardWork/full-sha-mismatch (0.08s)
+=== RUN   TestColdScanRestartBotAndWaitingCancellation
+--- PASS: TestColdScanRestartBotAndWaitingCancellation (0.09s)
+=== RUN   TestColdScanConcurrentTakeoverHasOneOwner
+--- PASS: TestColdScanConcurrentTakeoverHasOneOwner (0.16s)
+=== RUN   TestColdScanSharesCacheLimitsAndEvictsSafely
+--- PASS: TestColdScanSharesCacheLimitsAndEvictsSafely (0.24s)
+=== RUN   TestColdScanLargeResumeReadVolume
+    cold_scan_linux_test.go:314: opt-in 200/512 MiB interrupted cold verification
+--- SKIP: TestColdScanLargeResumeReadVolume (0.00s)
+=== RUN   TestVerifiedRangeWarmReadsAreBoundedAndRestartRevalidates
+--- PASS: TestVerifiedRangeWarmReadsAreBoundedAndRestartRevalidates (0.12s)
+=== RUN   TestVerifiedRangeDetectsChangesOutsideRequestedBlock
+=== RUN   TestVerifiedRangeDetectsChangesOutsideRequestedBlock/in-place-with-restored-mtime
+=== RUN   TestVerifiedRangeDetectsChangesOutsideRequestedBlock/replace
+=== RUN   TestVerifiedRangeDetectsChangesOutsideRequestedBlock/replace-root
+--- PASS: TestVerifiedRangeDetectsChangesOutsideRequestedBlock (0.49s)
+    --- PASS: TestVerifiedRangeDetectsChangesOutsideRequestedBlock/in-place-with-restored-mtime (0.10s)
+    --- PASS: TestVerifiedRangeDetectsChangesOutsideRequestedBlock/replace (0.20s)
+    --- PASS: TestVerifiedRangeDetectsChangesOutsideRequestedBlock/replace-root (0.19s)
+=== RUN   TestVerifiedRangeSeekBoundariesAndFullRead
+--- PASS: TestVerifiedRangeSeekBoundariesAndFullRead (0.13s)
+=== RUN   TestVerifiedRangeNeverEmitsAnUnverifiedBlock
+--- PASS: TestVerifiedRangeNeverEmitsAnUnverifiedBlock (0.05s)
+=== RUN   TestVerifiedRangeFailedFillInvalidatesPreviousBuffer
+--- PASS: TestVerifiedRangeFailedFillInvalidatesPreviousBuffer (0.08s)
+=== RUN   TestVerifiedRangeRejectsMutationAfterOpenAndHardlinks
+--- PASS: TestVerifiedRangeRejectsMutationAfterOpenAndHardlinks (0.09s)
+=== RUN   TestVerifiedRangeConcurrentColdReadsVerifyOnce
+--- PASS: TestVerifiedRangeConcurrentColdReadsVerifyOnce (0.14s)
+=== RUN   TestVerifiedRangeCancellationDoesNotPublishIndexOrHoldLock
+--- PASS: TestVerifiedRangeCancellationDoesNotPublishIndexOrHoldLock (0.05s)
+=== RUN   TestVerifiedRangeCacheEvictionAndMemoryBound
+--- PASS: TestVerifiedRangeCacheEvictionAndMemoryBound (0.42s)
+=== RUN   TestVerifiedRangeConfinesKeysAndLinks
+--- PASS: TestVerifiedRangeConfinesKeysAndLinks (0.05s)
+PASS
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	4.061s

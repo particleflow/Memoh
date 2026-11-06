@@ -1,0 +1,8 @@
+=== RUN   TestTaskSourceProcessRecovery
+    source_test.go:207: delivery host binding unavailable
+        delivery store unavailable or corrupt
+        delivery private storage permission denied
+--- FAIL: TestTaskSourceProcessRecovery (0.05s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.054s
+FAIL

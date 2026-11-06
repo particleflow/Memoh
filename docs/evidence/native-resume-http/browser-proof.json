@@ -1,0 +1,11 @@
+{
+  "combinedServer": true,
+  "realPG": true,
+  "mutations": 0,
+  "deviceReads": 0,
+  "pageErrors": [],
+  "detailStates": [
+    "unknown",
+    "unknown"
+  ]
+}

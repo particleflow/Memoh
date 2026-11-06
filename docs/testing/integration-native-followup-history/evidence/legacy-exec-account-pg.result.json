@@ -1,0 +1,18 @@
+{
+  "check": "legacy-exec-account-pg",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-run",
+    "^TestPostgresAccountAndBotAuthorization$",
+    "./internal/legacy-exec"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T00:05:01Z",
+  "elapsed_seconds": 3.035
+}

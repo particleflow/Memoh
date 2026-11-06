@@ -1,0 +1,1 @@
+PASS actual Server/PG/Web same Bot and configured authority after browser offline/online; policy and login retained; zero writes/device calls. No central LAN policy is present; TCP/TLS route selection is not claimed.

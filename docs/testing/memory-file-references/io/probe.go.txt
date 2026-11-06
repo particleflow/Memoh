@@ -1,0 +1,72 @@
+package builtin
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/memory/adapters"
+	"github.com/felinics/memoh/internal/storage/providers/fallback"
+	"github.com/felinics/memoh/internal/storage/providers/localfs"
+)
+
+func probeReadChars(t *testing.T) uint64 {
+	t.Helper()
+	raw, err := os.ReadFile("/proc/self/io")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range strings.Split(string(raw), "\n") {
+		if strings.HasPrefix(line, "rchar: ") {
+			v, err := strconv.ParseUint(strings.TrimSpace(strings.TrimPrefix(line, "rchar:")), 10, 64)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return v
+		}
+	}
+	t.Fatal("rchar missing")
+	return 0
+}
+func TestBoundedMemoryProjectionIO(t *testing.T) {
+	var rows []map[string]any
+	for _, size := range []int{1 << 20, 16 << 20} {
+		originals := localfs.NewOriginals(t.TempDir())
+		durable := fallback.NewDurable(localfs.New(t.TempDir()), originals, localfs.New(t.TempDir()))
+		files := media.NewService(nil, durable)
+		files.SetRequirePersistence(true)
+		asset, err := files.Ingest(t.Context(), media.IngestInput{BotID: "synthetic-io-bot", Mime: "text/plain", Reader: strings.NewReader(strings.Repeat("x", size))})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := NewBuiltinProvider(nil, nil)
+		p.SetFileResolver(files)
+		items := []adapters.MemoryItem{{Metadata: map[string]any{"content_hash": asset.ContentHash}}, {Metadata: map[string]any{"content_hash": asset.ContentHash}}}
+		before := probeReadChars(t)
+		start := time.Now()
+		for range 3 {
+			p.projectFileRefs(t.Context(), "synthetic-io-bot", items)
+			if len(items[0].FileRefs) != 1 || items[0].FileRefs[0].Status == "unavailable" {
+				t.Fatal(items)
+			}
+		}
+		delta := probeReadChars(t) - before
+		row := map[string]any{"file_bytes": size, "queries": 3, "duplicate_refs_per_query": 2, "rchar_delta": delta, "elapsed_ns": time.Since(start).Nanoseconds()}
+		rows = append(rows, row)
+		t.Logf("IO %v", row)
+	}
+	data, _ := json.MarshalIndent(rows, "", "  ")
+	out := os.Getenv("MEMORY_IO_EVIDENCE")
+	if out == "" {
+		t.Fatal("MEMORY_IO_EVIDENCE required")
+	}
+	if err := os.WriteFile(out, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("rchar counts bytes returned by read syscalls, not physical disk traffic; setup excluded")
+}

@@ -1,0 +1,11 @@
+✔ latest rejected controls cannot return under an old locale key or CSS hiding (1.543296ms)
+✔ icon-only replacement controls remain rejected (0.163947ms)
+✔ original interruption, replay gestures, historical navigation and actual errors remain allowed (0.109475ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50.811584

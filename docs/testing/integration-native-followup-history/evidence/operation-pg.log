@@ -1,0 +1,9 @@
+{"Time":"2026-10-22T23:59:21.70550978Z","Action":"start","Package":"github.com/felinics/memoh/internal/db"}
+{"Time":"2026-10-22T23:59:21.758205389Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation"}
+{"Time":"2026-10-22T23:59:21.758237498Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"=== RUN   TestComputerOperationsMigrationAndDurableIsolation\n"}
+{"Time":"2026-10-22T23:59:21.778984703Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"    computer_operations_postgres_integration_test.go:24: create isolated test database: ERROR: could not create directory \"base/344446\": No space left on device (SQLSTATE 53100)\n"}
+{"Time":"2026-10-22T23:59:21.779322385Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"--- FAIL: TestComputerOperationsMigrationAndDurableIsolation (0.02s)\n"}
+{"Time":"2026-10-22T23:59:21.779330096Z","Action":"fail","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Elapsed":0.02}
+{"Time":"2026-10-22T23:59:21.779521276Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"FAIL\n"}
+{"Time":"2026-10-22T23:59:21.78259268Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"FAIL\tgithub.com/felinics/memoh/internal/db\t0.076s\n"}
+{"Time":"2026-10-22T23:59:21.782630778Z","Action":"fail","Package":"github.com/felinics/memoh/internal/db","Elapsed":0.077}

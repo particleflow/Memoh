@@ -1,0 +1,40 @@
+=== RUN   TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection
+--- PASS: TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection (0.00s)
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware/malformed
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware/bad_signature
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware/expired
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware/revoked
+=== RUN   TestPrivateDeviceNoStoreThroughServerMiddleware/anonymous
+--- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware (0.02s)
+    --- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware/malformed (0.00s)
+    --- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware/bad_signature (0.00s)
+    --- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware/expired (0.00s)
+    --- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware/revoked (0.00s)
+    --- PASS: TestPrivateDeviceNoStoreThroughServerMiddleware/anonymous (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.041s
+=== RUN   TestCatalogCoversEveryDeclaredCode
+=== PAUSE TestCatalogCoversEveryDeclaredCode
+=== RUN   TestCatalogGolden
+    catalog_guard_test.go:300: new codes are not recorded in testdata/codes.golden; append these lines (or run with -update-golden):
+        computer.admission_conflict	409
+        computer.admission_paused	409
+        computer.admission_scope_unverified	409
+--- FAIL: TestCatalogGolden (0.00s)
+=== RUN   TestCatalogUnauthorizedIsSessionOnly
+=== PAUSE TestCatalogUnauthorizedIsSessionOnly
+=== RUN   TestCatalogDeclaredFaults
+=== PAUSE TestCatalogDeclaredFaults
+=== CONT  TestCatalogCoversEveryDeclaredCode
+=== CONT  TestCatalogDeclaredFaults
+--- PASS: TestCatalogDeclaredFaults (0.00s)
+=== CONT  TestCatalogUnauthorizedIsSessionOnly
+--- PASS: TestCatalogUnauthorizedIsSessionOnly (0.00s)
+--- PASS: TestCatalogCoversEveryDeclaredCode (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/apperror	0.006s
+testing: warning: no tests to run
+PASS
+ok  	github.com/felinics/memoh/internal/userruntime	0.006s [no tests to run]
+FAIL

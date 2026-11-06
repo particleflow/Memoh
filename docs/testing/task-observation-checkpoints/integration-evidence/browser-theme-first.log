@@ -1,0 +1,20 @@
+PASS actual combined Web: four groups, exact string revision, offline separated from persisted success, zero/recorded bytes without download URLs
+PASS 403 clears checkpoints and stops polling; explicit read and browser reconnection restore the same operation without mutations
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+false !== true
+
+    at file:///tmp/task-checkpoint-integration/browser.mjs:96:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.9.0

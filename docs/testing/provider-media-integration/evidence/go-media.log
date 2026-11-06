@@ -1,0 +1,88 @@
+=== RUN   TestMediaCatalogReadOnlyContract
+--- PASS: TestMediaCatalogReadOnlyContract (0.00s)
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/auth
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/forbidden
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/not_found
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/server
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/redirect
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/html
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/missing_data
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/null_data
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/wrong_shape
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/trailing_json
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/transport
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/oversized
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/key_echo
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/address_echo
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/url_id
+=== RUN   TestMediaCatalogFailuresAreNotEmptySuccess/duplicate
+--- PASS: TestMediaCatalogFailuresAreNotEmptySuccess (0.12s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/auth (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/forbidden (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/not_found (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/server (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/redirect (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/html (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/missing_data (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/null_data (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/wrong_shape (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/trailing_json (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/transport (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/oversized (0.10s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/key_echo (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/address_echo (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/url_id (0.00s)
+    --- PASS: TestMediaCatalogFailuresAreNotEmptySuccess/duplicate (0.00s)
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/empty
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/disabled
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/oauth
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/missing
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/url_userinfo
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/query
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/fragment
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/relative
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/empty#01
+=== RUN   TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/scheme
+--- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/empty (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/disabled (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/oauth (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/missing (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/url_userinfo (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/query (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/fragment (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/relative (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/empty#01 (0.00s)
+    --- PASS: TestMediaCatalogValidEmptyAndDisabledOrForeignProvider/scheme (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/providers	1.159s
+=== RUN   TestProviderMediaCatalogBoundary
+=== RUN   TestProviderMediaCatalogBoundary/success
+=== RUN   TestProviderMediaCatalogBoundary/empty
+=== RUN   TestProviderMediaCatalogBoundary/forbidden
+=== RUN   TestProviderMediaCatalogBoundary/unauthorized_upstream
+=== RUN   TestProviderMediaCatalogBoundary/redirect
+=== RUN   TestProviderMediaCatalogBoundary/invalid
+=== RUN   TestProviderMediaCatalogBoundary/anonymous
+=== RUN   TestProviderMediaCatalogBoundary/revoked
+=== RUN   TestProviderMediaCatalogBoundary/foreign_team
+=== RUN   TestProviderMediaCatalogBoundary/wrong_protocol
+=== RUN   TestProviderMediaCatalogBoundary/bad_id
+=== RUN   TestProviderMediaCatalogBoundary/not_enabled
+--- PASS: TestProviderMediaCatalogBoundary (0.02s)
+    --- PASS: TestProviderMediaCatalogBoundary/success (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/empty (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/forbidden (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/unauthorized_upstream (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/redirect (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/invalid (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/anonymous (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/revoked (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/foreign_team (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/wrong_protocol (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/bad_id (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/not_enabled (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.122s

@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  13:50:01
+   Duration  1.35s (transform 292ms, setup 0ms, import 467ms, tests 236ms, environment 496ms)
+

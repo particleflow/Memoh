@@ -1,0 +1,32 @@
+name: Native large-byte recovery
+on:
+  pull_request:
+    paths:
+      - 'internal/db/computer_delivery_native_large_windows_test.go'
+      - '.github/workflows/delivery-native-large.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows-large:
+    name: Windows 1 GiB real-byte recovery
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build existing official CLI bundle
+        run: python scripts/build-transferqueue-bundle.py --output '${{ runner.temp }}/default-delivery-windows-amd64'
+      - name: Execute one real-byte NTFS and PostgreSQL recovery
+        shell: pwsh
+        env:
+          MEMOH_NATIVE_LARGE_CLI_TEST: ${{ runner.temp }}/default-delivery-windows-amd64/transferqueue-cli.test.exe
+        run: ./scripts/test-native-delivery-postgres.ps1 -TestPattern '^TestWindowsNativeLargeByteRecovery$' -TestTimeout '12m'

@@ -1,0 +1,13 @@
+{
+  "source": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "platform_manifest": "sha256:51d2a528ec60730883402467586191fc113e18706ce856fd755fbe6bc26dfe36",
+  "layer": {
+    "mediaType": "application/vnd.oci.image.layer.v1.tar+zstd",
+    "digest": "sha256:e1788ebd8170e83b0b64bec4f7d4f6e6cf4128c14e1d651391d283dfac0d9cc0",
+    "size": 38512302
+  },
+  "layer_bytes": 38512302,
+  "binary_bytes": 132866232,
+  "binary_sha256": "340d8e6e50b759eb13db9a0cd6c5cbb93059487d3f3900a7d899e5935f80a6f8",
+  "product_recompiled": false
+}

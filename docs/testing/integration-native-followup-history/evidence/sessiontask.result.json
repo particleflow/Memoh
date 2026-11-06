@@ -1,0 +1,18 @@
+{
+  "check": "sessiontask",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "120s",
+    "./internal/sessiontask"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:58:40Z",
+  "elapsed_seconds": 2.882
+}

@@ -1,0 +1,47 @@
+{
+  "base": "69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee",
+  "native_source": "d88e3bc2ff8333a2d54f424a57aa6cb2d600cd82",
+  "source_cherry_pick": "912e85dec518f5a6930b45b0b88eecd62074a594",
+  "documentation_source": "c840a8f706d35f4709a2a793bf5bb2977e80abdd",
+  "unchanged_trees": {
+    "apps/web": {
+      "base_tree": "fa37a9ab821250d430443930a90f847e85bbf7f5",
+      "combined_tree": "fa37a9ab821250d430443930a90f847e85bbf7f5"
+    },
+    "packages/sdk": {
+      "base_tree": "78d14a996845002547a493d8fafccd2f32962963",
+      "combined_tree": "78d14a996845002547a493d8fafccd2f32962963"
+    },
+    "mobile": {
+      "base_tree": null,
+      "combined_tree": null,
+      "note": "Absent from both candidate trees; this does not verify the separately maintained Harmony source or signed HAP."
+    },
+    "spec": {
+      "base_tree": "93481e2ea318d684b348b25b28353ac6854068ff",
+      "combined_tree": "93481e2ea318d684b348b25b28353ac6854068ff"
+    },
+    "db/postgres/migrations": {
+      "base_tree": "50f6da61a57f75cc32b91ccc38befc16cd27d1de",
+      "combined_tree": "50f6da61a57f75cc32b91ccc38befc16cd27d1de"
+    },
+    "conf": {
+      "base_tree": "b72097b6e2e3f1990166d77dd498a7304ac785bd",
+      "combined_tree": "b72097b6e2e3f1990166d77dd498a7304ac785bd"
+    }
+  },
+  "directed_race": {
+    "pass": 53,
+    "fail": 0,
+    "skip": 0
+  },
+  "top_level_tests": [
+    "TestNativeRegistrationBindsDistinctBotsAndReconstructsScope",
+    "TestNativeDelegationPlanUsesExistingDistinctMounts",
+    "TestNativeDelegationPlanFailsClosed",
+    "TestNativeRegistrationRejectsLiveChangesAndForgedIdentity",
+    "TestNativeHandoffReturnsToSourceAndNeverRedispatches",
+    "TestNativeTextAndOriginalReadsDoNotGrantExecution",
+    "TestLegacyRegistrationRemainsReadableButCannotPlanNewDevice"
+  ]
+}

@@ -1,0 +1,202 @@
+package application
+
+import (
+	"bytes"
+	"compress/gzip"
+	"context"
+	"testing"
+
+	"github.com/felinics/memoh/internal/models"
+)
+
+// movingStickerTGS is a red square crossing a 512x512 canvas, so the sampled
+// frames are genuinely different from one another.
+func movingStickerTGS(t *testing.T) []byte {
+	t.Helper()
+	const document = `{"v":"5.5.2","w":512,"h":512,"ip":0,"op":60,"fr":30,"layers":[{"ty":1,"ind":1,"ip":0,"op":60,"st":0,"sw":128,"sh":128,"sc":"#ff0000","ks":{"o":{"a":0,"k":100},"r":{"a":0,"k":0},"p":{"a":1,"k":[{"t":0,"s":[0,128,0],"e":[384,128,0]},{"t":59,"s":[384,128,0]}]},"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]}}}]}`
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+	if _, err := writer.Write([]byte(document)); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+// The failure #1232 shipped: expanding frames into separate attachments makes
+// one sticker look like five to everything downstream. The attachment has to
+// stay singular — it is one file, with one path, counted once — and fan out
+// only where the stored frames are prepared for delivery.
+func TestAnimatedStickerStaysOneAttachmentWithManyFrames(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"sticker": movingStickerTGS(t)})
+	req := ChatRequest{
+		BotID:       "bot-1",
+		Attachments: []ChatAttachment{{Type: "image", ContentHash: "sticker", Mime: "image/webp", Name: "sticker.tgs"}},
+	}
+	model := models.GetResponse{Model: models.Model{Config: models.ModelConfig{
+		Compatibilities: []string{models.CompatVision},
+	}}}
+
+	merged, err := s.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
+	if len(merged) != 1 {
+		t.Fatalf("routeAndMergeAttachments() = %d attachments, want the sticker counted once", len(merged))
+	}
+	if paths := extractAttachmentPaths(merged); len(paths) != 1 {
+		t.Fatalf("extractAttachmentPaths() = %v, want a single reference to the original", paths)
+	}
+
+	item, ok := merged[0].(gatewayAttachment)
+	if !ok || item.Type != "image" || item.Mime != "image/png" {
+		t.Fatalf("routed attachment = %#v, want a PNG image attachment", merged[0])
+	}
+	if len(item.Frames) != animationFrameCount {
+		t.Fatalf("Frames = %d, want %d rendered frames", len(item.Frames), animationFrameCount)
+	}
+	if item.Payload != item.Frames[0] {
+		t.Fatal("Payload must stay the first frame so routing and size checks see a real image")
+	}
+	// The budget has to see every frame the model will receive, not just one.
+	if want := totalInlineDataURLBytes(item.Frames); item.Size != want {
+		t.Fatalf("Size = %d, want %d — the whole frame set", item.Size, want)
+	}
+	// Distinct frames, not the same image five times.
+	unique := map[string]bool{}
+	for _, frame := range item.Frames {
+		unique[frame] = true
+	}
+	if len(unique) != animationFrameCount {
+		t.Fatalf("%d distinct frames out of %d — the sampled frames are not distinct", len(unique), len(item.Frames))
+	}
+}
+
+// Every entry point has to see the same frames; that divergence is what let
+// the original bug reach the model from one path and not another.
+func TestAnimatedStickerIsIdenticalAcrossEntryPoints(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"sticker": movingStickerTGS(t)})
+	req := ChatRequest{
+		BotID:       "bot-1",
+		Attachments: []ChatAttachment{{Type: "image", ContentHash: "sticker", Mime: "application/x-gzip"}},
+	}
+	model := models.GetResponse{Model: models.Model{Config: models.ModelConfig{
+		Compatibilities: []string{models.CompatVision},
+	}}}
+
+	merged, err := s.routeAndMergeAttachments(context.Background(), model, req)
+	if err != nil {
+		t.Fatalf("routeAndMergeAttachments() error = %v", err)
+	}
+	gateway := merged[0].(gatewayAttachment).Frames
+	stored, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "sticker", "application/x-gzip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	prepared, err := s.prepareRuntimeAttachments(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(gateway) != animationFrameCount || len(stored) != len(gateway) || len(prepared.Images) != len(gateway) {
+		t.Fatalf("frame counts differ: gateway=%d stored=%d external=%d", len(gateway), len(stored), len(prepared.Images))
+	}
+	for i := range gateway {
+		if stored[i] != gateway[i] {
+			t.Fatalf("frame %d differs between entry points", i)
+		}
+	}
+}
+
+// An External Agent gets the frames too, and still one reachable original.
+func TestAnimatedStickerReachesExternalAgentAsFrames(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"sticker": movingStickerTGS(t)})
+	prepared, err := s.prepareRuntimeAttachments(context.Background(), ChatRequest{
+		BotID:       "bot-1",
+		Attachments: []ChatAttachment{{Type: "image", ContentHash: "sticker", Mime: "image/webp", Name: "sticker.tgs"}},
+	})
+	if err != nil {
+		t.Fatalf("prepareRuntimeAttachments() error = %v", err)
+	}
+	if len(prepared.Images) != animationFrameCount {
+		t.Fatalf("Images = %d, want %d frames", len(prepared.Images), animationFrameCount)
+	}
+	for i, image := range prepared.Images {
+		if image.MimeType != "image/png" || !bytes.HasPrefix(image.Data, []byte{0x89, 'P', 'N', 'G'}) {
+			t.Fatalf("image %d = %q with %d bytes, want PNG", i, image.MimeType, len(image.Data))
+		}
+	}
+	if len(prepared.References) != 1 || len(prepared.Context) != 1 {
+		t.Fatalf("references=%v context=%d, want the original counted once", prepared.References, len(prepared.Context))
+	}
+}
+
+// A sticker that never moves is five copies of one picture. Sending it five
+// times costs five times as much and says nothing more.
+func TestStaticAnimationCollapsesToOneFrame(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"still": tgsSticker(t)})
+	frames, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "still", "application/x-gzip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != 1 {
+		t.Fatalf("inlineStoredImageDataURLs() = %d frames, want identical frames collapsed to one", len(frames))
+	}
+}
+
+// Stickers are drawn for a chat background; an unflattened frame reaches some
+// providers as a subject on black.
+func TestAnimatedStickerFramesAreFlattenedOnWhite(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"sticker": movingStickerTGS(t)})
+	frames, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "sticker", "application/x-gzip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) == 0 {
+		t.Fatal("no frames rendered")
+	}
+	frame := decodeDataURLImage(t, frames[0])
+	// Top-right corner is outside the square at every sampled frame.
+	r, g, b, a := frame.At(frame.Bounds().Dx()-1, 0).RGBA()
+	if r != 0xffff || g != 0xffff || b != 0xffff || a != 0xffff {
+		t.Fatalf("corner pixel = (%d,%d,%d,%d), want opaque white", r, g, b, a)
+	}
+}
+
+// A render failure must not take the turn's other images down with it.
+func TestAnimationFailureLeavesOtherImagesAlone(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{
+		// gzip magic, but nothing behind it that ThorVG can parse.
+		"broken": append([]byte{0x1f, 0x8b, 0x08}, bytes.Repeat([]byte{0x00}, 64)...),
+		"photo":  rasterPNG(t),
+	})
+	broken := s.inlineImageAttachmentAssetIfNeeded(context.Background(), "bot-1", gatewayAttachment{
+		Type: "image", ContentHash: "broken", Mime: "application/x-gzip",
+	})
+	if broken.Transport == gatewayTransportInlineDataURL && len(broken.Frames) > 0 {
+		t.Fatalf("broken sticker produced frames: %#v", broken)
+	}
+	photo := s.inlineImageAttachmentAssetIfNeeded(context.Background(), "bot-1", gatewayAttachment{
+		Type: "image", ContentHash: "photo", Mime: "image/png",
+	})
+	if photo.Payload != dataURL("image/png", rasterPNG(t)) {
+		t.Fatalf("intact photo = %#v, want it still prepared", photo)
+	}
+}
+
+// The Telegram adapter now labels an animated sticker application/x-tgsticker
+// and stores the Lottie itself. That label is not one the raster allowlist
+// knows, so this is the regression guard that the two layers still agree: the
+// bytes decide, and the sticker is prepared as frames.
+func TestAdapterLabelledAnimatedStickerRenders(t *testing.T) {
+	s := imageInputService(t, map[string][]byte{"sticker": movingStickerTGS(t)})
+	frames, _, err := s.inlineStoredImageDataURLs(context.Background(), "bot-1", "sticker", "application/x-tgsticker")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != animationFrameCount {
+		t.Fatalf("inlineStoredImageDataURLs() = %d frames, want %d", len(frames), animationFrameCount)
+	}
+}

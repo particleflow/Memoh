@@ -1,0 +1,22 @@
+{
+  "check": "go-delivery",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "180s",
+    "-run",
+    "Delegat|AuthorizedDelivery",
+    "./internal/botdelegation",
+    "./internal/agent/application",
+    "./internal/handlers"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:01:29Z",
+  "elapsed_seconds": 58.738
+}

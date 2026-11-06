@@ -1,0 +1,1 @@
+An initial helper used PyYAML to parse whole workflow files and failed on an unchanged tab in a job configuration. No workflow was changed. The corrected helper parses trigger headers only; this is trigger scope inspection, not full workflow syntax validation.

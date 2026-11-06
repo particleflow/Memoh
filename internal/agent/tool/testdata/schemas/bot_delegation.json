@@ -1,0 +1,60 @@
+{
+  "delegate_to_bot": {
+    "properties": {
+      "attachments": {
+        "description": "Existing source conversation content_hash references; original bytes remain in NAS media storage.",
+        "items": {
+          "properties": {
+            "content_hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "content_hash"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "message": {
+        "description": "Task for the specialist. Do not embed file bytes or credentials.",
+        "type": "string"
+      },
+      "target_bot_id": {
+        "description": "Existing authorized Bot ID from list_delegate_bots.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "target_bot_id",
+      "message"
+    ],
+    "type": "object"
+  },
+  "get_bot_delegation": {
+    "properties": {
+      "delegation_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "delegation_id"
+    ],
+    "type": "object"
+  },
+  "list_delegate_bots": {
+    "properties": {},
+    "type": "object"
+  },
+  "retry_bot_delivery": {
+    "properties": {
+      "delegation_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "delegation_id"
+    ],
+    "type": "object"
+  }
+}

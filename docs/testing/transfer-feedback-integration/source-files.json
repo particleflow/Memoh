@@ -1,0 +1,32 @@
+[
+  {
+    "path": "cmd/transferqueue/cli_feedback_test.go",
+    "preimage": null,
+    "source_postimage": "37011278d67da8fed14e33adc643f67fd1c64834"
+  },
+  {
+    "path": "cmd/transferqueue/cli_feedback_windows_test.go",
+    "preimage": null,
+    "source_postimage": "46ba0a04fbaf89c767c5488476a969cf9afa9913"
+  },
+  {
+    "path": "cmd/transferqueue/main.go",
+    "preimage": "94d25633d1cd4fe725f6d394879bce5b5689ed15",
+    "source_postimage": "e29ec8ec95a0859cc732ff46bb00fdf0282e3b94"
+  },
+  {
+    "path": "contrib/herdr/memoh-delivery/README.md",
+    "preimage": "68f66def0f9b0db6af46950d96b09cc10f7c20fd",
+    "source_postimage": "76d92e5084e9f56bd8f08a9864368e84d9837930"
+  },
+  {
+    "path": "contrib/herdr/memoh-delivery/herdr-plugin.toml",
+    "preimage": "6c1201936b3e03505e6e7cdee11058f5504df69d",
+    "source_postimage": "cc1beb6fe9724d5410d3713c49cef65e9d4817fe"
+  },
+  {
+    "path": "docs/delivery-producer-feedback.md",
+    "preimage": "991dbd856434dc8699d6fe8c8b0ea4d27d146232",
+    "source_postimage": "c0f4c9c81cd3e5d6d973288b66680d593ea03891"
+  }
+]

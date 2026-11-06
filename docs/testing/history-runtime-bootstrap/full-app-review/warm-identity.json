@@ -1,0 +1,315 @@
+{
+  "sockets": [
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/web/ws",
+      "closed": true
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/web/ws",
+      "closed": false
+    }
+  ],
+  "http": [
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/bootstrap-review-a-ad40d397",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/container",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/ping",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/agents",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/skills/catalog",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/models",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/agents",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff/status",
+      "status": 200
+    },
+    {
+      "path": "/api/providers",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/skills/catalog",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/workdirs",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/container",
+      "status": 404
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/sessions/54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/events",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/contact",
+      "status": 200
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/agents",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/skills/catalog",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/settings",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/media/limits",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/workspace-targets",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/579f6727-2ed1-4e1b-a278-333e986bbd24/status",
+      "status": 200
+    },
+    {
+      "path": "/api/bots/88f8057e-7caf-489b-885e-d0c76865ed54/sessions/6f25432a-e437-4a17-93aa-8ed808624def",
+      "status": 404
+    }
+  ],
+  "errors": [],
+  "inference_frames": [],
+  "initial": {
+    "visible": [
+      true,
+      true
+    ],
+    "rows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def"
+  },
+  "router_identity": {
+    "same": false,
+    "app": "/bot/bootstrap-review-a-ad40d397?session=6f25432a-e437-4a17-93aa-8ed808624def",
+    "imported": "/"
+  },
+  "same_bot": {
+    "visible": [
+      true,
+      true
+    ],
+    "rows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-a-ad40d397?session=54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+  },
+  "same_bot_socket_delta": 0,
+  "other_bot": {
+    "visible": [
+      true,
+      true
+    ],
+    "rows": 2,
+    "skeletons": 0,
+    "path": "/bot/bootstrap-review-b-88f8057e?session=579f6727-2ed1-4e1b-a278-333e986bbd24"
+  },
+  "other_bot_socket_delta": 1,
+  "mismatched_session": {
+    "status": 404,
+    "new_sockets": 0
+  },
+  "passed": true,
+  "server_cleanup": {
+    "direct_child_reaped": true,
+    "exit": 0
+  }
+}

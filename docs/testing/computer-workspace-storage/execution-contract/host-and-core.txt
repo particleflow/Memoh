@@ -1,0 +1,34 @@
+=== RUN   TestPrepareWorkspaceRequestRejectsWorkdirTargetConflict
+--- PASS: TestPrepareWorkspaceRequestRejectsWorkdirTargetConflict (0.00s)
+=== RUN   TestPrepareWorkspaceRequestInjectsNativeWorkdirTargetWithoutWorkspaceRead
+--- PASS: TestPrepareWorkspaceRequestInjectsNativeWorkdirTargetWithoutWorkspaceRead (0.00s)
+=== RUN   TestPrepareWorkspaceRequestRemoteWorkdirRequiresWorkspaceRead
+--- PASS: TestPrepareWorkspaceRequestRemoteWorkdirRequiresWorkspaceRead (0.00s)
+=== RUN   TestPrepareWorkspaceRequestAcceptsMatchingExplicitTarget
+--- PASS: TestPrepareWorkspaceRequestAcceptsMatchingExplicitTarget (0.00s)
+=== RUN   TestResolveSessionWorkdirBindingFailsClosed
+--- PASS: TestResolveSessionWorkdirBindingFailsClosed (0.00s)
+=== RUN   TestPrepareWorkspaceRequestRequiresWorkspaceRead
+--- PASS: TestPrepareWorkspaceRequestRequiresWorkspaceRead (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.022s
+# github.com/felinics/memoh/cmd/internal/core [github.com/felinics/memoh/cmd/internal/core.test]
+compile: writing output: write $WORK/b976/_pkg_.a: no space left on device
+github.com/felinics/memoh/internal/agent/application: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b964/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/runtime/toolmount: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b979/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/runtime/claudecode: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b977/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/runtime/codex: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b981/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/runtime/grok: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b984/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/imagecapability: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b986/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/memory/wikistore: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b998/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/memory/adapters/builtin: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b987/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/adapter/agentsession: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1003/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/agent/adapter/channelidentity: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1005/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/channelaccess: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1009/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/command: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1209/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/policy: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1211/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/handlers: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1203/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/mcp/sources/federation: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1267/vet.cfg: no space left on device
+github.com/felinics/memoh/internal/memory/memllm: write /tmp/delegation-run-integration/build-tmp/go-build905386771/b1268/vet.cfg: no space left on device
+FAIL	github.com/felinics/memoh/cmd/internal/core [build failed]
+FAIL

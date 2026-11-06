@@ -1,0 +1,67 @@
+package cancelownership
+
+import (
+	"errors"
+	"io"
+)
+
+func SameStrings(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for i := range left {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
+}
+
+type Row struct{ Messages []int }
+
+func Nested(rows []Row) {
+	for row := range rows {
+		for message := range rows[row].Messages {
+			value := &rows[row].Messages[message]
+			*value++
+		}
+	}
+}
+
+func RuneBytes(text string) ([]byte, error) {
+	var result []byte
+	for _, r := range text {
+		if r > 255 {
+			return nil, errors.New("not Latin-1")
+		}
+		result = append(result, byte(r))
+	}
+	return result, nil
+}
+
+// ExplicitWireBits preserves the deliberately negative wire-frame bit pattern.
+func ExplicitWireBits() uint32 {
+	size := int32(-2147483648)
+	return uint32(size)
+}
+
+// UnsafeIndex is a non-executed negative control.
+func UnsafeIndex() int {
+	values := []int{1}
+	return values[2]
+}
+
+// UnsafeNarrow is a non-executed negative control.
+func UnsafeNarrow(value int64) int16 { return int16(value) }
+
+type Store interface{ Get() (int, error) }
+
+// Lookup mirrors the reported interface-returned error check without database IO.
+func Lookup(store Store) bool {
+	value, err := store.Get()
+	ready := err == nil
+	if err != nil && !errors.Is(err, io.EOF) {
+		return false
+	}
+	return ready && value > 0
+}

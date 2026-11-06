@@ -1,0 +1,107 @@
+{
+  "qualified_sources": {
+    "queue_invocation": "c878a31e268119939330d9eed52050539636b306",
+    "presence": "45c27c6e5f8aeb214a15cc1c9b4eeae1412ce294",
+    "navigation": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
+    "speech_frozen": [
+      "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+      "ba44c06261fb3be30557160840bc25e339cab650"
+    ],
+    "speech_cursor": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+    "speech_native_input": "09acf7b00d560bac3f312522756e3749d7ddd0a3"
+  },
+  "current_Harmony_source": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
+  "current_HAP": "36 unchanged",
+  "files": [
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "sha256": "e3ecc6b9611aa80b1c1f3e4f585d93fd1bfe4043e69a526416f8216c68ffac4d"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "sha256": "d52c2e317a220ea089f6d9098e650ce80e24a9a7acd5e07429e45fc8b5f67be7"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "sha256": "573c87db3c9b7e4e8a8eee52da3de46403181c92089547fa5c9dcf134b1f121d"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "sha256": "4d52b3b9bf7acdaf82a7e8b454d61b15539cc1f1be9805eec2bec4366a0e7697"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "sha256": "8877f81580dc47dffbb9c7be6e75b98b62d2608270e6179cff518973b8755378"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "sha256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+      "sha256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-render-completion.ts",
+      "sha256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-replay-cache.ts",
+      "sha256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-sentence-boundary.ts",
+      "sha256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "sha256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sha256": "f63335a9e25c5335412ad3d05ad100bea9beb2bbdce91547a29bd5c0df495fc1"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "sha256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "sha256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269"
+    },
+    {
+      "path": "apps/web/src/store/chat/route-context.ts",
+      "sha256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78"
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "sha256": "82cc814502755155302db56f83f5fbc7d8705d90926c9481151e8c76439cf149"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "sha256": "d66198b2faa3525e1c8485f95e92191669cd26f6156fbbbcc1765713ffc1917b"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "sha256": "fb802e4a1bc088353496174cd5bb119411cad00cf1a377dd622a8fdd2a41aeb9"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "sha256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f"
+    }
+  ],
+  "native_ETS": "no source patch implied; original Harmony consumer retains its adapters, official API26 and device acceptance pending",
+  "SDK": "GET playback/config plus POST/PUT playback/input; preserve existing functions/native context",
+  "pending": [
+    "efac durable queue P2 single-connection reconciliation; migration182 collides, no merge",
+    "download exact final source not delivered",
+    "actual selected speech protocol/MIME readback SAFE_FIELDS before asserting native applicability",
+    "physical phone/listening/500ms/Windows control disconnect TLS acceptance"
+  ],
+  "not_deployed": true,
+  "paid_calls": 0,
+  "reviewed_native_protocol_evidence": "1764c882642ef43256ccd8001b97c145c593af54",
+  "shared_production_and_SDK_equal_to": "286b4ae0ff04d8e7cfe341874e2cb61095cff5b9",
+  "Harmony_build_can_proceed_on_this_mapping": true,
+  "no_wait_for_performance_or_certificate_renewal": true
+}

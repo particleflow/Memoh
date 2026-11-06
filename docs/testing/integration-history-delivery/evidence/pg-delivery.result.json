@@ -1,0 +1,1 @@
+{"check": "pg-delivery", "command": ["go", "test", "-json", "-race", "-tags=integration", "-count=1", "-p", "1", "-timeout", "180s", "-run", "^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*|BotDelegationPostgres.*|SessionTasksPostgres.*)$", "./internal/db"], "exit_code": 0}

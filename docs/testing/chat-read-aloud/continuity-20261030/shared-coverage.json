@@ -1,0 +1,45 @@
+{
+  "WebBase": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "HAP36Source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+  "phoneGeneratedOrBuiltThisTurn": false,
+  "phoneInstalledReadback": false,
+  "files": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "baseAndHAP36SHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "candidateSHA256": "184c0c057a5d0294d6ee9c6a0122953af52dba822649bebd80efaa1b3fb517d5",
+      "changed": true,
+      "sharedBaseBytesEqual": true
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "baseAndHAP36SHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "candidateSHA256": "bf455f4b1f5477d41c73ac9d9c0c1893ad44b9edf2a9ea1bd98f5f2a3ff9fb23",
+      "changed": true,
+      "sharedBaseBytesEqual": true
+    },
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": {
+      "baseAndHAP36SHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "candidateSHA256": "7b8c52387994a40619f7d367d519c16b5846dbcb9b68e799959e4c68062cf599",
+      "changed": true,
+      "sharedBaseBytesEqual": true
+    },
+    "apps/web/src/pages/home/composables/speech-rendered-text.ts": {
+      "baseAndHAP36SHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "candidateSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "changed": false,
+      "sharedBaseBytesEqual": true
+    },
+    "apps/web/src/pages/home/composables/speech-visible-text.ts": {
+      "baseAndHAP36SHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "candidateSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "changed": false,
+      "sharedBaseBytesEqual": true
+    },
+    "apps/web/src/pages/home/composables/speech-timing.ts": {
+      "baseAndHAP36SHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "candidateSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "changed": false,
+      "sharedBaseBytesEqual": true
+    }
+  },
+  "sourceFix": "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5"
+}

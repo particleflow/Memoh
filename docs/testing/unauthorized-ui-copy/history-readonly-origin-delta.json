@@ -1,0 +1,251 @@
+{
+  "reviewBaseTree": "1ef52303e55e9711ffcf508bc1177f71174a3818",
+  "retainedBasis": "Explicitly preserve historical reading and real error/state presentation. Original file rename/delete operations are legal and unchanged. Latest rejected historical mutation controls override the recorded older source provenance.",
+  "removedPriorSourceRecords": [
+    {
+      "excerpt": "<Button type=\"button\" variant=\"outline\" :disabled=\"renameLoading\" @click=\"renameOpen = false\" > {{ t('common.cancel') }} </Button>",
+      "file": "apps/web/src/components/sidebar/session-dialogs.vue",
+      "tag": "Button",
+      "text": "{{ t('common.cancel') }}",
+      "conditions": [
+        "@click=\"renameOpen = false\""
+      ],
+      "fingerprint": "539909b8d8e737c4316b79ea131449884fef48d376b9988a3eddb757d62e6a2b",
+      "origin": {
+        "commit": "115d93177e505ac2b198d1430acf1b6c674fb77b",
+        "line": 29
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<Button type=\"submit\" :disabled=\"!renameTitle.trim()\" :loading=\"renameLoading\" > {{ t('common.confirm') }} </Button>",
+      "file": "apps/web/src/components/sidebar/session-dialogs.vue",
+      "tag": "Button",
+      "text": "{{ t('common.confirm') }}",
+      "conditions": [],
+      "fingerprint": "ef2d664c24d107a792f3613637d82a0dcba760b2f7fd9ae15e937c14f576d2fd",
+      "origin": {
+        "commit": "115d93177e505ac2b198d1430acf1b6c674fb77b",
+        "line": 37
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<DropdownMenuItem @select=\"$emit('rename', session)\" > <Pencil /> {{ t('common.rename') }} </DropdownMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "DropdownMenuItem",
+      "text": "{{ t('common.rename') }}",
+      "conditions": [
+        "@select=\"$emit('rename', session)\""
+      ],
+      "fingerprint": "5db412c6900e36acdb69bbc58d990f32216648c6516475bc0b9607e8fa3359f7",
+      "origin": {
+        "commit": "f1e363a6a95ae9cf89cf0d6f08f75c9b154773bb",
+        "line": 111
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<DropdownMenuItem @select=\"startSelection\"> <ListChecks /> {{ t('chat.selectSessions') }} </DropdownMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "DropdownMenuItem",
+      "text": "{{ t('chat.selectSessions') }}",
+      "conditions": [
+        "@select=\"startSelection\""
+      ],
+      "fingerprint": "6d4a3f71632160ce1590ce15f1946f7f64a700e6daf59324617b2bdb5640de96",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 146
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<DropdownMenuItem variant=\"destructive\" @select=\"$emit('delete', session)\" > <Trash2 /> {{ t('common.delete') }} </DropdownMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "DropdownMenuItem",
+      "text": "{{ t('common.delete') }}",
+      "conditions": [
+        "@select=\"$emit('delete', session)\""
+      ],
+      "fingerprint": "45949bd7fd5bdbeba223819275ecb24630fb5a090aa86fe0a40a9e2ed8e2fd2a",
+      "origin": {
+        "commit": "f1e363a6a95ae9cf89cf0d6f08f75c9b154773bb",
+        "line": 117
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<ContextMenuItem @select=\"$emit('rename', session)\"> <Pencil /> {{ t('common.rename') }} </ContextMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "ContextMenuItem",
+      "text": "{{ t('common.rename') }}",
+      "conditions": [
+        "@select=\"$emit('rename', session)\""
+      ],
+      "fingerprint": "6b6648285212fd5350fdc9d8e1a403ce8db28823043a501a6c8d0eb612c4805e",
+      "origin": {
+        "commit": "54d7def5ae6b31b1c9f3ebef074d9405ebb55abf",
+        "line": 112
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<ContextMenuItem @select=\"startSelection\"> <ListChecks /> {{ t('chat.selectSessions') }} </ContextMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "ContextMenuItem",
+      "text": "{{ t('chat.selectSessions') }}",
+      "conditions": [
+        "@select=\"startSelection\""
+      ],
+      "fingerprint": "a280299bbdebff66265d09bac1f3d7abef6abe8bbf3e59d745daa1a7917a8588",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 180
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<ContextMenuItem variant=\"destructive\" @select=\"$emit('delete', session)\" > <Trash2 /> {{ t('common.delete') }} </ContextMenuItem>",
+      "file": "apps/web/src/components/sidebar/session-item.vue",
+      "tag": "ContextMenuItem",
+      "text": "{{ t('common.delete') }}",
+      "conditions": [
+        "@select=\"$emit('delete', session)\""
+      ],
+      "fingerprint": "f5e0205fc76e644e4e1156bacfab885d42280a573a23fb01baf17fe9190a3f08",
+      "origin": {
+        "commit": "54d7def5ae6b31b1c9f3ebef074d9405ebb55abf",
+        "line": 116
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<TextButton class=\"text-xs\" @click=\"openDelete\" > {{ t('common.delete') }} </TextButton>",
+      "file": "apps/web/src/components/sidebar/session-selection-bar.vue",
+      "tag": "TextButton",
+      "text": "{{ t('common.delete') }}",
+      "conditions": [
+        "@click=\"openDelete\""
+      ],
+      "fingerprint": "82458c12345ee835fcad451da6f5f6d3e1969e2960f90c833f48585995fff9b4",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 13
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<TextButton class=\"text-xs\" @click=\"selection.clear()\" > {{ t('common.cancel') }} </TextButton>",
+      "file": "apps/web/src/components/sidebar/session-selection-bar.vue",
+      "tag": "TextButton",
+      "text": "{{ t('common.cancel') }}",
+      "conditions": [
+        "@click=\"selection.clear()\""
+      ],
+      "fingerprint": "09dc483d120ca67ee2d687da2c636b2b2ead169f25c74eafd17ac8738903c73b",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 19
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing operation or selection name, with its actual handler/condition preserved in excerpt.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<ConfirmDeleteDialog v-model:open=\"deleteOpen\" :title=\"t('chat.deleteSession')\" :description=\"t('chat.deleteSessionConfirm')\" :cancel-label=\"t('common.cancel')\" :confirm-label=\"t('common.confirm')\" :loading=\"deleteLoading\" @confirm=\"handleDelete\" />",
+      "file": "apps/web/src/components/sidebar/session-dialogs.vue",
+      "tag": "ConfirmDeleteDialog",
+      "text": "",
+      "conditions": [],
+      "fingerprint": "7ac551661a4315bf36e3da5054e87b0b56dd50b397ebd19a5a2a47d05b191986",
+      "origin": {
+        "commit": "115d93177e505ac2b198d1430acf1b6c674fb77b",
+        "line": 2
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Original scope/consequence of the user-selected action; needed to make that operation reviewable",
+      "priorAuditRecord": 50,
+      "priorDecision": "keep-action-body",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<DialogTitle>{{ t('chat.renameSession') }}</DialogTitle>",
+      "file": "apps/web/src/components/sidebar/session-dialogs.vue",
+      "tag": "DialogTitle",
+      "text": "{{ t('chat.renameSession') }}",
+      "conditions": [],
+      "fingerprint": "c695c36cf22a75b2924079bcefa644e5dcaf4e532e77616ae1084f68f19e0937",
+      "origin": {
+        "commit": "115d93177e505ac2b198d1430acf1b6c674fb77b",
+        "line": 15
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing original body/catalog data, real state/error, necessary field/name/heading or action confirmation; exact binding and originating source retained.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "<ConfirmDeleteDialog v-model:open=\"deleteOpen\" :title=\"t('chat.deleteSessions')\" :description=\"t('chat.deleteSessionsConfirm', { count: pendingIds.length })\" :cancel-label=\"t('common.cancel')\" :confirm-label=\"t('common.delete')\" :loading=\"deleting\" @confirm=\"handleDelete\" />",
+      "file": "apps/web/src/components/sidebar/session-selection-bar.vue",
+      "tag": "ConfirmDeleteDialog",
+      "text": "",
+      "conditions": [],
+      "fingerprint": "52f3074294a296386c24a1807748b4de3de0a45794590addea412e0afbbdd0f3",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 29
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Original scope/consequence of the user-selected action; needed to make that operation reviewable",
+      "priorAuditRecord": 53,
+      "priorDecision": "keep-action-body",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "chat.renameSessionFailed",
+      "file": "apps/web/src/components/sidebar/session-dialogs.vue",
+      "tag": "script-i18n",
+      "fingerprint": "626b72fddb0b7c8474b09f5dc3a65f2b6475ab5857eacffd79c8d0a449c61773",
+      "origin": {
+        "commit": "115d93177e505ac2b198d1430acf1b6c674fb77b",
+        "line": 50
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing runtime action/state/title translations, consumed by the original component.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    },
+    {
+      "excerpt": "chat.deleteSessionsFailed",
+      "file": "apps/web/src/components/sidebar/session-selection-bar.vue",
+      "tag": "script-i18n",
+      "fingerprint": "ca30d1f10a409e5f1abeb63f00c7297061c5ec6f6974a0adbe4ec6c525b77438",
+      "origin": {
+        "commit": "ae7cfc1968cd2c5316061965021323917b98bf74",
+        "line": 40
+      },
+      "basis": "Latest explicit rejection overrides this origin; this retained source is an existing operation/data/state/name, not authority to restore a rejected control.",
+      "necessity": "Existing runtime action/state/title translations, consumed by the original component.",
+      "latestDecision": "Remove: c4 fixed-contact history mutations are now refused403; latest explicit user UI restriction overrides this older source origin."
+    }
+  ],
+  "retainedSurfaces": 2031,
+  "fileManagementUnchangedAgainstReviewTree": true
+}

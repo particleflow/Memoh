@@ -1,0 +1,28 @@
+{
+  "candidateSites": 628,
+  "decisions": {
+    "removed-or-trimmed": 197,
+    "keep-body-data-or-state": 316,
+    "keep-control-name": 2,
+    "keep-action-body": 17,
+    "keep-accessibility": 4,
+    "trimmed-to-real-status": 24,
+    "keep-development-reference": 68
+  },
+  "finalReviewedTemplateAndScriptSurfaces": 2059,
+  "finalRenderedTemplateSurfaces": 1907,
+  "finalScriptI18nSurfaces": 152,
+  "localeDigestsEnZhJaRecorded": true,
+  "nativeSharedMappedFiles": 101,
+  "nativeDisplaySourcesReviewed": [
+    "SharedChat.ets",
+    "harmony-entry.ts",
+    "harmony-files.ts",
+    "harmony-resumable.ts",
+    "harmony-download.ts",
+    "harmony-voice.ts",
+    "HarmonyVoicePlayer.vue",
+    "HarmonyAttachments.vue"
+  ],
+  "nativeFilenameSizeAndResumeCapabilityRetained": true
+}

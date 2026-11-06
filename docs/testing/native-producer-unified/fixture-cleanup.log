@@ -1,0 +1,1 @@
+Initial cleanup precheck used a nonexistent table name and exited before deletion. Corrected to repository schema bot_remote_runtime_bindings. PASS explicit producer reference tuple persisted in isolated PG; removed only the new unmounted synthetic runtime row by exact ID/name/unusable-token match. Existing records, queues, source and database retained.

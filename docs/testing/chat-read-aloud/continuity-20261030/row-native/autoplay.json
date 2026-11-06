@@ -1,0 +1,60 @@
+{
+  "blocked": [
+    {
+      "ms": 747.5999999977648,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:46143/3ed2edf7-8fab-40cf-9bb9-3902c5e28a39",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    }
+  ],
+  "resumed": [
+    {
+      "ms": 747.5999999977648,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:46143/3ed2edf7-8fab-40cf-9bb9-3902c5e28a39",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    },
+    {
+      "ms": 877.5,
+      "active": true,
+      "ever": true,
+      "src": "blob:http://127.0.0.1:46143/3ed2edf7-8fab-40cf-9bb9-3902c5e28a39",
+      "outcome": "fulfilled"
+    }
+  ],
+  "continuedOriginalInputs": [
+    "First sentence."
+  ],
+  "note": "Continuation of an incomplete automatic reply, not completed-cache replay. Only cached replay asserts zero generation requests.",
+  "stateAfterClick": {
+    "key": "",
+    "status": "idle"
+  },
+  "media": [
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 885.3000000007451,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:46143/3ed2edf7-8fab-40cf-9bb9-3902c5e28a39"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 952,
+      "time": 0,
+      "src": "http://127.0.0.1:46143/?policy-only"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 952.0999999977648,
+      "time": 0,
+      "src": "http://127.0.0.1:46143/?policy-only"
+    }
+  ]
+}

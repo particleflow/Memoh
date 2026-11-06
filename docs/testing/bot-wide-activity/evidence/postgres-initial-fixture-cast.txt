@@ -1,0 +1,6 @@
+=== RUN   TestBotActivityPostgresUnopenedRunsScopeAndReadOnly
+    bot_activity_postgres_integration_test.go:47: ERROR: inconsistent types deduced for parameter $1 (SQLSTATE 42P08)
+--- FAIL: TestBotActivityPostgresUnopenedRunsScopeAndReadOnly (2.38s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	2.397s
+FAIL

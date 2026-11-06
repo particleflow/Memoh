@@ -1,0 +1,9 @@
+{"Time":"2026-10-23T04:36:40.684665618Z","Action":"start","Package":"github.com/felinics/memoh/internal/db"}
+{"Time":"2026-10-23T04:36:40.72657172Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestPiBatchHistoryPriorEvidenceIsScopedAndLatest"}
+{"Time":"2026-10-23T04:36:40.726597279Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestPiBatchHistoryPriorEvidenceIsScopedAndLatest","Output":"=== RUN   TestPiBatchHistoryPriorEvidenceIsScopedAndLatest\n"}
+{"Time":"2026-10-23T04:36:43.227836997Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestPiBatchHistoryPriorEvidenceIsScopedAndLatest","Output":"--- PASS: TestPiBatchHistoryPriorEvidenceIsScopedAndLatest (2.50s)\n"}
+{"Time":"2026-10-23T04:36:43.227881964Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestPiBatchHistoryPriorEvidenceIsScopedAndLatest","Elapsed":2.5}
+{"Time":"2026-10-23T04:36:43.227897999Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"PASS\n"}
+{"Time":"2026-10-23T04:36:44.232624253Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"ok  \tgithub.com/felinics/memoh/internal/db\t3.548s\n"}
+{"Time":"2026-10-23T04:36:44.232678405Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Elapsed":3.548}
+Required Pi batch history PostgreSQL scope/latest-evidence test passed without skips

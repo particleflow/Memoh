@@ -1,0 +1,34 @@
+{
+  "delegation": {
+    "id": "6881ccd2-6aa6-4884-9806-f70c80c93095",
+    "state": "completed",
+    "delivery_state": "accepted",
+    "revision": 4,
+    "target_session_id": "54244e5c-ec17-450d-822b-6e5e50bc2f40"
+  },
+  "runs": [
+    {
+      "session_id": "6bbefc12-dc26-4ad6-9dc5-8d867bf90f70",
+      "state": "completed",
+      "invocation_id": "1e87b5c3-1333-4b53-9f78-30509e479de8"
+    },
+    {
+      "session_id": "54244e5c-ec17-450d-822b-6e5e50bc2f40",
+      "state": "completed",
+      "invocation_id": "bot-delegation:6881ccd2-6aa6-4884-9806-f70c80c93095"
+    },
+    {
+      "session_id": "6bbefc12-dc26-4ad6-9dc5-8d867bf90f70",
+      "state": "completed",
+      "invocation_id": "follow-up:bac92ad4-5e40-5c48-aada-482190c24f31"
+    }
+  ],
+  "children": [
+    {
+      "id": "92487015-c2c7-4611-be09-2a5d24c67129",
+      "parent_session_id": "54244e5c-ec17-450d-822b-6e5e50bc2f40",
+      "bot_id": "031128c9-9aca-4b12-9fbc-00cbf7af7e8d",
+      "type": "subagent"
+    }
+  ]
+}

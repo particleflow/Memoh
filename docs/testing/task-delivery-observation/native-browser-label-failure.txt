@@ -1,0 +1,20 @@
+PASS native browser download: full bytes/hash match the original NAS media fixture
+PASS actual Web + JWT server + PG: all 18 seeded records automatically read; pending/failed distinct; 16 native download links only for committed references
+PASS real browser offline -> same selected detail and file records automatically recover, no task dispatch
+PASS synthetic old-route 404 is unavailable, does not poll; explicit reload recovers against real backend
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByText('Preview not available', { exact: true }) to be visible
+
+    at <evidence>/browser-native.mjs:58:61 {
+  log: [
+    "  - waiting for getByText('Preview not available', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

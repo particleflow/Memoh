@@ -1,0 +1,171 @@
+=== RUN   TestProductionResolverPreservesLegacyDefault
+--- PASS: TestProductionResolverPreservesLegacyDefault (0.01s)
+=== RUN   TestExplicitConfig
+=== RUN   TestExplicitConfig/absent
+=== RUN   TestExplicitConfig/omit
+=== RUN   TestExplicitConfig/configured
+=== RUN   TestExplicitConfig/null
+=== RUN   TestExplicitConfig/unknown_protocol
+=== RUN   TestExplicitConfig/missing_mode
+=== RUN   TestExplicitConfig/unknown_field
+--- PASS: TestExplicitConfig (0.00s)
+    --- PASS: TestExplicitConfig/absent (0.00s)
+    --- PASS: TestExplicitConfig/omit (0.00s)
+    --- PASS: TestExplicitConfig/configured (0.00s)
+    --- PASS: TestExplicitConfig/null (0.00s)
+    --- PASS: TestExplicitConfig/unknown_protocol (0.00s)
+    --- PASS: TestExplicitConfig/missing_mode (0.00s)
+    --- PASS: TestExplicitConfig/unknown_field (0.00s)
+=== RUN   TestNativeSupervisorAndSubagentImageChain
+=== RUN   TestNativeSupervisorAndSubagentImageChain/subagent_false
+    provider_test.go:278: real native loop + synthetic HTTP: chat=3 generation=1 edit=1; source=41d814e38ac6b138cd68e4ffbebc69ba5d7c86fc8787578b9c6ec92425ce7098 output=bc937c4cdb23543f341630b625aa71515b19683f06a81e939f13afad2deb0bd3
+=== RUN   TestNativeSupervisorAndSubagentImageChain/subagent_true
+    provider_test.go:278: real native loop + synthetic HTTP: chat=3 generation=1 edit=1; source=41d814e38ac6b138cd68e4ffbebc69ba5d7c86fc8787578b9c6ec92425ce7098 output=bc937c4cdb23543f341630b625aa71515b19683f06a81e939f13afad2deb0bd3
+--- PASS: TestNativeSupervisorAndSubagentImageChain (0.07s)
+    --- PASS: TestNativeSupervisorAndSubagentImageChain/subagent_false (0.03s)
+    --- PASS: TestNativeSupervisorAndSubagentImageChain/subagent_true (0.04s)
+=== RUN   TestUnknownNeverAutomaticallyRetries
+=== RUN   TestUnknownNeverAutomaticallyRetries/429
+=== RUN   TestUnknownNeverAutomaticallyRetries/500
+=== RUN   TestUnknownNeverAutomaticallyRetries/redirect
+=== RUN   TestUnknownNeverAutomaticallyRetries/disconnect
+=== RUN   TestUnknownNeverAutomaticallyRetries/invalid_base64
+=== RUN   TestUnknownNeverAutomaticallyRetries/url_only
+--- PASS: TestUnknownNeverAutomaticallyRetries (0.01s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/429 (0.01s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/500 (0.00s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/redirect (0.00s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/disconnect (0.00s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/invalid_base64 (0.00s)
+    --- PASS: TestUnknownNeverAutomaticallyRetries/url_only (0.00s)
+=== RUN   TestModelContentDoesNotSelectDestination
+--- PASS: TestModelContentDoesNotSelectDestination (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/imagecapability	1.143s
+=== RUN   TestImageCapabilityActualSpawnAndParentSend
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/success
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=3 send=1 steps=2 mode=success original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/revoked
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=revoked original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/foreign_reference
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=foreign_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/missing_reference
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=missing_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/unknown
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=2 send=0 steps=2 mode=unknown original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend (0.53s)
+    --- PASS: TestImageCapabilityActualSpawnAndParentSend/success (0.13s)
+    --- PASS: TestImageCapabilityActualSpawnAndParentSend/revoked (0.10s)
+    --- PASS: TestImageCapabilityActualSpawnAndParentSend/foreign_reference (0.10s)
+    --- PASS: TestImageCapabilityActualSpawnAndParentSend/missing_reference (0.10s)
+    --- PASS: TestImageCapabilityActualSpawnAndParentSend/unknown (0.10s)
+=== RUN   TestImageCapabilityUsesCurrentBotAndSessionAuthority
+--- PASS: TestImageCapabilityUsesCurrentBotAndSessionAuthority (0.00s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	1.616s
+=== RUN   TestNativeEvidenceRetainsSamplesExportsAndRestart
+--- PASS: TestNativeEvidenceRetainsSamplesExportsAndRestart (0.12s)
+=== RUN   TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples
+--- PASS: TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples (0.08s)
+=== RUN   TestNativeEvidenceCapacityPreservesOldEvidence
+--- PASS: TestNativeEvidenceCapacityPreservesOldEvidence (0.05s)
+=== RUN   TestNativeEvidenceLegacyHashIsNotRelabeled
+--- PASS: TestNativeEvidenceLegacyHashIsNotRelabeled (0.03s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/before
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_read
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_ingest
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_open
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/corrupt_bytes
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification (0.11s)
+    --- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/before (0.02s)
+    --- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_read (0.02s)
+    --- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_ingest (0.02s)
+    --- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_open (0.02s)
+    --- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/corrupt_bytes (0.02s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/user
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/bot
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/session
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/selected_pc
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/nas
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/grant_removed
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports (0.11s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/user (0.02s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/bot (0.02s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/session (0.02s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/selected_pc (0.02s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/nas (0.02s)
+    --- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/grant_removed (0.02s)
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/conflict
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/committed_response_lost
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/save_failed
+--- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement (0.09s)
+    --- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/conflict (0.03s)
+    --- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/committed_response_lost (0.03s)
+    --- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/save_failed (0.02s)
+=== RUN   TestNativeEvidenceCompactPagesWithAllInputReceipts
+--- PASS: TestNativeEvidenceCompactPagesWithAllInputReceipts (0.16s)
+=== RUN   TestNativeEvidenceExportRetainsObservationArrivingDuringIngest
+--- PASS: TestNativeEvidenceExportRetainsObservationArrivingDuringIngest (0.04s)
+=== RUN   TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts
+--- PASS: TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts (0.04s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	1.887s
+=== RUN   TestBackgroundProviderWaitAndInspectAgentResult
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_0e2c7a2b bot_id=bot1 agent_id=worker status=running
+--- PASS: TestBackgroundProviderWaitAndInspectAgentResult (0.01s)
+=== RUN   TestBackgroundProviderSpawnResultShape
+2026/10/23 10:26:18 INFO background spawn task started service=background task_id=bg_bot1_48b94af1 bot_id=bot1 description="spawn 2 task(s): alpha | beta"
+2026/10/23 10:26:18 INFO background spawn task finished service=background task_id=bg_bot1_48b94af1 status=failed branches=2 duration=61.092µs
+--- PASS: TestBackgroundProviderSpawnResultShape (0.00s)
+=== RUN   TestBackgroundProviderVideoResultShape
+2026/10/23 10:26:18 INFO background video task started service=background task_id=bg_bot1_fd9d07fd bot_id=bot1 description="generate video: waves"
+2026/10/23 10:26:18 INFO background video task finished service=background task_id=bg_bot1_fd9d07fd status=completed duration=37.357µs
+--- PASS: TestBackgroundProviderVideoResultShape (0.00s)
+=== RUN   TestBackgroundProviderListKillAndWait
+2026/10/23 10:26:18 INFO background spawn task started service=background task_id=bg_bot1_1055cbfa bot_id=bot1 description="long spawn"
+2026/10/23 10:26:18 INFO background task killed service=background task_id=bg_bot1_1055cbfa
+--- PASS: TestBackgroundProviderListKillAndWait (0.00s)
+=== RUN   TestBackgroundProviderWaitUntilEmitsProgressWhileWaiting
+2026/10/23 10:26:18 INFO background spawn task started service=background task_id=bg_bot1_347a6905 bot_id=bot1 description="long spawn"
+2026/10/23 10:26:18 INFO background spawn task finished service=background task_id=bg_bot1_347a6905 status=completed branches=1 duration=673.494µs
+--- PASS: TestBackgroundProviderWaitUntilEmitsProgressWhileWaiting (0.00s)
+=== RUN   TestGetBackgroundStatusIncludesTailWhileRunning
+2026/10/23 10:26:18 INFO background task spawned service=background task_id=bg_bot1_55fc145e bot_id=bot1 command="npm run dev"
+2026/10/23 10:26:18 INFO background task killed service=background task_id=bg_bot1_55fc145e
+--- PASS: TestGetBackgroundStatusIncludesTailWhileRunning (0.00s)
+2026/10/23 10:26:18 INFO job service=background operation=background.exec latency=156.506µs task_id=bg_bot1_55fc145e bot_id=bot1 status=killed
+=== RUN   TestBackgroundSpawnPersistsUserMessageBeforeAgentCompletes
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_967483bc bot_id=bot1 agent_id=worker status=running
+--- PASS: TestBackgroundSpawnPersistsUserMessageBeforeAgentCompletes (0.01s)
+=== RUN   TestBackgroundWaitTimeoutDoesNotCancelRunningAgentTask
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_3047ef91 bot_id=bot1 agent_id=worker status=running
+--- PASS: TestBackgroundWaitTimeoutDoesNotCancelRunningAgentTask (0.02s)
+=== RUN   TestKillBackgroundCancelsRunningAndQueuedAgentTasks
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_388cd6a3 bot_id=bot1 agent_id=worker status=running
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_ad721168 bot_id=bot1 agent_id=worker status=queued
+2026/10/23 10:26:18 INFO background task killed service=background task_id=bg_bot1_ad721168
+2026/10/23 10:26:18 INFO background managed task stop requested service=background task_id=bg_bot1_388cd6a3
+--- PASS: TestKillBackgroundCancelsRunningAndQueuedAgentTasks (0.02s)
+=== RUN   TestSpawnedResolvedTerminalSurvivesLateBackgroundStop
+=== RUN   TestSpawnedResolvedTerminalSurvivesLateBackgroundStop/completed
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_7882e7d5 bot_id=bot1 agent_id=worker status=running
+2026/10/23 10:26:18 INFO background managed task stop requested service=background task_id=bg_bot1_7882e7d5
+=== RUN   TestSpawnedResolvedTerminalSurvivesLateBackgroundStop/failed
+2026/10/23 10:26:18 INFO background agent task registered service=background task_id=bg_bot1_b9ce1ba5 bot_id=bot1 agent_id=worker status=running
+2026/10/23 10:26:18 INFO background managed task stop requested service=background task_id=bg_bot1_b9ce1ba5
+--- PASS: TestSpawnedResolvedTerminalSurvivesLateBackgroundStop (0.00s)
+    --- PASS: TestSpawnedResolvedTerminalSurvivesLateBackgroundStop/completed (0.00s)
+    --- PASS: TestSpawnedResolvedTerminalSurvivesLateBackgroundStop/failed (0.00s)
+=== RUN   TestBackgroundProviderUsageGatesRegisteredTools
+=== PAUSE TestBackgroundProviderUsageGatesRegisteredTools
+=== RUN   TestVideoGenStartsBackgroundTaskAndCompletes
+2026/10/23 10:26:18 INFO background video task started service=background task_id=bg_bot1_230fa92a bot_id=bot1 description="generate video: waves at sunrise"
+2026/10/23 10:26:18 INFO background video task finished service=background task_id=bg_bot1_230fa92a status=completed duration=215.245µs
+--- PASS: TestVideoGenStartsBackgroundTaskAndCompletes (0.00s)
+=== CONT  TestBackgroundProviderUsageGatesRegisteredTools
+--- PASS: TestBackgroundProviderUsageGatesRegisteredTools (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/tool	1.139s

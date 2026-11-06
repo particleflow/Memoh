@@ -1,0 +1,90 @@
+{
+  "product_commit": "7ec0f50c17d7f7361b49e7d84a84a6065988da9b",
+  "base_commit": "cfec37361e46889c94f10e2b7c95f85a39e50b0d",
+  "handoff_commit": "787780fbe3c1a91262d99a5a3b8820d531406c20",
+  "logs": "Published bytes equal the local files. No output decoding or normalization. Private synthetic token/input file excluded.",
+  "toolchain": "Existing /workspace/.memoh-cloud/tooling/node_modules/.bin; NODE_OPTIONS=--no-experimental-webstorage",
+  "files": {
+    "red.txt": {
+      "bytes": 1942,
+      "sha256": "ca26c46dcd8c97111c65d8d896bf11ba1cbf9b372dbf5b60501ac184fa6d6be5",
+      "command": "pnpm exec vitest run apps/web/src/lib/api-client.test.ts -t \"response ownership\"",
+      "exit": 1,
+      "command_note": "Equivalent reproduction command; the original shell invocation was not saved."
+    },
+    "tests.txt": {
+      "bytes": 344,
+      "sha256": "e053220286f0d58bd4c457dc5d49ac70de0f57c629116a599f4a8a6912878e8d",
+      "command": "pnpm exec vitest run apps/web/src/lib/api-client.test.ts apps/web/src/pages/login/login-submit.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts",
+      "exit": 0
+    },
+    "typecheck.txt": {
+      "bytes": 116,
+      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit": 0
+    },
+    "lint.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "pnpm exec eslint apps/web/src/lib/api-client.ts apps/web/src/lib/auth-session.ts apps/web/src/lib/api-client.test.ts",
+      "exit": 0
+    },
+    "build.txt": {
+      "bytes": 76364,
+      "sha256": "d75d93811effd44ae0659ef721ae53c0aa538c907c42996cbd6b3b4461e879b6",
+      "command": "pnpm --filter @memohai/web build",
+      "exit": 0
+    },
+    "ui-contract.txt": {
+      "bytes": 1169,
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit": 0
+    },
+    "core.txt": {
+      "bytes": 95,
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+      "command": "bash scripts/check-agent-core-boundary.sh",
+      "exit": 0
+    },
+    "browser-initial.txt": {
+      "bytes": 395,
+      "sha256": "d16a473488826c74c1332b9d26a6f8417324eda328fffa06a90482c5fe283739",
+      "command": "node /tmp/shared-auth-session-guard/browser.mjs (initial localized button-name selector)",
+      "exit": 1
+    },
+    "browser.txt": {
+      "bytes": 380,
+      "sha256": "e2972afc75126848cb03d09ababe018f0041d4e0a05631bb33b15fd6f72a2152",
+      "command": "node /tmp/shared-auth-session-guard/browser.mjs (published script)",
+      "exit": 0
+    },
+    "browser-proof.json": {
+      "bytes": 444,
+      "sha256": "5307c35f3657b6bd5ce88766e26da132be578d0446d3e9b1686f576f42aa16ce"
+    },
+    "browser.mjs": {
+      "bytes": 6280,
+      "sha256": "d12e58d4789a8a7a15e656bd3e177c5522f38edcd6ad9d1f038fe5e788e6bcae"
+    },
+    "login-retained.png": {
+      "bytes": 44619,
+      "sha256": "6bd6fdf9cc9b160523aaf5e88387b95522ec0066c2ca12697cf972d4c652a495"
+    },
+    "current-session-cleared.png": {
+      "bytes": 27429,
+      "sha256": "0b8b929e107b9204cd92f4aa393db4047e6b6780adf82342fd50fa28eccc3622"
+    },
+    "upstream-5e55-auth-session.patch": {
+      "bytes": 833,
+      "sha256": "5b57d06b34373e809ec24d6419469e19eaa759b2ef27f94a188d8e0aafe15a21"
+    },
+    "script-lint.txt": {
+      "command": "pnpm exec eslint docs/testing/shared-web-auth-session/browser.mjs",
+      "exit": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+=== RUN   TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites
+=== RUN   TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/off
+=== RUN   TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/explicit_off_without_legacy_sentinel
+=== RUN   TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/low
+--- PASS: TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites (0.01s)
+    --- PASS: TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/off (0.00s)
+    --- PASS: TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/explicit_off_without_legacy_sentinel (0.00s)
+    --- PASS: TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites/low (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.022s
+
+exit=0

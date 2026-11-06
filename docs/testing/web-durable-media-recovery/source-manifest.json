@@ -1,0 +1,131 @@
+{
+  "base_commit": "2d03f6cbabad67b242d33180cc36bf02d423e6d5",
+  "files": [
+    {
+      "path": "apps/web/package.json",
+      "bytes": 2625,
+      "sha256": "8847e5330afb777c1e6cecaef8336d06551b660f700bf169219b7ab1115a6254",
+      "git_blob_sha1": "a558332c170bcbb85f2cab923c2969c464b36d79"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "bytes": 231949,
+      "sha256": "9c8403ab62de155d09ad5f2ccfdd19625a0803584cd64493f0cac5ee2b8c7f20",
+      "git_blob_sha1": "ee50a48f3a893a59c9b22c87a549486c33363acb"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "bytes": 296599,
+      "sha256": "56ed15fda76d23298ac68ff99229a56d9bc73f2d7bbc00db5e6cb24b1bf0b987",
+      "git_blob_sha1": "72eb92dd2a9ac46bb8b5be34bfaa6bcc3bb746e6"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "bytes": 223125,
+      "sha256": "74592b8f352aab6f04d151b8154736f6ecfc027b7ca5c27beb4e731fdbc09426",
+      "git_blob_sha1": "39ae4c0def95633f4300260440f2fa822c0f40f9"
+    },
+    {
+      "path": "apps/web/src/lib/media-transfer-storage.ts",
+      "bytes": 3382,
+      "sha256": "2bd22b1d515059b51ff813ccf5f0fa73de9e1a1e40cc76af7e1d372eb8a5a57b",
+      "git_blob_sha1": "3b5ee069bdf34498738040e7e0c09f229abe5d56"
+    },
+    {
+      "path": "apps/web/src/lib/media-transfer.test.ts",
+      "bytes": 14639,
+      "sha256": "4a7ae8ad6c93c543c9486ec03b35ef860d72dbc1dff479d88814a4208a20a368",
+      "git_blob_sha1": "390a32d6045c39fe8a112dc4bda1d01134406c60"
+    },
+    {
+      "path": "apps/web/src/lib/media-transfer.ts",
+      "bytes": 20166,
+      "sha256": "056fd61c4e8f4bc9c5d474d389fe02b42610a5588a1be078ea700b6a3abfdf64",
+      "git_blob_sha1": "6f1eec3f5c2c37bcd7e2bd59577a8069b3f44c54"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/attachment-block.test.ts",
+      "bytes": 4392,
+      "sha256": "54e9408e72bef580c3ad8abad9dc38dbd482b17a9ee09eb75d11c31e7942642a",
+      "git_blob_sha1": "433c7e7f4643cee53eb90e39d6e384dbf6c350c5"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/attachment-block.vue",
+      "bytes": 11488,
+      "sha256": "9e143973189528d469baee0122b4a291191a6c039fcc9e5b500a5b00d2fbce50",
+      "git_blob_sha1": "807472e3cde1396817ac68cd153af639a50cb4f3"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "bytes": 200910,
+      "sha256": "a723dc6086117b6b1fe6171158ae22bb825b4505a20cb9e48dfc7626de28b61e",
+      "git_blob_sha1": "02a69e318681c6a03fc12a50519e0189e5fce96d"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts",
+      "bytes": 3338,
+      "sha256": "c53c52b8b9df04e8dcdd34165145503f31e982fec416a71c6a8d2fdfb994c7e6",
+      "git_blob_sha1": "66f1c0623368a1997250a3feaf1048a7a279ec4d"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/dockview/panel-asset.vue",
+      "bytes": 5220,
+      "sha256": "79fb85f6339b87c9a4ddd381c5a1e3a4ac2c4142677058689807be62076faaa7",
+      "git_blob_sha1": "dd0f5528776bb4f0cbca51fe86b4b1d21aa44027"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useBotDelegationDownload.test.ts",
+      "bytes": 4299,
+      "sha256": "e8242b54e3d0b6bc453c0929ac9ab63a5b34fca00f86ac50c8ca7065aadb304e",
+      "git_blob_sha1": "25934580eb09b16488ec7bba5bcd4c970f8c28e0"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useBotDelegationDownload.ts",
+      "bytes": 3782,
+      "sha256": "0d73435b10aaa57c293353616594fd3a8082d500388a39d3bb665d05b344e3f2",
+      "git_blob_sha1": "5edf291fc3249bddf285e9897a2e67f968c640c8"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useComposerUpload.lifecycle.test.ts",
+      "bytes": 3097,
+      "sha256": "2eca8b88a48cd71a1476db6a53ad9be285f0d6a8928cff461d1cde80e50dd1a8",
+      "git_blob_sha1": "08f5eeb9aece9b3edada5b2c1bf968be0c70e890"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useComposerUpload.test.ts",
+      "bytes": 3818,
+      "sha256": "cd8f57e45b44bb0389a6f7531bf4642945e601aaa1c59b6769fa584af578488a",
+      "git_blob_sha1": "62e4098b979e29608a8c0d9852937a9629940f43"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useComposerUpload.ts",
+      "bytes": 3289,
+      "sha256": "6fb52ec04ce5016a5cfd6f9ec286904086de7202a11dcd9f0bf666ef0ba0de1b",
+      "git_blob_sha1": "1d59e311429dbe7b351f49a17111e7dd75e565be"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useFileManagerProvider.ts",
+      "bytes": 1583,
+      "sha256": "448b41a7adc168319036fc339e7b93770e9a1b337fb0e8b5e254c1e2dbd744ff",
+      "git_blob_sha1": "ce9a0cc241874b45107cf51b5756d2f51d0f4da0"
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.test.ts",
+      "bytes": 113007,
+      "sha256": "605cd51f99a988220402a667d69d06c95e722b663b03cffe40efdaeb882ee750",
+      "git_blob_sha1": "5a8ff22e4c047ddc197dabcb54da2afdf28e7a7b"
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "bytes": 88075,
+      "sha256": "600e0ec0dc59aeaa47b97f02e61070d152b2f27f2520c59a7e652762808143c5",
+      "git_blob_sha1": "f4ec21b39760a4d15bad85686bb5ed2f822e00b3"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 361161,
+      "sha256": "096f88a9806d1d0622082740410781a2938aea77a03098af2ff1783974c8c0a8",
+      "git_blob_sha1": "f48d3f81b24fcea0eabe76181a436e06691d27de"
+    }
+  ]
+}

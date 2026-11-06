@@ -1,0 +1,6 @@
+{"case": "normal", "state": "failed", "delivery_state": "accepted", "summary_present": false, "model_calls": 0}
+Traceback (most recent call last):
+  File "/tmp/delegation-route-config/probe.py", line 56, in <module>
+    if kind=='normal' and result['state']!='completed':raise RuntimeError('normal real runtime did not complete; no timeout task submitted')
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: normal real runtime did not complete; no timeout task submitted

@@ -1,0 +1,48 @@
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_only
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/summary_ready
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/all_cached
+--- PASS: TestBatchCompletedControlRestartRecoveryBoundary (3.49s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected (0.88s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_only (0.87s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/summary_ready (0.96s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/all_cached (0.78s)
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/lost
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/malformed
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/reservation_save
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/ready_save
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/revoked_after_create
+=== RUN   TestBatchReaderUnknownCreationNeverRecreates/left_creating
+--- PASS: TestBatchReaderUnknownCreationNeverRecreates (0.62s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/lost (0.10s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/malformed (0.10s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/reservation_save (0.11s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/ready_save (0.11s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/revoked_after_create (0.10s)
+    --- PASS: TestBatchReaderUnknownCreationNeverRecreates/left_creating (0.11s)
+=== RUN   TestBatchReaderOnlyCASWinnerCreates
+--- PASS: TestBatchReaderOnlyCASWinnerCreates (0.14s)
+=== RUN   TestBatchReaderReadOnlyGetDoesNotCreate
+--- PASS: TestBatchReaderReadOnlyGetDoesNotCreate (0.10s)
+=== RUN   TestBatchReaderChangedIdentityAndRevocationPreserveProgress
+=== RUN   TestBatchReaderChangedIdentityAndRevocationPreserveProgress/identity
+=== RUN   TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked
+=== RUN   TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked_after_get
+--- PASS: TestBatchReaderChangedIdentityAndRevocationPreserveProgress (0.31s)
+    --- PASS: TestBatchReaderChangedIdentityAndRevocationPreserveProgress/identity (0.11s)
+    --- PASS: TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked (0.10s)
+    --- PASS: TestBatchReaderChangedIdentityAndRevocationPreserveProgress/revoked_after_get (0.11s)
+=== RUN   TestBatchReaderReceiptAndHashValidationRemainOriginal
+=== RUN   TestBatchReaderReceiptAndHashValidationRemainOriginal/receipt_attempt
+=== RUN   TestBatchReaderReceiptAndHashValidationRemainOriginal/completion_hash
+=== RUN   TestBatchReaderReceiptAndHashValidationRemainOriginal/diagnostic_hash
+--- PASS: TestBatchReaderReceiptAndHashValidationRemainOriginal (0.42s)
+    --- PASS: TestBatchReaderReceiptAndHashValidationRemainOriginal/receipt_attempt (0.09s)
+    --- PASS: TestBatchReaderReceiptAndHashValidationRemainOriginal/completion_hash (0.15s)
+    --- PASS: TestBatchReaderReceiptAndHashValidationRemainOriginal/diagnostic_hash (0.17s)
+=== RUN   TestBatchReaderPageRereadDoesNotDuplicateCommittedChunks
+--- PASS: TestBatchReaderPageRereadDoesNotDuplicateCommittedChunks (0.80s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	6.932s

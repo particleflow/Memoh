@@ -1,0 +1,18 @@
+{
+  "source": "28ac9393c7e20db34b804ad3ece63680eecded8c + Home visibility candidate",
+  "syntheticServerAndWav": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [],
+  "observations": [],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "failureBody": ""
+}

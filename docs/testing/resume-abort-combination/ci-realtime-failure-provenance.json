@@ -1,0 +1,15 @@
+{
+  "run": 40235542035,
+  "job": 121296201641,
+  "head": "7499b9c705bca462001e504eea5bc567fb6ceb17",
+  "url": "https://github.com/particleflow/Memoh/actions/runs/40235542035",
+  "format": "UTF-8 decoded GitHub job log from connector, not HTTP archive bytes",
+  "full_decoded_bytes": 56659,
+  "full_decoded_sha256": "e1db6cd0d9037be57c9d2a6cef8a095748415082f0171738d5a60ae8948ede01",
+  "public_excerpt_lines_1_based_inclusive": [
+    490,
+    546
+  ],
+  "excerpt_bytes": 3129,
+  "excerpt_sha256": "962b3344ce44d195ac21b2d12213c0c338428863aa7115fb88e5d3c988d4ff40"
+}

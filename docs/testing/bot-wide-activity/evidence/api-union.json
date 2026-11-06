@@ -1,0 +1,13 @@
+{
+  "base": "9253f2515370812a1bb0fccdf1f29e5e69de4ca7",
+  "new_operations": [
+    [
+      "/bots/{bot_id}/activity",
+      "get"
+    ]
+  ],
+  "removed_operations": [],
+  "base_count": 367,
+  "current_count": 368,
+  "generator": "go generate ./internal/handlers; pnpm run generate-sdk; sqlc v1.31.1 generate"
+}

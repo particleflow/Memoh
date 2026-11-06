@@ -1,0 +1,16 @@
+{
+  "route_paths_unchanged": 279,
+  "changed_definition": "botdelegation.View",
+  "new_optional_fields": [
+    "target_run_created_at",
+    "target_run_id",
+    "target_run_state",
+    "target_run_updated_at"
+  ],
+  "existing_required_fields_unchanged": true,
+  "migration_files_changed": false,
+  "source_commits": [
+    "fcbe5c2941bff9def230189b49499daf91f1049d",
+    "82691d889c2fed40df50f72d1b32232028dfaf93"
+  ]
+}

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/web-management-checks/results-file-route.py", line 13, in <module>
+    status,h,b=request(a['url']);assert status==200 and hashlib.sha256(b).hexdigest()==a['content_hash'];etag=h['ETag']
+                                                                                                              ~^^^^^^^^
+KeyError: 'ETag'

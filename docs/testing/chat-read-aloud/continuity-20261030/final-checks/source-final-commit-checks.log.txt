@@ -1,0 +1,34 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (6509ea540)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 20 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.91s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/audio ./internal/handlers ./internal/server ./spec
+[hooks] Go package selection: 0.27s
+[hooks] Go lint: golangci-lint run --concurrency=2 /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/internal/server /workspace/memoh-speech-continuity/spec
+[hooks] Go lint: 177.29s
+[hooks] Go test: go test -p=2 -timeout=600s /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/internal/server /workspace/memoh-speech-continuity/spec
+ok  	github.com/felinics/memoh/internal/audio	0.011s
+ok  	github.com/felinics/memoh/internal/handlers	4.831s
+ok  	github.com/felinics/memoh/internal/server	0.044s
+?   	github.com/felinics/memoh/spec	[no test files]
+[hooks] Go test: 10.05s
+[hooks] Total: 193.54s
+[fix/chat-continuous-read-aloud-20261030 ba44c0626] fix(chat): preserve speech coverage and replay generated audio
+ 32 files changed, 985 insertions(+), 107 deletions(-)
+ create mode 100644 apps/web/src/pages/home/composables/speech-replay-cache.test.ts
+ create mode 100644 apps/web/src/pages/home/composables/speech-replay-cache.ts
+ create mode 100644 apps/web/src/pages/home/composables/speech-sentence-boundary.test.ts
+ create mode 100644 apps/web/src/pages/home/composables/speech-sentence-boundary.ts
+ create mode 100644 apps/web/src/pages/home/composables/useChatReadAloud.cache.test.ts
+ create mode 100644 internal/audio/playback_identity_test.go

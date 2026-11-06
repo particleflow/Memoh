@@ -1,0 +1,47 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/speech-replay-cache.test.ts (7 tests | 2 failed) 125ms
+     × preserves all visible words once in order through per-code-point deltas and final flush: **重要。**后续也必须朗读。 14ms
+   × keeps full EOF-completed bytes after stop and replays them without a synthesis request 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-replay-cache.test.ts > uninterrupted text coverage before synthesis > preserves all visible words once in order through per-code-point deltas and final flush: **重要。**后续也必须朗读。
+AssertionError: expected '重要。' to be '**重要。**后续也必须朗读。' // Object.is equality
+
+Expected: "**重要。**后续也必须朗读。"
+Received: "重要。"
+
+ ❯ src/pages/home/composables/speech-replay-cache.test.ts:24:50
+     22|     for (const point of Array.from(source)) { current += point; output…
+     23|     output.push(...live.update([reply(source, false)], true, false).ma…
+     24|     expect(normalizeSpeechText(output.join(''))).toBe(normalizeSpeechT…
+       |                                                  ^
+     25|   })
+     26| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-replay-cache.test.ts > keeps full EOF-completed bytes after stop and replays them without a synthesis request
+AssertionError: expected 'incomplete' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "incomplete"
+
+ ❯ src/pages/home/composables/speech-replay-cache.test.ts:35:44
+     33|   const entry = { key: 'turn', cacheKey: 'account/bot/session/run', te…
+     34|   speech.enqueue(entry); await tick(); speech.stop()
+     35|   expect(speech.replayAvailability(entry)).toBe('ready')
+       |                                            ^
+     36|   expect(speech.replay(entry, 'voice/model/format-one')).toBe(true); a…
+     37|   expect(synthesize).toHaveBeenCalledOnce()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  12:35:51
+   Duration  510ms (transform 101ms, setup 0ms, import 233ms, tests 125ms, environment 0ms)

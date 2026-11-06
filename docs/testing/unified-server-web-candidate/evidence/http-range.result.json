@@ -1,0 +1,21 @@
+{
+  "check": "http-range",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "240s",
+    "./internal/handlers",
+    "-run",
+    "Test(BotDelegation|ComputerTransfer|TaskTransfer|GeneratedContracts)"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T04:33:34Z",
+  "elapsed_seconds": 71.535
+}

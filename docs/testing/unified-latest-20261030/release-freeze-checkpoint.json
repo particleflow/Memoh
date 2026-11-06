@@ -1,0 +1,32 @@
+{
+  "previous_remote": "286b4ae0ff04d8e7cfe341874e2cb61095cff5b9",
+  "previous_CI": "four classes passed; Go and ESLint failed, exact failures retained",
+  "fixes": [
+    "close unexpected test response body; guard still rejects before network",
+    "three native400 diagnostic strings moved to WithInternal; same validation/status",
+    "review exactly two existing UI surfaces/four actual replay-state locale keys; no guard or rejected-control changes"
+  ],
+  "new_narrow_checks": {
+    "bad_request_field_guard": "PASS 0.494s",
+    "nonlocal_fixture_guard": "PASS 0.018s",
+    "rejected_UI_controls": "4/4 PASS",
+    "copy_policy": "PASS2033 surfaces; exactly two replaced and no new controls"
+  },
+  "shared_and_SDK_product_equal_to286": true,
+  "strict_Qwen_evidence": "1764c882642ef43256ccd8001b97c145c593af54",
+  "queue_efac": "not merged; nested real-ledger single-connection defect, migration182 conflict",
+  "production_schema": 181,
+  "candidate_schema": 182,
+  "release_scope": "server-web only; one matching Harmony package; Windowsc868/bbdb remains pending field qualification, no forcedPC57 replacement",
+  "not_blocking_release": [
+    "download performance research",
+    "future real certificate renewal",
+    "all46 final field acceptance"
+  ],
+  "field_gaps_retained": [
+    "history eleven-skeleton attribution/acceptance",
+    "actual speech endpoint/MIME/SSML/voice capability presence under existing authorized scope",
+    "physical listening/ArkWeb/500ms",
+    "Windows upload/auth/positiveTLS/W02-W04"
+  ]
+}

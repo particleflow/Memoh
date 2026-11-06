@@ -1,0 +1,10 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages/session-http-pages
+    computer_delivery_pages_integration_test.go:143: HTTP status=401 cache="" body={"type":"urn:memoh:error:http.unauthorized","status":401,"detail":"Sign in to continue.","code":"http.unauthorized","args":{},"fault":"client","request_id":"5472feef-1670-48e7-816e-3d2d0e590c11"}
+--- FAIL: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages/session-http-pages (0.00s)
+    computer_delivery_integration_test.go:229: ledger metadata=257 pages=17 operation_json_bytes=512 elapsed=645.223759ms; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer
+--- FAIL: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages (0.70s)
+--- FAIL: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (3.59s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	3.634s

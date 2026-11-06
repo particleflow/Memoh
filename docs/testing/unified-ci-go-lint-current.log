@@ -1,0 +1,3 @@
+internal/imagecapability/protocol.go:89:25: G704: SSRF via taint analysis (gosec)
+	resp, err := oneShot.Do(req)
+	                       ^

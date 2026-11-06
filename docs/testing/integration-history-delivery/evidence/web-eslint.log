@@ -1,0 +1,35 @@
+
+<repo>/apps/web/src/components/computer/connect-computer-dialog.test.ts
+  27:29  warning  There is more than one component in this file  vue/one-component-per-file
+  37:32  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/bots/components/model-options.test.ts
+  32:13  warning  Prop "viewportAttrs" should define at least its type  vue/require-prop-types
+  32:30  warning  Prop "layout" should define at least its type         vue/require-prop-types
+
+<repo>/apps/web/src/pages/bots/components/schedule-editor.test.ts
+  19:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+
+<repo>/apps/web/src/pages/bots/new-progress.test.ts
+  107:25  warning  There is more than one component in this file  vue/one-component-per-file
+  141:25  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/home/commands/workspace-keyboard.integration.test.ts
+  122:19  warning  There is more than one component in this file  vue/one-component-per-file
+  177:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+<repo>/apps/web/src/pages/home/components/message-item.test.ts
+  20:39  warning  Prop 'text' requires default value to be set        vue/require-default-prop
+  24:14  warning  Prop 'onEdit' requires default value to be set      vue/require-default-prop
+  32:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+
+<repo>/apps/web/src/pages/keyboard-shortcuts/components/KeyCaptureDialog.test.ts
+   32:19  warning  There is more than one component in this file  vue/one-component-per-file
+   68:19  warning  There is more than one component in this file  vue/one-component-per-file
+   90:19  warning  There is more than one component in this file  vue/one-component-per-file
+  112:19  warning  There is more than one component in this file  vue/one-component-per-file
+  128:19  warning  There is more than one component in this file  vue/one-component-per-file
+  149:19  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 18 problems (0 errors, 18 warnings)
+

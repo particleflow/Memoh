@@ -1,0 +1,5 @@
+=== RUN   TestRegistrationTenThousandMetadataNoPayloadCopies
+    registration_scale_test.go:117: distinct_sparse_sources=10000 logical_bytes=10737418240000 registration_time=686.831389ms queue_file_bytes=12201500 queue_allocated_bytes=40968192 sampled_heap_baseline=282344 sampled_heap_peak=4036600 sampled_heap_growth=3754256 select_time=566.071055ms
+--- PASS: TestRegistrationTenThousandMetadataNoPayloadCopies (2.34s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	2.354s

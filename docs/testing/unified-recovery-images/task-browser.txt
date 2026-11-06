@@ -1,0 +1,2 @@
+PASS combined Web opens actual isolated task detail with native-content entry; no content or follow-up call
+LIMIT this is a persisted batch fixture, not a new native Agent execution; earlier native fixture configuration was restored

@@ -1,0 +1,43 @@
+name: Docker
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      validated_sha:
+        description: Exact workflow commit selected for validation (must match ref)
+        type: string
+        required: true
+      image_scope:
+        description: Images to build and publish
+        type: choice
+        options: [all, web, server, server-web]
+        default: all
+      source_sha:
+        description: Optional exact Web source; only workflow files may differ from ref
+        type: string
+        default: ''
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+jobs:
+  validate-ref:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check selected commit
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VALIDATED_SHA: ${{ inputs.validated_sha }}
+        run: |
+          [[ "$VALIDATED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$VALIDATED_SHA" = "$GITHUB_SHA"
+  build:
+    needs: validate-ref
+    uses: ./.github/workflows/docker-build.yml
+    with:
+      publish: ${{ github.event_name == 'workflow_dispatch' }}
+      image_scope: ${{ inputs.image_scope || 'all' }}
+      source_sha: ${{ inputs.source_sha || '' }}

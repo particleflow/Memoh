@@ -1,0 +1,116 @@
+[
+  {
+    "file": "web-management-ui-final.log",
+    "bytes": 329,
+    "sha256": "e8fc4bcd920810fb447908c81c91f34384b0f7f30f7956d50e11d0abf2260462",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-web-type-final.log",
+    "bytes": 100,
+    "sha256": "2825b2d730754d45b501c4f141702e8a35d722710342ff383286d8cd317af729",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-lint-final.log",
+    "bytes": 301,
+    "sha256": "692d1aab713b30615e796cc0934e8730fbe425c83f22db3b652cc6c92ce1df1a",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-ui-contract.log",
+    "bytes": 1169,
+    "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-build-final.log",
+    "bytes": 113269,
+    "sha256": "38cc91ef02bc9f12c30c4d4ccd3e12f72b1f3b96a7368729b22c952aa7b761de",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-core-boundary.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-settings-proof.json",
+    "bytes": 156,
+    "sha256": "4c1efdf51f699aa8d9c37b851a60f4fcf0ccfa3c9836afecb973aa751a9ab7f0",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-pg-business-proof.json",
+    "bytes": 982,
+    "sha256": "6ac1f68cc4a96f9d1e064cdf1a09f023e2266ab1e8ea270118737d792f5011b0",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-pg-final.json",
+    "bytes": 377,
+    "sha256": "754a1361c169e1f9b49e0a7141e83196ea76a3ee924ce28b7faecc0f427b1fb9",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-model-calls.json",
+    "bytes": 672,
+    "sha256": "9f275f1cbac6208808a6074da7f76c8d97f6754c1b91f8bfdfeb5bc59b3960bd",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-observe-proof.json",
+    "bytes": 7636,
+    "sha256": "b972597dd78a8db6d2406f1391190257e58e76d7753e34ba319c9e8155290381",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-retry-proof.json",
+    "bytes": 185,
+    "sha256": "7b2c93f5cb069b7dcb339d0e5c5f8d94c03e3b17fc69a9dc763a7e291d77b6cd",
+    "form": "original output; reviewed synthetic/local fixture data"
+  },
+  {
+    "file": "web-management-handoff-detail.png",
+    "bytes": 92632,
+    "sha256": "a345bb98c630d6bc92ab9b05cc470fe8a5ca9e219a0f63aabe023ab8d797426d",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-downstream-list.png",
+    "bytes": 90136,
+    "sha256": "21d327229f6b7bc8949774ad85e9db604c6f48fc466d42fe7c9ea8e0d20c1fbc",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-downstream-detail.png",
+    "bytes": 92079,
+    "sha256": "587779f28bba1f4db530b44313fa0b446e23ee02ba5e62609489e334afeed38c",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-downstream-narrow-dark-zh.png",
+    "bytes": 45018,
+    "sha256": "c468f4ac0c268eb14db974b98aea589eeb4cee2c17ded2221dd3207ea54c51df",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-network-error.png",
+    "bytes": 81994,
+    "sha256": "c4891a92401606c5ff7f97d54b7003b6d944a60b570436b11f0bf594b46e6b4e",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-delivery-accepted.png",
+    "bytes": 95147,
+    "sha256": "cbb4bff80f401431820f52a28adb192a3ce4a2a1a3ce578745db95d037ba0e1b",
+    "form": "actual browser screenshot of synthetic records"
+  },
+  {
+    "file": "web-management-settings-saved.png",
+    "bytes": 111426,
+    "sha256": "0e9a62d3b8359bd0837a24c29770779d5a6ac1d6b75ee90a1a07ed2721a5e617",
+    "form": "actual browser screenshot of synthetic records"
+  }
+]

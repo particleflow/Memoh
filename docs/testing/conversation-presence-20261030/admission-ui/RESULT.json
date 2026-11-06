@@ -1,0 +1,19 @@
+{
+  "source_commit": "45c27c6e5f8aeb214a15cc1c9b4eeae1412ce294",
+  "scope": "actual Vite chat page authenticated against real Go backend; controlled in-memory chat state fixture, not a full WS/browser/model e2e",
+  "checks": [
+    "natural ack rendered once on existing status surface",
+    "light zh",
+    "dark narrow zh",
+    "formal text suppresses stale ack even if status clear has not arrived",
+    "terminal/history status hidden"
+  ],
+  "page_errors": [],
+  "screenshots": [
+    "ack-light-zh.png",
+    "ack-dark-narrow-zh.png",
+    "formal-clears-ack.png"
+  ],
+  "human_qa": false,
+  "real_model_calls": 0
+}

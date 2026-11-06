@@ -1,0 +1,3 @@
+internal/transferclient/producer_feedback.go:188:4: unnecessary trailing newline (whitespace)
+			}
+			^

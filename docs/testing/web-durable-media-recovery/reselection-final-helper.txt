@@ -1,0 +1,7 @@
+{"stage":"reselect-ack","pid":21342,"journals":[{"kind":"upload","phase":"create-unknown","offset":0},{"kind":"download","phase":"ready","offset":3145747}],"requests":9,"page_errors":0,"message_attempts":0}
+Warning: Detected unsettled top-level await at file:///workspace/scratch/durable-integration.mjs:109
+} finally {socket?.close();browser.kill('SIGKILL');await new Promise(r=>browser.once('exit',r))}
+                                                   ^
+
+
+

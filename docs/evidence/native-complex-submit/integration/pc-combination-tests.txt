@@ -1,0 +1,4 @@
+ok  	github.com/felinics/memoh/internal/legacy-exec	12.671s
+ok  	github.com/felinics/memoh/internal/computertask	11.294s
+ok  	github.com/felinics/memoh/internal/nativeherdr	0.115s
+ok  	github.com/felinics/memoh/internal/imagecapability	0.793s

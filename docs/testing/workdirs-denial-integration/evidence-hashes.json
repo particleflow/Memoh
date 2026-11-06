@@ -1,0 +1,110 @@
+[
+  {
+    "file": "source-evidence/validation.json",
+    "rawSHA256": "6e1ac1f0785f45fdfd673c40f35b909b8b1def7a5f562e29de735946d16d62c7",
+    "publishedSHA256": "c1d51872559c15678140335d36dd199a8e1de4cbe8c02aebac8b493ec39b6ee6",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/integrity.json",
+    "rawSHA256": "656ab1f7ccbaadd98771208f1cc3b48c8d2cac6b9c7fa5cd9e8ef641be95dce7",
+    "publishedSHA256": "f2b6c23fc71ebb89fb016cf2258b107415a16f0f13b155eb6f503cdc4cc0b5c8",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/pagination-http-proof.json",
+    "rawSHA256": "e9a150aeaeaeece4bd8f33eb1b82c9d8f435f4fa7cb32c8f488f827254d9b254",
+    "publishedSHA256": "515417193fee6cb7240dbfcbd35ee4f2c4a32f9dd48739ab7643ceb8692d0b71",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/pagination-browser-proof.json",
+    "rawSHA256": "1bf5df89b407b9e17d71a9e9ca2f3cc88b1814908ff202234fd779dcc82f574d",
+    "publishedSHA256": "995df920e5736162c584b291c594b2ec19fcb9646ebcd99ae8bdf24483b8baf9",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/errors-before.json",
+    "rawSHA256": "6c9e64b021c7999c6d34a34d8884984023fba9a297ca427ed0ee48500056b887",
+    "publishedSHA256": "daec21592f8d740bb88ea7b6e0102f5e07db41b6cfd44613e45c456c8b68e097",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/errors-after.json",
+    "rawSHA256": "6997310a067aa26822f959476f72b23a585aaec05fa3dd76eadafc00d26d8749",
+    "publishedSHA256": "0f1f73668bad3a4d27f20068d1f7937832083eab1d75fed76ffed84a5ad31e5f",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/errors-final.json",
+    "rawSHA256": "217242a008bef5e113a25cefa972a0b605d41bdeb2d1284c97a77d5a64eabf53",
+    "publishedSHA256": "3611f23fed3457c32aa418489c0318ec77f692ac24d688273abf9fff7a67df18",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/workdirs-red-behavior.txt",
+    "rawSHA256": "bb695cd8e8d113be6b11327955d23bd5f15effaf36b68d22f6f0c87a68f8a336",
+    "publishedSHA256": "b74259ea692aab452bdbaf6533aa2833e2530e0e2c62bf44c58418e415ceb605",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/workdirs-red.txt",
+    "rawSHA256": "0426e86047b4a179ebe4ac51e504ede5f3b8cd651bfac002388fa4139133bfb7",
+    "publishedSHA256": "796e20034122cb44b4e7ecde904d3a9a510943e06b3522d6391c9d8352c5a1ac",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/workdirs-green.txt",
+    "rawSHA256": "d09432bf53a0866f4acc1af8f7615bb45a86c82fb2ad0f1416cf3ef18ac283f3",
+    "publishedSHA256": "53fcfbfae3ff379a11bf471117d0459f373326d07e440d8ddd7dfc6adc0a6fdc",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/workdirs-frozen-deps-tests.txt",
+    "rawSHA256": "dc8842ed897cb8f023f12b394c4ed323f0484774f8b004c8a340122d9980118b",
+    "publishedSHA256": "d83e9cea137aba215bae8108b8b87e982c91514e96e7c2fde17b30fa92ed910a",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "source-evidence/workdirs-ui-contract.txt",
+    "rawSHA256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "publishedSHA256": "c785d0b446712b7d7837076743cf5e209dd1f0d4f0f01b6406114f0790558ab9",
+    "processing": "trailing whitespace/outer blank lines only; source worker already redacted six credential occurrences in before/after diagnostics"
+  },
+  {
+    "file": "combination-tests.txt",
+    "rawSHA256": "8d77d9e2d455fe931dd3fc5959c9e72ce946610af12e5f64c25c1fbf5bf928a8",
+    "publishedSHA256": "88db7326fc6bdfd896b1df1f73801fa47ead02e4babecb0f3d639d5e85c307e4",
+    "processing": "trailing whitespace/outer blank lines only"
+  },
+  {
+    "file": "combination-types.txt",
+    "rawSHA256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "publishedSHA256": "89d678fee3bc7b19e45ec4a669d7cba386fc1ea42f1f65e9a8aa45335cda8ba9",
+    "processing": "trailing whitespace/outer blank lines only"
+  },
+  {
+    "file": "combination-browser.txt",
+    "rawSHA256": "d6802b0641f6b9cb353d2272b68601025cb3b60ba5b447987144fdaed7ef7e8a",
+    "publishedSHA256": "d6802b0641f6b9cb353d2272b68601025cb3b60ba5b447987144fdaed7ef7e8a",
+    "processing": "trailing whitespace/outer blank lines only"
+  },
+  {
+    "file": "combination-browser-proof.json",
+    "rawSHA256": "8f163be69bad9b2f9e4fa0677ee283e8fbe67e131e964f474cc83ccfa6fb845c",
+    "publishedSHA256": "8f163be69bad9b2f9e4fa0677ee283e8fbe67e131e964f474cc83ccfa6fb845c",
+    "processing": "trailing whitespace/outer blank lines only"
+  },
+  {
+    "file": "combination-ui-contract.txt",
+    "rawSHA256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "publishedSHA256": "c785d0b446712b7d7837076743cf5e209dd1f0d4f0f01b6406114f0790558ab9",
+    "processing": "trailing whitespace/outer blank lines only"
+  },
+  {
+    "file": "combination-staged-hook.txt",
+    "rawSHA256": "33622341ba272ac70d572ad4e5139f77c284dfdc9fc45a100b243a6b91d4a28a",
+    "publishedSHA256": "33622341ba272ac70d572ad4e5139f77c284dfdc9fc45a100b243a6b91d4a28a",
+    "processing": "trailing whitespace/outer blank lines only"
+  }
+]

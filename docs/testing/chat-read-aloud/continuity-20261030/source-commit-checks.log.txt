@@ -1,0 +1,20 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (be5f69cb9)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 5 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.30s
+[hooks] Go: no packages selected for this build context
+[hooks] Total: 5.30s
+[fix/chat-continuous-read-aloud-20261030 e57d218b3] fix(chat): preserve live speech triggers and continuous MP3 buffering
+ 5 files changed, 212 insertions(+), 26 deletions(-)
+ create mode 100644 apps/web/src/pages/home/composables/speech-continuity.test.ts

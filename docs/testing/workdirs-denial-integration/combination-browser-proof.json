@@ -1,0 +1,12 @@
+{
+  "baseCommit": "f3654de4bad74a9873e08b326a5d802826e28ba0",
+  "realExistingServerPG": true,
+  "onlyWorkdirDenialSynthetic": true,
+  "workdirRequests": 1,
+  "pageErrors": [],
+  "unhandledRejections": 0,
+  "businessRequests": [],
+  "deviceRequests": [],
+  "humanQA": false,
+  "fieldAcceptance": false
+}

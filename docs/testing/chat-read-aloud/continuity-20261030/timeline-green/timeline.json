@@ -1,0 +1,77 @@
+{
+  "origin": "http://127.0.0.1:43797",
+  "browser": "154.0.8037.57",
+  "providerCalls": 0,
+  "physicalAudibleMeasurement": false,
+  "firstNonzeroMS": 328.3999999985099,
+  "gapsMS": [],
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 307.69999999925494,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:43797/787f94cd-775c-4421-b582-cfe6e334fe1d"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 310.3999999985099,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:43797/787f94cd-775c-4421-b582-cfe6e334fe1d"
+    },
+    {
+      "type": "pause",
+      "trusted": true,
+      "ms": 2754.60000000149,
+      "time": 2.455508,
+      "src": "blob:http://127.0.0.1:43797/787f94cd-775c-4421-b582-cfe6e334fe1d"
+    },
+    {
+      "type": "ended",
+      "trusted": true,
+      "ms": 2755.300000000745,
+      "time": 2.455508,
+      "src": "blob:http://127.0.0.1:43797/787f94cd-775c-4421-b582-cfe6e334fe1d"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 2757.10000000149,
+      "time": 0,
+      "src": "http://127.0.0.1:43797/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 2757.199999999255,
+      "time": 0,
+      "src": "http://127.0.0.1:43797/"
+    }
+  ],
+  "playCalls": [
+    {
+      "ms": 306.1000000014901,
+      "active": true,
+      "ever": true,
+      "src": "blob:http://127.0.0.1:43797/787f94cd-775c-4421-b582-cfe6e334fe1d"
+    }
+  ],
+  "requests": [
+    {
+      "text": "First sentence.",
+      "relativeStartMS": 0,
+      "index": 0
+    },
+    {
+      "text": "Second sentence.",
+      "relativeStartMS": 655.21884,
+      "index": 1
+    }
+  ],
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "errors": []
+}

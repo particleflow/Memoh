@@ -1,0 +1,22 @@
+{
+  "source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+  "modified": false,
+  "runtimeVerified": false,
+  "files": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": {
+      "SHA256": "d37a3476d9ba5772f4b241c306341a1de690d457347265331cb6c9f8709065c4"
+    },
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets": {
+      "SHA256": "48dad46248cff3c5609cdc389ed8efa970d6c372478c80acc201b672ce7449f7"
+    },
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets": {
+      "SHA256": "87ec4e6ec9dd12e615427dddbf2a0402a85e2ed2a67657e5c40aae234a6aad47"
+    }
+  },
+  "findings": [
+    "SharedChat Web has no mediaPlayGestureAccess override.",
+    "aboutToDisappear releases native observers; speech/media visibility propagation remains unverified.",
+    "NativeWebNetwork intercepts profile/file routes, not playback or its new config GET; do not infer native file transport verifies TTS.",
+    "SharedWebPolicy memohRequest keeps logical base-origin path guard. Existing fetch/CORS path must expose identity header; this source adds that server exposure, no transport broadening."
+  ]
+}

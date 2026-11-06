@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  16:33:36
+   Duration  1.00s (transform 227ms, setup 0ms, import 352ms, tests 18ms, environment 480ms)
+

@@ -1,0 +1,76 @@
+{
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "trustedInput": [
+    {
+      "trusted": true,
+      "ms": 1005
+    },
+    {
+      "trusted": true,
+      "ms": 1012.6000000014901
+    },
+    {
+      "trusted": true,
+      "ms": 1014.5
+    },
+    {
+      "trusted": true,
+      "ms": 1017.4000000022352
+    },
+    {
+      "trusted": true,
+      "ms": 1019.3000000007451
+    },
+    {
+      "trusted": true,
+      "ms": 1020.8000000007451
+    },
+    {
+      "trusted": true,
+      "ms": 1022.3000000007451
+    },
+    {
+      "trusted": true,
+      "ms": 1024.9000000022352
+    },
+    {
+      "trusted": true,
+      "ms": 1027
+    }
+  ],
+  "playsAtStop": 1,
+  "playsAfterLateResponse": 1,
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 583,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:46143/9fe8b676-38ef-49f0-b7a7-e54817514cec"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 586.7000000029802,
+      "time": 0.007588,
+      "src": "blob:http://127.0.0.1:46143/9fe8b676-38ef-49f0-b7a7-e54817514cec"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 1040.9000000022352,
+      "time": 0,
+      "src": "http://127.0.0.1:46143/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 1041.1000000014901,
+      "time": 0,
+      "src": "http://127.0.0.1:46143/"
+    }
+  ]
+}

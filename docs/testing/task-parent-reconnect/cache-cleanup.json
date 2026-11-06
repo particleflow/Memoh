@@ -1,0 +1,22 @@
+{
+  "regenerable_task_go_cache_only": true,
+  "removed": [
+    {
+      "cache_entry": "3f/3f5137f2ef7aa2b4907c6b137764a6a379ae9586f2fc9b1a9f107bed935da528-d",
+      "bytes": 139735756
+    },
+    {
+      "cache_entry": "70/70be8b50a13559858b4a5ec8ac4b44f2607783d566fe4332e06e3b757b4b9f07-d",
+      "bytes": 139735756
+    },
+    {
+      "cache_entry": "bc/bc27147ccf742d404792dc508635c2cc765b16ee035822b6f968dc346c565797-d",
+      "bytes": 139738758
+    },
+    {
+      "cache_entry": "13/13710e97df1d0d7a08294c9ff4ccff56b5eab96e981cfa33a99d7faa3370036b-d",
+      "bytes": 139739210
+    }
+  ],
+  "bytes": 558949480
+}

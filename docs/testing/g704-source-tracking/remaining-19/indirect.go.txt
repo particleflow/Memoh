@@ -1,0 +1,35 @@
+package cancelownership
+
+import (
+	"context"
+	"io"
+)
+
+type Cancels map[string]context.CancelFunc
+
+func (r Cancels) Start(parent context.Context, id string) context.Context {
+	ctx, cancel := context.WithCancel(parent)
+	r[id] = cancel
+	return ctx
+}
+
+func (r Cancels) Stop(id string) { r[id]() }
+
+func UseMap(parent context.Context) {
+	registry := make(Cancels)
+	_ = registry.Start(parent, "synthetic")
+	registry.Stop("synthetic")
+}
+
+type CancelReader struct{ cancel context.CancelFunc }
+
+func (r CancelReader) Read([]byte) (int, error) {
+	r.cancel()
+	return 0, io.EOF
+}
+
+func UseReader(parent context.Context) {
+	_, cancel := context.WithCancel(parent)
+	reader := CancelReader{cancel: cancel}
+	_, _ = reader.Read(nil)
+}

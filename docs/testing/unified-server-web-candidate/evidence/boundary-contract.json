@@ -1,0 +1,70 @@
+{
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "tree": "1dd2eee0cb03cdb44614b27974eb00eaad3cfb20",
+  "official_baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046",
+  "unchanged_trees": [
+    {
+      "path": "internal/agent/runtime",
+      "head": "b21040a32c089642c2d0fdd312b19635e72fb38a",
+      "base": "b21040a32c089642c2d0fdd312b19635e72fb38a",
+      "official": "b21040a32c089642c2d0fdd312b19635e72fb38a"
+    },
+    {
+      "path": "internal/contextview",
+      "head": "7ef779cf08a7117978de05ab75425897ad61928e",
+      "base": "7ef779cf08a7117978de05ab75425897ad61928e",
+      "official": "7ef779cf08a7117978de05ab75425897ad61928e"
+    },
+    {
+      "path": "packages/runtime",
+      "head": "49f09a39168dd07e2759f0a3b6449eb8684b125b",
+      "base": "49f09a39168dd07e2759f0a3b6449eb8684b125b",
+      "official": "49f09a39168dd07e2759f0a3b6449eb8684b125b"
+    },
+    {
+      "path": "spec",
+      "head": "c7fedea06466a6372623e2d810431a4021b1bc7e",
+      "base": "c7fedea06466a6372623e2d810431a4021b1bc7e"
+    },
+    {
+      "path": "packages/sdk",
+      "head": "b8f3c1971ddabaa16056ed761171d75a2fa2b370",
+      "base": "b8f3c1971ddabaa16056ed761171d75a2fa2b370"
+    },
+    {
+      "path": "apps/web",
+      "head": "62ef04cf6576ef9f3a9b66fbe77e53a176f35a96",
+      "base": "62ef04cf6576ef9f3a9b66fbe77e53a176f35a96"
+    },
+    {
+      "path": "apps/desktop",
+      "head": "d5bf292f6c7a969ffda8bcecd2a6c38257de37a1",
+      "base": "d5bf292f6c7a969ffda8bcecd2a6c38257de37a1"
+    },
+    {
+      "path": "db/postgres/migrations",
+      "head": "d823966029488cf51e073cf12746b1430fd59d42",
+      "base": "d823966029488cf51e073cf12746b1430fd59d42"
+    },
+    {
+      "path": ".github/workflows/go-ci.yml",
+      "head": "60389411a1fcc8a81315dd872abf75912b1f4a65",
+      "base": "60389411a1fcc8a81315dd872abf75912b1f4a65"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "head": "0e5f2993cd6ab005e66e661af91981654291b6ef",
+      "base": "0e5f2993cd6ab005e66e661af91981654291b6ef"
+    }
+  ],
+  "api_operations": 360,
+  "api_operation_digest": "7ced9cd6199812f7cee81c151523eb4308d76594011b84d68af2241ddf7df931",
+  "pg_gates_both_preserved_once": [
+    "scripts/test-computer-operations-postgres.sh",
+    "scripts/test-pi-batch-history-postgres.sh"
+  ],
+  "selected_diff_files": [
+    "internal/handlers/bot_delegations_test.go",
+    "internal/handlers/computer_transfers_test.go"
+  ]
+}

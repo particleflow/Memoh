@@ -1,0 +1,60 @@
+{
+  "realServer": true,
+  "realPostgres": true,
+  "seededMetadata": true,
+  "realMediaUpload": true,
+  "taskDispatches": 0,
+  "modelCalls": 0,
+  "nativeDownload": true,
+  "nativePreviewHost": true,
+  "nativeImageLightbox": true,
+  "byteCount": 67,
+  "sha256Matches": true,
+  "anonymous": 401,
+  "mediaRequests": [
+    {
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "pageErrors": [],
+  "deliveryRequests": [
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    },
+    {
+      "status": 404,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    }
+  ],
+  "offlineRecovery": true,
+  "synthetic404": true
+}

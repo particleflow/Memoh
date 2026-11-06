@@ -1,0 +1,57 @@
+=== RUN   TestAssociationReviewTransientFailuresRemainReconcilable
+--- PASS: TestAssociationReviewTransientFailuresRemainReconcilable (0.04s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/200
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/499
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/401
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/403
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization (0.16s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/200 (0.02s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/499 (0.06s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/401 (0.04s)
+    --- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/403 (0.04s)
+=== RUN   TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked
+--- PASS: TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked (0.05s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/quota
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange (0.04s)
+    --- PASS: TestRetryAuthorizationExpiryAndSourceChange/quota (0.04s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/budget
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation (0.03s)
+    --- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/budget (0.03s)
+=== RUN   TestCreateQuotaRejectionCanRetryButUnknownCannot
+--- PASS: TestCreateQuotaRejectionCanRetryButUnknownCannot (0.00s)
+=== RUN   TestRetryContractServerDeadline
+=== RUN   TestRetryContractServerDeadline/3600
+=== RUN   TestRetryContractServerDeadline/Fri,_30_Oct_2026_07:02:34_GMT
+=== RUN   TestRetryContractServerDeadline/Wed,_01_Jan_3000_00:00:00_GMT
+--- PASS: TestRetryContractServerDeadline (0.00s)
+    --- PASS: TestRetryContractServerDeadline/3600 (0.00s)
+    --- PASS: TestRetryContractServerDeadline/Fri,_30_Oct_2026_07:02:34_GMT (0.00s)
+    --- PASS: TestRetryContractServerDeadline/Wed,_01_Jan_3000_00:00:00_GMT (0.00s)
+=== RUN   TestRetryContractInspectChild
+    retry_contract_test.go:57: subprocess only
+--- SKIP: TestRetryContractInspectChild (0.00s)
+=== RUN   TestRetryContractTransferSurvivesFailuresAndRestart
+    retry_contract_test.go:104: failures=15 child_inspection=true create=1 bytes=32 hash=16231252a03f3d5df8678c98e1fab3356124a9128b24165f669e33f4c091713d
+--- PASS: TestRetryContractTransferSurvivesFailuresAndRestart (0.09s)
+=== RUN   TestRetryContractAssociationUnknownSurvivesFailuresAndRestart
+    retry_contract_test.go:167: commit=1 resolve=16 failures=16 child_inspection=true cancel=true same_reference=true
+--- PASS: TestRetryContractAssociationUnknownSurvivesFailuresAndRestart (0.05s)
+=== RUN   TestRetryContractAssociationCommitAndAuthorization
+--- PASS: TestRetryContractAssociationCommitAndAuthorization (0.06s)
+=== RUN   TestRetryContractLegacyBlockedUnknownAndCancel
+--- PASS: TestRetryContractLegacyBlockedUnknownAndCancel (0.00s)
+=== RUN   TestRetryContractHTTPDeadlinePersists
+=== RUN   TestRetryContractHTTPDeadlinePersists/3600
+    retry_contract_test.go:271: TLS limits=1 no_create=true restored_exact_due=2026-10-30 07:02:34.641834585 +0000 UTC
+=== RUN   TestRetryContractHTTPDeadlinePersists/Wed,_01_Jan_3000_00:00:00_GMT
+    retry_contract_test.go:271: TLS limits=1 no_create=true restored_exact_due=3000-01-01 00:00:00 +0000 UTC
+--- PASS: TestRetryContractHTTPDeadlinePersists (0.02s)
+    --- PASS: TestRetryContractHTTPDeadlinePersists/3600 (0.01s)
+    --- PASS: TestRetryContractHTTPDeadlinePersists/Wed,_01_Jan_3000_00:00:00_GMT (0.01s)
+=== RUN   TestRetryContractCounterAndHeaderRepresentation
+--- PASS: TestRetryContractCounterAndHeaderRepresentation (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	0.569s

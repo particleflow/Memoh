@@ -1,0 +1,5 @@
+=== RUN   TestPiBatchHistoryPriorEvidenceIsScopedAndLatest
+--- PASS: TestPiBatchHistoryPriorEvidenceIsScopedAndLatest (2.50s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.548s
+Required Pi batch history PostgreSQL scope/latest-evidence test passed without skips

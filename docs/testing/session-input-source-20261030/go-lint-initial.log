@@ -1,0 +1,18 @@
+internal/agent/application/subagent_step_commit.go:146:39: Non-inherited new context, use function like `context.WithXXX` instead (contextcheck)
+		source, _ := inputsource.FromContext(c.ownerContext, c.botID, c.sessionID)
+		                                    ^
+internal/agent/application/subagent_step_commit.go:152:16: nilness: impossible condition: non-nil == nil (govet)
+			if metadata == nil {
+			            ^
+internal/agent/application/input_source_test.go:44:4: concat-loop: string concatenation in a loop (perfsprint)
+			system += m.Content
+			^
+cmd/internal/core/input_source_test.go:53:39: unused-parameter: parameter 'ctx' seems to be unused, consider removing or renaming it as _ (revive)
+func (p *sourceWireProvider) DoStream(ctx context.Context, req sdk.Request) (<-chan sdk.StreamPart, error) {
+                                      ^
+internal/handlers/local_channel.go:2720:98: unused-parameter: parameter 'modelID' seems to be unused, consider removing or renaming it as _ (revive)
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
+                                                                                                 ^
+internal/agent/application/subagent_step_commit.go:147:14: SA4031(related information): this is the value of metadata (staticcheck)
+		metadata = map[string]any{inputsource.MetadataKey: source}
+		           ^

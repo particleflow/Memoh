@@ -1,0 +1,7 @@
+Verified original isolated loopback PG. Only a unique temporary test database is created/cleaned.
+COMMAND: go test -tags=integration -race -count=1 -v ./internal/db -run ^TestComputerAdmissionEndpoint -timeout=90s
+=== RUN   TestComputerAdmissionEndpointConfigurationPreservesUnknownOperation
+    computer_endpoint_integration_test.go:81: PASS original unknown operation/revision/fingerprint/recovery-reader unchanged; same claim deduplicated; owner configuration persisted; stale/foreign CAS and paused mutation rejected
+--- PASS: TestComputerAdmissionEndpointConfigurationPreservesUnknownOperation (2.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.057s
