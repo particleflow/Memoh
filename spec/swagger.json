@@ -19713,6 +19713,98 @@
                 }
             }
         },
+        "/users/me/album-writebacks": {
+            "get": {
+                "description": "Returns queued items in enqueue order: the identity is the existing media content hash, plus the source bot and the size/mime/name needed to create the asset. A pending item stays until the phone reports it written; there is no expiry.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-writebacks"
+                ],
+                "summary": "List the caller's pending phone album write-backs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Only `pending` is defined",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/albumwriteback.PendingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/album-writebacks/written": {
+            "post": {
+                "description": "Idempotent per (pairing, content hash): a repeat keeps the first written timestamp. A pairing/hash the caller has no queued row for is not found. Write failures are not reported here; they stay pending for the next pull.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-writebacks"
+                ],
+                "summary": "Report one phone album write-back as written",
+                "parameters": [
+                    {
+                        "description": "Written report",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.phoneAlbumWritebackWrittenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/albumwriteback.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/me/channel-identities": {
             "get": {
                 "description": "List the IM channel identities bound to the current user's account",
@@ -22155,6 +22247,43 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "albumwriteback.Item": {
+            "type": "object",
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "content_hash": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pair_key": {
+                    "type": "string"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "albumwriteback.PendingResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/albumwriteback.Item"
+                    }
                 }
             }
         },
@@ -30460,6 +30589,17 @@
                     "type": "string"
                 },
                 "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.phoneAlbumWritebackWrittenRequest": {
+            "type": "object",
+            "properties": {
+                "content_hash": {
+                    "type": "string"
+                },
+                "pair_key": {
                     "type": "string"
                 }
             }

@@ -58,6 +58,8 @@ func ToolSendMessage() Name    { return newName("send_message") }
 func ToolListAgents() Name     { return newName("list_agents") }
 func ToolListModels() Name     { return newName("list_models") }
 
+func ToolQueueAlbumWriteback() Name { return newName("queue_album_writeback") }
+
 func ToolListWorkdirs() Name  { return newName("list_workdirs") }
 func ToolListACPAgents() Name { return newName("list_acp_agents") }
 
@@ -95,6 +97,7 @@ var all = []Name{
 	ToolRead(), ToolWrite(), ToolList(), ToolEdit(), ToolExec(), ToolApplyPatch(), ToolListExecutionLocations(), ToolListBackground(), ToolGetBackgroundStatus(), ToolKillBackground(), ToolWait(), ToolWaitUntil(),
 	ToolSend(), ToolReact(), ToolSpeak(),
 	ToolGetContacts(), ToolListSessions(), ToolGetMessages(), ToolSearchMessages(), ToolSearchMemory(), ToolCreateMemory(), ToolUpdateMemory(), ToolDeleteMemory(), ToolListSkills(), ToolUseSkill(), ToolSpawnAgent(), ToolSendMessage(), ToolListAgents(), ToolListModels(),
+	ToolQueueAlbumWriteback(),
 	ToolListWorkdirs(), ToolListACPAgents(),
 	ToolListSchedule(), ToolGetSchedule(), ToolCreateSchedule(), ToolUpdateSchedule(), ToolDeleteSchedule(),
 	ToolBrowserAction(), ToolBrowserObserve(), ToolComputerObserve(), ToolComputerAction(), ToolBrowserRemoteSession(),

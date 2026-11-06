@@ -119,6 +119,7 @@ func ServerModule() fx.Option {
 			provideAudioTempStore,
 			provideMediaStorage,
 			provideMediaService,
+			provideAlbumWritebackService,
 			provideBotDelegation,
 			provideSessionRunLedger,
 			provideRuntimeFenceActivator,

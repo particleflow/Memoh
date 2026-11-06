@@ -48,6 +48,8 @@ func ToolListModels() ToolName     { return toolname.ToolListModels() }
 func ToolListWorkdirs() ToolName  { return toolname.ToolListWorkdirs() }
 func ToolListACPAgents() ToolName { return toolname.ToolListACPAgents() }
 
+func ToolQueueAlbumWriteback() ToolName { return toolname.ToolQueueAlbumWriteback() }
+
 func ToolListSchedule() ToolName   { return toolname.ToolListSchedule() }
 func ToolGetSchedule() ToolName    { return toolname.ToolGetSchedule() }
 func ToolCreateSchedule() ToolName { return toolname.ToolCreateSchedule() }
