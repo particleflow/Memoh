@@ -846,7 +846,7 @@ func TestPresenceAttachmentDirectionBodyWording(t *testing.T) {
 // mention or skip.
 func TestPresenceAttachmentReplyIsModelWritten(t *testing.T) {
 	const freeReply = "视频这类我自己读不了，我会转给专门处理它的助手。"
-	base := &conversationPresenceSDKGenerator{generate: func(_ context.Context, request sdk.Request) (sdk.ModelResult, error) {
+	base := &conversationPresenceSDKGenerator{generate: func(_ context.Context, _ sdk.Request) (sdk.ModelResult, error) {
 		return sdk.ModelResult{Text: `{"text":"` + freeReply + `","phase":"thinking"}`, FinishReason: sdk.FinishReasonStop}, nil
 	}}
 	generator := &presenceDirectedGenerator{
