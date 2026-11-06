@@ -696,10 +696,13 @@ func (l *presenceJevLoop) fallbackBudget() *presenceJevResult {
 }
 
 // structuralFallback is the §7 constant path: a settled follow-up shape sends
-// the fixed acknowledgement, everything else stays silent.
+// the fixed acknowledgement, everything else stays silent. An attachment turn
+// never takes the constant acknowledgement: its fast reply must be written by
+// the model for this turn (TF-16 ruling 2026-11-06), so a structural fallback
+// there stays silent rather than publishing a pre-written line.
 func (e *presenceJevEngine) structuralFallback(reason string, detail presenceDecisionDetail) *presenceJevResult {
 	facts := e.in.Facts
-	ack := facts.PreviousSettled && !facts.FirstDirectInput && !facts.PendingUserInput && !facts.ReplyContinuation && facts.HistoryAvailable && runeLen(e.in.Text) > presenceFallbackMinInputRunes
+	ack := e.in.AttachmentCount == 0 && facts.PreviousSettled && !facts.FirstDirectInput && !facts.PendingUserInput && !facts.ReplyContinuation && facts.HistoryAvailable && runeLen(e.in.Text) > presenceFallbackMinInputRunes
 	mode := presenceModeFallbackNoop
 	temperature := conversationpresence.Hot
 	if ack {

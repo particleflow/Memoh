@@ -371,6 +371,16 @@ func TestPresenceJevFallbackSilentForShortInputAndOtherShapes(t *testing.T) {
 	if result := fallbackFor(conversationpresence.Facts{ReplyContinuation: true, PreviousSettled: true, HistoryAvailable: true}, long); result.Mode != presenceModeFallbackNoop {
 		t.Fatalf("reply continuation must stay silent: %+v", result)
 	}
+	// An attachment turn never falls back to the pre-written constant line: its
+	// reply is written by the model, so a structural fallback stays silent even
+	// when every other ack-shape condition holds.
+	attachmentTurn := &presenceJevEngine{
+		settings: PresenceJevRuntimeOptions{Timeout: 10 * time.Second, PullMax: 4, PullRunes: 500, StateMaxRunes: 3200, Directions: []string{"soothe"}},
+		in:       presenceJevInput{Text: long, Facts: conversationpresence.Facts{PreviousSettled: true, HistoryAvailable: true}, AttachmentCount: 1, AttachmentKinds: []string{"video"}, AdmittedAt: time.Now()},
+	}
+	if result := attachmentTurn.structuralFallback(jev.ReasonTimeout, presenceDecisionDetail{}); result.Mode != presenceModeFallbackNoop || result.Temperature != conversationpresence.Hot {
+		t.Fatalf("attachment fallback must stay silent, not publish a constant ack: %+v", result)
+	}
 }
 
 func TestPresenceJevUrgencyClamp(t *testing.T) {
@@ -789,29 +799,74 @@ func TestPresenceSlotsAttachmentKinds(t *testing.T) {
 	}
 }
 
-// TestPresenceAttachmentDirectionBodyWording pins the §3 direction wording
-// contract for attachment turns: future-tense preview (ack side of the §5
-// wording division), type and count only, no content claims, and no content
-// assertion for kinds the model cannot read.
+// TestPresenceAttachmentDirectionBodyWording pins the 2026-11-06 ruling on the
+// progress body: attachment_kinds is stated as a mechanical type list, the ack
+// word choice is the model's own, and no wording mapping survives — the body
+// prescribes neither a future-tense preview nor a per-kind phrase table.
 func TestPresenceAttachmentDirectionBodyWording(t *testing.T) {
 	body := presenceSystemPrompt("progress")
 	for _, want := range []string{
 		"attachment_kinds",
-		"接下来会查看/处理",
-		"只说类型与数量",
 		"不得描述、猜测其内容或查看结果",
-		"对视频、音频、表格文件不得断言能看到内容",
-		"我来处理一下",
+		"要不要提、怎么提由你按此刻情境决定",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("progress body missing %q:\n%s", want, body)
 		}
 	}
+	for _, banned := range []string{
+		"接下来会查看/处理",
+		"只说类型与数量",
+		"对视频、音频、表格文件不得断言能看到内容",
+		"我来处理一下",
+		// Dispatch stays the model's call: the acknowledgement must not be told
+		// to announce a handoff it cannot know happened.
+		"delegate_to_bot",
+		"专家",
+	} {
+		if strings.Contains(body, banned) {
+			t.Fatalf("progress body still prescribes ack wording %q:\n%s", banned, body)
+		}
+	}
 	if !strings.Contains(jevCriteriaDirection, "本回合有新增附件") {
 		t.Fatal("direction criteria missing the attachment progress rule")
 	}
+	if strings.Contains(jevCriteriaDirection, "预告接下来会查看/处理") {
+		t.Fatal("direction criteria still prescribes ack wording for attachment turns")
+	}
 	if !strings.Contains(jevCriteriaReplyMode, `新增附件≥1 → 直接命中⑦`) || !strings.Contains(jevCriteriaReplyMode, `信号区"新增附件"`) {
 		t.Fatal("reply-mode criteria missing the attachment signal rule")
+	}
+}
+
+// TestPresenceAttachmentReplyIsModelWritten pins the 2026-11-06 ruling that the
+// fast reply frees the model to answer on its own terms: whatever sentence the
+// generation returns is published verbatim, with no server-side rewrite, and
+// the slots carry only the mechanical facts (kinds and counts) the model may
+// mention or skip.
+func TestPresenceAttachmentReplyIsModelWritten(t *testing.T) {
+	const freeReply = "视频这类我自己读不了，我会转给专门处理它的助手。"
+	base := &conversationPresenceSDKGenerator{generate: func(_ context.Context, request sdk.Request) (sdk.ModelResult, error) {
+		return sdk.ModelResult{Text: `{"text":"` + freeReply + `","phase":"thinking"}`, FinishReason: sdk.FinishReasonStop}, nil
+	}}
+	generator := &presenceDirectedGenerator{
+		base: base, direction: "progress", attachmentKinds: []string{"视频", "表格"},
+		windowEnd: time.Now().Add(10 * time.Second), botName: "B", locale: "zh", userMessage: "这两个你看一下", urgency: 1,
+	}
+	result, err := generator.Generate(context.Background(), conversationpresence.Input{Phase: conversationpresence.Thinking}, conversationpresence.Limits{MaxInputRunes: 1200, MaxOutputTokens: 100, MaxTextRunes: 160})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Text != freeReply {
+		t.Fatalf("model-written reply was rewritten server-side: %q", result.Text)
+	}
+	slots := buildPresenceSlots("B", "zh", "这两个你看一下", nil, conversationpresence.Thinking, generator.attachmentKinds, 1, "", nil)
+	encoded, err := json.Marshal(slots)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(encoded), `"attachment_kinds":["视频","表格"]`) {
+		t.Fatalf("slot payload lost the mechanical kinds: %s", encoded)
 	}
 }
 
