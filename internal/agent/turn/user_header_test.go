@@ -44,6 +44,32 @@ func TestFormatUserHeaderWithoutAttachmentsUsesEmptyList(t *testing.T) {
 	}
 }
 
+func TestFormatUserHeaderStatesTaskResultTimeSeparately(t *testing.T) {
+	t.Parallel()
+
+	delivered := time.Date(2026, 11, 12, 10, 25, 0, 0, time.UTC)
+	happened := time.Date(2026, 11, 3, 15, 9, 0, 0, time.UTC)
+	header := FormatUserHeader(UserMessageHeaderInput{
+		DisplayName:      "task_result",
+		Channel:          "web",
+		ConversationType: "private",
+		Time:             delivered,
+		ResultAt:         happened,
+	}, "Background task finished.")
+
+	if !strings.Contains(header, `t="2026-11-12T10:25:00Z"`) {
+		t.Fatalf("delivery time missing: %s", header)
+	}
+	if !strings.Contains(header, `result_at="2026-11-03T15:09:00Z"`) {
+		t.Fatalf("original result time missing: %s", header)
+	}
+	// An ordinary input never claims an outcome time it does not have.
+	plain := FormatUserHeader(UserMessageHeaderInput{DisplayName: "User", Channel: "web", Time: delivered}, "hello")
+	if strings.Contains(plain, "result_at=") {
+		t.Fatalf("plain input dated as a task result: %s", plain)
+	}
+}
+
 func TestUnwrapUserMessageEnvelope(t *testing.T) {
 	t.Parallel()
 

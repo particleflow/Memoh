@@ -198,6 +198,10 @@ func TestTaskResultPostgresCrashWindows(t *testing.T) {
 	if _, err = q.Finish(ctx, r, worker, "completed"); err != nil {
 		t.Fatal(err)
 	}
+	// The task finished a week before this delivery runs. The run's own terminal
+	// write carries that instant, and the result must keep it.
+	finishedAt := time.Date(2026, 11, 3, 15, 9, 0, 0, time.UTC)
+	exec(`UPDATE session_runs SET updated_at=$2 WHERE run_id=$1`, worker, finishedAt)
 	// C1: execution/result are durable, delivery wake and all memory are lost.
 	pool.Close()
 	pool = open()
@@ -218,6 +222,11 @@ func TestTaskResultPostgresCrashWindows(t *testing.T) {
 	_, preparedSource, sourceErr := h.prepareResult(ctx, application.ChatRequest{TaskResultReceipt: first.TaskResultReceipt, BotID: bot, ThreadID: parent, UserID: user, CurrentChannel: first.CurrentChannel, ChatID: first.ChatID, RouteID: first.RouteID, ReplyTarget: first.ReplyTarget, ConversationType: first.ConversationType})
 	if sourceErr != nil || preparedSource.InputSource == nil || preparedSource.InputSource.Kind != inputsource.Result || preparedSource.InputSource.OriginBotID != bot || preparedSource.InputSource.OriginSessionID != child || preparedSource.InputSource.TaskID != r.TaskID || preparedSource.InputSource.UserID != "" {
 		t.Fatalf("restored result source: %+v %v", preparedSource.InputSource, sourceErr)
+	}
+	// The native worker run records when it finished, and that is the time the
+	// model must see — not this delivery's.
+	if !preparedSource.TaskResultAt.Equal(finishedAt) {
+		t.Fatalf("result time = %v, want the task's recorded finish %v", preparedSource.TaskResultAt, finishedAt)
 	}
 	ref, _ := taskresult.Parse(first.TaskResultReceipt)
 	if ref.Attempt != 1 {

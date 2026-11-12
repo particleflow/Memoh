@@ -87,6 +87,10 @@ func TestComputerTaskResultFollowUpPostgres(t *testing.T) {
 		return id
 	}
 	operation := insertOperation(session, target, "completed", "succeeded")
+	// The outcome happened a week before anyone reconnects: the published receipt
+	// must keep this time instead of the delivery time.
+	occurredAt := time.Date(2026, 11, 3, 15, 9, 0, 0, time.UTC)
+	exec(`UPDATE computer_operations SET updated_at=$2 WHERE id=$1`, operation, occurredAt)
 	subagentOperation := insertOperation(child, target, "completed", "succeeded")
 
 	var received []turn.StartTurnCommand
@@ -138,6 +142,14 @@ func TestComputerTaskResultFollowUpPostgres(t *testing.T) {
 	if !strings.Contains(prepared.ModelQuery, "Report this saved background task outcome") || !strings.Contains(prepared.ModelQuery, "do not execute, retry") {
 		t.Fatalf("prepared model query: %q", prepared.ModelQuery)
 	}
+	// The delivered result states when it happened. On the base it carried only
+	// the admission time, so a week-old outcome read as today's news.
+	if !prepared.TaskResultAt.Equal(occurredAt) {
+		t.Fatalf("result time = %v, want the recorded outcome time %v", prepared.TaskResultAt, occurredAt)
+	}
+	if prepared.TaskResultAt.Equal(time.Now()) || time.Since(prepared.TaskResultAt) < time.Hour {
+		t.Fatalf("result time followed the delivery instead of the outcome: %v", prepared.TaskResultAt)
+	}
 
 	// A subagent child session's task never reconnects by itself.
 	if _, e = h.loadResultTask(ctx, "computer_task", subagentOperation, bot, user, child); e == nil {
@@ -154,6 +166,15 @@ func TestComputerTaskResultFollowUpPostgres(t *testing.T) {
 		t.Fatal("retry changed the original invocation")
 	}
 	mu.Unlock()
+	// A retry must not re-date the result: the event froze the task's recorded
+	// outcome time, and neither this pass nor the delivery bookkeeping moves it.
+	_, redelivered, e := h.prepareResult(ctx, application.ChatRequest{TaskResultReceipt: first.TaskResultReceipt, BotID: bot, ThreadID: session, UserID: user, CurrentChannel: first.CurrentChannel, ChatID: first.ChatID, RouteID: first.RouteID, ReplyTarget: first.ReplyTarget, ConversationType: first.ConversationType})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !redelivered.TaskResultAt.Equal(occurredAt) {
+		t.Fatalf("redelivered result time = %v, want the recorded outcome time %v", redelivered.TaskResultAt, occurredAt)
+	}
 	// A committed visible reply ends automatic delivery.
 	fenced := runtimefence.WithContext(ctx, runtimefence.Fence{BotID: bot, SessionID: session, Token: 1})
 	summaryRun := uuid.NewString()

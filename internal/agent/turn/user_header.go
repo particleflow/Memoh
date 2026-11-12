@@ -19,6 +19,10 @@ type UserMessageMeta struct {
 	Time              string   `json:"time"`
 	Timezone          string   `json:"timezone,omitempty"`
 	AttachmentPaths   []string `json:"attachments"`
+	// ResultAt is when the reported task outcome actually happened. Only a task
+	// result envelope carries it, so the model can see that a late result is old
+	// even though the envelope itself is delivered now.
+	ResultAt string `json:"result_at,omitempty"`
 	// ReplyTo names the message this input quotes. It renders as the
 	// envelope's <in-reply-to> child — the same shape the timeline renderer
 	// emits — so the model sees a truncated pointer, never the full quote.
@@ -48,6 +52,9 @@ type UserMessageHeaderInput struct {
 	Time              time.Time
 	Timezone          string
 	ReplyTo           *UserMessageReplyRef
+	// ResultAt is the recorded outcome time of a result delivery. Zero means the
+	// input is not a task result, and the envelope states only the message time.
+	ResultAt time.Time
 }
 
 // BuildUserMessageMetaFromInput constructs metadata from one cohesive input.
@@ -71,6 +78,9 @@ func BuildUserMessageMetaFromInput(input UserMessageHeaderInput) UserMessageMeta
 	}
 	if !input.Time.IsZero() {
 		meta.Time = input.Time.Format(time.RFC3339)
+	}
+	if !input.ResultAt.IsZero() {
+		meta.ResultAt = input.ResultAt.Format(time.RFC3339)
 	}
 	return meta
 }
@@ -142,6 +152,11 @@ func FormatUserHeaderFromMeta(meta UserMessageMeta, query string) string {
 	}
 	writeXMLAttr(&sb, "sender", meta.DisplayName)
 	writeXMLAttr(&sb, "t", meta.Time)
+	// A late-delivered task result states when it happened: an envelope that only
+	// showed the delivery time made an old failure read as today's news.
+	if meta.ResultAt != "" {
+		writeXMLAttr(&sb, "result_at", meta.ResultAt)
+	}
 	writeXMLAttr(&sb, "channel", meta.Channel)
 	if meta.ConversationName != "" {
 		writeXMLAttr(&sb, "conversation", meta.ConversationName)

@@ -718,6 +718,7 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 		Target:            strings.TrimSpace(req.ReplyTarget),
 		AttachmentPaths:   extractAttachmentPaths(mergedAttachments),
 		Time:              time.Now().In(tz),
+		ResultAt:          req.TaskResultAt,
 		Timezone:          runCfg.Identity.Timezone,
 	}
 	// A validated quote rides the current turn's envelope as the same

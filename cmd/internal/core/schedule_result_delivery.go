@@ -166,6 +166,11 @@ func (h *delegationHost) loadScheduleResult(ctx context.Context, id, bot, user, 
 	}
 	t.sourceTaskID, t.occurrence = row.ScheduleID.String(), row.ID.String()
 	t.state = "unknown"
+	// The fire's own completion is the moment this outcome happened, and it never
+	// moves afterwards; the delivery time is recorded separately on the envelope.
+	if row.CompletedAt.Valid {
+		t.resultAt = row.CompletedAt.Time
+	}
 	// A run is resolved only by this exact persisted fire, never by latest run.
 	if row.SessionID.Valid {
 		t.originBot, t.originSession = bot, row.SessionID.String()
