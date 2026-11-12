@@ -84,10 +84,15 @@ type resultDeliveryWake struct {
 	backoffCap  time.Duration
 }
 
+// resultTask carries one deliverable task outcome. resultAt is when that
+// outcome was recorded on the task's own row, never when this delivery ran: a
+// result that waited in the follow-up queue through an offline period keeps the
+// time it happened, so the model can tell it apart from fresh news.
 type resultTask struct {
 	sourceTaskID, occurrence                       string
 	originBot, originSession                       string
 	kind, id, bot, user, session, state, run, text string
+	resultAt                                       time.Time
 	raw                                            []byte
 	delivery                                       taskresult.Delivery
 	cmd                                            turn.StartTurnCommand
@@ -306,6 +311,11 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.state, t.run = r.State, r.RunID
 		t.originBot, t.originSession = r.BotID, r.SessionID
+		// The native receipt has no completion instant of its own: it is stamped
+		// when the task was queued. A terminal run write is the exact boundary of
+		// the outcome, so that wins; the receipt time remains for a task whose
+		// claim was resolved without a run.
+		t.resultAt = r.CreatedAt
 		if r.State == "queued" {
 			return t, errResultNotReady
 		}
@@ -319,6 +329,7 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 				return t, errResultNotReady
 			}
 			t.state, t.run = run.State, run.RunID.String()
+			t.resultAt = run.UpdatedAt.Time
 			if t.state == "lost" {
 				t.state = "unknown"
 			}
@@ -352,6 +363,10 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.originBot, t.originSession = r.Identity.TargetBotID, r.Identity.TargetSessionID
 		t.state, t.run = r.State, r.RunID
+		// The record's own last state write is when the specialist reported its
+		// outcome; result-delivery bookkeeping is a separate JSON CAS and never
+		// moves it. The observed worker run is a closer witness when one exists.
+		t.resultAt = r.UpdatedAt
 		if r.State == "accepted" || r.State == "running" || r.State == "unknown" {
 			observed, e := h.service.Ledger.TargetRun(ctx, r)
 			if e != nil {
@@ -363,6 +378,7 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 				}
 			} else {
 				t.state, t.run = observed.State, observed.ID
+				t.resultAt = observed.UpdatedAt
 				if t.state == "lost" {
 					t.state = "unknown"
 				}
@@ -412,6 +428,9 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.state, t.run = computerResultState(r.State), r.RunID
 		t.originBot, t.originSession = r.BotID, r.SessionID
+		// Result-delivery bookkeeping writes details only, so the operation's last
+		// execution write is when its terminal receipt was recorded.
+		t.resultAt = r.UpdatedAt
 		t.text = computerResultText(r, d)
 		t.cmd = delegationDeliveryCommand(botdelegation.Record{Identity: b}, routing, t.text, nil)
 		t.cmd.DelegationResultID = ""
@@ -440,6 +459,10 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 		}
 		t.state, t.run = "completed", rec.RunID
 		t.originBot, t.originSession = rec.BotID, rec.SessionID
+		// A batch row has no completion instant, and its updated_at is rewritten by
+		// delivery bookkeeping. Its creation is the submission time of the work
+		// being reported, and it never moves, so it dates the aggregate result.
+		t.resultAt = rec.CreatedAt
 		t.text = computerBatchResultText(rec)
 		t.cmd = delegationDeliveryCommand(botdelegation.Record{Identity: b}, routing, t.text, nil)
 		t.cmd.DelegationResultID = ""
@@ -585,6 +608,10 @@ func (h *delegationHost) prepareResult(ctx context.Context, req application.Chat
 		return ctx, req, botdelegation.ErrDenied
 	}
 	req.Query = t.text
+	// Date the result envelope with the task's own recorded outcome time, never
+	// with the admission time. A result that waited in the queue (offline, busy
+	// session) then reads as old instead of as today's news.
+	req.TaskResultAt = t.resultAt
 	taskID := t.sourceTaskID
 	if taskID == "" {
 		taskID = ref.TaskID

@@ -296,6 +296,14 @@ func TestScheduleResultPostgresCrashWindows(t *testing.T) {
 	if sourceErr != nil || preparedSource.InputSource == nil || preparedSource.InputSource.Kind != inputsource.Result || preparedSource.InputSource.TaskID != plan || preparedSource.InputSource.OriginBotID != bot || preparedSource.InputSource.UserID != "" {
 		t.Fatalf("schedule result source: %+v %v", preparedSource.InputSource, sourceErr)
 	}
+	// The fire's own completion instant dates the result, not this delivery.
+	recorded, readErr := h.store.ReadScheduleResultFire(ctx, sqlc.ReadScheduleResultFireParams{BotID: nativeTaskUUID(bot), FireID: nativeTaskUUID(unknown)})
+	if readErr != nil || !recorded.CompletedAt.Valid {
+		t.Fatalf("read fire completion: %v", readErr)
+	}
+	if !preparedSource.TaskResultAt.Equal(recorded.CompletedAt.Time) {
+		t.Fatalf("schedule result time = %v, want the fire's completion %v", preparedSource.TaskResultAt, recorded.CompletedAt.Time)
+	}
 	if _, _, e = h.prepareResult(ctx, req); e != nil {
 		t.Fatal("valid schedule result rejected", e)
 	}

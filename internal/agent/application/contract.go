@@ -2,6 +2,7 @@ package application
 
 import (
 	"encoding/json"
+	"time"
 
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/turn"
@@ -14,9 +15,15 @@ import (
 // channel and function fields below are strictly in-process runtime state.
 type ChatRequest struct {
 	// InputSource is reconstructed only by trusted in-process ingress/ledgers.
-	InputSource              *inputsource.Source `json:"-"`
-	DelegationResultID       string              `json:"-"`
-	TaskResultReceipt        string              `json:"-"`
+	InputSource        *inputsource.Source `json:"-"`
+	DelegationResultID string              `json:"-"`
+	TaskResultReceipt  string              `json:"-"`
+	// TaskResultAt is when the reported task recorded its outcome, read by the
+	// trusted result ingress from that task's own record. It dates the envelope
+	// of a result turn, so a result delivered late (a queued follow-up released
+	// after an offline period) reaches the model with the time the outcome
+	// happened instead of the time it was finally admitted.
+	TaskResultAt             time.Time `json:"-"`
 	discussCurrentSources    []turn.ContextMessageSource
 	discussOmittedSources    []turn.ContextMessageSource
 	discussMessages          []turn.DiscussMessage
