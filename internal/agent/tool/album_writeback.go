@@ -10,6 +10,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/albumwriteback"
+	"github.com/felinics/memoh/internal/apperror"
 )
 
 // AlbumWritebackProvider queues finished media for the user's phone album.
@@ -71,7 +72,14 @@ func (p *AlbumWritebackProvider) Tools(_ context.Context, session SessionContext
 					Name:          args.Name,
 				})
 				if err != nil {
-					return sdk.ToolOutput{}, albumWritebackToolError(err)
+					// A rejected call answers with a machine code and its catalog
+					// fact. No instruction text: the model decides whether and how
+					// to mention it, and a queue label the user never registered is
+					// not the model's to explain.
+					if out, ok := albumWritebackRejection(err); ok {
+						return out, nil
+					}
+					return sdk.ToolOutput{}, err
 				}
 				return toolexec.OutputFromValue(map[string]any{
 					"ok":          true,
@@ -85,15 +93,26 @@ func (p *AlbumWritebackProvider) Tools(_ context.Context, session SessionContext
 	}, nil
 }
 
-func albumWritebackToolError(err error) error {
+// albumWritebackRejection turns a rejected queue request into a machine fact:
+// the stable code plus the catalog's own English detail. It returns false for
+// failures that are not the caller's to report, which stay plain errors.
+func albumWritebackRejection(err error) (sdk.ToolOutput, bool) {
+	code := apperror.Code("")
 	switch {
 	case errors.Is(err, albumwriteback.ErrInvalid):
-		return errors.New("参数无效：pair_key 只能用字母、数字、下划线、连字符或点，content_hashes 必须是 64 位小写十六进制摘要")
+		code = apperror.CodeAlbumQueueRejected
 	case errors.Is(err, albumwriteback.ErrAssetUnavailable):
-		return errors.New("有 media 不属于本 Bot 或已不存在，本次未排入任何项目；请用处理结果中的 content_hash 重试")
+		code = apperror.CodeAlbumAssetUnavailable
 	default:
-		return err
+		return sdk.ToolOutput{}, false
 	}
+	definition, _ := apperror.Lookup(code)
+	return toolexec.OutputFromValue(map[string]any{
+		"ok":      false,
+		"code":    string(code),
+		"detail":  definition.Detail,
+		"message": definition.Detail,
+	}), true
 }
 
 type queueAlbumWritebackArgs struct {

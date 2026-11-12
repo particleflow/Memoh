@@ -277,3 +277,95 @@ func TestPendingKeepsEnqueueOrderPerOwner(t *testing.T) {
 		t.Fatalf("pending identity = %+v", pending.Items[0])
 	}
 }
+
+// EnqueueVerified is the automatic path: the delivery commit already verified
+// the bytes, so it writes without a Stat and carries no filename. The phone
+// derives the display name from the MIME type.
+func TestEnqueueVerifiedWritesWithoutResolvingTheAsset(t *testing.T) {
+	hash := testHash("verified")
+	service, store := newTestService(t)
+
+	// No known assets: an ordinary Enqueue would reject this hash.
+	got, err := service.EnqueueVerified(context.Background(), testUser, testBot, "processed-default", VerifiedItem{
+		ContentHash: hash,
+		SizeBytes:   2048,
+		Mime:        "image/png",
+	})
+	if err != nil || got != hash {
+		t.Fatalf("EnqueueVerified = %q, %v", got, err)
+	}
+	if len(store.rows) != 1 {
+		t.Fatalf("rows = %d, want 1", len(store.rows))
+	}
+	pending, err := service.Pending(context.Background(), testUser)
+	if err != nil || len(pending.Items) != 1 {
+		t.Fatalf("pending = %+v, %v", pending.Items, err)
+	}
+	item := pending.Items[0]
+	if item.ContentHash != hash || item.Mime != "image/png" || item.SizeBytes == nil || *item.SizeBytes != 2048 {
+		t.Fatalf("item = %+v", item)
+	}
+	if item.Name != "" {
+		t.Fatalf("automatic enqueue invented a name: %q", item.Name)
+	}
+}
+
+func TestEnqueueVerifiedReturnsAWrittenItemToPending(t *testing.T) {
+	hash := testHash("verified-again")
+	service, _ := newTestService(t)
+	ctx := context.Background()
+	item := VerifiedItem{ContentHash: hash, SizeBytes: 10, Mime: "image/jpeg"}
+	if _, err := service.EnqueueVerified(ctx, testUser, testBot, "p", item); err != nil {
+		t.Fatalf("EnqueueVerified: %v", err)
+	}
+	if _, err := service.MarkWritten(ctx, testUser, "p", hash); err != nil {
+		t.Fatalf("MarkWritten: %v", err)
+	}
+	if got, err := service.Pending(ctx, testUser); err != nil || len(got.Items) != 0 {
+		t.Fatalf("written item still pending: %+v %v", got.Items, err)
+	}
+	// The same product delivered again is a valid new intent.
+	if _, err := service.EnqueueVerified(ctx, testUser, testBot, "p", item); err != nil {
+		t.Fatalf("re-EnqueueVerified: %v", err)
+	}
+	if got, err := service.Pending(ctx, testUser); err != nil || len(got.Items) != 1 || got.Items[0].ContentHash != hash {
+		t.Fatalf("re-queued item = %+v %v", got.Items, err)
+	}
+}
+
+func TestEnqueueVerifiedRejectsMalformedInput(t *testing.T) {
+	service, store := newTestService(t)
+	ctx := context.Background()
+	for _, tc := range []struct {
+		name string
+		call func() error
+	}{
+		{"empty label", func() error {
+			_, err := service.EnqueueVerified(ctx, testUser, testBot, "", VerifiedItem{ContentHash: testHash("x")})
+			return err
+		}},
+		{"uppercase hash", func() error {
+			_, err := service.EnqueueVerified(ctx, testUser, testBot, "p", VerifiedItem{ContentHash: strings.ToUpper(testHash("x"))})
+			return err
+		}},
+		{"short hash", func() error {
+			_, err := service.EnqueueVerified(ctx, testUser, testBot, "p", VerifiedItem{ContentHash: "abc"})
+			return err
+		}},
+		{"malformed bot", func() error {
+			_, err := service.EnqueueVerified(ctx, testUser, "not-a-uuid", "p", VerifiedItem{ContentHash: testHash("y")})
+			return err
+		}},
+		{"malformed owner", func() error {
+			_, err := service.EnqueueVerified(ctx, "not-a-uuid", testBot, "p", VerifiedItem{ContentHash: testHash("z")})
+			return err
+		}},
+	} {
+		if err := tc.call(); !errors.Is(err, ErrInvalid) {
+			t.Fatalf("%s error = %v, want ErrInvalid", tc.name, err)
+		}
+	}
+	if len(store.rows) != 0 {
+		t.Fatalf("rejected calls wrote %d rows", len(store.rows))
+	}
+}

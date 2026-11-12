@@ -561,6 +561,10 @@
       "usage_unavailable": "暂时无法获取额度，请稍后再试。"
     },
     "agent_dependency_missing": "{dep_id} 尚未安装在此工作区。请在 Bot 的「依赖」中安装，或等待正在进行的安装完成，然后重新发送消息。",
+    "album": {
+      "asset_unavailable": "部分内容哈希不属于本 Bot 或已不存在，本次未排入任何项目。",
+      "queue_rejected": "相册写回请求无效：配对标签或内容哈希不符合要求。"
+    },
     "app": {
       "busy": "该应用的另一个操作正在进行中。",
       "dependencies_unavailable": "此服务器未启用工作区依赖服务，应用无法管理依赖。请联系管理员。",

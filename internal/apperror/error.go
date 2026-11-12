@@ -280,6 +280,10 @@ const (
 	CodeMediaAttachmentUnreadable  Code = "media.attachment_unreadable"
 	CodeMediaAttachmentUnavailable Code = "media.attachment_unavailable"
 	CodeMediaIngestFailed          Code = "media.ingest_failed"
+	// Album write-back outcomes the tool reports as machine facts. The model
+	// composes its own wording; no pre-written sentence is returned.
+	CodeAlbumQueueRejected         Code = "album.queue_rejected"
+	CodeAlbumAssetUnavailable      Code = "album.asset_unavailable"
 	CodeMessageNotFound            Code = "message.not_found"
 	CodeModelNotFound              Code = "model.not_found"
 	CodeProviderNotFound           Code = "provider.not_found"
@@ -1301,6 +1305,8 @@ var catalog = map[Code]Definition{
 	CodeMediaAttachmentUnreadable:     {HTTPStatus: http.StatusConflict, Detail: "This file could not be read, so the message could not be processed. Send it again, or check that it is complete."},
 	CodeMediaAttachmentUnavailable:    {HTTPStatus: http.StatusServiceUnavailable, Detail: "Stored files could not be read right now, so the message was not processed. Try again shortly."},
 	CodeMediaIngestFailed:             {HTTPStatus: http.StatusInternalServerError, Detail: "The file could not be stored as an attachment. Check that it still exists and try again."},
+	CodeAlbumQueueRejected:            {HTTPStatus: http.StatusBadRequest, Detail: "The album write-back request is invalid."},
+	CodeAlbumAssetUnavailable:         {HTTPStatus: http.StatusNotFound, Detail: "A media item is not available to this bot."},
 	CodeMessageNotFound:               {HTTPStatus: http.StatusNotFound, Detail: "This message no longer exists. Refresh the conversation and try again."},
 	CodeModelNotFound:                 {HTTPStatus: http.StatusNotFound, Detail: "This model no longer exists. Refresh the list and choose another one."},
 	CodeProviderNotFound:              {HTTPStatus: http.StatusNotFound, Detail: "This provider no longer exists. Refresh the list and choose another one."},

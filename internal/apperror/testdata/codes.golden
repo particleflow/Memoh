@@ -57,6 +57,8 @@ agent_credential.runtime_busy	409
 agent_credential.usage_auth_expired	409
 agent_credential.usage_unavailable	502
 agent_dependency_missing	409
+album.asset_unavailable	404
+album.queue_rejected	400
 app.busy	409
 app.dependencies_unavailable	503
 app.not_found	404

@@ -105,7 +105,7 @@ func (s *Service) Enqueue(ctx context.Context, userID, botID string, in EnqueueI
 		return EnqueueResult{}, errors.New("album write-back service not configured")
 	}
 	pairKey := strings.TrimSpace(in.PairKey)
-	if !validPairKey(pairKey) || len(in.ContentHashes) == 0 || len(in.ContentHashes) > MaxItemsPerCall {
+	if !ValidPairKey(pairKey) || len(in.ContentHashes) == 0 || len(in.ContentHashes) > MaxItemsPerCall {
 		return EnqueueResult{}, ErrInvalid
 	}
 	name := strings.TrimSpace(in.Name)
@@ -155,6 +155,51 @@ func (s *Service) Enqueue(ctx context.Context, userID, botID string, in EnqueueI
 	return EnqueueResult{PairKey: pairKey, Enqueued: enqueued}, nil
 }
 
+// VerifiedItem is one already-verified delivery reference: its hash went through
+// the endpoint's identity check and a full sha256 scan, so the queue writes it
+// without a second Stat against the Bot's originals.
+type VerifiedItem struct {
+	ContentHash string
+	SizeBytes   int64
+	Mime        string
+}
+
+// EnqueueVerified queues one product the endpoint already verified against its
+// delivered bytes. It skips the Stat call Enqueue makes to reject untrusted
+// caller-supplied hashes, and it carries no filename: the queue knows only the
+// hash, the size and the MIME type, and the phone derives a display name from
+// the MIME type. A hash already written for this pairing returns to pending, so
+// re-processing the same product queues it again.
+func (s *Service) EnqueueVerified(ctx context.Context, userID, botID, pairKey string, item VerifiedItem) (string, error) {
+	if s == nil || s.store == nil {
+		return "", errors.New("album write-back service not configured")
+	}
+	pairKey = strings.TrimSpace(pairKey)
+	contentHash := strings.TrimSpace(item.ContentHash)
+	if !ValidPairKey(pairKey) || !validContentHash(contentHash) {
+		return "", ErrInvalid
+	}
+	if _, err := db.ParseUUID(userID); err != nil {
+		return "", ErrInvalid
+	}
+	if _, err := db.ParseUUID(botID); err != nil {
+		return "", ErrInvalid
+	}
+	size := item.SizeBytes
+	record := dbstore.PhoneAlbumWritebackRecord{
+		UserID:      userID,
+		PairKey:     pairKey,
+		BotID:       botID,
+		ContentHash: contentHash,
+		Mime:        item.Mime,
+		SizeBytes:   &size,
+	}
+	if _, err := s.store.EnqueuePhoneAlbumWriteback(ctx, record); err != nil {
+		return "", err
+	}
+	return contentHash, nil
+}
+
 // Pending returns the owner's pending set in enqueue order. Every pending row is
 // its own terminal unit, so a phone that stops mid-list resumes from the same
 // list next time.
@@ -184,7 +229,7 @@ func (s *Service) MarkWritten(ctx context.Context, userID, pairKey, contentHash 
 	}
 	pairKey = strings.TrimSpace(pairKey)
 	contentHash = strings.TrimSpace(contentHash)
-	if !validPairKey(pairKey) || !validContentHash(contentHash) {
+	if !ValidPairKey(pairKey) || !validContentHash(contentHash) {
 		return Item{}, ErrInvalid
 	}
 	if _, err := db.ParseUUID(userID); err != nil {
@@ -224,8 +269,10 @@ func itemName(name, storageKey string) string {
 	return path.Base(storageKey)
 }
 
-// validPairKey accepts the pairing labels the phone and the bot agree on.
-func validPairKey(value string) bool {
+// ValidPairKey accepts the pairing labels the phone and the bot agree on. It is
+// exported so the pairing archive validates a label with the same rule the queue
+// applies: one label vocabulary, not two.
+func ValidPairKey(value string) bool {
 	if value == "" || len(value) > MaxPairKeyBytes {
 		return false
 	}

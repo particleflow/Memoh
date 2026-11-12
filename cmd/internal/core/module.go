@@ -120,6 +120,7 @@ func ServerModule() fx.Option {
 			provideMediaStorage,
 			provideMediaService,
 			provideAlbumWritebackService,
+			provideAlbumPairService,
 			provideBotDelegation,
 			provideSessionRunLedger,
 			provideRuntimeFenceActivator,

@@ -639,6 +639,19 @@ definitions:
       updated_at:
         type: string
     type: object
+  albumpairs.Pair:
+    properties:
+      bot_id:
+        type: string
+      created_at:
+        type: string
+      pair_key:
+        type: string
+      state:
+        type: string
+      updated_at:
+        type: string
+    type: object
   albumwriteback.Item:
     properties:
       bot_id:
@@ -3624,6 +3637,13 @@ definitions:
     required:
     - code
     type: object
+  handlers.AlbumPairResponse:
+    properties:
+      pairs:
+        items:
+          $ref: '#/definitions/albumpairs.Pair'
+        type: array
+    type: object
   handlers.AppConnectorCredentialRequest:
     properties:
       auth_method:
@@ -6103,6 +6123,11 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    type: object
+  handlers.albumPairUpsertRequest:
+    properties:
+      bot_id:
+        type: string
     type: object
   handlers.browserSessionCreateRequest:
     properties:
@@ -22457,6 +22482,103 @@ paths:
       summary: Update current user profile
       tags:
       - users
+  /users/me/album-pairs:
+    get:
+      description: 'Every pairing this user designated, active and unbound, oldest
+        first. A pairing records intent only: the pairing label plus the Bot whose
+        finished products go there. The album uri and name stay on the phone.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AlbumPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List the caller's album pairings
+      tags:
+      - album-pairs
+  /users/me/album-pairs/{pair_key}:
+    delete:
+      description: Turns automatic queueing off for this label. The pairing row and
+        its label stay, so naming the same album again reuses it, and already queued
+        write-backs stay queued until the phone reports them written.
+      parameters:
+      - description: Pairing label to unbind
+        in: path
+        name: pair_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/albumpairs.Pair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Unbind an album pairing
+      tags:
+      - album-pairs
+    put:
+      consumes:
+      - application/json
+      description: Activates the pairing label for the given Bot. Reusing a label
+        for another Bot, or after an unbind, updates the existing pairing instead
+        of creating a second one. Activating a label also retires that Bot's previous
+        active pairing, because one processing line writes into one album.
+      parameters:
+      - description: Pairing label the phone uses for this album
+        in: path
+        name: pair_key
+        required: true
+        type: string
+      - description: Target Bot
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.albumPairUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/albumpairs.Pair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Designate (or re-designate) an album pairing
+      tags:
+      - album-pairs
   /users/me/album-writebacks:
     get:
       description: 'Returns queued items in enqueue order: the identity is the existing
