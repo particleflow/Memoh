@@ -183,6 +183,8 @@ func TestAlbumSinkIgnoresRevokedPairings(t *testing.T) {
 // The sink is best effort: a failing lookup or write must not panic and must
 // not change the commit, so it only logs.
 func TestAlbumSinkSwallowsFailures(t *testing.T) {
+	t.Parallel()
+
 	sink := AlbumDeliveryCommitSink(slog.New(slog.DiscardHandler), albumpairs.NewService(nil, failingPairStore{}), albumwriteback.NewService(nil, &sinkWritebackStore{}, nil))
 	sink(context.Background(), sinkIdentity(), computertask.DeliveryRequest{
 		Version:     1,
