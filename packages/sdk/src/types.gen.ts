@@ -384,6 +384,14 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AlbumpairsPair = {
+    bot_id?: string;
+    created_at?: string;
+    pair_key?: string;
+    state?: string;
+    updated_at?: string;
+};
+
 export type AlbumwritebackItem = {
     bot_id?: string;
     content_hash?: string;
@@ -2013,6 +2021,10 @@ export type HandlersAgentAuthorizationExchangeRequest = {
     code: string;
 };
 
+export type HandlersAlbumPairResponse = {
+    pairs?: Array<AlbumpairsPair>;
+};
+
 export type HandlersAppConnectorCredentialRequest = {
     auth_method: string;
     fields?: {
@@ -3428,6 +3440,10 @@ export type HandlersAgentCredentialPutRequest = {
     secret?: {
         [key: string]: string;
     };
+};
+
+export type HandlersAlbumPairUpsertRequest = {
+    bot_id?: string;
 };
 
 export type HandlersBrowserSessionCreateRequest = {
@@ -20605,6 +20621,114 @@ export type PutUsersMeResponses = {
 };
 
 export type PutUsersMeResponse = PutUsersMeResponses[keyof PutUsersMeResponses];
+
+export type GetUsersMeAlbumPairsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/me/album-pairs';
+};
+
+export type GetUsersMeAlbumPairsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeAlbumPairsError = GetUsersMeAlbumPairsErrors[keyof GetUsersMeAlbumPairsErrors];
+
+export type GetUsersMeAlbumPairsResponses = {
+    /**
+     * OK
+     */
+    200: HandlersAlbumPairResponse;
+};
+
+export type GetUsersMeAlbumPairsResponse = GetUsersMeAlbumPairsResponses[keyof GetUsersMeAlbumPairsResponses];
+
+export type DeleteUsersMeAlbumPairsByPairKeyData = {
+    body?: never;
+    path: {
+        /**
+         * Pairing label to unbind
+         */
+        pair_key: string;
+    };
+    query?: never;
+    url: '/users/me/album-pairs/{pair_key}';
+};
+
+export type DeleteUsersMeAlbumPairsByPairKeyErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type DeleteUsersMeAlbumPairsByPairKeyError = DeleteUsersMeAlbumPairsByPairKeyErrors[keyof DeleteUsersMeAlbumPairsByPairKeyErrors];
+
+export type DeleteUsersMeAlbumPairsByPairKeyResponses = {
+    /**
+     * OK
+     */
+    200: AlbumpairsPair;
+};
+
+export type DeleteUsersMeAlbumPairsByPairKeyResponse = DeleteUsersMeAlbumPairsByPairKeyResponses[keyof DeleteUsersMeAlbumPairsByPairKeyResponses];
+
+export type PutUsersMeAlbumPairsByPairKeyData = {
+    /**
+     * Target Bot
+     */
+    body: HandlersAlbumPairUpsertRequest;
+    path: {
+        /**
+         * Pairing label the phone uses for this album
+         */
+        pair_key: string;
+    };
+    query?: never;
+    url: '/users/me/album-pairs/{pair_key}';
+};
+
+export type PutUsersMeAlbumPairsByPairKeyErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeAlbumPairsByPairKeyError = PutUsersMeAlbumPairsByPairKeyErrors[keyof PutUsersMeAlbumPairsByPairKeyErrors];
+
+export type PutUsersMeAlbumPairsByPairKeyResponses = {
+    /**
+     * OK
+     */
+    200: AlbumpairsPair;
+};
+
+export type PutUsersMeAlbumPairsByPairKeyResponse = PutUsersMeAlbumPairsByPairKeyResponses[keyof PutUsersMeAlbumPairsByPairKeyResponses];
 
 export type GetUsersMeAlbumWritebacksData = {
     body?: never;

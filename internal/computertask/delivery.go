@@ -128,13 +128,29 @@ type DeliveryService struct {
 	transactions   DeliveryTransactions
 	assets         DeliveryAssets
 	commitObserver func(context.Context, DeliveryIdentity)
+	commitSink     DeliverySink
 }
+
+// DeliverySink is the host's post-commit work for one verified delivery. It runs
+// after the ledger records `committed`, outside the commit transaction, and it
+// never changes the commit result: a sink failure is logged by its owner and the
+// delivery stays committed. Unlike the observer it may write durable state of its
+// own, so it must stay bounded and idempotent.
+type DeliverySink func(context.Context, DeliveryIdentity, DeliveryRequest)
 
 // WithCommitObserver registers a host wake for the first endpoint-verified
 // delivery commit. The callback only signals; it never mutates the ledger,
 // and it must not block on task-result scanning.
 func (s *DeliveryService) WithCommitObserver(observe func(context.Context, DeliveryIdentity)) *DeliveryService {
 	s.commitObserver = observe
+	return s
+}
+
+// WithDeliverySink registers post-commit work for one verified delivery. It is
+// separate from the commit observer: the observer only signals a scan, while the
+// sink records durable state.
+func (s *DeliveryService) WithDeliverySink(sink DeliverySink) *DeliveryService {
+	s.commitSink = sink
 	return s
 }
 

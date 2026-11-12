@@ -33,6 +33,7 @@ type AsyncDeliveryService struct {
 	wg        sync.WaitGroup
 	lease     time.Duration
 	committed func(context.Context, DeliveryIdentity)
+	sink      DeliverySink
 }
 
 func NewAsyncDeliveryService(lifetime context.Context, base *DeliveryService, check DeliveryIdentityCheck, log *slog.Logger) (*AsyncDeliveryService, error) {
@@ -40,7 +41,7 @@ func NewAsyncDeliveryService(lifetime context.Context, base *DeliveryService, ch
 		return nil, ErrDeliveryBinding
 	}
 	life, cancel := context.WithCancel(lifetime)
-	return &AsyncDeliveryService{base: base, check: check, log: log, life: life, cancel: cancel, slots: make(chan struct{}, 2), lease: 10 * time.Minute, committed: base.commitObserver}, nil
+	return &AsyncDeliveryService{base: base, check: check, log: log, life: life, cancel: cancel, slots: make(chan struct{}, 2), lease: 10 * time.Minute, committed: base.commitObserver, sink: base.commitSink}, nil
 }
 
 // Close cancels cooperative work. Filesystem calls can still outlive cancellation.
@@ -221,6 +222,11 @@ func (s *AsyncDeliveryService) verify(ctx context.Context, id DeliveryIdentity, 
 	// signal for the owning operation. Wake a result scan; never scan here.
 	if s.committed != nil && outcome.Outcome == "committed" {
 		s.committed(finish, id)
+	}
+	// Post-commit work runs on the same detached worker. The committed outcome
+	// is already durable, so a sink failure never changes it.
+	if s.sink != nil && outcome.Outcome == "committed" {
+		s.sink(finish, id, ref)
 	}
 	return err
 }

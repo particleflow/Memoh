@@ -81,6 +81,17 @@ type AgentSessionPublication struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type AlbumPair struct {
+	TeamID    pgtype.UUID        `json:"team_id"`
+	ID        pgtype.UUID        `json:"id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	BotID     pgtype.UUID        `json:"bot_id"`
+	PairKey   string             `json:"pair_key"`
+	State     string             `json:"state"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
 type AuthSession struct {
 	ID           pgtype.UUID        `json:"id"`
 	UserID       pgtype.UUID        `json:"user_id"`

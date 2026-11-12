@@ -285,3 +285,63 @@ func TestAsyncDeliveryCommitObserverSignalsVerifiedCommitOnly(t *testing.T) {
 		t.Fatalf("failed verification signalled completion: %+v", observed)
 	}
 }
+
+// The sink is the post-commit hook that may write durable state. It runs once
+// per verified commit with the same immutable reference, and never for a failed
+// verification.
+func TestAsyncDeliverySinkRunsOnlyForVerifiedCommits(t *testing.T) {
+	f, s, a, ctx, ref := asyncFixture(t)
+	var mu sync.Mutex
+	type call struct {
+		id  DeliveryIdentity
+		ref DeliveryRequest
+	}
+	var calls []call
+	s.sink = func(_ context.Context, id DeliveryIdentity, got DeliveryRequest) {
+		mu.Lock()
+		defer mu.Unlock()
+		calls = append(calls, call{id: id, ref: got})
+	}
+	if _, err := s.Commit(ctx, f.id.OperationID, "result", ref, ""); err != nil {
+		t.Fatal(err)
+	}
+	<-a.started
+	close(a.release)
+	awaitDelivery(ctx, t, s, f.id.OperationID, "result", ref, "committed")
+	mu.Lock()
+	if len(calls) != 1 || calls[0].id.OperationID != f.id.OperationID || calls[0].ref.ContentHash != ref.ContentHash {
+		mu.Unlock()
+		t.Fatalf("sink calls: %+v", calls)
+	}
+	mu.Unlock()
+
+	f2, s2, _, ctx2, ref2 := asyncFixture(t)
+	s2.sink = func(context.Context, DeliveryIdentity, DeliveryRequest) {
+		mu.Lock()
+		defer mu.Unlock()
+		calls = append(calls, call{})
+	}
+	s2.lease = 50 * time.Millisecond
+	if _, err := s2.Commit(ctx2, f2.id.OperationID, "slow", ref2, ""); err != nil {
+		t.Fatal(err)
+	}
+	awaitDelivery(ctx2, t, s2, f2.id.OperationID, "slow", ref2, "failed")
+	mu.Lock()
+	defer mu.Unlock()
+	if len(calls) != 1 {
+		t.Fatalf("failed verification reached the sink: %+v", calls)
+	}
+}
+
+// A sink failure must never change the commit outcome.
+func TestAsyncDeliverySinkFailureDoesNotChangeTheCommit(t *testing.T) {
+	f, s, a, ctx, ref := asyncFixture(t)
+	s.sink = func(context.Context, DeliveryIdentity, DeliveryRequest) { panic("sink exploded") }
+	if _, err := s.Commit(ctx, f.id.OperationID, "result", ref, ""); err != nil {
+		t.Fatal(err)
+	}
+	<-a.started
+	close(a.release)
+	// job.Go recovers the panic and records it; the ledger keeps `committed`.
+	awaitDelivery(ctx, t, s, f.id.OperationID, "result", ref, "committed")
+}
