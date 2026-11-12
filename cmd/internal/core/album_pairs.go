@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/felinics/memoh/internal/albumpairs"
@@ -42,7 +43,7 @@ func AlbumDeliveryCommitSink(log *slog.Logger, pairs *albumpairs.Service, writeb
 		userID, botID := identity.Binding.UserID, identity.Binding.BotID
 		pair, err := pairs.Resolve(ctx, userID, botID)
 		if err != nil {
-			if err != albumpairs.ErrNotFound {
+			if !errors.Is(err, albumpairs.ErrNotFound) {
 				log.Warn("album pairing lookup failed", slog.String("operation_id", identity.OperationID))
 			}
 			return

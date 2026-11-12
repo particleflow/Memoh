@@ -32,7 +32,7 @@ type sinkPairStore struct {
 	rows []dbstore.AlbumPairRecord
 }
 
-func (s *sinkPairStore) ListAlbumPairs(context.Context, string) ([]dbstore.AlbumPairRecord, error) {
+func (*sinkPairStore) ListAlbumPairs(context.Context, string) ([]dbstore.AlbumPairRecord, error) {
 	return nil, nil
 }
 
@@ -43,7 +43,7 @@ func (s *sinkPairStore) UpsertAlbumPair(_ context.Context, record dbstore.AlbumP
 	return record, nil
 }
 
-func (s *sinkPairStore) RevokeAlbumPair(context.Context, string, string) (dbstore.AlbumPairRecord, error) {
+func (*sinkPairStore) RevokeAlbumPair(context.Context, string, string) (dbstore.AlbumPairRecord, error) {
 	return dbstore.AlbumPairRecord{}, db.ErrNotFound
 }
 
@@ -76,11 +76,11 @@ func (s *sinkWritebackStore) EnqueuePhoneAlbumWriteback(_ context.Context, recor
 	return record, nil
 }
 
-func (s *sinkWritebackStore) ListPendingPhoneAlbumWritebacks(context.Context, string) ([]dbstore.PhoneAlbumWritebackRecord, error) {
+func (*sinkWritebackStore) ListPendingPhoneAlbumWritebacks(context.Context, string) ([]dbstore.PhoneAlbumWritebackRecord, error) {
 	return nil, nil
 }
 
-func (s *sinkWritebackStore) MarkPhoneAlbumWritebackWritten(context.Context, string, string, string) (dbstore.PhoneAlbumWritebackRecord, error) {
+func (*sinkWritebackStore) MarkPhoneAlbumWritebackWritten(context.Context, string, string, string) (dbstore.PhoneAlbumWritebackRecord, error) {
 	return dbstore.PhoneAlbumWritebackRecord{}, db.ErrNotFound
 }
 
@@ -191,6 +191,17 @@ func TestAlbumSinkSwallowsFailures(t *testing.T) {
 		SizeBytes:   1,
 		Mime:        "image/png",
 	})
+	// A write-side failure after a successful lookup is equally harmless.
+	failingWriteback := AlbumDeliveryCommitSink(slog.New(slog.DiscardHandler), albumpairs.NewService(nil, &sinkPairStore{rows: []dbstore.AlbumPairRecord{
+		{UserID: sinkUser, BotID: sinkBot, PairKey: "red-jade", State: albumpairs.StateActive},
+	}}), albumwriteback.NewService(nil, &failingWritebackStore{}, nil))
+	failingWriteback(context.Background(), sinkIdentity(), computertask.DeliveryRequest{
+		Version:     1,
+		Direction:   "upload",
+		ContentHash: sinkHash("broken-write"),
+		SizeBytes:   1,
+		Mime:        "image/png",
+	})
 }
 
 // The sink is registered only when both services exist.
@@ -219,4 +230,20 @@ func (failingPairStore) RevokeAlbumPair(context.Context, string, string) (dbstor
 
 func (failingPairStore) ResolveActiveAlbumPair(context.Context, string, string) (dbstore.AlbumPairRecord, error) {
 	return dbstore.AlbumPairRecord{}, errors.New("store offline")
+}
+
+// failingWritebackStore rejects every enqueue, so the sink's write path runs
+// after a successful pairing lookup.
+type failingWritebackStore struct{}
+
+func (*failingWritebackStore) EnqueuePhoneAlbumWriteback(context.Context, dbstore.PhoneAlbumWritebackRecord) (dbstore.PhoneAlbumWritebackRecord, error) {
+	return dbstore.PhoneAlbumWritebackRecord{}, errors.New("queue offline")
+}
+
+func (*failingWritebackStore) ListPendingPhoneAlbumWritebacks(context.Context, string) ([]dbstore.PhoneAlbumWritebackRecord, error) {
+	return nil, nil
+}
+
+func (*failingWritebackStore) MarkPhoneAlbumWritebackWritten(context.Context, string, string, string) (dbstore.PhoneAlbumWritebackRecord, error) {
+	return dbstore.PhoneAlbumWritebackRecord{}, db.ErrNotFound
 }
