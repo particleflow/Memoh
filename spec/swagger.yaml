@@ -6767,6 +6767,138 @@ definitions:
         type: string
       result: {}
     type: object
+  imageworkflow.CreateInput:
+    properties:
+      bot_id:
+        type: string
+      instruction:
+        type: string
+      name:
+        type: string
+    type: object
+  imageworkflow.InputFile:
+    properties:
+      content_hash:
+        type: string
+      mime:
+        type: string
+      path:
+        type: string
+      size_bytes:
+        type: integer
+    type: object
+  imageworkflow.ListResponse:
+    properties:
+      workflows:
+        items:
+          $ref: '#/definitions/imageworkflow.Workflow'
+        type: array
+    type: object
+  imageworkflow.ResumeResult:
+    properties:
+      armed_runs:
+        type: integer
+      workflow:
+        $ref: '#/definitions/imageworkflow.Workflow'
+    type: object
+  imageworkflow.Route:
+    properties:
+      bot_id:
+        type: string
+      input_dir:
+        type: string
+      input_pair_key:
+        type: string
+      state:
+        type: string
+      workflow_id:
+        type: string
+    type: object
+  imageworkflow.RoutesResponse:
+    properties:
+      routes:
+        items:
+          $ref: '#/definitions/imageworkflow.Route'
+        type: array
+    type: object
+  imageworkflow.RunSummary:
+    properties:
+      created_at:
+        type: string
+      fingerprint:
+        type: string
+      id:
+        type: string
+      item_count:
+        type: integer
+      state:
+        type: string
+    type: object
+  imageworkflow.TriggerRequest:
+    properties:
+      batch_key:
+        type: string
+      files:
+        items:
+          $ref: '#/definitions/imageworkflow.InputFile'
+        type: array
+      source:
+        type: string
+    type: object
+  imageworkflow.TriggerResult:
+    properties:
+      duplicate:
+        type: boolean
+      run_id:
+        type: string
+      schedule_id:
+        type: string
+      state:
+        type: string
+    type: object
+  imageworkflow.UpdateInput:
+    properties:
+      instruction:
+        type: string
+      name:
+        type: string
+    type: object
+  imageworkflow.Workflow:
+    properties:
+      bot_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      input_pair_key:
+        type: string
+      instruction:
+        type: string
+      name:
+        type: string
+      output_pair_key:
+        type: string
+      state:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  imageworkflow.WorkflowDetail:
+    properties:
+      run_counts:
+        additionalProperties:
+          type: integer
+        type: object
+      runs:
+        items:
+          $ref: '#/definitions/imageworkflow.RunSummary'
+        type: array
+      workflow:
+        $ref: '#/definitions/imageworkflow.Workflow'
+    type: object
   inputsource.Source:
     properties:
       bot_id:
@@ -13140,6 +13272,56 @@ paths:
       summary: Run bot hooks for a synthetic event
       tags:
       - hooks
+  /bots/{bot_id}/image-workflows/{workflow_id}/trigger:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a batch of input files for this workflow. The workflow
+        must be active with both album pairings designated; a paused workflow stores
+        the batch as held. A repeated batch identity returns the original run.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      - description: Batch source and files
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/imageworkflow.TriggerRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/imageworkflow.TriggerResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Trigger one workflow batch
+      tags:
+      - image-workflows
   /bots/{bot_id}/mcp:
     get:
       description: List MCP connections for a bot
@@ -20169,6 +20351,29 @@ paths:
       summary: List fetch provider metadata
       tags:
       - fetch-providers
+  /internal/image-workflow-routes:
+    get:
+      description: One entry per live workflow with the absolute input directory,
+        so the directory watcher can route a batch to a workflow instead of the generic
+        file batch.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.RoutesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read the image workflow route table
+      tags:
+      - image-workflows
   /memory/config:
     get:
       description: Get the team-level Built-in Memory configuration
@@ -22790,6 +22995,242 @@ paths:
       summary: List the caller's bot-to-Computer access grants
       tags:
       - user-runtimes
+  /users/me/image-workflows:
+    get:
+      description: Every workflow this user owns, oldest first, revoked rows included.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.ListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List the caller's image workflows
+      tags:
+      - image-workflows
+    post:
+      consumes:
+      - application/json
+      description: Registers a workflow in state active and mints its input and output
+        pairing labels. The albums themselves are designated on the phone.
+      parameters:
+      - description: Name, instruction and executing Bot
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/imageworkflow.CreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/imageworkflow.Workflow'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Create an image workflow
+      tags:
+      - image-workflows
+  /users/me/image-workflows/{workflow_id}:
+    delete:
+      description: 'Soft delete: the workflow and its pairing labels keep their row,
+        both album pairings are revoked, and queued write-backs, runs and products
+        stay untouched.'
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.Workflow'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Revoke an image workflow
+      tags:
+      - image-workflows
+    get:
+      description: The workflow plus its newest runs and per-state run counts.
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Get one image workflow
+      tags:
+      - image-workflows
+    put:
+      consumes:
+      - application/json
+      description: Changes the name and/or the instruction. Pairing labels are not
+        editable here.
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      - description: Fields to change
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/imageworkflow.UpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.Workflow'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Update an image workflow
+      tags:
+      - image-workflows
+  /users/me/image-workflows/{workflow_id}/pause:
+    post:
+      description: Stops new triggers from arming and removes the directory route.
+        Pending write-backs keep draining.
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.Workflow'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Pause an image workflow
+      tags:
+      - image-workflows
+  /users/me/image-workflows/{workflow_id}/resume:
+    post:
+      description: Returns the workflow to active and arms every held run.
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/imageworkflow.ResumeResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Resume an image workflow
+      tags:
+      - image-workflows
   /users/me/password:
     put:
       description: Update current user password with current password check

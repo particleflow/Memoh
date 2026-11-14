@@ -150,6 +150,12 @@ http.too_many_requests	429
 http.unauthorized	401
 http.unsupported_media_type	415
 http.upgrade_required	426
+image_workflow.cycle_detected	409
+image_workflow.name_taken	409
+image_workflow.not_active	409
+image_workflow.not_found	404
+image_workflow.pair_unavailable	409
+image_workflow.request_invalid	400
 internal	500
 invalid_chat_runtime	400
 mcp.connection_not_found	404

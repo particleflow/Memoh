@@ -282,21 +282,30 @@ const (
 	CodeMediaIngestFailed          Code = "media.ingest_failed"
 	// Album write-back outcomes the tool reports as machine facts. The model
 	// composes its own wording; no pre-written sentence is returned.
-	CodeAlbumQueueRejected         Code = "album.queue_rejected"
-	CodeAlbumAssetUnavailable      Code = "album.asset_unavailable"
-	CodeMessageNotFound            Code = "message.not_found"
-	CodeModelNotFound              Code = "model.not_found"
-	CodeProviderNotFound           Code = "provider.not_found"
-	CodeTTSProviderNotFound        Code = "tts_provider.not_found"
-	CodeTTSModelNotFound           Code = "tts_model.not_found"
-	CodeTranscriptionModelNotFound Code = "transcription_model.not_found"
-	CodeVideoProviderNotFound      Code = "video_provider.not_found"
-	CodeVideoModelNotFound         Code = "video_model.not_found"
-	CodeUserNotFound               Code = "user.not_found"
-	CodeUserRuntimeNotFound        Code = "user_runtime.not_found"
-	CodeWorkdirNotFound            Code = "workdir.not_found"
-	CodeWorkspaceTargetNotFound    Code = "workspace_target.not_found"
-	CodeSupermarketNotFound        Code = "supermarket.not_found"
+	CodeAlbumQueueRejected    Code = "album.queue_rejected"
+	CodeAlbumAssetUnavailable Code = "album.asset_unavailable"
+	// Image workflow refusals. The contract publishes these six and no others
+	// (contracts/image-workflows.json, error_codes): each stands for one cause a
+	// client branches on, so a client needs no error text.
+	CodeImageWorkflowNotFound        Code = "image_workflow.not_found"
+	CodeImageWorkflowRequestInvalid  Code = "image_workflow.request_invalid"
+	CodeImageWorkflowNameTaken       Code = "image_workflow.name_taken"
+	CodeImageWorkflowPairUnavailable Code = "image_workflow.pair_unavailable"
+	CodeImageWorkflowCycleDetected   Code = "image_workflow.cycle_detected"
+	CodeImageWorkflowNotActive       Code = "image_workflow.not_active"
+	CodeMessageNotFound              Code = "message.not_found"
+	CodeModelNotFound                Code = "model.not_found"
+	CodeProviderNotFound             Code = "provider.not_found"
+	CodeTTSProviderNotFound          Code = "tts_provider.not_found"
+	CodeTTSModelNotFound             Code = "tts_model.not_found"
+	CodeTranscriptionModelNotFound   Code = "transcription_model.not_found"
+	CodeVideoProviderNotFound        Code = "video_provider.not_found"
+	CodeVideoModelNotFound           Code = "video_model.not_found"
+	CodeUserNotFound                 Code = "user.not_found"
+	CodeUserRuntimeNotFound          Code = "user_runtime.not_found"
+	CodeWorkdirNotFound              Code = "workdir.not_found"
+	CodeWorkspaceTargetNotFound      Code = "workspace_target.not_found"
+	CodeSupermarketNotFound          Code = "supermarket.not_found"
 
 	// MCP connection codes, and the OAuth state code that MCP shares with
 	// provider sign-in.
@@ -1307,6 +1316,12 @@ var catalog = map[Code]Definition{
 	CodeMediaIngestFailed:             {HTTPStatus: http.StatusInternalServerError, Detail: "The file could not be stored as an attachment. Check that it still exists and try again."},
 	CodeAlbumQueueRejected:            {HTTPStatus: http.StatusBadRequest, Detail: "The album write-back request is invalid."},
 	CodeAlbumAssetUnavailable:         {HTTPStatus: http.StatusNotFound, Detail: "A media item is not available to this bot."},
+	CodeImageWorkflowNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This image workflow was not found."},
+	CodeImageWorkflowRequestInvalid:   {HTTPStatus: http.StatusBadRequest, Detail: "The image workflow request is invalid."},
+	CodeImageWorkflowNameTaken:        {HTTPStatus: http.StatusConflict, Detail: "You already have an image workflow with this name."},
+	CodeImageWorkflowPairUnavailable:  {HTTPStatus: http.StatusConflict, Detail: "This image workflow has no album designated for one of its sides yet."},
+	CodeImageWorkflowCycleDetected:    {HTTPStatus: http.StatusConflict, Detail: "These albums would feed each other, so the image workflow was not saved."},
+	CodeImageWorkflowNotActive:        {HTTPStatus: http.StatusConflict, Detail: "This image workflow is not active."},
 	CodeMessageNotFound:               {HTTPStatus: http.StatusNotFound, Detail: "This message no longer exists. Refresh the conversation and try again."},
 	CodeModelNotFound:                 {HTTPStatus: http.StatusNotFound, Detail: "This model no longer exists. Refresh the list and choose another one."},
 	CodeProviderNotFound:              {HTTPStatus: http.StatusNotFound, Detail: "This provider no longer exists. Refresh the list and choose another one."},

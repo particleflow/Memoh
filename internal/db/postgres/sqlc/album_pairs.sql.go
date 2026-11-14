@@ -13,7 +13,7 @@ import (
 
 const listAlbumPairs = `-- name: ListAlbumPairs :many
 
-SELECT team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at FROM public.album_pairs
+SELECT team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at, workflow_id, role FROM public.album_pairs
 WHERE team_id = public.memoh_current_team_id() AND user_id = $1
 ORDER BY created_at, id
 `
@@ -23,10 +23,12 @@ ORDER BY created_at, id
 // no album uri, album name or device identity here; the phone's local ledger
 // resolves a label to an album on that device.
 //
-// One processing line has at most one active target (partial unique index
-// album_pairs_active_bot), so activating a target first retires that line's
-// previous one. Unbinding keeps the row and its key: naming the same album
-// again reuses it.
+// A row either belongs to an image workflow (workflow_id + role) or is the bare
+// automatic write-back target (workflow_id IS NULL). One bare target per
+// processing line (partial unique index album_pairs_active_bot), so activating a
+// target first retires that line's previous bare one; a workflow role retires
+// only that workflow's rows. Unbinding keeps the row and its key: naming the same
+// album again reuses it.
 func (q *Queries) ListAlbumPairs(ctx context.Context, userID pgtype.UUID) ([]AlbumPair, error) {
 	rows, err := q.db.Query(ctx, listAlbumPairs, userID)
 	if err != nil {
@@ -45,6 +47,8 @@ func (q *Queries) ListAlbumPairs(ctx context.Context, userID pgtype.UUID) ([]Alb
 			&i.State,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.WorkflowID,
+			&i.Role,
 		); err != nil {
 			return nil, err
 		}
@@ -57,9 +61,10 @@ func (q *Queries) ListAlbumPairs(ctx context.Context, userID pgtype.UUID) ([]Alb
 }
 
 const resolveActiveAlbumPair = `-- name: ResolveActiveAlbumPair :one
-SELECT team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at FROM public.album_pairs
+SELECT team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at, workflow_id, role FROM public.album_pairs
 WHERE team_id = public.memoh_current_team_id() AND user_id = $1
   AND bot_id = $2 AND state = 'active'
+  AND workflow_id IS NULL
 `
 
 type ResolveActiveAlbumPairParams struct {
@@ -67,6 +72,8 @@ type ResolveActiveAlbumPairParams struct {
 	BotID  pgtype.UUID `json:"bot_id"`
 }
 
+// The bare target lookup: the owner's single automatic write-back target. A
+// workflow-role row is never that target.
 func (q *Queries) ResolveActiveAlbumPair(ctx context.Context, arg ResolveActiveAlbumPairParams) (AlbumPair, error) {
 	row := q.db.QueryRow(ctx, resolveActiveAlbumPair, arg.UserID, arg.BotID)
 	var i AlbumPair
@@ -79,6 +86,40 @@ func (q *Queries) ResolveActiveAlbumPair(ctx context.Context, arg ResolveActiveA
 		&i.State,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WorkflowID,
+		&i.Role,
+	)
+	return i, err
+}
+
+const resolveActiveWorkflowAlbumPair = `-- name: ResolveActiveWorkflowAlbumPair :one
+SELECT team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at, workflow_id, role FROM public.album_pairs
+WHERE team_id = public.memoh_current_team_id() AND user_id = $1
+  AND workflow_id = $2 AND role = $3 AND state = 'active'
+`
+
+type ResolveActiveWorkflowAlbumPairParams struct {
+	UserID     pgtype.UUID `json:"user_id"`
+	WorkflowID pgtype.UUID `json:"workflow_id"`
+	Role       pgtype.Text `json:"role"`
+}
+
+// The workflow-attributed lookup: which label one workflow designated for one
+// role.
+func (q *Queries) ResolveActiveWorkflowAlbumPair(ctx context.Context, arg ResolveActiveWorkflowAlbumPairParams) (AlbumPair, error) {
+	row := q.db.QueryRow(ctx, resolveActiveWorkflowAlbumPair, arg.UserID, arg.WorkflowID, arg.Role)
+	var i AlbumPair
+	err := row.Scan(
+		&i.TeamID,
+		&i.ID,
+		&i.UserID,
+		&i.BotID,
+		&i.PairKey,
+		&i.State,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.WorkflowID,
+		&i.Role,
 	)
 	return i, err
 }
@@ -89,16 +130,25 @@ SET state = 'revoked', updated_at = now()
 WHERE team_id = public.memoh_current_team_id()
   AND user_id = $1 AND bot_id = $2
   AND state = 'active' AND pair_key <> $3
+  AND workflow_id IS NOT DISTINCT FROM $4
 `
 
 type RetireActiveAlbumPairParams struct {
-	UserID  pgtype.UUID `json:"user_id"`
-	BotID   pgtype.UUID `json:"bot_id"`
-	PairKey string      `json:"pair_key"`
+	UserID     pgtype.UUID `json:"user_id"`
+	BotID      pgtype.UUID `json:"bot_id"`
+	PairKey    string      `json:"pair_key"`
+	WorkflowID pgtype.UUID `json:"workflow_id"`
 }
 
+// Retiring is scoped by workflow: a bare designation passes NULL and behaves
+// exactly as before, a workflow designation retires only that workflow's rows.
 func (q *Queries) RetireActiveAlbumPair(ctx context.Context, arg RetireActiveAlbumPairParams) error {
-	_, err := q.db.Exec(ctx, retireActiveAlbumPair, arg.UserID, arg.BotID, arg.PairKey)
+	_, err := q.db.Exec(ctx, retireActiveAlbumPair,
+		arg.UserID,
+		arg.BotID,
+		arg.PairKey,
+		arg.WorkflowID,
+	)
 	return err
 }
 
@@ -108,7 +158,7 @@ SET state = 'revoked',
     updated_at = CASE WHEN state = 'revoked' THEN updated_at ELSE now() END
 WHERE team_id = public.memoh_current_team_id() AND user_id = $1
   AND pair_key = $2
-RETURNING team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at
+RETURNING team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at, workflow_id, role
 `
 
 type RevokeAlbumPairParams struct {
@@ -130,31 +180,63 @@ func (q *Queries) RevokeAlbumPair(ctx context.Context, arg RevokeAlbumPairParams
 		&i.State,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WorkflowID,
+		&i.Role,
 	)
 	return i, err
 }
 
+const revokeWorkflowAlbumPairs = `-- name: RevokeWorkflowAlbumPairs :exec
+UPDATE public.album_pairs
+SET state = 'revoked', updated_at = now()
+WHERE team_id = public.memoh_current_team_id()
+  AND user_id = $1 AND workflow_id = $2
+  AND state = 'active'
+`
+
+type RevokeWorkflowAlbumPairsParams struct {
+	UserID     pgtype.UUID `json:"user_id"`
+	WorkflowID pgtype.UUID `json:"workflow_id"`
+}
+
+// Revoking a workflow revokes both of its pairing rows; the rows stay, so the
+// labels stay occupied.
+func (q *Queries) RevokeWorkflowAlbumPairs(ctx context.Context, arg RevokeWorkflowAlbumPairsParams) error {
+	_, err := q.db.Exec(ctx, revokeWorkflowAlbumPairs, arg.UserID, arg.WorkflowID)
+	return err
+}
+
 const upsertAlbumPair = `-- name: UpsertAlbumPair :one
-INSERT INTO public.album_pairs (user_id, bot_id, pair_key, state)
-VALUES ($1, $2, $3, 'active')
+INSERT INTO public.album_pairs (user_id, bot_id, pair_key, state, workflow_id, role)
+VALUES ($1, $2, $3, 'active', $4, $5)
 ON CONFLICT (team_id, user_id, pair_key) DO UPDATE SET
   bot_id = EXCLUDED.bot_id,
   state = 'active',
+  workflow_id = EXCLUDED.workflow_id,
+  role = EXCLUDED.role,
   updated_at = CASE
     WHEN album_pairs.state = 'active' AND album_pairs.bot_id = EXCLUDED.bot_id THEN album_pairs.updated_at
     ELSE now()
   END
-RETURNING team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at
+RETURNING team_id, id, user_id, bot_id, pair_key, state, created_at, updated_at, workflow_id, role
 `
 
 type UpsertAlbumPairParams struct {
-	UserID  pgtype.UUID `json:"user_id"`
-	BotID   pgtype.UUID `json:"bot_id"`
-	PairKey string      `json:"pair_key"`
+	UserID     pgtype.UUID `json:"user_id"`
+	BotID      pgtype.UUID `json:"bot_id"`
+	PairKey    string      `json:"pair_key"`
+	WorkflowID pgtype.UUID `json:"workflow_id"`
+	Role       pgtype.Text `json:"role"`
 }
 
 func (q *Queries) UpsertAlbumPair(ctx context.Context, arg UpsertAlbumPairParams) (AlbumPair, error) {
-	row := q.db.QueryRow(ctx, upsertAlbumPair, arg.UserID, arg.BotID, arg.PairKey)
+	row := q.db.QueryRow(ctx, upsertAlbumPair,
+		arg.UserID,
+		arg.BotID,
+		arg.PairKey,
+		arg.WorkflowID,
+		arg.Role,
+	)
 	var i AlbumPair
 	err := row.Scan(
 		&i.TeamID,
@@ -165,6 +247,8 @@ func (q *Queries) UpsertAlbumPair(ctx context.Context, arg UpsertAlbumPairParams
 		&i.State,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WorkflowID,
+		&i.Role,
 	)
 	return i, err
 }

@@ -3864,6 +3864,87 @@ export type HooksToolPayload = {
     result?: unknown;
 };
 
+export type ImageworkflowCreateInput = {
+    bot_id?: string;
+    instruction?: string;
+    name?: string;
+};
+
+export type ImageworkflowInputFile = {
+    content_hash?: string;
+    mime?: string;
+    path?: string;
+    size_bytes?: number;
+};
+
+export type ImageworkflowListResponse = {
+    workflows?: Array<ImageworkflowWorkflow>;
+};
+
+export type ImageworkflowResumeResult = {
+    armed_runs?: number;
+    workflow?: ImageworkflowWorkflow;
+};
+
+export type ImageworkflowRoute = {
+    bot_id?: string;
+    input_dir?: string;
+    input_pair_key?: string;
+    state?: string;
+    workflow_id?: string;
+};
+
+export type ImageworkflowRoutesResponse = {
+    routes?: Array<ImageworkflowRoute>;
+};
+
+export type ImageworkflowRunSummary = {
+    created_at?: string;
+    fingerprint?: string;
+    id?: string;
+    item_count?: number;
+    state?: string;
+};
+
+export type ImageworkflowTriggerRequest = {
+    batch_key?: string;
+    files?: Array<ImageworkflowInputFile>;
+    source?: string;
+};
+
+export type ImageworkflowTriggerResult = {
+    duplicate?: boolean;
+    run_id?: string;
+    schedule_id?: string;
+    state?: string;
+};
+
+export type ImageworkflowUpdateInput = {
+    instruction?: string;
+    name?: string;
+};
+
+export type ImageworkflowWorkflow = {
+    bot_id?: string;
+    created_at?: string;
+    id?: string;
+    input_pair_key?: string;
+    instruction?: string;
+    name?: string;
+    output_pair_key?: string;
+    state?: string;
+    updated_at?: string;
+    user_id?: string;
+};
+
+export type ImageworkflowWorkflowDetail = {
+    run_counts?: {
+        [key: string]: number;
+    };
+    runs?: Array<ImageworkflowRunSummary>;
+    workflow?: ImageworkflowWorkflow;
+};
+
 export type InputsourceSource = {
     bot_id?: string;
     channel?: string;
@@ -10217,6 +10298,55 @@ export type PostBotsByBotIdHooksTestResponses = {
 };
 
 export type PostBotsByBotIdHooksTestResponse = PostBotsByBotIdHooksTestResponses[keyof PostBotsByBotIdHooksTestResponses];
+
+export type PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerData = {
+    /**
+     * Batch source and files
+     */
+    body: ImageworkflowTriggerRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/image-workflows/{workflow_id}/trigger';
+};
+
+export type PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerError = PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerErrors[keyof PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerErrors];
+
+export type PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerResponses = {
+    /**
+     * Accepted
+     */
+    202: ImageworkflowTriggerResult;
+};
+
+export type PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerResponse = PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerResponses[keyof PostBotsByBotIdImageWorkflowsByWorkflowIdTriggerResponses];
 
 export type GetBotsByBotIdMcpData = {
     body?: never;
@@ -17955,6 +18085,35 @@ export type PutFetchProvidersByIdResponses = {
 
 export type PutFetchProvidersByIdResponse = PutFetchProvidersByIdResponses[keyof PutFetchProvidersByIdResponses];
 
+export type GetInternalImageWorkflowRoutesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/internal/image-workflow-routes';
+};
+
+export type GetInternalImageWorkflowRoutesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetInternalImageWorkflowRoutesError = GetInternalImageWorkflowRoutesErrors[keyof GetInternalImageWorkflowRoutesErrors];
+
+export type GetInternalImageWorkflowRoutesResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowRoutesResponse;
+};
+
+export type GetInternalImageWorkflowRoutesResponse = GetInternalImageWorkflowRoutesResponses[keyof GetInternalImageWorkflowRoutesResponses];
+
 export type GetMemoryConfigData = {
     body?: never;
     path?: never;
@@ -20992,6 +21151,280 @@ export type GetUsersMeComputerAccessResponses = {
 };
 
 export type GetUsersMeComputerAccessResponse = GetUsersMeComputerAccessResponses[keyof GetUsersMeComputerAccessResponses];
+
+export type GetUsersMeImageWorkflowsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/me/image-workflows';
+};
+
+export type GetUsersMeImageWorkflowsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeImageWorkflowsError = GetUsersMeImageWorkflowsErrors[keyof GetUsersMeImageWorkflowsErrors];
+
+export type GetUsersMeImageWorkflowsResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowListResponse;
+};
+
+export type GetUsersMeImageWorkflowsResponse = GetUsersMeImageWorkflowsResponses[keyof GetUsersMeImageWorkflowsResponses];
+
+export type PostUsersMeImageWorkflowsData = {
+    /**
+     * Name, instruction and executing Bot
+     */
+    body: ImageworkflowCreateInput;
+    path?: never;
+    query?: never;
+    url: '/users/me/image-workflows';
+};
+
+export type PostUsersMeImageWorkflowsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeImageWorkflowsError = PostUsersMeImageWorkflowsErrors[keyof PostUsersMeImageWorkflowsErrors];
+
+export type PostUsersMeImageWorkflowsResponses = {
+    /**
+     * Created
+     */
+    201: ImageworkflowWorkflow;
+};
+
+export type PostUsersMeImageWorkflowsResponse = PostUsersMeImageWorkflowsResponses[keyof PostUsersMeImageWorkflowsResponses];
+
+export type DeleteUsersMeImageWorkflowsByWorkflowIdData = {
+    body?: never;
+    path: {
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/users/me/image-workflows/{workflow_id}';
+};
+
+export type DeleteUsersMeImageWorkflowsByWorkflowIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type DeleteUsersMeImageWorkflowsByWorkflowIdError = DeleteUsersMeImageWorkflowsByWorkflowIdErrors[keyof DeleteUsersMeImageWorkflowsByWorkflowIdErrors];
+
+export type DeleteUsersMeImageWorkflowsByWorkflowIdResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowWorkflow;
+};
+
+export type DeleteUsersMeImageWorkflowsByWorkflowIdResponse = DeleteUsersMeImageWorkflowsByWorkflowIdResponses[keyof DeleteUsersMeImageWorkflowsByWorkflowIdResponses];
+
+export type GetUsersMeImageWorkflowsByWorkflowIdData = {
+    body?: never;
+    path: {
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/users/me/image-workflows/{workflow_id}';
+};
+
+export type GetUsersMeImageWorkflowsByWorkflowIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeImageWorkflowsByWorkflowIdError = GetUsersMeImageWorkflowsByWorkflowIdErrors[keyof GetUsersMeImageWorkflowsByWorkflowIdErrors];
+
+export type GetUsersMeImageWorkflowsByWorkflowIdResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowWorkflowDetail;
+};
+
+export type GetUsersMeImageWorkflowsByWorkflowIdResponse = GetUsersMeImageWorkflowsByWorkflowIdResponses[keyof GetUsersMeImageWorkflowsByWorkflowIdResponses];
+
+export type PutUsersMeImageWorkflowsByWorkflowIdData = {
+    /**
+     * Fields to change
+     */
+    body: ImageworkflowUpdateInput;
+    path: {
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/users/me/image-workflows/{workflow_id}';
+};
+
+export type PutUsersMeImageWorkflowsByWorkflowIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeImageWorkflowsByWorkflowIdError = PutUsersMeImageWorkflowsByWorkflowIdErrors[keyof PutUsersMeImageWorkflowsByWorkflowIdErrors];
+
+export type PutUsersMeImageWorkflowsByWorkflowIdResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowWorkflow;
+};
+
+export type PutUsersMeImageWorkflowsByWorkflowIdResponse = PutUsersMeImageWorkflowsByWorkflowIdResponses[keyof PutUsersMeImageWorkflowsByWorkflowIdResponses];
+
+export type PostUsersMeImageWorkflowsByWorkflowIdPauseData = {
+    body?: never;
+    path: {
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/users/me/image-workflows/{workflow_id}/pause';
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdPauseErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdPauseError = PostUsersMeImageWorkflowsByWorkflowIdPauseErrors[keyof PostUsersMeImageWorkflowsByWorkflowIdPauseErrors];
+
+export type PostUsersMeImageWorkflowsByWorkflowIdPauseResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowWorkflow;
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdPauseResponse = PostUsersMeImageWorkflowsByWorkflowIdPauseResponses[keyof PostUsersMeImageWorkflowsByWorkflowIdPauseResponses];
+
+export type PostUsersMeImageWorkflowsByWorkflowIdResumeData = {
+    body?: never;
+    path: {
+        /**
+         * Workflow ID
+         */
+        workflow_id: string;
+    };
+    query?: never;
+    url: '/users/me/image-workflows/{workflow_id}/resume';
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdResumeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdResumeError = PostUsersMeImageWorkflowsByWorkflowIdResumeErrors[keyof PostUsersMeImageWorkflowsByWorkflowIdResumeErrors];
+
+export type PostUsersMeImageWorkflowsByWorkflowIdResumeResponses = {
+    /**
+     * OK
+     */
+    200: ImageworkflowResumeResult;
+};
+
+export type PostUsersMeImageWorkflowsByWorkflowIdResumeResponse = PostUsersMeImageWorkflowsByWorkflowIdResumeResponses[keyof PostUsersMeImageWorkflowsByWorkflowIdResumeResponses];
 
 export type PutUsersMePasswordData = {
     /**
