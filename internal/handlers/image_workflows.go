@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
+	"io"
 	"log/slog"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -15,13 +19,13 @@ import (
 // watcher reads.
 //
 // Frozen contract: contracts/image-workflows.json.
-//
-// This handler is a stub for the test-first round. Every route is registered so
-// the contract tests compile and reach the boundary, and every route answers
-// 501 until the feature lands.
 type ImageWorkflowHandler struct {
 	logger  *slog.Logger
 	service *imageworkflow.Service
+	// authorizeBot is the manage-access check the trigger route needs. The
+	// other routes are owner-scoped by the caller's own session, exactly like
+	// the album-pair surface.
+	authorizeBot func(c echo.Context, userID, botID string) error
 }
 
 func NewImageWorkflowHandler(log *slog.Logger, service *imageworkflow.Service) *ImageWorkflowHandler {
@@ -29,6 +33,12 @@ func NewImageWorkflowHandler(log *slog.Logger, service *imageworkflow.Service) *
 		log = slog.Default()
 	}
 	return &ImageWorkflowHandler{logger: log.With(slog.String("handler", "image_workflow")), service: service}
+}
+
+// SetBotAuthorizer installs the Bot manage-access check the trigger route
+// requires, the same authorization family as POST /bots/{bot_id}/schedule.
+func (h *ImageWorkflowHandler) SetBotAuthorizer(authorize func(c echo.Context, userID, botID string) error) {
+	h.authorizeBot = authorize
 }
 
 func (h *ImageWorkflowHandler) Register(e *echo.Echo) {
@@ -47,6 +57,16 @@ func (h *ImageWorkflowHandler) Register(e *echo.Echo) {
 	e.GET("/internal/image-workflow-routes", h.Routes)
 }
 
+// configured answers 503 when the service was not wired, exactly like the
+// album-pair surface: a deployment without a database must not answer archive
+// writes it cannot keep.
+func (h *ImageWorkflowHandler) configured() error {
+	if h == nil || h.service == nil {
+		return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
+	}
+	return nil
+}
+
 // List godoc
 // @Summary List the caller's image workflows
 // @Description Every workflow this user owns, oldest first, revoked rows included.
@@ -57,8 +77,18 @@ func (h *ImageWorkflowHandler) Register(e *echo.Echo) {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows [get].
 func (h *ImageWorkflowHandler) List(c echo.Context) error {
-	// TODO(F3): read the owner from the request, call service.List, answer 200.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	workflows, err := h.service.List(c.Request().Context(), userID)
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, imageworkflow.ListResponse{Workflows: workflows})
 }
 
 // Create godoc
@@ -75,8 +105,22 @@ func (h *ImageWorkflowHandler) List(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows [post].
 func (h *ImageWorkflowHandler) Create(c echo.Context) error {
-	// TODO(F3): bind, validate, create, answer 201.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	var req imageworkflow.CreateInput
+	if err := decodeStrict(c, &req); err != nil {
+		return err
+	}
+	created, err := h.service.Create(c.Request().Context(), userID, req)
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusCreated, created)
 }
 
 // Get godoc
@@ -91,8 +135,18 @@ func (h *ImageWorkflowHandler) Create(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows/{workflow_id} [get].
 func (h *ImageWorkflowHandler) Get(c echo.Context) error {
-	// TODO(F3): read one workflow with its runs.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	detail, err := h.service.Get(c.Request().Context(), userID, c.Param("workflow_id"))
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, detail)
 }
 
 // Update godoc
@@ -110,8 +164,22 @@ func (h *ImageWorkflowHandler) Get(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows/{workflow_id} [put].
 func (h *ImageWorkflowHandler) Update(c echo.Context) error {
-	// TODO(F3): bind, validate, update.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	var req imageworkflow.UpdateInput
+	if err := decodeStrict(c, &req); err != nil {
+		return err
+	}
+	updated, err := h.service.Update(c.Request().Context(), userID, c.Param("workflow_id"), req)
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, updated)
 }
 
 // Revoke godoc
@@ -126,8 +194,18 @@ func (h *ImageWorkflowHandler) Update(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows/{workflow_id} [delete].
 func (h *ImageWorkflowHandler) Revoke(c echo.Context) error {
-	// TODO(F3/F7): revoke the workflow and its two pairings in one transaction.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	revoked, err := h.service.Revoke(c.Request().Context(), userID, c.Param("workflow_id"))
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, revoked)
 }
 
 // Pause godoc
@@ -143,8 +221,18 @@ func (h *ImageWorkflowHandler) Revoke(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows/{workflow_id}/pause [post].
 func (h *ImageWorkflowHandler) Pause(c echo.Context) error {
-	// TODO(F7): pause, idempotently.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	paused, err := h.service.Pause(c.Request().Context(), userID, c.Param("workflow_id"))
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, paused)
 }
 
 // Resume godoc
@@ -160,8 +248,18 @@ func (h *ImageWorkflowHandler) Pause(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /users/me/image-workflows/{workflow_id}/resume [post].
 func (h *ImageWorkflowHandler) Resume(c echo.Context) error {
-	// TODO(F7): arm every held run, then set the workflow active.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	result, err := h.service.Resume(c.Request().Context(), userID, c.Param("workflow_id"))
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, result)
 }
 
 // Trigger godoc
@@ -180,8 +278,31 @@ func (h *ImageWorkflowHandler) Resume(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /bots/{bot_id}/image-workflows/{workflow_id}/trigger [post].
 func (h *ImageWorkflowHandler) Trigger(c echo.Context) error {
-	// TODO(F4/F5): authorize bot access, then trigger.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	botID := c.Param("bot_id")
+	// The trigger is the one route that acts on a Bot rather than on the
+	// caller's own archive, so it carries the same manage-access check as
+	// POST /bots/{bot_id}/schedule.
+	if h.authorizeBot != nil {
+		if err := h.authorizeBot(c, userID, botID); err != nil {
+			return err
+		}
+	}
+	var req imageworkflow.TriggerRequest
+	if err := decodeStrict(c, &req); err != nil {
+		return err
+	}
+	result, err := h.service.Trigger(c.Request().Context(), userID, botID, c.Param("workflow_id"), req)
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusAccepted, result)
 }
 
 // Routes godoc
@@ -194,12 +315,53 @@ func (h *ImageWorkflowHandler) Trigger(c echo.Context) error {
 // @Failure 503 {object} server.Problem
 // @Router /internal/image-workflow-routes [get].
 func (h *ImageWorkflowHandler) Routes(c echo.Context) error {
-	// TODO(F9): list the caller's routes.
-	return notImplemented(c)
+	if err := h.configured(); err != nil {
+		return err
+	}
+	userID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	routes, err := h.service.Routes(c.Request().Context(), userID)
+	if err != nil {
+		return imageWorkflowHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, imageworkflow.RoutesResponse{Routes: routes})
 }
 
-// notImplemented is the stub answer of this test-first round: the route exists,
-// nothing behind it does yet.
-func notImplemented(echo.Context) error {
-	return apperror.New(apperror.CodeHTTPNotImplemented, nil)
+// decodeStrict binds one JSON body and refuses unknown fields, so a client that
+// sends an album uri or a label to this surface learns it is not editable here
+// instead of having it silently ignored.
+func decodeStrict(c echo.Context, target any) error {
+	decoder := json.NewDecoder(http.MaxBytesReader(c.Response(), c.Request().Body, 1<<20))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		return apperror.FieldInvalid("request", err)
+	}
+	if err := decoder.Decode(new(any)); !errors.Is(err, io.EOF) {
+		return apperror.FieldInvalid("request", err)
+	}
+	return nil
+}
+
+// imageWorkflowHTTPError maps the package errors onto the contract's six codes.
+func imageWorkflowHTTPError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, imageworkflow.ErrInvalid):
+		return apperror.Wrap(apperror.CodeImageWorkflowRequestInvalid, err, nil)
+	case errors.Is(err, imageworkflow.ErrNotFound):
+		return apperror.Wrap(apperror.CodeImageWorkflowNotFound, err, nil)
+	case errors.Is(err, imageworkflow.ErrNameTaken):
+		return apperror.Wrap(apperror.CodeImageWorkflowNameTaken, err, nil)
+	case errors.Is(err, imageworkflow.ErrPairUnavailable):
+		return apperror.Wrap(apperror.CodeImageWorkflowPairUnavailable, err, nil)
+	case errors.Is(err, imageworkflow.ErrCycle):
+		return apperror.Wrap(apperror.CodeImageWorkflowCycleDetected, err, nil)
+	case errors.Is(err, imageworkflow.ErrNotActive):
+		return apperror.Wrap(apperror.CodeImageWorkflowNotActive, err, nil)
+	default:
+		return err
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
 
 	coremodule "github.com/felinics/memoh/cmd/internal/core"
@@ -41,6 +42,7 @@ import (
 	channelchecker "github.com/felinics/memoh/internal/healthcheck/checkers/channel"
 	mcpchecker "github.com/felinics/memoh/internal/healthcheck/checkers/mcp"
 	modelchecker "github.com/felinics/memoh/internal/healthcheck/checkers/model"
+	"github.com/felinics/memoh/internal/imageworkflow"
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/media"
 	memprovider "github.com/felinics/memoh/internal/memory/adapters"
@@ -149,6 +151,18 @@ func provideExternalAgentCodexServerHandler(handler *handlers.ExternalAgentCodex
 }
 
 func provideExternalAgentLoginServerHandler(handler *handlers.ExternalAgentLoginHandler) *handlers.ExternalAgentLoginHandler {
+	return handler
+}
+
+// provideImageWorkflowHandler wires the workflow surface and gives its trigger
+// route the same Bot manage-access check POST /bots/{bot_id}/schedule applies:
+// triggering a batch runs work on a Bot, so the caller must hold manage on it.
+func provideImageWorkflowHandler(log *slog.Logger, service *imageworkflow.Service, botService *bots.Service, accountService *accounts.Service) *handlers.ImageWorkflowHandler {
+	handler := handlers.NewImageWorkflowHandler(log, service)
+	handler.SetBotAuthorizer(func(c echo.Context, userID, botID string) error {
+		_, err := handlers.AuthorizeBotAccess(c.Request().Context(), botService, accountService, userID, botID)
+		return err
+	})
 	return handler
 }
 

@@ -63,17 +63,19 @@ func TestF8DetectCycleIgnoresTheCandidatesOwnEdge(t *testing.T) {
 // F8: the service reads the owner's live edges and refuses a closing edge, and
 // a revoked workflow's edge no longer constrains anything.
 func TestF8CheckCreateCycleUsesLiveEdgesOnly(t *testing.T) {
-	closed := imageworkflow.Edge{WorkflowID: "b", InputPairKey: "out-a", OutputPairKey: "in-a"}
-
 	service, world := newContractService()
-	world.SeedWorkflow("a", contractUser, contractBot, "first", imageworkflow.StateActive, "x")
+	live := world.SeedWorkflow("a", contractUser, contractBot, "first", imageworkflow.StateActive, "x")
+	// A candidate consuming the live workflow's output and feeding its input
+	// runs backwards through the live edge, which closes the pairing graph.
+	closed := imageworkflow.Edge{WorkflowID: "b", InputPairKey: live.OutputPairKey, OutputPairKey: live.InputPairKey}
 	if err := service.CheckCreateCycle(context.Background(), contractUser, closed); !errors.Is(err, imageworkflow.ErrCycle) {
 		t.Fatalf("CheckCreateCycle with a live closing edge = %v, want ErrCycle", err)
 	}
 
 	revokedService, revokedWorld := newContractService()
-	revokedWorld.SeedWorkflow("a", contractUser, contractBot, "first", imageworkflow.StateRevoked, "x")
-	if err := revokedService.CheckCreateCycle(context.Background(), contractUser, closed); err != nil {
+	revoked := revokedWorld.SeedWorkflow("a", contractUser, contractBot, "first", imageworkflow.StateRevoked, "x")
+	revokedEdge := imageworkflow.Edge{WorkflowID: "b", InputPairKey: revoked.OutputPairKey, OutputPairKey: revoked.InputPairKey}
+	if err := revokedService.CheckCreateCycle(context.Background(), contractUser, revokedEdge); err != nil {
 		t.Fatalf("CheckCreateCycle with only a revoked edge = %v, want nil", err)
 	}
 }

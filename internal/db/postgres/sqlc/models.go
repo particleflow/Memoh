@@ -82,14 +82,16 @@ type AgentSessionPublication struct {
 }
 
 type AlbumPair struct {
-	TeamID    pgtype.UUID        `json:"team_id"`
-	ID        pgtype.UUID        `json:"id"`
-	UserID    pgtype.UUID        `json:"user_id"`
-	BotID     pgtype.UUID        `json:"bot_id"`
-	PairKey   string             `json:"pair_key"`
-	State     string             `json:"state"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	TeamID     pgtype.UUID        `json:"team_id"`
+	ID         pgtype.UUID        `json:"id"`
+	UserID     pgtype.UUID        `json:"user_id"`
+	BotID      pgtype.UUID        `json:"bot_id"`
+	PairKey    string             `json:"pair_key"`
+	State      string             `json:"state"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	WorkflowID pgtype.UUID        `json:"workflow_id"`
+	Role       pgtype.Text        `json:"role"`
 }
 
 type AuthSession struct {
@@ -724,6 +726,36 @@ type FetchProvider struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	TeamID    pgtype.UUID        `json:"team_id"`
+}
+
+type ImageWorkflow struct {
+	TeamID        pgtype.UUID        `json:"team_id"`
+	ID            pgtype.UUID        `json:"id"`
+	UserID        pgtype.UUID        `json:"user_id"`
+	BotID         pgtype.UUID        `json:"bot_id"`
+	Name          string             `json:"name"`
+	Instruction   string             `json:"instruction"`
+	InputPairKey  string             `json:"input_pair_key"`
+	OutputPairKey string             `json:"output_pair_key"`
+	State         string             `json:"state"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ImageWorkflowRun struct {
+	TeamID              pgtype.UUID        `json:"team_id"`
+	ID                  pgtype.UUID        `json:"id"`
+	WorkflowID          pgtype.UUID        `json:"workflow_id"`
+	ScheduleID          pgtype.UUID        `json:"schedule_id"`
+	SessionID           pgtype.UUID        `json:"session_id"`
+	InstructionSnapshot string             `json:"instruction_snapshot"`
+	Files               []byte             `json:"files"`
+	Fingerprint         string             `json:"fingerprint"`
+	State               string             `json:"state"`
+	Result              pgtype.Text        `json:"result"`
+	Error               pgtype.Text        `json:"error"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
 }
 
 type LifecycleEvent struct {

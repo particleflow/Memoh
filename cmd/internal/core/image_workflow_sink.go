@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/felinics/memoh/internal/albumwriteback"
@@ -17,10 +18,6 @@ import (
 // Only upload deliveries are products, as in AlbumDeliveryCommitSink, and every
 // failure is logged and dropped: the commit already succeeded and must not be
 // affected.
-//
-// TODO(F6): resolve the output pair through imageworkflow.Service.ResolveOutputPair
-// and enqueue the verified hash into that pairing label, then register this sink
-// in place of AlbumDeliveryCommitSink in transfer_providers.go.
 func ImageWorkflowDeliveryCommitSink(log *slog.Logger, workflows *imageworkflow.Service, writebacks *albumwriteback.Service) computertask.DeliverySink {
 	if workflows == nil || writebacks == nil {
 		return nil
@@ -30,10 +27,25 @@ func ImageWorkflowDeliveryCommitSink(log *slog.Logger, workflows *imageworkflow.
 	}
 	log = log.With(slog.String("component", "image_workflow_delivery_sink"))
 	return func(ctx context.Context, identity computertask.DeliveryIdentity, ref computertask.DeliveryRequest) {
+		// A download delivery writes onto the device, not onto the NAS: its bytes
+		// are not a processing product, so it is never queued for an album.
 		if ref.Direction != "upload" {
 			return
 		}
-		// Stub: the lineage resolution is not implemented yet, so nothing is
-		// queued. The contract test in this package fails until this body exists.
+		userID, botID := identity.Binding.UserID, identity.Binding.BotID
+		pairKey, err := workflows.ResolveOutputPair(ctx, userID, botID, identity.Binding.SessionID)
+		if err != nil {
+			if !errors.Is(err, imageworkflow.ErrPairUnavailable) {
+				log.Warn("image workflow attribution failed", slog.String("operation_id", identity.OperationID))
+			}
+			return
+		}
+		if _, err := writebacks.EnqueueVerified(ctx, userID, botID, pairKey, albumwriteback.VerifiedItem{
+			ContentHash: ref.ContentHash,
+			SizeBytes:   ref.SizeBytes,
+			Mime:        ref.Mime,
+		}); err != nil {
+			log.Warn("album write-back enqueue failed", slog.String("operation_id", identity.OperationID))
+		}
 	}
 }

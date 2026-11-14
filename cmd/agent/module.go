@@ -100,6 +100,7 @@ func commonOptions() fx.Option {
 			provideServerHandler(handlers.NewUserComputerAccessHandler),
 			provideServerHandler(handlers.NewPhoneAlbumWritebackHandler),
 			provideServerHandler(handlers.NewAlbumPairHandler),
+			provideServerHandler(provideImageWorkflowHandler),
 			provideServerHandler(handlers.NewRuntimeConnectHandler),
 			provideServerHandler(handlers.NewBotRemoteRuntimeHandler),
 			provideServerHandler(handlers.NewWorkdirHandler),
