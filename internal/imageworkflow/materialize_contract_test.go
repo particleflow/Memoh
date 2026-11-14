@@ -28,7 +28,7 @@ func TestF5MaterializeHardlinksTheCanonicalOriginal(t *testing.T) {
 		t.Fatal(err)
 	}
 	payload := []byte("canonical bytes")
-	if err := os.WriteFile(originalPath, payload, 0o640); err != nil {
+	if err := os.WriteFile(originalPath, payload, 0o640); err != nil { //nolint:gosec // G306: the fixture mirrors an original stored at 0640; its mode is never asserted.
 		t.Fatal(err)
 	}
 
@@ -84,7 +84,7 @@ func TestF5MaterializeUsesTheResolvedOwnerBot(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(ownerPath), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(ownerPath, []byte("owner bytes"), 0o640); err != nil {
+	if err := os.WriteFile(ownerPath, []byte("owner bytes"), 0o640); err != nil { //nolint:gosec // G306: the fixture mirrors an original stored at 0640; its mode is never asserted.
 		t.Fatal(err)
 	}
 	// The requesting bot has no such file; only the resolved owner does.
@@ -121,7 +121,7 @@ func TestF5MaterializeIsIdempotent(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(originalPath), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(originalPath, []byte("bytes"), 0o640); err != nil {
+	if err := os.WriteFile(originalPath, []byte("bytes"), 0o640); err != nil { //nolint:gosec // G306: the fixture mirrors an original stored at 0640; its mode is never asserted.
 		t.Fatal(err)
 	}
 	request := imageworkflow.MaterializeRequest{
@@ -185,7 +185,7 @@ func TestF5MaterializedNameCarriesTheExtension(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(originalPath), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(originalPath, []byte("heic bytes"), 0o640); err != nil {
+	if err := os.WriteFile(originalPath, []byte("heic bytes"), 0o640); err != nil { //nolint:gosec // G306: the fixture mirrors an original stored at 0640; its mode is never asserted.
 		t.Fatal(err)
 	}
 	materialized, err := imageworkflow.MaterializeInput(context.Background(), imageworkflow.MaterializeRequest{
