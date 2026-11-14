@@ -315,6 +315,14 @@
       "unsupported_media_type": "このリクエストのコンテンツタイプはサポートされていません。",
       "upgrade_required": "このエンドポイントには別のプロトコルが必要です。"
     },
+    "image_workflow": {
+      "cycle_detected": "これらのアルバムは循環しているため、画像ワークフローは保存されませんでした。",
+      "name_taken": "同名の画像ワークフローがすでにあります。",
+      "not_active": "この画像ワークフローは有効ではありません。",
+      "not_found": "この画像ワークフローは見つかりません。",
+      "pair_unavailable": "この画像ワークフローは一方のアルバムがまだ指定されていません。",
+      "request_invalid": "画像ワークフローのリクエストが不正です。"
+    },
     "internal": "サーバーでエラーが発生しました。もう一度お試しください。",
     "invalid_chat_runtime": "選択されたチャットruntimeが無効です。",
     "mcp": {

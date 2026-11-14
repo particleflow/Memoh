@@ -700,6 +700,14 @@
       "unsupported_media_type": "不支持该请求内容类型。",
       "upgrade_required": "该接口需要使用其他协议。"
     },
+    "image_workflow": {
+      "cycle_detected": "这些相册会形成循环，图像工作流未保存。",
+      "name_taken": "你已有同名的图像工作流。",
+      "not_active": "这个图像工作流已不在活动状态。",
+      "not_found": "未找到这个图像工作流。",
+      "pair_unavailable": "这个图像工作流还有一侧未指定相册。",
+      "request_invalid": "图像工作流请求无效。"
+    },
     "internal": "服务器出错了，请重试。",
     "invalid_chat_runtime": "选择的对话运行时无效。",
     "mcp": {

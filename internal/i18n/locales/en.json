@@ -700,6 +700,14 @@
       "unsupported_media_type": "The request content type is not supported.",
       "upgrade_required": "This endpoint requires a different protocol."
     },
+    "image_workflow": {
+      "cycle_detected": "These albums would feed each other, so the image workflow was not saved.",
+      "name_taken": "You already have an image workflow with this name.",
+      "not_active": "This image workflow is not active.",
+      "not_found": "This image workflow was not found.",
+      "pair_unavailable": "This image workflow has no album designated for one of its sides yet.",
+      "request_invalid": "The image workflow request is invalid."
+    },
     "internal": "Something went wrong on the server. Please try again.",
     "invalid_chat_runtime": "The selected chat runtime is invalid.",
     "mcp": {
