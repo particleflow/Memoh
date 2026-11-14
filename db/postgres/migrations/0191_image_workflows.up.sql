@@ -35,7 +35,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS image_workflows_output_pair
   ON public.image_workflows(team_id, output_pair_key) WHERE state <> 'revoked';
 
 CREATE TABLE IF NOT EXISTS public.image_workflow_runs (
-  team_id UUID NOT NULL,
+  team_id UUID NOT NULL REFERENCES public.teams(id) ON DELETE CASCADE,
   id UUID NOT NULL DEFAULT gen_random_uuid(),
   workflow_id UUID NOT NULL,
   schedule_id UUID,
